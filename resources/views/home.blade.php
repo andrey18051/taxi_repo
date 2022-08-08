@@ -64,4 +64,16 @@
 
         </div>
     </div>
+
+    <div class="container">
+        <a type="button" href="{{ route('taxi-version') }}" class="btn">Version</a>
+        <a type="button" href="{{ route('taxi-profile') }}" class="btn">Profile</a>
+        <a type="button" href="{{ route('taxi-addresses') }}" class="btn">Addresses</a>
+        <a type="button" href="{{ route('taxi-lastaddresses') }}" class="btn">Lastaddresses</a>
+        <a type="button" href="{{ route('taxi-tariffs') }}" class="btn">Tariffs</a>
+        <a type="button" href="{{ route('taxi-ordershistory') }}" class="btn">Ordershistory</a>
+        <a type="button" href="{{ route('taxi-ordersreport') }}" class="btn">Ordersreport</a>
+        <a type="button" href="{{ route('taxi-bonusreport') }}" class="btn">Bonusreport</a>
+        <a type="button" href="{{ route('taxi-profile-put') }}" class="btn">Profile put</a>
+    </div>
 @endsection

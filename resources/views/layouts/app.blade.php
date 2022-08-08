@@ -39,12 +39,12 @@
                     <nav class="nav">
                         <label for="nav-toggle" class="nav-toggle" onclick></label>
                         <ul class="navbar-nav">
-                            <li><a href="https://next.privat24.ua/">Приват24</a>
+<!--                            <li><a href="https://next.privat24.ua/">Приват24</a>
                             <li><a href="https://online.pravex.ua/user?ReturnUrl=%2F">Правекс</a>
                             <li><a href="https://vchasno.ua/auth/login">Вчасно</a>
                             <li><a href="https://sota-buh.com.ua/account/login?ReturnUrl=%2Fedo">Сота</a>
                             <li><a href="https://pa.zbutenergo.kharkov.ua/frontend/web/index.php/uk/changed-acc/information">Харэнерго</a>
-                            <li><a href="https://www.mdoffice.com.ua">MD Office</a>
+                            <li><a href="https://www.mdoffice.com.ua">MD Office</a>-->
                             <li><a href="{{ route('admin') }}">Admin</a>
                         </ul>
                     </nav>

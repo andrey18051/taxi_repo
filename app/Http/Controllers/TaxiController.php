@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+class TaxiController extends Controller
+{
+    /**
+     * @return string
+     */
+    public function version()
+    {
+        $response = Http::get('http://31.43.107.151:7303/api/version');
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function profile()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/profile');
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function addresses()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])-> accept('application/json')->get('http://31.43.107.151:7303/api/client/addresses');
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function lastaddresses()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization, ])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/lastaddresses');
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function tariffs()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])-> accept('application/json')->get('http://31.43.107.151:7303/api/tariffs');
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function ordershistory()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/ordershistory');
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function ordersreport()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])-> accept('application/json')->asForm()->get('http://31.43.107.151:7303/api/clients/ordersreport', [
+             'dateFrom' => '2013.08.13',
+             'dateTo' => '2013.08.13',
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function bonusreport()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/bonusreport');
+        return $response->body();
+    }
+
+    public function profileput()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,])-> accept('application/json')->asForm()->put('http://31.43.107.151:7303/api/clients/profile', [
+            'patch' => 'name, address',
+            'user_first_name' => 'Mykyta',
+            'user_middle_name' => 'Andriyovich',
+            'user_last_name' => 'Korzhov',
+            'route_address_from' => 'Scince avenu',
+            'route_address_number_from' => '4B',
+            'route_address_entrance_from' => '12',
+            'route_address_apartment_from' => '1',
+            ]);
+        return $response->status();
+    }
+}

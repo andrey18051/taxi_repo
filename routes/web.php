@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,3 +37,13 @@ Route::get('/admin', function () {
 Route::get('/admin/{any}', function () {
     return view('admin.home');
 })->where('any', '.*')->middleware('role:superadministrator');
+
+Route::get('/taxi/version', [TaxiController::class, 'version'])->name('taxi-version');
+Route::get('/taxi/profile', [TaxiController::class, 'profile'])->name('taxi-profile');
+Route::get('/taxi/addresses', [TaxiController::class, 'addresses'])->name('taxi-addresses');
+Route::get('/taxi/lastaddresses', [TaxiController::class, 'lastaddresses'])->name('taxi-lastaddresses');
+Route::get('/taxi/tariffs', [TaxiController::class, 'tariffs'])->name('taxi-tariffs');
+Route::get('/taxi/ordershistory', [TaxiController::class, 'ordershistory'])->name('taxi-ordershistory');
+Route::get('/taxi/ordersreport', [TaxiController::class, 'ordersreport'])->name('taxi-ordersreport');
+Route::get('/taxi/bonusreport', [TaxiController::class, 'bonusreport'])->name('taxi-bonusreport');
+Route::get('/taxi/profile/put', [TaxiController::class, 'profileput'])->name('taxi-profile-put');
