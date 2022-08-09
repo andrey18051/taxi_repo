@@ -47,3 +47,5 @@ Route::get('/taxi/ordershistory', [TaxiController::class, 'ordershistory'])->nam
 Route::get('/taxi/ordersreport', [TaxiController::class, 'ordersreport'])->name('taxi-ordersreport');
 Route::get('/taxi/bonusreport', [TaxiController::class, 'bonusreport'])->name('taxi-bonusreport');
 Route::get('/taxi/profile/put', [TaxiController::class, 'profileput'])->name('taxi-profile-put');
+Route::get('/taxi/sendConfirmCode', [TaxiController::class, 'sendConfirmCode'])->name('taxi-sendConfirmCode');
+Route::get('/taxi/register', [TaxiController::class, 'register'])->name('taxi-register');

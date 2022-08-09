@@ -21,13 +21,13 @@ class TaxiController extends Controller
      */
     public function profile()
     {
-        $username = '0936734488';
+        $username = '0936734455';
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            ])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/profile');
+            ])->get('http://31.43.107.151:7303/api/clients/profile');
         return $response->body();
     }
 
@@ -42,7 +42,7 @@ class TaxiController extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            ])-> accept('application/json')->get('http://31.43.107.151:7303/api/client/addresses');
+        ])->get('http://31.43.107.151:7303/api/client/addresses');
         return $response->body();
     }
 
@@ -56,7 +56,7 @@ class TaxiController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $response = Http::withHeaders([
-            'Authorization' => $authorization, ])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/lastaddresses');
+            'Authorization' => $authorization, ])->get('http://31.43.107.151:7303/api/clients/lastaddresses');
         return $response->body();
     }
 
@@ -71,7 +71,7 @@ class TaxiController extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])-> accept('application/json')->get('http://31.43.107.151:7303/api/tariffs');
+        ])->get('http://31.43.107.151:7303/api/tariffs');
         return $response->body();
     }
 
@@ -85,7 +85,8 @@ class TaxiController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $response = Http::withHeaders([
-            'Authorization' => $authorization,])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/ordershistory');
+            'Authorization' => $authorization,
+        ])->get('http://31.43.107.151:7303/api/clients/ordershistory');
         return $response->body();
     }
 
@@ -118,10 +119,13 @@ class TaxiController extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            ])-> accept('application/json')->get('http://31.43.107.151:7303/api/clients/bonusreport');
+            ])->get('http://31.43.107.151:7303/api/clients/bonusreport');
         return $response->body();
     }
 
+    /**
+     * @return int
+     */
     public function profileput()
     {
         $username = '0936734488';
@@ -129,7 +133,7 @@ class TaxiController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $response = Http::withHeaders([
-            'Authorization' => $authorization,])-> accept('application/json')->asForm()->put('http://31.43.107.151:7303/api/clients/profile', [
+            'Authorization' => $authorization,])->put('http://31.43.107.151:7303/api/clients/profile', [
             'patch' => 'name, address',
             'user_first_name' => 'Mykyta',
             'user_middle_name' => 'Andriyovich',
@@ -140,5 +144,34 @@ class TaxiController extends Controller
             'route_address_apartment_from' => '1',
             ]);
         return $response->status();
+    }
+
+    /**
+     * @return int
+     */
+    public function sendConfirmCode()
+    {
+
+        $response = Http::accept('application/json')->post('http://31.43.107.151:7303/api/account/register/sendConfirmCode', [
+                'phone' => '0936734455',
+            ]);
+        return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function register()
+    {
+        $password = hash('SHA512', '11223344');
+
+        $response = Http::accept('application/json')->post('http://31.43.107.151:7303/api/account/register', [
+            'phone' => '0936734455',
+            'confirm_code' => '9183',
+            'password' => '11223344',
+            'confirm_password' => '11223344',
+            'user_first_name' => 'Sergii',
+        ]);
+        return $response->body();
     }
 }

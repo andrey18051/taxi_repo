@@ -75,5 +75,7 @@
         <a type="button" href="{{ route('taxi-ordersreport') }}" class="btn">Ordersreport</a>
         <a type="button" href="{{ route('taxi-bonusreport') }}" class="btn">Bonusreport</a>
         <a type="button" href="{{ route('taxi-profile-put') }}" class="btn">Profile put</a>
+        <a type="button" href="{{ route('taxi-sendConfirmCode') }}" class="btn">SendConfirmCode</a>
+        <a type="button" href="{{ route('taxi-register') }}" class="btn">Register</a>
     </div>
 @endsection
