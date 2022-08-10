@@ -49,3 +49,4 @@ Route::get('/taxi/bonusreport', [TaxiController::class, 'bonusreport'])->name('t
 Route::get('/taxi/profile/put', [TaxiController::class, 'profileput'])->name('taxi-profile-put');
 Route::get('/taxi/sendConfirmCode', [TaxiController::class, 'sendConfirmCode'])->name('taxi-sendConfirmCode');
 Route::get('/taxi/register', [TaxiController::class, 'register'])->name('taxi-register');
+Route::get('/taxi/cost', [TaxiController::class, 'cost'])->name('taxi-cost');

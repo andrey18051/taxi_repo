@@ -163,9 +163,7 @@ class TaxiController extends Controller
      */
     public function register()
     {
-        $password = hash('SHA512', '11223344');
-
-        $response = Http::accept('application/json')->post('http://31.43.107.151:7303/api/account/register', [
+             $response = Http::accept('application/json')->post('http://31.43.107.151:7303/api/account/register', [
             'phone' => '0936734455',
             'confirm_code' => '9183',
             'password' => '11223344',
@@ -173,5 +171,47 @@ class TaxiController extends Controller
             'user_first_name' => 'Sergii',
         ]);
         return $response->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function cost()
+    {
+        $username = '0936734455';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+
+            ])->post('http://31.43.107.151:7303/api/weborders/cost', [
+            'user_full_name' => 'Иванов Александр',
+            'user_phone' => '',
+            'client_sub_card' => null,
+            'required_time' => null,
+            'reservation' => false,
+            'route_address_entrance_from' => null,
+            'comment' => '',
+            'add_cost' => 12.0,
+            'wagon' => false,
+            'minibus' => false,
+            'premium' => false,
+            'flexible_tariff_name' => 'Базовый',
+            'baggage' => false,
+            'animal' => false,
+            'conditioner' => true,
+            'courier_delivery' => false,
+            'route_undefined' => false,
+            'terminal' => false,
+            'receipt' => false,
+            'route' => [
+                ['name' => 'Казино Афина Плаза (Греческая пл. 3/4)'],
+                ['name' => 'Казино Кристал (ДЕВОЛАНОВСКИЙ СПУСК 11)'],
+            ],
+            'taxiColumnId' => 0,
+        ]);
+
+        return $response->body() ;
     }
 }
