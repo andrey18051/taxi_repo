@@ -71,12 +71,25 @@
         <a type="button" href="{{ route('taxi-addresses') }}" class="btn">Addresses</a>
         <a type="button" href="{{ route('taxi-lastaddresses') }}" class="btn">Lastaddresses</a>
         <a type="button" href="{{ route('taxi-tariffs') }}" class="btn">Tariffs</a>
-        <a type="button" href="{{ route('taxi-ordershistory') }}" class="btn">Ordershistory</a>
-        <a type="button" href="{{ route('taxi-ordersreport') }}" class="btn">Ordersreport</a>
-        <a type="button" href="{{ route('taxi-bonusreport') }}" class="btn">Bonusreport</a>
+        <a type="button" href="{{ route('taxi-ordersHistory') }}" class="btn">OrdersHistory</a>
+        <a type="button" href="{{ route('taxi-ordersReport') }}" class="btn">OrdersReport</a>
+        <a type="button" href="{{ route('taxi-bonusReport') }}" class="btn">BonusReport</a>
         <a type="button" href="{{ route('taxi-profile-put') }}" class="btn">Profile put</a>
         <a type="button" href="{{ route('taxi-sendConfirmCode') }}" class="btn">SendConfirmCode</a>
         <a type="button" href="{{ route('taxi-register') }}" class="btn">Register</a>
         <a type="button" href="{{ route('taxi-cost') }}" class="btn">Cost</a>
+        <a type="button" href="{{ route('taxi-objects') }}" class="btn">Objects</a>
+        <a type="button" href="{{ route('taxi-objectsSearch') }}" class="btn">ObjectsSearch</a>
+        <a type="button" href="{{ route('taxi-streets') }}" class="btn">Streets</a>
+        <a type="button" href="{{ route('taxi-streetsSearch') }}" class="btn">StreetsSearch</a>
+        <a type="button" href="{{ route('taxi-geodataSearch') }}" class="btn">GeodataSearch</a>
+        <a type="button" href="{{ route('taxi-geodataSearchLatLng') }}" class="btn">GeodataSearchLatLng</a>
+        <a type="button" href="{{ route('taxi-geodataNearest') }}" class="btn">GeodataNearest</a>
+        <a type="button" href="{{ route('taxi-settings') }}" class="btn">Settings</a>
+        <a type="button" href="{{ route('taxi-addCostIncrementValue') }}" class="btn">AddCostIncrementValue</a>
+        <a type="button" href="{{ route('taxi-time') }}" class="btn">Time</a>
+        <a type="button" href="{{ route('taxi-tnVersion') }}" class="btn">TnVersion</a>
+        <a type="button" href="{{ route('taxi-driversPosition') }}" class="btn">DriversPosition</a>
+
     </div>
 @endsection
