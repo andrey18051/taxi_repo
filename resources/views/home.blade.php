@@ -66,18 +66,37 @@
     </div>
 
     <div class="container">
+        <h3>User section</h3>
+        <a type="button" href="{{ route('taxi-account') }}" class="btn">Account</a>
+        <a type="button" href="{{ route('taxi-changePassword') }}" class="btn">ChangePassword</a>
+        <a type="button" href="{{ route('taxi-restoreSendConfirmCode') }}" class="btn">RestoreSendConfirmCode</a>
+        <a type="button" href="{{ route('taxi-restoreСheckConfirmCode') }}" class="btn">RestoreСheckConfirmCode</a>
+        <a type="button" href="{{ route('taxi-restorePassword') }}" class="btn">RestorePassword</a>
+        <a type="button" href="{{ route('taxi-sendConfirmCode') }}" class="btn">SendConfirmCode</a>
+        <a type="button" href="{{ route('taxi-register') }}" class="btn">Register</a>
+        <a type="button" href="{{ route('taxi-approvedPhonesSendConfirmCode') }}" class="btn">ApprovedPhonesSendConfirmCode</a>
+        <a type="button" href="{{ route('taxi-approvedPhones') }}" class="btn">ApprovedPhones</a>
+    </div>
+
+    <div class="container">
+        <h3>Webordes section</h3>
         <a type="button" href="{{ route('taxi-version') }}" class="btn">Version</a>
+        <a type="button" href="{{ route('taxi-cost') }}" class="btn">Cost</a>
+        <a type="button" href="{{ route('taxi-weborders') }}" class="btn">Weborders</a>
+        <a type="button" href="{{ route('taxi-tariffs') }}" class="btn">Tariffs</a>
+        <a type="button" href="{{ route('taxi-webordersUid') }}" class="btn">WebordersUid</a>
+
+    </div>
+
+    <div class="container">
+        <h3>Another section</h3>
         <a type="button" href="{{ route('taxi-profile') }}" class="btn">Profile</a>
         <a type="button" href="{{ route('taxi-addresses') }}" class="btn">Addresses</a>
         <a type="button" href="{{ route('taxi-lastaddresses') }}" class="btn">Lastaddresses</a>
-        <a type="button" href="{{ route('taxi-tariffs') }}" class="btn">Tariffs</a>
         <a type="button" href="{{ route('taxi-ordersHistory') }}" class="btn">OrdersHistory</a>
         <a type="button" href="{{ route('taxi-ordersReport') }}" class="btn">OrdersReport</a>
         <a type="button" href="{{ route('taxi-bonusReport') }}" class="btn">BonusReport</a>
         <a type="button" href="{{ route('taxi-profile-put') }}" class="btn">Profile put</a>
-        <a type="button" href="{{ route('taxi-sendConfirmCode') }}" class="btn">SendConfirmCode</a>
-        <a type="button" href="{{ route('taxi-register') }}" class="btn">Register</a>
-        <a type="button" href="{{ route('taxi-cost') }}" class="btn">Cost</a>
         <a type="button" href="{{ route('taxi-objects') }}" class="btn">Objects</a>
         <a type="button" href="{{ route('taxi-objectsSearch') }}" class="btn">ObjectsSearch</a>
         <a type="button" href="{{ route('taxi-streets') }}" class="btn">Streets</a>

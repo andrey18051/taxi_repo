@@ -8,166 +8,86 @@ use Illuminate\Support\Facades\Http;
 class TaxiController extends Controller
 {
     /**
-     * Запрос версии
+     * Авторизация пользователя
      * @return string
      */
-    public function version()
+    public function account()
     {
-        $response = Http::get('http://31.43.107.151:7303/api/version');
-        return $response->body();
-    }
-
-    /**
-     * Запрос профиля клиента
-     * @return string
-     */
-    public function profile()
-    {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-            ])->get('http://31.43.107.151:7303/api/clients/profile');
-        return $response->body();
-    }
-
-    /**
-     * Получение избранных адресов
-     * @return string
-     */
-    public function addresses()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/client/addresses');
-        return $response->body();
-    }
-
-    /**
-     * Запрос пяти самых новых адресов клиента
-     * @return string
-     */
-    public function lastaddresses()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization, ])->get('http://31.43.107.151:7303/api/clients/lastaddresses');
-        return $response->body();
-    }
-
-    /**
-     * Получение списка тарифов
-     * @return string
-     */
-    public function tariffs()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/tariffs');
-        return $response->body();
-    }
-
-    /**
-     * Запрос истории по заказам клиента
-     * @return string
-     */
-    public function ordersHistory()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/clients/ordershistory', [
-            'limit' => '10', //Необязательный. Вернуть количество записей
-            'offset' => '0', //Необязательный. Пропустить количество записей
-            'executionStatus' => '*', /* Необязательный.
-                Критерий выборки заказов в зависимости от статуса выполнения заказа (см. далее execution_status). В качестве параметра можно передавать перечень статусов выполнения заказа (Примечание 2) разделенных запятой, которые необходимо получить. Например:
-                executionStatus=WaitingCarSearch,SearchesForCar,CarFound,Running,Canceled,Executed
-                или executionStatus=* - возвращает все заказы
-                отсутствующий параметр  executionStatus — эквивалентен executionStatus=Executed*/
+        $url = config('app.taxi2012Url') . '/api/account';
+        $response = Http::post($url, [
+            //Все поля обязательные
+            'login' => '0936734488', //Логин (или телефонный номер) для авторизации пользователя
+            'password' => hash('SHA512', '11223344') //SHA512 Hash пароля пользователя.*
+            // WebOrdersApiClientAppToken	Да	Токен для отправки пушей.
         ]);
         return $response->body();
     }
 
     /**
-     * Запрос отчета по заказам клиентом
+     * Смена пароля
      * @return string
      */
-    public function ordersReport()
+    public function changePassword()
     {
         $username = '0936734488';
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/account/changepassword';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            ])-> accept('application/json')->asForm()->get('http://31.43.107.151:7303/api/clients/ordersreport', [
-             'dateFrom' => '2013.08.13', //Обязательный. Начальный интервал для отчета
-             'dateTo' => '2013.08.13', //Обязательный. Конечный интервал для отчета
+        ])->put($url, [
+            //Все поля обязательные
+            'oldPassword' => '11223344', //Старый пароль
+            'newPassword' => '22223344', //Новый пароль
+            'repeatNewPassword' => '22223344' //Repeat Новый пароль
         ]);
-        return $response->body();
+        return $response->status();
     }
 
     /**
-     * Запрос истории по изменениям бонусов клиента
+     * Восстановление пароля
+     * Получение кода подтверждения
      * @return string
      */
-    public function bonusReport()
+    public function restoreSendConfirmCode()
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-            ])->get('http://31.43.107.151:7303/api/clients/bonusreport', [
-            'limit' => '10', //Необязательный. Вернуть количество записей
-            'offset'=> '0', //Необязательный. Пропустить количество записей
+        $url = config('app.taxi2012Url') . '/api/account/restore/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => '0936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
         ]);
-        return $response->body();
+        return $response->status();
     }
 
     /**
-     * Обновление профиля клиента
-     * @return int
+     * Восстановление пароля
+     * Получение кода подтверждения
+     * @return string
      */
-    public function profileput()
+    public function restoreСheckConfirmCode()
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $url = config('app.taxi2012Url') . '/api/account/restore/checkConfirmCode';
+        $response = Http::post($url, [
+            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
+            'confirm_code' => '6024' //Обязательный. Код подтверждения.
+        ]);
+        return $response->status();
+    }
 
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,])->put('http://31.43.107.151:7303/api/clients/profile', [
-            'patch' => 'name, address', /*Обновление патчем.- является необязательным параметром и позволяет выполнить частичное обновление (обновить только имя клиента, только адрес клиента, или и то и другое).
-                Возможный значения «patch»:
-                «name» - будет обновлена только группа полей: user_first_name, user_middle_name и user_last_name;
-                «address» - будет обновлена только группа полей: route_address_from, route_address_number_from, route_address_entrance_from и route_address_apartment_from;
-                Значения параметра «patch» можно объединять разделителем «,» (запятая);
-                Если «patch» не содержит значения — будут обновлены все поля.*/
-            'user_first_name' => 'Mykyta', //Имя
-            'user_middle_name' => 'Andriyovich', //Отчество
-            'user_last_name' => 'Korzhov', //Фамилия
-            'route_address_from' => 'Scince avenu', //Адрес
-            'route_address_number_from' => '4B', //Номер дома
-            'route_address_entrance_from' => '12', //Подъезд
-            'route_address_apartment_from' => '1', //Квартира
-            ]);
+    /**
+     * Восстановление пароля
+     * @return string
+     */
+    public function restorePassword()
+    {
+        $url = config('app.taxi2012Url') . '/api/account/restore';
+        $response = Http::post($url, [
+            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
+            'confirm_code' => '6024', //Обязательный. Код подтверждения.
+            'password' => '11223344', //Новый пароль
+            'confirm_password' => '11223344' //Repeat Новый пароль
+        ]);
         return $response->status();
     }
 
@@ -178,12 +98,12 @@ class TaxiController extends Controller
      */
     public function sendConfirmCode()
     {
-
-        $response = Http::post('http://31.43.107.151:7303/api/account/register/sendConfirmCode', [
-                'phone' => '0936734455', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-                'taxiColumnId' => '0', //Необязательный. Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-                 'appHash' => '' //Необязательный. Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
-            ]);
+        $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => '0936734455', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => '0', //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+            'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
+        ]);
         return $response->body();
     }
 
@@ -194,14 +114,56 @@ class TaxiController extends Controller
      */
     public function register()
     {
-             $response = Http::post('http://31.43.107.151:7303/api/account/register', [
-                 //Все параметры обязательные
+        $url = config('app.taxi2012Url') . '/api/account/register';
+        $response = Http::post($url, [
+            //Все параметры обязательные
             'phone' => '0936734455', //Номер мобильного телефона, на который будет отправлен код подтверждения
             'confirm_code' => '9183', //Код подтверждения, полученный в SMS.
             'password' => '11223344', //Пароль.
             'confirm_password' => '11223344', //Пароль (повтор).
             'user_first_name' => 'Sergii', // Необязательный. Имя клиента
         ]);
+        return $response->body();
+    }
+
+    /**
+     * Верификация телефона
+     * Получение кода подтверждения
+     * @return string
+     */
+    public function approvedPhonesSendConfirmCode()
+    {
+        $url = config('app.taxi2012Url') . '/api/approvedPhones/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => '0936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+        ]);
+        return $response->status();
+    }
+
+    /**
+     * Верификация телефона
+     * Получение кода подтверждения
+     * @return string
+     */
+    public function approvedPhones()
+    {
+        $url = config('app.taxi2012Url') . '/api/approvedPhones/';
+        $response = Http::post($url, [
+            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
+            'confirm_code' => '5945' //Обязательный. Код подтверждения.
+        ]);
+        return $response->status();
+    }
+
+    /**
+     * Запрос версии
+     * @return string
+     */
+    public function version()
+    {
+        $url = config('app.taxi2012Url') . '/api/version';
+        $response = Http::get($url);
         return $response->body();
     }
 
@@ -216,10 +178,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-
-            ])->post('http://31.43.107.151:7303/api/weborders/cost', [
+        ])->post($url, [
             'user_full_name' => 'Иванов Александр', //Полное имя пользователя
             'user_phone' => '', //Телефон пользователя
             'client_sub_card' => null,
@@ -253,6 +215,240 @@ class TaxiController extends Controller
     }
 
     /**
+     * Работа с заказами
+     * Создание заказа
+     * @return string
+     */
+    public function weborders()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/weborders';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'user_full_name' => 'Иванов Александр', //Полное имя пользователя
+            'user_phone' => '0936734455', //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => null, //Время подачи предварительного заказа
+            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => '', //Комментарий к заказу
+            'add_cost' => 0,
+            'wagon' => false, //Универсал: True, False
+            'minibus' => false, //Микроавтобус: True, False
+            'premium' => false, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => 'Базовый', //Гибкий тариф
+            'baggage' => false, //Загрузка салона. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'animal' => false, //Перевозка животного. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'conditioner' => true, //Кондиционер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'courier_delivery' => false, //Курьер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'route_undefined' => false, //По городу: True, False
+            'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => 'Казино Афина Плаза (Греческая пл. 3/4)'/*, 'number' => 1*/],
+                ['name' => 'Казино Кристал (ДЕВОЛАНОВСКИЙ СПУСК 11)'],
+            ],
+            'taxiColumnId' => 0, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        /*{"dispatching_order_uid":"af5857857f9c420f84773cda79698304","discount_trip":false,"find_car_timeout":3600,"find_car_delay":0,"order_cost":"55","currency":" грн.","route_address_from":{"name":"Казино Афина Плаза (Греческая пл. 3/4)","number":null,"lat":46.483063297443,"lng":30.7356095407788},"route_address_to":{"name":"Казино Кристал (ДЕВОЛАНОВСКИЙ СПУСК 11)","number":null,"lat":46.4815271604416,"lng":30.7462156083731}}
+        */]);
+
+        return $response->body() ;
+    }
+
+
+    /**
+     * Получение списка тарифов
+     * @return string
+     */
+    public function tariffs()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/tariffs';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        return $response->body();
+    }
+
+    /**
+     * Работа с заказами
+     * Создание заказа
+     * @return string
+     */
+    public function webordersUid()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = 'af5857857f9c420f84773cda79698304'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        return $response->body() ;
+    }
+    /**
+     * Запрос профиля клиента
+     * @return string
+     */
+    public function profile()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])->get($url);
+        return $response->body();
+    }
+
+    /**
+     * Получение избранных адресов
+     * @return string
+     */
+    public function addresses()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        return $response->body();
+    }
+
+    /**
+     * Запрос пяти самых новых адресов клиента
+     * @return string
+     */
+    public function lastaddresses()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/lastaddresses';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization, ])->get($url);
+        return $response->body();
+    }
+
+
+    /**
+     * Запрос истории по заказам клиента
+     * @return string
+     */
+    public function ordersHistory()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/ordershistory';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'limit' => '10', //Необязательный. Вернуть количество записей
+            'offset' => '0', //Необязательный. Пропустить количество записей
+            'executionStatus' => '*', /* Необязательный.
+                Критерий выборки заказов в зависимости от статуса выполнения заказа (см. далее execution_status). В качестве параметра можно передавать перечень статусов выполнения заказа (Примечание 2) разделенных запятой, которые необходимо получить. Например:
+                executionStatus=WaitingCarSearch,SearchesForCar,CarFound,Running,Canceled,Executed
+                или executionStatus=* - возвращает все заказы
+                отсутствующий параметр  executionStatus — эквивалентен executionStatus=Executed*/
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Запрос отчета по заказам клиентом
+     * @return string
+     */
+    public function ordersReport()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/ordersreport';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])->get($url, [
+             'dateFrom' => '2013.08.13', //Обязательный. Начальный интервал для отчета
+             'dateTo' => '2013.08.13', //Обязательный. Конечный интервал для отчета
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Запрос истории по изменениям бонусов клиента
+     * @return string
+     */
+    public function bonusReport()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/bonusreport';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            ])->get($url, [
+            'limit' => '10', //Необязательный. Вернуть количество записей
+            'offset'=> '0', //Необязательный. Пропустить количество записей
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Обновление профиля клиента
+     * @return int
+     */
+    public function profileput()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,])->put($url, [
+            'patch' => 'name, address', /*Обновление патчем.- является необязательным параметром и позволяет выполнить частичное обновление (обновить только имя клиента, только адрес клиента, или и то и другое).
+                Возможный значения «patch»:
+                «name» - будет обновлена только группа полей: user_first_name, user_middle_name и user_last_name;
+                «address» - будет обновлена только группа полей: route_address_from, route_address_number_from, route_address_entrance_from и route_address_apartment_from;
+                Значения параметра «patch» можно объединять разделителем «,» (запятая);
+                Если «patch» не содержит значения — будут обновлены все поля.*/
+            'user_first_name' => 'Mykyta', //Имя
+            'user_middle_name' => 'Andriyovich', //Отчество
+            'user_last_name' => 'Korzhov', //Фамилия
+            'route_address_from' => 'Scince avenu', //Адрес
+            'route_address_number_from' => '4B', //Номер дома
+            'route_address_entrance_from' => '12', //Подъезд
+            'route_address_apartment_from' => '1', //Квартира
+            ]);
+        return $response->status();
+    }
+
+
+
+
+    /**
      * Гео данные
      * Запрос гео-данных (всех объектов)
      * @return string
@@ -263,9 +459,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/objects';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/objects', [
+        ])->get($url, [
             'versionDateGratherThan' => '', //Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
 
@@ -283,9 +480,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/objects/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/objects/search', [
+        ])->get($url, [
             'q' => 'Оде', //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
             'limit' => 10, //Кол-во возвращаемых записей (предел).
@@ -314,9 +512,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/streets';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/streets', [
+        ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
 
@@ -334,9 +533,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/streets/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/streets/search', [
+        ])->get($url, [
             'q' => 'Оде', //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
             'limit' => 10, //Кол-во возвращаемых записей (предел).
@@ -367,9 +567,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/search', [
+        ])->get($url, [
             'q' => 'Оде', //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
             'limit' => 10, //Кол-во возвращаемых записей (предел).
@@ -400,13 +601,14 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/search', [
+        ])->get($url, [
             'lat' => '46.4834363079238', //Обязательный. Широта
             'lng' => '30.6886028410144', //Обязательный. Долгота
             'r' => '100' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.
-       ]);
+        ]);
 
         return $response->body() ;
     }
@@ -422,9 +624,10 @@ class TaxiController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/geodata/nearest';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/geodata/nearest', [
+        ])->get($url, [
             'lat' => '46.4834363079238', //Обязательный. Широта
             'lng' => '30.6886028410144', //Обязательный. Долгота
             'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.
@@ -439,7 +642,8 @@ class TaxiController extends Controller
      */
     public function settings()
     {
-        $response = Http::get('http://31.43.107.151:7303/api/settings');
+        $url = config('app.taxi2012Url') . '/api/settings';
+        $response = Http::get($url);
 
         return $response->body() ;
     }
@@ -450,7 +654,8 @@ class TaxiController extends Controller
      */
     public function addCostIncrementValue()
     {
-        $response = Http::get('http://31.43.107.151:7303/api/settings/addCostIncrementValue');
+        $url = config('app.taxi2012Url') . '/api/settings/addCostIncrementValue';
+        $response = Http::get($url);
 
         return $response->body() ;
     }
@@ -461,7 +666,8 @@ class TaxiController extends Controller
      */
     public function time()
     {
-        $response = Http::get('http://31.43.107.151:7303/api/time');
+        $url = config('app.taxi2012Url') . '/api/time';
+        $response = Http::get($url);
 
         return $response->body() ;
     }
@@ -472,7 +678,8 @@ class TaxiController extends Controller
      */
     public function tnVersion()
     {
-        $response = Http::get('http://31.43.107.151:7303/api/tnVersion');
+        $url = config('app.taxi2012Url') . '/api/tnVersion';
+        $response = Http::get($url);
 
         return $response->body() ;
     }
@@ -483,13 +690,15 @@ class TaxiController extends Controller
      */
     public function driversPosition()
     {
+
+        $url = config('app.taxi2012Url') . '/api/drivers/position';
         $username = '0936734455';
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get('http://31.43.107.151:7303/api/drivers/position', [
+        ])->get($url, [
             'lat' => '46.4834363079238', //Обязательный. Широта
             'lng' => '30.6886028410144', //Обязательный. Долгота
             'radius' => '100' //Обязательный. Радиус поиска автомобилей (в км.)
