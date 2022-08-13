@@ -249,8 +249,8 @@ class TaxiController extends Controller
             'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
             'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
             'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => 'Казино Афина Плаза (Греческая пл. 3/4)'/*, 'number' => 1*/],
-                ['name' => 'Казино Кристал (ДЕВОЛАНОВСКИЙ СПУСК 11)'],
+                ['name' => 'КАВКАЗСКАЯ УЛ.', 'number' => '2'],
+                ['name' => 'КРАЙНЯЯ УЛ.', 'number' => '2'],
             ],
             'taxiColumnId' => 0, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
@@ -290,7 +290,7 @@ class TaxiController extends Controller
         $username = '0936734488';
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-        $uid = 'af5857857f9c420f84773cda79698304'; //идентификатор заказа
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
         $url = config('app.taxi2012Url') . '/api/weborders/' . $uid;
         $response = Http::withHeaders([
@@ -299,13 +299,257 @@ class TaxiController extends Controller
 
         return $response->body() ;
     }
+
+    /**
+     * Запрос информации о позывном
+     * @return string
+     */
+    public function webordersUidDriver()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/driver';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        return $response->body() ;
+    }
+
+    /**
+     * Добавочная стоимость
+     * Get -проверить
+     * @return string
+     */
+    public function webordersUidCostAdditionalGet()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        return $response->body() ;
+    }
+    /**
+     * Добавочная стоимость
+     * Post - добавить
+     * @return string
+     */
+    public function webordersUidCostAdditionalPost()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'amount' => 100
+        ]);
+
+        return $response->body() ;
+    }
+    /**
+     * Добавочная стоимость
+     * Put - изменить
+     * @return string
+     */
+    public function webordersUidCostAdditionalPut()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->put($url, [
+            'amount' => 50
+        ]);
+
+        return $response->body() ;
+    }
+
+    /**
+     * Добавочная стоимость
+     * Delete - Удалить
+     * @return string
+     */
+    public function webordersUidCostAdditionalDelete()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->delete($url);
+
+        return $response->body() ;
+    }
+    /**
+     * Запрос GPS положения машины, выполняющей заказ
+     * @return string
+     */
+    public function webordersDrivercarPosition()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/drivercarposition/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        return $response->body() ;
+    }
+
+    /**
+     * Запрос отмены заказа клиентом
+     * @return string
+     */
+    public function webordersCancel()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '5b1e13c458514781881da701583c8ccd'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/cancel/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->put($url);
+
+        return $response->body() ;
+    }
+
+    /**
+     * Оценка поездки
+     * @return int
+     */
+    public function webordersRate()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = '5b1e13c458514781881da701583c8ccd'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/rate/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'rating' => 5, // Обязательный.	1, 2, 3, 4, 5	Оценка поездки
+            'rating_comment' => 'Ok' //Комментарий к оценке. Максимальная длина 120 символов.
+        ]);
+
+        return $response->status() ;
+    }
+
+    /**
+     * Запрос на скрытие заказа (удалить поездку)
+     * @return int
+     */
+    public function webordersHide()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $uid = 'f719e712ad0545a38ab5650ce71d5138'; //идентификатор заказа
+
+        $url = config('app.taxi2012Url') . '/api/weborders/hide/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->put($url);
+
+        return $response->status() ;
+    }
+
+    /**
+     * Запрос отчета по заказам клиентом
+     * @return string
+     */
+    public function ordersReport()
+    {
+        $username = '0936734455';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/ordersreport';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'dateFrom' => '2022-01-01', //Обязательный. Начальный интервал для отчета
+            'dateTo' => '2022-12-31', //Обязательный. Конечный интервал для отчета
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Запрос истории по заказам клиента
+     * @return string
+     */
+    public function ordersHistory()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/ordershistory';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+          //  'limit' => '10', //Необязательный. Вернуть количество записей
+            'offset' => '0', //Необязательный. Пропустить количество записей
+            'executionStatus' => '*', /* Необязательный.
+                Критерий выборки заказов в зависимости от статуса выполнения заказа (см. далее execution_status). В качестве параметра можно передавать перечень статусов выполнения заказа (Примечание 2) разделенных запятой, которые необходимо получить. Например:
+                executionStatus=WaitingCarSearch,SearchesForCar,CarFound,Running,Canceled,Executed
+                или executionStatus=* - возвращает все заказы
+                отсутствующий параметр  executionStatus — эквивалентен executionStatus=Executed*/
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Запрос истории по изменениям бонусов клиента
+     * @return string
+     */
+    public function ordersBonusreport()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/bonusreport';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            //  'limit' => '10', //Необязательный. Вернуть количество записей
+            'offset' => '0', //Необязательный. Пропустить количество записей
+           ]);
+        return $response->body();
+    }
     /**
      * Запрос профиля клиента
      * @return string
      */
     public function profile()
     {
-        $username = '0936734488';
+        $username = '0936734455';
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -313,23 +557,6 @@ class TaxiController extends Controller
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             ])->get($url);
-        return $response->body();
-    }
-
-    /**
-     * Получение избранных адресов
-     * @return string
-     */
-    public function addresses()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $url = config('app.taxi2012Url') . '/api/client/addresses';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url);
         return $response->body();
     }
 
@@ -348,80 +575,13 @@ class TaxiController extends Controller
             'Authorization' => $authorization, ])->get($url);
         return $response->body();
     }
-
-
-    /**
-     * Запрос истории по заказам клиента
-     * @return string
-     */
-    public function ordersHistory()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $url = config('app.taxi2012Url') . '/api/clients/ordershistory';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url, [
-            'limit' => '10', //Необязательный. Вернуть количество записей
-            'offset' => '0', //Необязательный. Пропустить количество записей
-            'executionStatus' => '*', /* Необязательный.
-                Критерий выборки заказов в зависимости от статуса выполнения заказа (см. далее execution_status). В качестве параметра можно передавать перечень статусов выполнения заказа (Примечание 2) разделенных запятой, которые необходимо получить. Например:
-                executionStatus=WaitingCarSearch,SearchesForCar,CarFound,Running,Canceled,Executed
-                или executionStatus=* - возвращает все заказы
-                отсутствующий параметр  executionStatus — эквивалентен executionStatus=Executed*/
-        ]);
-        return $response->body();
-    }
-
-    /**
-     * Запрос отчета по заказам клиентом
-     * @return string
-     */
-    public function ordersReport()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $url = config('app.taxi2012Url') . '/api/clients/ordersreport';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-            ])->get($url, [
-             'dateFrom' => '2013.08.13', //Обязательный. Начальный интервал для отчета
-             'dateTo' => '2013.08.13', //Обязательный. Конечный интервал для отчета
-        ]);
-        return $response->body();
-    }
-
-    /**
-     * Запрос истории по изменениям бонусов клиента
-     * @return string
-     */
-    public function bonusReport()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $url = config('app.taxi2012Url') . '/api/clients/bonusreport';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-            ])->get($url, [
-            'limit' => '10', //Необязательный. Вернуть количество записей
-            'offset'=> '0', //Необязательный. Пропустить количество записей
-        ]);
-        return $response->body();
-    }
-
     /**
      * Обновление профиля клиента
      * @return int
      */
     public function profileput()
     {
-        $username = '0936734488';
+        $username = '0936734455';
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -434,20 +594,243 @@ class TaxiController extends Controller
                 «address» - будет обновлена только группа полей: route_address_from, route_address_number_from, route_address_entrance_from и route_address_apartment_from;
                 Значения параметра «patch» можно объединять разделителем «,» (запятая);
                 Если «patch» не содержит значения — будут обновлены все поля.*/
-            'user_first_name' => 'Mykyta', //Имя
-            'user_middle_name' => 'Andriyovich', //Отчество
-            'user_last_name' => 'Korzhov', //Фамилия
+            'user_first_name' => 'Hanna', //Имя
+            'user_middle_name' => 'Anatoliyvna', //Отчество
+            'user_last_name' => 'Korzhova', //Фамилия
             'route_address_from' => 'Scince avenu', //Адрес
             'route_address_number_from' => '4B', //Номер дома
             'route_address_entrance_from' => '12', //Подъезд
             'route_address_apartment_from' => '1', //Квартира
-            ]);
+        ]);
         return $response->status();
     }
 
+    /**
+     * Обновление информации для отправки push
+     * @return string
+     */
+    public function credential()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/clients/credential';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            //X-WO-API-APP-ID: App_name
+        ])->put($url, [
+            'app_registration_token' => 'string' //токен (*) Если значения X-WO-API-APP-ID нет в БД сервера или он пустой, он записан в профиль клиента не будет.
+        ]);
+        return $response->status();
+    }
 
+    /**
+     * Смена телефона клиента
+     * Получение кода подтверждения
+     * @return int
+     */
+    public function changePhoneSendConfirmCode()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/clients/changePhone/sendConfirmCode';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'phone' => '380936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+        ]);
+        return $response->status();
+    }
+    /**
+     * Смена телефона клиента
+     * Смена телефона
+     * @return int
+     */
+    public function clientsChangePhone()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/changePhone/';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->put($url, [
+            'phone' => '380936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'confirm_code' => '1130' //Обязательный. Код подтверждения.
+        ]);
+        return $response->status();
+    }
+
+    /**
+     * Виртуальный баланс
+     * Пополнение баланса клиента (прием платежей) через платежные системы
+     * @return int
+     * Алгоритм приема платежей через платежную систему LiqPay.
+        1. Клиентское приложение, после успешной авторизации пользователя, присылает запрос на создание платежной транзакции.
+        2. После прохождения проверки на возможность создать транзакцию (пополнения баланс пользователя через платежную систему) - возвращается:
+            Уникальный идентификатор транзакции;
+            Сумма платежа;
+            Валюта платежа;
+            Описание платежа;
+            Уникальный идентификатор пользователя;
+            URL для получения изменений статуса платежа.
+        3. Клиентское приложение формирует запрос на проведение платежа через платежную систему LiqPay, указав все обязательные параметры.
+        4. Поле проведения оплаты через платежную систему, сервер ИДС получает от платежной системы информацию о статусе транзакции.
+        5. При успешном статусе транзакции - автоматически меняется статус транзакции и на баланс клиента зачисляется оплаченная сумма платежа.
+        6. Клиентское приложение опрашивает сервер для получения текущего статуса транзакции.
+        ВАЖНО! Необходимо обязательно указать параметр "server_url", иначе транзакция не будет завершена, и средства не будут автоматически начислены на баланс клиента.
+        Для LiqPay: http://<ipaddress>:<port>/api/liqpay/status/
+     */
+    public function clientsBalanceTransactions()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/balance/transactions/';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'amount' => '100.21', //Обязательный. Сумма платежа
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Получение транзакции оплаты
+     * @return string
+     */
+    public function clientsBalanceTransactionsGet()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $id = 37867;
+
+        $url = config('app.taxi2012Url') . '/api/clients/balance/transaction/' . $id;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        return $response->body();
+    }
+
+    /**
+     * История изменения баланса
+     * @return string
+     */
+    public function clientsBalanceTransactionsGetHistory()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/balance/transactions/';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            /*Необязательные
+             * 'limit' => '10', //Вернуть количество записей
+             * 'offset' => '0', //Пропустить количество записей
+             */
+        ]);
+        return $response->body();
+    }
+    /**
+     * Получение избранных адресов
+     * @return string
+     */
+    public function addresses()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        return $response->body();
+    }
+
+    /**
+     * Сохранение избранного адреса
+     * @return string
+     */
+    public function addressesPost()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+           'alias' => 'Мой дом', //Название. Максимальный размер 100.
+            'comment' => 'Домофон не работает', //Комментарий для создания заказа. Максимальный размер 1024.
+            'type' => '1', //Тип адреса: 1 - home, 2 - job, 3 - other.
+            'entrance' => '1', //Подъезд
+            'address' => [
+                'name' => 'Одесская киностудия - Французский бул,33', //Улица или Объект. Если number пустое, то name это Объект, иначе Улица. Максимальный размер 200.
+                'number' => '',//Номер дома. Максимальный размер 10.
+                'lat' => 46.4595370800332,//Широта
+                'lng' => 30.7571053560882//Долгота
+            ]
+        ]);
+        return $response->body();
+    }
+
+    /**
+     * Изменение избранного адреса
+     * @return string
+     */
+    public function addressesPut()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->put($url, [
+            'favorite_address_uid' => '092f5cce-715c-4a6a-8aa7-bf54f434c3cf',//Идентификатор избранного адреса, который необходимо обновить.
+            'alias' => 'Мой дом', //Название. Максимальный размер 100.
+            'comment' => 'Домофон не работает', //Комментарий для создания заказа. Максимальный размер 1024.
+            'type' => '1', //Тип адреса: 1 - home, 2 - job, 3 - other.
+            'entrance' => '1', //Подъезд
+            'address' => [
+                'name' => 'Г Одесский Дворик (Успенская 19)', //Улица или Объект. Если number пустое, то name это Объект, иначе Улица. Максимальный размер 200.
+                'number' => '',//Номер дома. Максимальный размер 10.
+                'lat' => 46.4746977985894,//Широта
+                'lng' => 30.7506863475721//Долгота
+            ]
+        ]);
+        return $response->status();
+    }
+
+    /**
+     * Удаление избранного адреса
+     * @return int
+     */
+    public function addressesDelete()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $favorite_address_uid = '7deb3fed-767e-4fe6-b8d8-2f8ad4b0fd14';
+
+        $url = config('app.taxi2012Url') . '/api/client/addresses/' . $favorite_address_uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->delete($url);
+        return $response->status();
+    }
     /**
      * Гео данные
      * Запрос гео-данных (всех объектов)
