@@ -24,6 +24,7 @@ window.Vue = require('vue').default;
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('user-component', require('./views/user/UserHome.vue').default);
 Vue.component('user-edit', require('./views/user/UserEdit.vue').default);
+Vue.component('taxi-account', require('./views/taxi/account.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

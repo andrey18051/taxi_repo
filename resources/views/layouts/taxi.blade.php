@@ -27,7 +27,9 @@
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
+
                 <a class="navbar-brand" href="{{ url('/') }}">
+                    <img src="{{ asset('img/logo.jpg') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -35,28 +37,13 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
-                    <input type="checkbox" id="nav-toggle" hidden>
-                    <nav class="nav">
-                        <label for="nav-toggle" class="nav-toggle" onclick></label>
-                        <ul class="navbar-nav">
-<!--                            <li><a href="https://176.57.71.92:8083">VestaCP</a>
-                            <li><a href="https://176.57.71.92:8083/list/filemanager/">FileManager</a>
-                            <li><a href="http://176.57.71.92/phpmyadmin/">PhpMyadmin</a>
-                            <li><a href="https://cp.zomro.com/billmgr">Zomro</a>-->
-                            <li><a href="{{ asset('/laratrust') }}">Roles</a>
-                            <li><router-link to="/admin/users">Users</router-link></li>
-                            <li><a href="{{ asset('/') }}">Taxi</a>
-                            <li><a href="{{ route('home') }}">Home</a>
-                        </ul>
-                    </nav>
-                    <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
                         <!-- Authentication Links -->
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+
+                                    <a class="nav-link" href="{{ route('web-account') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
 
@@ -72,6 +59,7 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <router-link  class="dropdown-item" to="/taxi/account">{{ __('Profile') }}</router-link>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

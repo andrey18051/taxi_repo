@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class TaxiController extends Controller
+class WebOrderController extends Controller
 {
     /**
      * Авторизация пользователя
@@ -20,7 +20,7 @@ class TaxiController extends Controller
             'password' => hash('SHA512', '22223344') //SHA512 Hash пароля пользователя.*
             // WebOrdersApiClientAppToken	Да	Токен для отправки пушей.
         ]);
-        return $response->body();
+        return $response;
     }
 
     /**

@@ -233,7 +233,7 @@ return [
     ],
 
     /**
-     * URL API taxi2012
+     * URL API taxi
      */
     'taxi2012Url' => 'http://31.43.107.151:7303'
 

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WebOrderController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+Route::get('/welcome', function () {
     return view('welcome');
 });
 
@@ -37,6 +39,20 @@ Route::get('/admin', function () {
 Route::get('/admin/{any}', function () {
     return view('admin.home');
 })->where('any', '.*')->middleware('role:superadministrator');
+
+Route::get('/', function () {
+    return view('taxi.home');
+});
+
+Route::get('/taxi/{any}', function () {
+    return view('taxi.home');
+})->where('any', '.*');
+
+/**
+ * WebOrder routs
+ */
+Route::get('/axios/account', [WebOrderController::class, 'account'])->name('web-account');
+
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');
