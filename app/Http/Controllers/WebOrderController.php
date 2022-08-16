@@ -11,17 +11,73 @@ class WebOrderController extends Controller
      * Авторизация пользователя
      * @return string
      */
-    public function account()
+    public function account($authorization)
     {
-        $url = config('app.taxi2012Url') . '/api/account';
-        $response = Http::post($url, [
-            //Все поля обязательные
-            'login' => '0936734488', //Логин (или телефонный номер) для авторизации пользователя
-            'password' => hash('SHA512', '22223344') //SHA512 Hash пароля пользователя.*
-            // WebOrdersApiClientAppToken	Да	Токен для отправки пушей.
-        ]);
-        return $response;
+        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        return $response->collect();
+
     }
+    public function authorization($req)
+    {
+        $username = $req->username;
+        $password = hash('SHA512', $req->password);
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        return $authorization;
+    }
+
+    /**
+     * Запрос профиля клиента
+     * @return string
+     */
+    public function profile(Request $req)
+    {
+        $username = $req->username;
+        $password = hash('SHA512', $req->password);
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        if ($response->status() == "200") {
+
+            return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
+        } else {
+            return view('taxi.login');
+        }
+    }
+    /**
+     * Обновление профиля клиента
+     * @return int
+     */
+    public function profileput(Request $req)
+    {
+
+        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $req->authorization])->put($url, [
+            'patch' => 'name, address', /*Обновление патчем.- является необязательным параметром и позволяет выполнить частичное обновление (обновить только имя клиента, только адрес клиента, или и то и другое).
+                Возможный значения «patch»:
+                «name» - будет обновлена только группа полей: user_first_name, user_middle_name и user_last_name;
+                «address» - будет обновлена только группа полей: route_address_from, route_address_number_from, route_address_entrance_from и route_address_apartment_from;
+                Значения параметра «patch» можно объединять разделителем «,» (запятая);
+                Если «patch» не содержит значения — будут обновлены все поля.*/
+            'user_first_name' => $req->user_first_name, //Имя
+            'user_middle_name' => $req->user_middle_name, //Отчество
+            'user_last_name' => $req->user_last_name, //Фамилия
+            'route_address_from' => $req->route_address_from, //Адрес
+            'route_address_number_from' => $req->route_address_number_from, //Номер дома
+            'route_address_entrance_from' => $req->route_address_entrance_from, //Подъезд
+            'route_address_apartment_from' => $req->route_address_apartment_from, //Квартира
+        ]);
+        return view('taxi.home');
+    }
+
 
     /**
      * Смена пароля
@@ -543,22 +599,7 @@ class WebOrderController extends Controller
            ]);
         return $response->body();
     }
-    /**
-     * Запрос профиля клиента
-     * @return string
-     */
-    public function profile()
-    {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-            ])->get($url);
-        return $response->body();
-    }
 
     /**
      * Запрос пяти самых новых адресов клиента
@@ -575,35 +616,7 @@ class WebOrderController extends Controller
             'Authorization' => $authorization, ])->get($url);
         return $response->body();
     }
-    /**
-     * Обновление профиля клиента
-     * @return int
-     */
-    public function profileput()
-    {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,])->put($url, [
-            'patch' => 'name, address', /*Обновление патчем.- является необязательным параметром и позволяет выполнить частичное обновление (обновить только имя клиента, только адрес клиента, или и то и другое).
-                Возможный значения «patch»:
-                «name» - будет обновлена только группа полей: user_first_name, user_middle_name и user_last_name;
-                «address» - будет обновлена только группа полей: route_address_from, route_address_number_from, route_address_entrance_from и route_address_apartment_from;
-                Значения параметра «patch» можно объединять разделителем «,» (запятая);
-                Если «patch» не содержит значения — будут обновлены все поля.*/
-            'user_first_name' => 'Hanna', //Имя
-            'user_middle_name' => 'Anatoliyvna', //Отчество
-            'user_last_name' => 'Korzhova', //Фамилия
-            'route_address_from' => 'Scince avenu', //Адрес
-            'route_address_number_from' => '4B', //Номер дома
-            'route_address_entrance_from' => '12', //Подъезд
-            'route_address_apartment_from' => '1', //Квартира
-        ]);
-        return $response->status();
-    }
 
     /**
      * Обновление информации для отправки push

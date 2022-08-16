@@ -3,6 +3,7 @@
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebOrderController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -44,15 +45,29 @@ Route::get('/', function () {
     return view('taxi.home');
 });
 
-Route::get('/taxi/{any}', function () {
-    return view('taxi.home');
-})->where('any', '.*');
+Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
 
-/**
- * WebOrder routs
- */
-Route::get('/axios/account', [WebOrderController::class, 'account'])->name('web-account');
+Route::get('/profile/view', function () {
+    return view('taxi.profileEdit');
+})->name('profile-edit-view');
 
+Route::get('/profile/edit/form/{authorization}', function ($authorization) {
+    $response = new WebOrderController();
+    $response = $response->account($authorization);
+    return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
+})->name('profile-edit-form');
+
+/*Route::get('/profile/edit/form/{authorization}/{response}', function ($authorization, $response) {
+    return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
+})->name('profile-edit-form');*/
+
+Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('profile-edit');
+
+Route::get('/login/taxi', function () {
+    return view('taxi.login');
+})->name('taxi-login');
+
+Route::get('/account/edit/', [WebOrderController::class, 'profileput'])->name('account-edit');
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');
