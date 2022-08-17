@@ -49,12 +49,23 @@ class WebOrderController extends Controller
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
-        if ($response->status() == "200") {
-             return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
+
+      if ($response->status() == "200") {
+             //return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
+             return redirect()->route('profile-view', ['authorization' => $authorization])->with('success', 'Ласкаво просимо');
         } else {
-            return view('taxi.login');
+          //  return view('taxi.login');
+          return redirect()->route('login')->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
         }
+ /*
+        if ($response->status() == "200") {
+            //
+        } else {
+        //
+        }*/
+
     }
+
     /**
      * Обновление профиля клиента
      * @return int
@@ -79,10 +90,70 @@ class WebOrderController extends Controller
             'route_address_entrance_from' => $req->route_address_entrance_from, //Подъезд
             'route_address_apartment_from' => $req->route_address_apartment_from, //Квартира
             ]);
-        // return $authorization;
-       return redirect()->route('profile-view', ['authorization' => $authorization]);
-        // return redirect()->route('home');
+
+       return redirect()->route('profile-view', ['authorization' => $authorization])->with('success', 'Особисті дані успішно оновлено');
     }
+
+    /**
+     * Регистрация пользователя
+     * Получение кода подтверждения
+     * @return int
+     */
+    public function sendConfirmCode(Request $req)
+    {
+        $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => '0', //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+            'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
+        ]);
+
+        if ($response->status() == "200") {
+            return redirect()->route('registration-form')->with('success', 'Код підтвердження успішно надіслано на вказаний телефон');
+        } else {
+            return redirect()->route('registration-sms')->with('error', 'Пользователь с таким номером телефона уже зарегистрирован');
+        }
+    }
+
+    /**
+     * Регистрация пользователя
+     * Регистрация с кодом подтверждения
+     * @return string
+     */
+    public function register(Request $req)
+    {
+        $url = config('app.taxi2012Url') . '/api/account/register';
+        $response = Http::post($url, [
+            //Все параметры обязательные
+            'phone' => $req->phone, //Номер мобильного телефона, на который будет отправлен код подтверждения
+            'confirm_code' => $req->confirm_code, //Код подтверждения, полученный в SMS.
+            'password' =>  $req->password, //Пароль.
+            'confirm_password' => $req-> confirm_password, //Пароль (повтор).
+            'user_first_name' => 'Новий користувач', // Необязательный. Имя клиента
+        ]);
+        if ($response->status() == "200") {
+            $username = $req->phone;
+            $password = hash('SHA512', $req->password);
+            $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+            return redirect()->route('profile-view', ['authorization' => $authorization])->with('success', 'Реєстрація нового користувача успішна');
+        } else {
+            return redirect()->route('registration-form')->with('error', $response->body());
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -153,40 +224,6 @@ class WebOrderController extends Controller
         return $response->status();
     }
 
-    /**
-     * Регистрация пользователя
-     * Получение кода подтверждения
-     * @return int
-     */
-    public function sendConfirmCode()
-    {
-        $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
-        $response = Http::post($url, [
-            'phone' => '0936734455', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => '0', //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-            'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
-        ]);
-        return $response->body();
-    }
-
-    /**
-     * Регистрация пользователя
-     * Регистрация с кодом подтверждения
-     * @return string
-     */
-    public function register()
-    {
-        $url = config('app.taxi2012Url') . '/api/account/register';
-        $response = Http::post($url, [
-            //Все параметры обязательные
-            'phone' => '0936734455', //Номер мобильного телефона, на который будет отправлен код подтверждения
-            'confirm_code' => '9183', //Код подтверждения, полученный в SMS.
-            'password' => '11223344', //Пароль.
-            'confirm_password' => '11223344', //Пароль (повтор).
-            'user_first_name' => 'Sergii', // Необязательный. Имя клиента
-        ]);
-        return $response->body();
-    }
 
     /**
      * Верификация телефона

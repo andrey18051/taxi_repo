@@ -41,10 +41,17 @@ Route::get('/admin/{any}', function () {
     return view('admin.home');
 })->where('any', '.*')->middleware('role:superadministrator');
 
+//*********************************************************************************************************************/
 Route::get('/', function () {
     return view('taxi.home');
 })->name('home');
 
+/**
+ * Профиль
+ */
+Route::get('/login', function () {
+    return view('taxi.login');
+})->name('login');
 Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
 
 Route::get('/profile/view/{authorization}', function ($authorization) {
@@ -60,6 +67,29 @@ Route::get('/profile/edit/form/{authorization}', function ($authorization) {
 })->name('profile-edit-form');
 
 Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('profile-edit');
+
+/**
+ * Регистрация
+ */
+Route::get('/registration/sms', function () {
+    return view('taxi.registerSMS');
+})->name('registration-sms');
+
+Route::get('/sendConfirmCode', [WebOrderController::class, 'sendConfirmCode'])->name('sendConfirmCode');
+
+Route::get('/registration/form', function () {
+    return view('taxi.register');
+})->name('registration-form');
+
+Route::get('/registration/confirm-code', [WebOrderController::class, 'register'])->name('registration');
+
+
+
+
+
+
+
+
 
 Route::get('/login/taxi', function () {
     return view('taxi.login');

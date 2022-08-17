@@ -46,8 +46,8 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('profile') }}">{{ __('Profile') }}</a>
-
+                                    <a class="dropdown-item" href="{{ route('login') }}">{{ __('Вхід') }}</a>
+                                    <a class="dropdown-item" href="{{ route('registration-sms') }}">{{ __('Реєстрація') }}</a>
                                 </div>
                             </li>
 
@@ -57,6 +57,7 @@
         </nav>
 
         <main class="py-4">
+            @include ('layouts.messages')
             @yield('content')
         </main>
     </div>

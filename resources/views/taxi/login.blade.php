@@ -48,13 +48,13 @@
 
                                 <!-- Phone input -->
                                 <div class="form-outline mb-4">
-                                    <input type="text" class="form-control" name="username" value="0936734488">
+                                    <input type="text" class="form-control" name="username" placeholder="0936734488">
                                     <label class="form-label" for="username">Телефон</label>
                                 </div>
 
                                 <!-- Password input -->
                                 <div class="form-outline mb-4">
-                                    <input type="text" class="form-control" name="password" id="password" value="22223344"><br>
+                                    <input type="password" class="form-control" name="password" id="password" placeholder="22223344"><br>
                                     <label class="form-label" for="password">Пароль</label>
                                 </div>
 
@@ -62,6 +62,9 @@
                                 <button type="submit" class="btn btn-primary btn-block mb-4">
                                     Увійти
                                 </button>
+                                <a  class="btn btn-success btn-block mb-4" href="{{route('registration-sms')}}">
+                                    Зареєструватись
+                                </a>
 
                             </form>
                         </div>
