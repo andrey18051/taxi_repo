@@ -43,23 +43,21 @@ Route::get('/admin/{any}', function () {
 
 Route::get('/', function () {
     return view('taxi.home');
-});
+})->name('home');
 
 Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
 
-Route::get('/profile/view', function () {
-    return view('taxi.profileEdit');
-})->name('profile-edit-view');
+Route::get('/profile/view/{authorization}', function ($authorization) {
+    $response = new WebOrderController();
+    $response = $response->account($authorization);
+    return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
+})->name('profile-view');
 
 Route::get('/profile/edit/form/{authorization}', function ($authorization) {
     $response = new WebOrderController();
     $response = $response->account($authorization);
     return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
 })->name('profile-edit-form');
-
-/*Route::get('/profile/edit/form/{authorization}/{response}', function ($authorization, $response) {
-    return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
-})->name('profile-edit-form');*/
 
 Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('profile-edit');
 

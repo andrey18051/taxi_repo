@@ -21,6 +21,11 @@ class WebOrderController extends Controller
         return $response->collect();
 
     }
+
+    /**
+     * @param $req
+     * @return string
+     */
     public function authorization($req)
     {
         $username = $req->username;
@@ -45,8 +50,7 @@ class WebOrderController extends Controller
             'Authorization' => $authorization,
         ])->get($url);
         if ($response->status() == "200") {
-
-            return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
+             return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
         } else {
             return view('taxi.login');
         }
@@ -57,7 +61,7 @@ class WebOrderController extends Controller
      */
     public function profileput(Request $req)
     {
-
+        $authorization = $req->authorization;
         $url = config('app.taxi2012Url') . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $req->authorization])->put($url, [
@@ -74,8 +78,10 @@ class WebOrderController extends Controller
             'route_address_number_from' => $req->route_address_number_from, //Номер дома
             'route_address_entrance_from' => $req->route_address_entrance_from, //Подъезд
             'route_address_apartment_from' => $req->route_address_apartment_from, //Квартира
-        ]);
-        return view('taxi.home');
+            ]);
+        // return $authorization;
+       return redirect()->route('profile-view', ['authorization' => $authorization]);
+        // return redirect()->route('home');
     }
 
 

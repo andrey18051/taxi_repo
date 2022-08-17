@@ -1,48 +1,6 @@
 @extends('layouts.taxi')
 
 @section('content')
-<!--
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
-                <h1>Account</h1>
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    {{ __('You are logged in!') }}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
--->
-
-
-{{-- $response}}{{$authorization}}
-
-
-{{$response["user_login"]}}
-{{$response["user_first_name"]}}
-{{$response["user_middle_name"]}}
-{{$response["user_last_name"]}}
-
-{{$response["user_balance"]}}
-{{$response["orders_count"]}}
-{{$response["client_bonuses"]}}
-
-
-{{$response["discount"]["value"]}}
-{{$response["discount"]["unit"]}}
-
-{{$response["payment_type"]}}
-{{$response["corporate_account"] --}}
-
 <section style="background-color: #eee;">
     <div class="container py-5">
         <div class="row">
@@ -61,16 +19,13 @@
             <div class="col-lg-4">
                 <div class="card mb-4">
                     <div class="card-body text-center">
-                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                        <img src="{{ asset('img/logo-profile.jpg')}}" alt="avatar"
                              class="rounded-circle img-fluid" style="width: 150px;">
                         <h5 class="my-3">
                             {{$response["user_first_name"]}}
                             {{$response["user_last_name"]}}
-
-                            </h5>
-                        <p class="text-muted mb-1">Ідентіфікатор {{$response["id"]}}</p>
-
-                        <div class="d-flex justify-content-center mb-2">
+                        </h5>
+                    <div class="d-flex justify-content-center mb-2">
                             <a type="button" class="btn btn-primary"  href="{{ route('profile-edit-form', $authorization) }}">Оновити</a>
                             <button type="button" class="btn btn-outline-primary ms-1">Message</button>
                         </div>
@@ -81,23 +36,7 @@
                         <ul class="list-group list-group-flush rounded-3">
                             <li class="list-group-item d-flex justify-content-between align-items-center p-3">
                                 <i class="fas fa-globe fa-lg text-warning"></i>
-                                <p class="mb-0">https://mdbootstrap.com</p>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                                <i class="fab fa-github fa-lg" style="color: #333333;"></i>
-                                <p class="mb-0">mdbootstrap</p>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                                <i class="fab fa-twitter fa-lg" style="color: #55acee;"></i>
-                                <p class="mb-0">@mdbootstrap</p>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                                <i class="fab fa-instagram fa-lg" style="color: #ac2bac;"></i>
-                                <p class="mb-0">mdbootstrap</p>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                                <i class="fab fa-facebook-f fa-lg" style="color: #3b5998;"></i>
-                                <p class="mb-0">mdbootstrap</p>
+                                <p class="mb-0">Ідентіфікатор <b>{{$response["id"]}}</b></p>
                             </li>
                         </ul>
                     </div>
@@ -146,69 +85,33 @@
                     <div class="col-md-6">
                         <div class="card mb-4 mb-md-0">
                             <div class="card-body">
-                                <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
-                                </p>
-                                <p class="mb-1" style="font-size: .77rem;">Web Design</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
-                                <div class="progress rounded mb-2" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
+                                <p class="mb-4"><span class="text-primary font-italic me-1">Фінансова інформація</span></p>
+                                <p class="mb-1">Текущий баланс: <b>{{$response["user_balance"]}} грн</b></p>
+                                @if($response["payment_type"] == "0")
+                                    <p class="mb-1" style="font-size: .77rem;">Категорія оплати користувача: готівка</p>
+                                @else
+                                    <p class="mb-1" style="font-size: .77rem;">Категорія оплати користувача: безготівка</p>
+                                @endif
+                                <p class="mb-1" style="font-size: .77rem;">Корпоративний рахунок: {{$response["corporate_account"]}}</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="card mb-4 mb-md-0">
                             <div class="card-body">
-                                <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
-                                </p>
-                                <p class="mb-1" style="font-size: .77rem;">Web Design</p>
+                                <p class="mb-4"><span class="text-primary font-italic me-1">Активність користування сервісом</span></p>
+                                <p class="mb-1" style="font-size: .77rem;">Усього заказів: {{$response["orders_count"]}}</p>
+                                <p class="mb-1" style="font-size: .77rem;">Усього бонусів: {{$response["client_bonuses"]}} грн</p>
+                                <p class="mb-1" style="font-size: .77rem;">Знижка: {{$response["discount"]["value"]}} {{$response["discount"]["unit"]}}</p>
                                 <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
-                                <div class="progress rounded" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
-                                <div class="progress rounded mb-2" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
+                                    <div class="progress-bar" role="progressbar" style="width: {{$response["discount"]["value"]}}%" aria-valuenow="{{$response["discount"]["value"]}}"
                                          aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
         </div>
