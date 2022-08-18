@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TaxiController;
+use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebOrderController;
 use Illuminate\Http\Request;
@@ -17,6 +18,15 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/search', function () {
+    return view('search');
+});
+Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
+Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
+
+
+
 
 Route::get('/welcome', function () {
     return view('welcome');
@@ -49,9 +59,9 @@ Route::get('/', function () {
 /**
  * Профиль
  */
-Route::get('/login', function () {
+Route::get('/taxi/login', function () {
     return view('taxi.login');
-})->name('login');
+})->name('login-taxi');
 Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
 
 Route::get('/profile/view/{authorization}', function ($authorization) {

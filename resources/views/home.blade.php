@@ -68,6 +68,7 @@
     <div class="container">
         <h3>User section</h3>
         <a type="button" href="{{ route('taxi-account') }}" class="btn">Account</a>
+        <a type="button" href="{{ route('search-home') }}" class="btn">Search home</a>
         <a type="button" href="{{ route('taxi-changePassword') }}" class="btn">ChangePassword</a>
         <a type="button" href="{{ route('taxi-restoreSendConfirmCode') }}" class="btn">RestoreSendConfirmCode</a>
         <a type="button" href="{{ route('taxi-restoreСheckConfirmCode') }}" class="btn">RestoreСheckConfirmCode</a>
