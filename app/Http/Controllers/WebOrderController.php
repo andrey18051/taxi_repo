@@ -141,7 +141,71 @@ class WebOrderController extends Controller
         }
     }
 
+    /**
+     * Работа с заказами
+     * Рассчет стоимости заказа
+     * @return string
+     */
+    public function cost(Request $req)
+    {
+        $username = '0936734455';
+        $password = hash('SHA512', '11223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $url = config('app.taxi2012Url') . '/api/weborders/cost';
+
+        $from = $req->search;
+        $from_number = $req->from_number;
+        $to = $req->search1;
+        $to_number = $req->to_number;
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'user_full_name' => 'Иванов Александр', //Полное имя пользователя
+            'user_phone' => '', //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => null, //Время подачи предварительного заказа
+            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => '', //Комментарий к заказу
+            'add_cost' => 0,
+            'wagon' => false, //Универсал: True, False
+            'minibus' => false, //Микроавтобус: True, False
+            'premium' => false, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => 'Базовый', //Гибкий тариф
+            'baggage' => false, //Загрузка салона. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'animal' => false, //Перевозка животного. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'conditioner' => true, //Кондиционер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'courier_delivery' => false, //Курьер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'route_undefined' => false, //По городу: True, False
+            'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'number' => $from_number],
+                ['name' => $to, 'number' => $to_number],
+            ],
+            'taxiColumnId' => 0, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ]);
+
+        if ($response->status() == "200") {
+            /* $username = $req->phone;
+             $password = hash('SHA512', $req->password);
+             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+      //       return redirect()->route('search', ['authorization' => $authorization])->with('success', 'Реєстрація нового користувача успішна');*/
+            $json_arr = json_decode($response, true);
+            $order_cost = "Вартість поїздки за маршрутом $from, будинок $from_number
+              -  $to, будинок $to_number становитиме: " . $json_arr['order_cost'] . 'грн';
+            return redirect()->route('search-home')->with('success', $order_cost);
+
+        } else {
+            return redirect()->route('search-home')->with('error', "Помилка створення маршруту  $from, будинок $from_number
+              -  $to, будинок $to_number" );
+        }
+    }
 
 
 
@@ -266,52 +330,7 @@ class WebOrderController extends Controller
         return $response->body();
     }
 
-    /**
-     * Работа с заказами
-     * Рассчет стоимости заказа
-     * @return string
-     */
-    public function cost()
-    {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/weborders/cost';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->post($url, [
-            'user_full_name' => 'Иванов Александр', //Полное имя пользователя
-            'user_phone' => '', //Телефон пользователя
-            'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
-            'route_address_entrance_from' => null,
-            'comment' => '', //Комментарий к заказу
-            'add_cost' => 0,
-            'wagon' => false, //Универсал: True, False
-            'minibus' => false, //Микроавтобус: True, False
-            'premium' => false, //Машина премиум-класса: True, False
-            'flexible_tariff_name' => 'Базовый', //Гибкий тариф
-            'baggage' => false, //Загрузка салона. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'animal' => false, //Перевозка животного. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'conditioner' => true, //Кондиционер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'courier_delivery' => false, //Курьер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'route_undefined' => false, //По городу: True, False
-            'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => 'Казино Афина Плаза (Греческая пл. 3/4)'/*, 'number' => 1*/],
-                ['name' => 'Казино Кристал (ДЕВОЛАНОВСКИЙ СПУСК 11)'],
-            ],
-            'taxiColumnId' => 0, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
-
-        return $response->body() ;
-    }
 
     /**
      * Работа с заказами

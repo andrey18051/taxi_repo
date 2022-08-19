@@ -19,11 +19,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/search', function () {
-    return view('search');
-});
-Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
-Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
+
 
 
 
@@ -93,9 +89,20 @@ Route::get('/registration/form', function () {
 
 Route::get('/registration/confirm-code', [WebOrderController::class, 'register'])->name('registration');
 
+Route::get('/search', function () {
+    return view('search');
+});
+/**
+ * Поиск по улицам
+ */
+Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
+Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
+Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
+/**
+ * Расчет стоимости
+ */
 
-
-
+Route::get('/cost', [WebOrderController::class, 'cost'])->name('cost');
 
 
 
