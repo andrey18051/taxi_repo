@@ -12,8 +12,6 @@
         <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
     </head>
 
-    <!-- Scripts-->
-    <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -41,14 +39,10 @@
                         <!-- Authentication Links -->
 
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ "Кабинет" }}
+                                <a id="navbarDropdown" class="nav-link" href="{{ route('login-taxi') }}" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    {{ __('Вхід') }}
                                 </a>
 
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('login-taxi') }}">{{ __('Вхід') }}</a>
-                                    <a class="dropdown-item" href="{{ route('registration-sms') }}">{{ __('Реєстрація') }}</a>
-                                </div>
                             </li>
 
                     </ul>
@@ -61,5 +55,32 @@
             @yield('content')
         </main>
     </div>
-    </body>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
+    </script>
+    <script type="text/javascript">
+        var route = "{{ url('autocomplete-search') }}";
+        $('#search').typeahead({
+            source: function (query, process) {
+                return $.get(route, {
+                    query: query
+                }, function (data) {
+                    return process(data);
+                });
+            }
+        });
+        $('#search1').typeahead({
+            source: function (query, process) {
+                return $.get(route, {
+                    query: query
+                }, function (data) {
+                    return process(data);
+                });
+            }
+        });
+    </script>
+    <!-- Scripts
+    <script src="{{ asset('js/app.js') }}" defer></script>-->
+
+</body>
 </html>

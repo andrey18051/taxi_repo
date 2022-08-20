@@ -1,7 +1,7 @@
-@extends('layouts.taxi')
+@extends('layouts.cost')
 
 @section('content')
-
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
     <div class="container">
         <main>
             <div class="py-5 text-center">
@@ -216,12 +216,9 @@
                 <li class="list-inline-item"><a href="#">Поддержка</a></li>
             </ul>
         </footer>
-        <script src="/docs/5.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-        <script src="form-validation.js" crossorigin="anonymous"></script>
 
     </div>
-
+    </div>
 
 
 @endsection
