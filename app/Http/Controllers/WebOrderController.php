@@ -148,8 +148,8 @@ class WebOrderController extends Controller
      */
     public function cost(Request $req)
     {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/weborders/cost';
@@ -158,7 +158,30 @@ class WebOrderController extends Controller
         $from_number = $req->from_number;
         $to = $req->search1;
         $to_number = $req->to_number;
-
+        $auto_type = '';
+        if ($req->wagon == 'on') {
+            $wagon = true;
+            $wagon_type = " Універсал";
+            $auto_type = 'Тип авто:' . $wagon_type . " ";
+        } else {
+            $wagon = false;
+        };
+        if ($req->minibus == 'on') {
+            $minibus = true;
+            $minibus_type = " Мікроавтобус";
+            $auto_type = 'Тип авто:' . $auto_type . $minibus_type . " ";
+        } else {
+            $minibus = false;
+        };
+        if ($req->premium == 'on') {
+            $premium = true;
+            $premium_type = " Машина преміум-класса";
+            $auto_type = $auto_type . $premium_type;
+        } else {
+            $premium = false;
+        };
+        $flexible_tariff_name = $req->flexible_tariff_name;
+        $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -170,17 +193,17 @@ class WebOrderController extends Controller
             'route_address_entrance_from' => null,
             'comment' => '', //Комментарий к заказу
             'add_cost' => 0,
-            'wagon' => false, //Универсал: True, False
-            'minibus' => false, //Микроавтобус: True, False
-            'premium' => false, //Машина премиум-класса: True, False
-            'flexible_tariff_name' => 'Базовый', //Гибкий тариф
-            'baggage' => false, //Загрузка салона. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'wagon' => $wagon, //Универсал: True, False
+            'minibus' => $minibus, //Микроавтобус: True, False
+            'premium' => $premium, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
+           /* 'baggage' => false, //Загрузка салона. Параметр доступен при X-API-VERSION < 1.41.0: True, False
             'animal' => false, //Перевозка животного. Параметр доступен при X-API-VERSION < 1.41.0: True, False
             'conditioner' => true, //Кондиционер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'courier_delivery' => false, //Курьер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+            'courier_delivery' => false, //Курьер. Параметр доступен при X-API-VERSION < 1.41.0: True, False*/
             'route_undefined' => false, //По городу: True, False
-            'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+           // 'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
+           // 'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
             'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'number' => $from_number],
                 ['name' => $to, 'number' => $to_number],
@@ -197,21 +220,32 @@ class WebOrderController extends Controller
              $authorization = 'Basic ' . base64_encode($username . ':' . $password);
       //       return redirect()->route('search', ['authorization' => $authorization])->with('success', 'Реєстрація нового користувача успішна');*/
             $json_arr = json_decode($response, true);
-            $order_cost = "Вартість поїздки за маршрутом $from, будинок $from_number
-              -  $to, будинок $to_number становитиме: " . $json_arr['order_cost'] . 'грн';
-            return redirect()->route('search-home')->with('success', $order_cost);
+            $order = "Маршрут: $from, будинок $from_number
+              -  $to, будинок $to_number. $auto_type";
+            $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн';
+            return redirect()->route('home')->with('success', $order)->with('cost', $cost);
 
         } else {
-            return redirect()->route('search-home')->with('error', "Помилка створення маршруту  $from, будинок $from_number
+            return redirect()->route('home')->with('error', "Помилка створення маршруту  $from, будинок $from_number
               -  $to, будинок $to_number" );
         }
     }
+    /**
+     * Получение списка тарифов
+     * @return string
+     */
+    public function tariffs()
+    {
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-
-
-
-
-
+        $url = config('app.taxi2012Url') . '/api/tariffs';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        return $response->body();
+    }
 
 
 
@@ -381,22 +415,7 @@ class WebOrderController extends Controller
     }
 
 
-    /**
-     * Получение списка тарифов
-     * @return string
-     */
-    public function tariffs()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/tariffs';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url);
-        return $response->body();
-    }
 
     /**
      * Работа с заказами

@@ -270,14 +270,14 @@ class TaxiController extends Controller
     public function tariffs()
     {
         $username = '0936734488';
-        $password = hash('SHA512', '11223344');
+        $password = hash('SHA512', '22223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/tariffs';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
-        return $response->body();
+        return $response->collect();
     }
 
     /**

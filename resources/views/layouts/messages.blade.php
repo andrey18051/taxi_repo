@@ -14,6 +14,10 @@
     <div class="container">
         <div class="alert alert-success text-center">
             {{session('success')}}
+
+        </div>
+        <div class="alert alert-info text-center">
+             {{session('cost')}}
         </div>
     </div>
 @endif

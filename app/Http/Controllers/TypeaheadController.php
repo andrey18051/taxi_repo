@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\Config;
 use App\Models\Street;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -11,10 +12,7 @@ class TypeaheadController extends Controller
 {
     public function index()
     {
-
-
-
-        return view('search');
+        return view('home');
     }
 
     public function autocompleteSearch(Request $request)
@@ -31,19 +29,35 @@ class TypeaheadController extends Controller
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
-        $json_arr = json_decode($json_str, true);
-        DB::table('streets')->truncate();
-        $i = 0;
-        do {
-            $streets = new Street();
-            $streets->name = $json_arr['geo_street'][$i]['name'];
-            $streets->old_name = $json_arr['geo_street'][$i]['old_name'];
-            $streets->save();
-            $i++;
-        }
-        while ($i < count($json_arr['geo_street']));
 
-         $filterResult = Street::where('name', 'LIKE', '%' . $query . '%')->get();
-          return  response()->json($filterResult);
+        $json_arr = json_decode($json_str, true);
+
+        /**
+         * Проверка версии геоданных и обновление или создание базы адресов
+         * $json_arr['version_date'] - текущая версия улиц в базе
+         * config('app.streetVersionDate') - дата версии в конфиге
+         */
+
+        $svd = Config::where('id', '1')->first();
+        //Проверка версии геоданных и обновление или создание базы адресов
+        if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
+            $svd->streetVersionDate = $json_arr['version_date'];
+            $svd->save();
+            echo $svd->streetVersionDate;
+            DB::table('streets')->truncate();
+            $i = 0;
+            do {
+                $streets = new Street();
+                $streets->name = $json_arr['geo_street'][$i]['name'];
+                $streets->old_name = $json_arr['geo_street'][$i]['old_name'];
+                $streets->save();
+                $i++;
+            }
+            while ($i < count($json_arr['geo_street']));
+        }
+
+        $filterResult = Street::where('name', 'LIKE', '%' . $query . '%')->get();
+
+        return  response()->json($filterResult);
     }
 }

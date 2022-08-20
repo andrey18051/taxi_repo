@@ -49,7 +49,10 @@ Route::get('/admin/{any}', function () {
 
 //*********************************************************************************************************************/
 Route::get('/', function () {
-    return view('taxi.home');
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $json_arr = json_decode($tariffs, true);
+    return view('taxi.home', ['json_arr' => $json_arr]);
 })->name('home');
 
 /**
@@ -95,7 +98,7 @@ Route::get('/search', function () {
 /**
  * Поиск по улицам
  */
-Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
+//Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
 Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
 /**
