@@ -1,4 +1,4 @@
-@extends('layouts.taxi')
+@extends('layouts.logout')
 
 @section('content')
 <!--<div class="container">

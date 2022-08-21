@@ -28,7 +28,11 @@ const  routes = [
         path: "/taxi/account",
         component: TaxiAccount
 
-    }
+    },
+    {
+        name: 'editOrder',
+        path: "/costhistory/orders/:id"
+    },
     ];
 
     export default new vueRouter({

@@ -1,4 +1,4 @@
-@extends('layouts.taxi')
+@extends('layouts.logout')
 
 @section('content')
 <section style="background-color: #eee;">
@@ -26,8 +26,10 @@
                             {{$response["user_last_name"]}}
                         </h5>
                     <div class="d-flex justify-content-center mb-2">
-                            <a type="button" class="btn btn-primary"  href="{{ route('profile-edit-form', $authorization) }}">Оновити</a>
-                            <button type="button" class="btn btn-outline-primary ms-1">Message</button>
+                            <a type="button" class="btn btn-primary"
+                               href="{{ route('profile-edit-form', $authorization) }}">Оновити</a>
+                            <a type="button" class="btn btn-outline-primary ms-1"
+                               href="{{ route('costhistory', $authorization) }}">Мои маршруты</a>
                         </div>
                     </div>
                 </div>

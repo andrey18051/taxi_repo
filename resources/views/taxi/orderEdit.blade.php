@@ -1,7 +1,9 @@
-@extends('layouts.taxi')
+@extends('layouts.cost')
 
 @section('content')
-    <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+    {{-- print_r($orderId) --}}
+
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
     <div class="container">
         <main>
             <div class="py-5 text-center">
@@ -18,28 +20,44 @@
                         <ul class="list-group mb-3">
                             <li class="list-group-item d-flex justify-content-between lh-sm">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
+                                    @if ( $orderId['0']['wagon'] !== 0)
+                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon" checked>
+                                    @else
+                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
+                                    @endif
                                     <label class="form-check-label" for="wagon">Универсал</label>
                                 </div>
                            </li>
                             <li class="list-group-item d-flex justify-content-between lh-sm">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
+                                    @if ( $orderId['0']['minibus'] !== 0)
+                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus" checked>
+                                    @else
+                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
+                                    @endif
                                     <label class="form-check-label" for="minibus">Мікроавтобус</label>
                                 </div>
                             </li>
                             <li class="list-group-item d-flex justify-content-between lh-sm">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="premium" name="premium">
+                                    @if ( $orderId['0']['premium'] !== 0)
+                                        <input type="checkbox" class="form-check-input" id="premium" name="premium" checked>
+                                    @else
+                                        <input type="checkbox" class="form-check-input" id="premium" name="premium">
+                                    @endif
                                     <label class="form-check-label" for="premium">Машина преміум-класса</label>
                                 </div>
                             </li>
                             <li class="list-group-item d-flex justify-content-between lh-sm">
                                 <div class="col-md-12">
                                 <label for="$flexible_tariff_name" class="form-label">Тариф</label>
+
                                 <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
+                                            <option>{{ $orderId['0']['flexible_tariff_name'] }}</option>
                                         @for ($i = 0; $i < count($json_arr); $i++)
+                                            @if($orderId['0']['flexible_tariff_name'] !==$json_arr[$i]['name'])
                                             <option>{{$json_arr[$i]['name']}}</option>
+                                            @endif
                                         @endfor
                                 </select>
                                 </div>
@@ -51,31 +69,31 @@
                             <div class="row g-3">
                                 <div class="col-sm-8">
                                     <label for="user_phone" class="form-label">Телефон</label>
-                                    <input type="tel" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936734488" value="" required>
+                                    <input type="tel" class="form-control" id="user_phone" name="user_phone"  value="{{ $orderId['0']['user_phone'] }}"  readonly>
                                 </div>
                                 <div class="col-sm-4">
                                     <label for="user_full_name" class="form-label">Ім'я</label>
-                                    <input type="name" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" required/>
+                                    <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
 
                                 </div>
                                 <div class="col-sm-8">
                                     <label for="search" class="form-label">Звідки</label>
-                                    <input type="text" class="form-control" id="search" name="search" placeholder="Пошук вулиці" value="" required>
+                                    <input type="text" class="form-control" id="search" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
                                 </div>
 
                                 <div class="col-sm-4">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="будинок" value="1" class="form-control" />
+                                    <input type="text" id="from_number" name="from_number" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
 
                                 </div>
                                 <div class="col-sm-8">
                                     <label for="search1" class="form-label">Куди</label>
-                                    <input type="text" class="form-control" id="search1" name="search1" placeholder="Пошук вулиці" value="" required>
+                                    <input type="text" class="form-control" id="search1" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
                                 </div>
 
                                 <div class="col-sm-4">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="будинок" value="1" class="form-control" />
+                                    <input type="text" id="to_number" name="to_number" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
 
                                 </div>
 

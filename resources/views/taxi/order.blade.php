@@ -1,7 +1,7 @@
-@extends('layouts.taxi')
+@extends('layouts.cost')
 
 @section('content')
-    <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
     <div class="container">
         <main>
             <div class="py-5 text-center">

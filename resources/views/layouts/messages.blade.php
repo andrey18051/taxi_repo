@@ -14,11 +14,15 @@
     <div class="container">
         <div class="alert alert-success text-center">
             {{session('success')}}
+        </div>
+    </div>
+@endif
 
-        </div>
-        <div class="alert alert-info text-center">
-             {{session('cost')}}
-        </div>
+@if(session('cost'))
+    <div class="container">
+        <a  class="w-100 btn btn-primary btn-lg" href="{{route('login-taxi')}}">
+            {{session('cost')}}
+        </a>
     </div>
 @endif
 

@@ -4,6 +4,8 @@ use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebOrderController;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -47,7 +49,10 @@ Route::get('/admin/{any}', function () {
     return view('admin.home');
 })->where('any', '.*')->middleware('role:superadministrator');
 
-//*********************************************************************************************************************/
+/**
+/***********************************************************************************************************************
+*/
+
 Route::get('/', function () {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
@@ -58,9 +63,10 @@ Route::get('/', function () {
 /**
  * Профиль
  */
-Route::get('/taxi/login', function () {
+Route::get('/login', function () {
     return view('taxi.login');
 })->name('login-taxi');
+
 Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
 
 Route::get('/profile/view/{authorization}', function ($authorization) {
@@ -108,8 +114,49 @@ Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-co
 Route::get('/cost', [WebOrderController::class, 'cost'])->name('cost');
 
 
+/**
+ * Заказы
+ */
+Route::get('/costhistory-orders/{user_login}', function ($user_login){
+    return response()->json(Order::where('user_phone', $user_login)->orderBy('created_at', 'desc')->get());
+})->name('costhistory-orders');
+
+Route::get('/costhistory/orders/{id}', function ($id){
+    //   return ;
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $json_arr = json_decode($tariffs, true);
+    $orderId = json_decode(Order::where('id', $id)->get(), true);
+
+    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
+})->name('costhistory-orders-id');
+
+Route::get('/costhistory/{authorization}', function ($authorization){
+    $response = new WebOrderController();
+    $response = $response->account($authorization);
+    return view('taxi.costhistory', ['authorization' => $authorization, 'response' => $response]);
+})->name('costhistory');
+
+Route::get('/profile/edit/form/{authorization}', function ($authorization) {
+    $response = new WebOrderController();
+    $response = $response->account($authorization);
+    return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
+})->name('profile-edit-form');
 
 
+Route::get('/costhistory/orders', function (){
+    return response()->json(Order::get());
+})->name('costhistory-orders');
+
+Route::get('/costhistory/orders/{id}', function ($id){
+ //   return ;
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $json_arr = json_decode($tariffs, true);
+    $orderId = json_decode(Order::where('id', $id)->get(), true);
+
+    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
+})->name('costhistory-orders-id');
 
 Route::get('/login/taxi', function () {
     return view('taxi.login');

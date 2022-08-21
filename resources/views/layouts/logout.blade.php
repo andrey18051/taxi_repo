@@ -39,16 +39,13 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto">
                         <!-- Authentication Links -->
-                        <li class="nav-item dropdown">
-                            <a id="navbar" class="nav-link" href="{{ route('login-taxi') }}" role="button" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Вхід') }}
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a id="navbar" class="nav-link" href="{{ route('registration-sms') }}" role="button" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ __('Реєстрація') }}
-                            </a>
-                        </li>
+
+                            <li class="nav-item dropdown">
+                                <a id="navbar" class="nav-link" href="/" role="button" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    {{ "Вихід" }}
+                                </a>
+                            </li>
+
                     </ul>
                 </div>
             </div>
