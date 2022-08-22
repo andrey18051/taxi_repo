@@ -44,6 +44,15 @@
                                 </select>
                                 </div>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="col-md-12">
+                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                            <option>готівка</option>
+                                            <option>безготівка</option>
+                                    </select>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-7 col-lg-8">
@@ -65,7 +74,7 @@
 
                                 <div class="col-sm-4">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="будинок" value="1" class="form-control" />
+                                    <input type="text" id="from_number" name="from_number" value="1" class="form-control" />
 
                                 </div>
                                 <div class="col-sm-8">
@@ -75,10 +84,19 @@
 
                                 <div class="col-sm-4">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="будинок" value="1" class="form-control" />
+                                    <input type="text" id="to_number" name="to_number" value="1" class="form-control" />
+
+                                </div>
+                                <div class="col-sm-8">
+                                    <label for="comment" class="form-label">Коментар</label>
+                                    <textarea class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>
 
                                 </div>
 
+                                <div class="col-sm-4">
+                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>
+                                    <input type="text" id="add_cost" name="add_cost" value="0" class="form-control" />
+                                </div>
 
     <!--                            <div class="col-12">
                                     <label for="username" class="form-label">Имя пользователя</label>

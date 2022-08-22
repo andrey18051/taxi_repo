@@ -5510,9 +5510,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Order",
   props: {
-    user_name: {
-      type: String
-    }
+    user_name: String,
+    authorization: String
   },
   data: function data() {
     return {
@@ -5595,24 +5594,6 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_0___default().get('/costhistory-orders/' + this.user_name).then(function (res) {
         _this.orders = res.data;
         _this.loading = false;
-      });
-    },
-    deleteUser: function deleteUser(id) {
-      var _this2 = this;
-
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/destroy/' + id).then(function (response) {
-        var i = _this2.users.map(function (data) {
-          return data.id;
-        }).indexOf(id);
-
-        _this2.users.splice(i, 1);
-
-        alert(response.data);
-      });
-    },
-    editUser: function editUser(id, name, email) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email).then(function (ret) {
-        console.log(ret.data);
       });
     }
   }
@@ -5988,7 +5969,10 @@ var routes = [{
   component: _views_taxi_account__WEBPACK_IMPORTED_MODULE_5__["default"]
 }, {
   name: 'editOrder',
-  path: "/costhistory/orders/:id"
+  path: "/costhistory/orders/edit/:id"
+}, {
+  name: 'destroyOrder',
+  path: "/costhistory/orders/destroy/:id/:authorization"
 }];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: "history",
@@ -31487,15 +31471,20 @@ var render = function () {
                                   ),
                                   _vm._v(" "),
                                   _c(
-                                    "button",
+                                    "router-link",
                                     {
                                       staticClass: "btn btn-danger",
                                       staticStyle: { "margin-left": "5px" },
-                                      attrs: { title: "Видалити" },
-                                      on: {
-                                        click: function ($event) {
-                                          return _vm.deleteUser(row.id)
+                                      attrs: {
+                                        to: {
+                                          name: "destroyOrder",
+                                          params: {
+                                            id: row.id,
+                                            authorization: _vm.authorization,
+                                          },
                                         },
+                                        target: "_blank",
+                                        title: "Видалити",
                                       },
                                     },
                                     [
@@ -31547,7 +31536,7 @@ var render = function () {
                 { attrs: { slot: "head" }, slot: "head" },
                 [
                   _c("v-th", { attrs: { sortKey: "flexible_tariff_name" } }, [
-                    _vm._v("Тариф"),
+                    _vm._v("Тариф "),
                   ]),
                   _vm._v(" "),
                   _c("v-th", { attrs: { sortKey: "routefrom" } }, [

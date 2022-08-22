@@ -31,8 +31,12 @@ const  routes = [
     },
     {
         name: 'editOrder',
-        path: "/costhistory/orders/:id"
+        path: "/costhistory/orders/edit/:id"
     },
+    {
+        name: 'destroyOrder',
+        path: "/costhistory/orders/destroy/:id/:authorization"
+    }
     ];
 
     export default new vueRouter({

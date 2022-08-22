@@ -32,7 +32,7 @@ Route::get('/welcome', function () {
 
 Auth::routes(['verify' => true]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home-admin');
 
 
 Route::get('/users/all', [UserController::class,'index']);
@@ -60,6 +60,12 @@ Route::get('/', function () {
     return view('taxi.home', ['json_arr' => $json_arr]);
 })->name('home');
 
+Route::get('/homeorder/{id}', function ($id) {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $json_arr = json_decode($tariffs, true);
+    return view('taxi.home', ['json_arr' => $json_arr, 'id' => $id]);
+})->name('home-id');
 /**
  * Профиль
  */
@@ -106,22 +112,37 @@ Route::get('/search', function () {
  */
 //Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
-Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
+
 /**
  * Расчет стоимости
  */
 
 Route::get('/cost', [WebOrderController::class, 'cost'])->name('cost');
-
-
+Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
+/**
+ * Расчет стоимости исправленного заказа
+ */
+Route::get('/search/cost/edit/{id}', [WebOrderController::class, 'costEdit'])->name('search-cost-edit');
 /**
  * Заказы
+ * Поиск всех расчетов пользователя
  */
-Route::get('/costhistory-orders/{user_login}', function ($user_login){
+Route::get('/costhistory-orders/{user_login}', function ($user_login) {
     return response()->json(Order::where('user_phone', $user_login)->orderBy('created_at', 'desc')->get());
 })->name('costhistory-orders');
 
-Route::get('/costhistory/orders/{id}', function ($id){
+
+
+Route::get('/costhistory/{authorization}', function ($authorization) {
+    $response = new WebOrderController();
+    $response = $response->account($authorization);
+    return view('taxi.costhistory', ['authorization' => $authorization, 'response' => $response]);
+})->name('costhistory');
+
+/**
+ * Редактирование расчета
+ */
+Route::get('/costhistory/orders/edit/{id}', function ($id){
     //   return ;
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
@@ -131,11 +152,30 @@ Route::get('/costhistory/orders/{id}', function ($id){
     return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
 })->name('costhistory-orders-id');
 
-Route::get('/costhistory/{authorization}', function ($authorization){
+/**
+ * Удаление расчета
+ */
+Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $authorization) {
     $response = new WebOrderController();
     $response = $response->account($authorization);
-    return view('taxi.costhistory', ['authorization' => $authorization, 'response' => $response]);
-})->name('costhistory');
+
+    Order::where('id', $id)->delete();
+    return redirect()->route('costhistory', ['authorization' => $authorization])
+        ->with('success', "Запис успішно видалений");
+})->name('costhistory-orders-id-destroy');
+/**
+ * Отправка заказа
+ */
+Route::get('/costhistory/orders/neworder/{id}', function ($id) {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $json_arr = json_decode($tariffs, true);
+    $WebOrder->costWebOrder($id);
+    return redirect()->route('home', ['json_arr' => $json_arr]);
+})->name('costhistory-orders-neworder');
+
+
+
 
 Route::get('/profile/edit/form/{authorization}', function ($authorization) {
     $response = new WebOrderController();

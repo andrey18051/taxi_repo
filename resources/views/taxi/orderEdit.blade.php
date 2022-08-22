@@ -10,7 +10,7 @@
                   <h2>Форма розрахунку заказа</h2>
                 <p class="lead">Заповнити поля для розрахунку вартості поїздки.</p>
             </div>
-            <form action="{{route('search-cost')}}">
+            <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">
                 @csrf
                 <div class="row g-5">
                     <div class="col-md-5 col-lg-4 order-md-last">
@@ -62,6 +62,20 @@
                                 </select>
                                 </div>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="col-md-12">
+                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                        @if( $orderId['0']['payment_type'] == 0)
+                                            <option>готівка</option>
+                                            <option>безготівка</option>
+                                        @else
+                                            <option>безготівка</option>
+                                            <option>готівка</option>
+                                        @endif
+                                    </select>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-7 col-lg-8">
@@ -94,9 +108,17 @@
                                 <div class="col-sm-4">
                                     <label for="to_number" class="form-label">Будинок</label>
                                     <input type="text" id="to_number" name="to_number" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                                </div>
+                                <div class="col-sm-8">
+                                    <label for="comment" class="form-label">Коментар</label>
+                                    <textarea class="form-control" id="comment" name="comment"  >{{ $orderId['0']['comment'] }}</textarea>
 
                                 </div>
 
+                                <div class="col-sm-4">
+                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>
+                                    <input type="text" id="add_cost" name="add_cost" class="form-control" value="{{ $orderId['0']['add_cost'] }}" />
+                                </div>
 
     <!--                            <div class="col-12">
                                     <label for="username" class="form-label">Имя пользователя</label>

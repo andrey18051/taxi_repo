@@ -20,7 +20,7 @@
 
 @if(session('cost'))
     <div class="container">
-        <a  class="w-100 btn btn-primary btn-lg" href="{{route('login-taxi')}}">
+        <a  class="w-100 btn btn-primary btn-lg" href="{{route('costhistory-orders-neworder', $id)}}">
             {{session('cost')}}
         </a>
     </div>
