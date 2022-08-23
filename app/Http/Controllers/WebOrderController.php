@@ -242,7 +242,7 @@ class WebOrderController extends Controller
             $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $order->save();
-            $id = Order::all()->count();
+            $id = $order;
             /**
              *
              */
@@ -332,7 +332,7 @@ class WebOrderController extends Controller
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         ]);
-     //   return $response->body();
+
         if ($response->status() == "200") {
 
             $order = Order::where ('id', $id)->first();
