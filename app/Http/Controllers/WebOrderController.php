@@ -132,7 +132,8 @@ class WebOrderController extends Controller
             $username = $req->phone;
             $password = hash('SHA512', $req->password);
             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-            return redirect()->route('profile-view', ['authorization' => $authorization])->with('success', 'Реєстрація нового користувача успішна');
+            return redirect()->route('profile-view', ['authorization' => $authorization])
+                ->with('success', 'Реєстрація нового користувача успішна');
         } else {
             return redirect()->route('registration-form')->with('error', $response->body());
         }
@@ -243,12 +244,10 @@ class WebOrderController extends Controller
             $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $order->save();
             $id = $order;
-            /**
-             *
-             */
             $json_arr = json_decode($response, true);
-            $order = "Вітаємо $user_full_name на нашому сайті.  Ви зробили розрахунок за маршрутом зі $from (будинок $from_number) до
-                $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+            $order = "Вітаємо $user_full_name на нашому сайті
+            . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
+            . Оплата $req->payment_type. $auto_type";
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
             return redirect()->route('home-id', ['id' => $id])->with('success', $order)->with('cost', $cost);
 
@@ -358,13 +357,14 @@ class WebOrderController extends Controller
             $order->save();
 
             $json_arr = json_decode($response, true);
-            $order = "Вітаємо $user_full_name на нашому сайті.  Ви зробили розрахунок за маршрутом від улиці  $from (будинок $from_number) до
-                $to (будинок $to_number). Спосіб оплати замовлення: $req->payment_type. $auto_type";
+            $order = "Вітаємо $user_full_name на нашому сайті
+            . Ви зробили розрахунок за маршрутом від улиці $from (будинок $from_number) до  $to (будинок $to_number)
+            . Спосіб оплати: $req->payment_type. $auto_type";
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
             return redirect()->route('home-id', ['id' => $id])->with('success', $order)->with('cost', $cost);
 
         } else {
-            return redirect()->route('home-id', ['id' => $id])->with('error', "Помилка створення маршруту." );
+            return redirect()->route('home-id', ['id' => $id])->with('error', "Помилка створення маршруту.");
         }
 
     }
@@ -379,7 +379,7 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '22223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $req = Order::where('id',$id)->first();
+        $req = Order::where('id', $id)->first();
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
         $from = $req->routefrom;
@@ -513,13 +513,15 @@ class WebOrderController extends Controller
             } else {
                 $payment_type = ',безготівка';
             };
-            $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом зі $from (будинок $from_number) до
-                $to (будинок $to_number). Спосіб оплати замовлення: $payment_type. $auto_type " .
-                "Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер заказа: " .  $json_arrWeb['dispatching_order_uid'];
+            $order = "Вітаємо $user_full_name
+            . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
+            . Спосіб оплати: $payment_type. $auto_type
+            . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
+            . Номер: " .  $json_arrWeb['dispatching_order_uid'];
             return redirect()->route('home')->with('success', $order);
 
         } else {
-            return redirect()->route('home')->with('error', "Помілка створення заказу: $responseWeb->status()" );
+            return redirect()->route('home')->with('error', "Помілка створення заказу");
         }
     }
     /**
