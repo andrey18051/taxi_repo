@@ -69,7 +69,7 @@ Route::get('/homeorder/{id}', function ($id) {
 /**
  * Профиль
  */
-Route::get('/login', function () {
+Route::get('/login-taxi', function () {
     return view('taxi.login');
 })->name('login-taxi');
 
@@ -110,7 +110,7 @@ Route::get('/search', function () {
 /**
  * Поиск по улицам
  */
-//Route::get('/search/home', [TypeaheadController::class, 'index'])->name('search-home');
+Route::get('/search-home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
 
 /**
