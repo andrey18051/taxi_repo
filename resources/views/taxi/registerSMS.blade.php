@@ -48,7 +48,7 @@
 
                                         <!-- Phone input -->
                                         <div class="form-outline mb-4">
-                                            <input type="text" class="form-control" name="username" placeholder="0936734488">
+                                            <input type="text" class="form-control" name="username" placeholder="0936665544">
                                             <label class="form-label" for="username">Телефон</label>
                                         </div>
 

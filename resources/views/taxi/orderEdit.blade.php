@@ -7,7 +7,7 @@
     <div class="container">
         <main>
             <div class="py-5 text-center">
-                  <h2>Форма розрахунку заказа</h2>
+                  <h2>Форма розрахунку замовлення</h2>
                 <p class="lead">Заповнити поля для розрахунку вартості поїздки.</p>
             </div>
             <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">

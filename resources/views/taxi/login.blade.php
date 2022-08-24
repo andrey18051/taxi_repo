@@ -48,13 +48,13 @@
 
                                 <!-- Phone input -->
                                 <div class="form-outline mb-4">
-                                    <input type="text" class="form-control" name="username" placeholder="0936734488">
+                                    <input type="text" class="form-control" name="username" placeholder="0936665544">
                                     <label class="form-label" for="username">Телефон</label>
                                 </div>
 
                                 <!-- Password input -->
                                 <div class="form-outline mb-4">
-                                    <input type="password" class="form-control" name="password" id="password" placeholder="22223344"><br>
+                                    <input type="password" class="form-control" name="password" id="password" ><br>
                                     <label class="form-label" for="password">Пароль</label>
                                 </div>
 
