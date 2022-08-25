@@ -24,6 +24,11 @@
             {{session('cost')}}
         </a>
     </div>
+    <div class="container" style="margin-top: 10px">
+        <a  class="w-100 btn btn-danger btn-lg" href="{{route('home')}}">
+            {{'Відмовитися'}}
+        </a>
+    </div>
 @endif
 
 @if(session('error'))

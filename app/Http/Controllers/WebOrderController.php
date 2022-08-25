@@ -146,8 +146,8 @@ class WebOrderController extends Controller
      */
     public function cost(Request $req)
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/weborders/cost';
@@ -249,7 +249,7 @@ class WebOrderController extends Controller
             . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
             . Оплата $req->payment_type. $auto_type";
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
-            return redirect()->route('home-id', ['id' => $id])->with('success', $order)->with('cost', $cost);
+            return redirect()->route('home-id', ['id' => $id])->with('success', $order)/*->with('cost', $cost)*/;
 
         } else {
             return redirect()->route('home')->with('error', "Помилка створення маршруту");
@@ -263,8 +263,8 @@ class WebOrderController extends Controller
      */
     public function costEdit($id, Request $req)
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/weborders/cost';
@@ -361,7 +361,7 @@ class WebOrderController extends Controller
             . Ви зробили розрахунок за маршрутом від улиці $from (будинок $from_number) до  $to (будинок $to_number)
             . Спосіб оплати: $req->payment_type. $auto_type";
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
-            return redirect()->route('home-id', ['id' => $id])->with('success', $order)->with('cost', $cost);
+            return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
 
         } else {
             return redirect()->route('home-id', ['id' => $id])->with('error', "Помилка створення маршруту.");
@@ -375,8 +375,8 @@ class WebOrderController extends Controller
      */
     public function costWebOrder($id)
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $req = Order::where('id', $id)->first();
@@ -517,7 +517,9 @@ class WebOrderController extends Controller
             . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
             . Спосіб оплати: $payment_type. $auto_type
             . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
-            . Номер: " .  $json_arrWeb['dispatching_order_uid'];
+            . Номер: " .  $json_arrWeb['dispatching_order_uid']
+            . " Очікуйте на інформацію від оператора з обробки замовлення
+            . Скасувати або внести зміни можна за номером оператора (0674061856, 0933242525, 0504115575)";
             return redirect()->route('home')->with('success', $order);
 
         } else {
@@ -531,8 +533,8 @@ class WebOrderController extends Controller
      */
     public function weborders()
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/weborders';
@@ -578,8 +580,8 @@ class WebOrderController extends Controller
      */
     public function tariffs()
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/tariffs';
@@ -760,8 +762,8 @@ class WebOrderController extends Controller
      */
     public function webordersUidCostAdditionalGet()
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 

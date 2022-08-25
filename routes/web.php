@@ -100,8 +100,36 @@ Route::get('/homeorder/{id}', function ($id) {
                 $ii++;
         }
     }
-    return view('taxi.home', ['json_arr' => $json_arr, 'id' => $id]);
+    $orderId = json_decode(Order::where('id', $id)->get(), true);
+    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
 })->name('home-id');
+
+Route::get('/homeorder/afterorder/{id}', function ($id) {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case '1,5':
+            case '2.0':
+            case 'Универсал':
+            case 'Микроавтобус':
+            case 'Премиум-класс':
+                break;
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+            case 'Манго':
+            case 'Онлайн платный':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    $orderId = json_decode(Order::where('id', $id)->get(), true);
+    return view('taxi.homeblank', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
+})->name('home-id-afterorder');
+
 /**
  * Профиль
  */

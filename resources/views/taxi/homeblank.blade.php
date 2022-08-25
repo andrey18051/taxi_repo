@@ -1,7 +1,7 @@
-@extends('layouts.cost')
+@extends('layouts.taxi')
 
 @section('content')
-    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+<!--    <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
     <div class="container">
         <main>
             <div class="py-5 text-center">
@@ -44,18 +44,27 @@
                                 </select>
                                 </div>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="col-md-12">
+                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                            <option>готівка</option>
+                                            <option>безготівка</option>
+                                    </select>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-7 col-lg-8">
 
                             <div class="row g-3">
                                 <div class="col-sm-8">
-                                    <label for="user_phone" class="form-label">Телефон</label>
-                                    <input type="tel" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="09366655544" value="" required>
+&lt;!&ndash;                                    <label for="user_phone" class="form-label">Телефон</label>&ndash;&gt;
+                                    <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="0936665544">
                                 </div>
                                 <div class="col-sm-4">
-                                    <label for="user_full_name" class="form-label">Ім'я</label>
-                                    <input type="name" id="user_full_name" name="user_full_name" placeholder="Новий замовник"  class="form-control" value="Новий замовник" >
+&lt;!&ndash;                                    <label for="user_full_name" class="form-label">Ім'я</label>&ndash;&gt;
+                                    <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
 
                                 </div>
                                 <div class="col-sm-8">
@@ -65,7 +74,7 @@
 
                                 <div class="col-sm-4">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="будинок" value="1" class="form-control" />
+                                    <input type="text" id="from_number" name="from_number" value="1" class="form-control" />
 
                                 </div>
                                 <div class="col-sm-8">
@@ -75,12 +84,22 @@
 
                                 <div class="col-sm-4">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="будинок" value="1" class="form-control" />
+                                    <input type="text" id="to_number" name="to_number" value="1" class="form-control" />
+
+                                </div>
+                                <div class="col-sm-8">
+&lt;!&ndash;                                    <label for="comment" class="form-label">Коментар</label>&ndash;&gt;
+                                    <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+&lt;!&ndash;                                    <textarea type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>&ndash;&gt;
 
                                 </div>
 
+                                <div class="col-sm-4">
+&lt;!&ndash;                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>&ndash;&gt;
+                                    <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+                                </div>
 
-    <!--                            <div class="col-12">
+    &lt;!&ndash;                            <div class="col-12">
                                     <label for="username" class="form-label">Имя пользователя</label>
                                     <div class="input-group has-validation">
                                         <span class="input-group-text">@</span>
@@ -140,9 +159,9 @@
                                     <div class="invalid-feedback">
                                         Почтовый индекс обязателен.
                                     </div>
-                                </div>-->
+                                </div>&ndash;&gt;
                             </div>
-    <!--
+    &lt;!&ndash;
                             <hr class="my-4">
 
                             <div class="form-check">
@@ -208,8 +227,8 @@
                                     </div>
                                 </div>
                             </div>
--->
-                            <hr class="my-4">
+&ndash;&gt;
+&lt;!&ndash;                            <hr class="my-4">&ndash;&gt;
 
                             <button class="w-100 btn btn-primary btn-lg" type="submit">Розрахувати вартість поїздки</button>
 
@@ -227,7 +246,7 @@
         </footer>
 
     </div>
-    </div>
+    </div>-->
 
 
 @endsection

@@ -4,67 +4,22 @@
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
     <div class="container">
         <main>
-            <div class="py-5 text-center">
-                  <h2>Форма розрахунку замовлення</h2>
-                <p class="lead">Заповнити поля для розрахунку вартості поїздки.</p>
+            <div class="py-1 text-center">
+                <h2>Заповнити поля для розрахунку вартості поїздки.</h2>
             </div>
             <form action="{{route('search-cost')}}">
                 @csrf
                 <div class="row g-5">
-                    <div class="col-md-5 col-lg-4 order-md-last">
-                        <h4 class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-primary">Бажаний тип авто</span>
-                        </h4>
-                        <ul class="list-group mb-3">
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
-                                    <label class="form-check-label" for="wagon">Универсал</label>
-                                </div>
-                           </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
-                                    <label class="form-check-label" for="minibus">Мікроавтобус</label>
-                                </div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="premium" name="premium">
-                                    <label class="form-check-label" for="premium">Машина преміум-класса</label>
-                                </div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="col-md-12">
-                                <label for="$flexible_tariff_name" class="form-label">Тариф</label>
-                                <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
-                                        @for ($i = 0; $i < count($json_arr); $i++)
-                                            <option>{{$json_arr[$i]['name']}}</option>
-                                        @endfor
-                                </select>
-                                </div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="col-md-12">
-                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
-                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
-                                            <option>готівка</option>
-                                            <option>безготівка</option>
-                                    </select>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
                     <div class="col-md-7 col-lg-8">
 
                             <div class="row g-3">
                                 <div class="col-sm-8">
-                                    <label for="user_phone" class="form-label">Телефон</label>
-                                    <input type="tel" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936734488" value="" required>
+<!--                                    <label for="user_phone" class="form-label">Телефон</label>-->
+                                    <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="0936665544">
                                 </div>
                                 <div class="col-sm-4">
-                                    <label for="user_full_name" class="form-label">Ім'я</label>
-                                    <input type="name" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" required/>
+<!--                                    <label for="user_full_name" class="form-label">Ім'я</label>-->
+                                    <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
 
                                 </div>
                                 <div class="col-sm-8">
@@ -74,7 +29,7 @@
 
                                 <div class="col-sm-4">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" value="1" class="form-control" />
+                                    <input type="text" id="from_number" name="from_number" placeholder="1" class="form-control" value="" required/>
 
                                 </div>
                                 <div class="col-sm-8">
@@ -84,18 +39,19 @@
 
                                 <div class="col-sm-4">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" value="1" class="form-control" />
+                                    <input type="text" id="to_number" name="to_number" placeholder="1" class="form-control" value="" required/>
 
                                 </div>
                                 <div class="col-sm-8">
-                                    <label for="comment" class="form-label">Коментар</label>
-                                    <textarea class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>
+<!--                                    <label for="comment" class="form-label">Коментар</label>-->
+                                    <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+<!--                                    <textarea type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>-->
 
                                 </div>
 
                                 <div class="col-sm-4">
-                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>
-                                    <input type="text" id="add_cost" name="add_cost" value="0" class="form-control" />
+<!--                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>-->
+                                    <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                                 </div>
 
     <!--                            <div class="col-12">
@@ -227,12 +183,55 @@
                                 </div>
                             </div>
 -->
-                            <hr class="my-4">
-
-                            <button class="w-100 btn btn-primary btn-lg" type="submit">Розрахувати вартість поїздки</button>
-
+<!--                            <hr class="my-4">-->
                     </div>
+                    <div class="col-md-5 col-lg-4 order-md-last">
+                        <h4 class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-primary">Бажаний тип авто</span>
+                        </h4>
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
+                                    <label class="form-check-label" for="wagon">Универсал</label>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
+                                    <label class="form-check-label" for="minibus">Мікроавтобус</label>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="premium" name="premium">
+                                    <label class="form-check-label" for="premium">Машина преміум-класса</label>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="col-md-12">
+                                    <label for="$flexible_tariff_name" class="form-label">Тариф</label>
+                                    <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
+                                        @for ($i = 0; $i < count($json_arr); $i++)
+                                            <option>{{$json_arr[$i]['name']}}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div class="col-md-12">
+                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                        <option>готівка</option>
+                                        <option>безготівка</option>
+                                    </select>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
                 </div>
+                <button class="w-100 btn btn-primary btn-lg" type="submit">Розрахувати вартість поїздки</button>
             </form>
         </main>
         <footer class="my-5 pt-5 text-muted text-center text-small">
