@@ -17,7 +17,7 @@
                         <div class="row g-3">
                             <div class="col-sm-8">
                                 <label for="user_phone" class="form-label">Телефон</label>
-                                <input type="tel" class="form-control" id="user_phone" name="user_phone"  value="{{ $orderId['0']['user_phone'] }}"  autofocus>
+                                <input type="tel" class="form-control" id="user_phone" name="user_phone"  value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
                             </div>
                             <div class="col-sm-4">
                                 <label for="user_full_name" class="form-label">Ім'я</label>

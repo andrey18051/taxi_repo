@@ -16,7 +16,7 @@
                             <div class="row g-3">
                                 <div class="col-sm-8">
 <!--                                    <label for="user_phone" class="form-label">Телефон</label>-->
-                                    <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="0936665544">
+                                    <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
                                 </div>
                                 <div class="col-sm-4">
 <!--                                    <label for="user_full_name" class="form-label">Ім'я</label>-->
