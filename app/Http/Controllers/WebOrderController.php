@@ -586,6 +586,7 @@ class WebOrderController extends Controller
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
+
         return $response->body();
     }
 

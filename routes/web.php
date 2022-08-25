@@ -56,14 +56,50 @@ Route::get('/admin/{any}', function () {
 Route::get('/', function () {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
-    $json_arr = json_decode($tariffs, true);
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case '1,5':
+            case '2.0':
+            case 'Универсал':
+            case 'Микроавтобус':
+            case 'Премиум-класс':
+                break;
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+            case 'Манго':
+            case 'Онлайн платный':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
     return view('taxi.home', ['json_arr' => $json_arr]);
 })->name('home');
 
 Route::get('/homeorder/{id}', function ($id) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
-    $json_arr = json_decode($tariffs, true);
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case '1,5':
+            case '2.0':
+            case 'Универсал':
+            case 'Микроавтобус':
+            case 'Премиум-класс':
+                break;
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+            case 'Манго':
+            case 'Онлайн платный':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
     return view('taxi.home', ['json_arr' => $json_arr, 'id' => $id]);
 })->name('home-id');
 /**
@@ -146,7 +182,26 @@ Route::get('/costhistory/orders/edit/{id}', function ($id){
     //   return ;
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
-    $json_arr = json_decode($tariffs, true);
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case '1,5':
+            case '2.0':
+            case 'Универсал':
+            case 'Микроавтобус':
+            case 'Премиум-класс':
+                break;
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+            case 'Манго':
+            case 'Онлайн платный':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
     return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
@@ -169,7 +224,26 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
 Route::get('/costhistory/orders/neworder/{id}', function ($id) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
-    $json_arr = json_decode($tariffs, true);
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case '1,5':
+            case '2.0':
+            case 'Универсал':
+            case 'Микроавтобус':
+            case 'Премиум-класс':
+                break;
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+            case 'Манго':
+            case 'Онлайн платный':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+
     $WebOrder->costWebOrder($id);
     return redirect()->route('home', ['json_arr' => $json_arr]);
 })->name('costhistory-orders-neworder');
@@ -192,7 +266,26 @@ Route::get('/costhistory/orders/{id}', function ($id){
  //   return ;
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
-    $json_arr = json_decode($tariffs, true);
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case '1,5':
+            case '2.0':
+            case 'Универсал':
+            case 'Микроавтобус':
+            case 'Премиум-класс':
+                break;
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+            case 'Манго':
+            case 'Онлайн платный':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
     return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
