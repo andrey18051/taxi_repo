@@ -23,24 +23,24 @@
                                     <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
 
                                 </div>
-                                <div class="col-sm-11">
+                                <div class="col-9">
                                     <label for="search" class="form-label">Звідки</label>
                                     <input type="text" class="form-control" id="search" name="search" placeholder="Пошук вулиці" value="" required>
                                 </div>
 
-                                <div class="col-sm-1">
+                                <div class="col-3">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="1" class="form-control" value="" required/>
+                                    <input type="text" id="from_number" name="from_number" placeholder="1" class="form-control" style="text-align: center" value="" required/>
 
                                 </div>
-                                <div class="col-sm-11">
+                                <div class="col-9">
                                     <label for="search1" class="form-label">Куди</label>
                                     <input type="text" class="form-control" id="search1" name="search1" placeholder="Пошук вулиці" value="" required>
                                 </div>
 
-                                <div class="col-sm-1">
+                                <div class="col-3">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="1" class="form-control" value="" required/>
+                                    <input type="text" id="to_number" name="to_number" placeholder="1" class="form-control" style="text-align: center" value="" required/>
 
                                 </div>
                                 <div class="col-sm-11">
@@ -236,7 +236,7 @@
                         </div>
                     </div>
 
-                </div><button class="w-100 btn btn-primary btn-lg" type="submit">Розрахувати вартість поїздки</button>
+                </div><button class="w-100 btn btn-primary btn-lg" type="submit" >Розрахувати вартість поїздки</button>
             </form>
         </main>
         <footer class="my-5 pt-5 text-muted text-center text-small">

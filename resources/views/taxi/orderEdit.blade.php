@@ -24,34 +24,34 @@
                                 <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
 
                             </div>
-                            <div class="col-sm-8">
+                            <div class="col-9">
                                 <label for="search" class="form-label">Звідки</label>
                                 <input type="text" class="form-control" id="search" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
                             </div>
 
-                            <div class="col-sm-4">
+                            <div class="col-3">
                                 <label for="from_number" class="form-label">Будинок</label>
-                                <input type="text" id="from_number" name="from_number" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
+                                <input type="text" id="from_number" name="from_number" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
 
                             </div>
-                            <div class="col-sm-8">
+                            <div class="col-9">
                                 <label for="search1" class="form-label">Куди</label>
                                 <input type="text" class="form-control" id="search1" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
                             </div>
 
-                            <div class="col-sm-4">
-                                <label for="to_number" class="form-label">Будинок</label>
-                                <input type="text" id="to_number" name="to_number" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                            <div class="col-3">
+                                <label for="to_number" class="form-label" >Будинок</label>
+                                <input type="text" id="to_number" name="to_number" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
                             </div>
-                            <div class="col-sm-8">
+                            <div class="col-8">
                                 <label for="comment" class="form-label">Коментар</label>
                                 <textarea class="form-control" id="comment" name="comment"  >{{ $orderId['0']['comment'] }}</textarea>
 
                             </div>
 
-                            <div class="col-sm-4">
-                                <label for="add_cost" class="form-label">Додати до вартості (грн)</label>
-                                <input type="text" id="add_cost" name="add_cost" class="form-control" value="{{ $orderId['0']['add_cost'] }}" />
+                            <div class="col-4">
+                                <label for="add_cost" class="form-label"  >Додати до вартості (грн)</label>
+                                <input type="text" id="add_cost" name="add_cost" style="text-align: center" class="form-control" value="{{ $orderId['0']['add_cost'] }}" />
                             </div>
 
                             <!--                            <div class="col-12">
@@ -189,72 +189,53 @@
 
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
-                        <h4 class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-primary">Бажаний тип авто</span>
-                        </h4>
-                        <ul class="list-group mb-3">
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="form-check">
-                                    @if ( $orderId['0']['wagon'] !== 0)
-                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon" checked>
-                                    @else
-                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
-                                    @endif
-                                    <label class="form-check-label" for="wagon">Универсал</label>
-                                </div>
-                           </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="form-check">
-                                    @if ( $orderId['0']['minibus'] !== 0)
-                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus" checked>
-                                    @else
-                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
-                                    @endif
-                                    <label class="form-check-label" for="minibus">Мікроавтобус</label>
-                                </div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="form-check">
-                                    @if ( $orderId['0']['premium'] !== 0)
-                                        <input type="checkbox" class="form-check-input" id="premium" name="premium" checked>
-                                    @else
-                                        <input type="checkbox" class="form-check-input" id="premium" name="premium">
-                                    @endif
-                                    <label class="form-check-label" for="premium">Машина преміум-класса</label>
-                                </div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="col-md-12">
-                                <label for="$flexible_tariff_name" class="form-label">Тариф</label>
 
-                                <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
-                                            <option>{{ $orderId['0']['flexible_tariff_name'] }}</option>
-                                        @for ($i = 0; $i < count($json_arr); $i++)
-                                            @if($orderId['0']['flexible_tariff_name'] !==$json_arr[$i]['name'])
-                                            <option>{{$json_arr[$i]['name']}}</option>
-                                            @endif
-                                        @endfor
-                                </select>
-                                </div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="col-md-12">
-                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
-                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
-                                        @if( $orderId['0']['payment_type'] == 0)
+                        <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last" onclick="showHide('block_id')">Бажаний тип авто</a><br/><br/>
+
+                        <div id="block_id" style="display: none;">
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
+                                        <label class="form-check-label" for="wagon">Универсал</label>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
+                                        <label class="form-check-label" for="minibus">Мікроавтобус</label>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="premium" name="premium">
+                                        <label class="form-check-label" for="premium">Машина преміум-класса</label>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div class="col-md-12">
+                                        <label for="$flexible_tariff_name" class="form-label">Тариф</label>
+                                        <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
+                                            @for ($i = 0; $i < count($json_arr); $i++)
+                                                <option>{{$json_arr[$i]['name']}}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div class="col-md-12">
+                                        <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                        <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
                                             <option>готівка</option>
                                             <option>безготівка</option>
-                                        @else
-                                            <option>безготівка</option>
-                                            <option>готівка</option>
-                                        @endif
-                                    </select>
-                                </div>
-                            </li>
-                        </ul>
+                                        </select>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <button class="w-100 btn btn-danger btn-lg" type="submit">Підтвердіть замовлення</button>
+                <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
 
             </form>
         </main>
@@ -270,5 +251,24 @@
     </div>
     </div>
 
-
+    <script type="text/javascript">
+        /**
+         * Функция Скрывает/Показывает блок
+         * @author ox2.ru дизайн студия
+         **/
+        function showHide(element_id) {
+            //Если элемент с id-шником element_id существует
+            if (document.getElementById(element_id)) {
+                //Записываем ссылку на элемент в переменную obj
+                var obj = document.getElementById(element_id);
+                //Если css-свойство display не block, то:
+                if (obj.style.display != "block") {
+                    obj.style.display = "block"; //Показываем элемент
+                }
+                else obj.style.display = "none"; //Скрываем элемент
+            }
+            //Если элемент с id-шником element_id не найден, то выводим сообщение
+            else alert("Элемент с id: " + element_id + " не найден!");
+        }
+    </script>
 @endsection

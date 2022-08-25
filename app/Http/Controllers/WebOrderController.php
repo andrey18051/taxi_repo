@@ -517,13 +517,14 @@ class WebOrderController extends Controller
             . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
             . Спосіб оплати: $payment_type. $auto_type
             . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
-            . Номер: " .  $json_arrWeb['dispatching_order_uid']
-            . " Очікуйте на інформацію від оператора з обробки замовлення
-            . Скасувати або внести зміни можна за номером оператора (0674061856, 0933242525, 0504115575)";
-            return redirect()->route('home')->with('success', $order);
+            . Номер: " .  $json_arrWeb['dispatching_order_uid'];
+            return redirect()->route('home')->with('success', $order)
+                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення
+                . Скасувати або внести зміни можна за номером оператора");
 
         } else {
-            return redirect()->route('home')->with('error', "Помілка створення заказу");
+            return redirect()->route('home')->with('error', "Помілка створення заказу")
+               ;
         }
     }
     /**
