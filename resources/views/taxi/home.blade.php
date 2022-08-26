@@ -232,7 +232,7 @@
                                         <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
                                         <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
                                             <option>готівка</option>
-                                            <option>безготівка</option>
+<!--                                            <option>безготівка</option>-->
                                         </select>
                                     </div>
                                 </li>

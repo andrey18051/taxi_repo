@@ -252,11 +252,11 @@
                                         <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
                                         <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
                                             @if( $orderId['0']['payment_type'] == 1)
-                                                <option>безготівка</option>
+                                             {{--   <option>безготівка</option>--}}
                                                 <option>готівка</option>
                                             @else
                                                 <option>готівка</option>
-                                                <option>безготівка</option>
+<!--                                                <option>безготівка</option>-->
                                             @endif
                                         </select>
                                     </div>
