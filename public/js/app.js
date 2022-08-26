@@ -5506,6 +5506,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Order",
@@ -31091,7 +31093,14 @@ var render = function () {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "container" },
+        {
+          staticClass: "container",
+          staticStyle: {
+            display: "block",
+            overflow: "auto",
+            "max-width": "100%",
+          },
+        },
         [
           _c(
             "v-table",

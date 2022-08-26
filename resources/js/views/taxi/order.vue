@@ -9,7 +9,9 @@
                     </div>
                 </div>
             </div>
-       <div class="container">
+       <div class="container" style="display: block;
+                  overflow: auto;
+                  max-width: 100%;">
 
                 <v-table
                 :data="orders"
