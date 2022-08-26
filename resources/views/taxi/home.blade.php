@@ -33,14 +33,18 @@
                                     <input type="text" id="from_number" name="from_number" placeholder="1" class="form-control" style="text-align: center" value="" required/>
 
                                 </div>
+                                <div class="col-12" >
+                                    <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" value="1">
+                                    <label class="form-check-label" for="route_undefined">По місту</label>
+                                </div>
                                 <div class="col-9">
                                     <label for="search1" class="form-label">Куди</label>
-                                    <input type="text" class="form-control" id="search1" name="search1" placeholder="Пошук вулиці" value="" required>
+                                    <input type="text" class="form-control" id="search1" name="search1" placeholder="Пошук вулиці" >
                                 </div>
 
                                 <div class="col-3">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="1" class="form-control" style="text-align: center" value="" required/>
+                                    <input type="text" id="to_number" name="to_number" placeholder="1" class="form-control" style="text-align: center" value="" />
 
                                 </div>
                                 <div class="col-sm-11">

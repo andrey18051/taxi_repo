@@ -19,8 +19,8 @@ class TypeaheadController extends Controller
     {
         $query = $request->get('query');
 
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/geodata/streets';

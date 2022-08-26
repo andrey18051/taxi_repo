@@ -34,6 +34,15 @@
                                 <input type="text" id="from_number" name="from_number" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
 
                             </div>
+                            <div class="col-12" >
+                                <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined"
+                                    @if( $orderId['0']['route_undefined'] == 1)
+                                        checked
+                                       value="1"
+                                    @endif
+                                   >
+                                <label class="form-check-label" for="route_undefined">По місту</label>
+                            </div>
                             <div class="col-9">
                                 <label for="search1" class="form-label">Куди</label>
                                 <input type="text" class="form-control" id="search1" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
@@ -196,28 +205,44 @@
                             <ul class="list-group mb-3">
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
+                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
+                                            @if( $orderId['0']['wagon'] == 1)
+                                               checked
+                                               value="1"
+                                            @endif>
                                         <label class="form-check-label" for="wagon">Универсал</label>
                                     </div>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
+                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus"
+                                            @if( $orderId['0']['minibus'] == 1)
+                                               checked
+                                               value="1"
+                                            @endif>
                                         <label class="form-check-label" for="minibus">Мікроавтобус</label>
                                     </div>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="premium" name="premium">
+                                        <input type="checkbox" class="form-check-input" id="premium" name="premium"
+                                            @if( $orderId['0']['premium'] == 1)
+                                               checked
+                                               value="1"
+                                            @endif>
                                         <label class="form-check-label" for="premium">Машина преміум-класса</label>
                                     </div>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="col-md-12">
                                         <label for="$flexible_tariff_name" class="form-label">Тариф</label>
+
                                         <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
+                                            <option>{{$orderId[0]['flexible_tariff_name']}}</option>
                                             @for ($i = 0; $i < count($json_arr); $i++)
+                                                @if( $json_arr[$i]['name'] != $orderId[0]['flexible_tariff_name'])
                                                 <option>{{$json_arr[$i]['name']}}</option>
+                                                @endif
                                             @endfor
                                         </select>
                                     </div>
@@ -226,8 +251,13 @@
                                     <div class="col-md-12">
                                         <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
                                         <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
-                                            <option>готівка</option>
-                                            <option>безготівка</option>
+                                            @if( $orderId['0']['payment_type'] == 1)
+                                                <option>безготівка</option>
+                                                <option>готівка</option>
+                                            @else
+                                                <option>готівка</option>
+                                                <option>безготівка</option>
+                                            @endif
                                         </select>
                                     </div>
                                 </li>

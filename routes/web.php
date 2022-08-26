@@ -60,17 +60,18 @@ Route::get('/', function () {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            case '1,5':
+    /*        case '1,5':
             case '2.0':
             case 'Универсал':
             case 'Микроавтобус':
             case 'Премиум-класс':
-                break;
+            case 'Манго':
+            case 'Онлайн платный':
+                break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-            case 'Манго':
-            case 'Онлайн платный':
+
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
@@ -85,17 +86,18 @@ Route::get('/homeorder/{id}', function ($id) {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            case '1,5':
+      /*      case '1,5':
             case '2.0':
             case 'Универсал':
             case 'Микроавтобус':
             case 'Премиум-класс':
-                break;
+            case 'Манго':
+            case 'Онлайн платный':
+                break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-            case 'Манго':
-            case 'Онлайн платный':
+
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
@@ -111,17 +113,17 @@ Route::get('/homeorder/afterorder/{id}', function ($id) {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            case '1,5':
+            /*case '1,5':
             case '2.0':
             case 'Универсал':
             case 'Микроавтобус':
             case 'Премиум-класс':
-                break;
+            case 'Манго':
+            case 'Онлайн платный':
+                break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-            case 'Манго':
-            case 'Онлайн платный':
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
