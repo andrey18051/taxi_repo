@@ -30,7 +30,7 @@
 
                                 <div class="col-3">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="1" class="form-control" style="text-align: center" value="" required/>
+                                    <input type="text" id="from_number" name="from_number" placeholder="?" class="form-control" style="text-align: center" value="" required/>
 
                                 </div>
                                 <div class="col-12" >
@@ -44,7 +44,7 @@
 
                                 <div class="col-3">
                                     <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="1" class="form-control" style="text-align: center" value="" />
+                                    <input type="text" id="to_number" name="to_number" placeholder="?" class="form-control" style="text-align: center" value="" />
 
                                 </div>
                                 <div class="col-sm-11">

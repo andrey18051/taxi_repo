@@ -305,10 +305,11 @@ class WebOrderController extends Controller
         if ($req->premium == 'on') {
             $premium = true;
             $premium_type = " Машина преміум-класса";
-            $auto_type = $auto_type . $premium_type;
+            $auto_type = 'Тип авто:' . $auto_type . $premium_type;
         } else {
             $premium = false;
         };
+        $auto_type = 'Тип авто: звичайне';
         $flexible_tariff_name = $req->flexible_tariff_name;
         $auto_type = $auto_type . ". Тариф: $flexible_tariff_name";
         $comment = $req->comment;
@@ -433,6 +434,7 @@ class WebOrderController extends Controller
         } else {
             $premium = false;
         };
+
         $flexible_tariff_name = $req->flexible_tariff_name;
         $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
         $comment = $req->comment;
@@ -550,13 +552,13 @@ class WebOrderController extends Controller
             if ($route_undefined === true) {
                 $order = "Вітаємо $user_full_name
                 . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту
-                . Оплата $req->payment_type. $auto_type
+                . Оплата $payment_type. $auto_type
                 . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
                 . Номер: " .  $json_arrWeb['dispatching_order_uid'];
             } else {
                 $order = "Вітаємо $user_full_name
                 . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
-                . Оплата $req->payment_type. $auto_type
+                . Оплата $payment_type. $auto_type
                 . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
                 . Номер: " .  $json_arrWeb['dispatching_order_uid'];
             };
