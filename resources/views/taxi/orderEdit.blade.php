@@ -15,27 +15,19 @@
                     <div class="col-md-7 col-lg-8">
 
                         <div class="row g-3">
-                            <div class="col-sm-8">
-                                <label for="user_phone" class="form-label">Телефон</label>
-                                <input type="tel" class="form-control" id="user_phone" name="user_phone"  value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
-                            </div>
-                            <div class="col-sm-4">
-                                <label for="user_full_name" class="form-label">Ім'я</label>
-                                <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
 
-                            </div>
                             <div class="col-9">
                                 <label for="search" class="form-label">Звідки</label>
-                                <input type="text" class="form-control" id="search" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
+                                <input type="text" class="form-control" id="search" autocomplete="off" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
                             </div>
 
                             <div class="col-3">
                                 <label for="from_number" class="form-label">Будинок</label>
-                                <input type="text" id="from_number" name="from_number" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
+                                <input type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
 
                             </div>
                             <div class="col-12" >
-                                <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined"
+                                <input type="checkbox" class="form-check-input" autocomplete="off" id="route_undefined" name="route_undefined"
                                     @if( $orderId['0']['route_undefined'] == 1)
                                         checked
                                        value="1"
@@ -45,12 +37,21 @@
                             </div>
                             <div class="col-9">
                                 <label for="search1" class="form-label">Куди</label>
-                                <input type="text" class="form-control" id="search1" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
+                                <input type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
                             </div>
 
                             <div class="col-3">
                                 <label for="to_number" class="form-label" >Будинок</label>
-                                <input type="text" id="to_number" name="to_number" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                                <input type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                            </div>
+                            <div class="col-sm-8">
+                                <label for="user_phone" class="form-label">Телефон</label>
+                                <input type="tel" class="form-control" id="user_phone" name="user_phone"  value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="user_full_name" class="form-label">Ім'я</label>
+                                <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
+
                             </div>
                             <div class="col-8">
                                 <label for="comment" class="form-label">Коментар</label>
