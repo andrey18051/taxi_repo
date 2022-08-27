@@ -33,12 +33,12 @@
 
                                         <!-- Password input -->
                                         <div class="form-outline mb-4">
-                                            <input type="password" class="form-control" name="password" id="password">
+                                            <input type="password" class="form-control" name="password" placeholder="1122334455" id="password">
                                             <label class="form-label" for="password">Пароль</label>
                                         </div>
                                         <!-- Password input confirm -->
                                         <div class="form-outline mb-4">
-                                            <input type="password" class="form-control" name="confirm_password" id="confirm_password" placeholder="22223344">
+                                            <input type="password" class="form-control" name="confirm_password" id="confirm_password" placeholder="1122334455">
                                             <label class="form-label" for="confirm_password">Підтвердити пароль</label>
                                         </div>
                                         <!-- Password input confirm -->

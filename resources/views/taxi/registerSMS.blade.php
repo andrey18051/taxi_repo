@@ -51,9 +51,13 @@
                                             <input type="text" class="form-control" name="username" placeholder="0936665544">
                                             <label class="form-label" for="username">Телефон</label>
                                         </div>
+                                        <div class="form-outline mb-4">
+                                            <script src="https://www.google.com/recaptcha/api.js"></script>
+                                            <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                                        </div>
 
                                         <!-- Submit button -->
-                                        <button type="submit" class="btn btn-primary btn-block mb-4">
+                                        <button type="submit" class="btn btn-primary btn-block mb-4" style="margin-top: 10px">
                                             Отримати смс-код
                                         </button>
 

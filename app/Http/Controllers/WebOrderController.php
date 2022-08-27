@@ -96,19 +96,38 @@ class WebOrderController extends Controller
      */
     public function sendConfirmCode(Request $req)
     {
-        $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
-        $response = Http::post($url, [
-            'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => '0', //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-            'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
-        ]);
+        $error = true;
+        $secret = config('app.RECAPTCHA_SECRET_KEY');
 
-        if ($response->status() == "200") {
-            return redirect()->route('registration-form')
-                ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон');
-        } else {
-            return redirect()->route('registration-sms')
-                ->with('error', 'Пользователь с таким номером телефона уже зарегистрирован');
+        if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, 'secret=' . $secret . '&response=' . $_GET['g-recaptcha-response']);
+            $out = curl_exec($curl);
+            curl_close($curl);
+
+            $out = json_decode($out);
+            if ($out->success == true) {
+                $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
+                $response = Http::post($url, [
+                'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+                'taxiColumnId' => '0', //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+                'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
+                ]);
+
+                if ($response->status() == "200") {
+                    return redirect()->route('registration-form')
+                    ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон');
+                } else {
+                    return redirect()->route('registration-sms')
+                    ->with('error', 'Пользователь с таким номером телефона уже зарегистрирован');
+                }
+            }
+        }
+        if ($error) {
+            return redirect()->route('registration-sms')->with('error', "Не пройдено перевірку 'Я не робот'");
+
         }
     }
 

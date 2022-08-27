@@ -5,6 +5,7 @@
     <div class="container">
         <main>
             <div class="text-center">
+                <h1>Таксі Київ (Київська область)</h1>
                 <p class="lead">Заповнити поля для розрахунку вартості поїздки.</p>
             </div>
             <form action="{{route('search-cost')}}" id="form">
@@ -120,7 +121,7 @@
                                         Почтовый индекс обязателен.
                                     </div>
                                 </div>-->
-                            </div>
+
     <!--
                             <hr class="my-4">
 
@@ -190,7 +191,7 @@
 -->
                         <script src="https://www.google.com/recaptcha/api.js"></script>
                         <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-
+                    </div>
 
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
