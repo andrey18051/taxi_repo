@@ -7,7 +7,7 @@
             <div class="text-center">
                 <p class="lead">Заповнити поля для розрахунку вартості поїздки.</p>
             </div>
-            <form action="{{route('search-cost')}}">
+            <form action="{{route('search-cost')}}" id="form">
                 @csrf
                 <div class="row g-5">
 
@@ -188,8 +188,8 @@
                                 </div>
                             </div>
 -->
-<!--                            <hr class="my-4">-->
-
+                        <script src="https://www.google.com/recaptcha/api.js"></script>
+                        <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
 
 
                     </div>
@@ -267,6 +267,7 @@
             //Если элемент с id-шником element_id не найден, то выводим сообщение
             else alert("Элемент с id: " + element_id + " не найден!");
         }
+
     </script>
 
 

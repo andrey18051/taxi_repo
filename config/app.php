@@ -252,5 +252,10 @@ return [
     'username' => 'ONLINE56',
     'password' => 'gggdsh5+',
 
+    /**
+     * reCaptha key
+     */
+    'RECAPTCHA_SITE_KEY' => '6LdJgrAhAAAAAJnFNzTDLxaaHM1U5-LJLzq1p3G3',
+    'RECAPTCHA_SECRET_KEY' => '6LdJgrAhAAAAABoiRvdHosArI6Pdd6jBVa5Ep5SL'
 
 ];
