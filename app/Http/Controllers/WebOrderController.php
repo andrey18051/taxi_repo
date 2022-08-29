@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Feedback;
 use App\Models\Order;
 use App\Models\Orderweb;
 use Illuminate\Database\Eloquent\Model;
@@ -189,7 +190,6 @@ class WebOrderController extends Controller
                 $user_phone = $req->user_phone;
                 $from = $req->search;
                 $from_number = $req->from_number;
-
                 $auto_type = '';
                 if ($req->wagon == 'on') {
                     $wagon = true;
@@ -204,6 +204,7 @@ class WebOrderController extends Controller
                     $auto_type = 'Тип авто:' . $auto_type . $minibus_type . " ";
                 } else {
                     $minibus = false;
+                    $params['minibus'] = false;
                 };
                 if ($req->premium == 'on') {
                     $premium = true;
@@ -217,6 +218,7 @@ class WebOrderController extends Controller
                 $comment = $req->comment;
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
+
                 if ($req->payment_type == 'готівка') {
                     $payment_type = '0';
                 } else {
@@ -305,7 +307,80 @@ class WebOrderController extends Controller
             }
         }
         if ($error) {
-            return redirect()->route('home')->with('error', "Не пройдено перевірку 'Я не робот'");
+            $params['user_full_name'] = $req->user_full_name;
+            $params['user_phone'] = $req->user_phone;
+            $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
+            $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
+            $params['client_sub_card'] = null;
+            $params['required_time'] = null; //Время подачи предварительного заказа
+            $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+            $params['route_address_entrance_from'] = null;
+            if ($req->wagon == 'on') {
+                $params['wagon'] = true; //Универсал: True, False
+            } else {
+                $params['wagon'] = false;
+            };
+            if ($req->minibus == 'on') {
+                $params['minibus'] = true; //Микроавтобус: True, False
+            } else {
+                $params['minibus'] = false;
+            };
+            if ($req->premium == 'on') {
+                $params['premium'] = true; //Машина премиум-класса: True, False
+            } else {
+                $params['premium'] = false;
+            };
+
+            $params['flexible_tariff_name'] = $req->flexible_tariff_name; //Гибкий тариф
+            $params['comment'] = $req->comment; //Комментарий к заказу
+            $params['add_cost'] = $req->add_cost; //Добавленная стоимость
+            $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+
+            if ($req->payment_type == 'готівка') {
+                $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            } else {
+                $params['payment_type'] = '1';
+            };
+
+            $params['routeto'] = $req->search1; //Обязательный. Улица куда.
+            $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
+            $params['route_undefined'] = false; //По городу: True, False
+            if ($req->route_undefined === '1') {
+                $params['routeto'] = $req->search; //Обязательный. Улица куда.
+                $params['routetonumber'] =  $req->from_number; //Обязательный. Дом куда.
+                $params['route_undefined'] = true; //По городу: True, False
+            };
+            $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+
+            ?>
+            <script type="text/javascript">
+                alert("Не пройдено перевірку на робота");
+            </script>
+            <?php
+            $WebOrder = new \App\Http\Controllers\WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case '1,5':
+                    case '2.0':
+                    case 'Универсал':
+                    case 'Микроавтобус':
+                    case 'Премиум-класс':
+                    case 'Манго':
+                    case 'Онлайн платный':
+                        break;
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
+            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+          //  return redirect()->route('home')->with('error', "Не пройдено перевірку 'Я не робот'");
 
         }
     }
@@ -630,13 +705,30 @@ class WebOrderController extends Controller
 
             $out = json_decode($out);
             if ($out->success == true) {
-              /*  Mail::to('andrey18051@gmail.com')->text($req->message);*/
-                 return redirect()->route('home')->with('success', "$req->message");
+                $params = [
+                    'email' => $req->email,
+                    'subject' => $req->subject,
+                    'message' => $req->message,
+                ];
+
+                Mail::to('andrey18051@gmail.com')->send(new Feedback($params));
+                return redirect()->route('home')
+                    ->with('success',
+                    "Повідомлення успішно надіслано адміністратору сайту. Чекайте на відповідь на свій email.");
             }
         }
         if ($error) {
-            return redirect()->route('home')->with('error', "Не пройдено перевірку 'Я не робот'");
-
+            $params = [
+                'email' => $req->email,
+                'subject' => $req->subject,
+                'message' => $req->message,
+            ];
+            ?>
+            <script type="text/javascript">
+            alert("Не пройдено перевірку на робота");
+            </script>
+            <?php
+            return view('taxi.feedbackReq', ['params' => $params]);
         }
 
 }

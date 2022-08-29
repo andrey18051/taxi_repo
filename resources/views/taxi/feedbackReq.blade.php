@@ -1,7 +1,7 @@
 @extends('layouts.taxi')
 
 @section('content')
-
+{{-- print_r($params) --}}
     <section class="">
         <!-- Jumbotron -->
         <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
@@ -50,18 +50,18 @@
 
 
                                         <div class="form-outline mb-4">
-                                            <input type="email" class="form-control" name="email" placeholder="myemail@gmail.com" required>
+                                            <input type="email" class="form-control" name="email" value="{{ $params['email'] }}" placeholder="myemail@gmail.com">
                                             <label class="form-label" for="email">Email</label>
                                         </div>
 
 
                                         <div class="form-outline mb-4">
-                                            <input type="text" class="form-control" name="subject" id="subject" required>
+                                            <input type="text" class="form-control" name="subject" value="{{ $params['subject'] }}" id="subject" >
                                             <label class="form-label" for="subject">Тема повідомлення</label>
                                         </div>
 
                                         <div class="form-outline mb-4">
-                                            <textarea name="message" id="message" class="form-control"   cols="50" rows="3" required></textarea>
+                                            <textarea name="message" id="message" class="form-control"   cols="50" rows="3">{{ $params['message'] }}</textarea>
                                             <label class="form-label" for="message">Повідомлення</label>
                                         </div>
                                         <div class="form-outline mb-4">
