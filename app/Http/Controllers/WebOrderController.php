@@ -7,6 +7,7 @@ use App\Models\Orderweb;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class WebOrderController extends Controller
 {
@@ -610,53 +611,35 @@ class WebOrderController extends Controller
                ;
         }
     }
+
     /**
-     * Работа с заказами
-     * Создание заказа
-     * @return string
+     *Отправка почты с сайта
      */
-    public function weborders()
+    public function feedbackEmail(Request $req)
     {
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $error = true;
+        $secret = config('app.RECAPTCHA_SECRET_KEY');
 
-        $url = config('app.taxi2012Url') . '/api/weborders';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->post($url, [
-            'user_full_name' => 'Иванов Александр', //Полное имя пользователя
-            'user_phone' => '0936734455', //Телефон пользователя
-            'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
-            'route_address_entrance_from' => null,
-            'comment' => '', //Комментарий к заказу
-            'add_cost' => 0,
-            'wagon' => false, //Универсал: True, False
-            'minibus' => false, //Микроавтобус: True, False
-            'premium' => false, //Машина премиум-класса: True, False
-            'flexible_tariff_name' => 'Базовый', //Гибкий тариф
-            'baggage' => false, //Загрузка салона. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'animal' => false, //Перевозка животного. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'conditioner' => true, //Кондиционер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'courier_delivery' => false, //Курьер. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'route_undefined' => false, //По городу: True, False
-            'terminal' => false, //Терминал. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'receipt' => false, //Требование чека за поездку. Параметр доступен при X-API-VERSION < 1.41.0: True, False
-            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => 'КАВКАЗСКАЯ УЛ.', 'number' => '2'],
-                ['name' => 'КРАЙНЯЯ УЛ.', 'number' => '2'],
-            ],
-            'taxiColumnId' => 0, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-            /*{"dispatching_order_uid":"af5857857f9c420f84773cda79698304","discount_trip":false,"find_car_timeout":3600,"find_car_delay":0,"order_cost":"55","currency":" грн.","route_address_from":{"name":"Казино Афина Плаза (Греческая пл. 3/4)","number":null,"lat":46.483063297443,"lng":30.7356095407788},"route_address_to":{"name":"Казино Кристал (ДЕВОЛАНОВСКИЙ СПУСК 11)","number":null,"lat":46.4815271604416,"lng":30.7462156083731}}
-            */]);
+        if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, 'secret=' . $secret . '&response=' . $_GET['g-recaptcha-response']);
+            $out = curl_exec($curl);
+            curl_close($curl);
 
-        return $response->body() ;
-    }
+            $out = json_decode($out);
+            if ($out->success == true) {
+              /*  Mail::to('andrey18051@gmail.com')->text($req->message);*/
+                 return redirect()->route('home')->with('success', "$req->message");
+            }
+        }
+        if ($error) {
+            return redirect()->route('home')->with('error', "Не пройдено перевірку 'Я не робот'");
+
+        }
+
+}
 
     /**
      * Получение списка тарифов

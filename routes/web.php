@@ -319,7 +319,8 @@ Route::get('/costhistory/orders/{id}', function ($id){
 
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
-    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
+    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])
+        ->with('success', 'Уважно перевірте та підтвердіть замовлення');
 })->name('costhistory-orders-id');
 
 Route::get('/login/taxi', function () {
@@ -337,7 +338,7 @@ Route::get('/feedback', function () {
     return view('taxi.feedback');
 })->name('feedback');
 
-
+Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');
