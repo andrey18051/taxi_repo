@@ -61,7 +61,7 @@
         <ul class="list-inline">
             <li class="list-inline-item"><a href="/">Конфіденційність</a></li>
             <li class="list-inline-item"><a href="/">Умови</a></li>
-            <li class="list-inline-item"><a href="/">Підтримка</a></li>
+            <li class="list-inline-item"><a href="{{ route('feedback') }}">Підтримка</a></li>
         </ul>
     </footer>
     </body>

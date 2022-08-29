@@ -305,12 +305,13 @@ Route::get('/costhistory/orders/{id}', function ($id){
             case 'Универсал':
             case 'Микроавтобус':
             case 'Премиум-класс':
+            case 'Манго':
+            case 'Онлайн платный':
                 break;
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-            case 'Манго':
-            case 'Онлайн платный':
+
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
@@ -326,6 +327,17 @@ Route::get('/login/taxi', function () {
 })->name('taxi-login');
 
 Route::get('/account/edit/', [WebOrderController::class, 'profileput'])->name('account-edit');
+
+
+/**
+ * Обратная связь
+ */
+
+Route::get('/feedback', function () {
+    return view('taxi.feedback');
+})->name('feedback');
+
+
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');

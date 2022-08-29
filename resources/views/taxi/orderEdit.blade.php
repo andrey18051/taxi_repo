@@ -238,7 +238,7 @@
                                     <div class="col-md-12">
                                         <label for="$flexible_tariff_name" class="form-label">Тариф</label>
 
-                                        <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" required>
+                                        <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name">
                                             <option>{{$orderId[0]['flexible_tariff_name']}}</option>
                                             @for ($i = 0; $i < count($json_arr); $i++)
                                                 @if( $json_arr[$i]['name'] != $orderId[0]['flexible_tariff_name'])
