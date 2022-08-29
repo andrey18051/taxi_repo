@@ -72,7 +72,8 @@
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
 
-                            <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last" onclick="showHide('block_id')">Бажаний тип авто</a><br/><br/>
+                            <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
+                               onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
                         <div id="block_id" style="display: none;">
                             <ul class="list-group mb-3">
