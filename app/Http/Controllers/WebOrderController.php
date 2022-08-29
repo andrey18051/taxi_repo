@@ -191,14 +191,14 @@ class WebOrderController extends Controller
                 $from = $req->search;
                 $from_number = $req->from_number;
                 $auto_type = '';
-                if ($req->wagon == 'on') {
+                if ($req->wagon == 'on'  || $req->wagon == 1) {
                     $wagon = true;
                     $wagon_type = " Універсал";
                     $auto_type = 'Тип авто:' . $wagon_type . " ";
                 } else {
                     $wagon = false;
                 };
-                if ($req->minibus == 'on') {
+                if ($req->minibus == 'on'  || $req->minibus == 1) {
                     $minibus = true;
                     $minibus_type = " Мікроавтобус";
                     $auto_type = 'Тип авто:' . $auto_type . $minibus_type . " ";
@@ -206,7 +206,7 @@ class WebOrderController extends Controller
                     $minibus = false;
                     $params['minibus'] = false;
                 };
-                if ($req->premium == 'on') {
+                if ($req->premium == 'on'  || $req->premium == 1) {
                     $premium = true;
                     $premium_type = " Машина преміум-класса";
                     $auto_type = $auto_type . $premium_type;
@@ -315,20 +315,20 @@ class WebOrderController extends Controller
             $params['required_time'] = null; //Время подачи предварительного заказа
             $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
             $params['route_address_entrance_from'] = null;
-            if ($req->wagon == 'on') {
-                $params['wagon'] = true; //Универсал: True, False
+            if ($req->wagon == 'on' || $req->wagon == 1) {
+                $params['wagon'] = 1; //Универсал: True, False
             } else {
-                $params['wagon'] = false;
+                $params['wagon'] = 0;
             };
-            if ($req->minibus == 'on') {
-                $params['minibus'] = true; //Микроавтобус: True, False
+            if ($req->minibus == 'on' || $req->minibus == 1) {
+                $params['minibus'] = 1; //Микроавтобус: True, False
             } else {
-                $params['minibus'] = false;
+                $params['minibus'] = 0;
             };
-            if ($req->premium == 'on') {
-                $params['premium'] = true; //Машина премиум-класса: True, False
+            if ($req->premium == 'on' || $req->premium == 1) {
+                $params['premium'] = 1; //Машина премиум-класса: True, False
             } else {
-                $params['premium'] = false;
+                $params['premium'] = 0;
             };
 
             $params['flexible_tariff_name'] = $req->flexible_tariff_name; //Гибкий тариф

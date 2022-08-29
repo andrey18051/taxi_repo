@@ -36,7 +36,11 @@
 
                                 </div>
                                 <div class="col-12" >
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1">
+                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined"
+                                           @if( $params['route_undefined'] == 1)
+                                           checked
+                                           value="1"
+                                        @endif>
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
                                 <div class="col-9">
