@@ -295,15 +295,9 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
                     if ($route_undefined === true) {
-                        $order = "Вітаємо $user_full_name на нашому сайті
-                        . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту
-                        . Оплата $req->payment_type. $auto_type
-                        Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
                     } else {
-                        $order = "Вітаємо $user_full_name на нашому сайті
-                        . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
-                        . Оплата $req->payment_type. $auto_type
-                        Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
                     };
 
 
@@ -507,15 +501,11 @@ class WebOrderController extends Controller
 
             $json_arr = json_decode($response, true);
             if ($route_undefined === true) {
-                $order = "Вітаємо $user_full_name
-                . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту
-                . Оплата $req->payment_type. $auto_type";
+                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
             } else {
-                $order = "Вітаємо $user_full_name
-                . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number).
-                 Оплата $req->payment_type. $auto_type";
+                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
             };
-            $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
+            $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
 
         } else {
@@ -563,7 +553,7 @@ class WebOrderController extends Controller
             $premium = false;
         };
         if ($auto_type == 'Тип авто: ') {
-            $auto_type = 'Тип авто: звичайне. ';
+            $auto_type = 'Тип авто: звичайне';
         };
 
         $flexible_tariff_name = $req->flexible_tariff_name;
@@ -688,20 +678,13 @@ class WebOrderController extends Controller
 
             if ($route_undefined !== false) {
                 $order = "Вітаємо $user_full_name
-                . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту
-                . Оплата $payment_type. $auto_type
-                . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
-                . Номер: " .  $json_arrWeb['dispatching_order_uid'];
+                . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту. Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
             } else {
                 $order = "Вітаємо $user_full_name
-                . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
-                . Оплата $payment_type. $auto_type
-                . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
-                . Номер: " .  $json_arrWeb['dispatching_order_uid'];
+                . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
             };
             return redirect()->route('homeblank')->with('success', $order)
-                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення
-                . Скасувати або внести зміни можна за номером оператора")
+                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
                 ->with('back', 'Зробити нове замовлення.');
 
         } else {
