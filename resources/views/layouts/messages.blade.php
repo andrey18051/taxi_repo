@@ -73,3 +73,11 @@
         </div>
     </div>
 @endif
+
+@if(session('back'))
+    <div class="container">
+        <a  class="w-100 btn btn-secondary btn-lg" href="{{route('home')}}">
+            {{session('back')}}
+        </a>
+    </div>
+@endif

@@ -132,6 +132,10 @@ Route::get('/homeorder/afterorder/{id}', function ($id) {
     return view('taxi.homeblank', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
 })->name('home-id-afterorder');
 
+Route::get('/homeblank', function () {
+    return view('taxi.homeblank');
+})->name('homeblank');
+
 /**
  * Профиль
  */
@@ -263,19 +267,19 @@ Route::get('/costhistory/orders/neworder/{id}', function ($id) {
             case 'Универсал':
             case 'Микроавтобус':
             case 'Премиум-класс':
+            case 'Манго':
+            case 'Онлайн платный':
                 break;
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-            case 'Манго':
-            case 'Онлайн платный':
+
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
     }
 
-    $WebOrder->costWebOrder($id);
-    return redirect()->route('home', ['json_arr' => $json_arr]);
+     return $WebOrder->costWebOrder($id);
 })->name('costhistory-orders-neworder');
 
 

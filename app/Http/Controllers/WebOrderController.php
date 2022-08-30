@@ -190,31 +190,35 @@ class WebOrderController extends Controller
                 $user_phone = $req->user_phone;
                 $from = $req->search;
                 $from_number = $req->from_number;
-                $auto_type = '';
-                if ($req->wagon == 'on'  || $req->wagon == 1) {
+                $auto_type = 'Тип авто: ';
+                if ($req->wagon == 'on' || $req->wagon == '1') {
                     $wagon = true;
                     $wagon_type = " Універсал";
-                    $auto_type = 'Тип авто:' . $wagon_type . " ";
+                    $auto_type = $auto_type . $wagon_type . " ";
                 } else {
                     $wagon = false;
                 };
-                if ($req->minibus == 'on'  || $req->minibus == 1) {
+                if ($req->minibus == 'on' || $req->minibus == '1') {
                     $minibus = true;
                     $minibus_type = " Мікроавтобус";
-                    $auto_type = 'Тип авто:' . $auto_type . $minibus_type . " ";
+                    $auto_type = $auto_type . $minibus_type . " ";
                 } else {
                     $minibus = false;
-                    $params['minibus'] = false;
                 };
-                if ($req->premium == 'on'  || $req->premium == 1) {
+                if ($req->premium == 'on' || $req->premium == '1') {
                     $premium = true;
                     $premium_type = " Машина преміум-класса";
                     $auto_type = $auto_type . $premium_type;
                 } else {
                     $premium = false;
                 };
+                if ($auto_type == 'Тип авто: ') {
+                    $auto_type = 'Тип авто: звичайне. ';
+                };
                 $flexible_tariff_name = $req->flexible_tariff_name;
-                $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+                if ($flexible_tariff_name) {
+                    $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+                };
                 $comment = $req->comment;
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
@@ -228,7 +232,8 @@ class WebOrderController extends Controller
                 $route_undefined = false;
                 $to = $req->search1;
                 $to_number = $req->to_number;
-                if ($req->route_undefined === '1') {
+              //  return $req->route_undefined;
+                if ($req->route_undefined == 1) {
                     $route_undefined = true;
                     $to = $from;
                     $to_number = $from_number;
@@ -288,17 +293,20 @@ class WebOrderController extends Controller
                     $order->save();
                     $id = $order;
                     $json_arr = json_decode($response, true);
+                    $order_cost  = $json_arr['order_cost'];
                     if ($route_undefined === true) {
                         $order = "Вітаємо $user_full_name на нашому сайті
-                . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту
-                . Оплата $req->payment_type. $auto_type";
+                        . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту
+                        . Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.";
                     } else {
                         $order = "Вітаємо $user_full_name на нашому сайті
-                . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
-                . Оплата $req->payment_type. $auto_type";
+                        . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
+                        . Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.";
                     };
 
-                    //      $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
+
                     return redirect()->route('home-id', ['id' => $id])->with('success', $order);
 
                 } else {
@@ -402,31 +410,35 @@ class WebOrderController extends Controller
         $from = $req->search;
         $from_number = $req->from_number;
 
-        $auto_type = '';
-        if ($req->wagon == 'on') {
+        $auto_type = 'Тип авто: ';
+        if ($req->wagon == 'on' || $req->wagon == '1') {
             $wagon = true;
             $wagon_type = " Універсал";
-            $auto_type = 'Тип авто:' . $wagon_type . " ";
+            $auto_type = $auto_type . $wagon_type . " ";
         } else {
             $wagon = false;
         };
-        if ($req->minibus == 'on') {
+        if ($req->minibus == 'on' || $req->minibus == '1') {
             $minibus = true;
             $minibus_type = " Мікроавтобус";
-            $auto_type = 'Тип авто:' . $auto_type . $minibus_type . " ";
+            $auto_type = $auto_type . $minibus_type . " ";
         } else {
             $minibus = false;
         };
-        if ($req->premium == 'on') {
+        if ($req->premium == 'on' || $req->premium == '1') {
             $premium = true;
             $premium_type = " Машина преміум-класса";
-            $auto_type = 'Тип авто:' . $auto_type . $premium_type;
+            $auto_type = $auto_type . $premium_type;
         } else {
             $premium = false;
         };
-        $auto_type = 'Тип авто: звичайне';
+        if ($auto_type == 'Тип авто: ') {
+            $auto_type = 'Тип авто: звичайне. ';
+        };
         $flexible_tariff_name = $req->flexible_tariff_name;
-        $auto_type = $auto_type . ". Тариф: $flexible_tariff_name";
+        if ($flexible_tariff_name) {
+            $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+        };
         $comment = $req->comment;
         $add_cost = $req->add_cost;
         $taxiColumnId = config('app.taxiColumnId');
@@ -438,7 +450,8 @@ class WebOrderController extends Controller
         $route_undefined = false;
         $to = $req->search1;
         $to_number = $req->to_number;
-        if ($req->route_undefined === '1') {
+
+        if ($req->route_undefined == 1) {
             $route_undefined = true;
             $to = $from;
             $to_number = $from_number;
@@ -499,8 +512,8 @@ class WebOrderController extends Controller
                 . Оплата $req->payment_type. $auto_type";
             } else {
                 $order = "Вітаємо $user_full_name
-                . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number)
-                . Оплата $req->payment_type. $auto_type";
+                . Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number).
+                 Оплата $req->payment_type. $auto_type";
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -527,31 +540,36 @@ class WebOrderController extends Controller
         $from = $req->routefrom;
         $from_number = $req->routefromnumber;
 
-        $auto_type = '';
-        if ($req->wagon ==  true) {
+        $auto_type = 'Тип авто: ';
+        if ($req->wagon == 1) {
             $wagon = true;
             $wagon_type = " Універсал";
-            $auto_type = 'Тип авто:' . $wagon_type . " ";
+            $auto_type = $auto_type . $wagon_type . " ";
         } else {
             $wagon = false;
         };
-        if ($req->minibus ==  true) {
+        if ($req->minibus == 1) {
             $minibus = true;
             $minibus_type = " Мікроавтобус";
-            $auto_type = 'Тип авто:' . $auto_type . $minibus_type . " ";
+            $auto_type = $auto_type . $minibus_type . " ";
         } else {
             $minibus = false;
         };
-        if ($req->premium ==  true) {
+        if ($req->premium == 1) {
             $premium = true;
             $premium_type = " Машина преміум-класса";
             $auto_type = $auto_type . $premium_type;
         } else {
             $premium = false;
         };
+        if ($auto_type == 'Тип авто: ') {
+            $auto_type = 'Тип авто: звичайне. ';
+        };
 
         $flexible_tariff_name = $req->flexible_tariff_name;
-        $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+        if ($flexible_tariff_name) {
+            $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+        };
         $comment = $req->comment;
         $add_cost = $req->add_cost;
         $taxiColumnId = config('app.taxiColumnId');
@@ -560,7 +578,8 @@ class WebOrderController extends Controller
         $route_undefined = false;
         $to = $req->routeto;
         $to_number = $req->routetonumber;
-        if ($req->route_undefined === '1') {
+
+        if ($req->route_undefined == "1") {
             $route_undefined = true;
             $to = $req->routefrom;
             $to_number = $req->routefromnumber;
@@ -600,6 +619,7 @@ class WebOrderController extends Controller
         /**
          * Заказ поездки
         */
+
         $url = config('app.taxi2012Url') . '/api/weborders';
         $responseWeb = Http::withHeaders([
             'Authorization' => $authorization,
@@ -652,6 +672,7 @@ class WebOrderController extends Controller
             $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $json_arr = json_decode($response, true);
+
             $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
             $json_arrWeb = json_decode($responseWeb, true);
             $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
@@ -662,9 +683,10 @@ class WebOrderController extends Controller
             if ($req->payment_type == '0') {
                 $payment_type = 'готівка';
             } else {
-                $payment_type = ',безготівка';
+                $payment_type = 'безготівка';
             };
-            if ($route_undefined === true) {
+
+            if ($route_undefined !== false) {
                 $order = "Вітаємо $user_full_name
                 . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту
                 . Оплата $payment_type. $auto_type
@@ -677,13 +699,14 @@ class WebOrderController extends Controller
                 . Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн
                 . Номер: " .  $json_arrWeb['dispatching_order_uid'];
             };
-            return redirect()->route('home')->with('success', $order)
+            return redirect()->route('homeblank')->with('success', $order)
                 ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення
-                . Скасувати або внести зміни можна за номером оператора");
+                . Скасувати або внести зміни можна за номером оператора")
+                ->with('back', 'Зробити нове замовлення.');
 
         } else {
             return redirect()->route('home')->with('error', "Помілка створення заказу")
-               ;
+                ->with('back', 'Зробити нове замовлення.');
         }
     }
 
