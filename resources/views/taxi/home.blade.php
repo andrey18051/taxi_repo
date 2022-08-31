@@ -7,10 +7,10 @@
        </div>
      <div class="container">
          <div class="row">
-             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-2 col-4 order-md-last"
+             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1 col-4 order-md-last"
                 onclick="showHide('block_street')">Пошук за адресою</a><br/><br/>
 
-             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1 col-4 order-md-last"
+             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-2 col-4 order-md-last"
                 onclick="showHide('block_object')">Пошук по об'єктах</a><br/><br/>
          </div>
     </div>

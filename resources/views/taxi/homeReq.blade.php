@@ -36,22 +36,30 @@
 
                                 </div>
                                 <div class="col-12" >
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined"
-                                           @if( $params['route_undefined'] == 1)
+                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
+                                           @if($params['route_undefined'] == 1)
                                            checked
                                            value="1"
                                         @endif>
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
-                                <div class="col-9">
+                                <div id="block_city" class="container"
+                                     @if($params['route_undefined'] == 1)
+                                     style="display:none"
+                                     @else  style="display:block"
+                                    @endif
+                                >
+                                    <div class="row">
+                                        <div class="col-9">
                                     <label for="search1" class="form-label">Куди</label>
                                     <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" value="{{ $params['routeto']}}" placeholder="Пошук вулиці" >
                                 </div>
-
-                                <div class="col-3">
+                                        <div class="col-3">
                                     <label for="to_number" class="form-label">Будинок</label>
                                     <input type="text" id="to_number" name="to_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routetonumber']}}"  />
 
+                                </div>
+                                    </div>
                                 </div>
                                 <div class="col-sm-11">
 <!--                                    <label for="comment" class="form-label">Коментар</label>-->
@@ -157,10 +165,20 @@
                 //Записываем ссылку на элемент в переменную obj
                 var obj = document.getElementById(element_id);
                 //Если css-свойство display не block, то:
-                if (obj.style.display != "block") {
-                    obj.style.display = "block"; //Показываем элемент
+
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
                 }
-                else obj.style.display = "none"; //Скрываем элемент
+
+                if (element_id == "block_id") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
             }
             //Если элемент с id-шником element_id не найден, то выводим сообщение
             else alert("Элемент с id: " + element_id + " не найден!");
