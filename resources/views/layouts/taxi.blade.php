@@ -85,6 +85,26 @@
             });
         }
     });
+    var route2 = "{{ url('autocomplete-search-object') }}";
+    $('#search2').typeahead({
+        source: function (query, process) {
+            return $.get(route2, {
+                query: query
+            }, function (data) {
+                return process(data);
+            });
+        }
+    });
+    $('#search3').typeahead({
+        source: function (query, process) {
+            return $.get(route2, {
+                query: query
+            }, function (data) {
+                return process(data);
+            });
+        }
+    });
+
 </script>
 <!-- Scripts
 <script src="{{ asset('js/app.js') }}" defer></script>-->

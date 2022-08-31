@@ -145,7 +145,7 @@
                 <div class="text-center">
                     <p class="lead">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>
                 </div>
-                <form action="{{route('search-cost')}}" id="form">
+                <form action="{{route('search-cost-object')}}" id="form_object">
                     @csrf
                     <div class="row g-5">
 
@@ -161,29 +161,20 @@
                                     <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
 
                                 </div>
-                                <div class="col-9">
+                                <div class="col-12">
                                     <label for="search" class="form-label">Звідки</label>
-                                    <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці" value="" required>
+                                    <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                 </div>
 
-                                <div class="col-3">
-                                    <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
-
-                                </div>
                                 <div class="col-12" >
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1">
+                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
-                                <div class="col-9">
-                                    <label for="search1" class="form-label">Куди</label>
-                                    <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук вулиці" >
-                                </div>
-
-                                <div class="col-3">
-                                    <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" />
-
+                                <div id="block_city_object" class="container"  style="display:block">
+                                    <div class="col-12">
+                                        <label for="search1" class="form-label">Куди</label>
+                                        <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта" >
+                                    </div>
                                 </div>
                                 <div class="col-sm-11">
                                     <!--                                    <label for="comment" class="form-label">Коментар</label>-->
@@ -276,13 +267,13 @@
                     }
                     else obj.style.display = "none"; //Скрываем элемент
                 }
-               /* if (element_id == "block_object") {
+                if (element_id == "block_object") {
                     if (obj.style.display != "block") {
                         document.getElementById("block_street").style.display = 'none';
                         obj.style.display = "block"; //Показываем элемент
                     }
                     else obj.style.display = "none"; //Скрываем элемент
-                }*/
+                }
                 if (element_id == "block_id_street") {
                     if (obj.style.display != "block") {
                         obj.style.display = "block"; //Показываем элемент
@@ -291,6 +282,12 @@
                 }
 
                 if (element_id == "block_id_object") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+                if (element_id == "block_city_object") {
                     if (obj.style.display != "block") {
                         obj.style.display = "block"; //Показываем элемент
                     }

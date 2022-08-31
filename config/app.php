@@ -249,9 +249,14 @@ return [
      * 'username' => '0936734488',
      * 'password' => '22223344',
      */
+
+
+    /**
+     * Мастер логин и пароль Киев
+     */
+
     'username' => 'ONLINE56',
     'password' => 'gggdsh5+',
-
     /**
      * reCaptha key
      */

@@ -29,9 +29,9 @@ class CreateOrderwebsTable extends Migration
             $table->string('flexible_tariff_name')->nullable(); //Гибкий тариф
             $table->boolean('route_undefined')->default(false); //По городу: True, False
             $table->string('routefrom'); //Обязательный. Улица откуда.
-            $table->string('routefromnumber'); //Обязательный. Дом откуда.
+            $table->string('routefromnumber')->nullable(); //Обязательный. Дом откуда.
             $table->string('routeto'); //Обязательный. Улица куда.
-            $table->string('routetonumber'); //Обязательный. Дом куда.
+            $table->string('routetonumber')->nullable(); //Обязательный. Дом куда.
             $table->set('taxiColumnId', ['0','1','2'])->default('0'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             $table->set('payment_type', ['0','1'])->default('0'); //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $table->string('web_cost');// Стоимость поездки
