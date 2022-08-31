@@ -36,30 +36,35 @@
                                     <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
 
                                 </div>
-                                <div class="col-9">
-                                    <label for="search" class="form-label">Звідки</label>
-                                    <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці" value="" required>
-                                </div>
 
-                                <div class="col-3">
-                                    <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
+                                    <div class="col-9">
+                                        <label for="search" class="form-label">Звідки</label>
+                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці" value="" required>
+                                    </div>
 
-                                </div>
+                                    <div class="col-3">
+                                        <label for="from_number" class="form-label">Будинок</label>
+                                        <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
+                                    </div>
+
                                 <div class="col-12" >
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1">
+                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
-                                <div class="col-9">
-                                    <label for="search1" class="form-label">Куди</label>
-                                    <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук вулиці" >
+                                <div id="block_city" class="container"  style="display:block">
+                                    <div class="row">
+                                        <div class="col-9">
+                                            <label for="search1" class="form-label">Куди</label>
+                                            <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук вулиці" >
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label for="to_number" class="form-label">Будинок</label>
+                                            <input type="text" id="to_number" name="to_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="col-3">
-                                    <label for="to_number" class="form-label">Будинок</label>
-                                    <input type="text" id="to_number" name="to_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" />
-
-                                </div>
                                 <div class="col-sm-11">
 <!--                                    <label for="comment" class="form-label">Коментар</label>-->
                                     <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
@@ -202,7 +207,7 @@
                             <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                                onclick="showHide('block_id_object')">Додаткові параметри</a><br/><br/>
 
-                            <div id="block_id_object" style="display: none;">
+                            <div id="block_id_object" style="display: none">
                                 <ul class="list-group mb-3">
                                     <li class="list-group-item d-flex justify-content-between lh-sm">
                                         <div class="form-check">
@@ -291,7 +296,18 @@
                     }
                     else obj.style.display = "none"; //Скрываем элемент
                 }
-
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+                if (element_id == "block_id") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
             }
             //Если элемент с id-шником element_id не найден, то выводим сообщение
             else alert("Элемент с id: " + element_id + " не найден!");

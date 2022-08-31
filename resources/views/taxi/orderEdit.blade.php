@@ -27,7 +27,7 @@
 
                             </div>
                             <div class="col-12" >
-                                <input type="checkbox" class="form-check-input" autocomplete="off" id="route_undefined" name="route_undefined"
+                                <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
                                     @if( $orderId['0']['route_undefined'] == 1)
                                         checked
                                        value="1"
@@ -35,14 +35,23 @@
                                    >
                                 <label class="form-check-label" for="route_undefined">По місту</label>
                             </div>
-                            <div class="col-9">
-                                <label for="search1" class="form-label">Куди</label>
-                                <input type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
-                            </div>
+                            <div id="block_city" class="container"
+                                 @if( $orderId['0']['route_undefined'] == 1)
+                                 style="display:none"
+                                 @else  style="display:block"
+                                 @endif
+                                >
+                                <div class="row">
+                                    <div class="col-9">
+                                        <label for="search1" class="form-label">Куди</label>
+                                        <input type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
+                                    </div>
 
-                            <div class="col-3">
-                                <label for="to_number" class="form-label" >Будинок</label>
-                                <input type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                                    <div class="col-3">
+                                        <label for="to_number" class="form-label" >Будинок</label>
+                                        <input type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-sm-8">
                                 <label for="user_phone" class="form-label">Телефон</label>
@@ -70,7 +79,7 @@
                         <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
-                        <div id="block_id" style="display: none;">
+                        <div id="block_id" style="display: none">
                             <ul class="list-group mb-3">
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
@@ -154,13 +163,24 @@
                 //Записываем ссылку на элемент в переменную obj
                 var obj = document.getElementById(element_id);
                 //Если css-свойство display не block, то:
-                if (obj.style.display != "block") {
-                    obj.style.display = "block"; //Показываем элемент
+
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
                 }
-                else obj.style.display = "none"; //Скрываем элемент
-            }
+
+                if (element_id == "block_id") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+        }
             //Если элемент с id-шником element_id не найден, то выводим сообщение
             else alert("Элемент с id: " + element_id + " не найден!");
         }
+
     </script>
 @endsection
