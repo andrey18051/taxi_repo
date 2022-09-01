@@ -5508,6 +5508,48 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Order",
@@ -31193,35 +31235,7 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
-                          _c("td", [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.filters.routefromnumber.value,
-                                  expression: "filters.routefromnumber.value",
-                                },
-                              ],
-                              staticClass: "form-input input-lg",
-                              attrs: { placeholder: "Пошук" },
-                              domProps: {
-                                value: _vm.filters.routefromnumber.value,
-                              },
-                              on: {
-                                input: function ($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.filters.routefromnumber,
-                                    "value",
-                                    $event.target.value
-                                  )
-                                },
-                              },
-                            }),
-                          ]),
+                          _c("td"),
                           _vm._v(" "),
                           _c("td", [
                             _c("input", {
@@ -31251,35 +31265,7 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
-                          _c("td", [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.filters.routetonumber.value,
-                                  expression: "filters.routetonumber.value",
-                                },
-                              ],
-                              staticClass: "form-input input-lg",
-                              attrs: { placeholder: "Пошук" },
-                              domProps: {
-                                value: _vm.filters.routetonumber.value,
-                              },
-                              on: {
-                                input: function ($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.filters.routetonumber,
-                                    "value",
-                                    $event.target.value
-                                  )
-                                },
-                              },
-                            }),
-                          ]),
+                          _c("td"),
                           _vm._v(" "),
                           _c("td"),
                         ]),
@@ -31287,151 +31273,164 @@ var render = function () {
                         _vm._l(displayData, function (row) {
                           return _c("tr", { key: row.id }, [
                             _c("td", [
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model.text",
-                                    value: row.flexible_tariff_name,
-                                    expression: "row.flexible_tariff_name",
-                                    modifiers: { text: true },
+                              _c("div", { staticStyle: { width: "200px" } }, [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.flexible_tariff_name,
+                                      expression: "row.flexible_tariff_name",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: {
+                                    id: "flexible_tariff_name",
+                                    required: "",
                                   },
-                                ],
-                                staticClass: "form-control",
-                                attrs: {
-                                  id: "flexible_tariff_name",
-                                  required: "",
-                                },
-                                domProps: { value: row.flexible_tariff_name },
-                                on: {
-                                  input: function ($event) {
-                                    if ($event.target.composing) {
-                                      return
-                                    }
-                                    _vm.$set(
-                                      row,
-                                      "flexible_tariff_name",
-                                      $event.target.value
-                                    )
+                                  domProps: { value: row.flexible_tariff_name },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "flexible_tariff_name",
+                                        $event.target.value
+                                      )
+                                    },
                                   },
-                                },
-                              }),
+                                }),
+                              ]),
                             ]),
                             _vm._v(" "),
                             _c("td", [
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model.text",
-                                    value: row.routefrom,
-                                    expression: "row.routefrom",
-                                    modifiers: { text: true },
+                              _c("div", { staticStyle: { width: "300px" } }, [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.routefrom,
+                                      expression: "row.routefrom",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: { id: "routefrom", required: "" },
+                                  domProps: { value: row.routefrom },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "routefrom",
+                                        $event.target.value
+                                      )
+                                    },
                                   },
-                                ],
-                                staticClass: "form-control",
-                                attrs: { id: "routefrom", required: "" },
-                                domProps: { value: row.routefrom },
-                                on: {
-                                  input: function ($event) {
-                                    if ($event.target.composing) {
-                                      return
-                                    }
-                                    _vm.$set(
-                                      row,
-                                      "routefrom",
-                                      $event.target.value
-                                    )
-                                  },
-                                },
-                              }),
+                                }),
+                              ]),
                             ]),
                             _vm._v(" "),
                             _c("td", [
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model.text",
-                                    value: row.routefromnumber,
-                                    expression: "row.routefromnumber",
-                                    modifiers: { text: true },
+                              _c("div", { staticStyle: { width: "50px" } }, [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.routefromnumber,
+                                      expression: "row.routefromnumber",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: {
+                                    id: "routefromnumber",
+                                    required: "",
                                   },
-                                ],
-                                staticClass: "form-control",
-                                attrs: { id: "routefromnumber", required: "" },
-                                domProps: { value: row.routefromnumber },
-                                on: {
-                                  input: function ($event) {
-                                    if ($event.target.composing) {
-                                      return
-                                    }
-                                    _vm.$set(
-                                      row,
-                                      "routefromnumber",
-                                      $event.target.value
-                                    )
+                                  domProps: { value: row.routefromnumber },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "routefromnumber",
+                                        $event.target.value
+                                      )
+                                    },
                                   },
-                                },
-                              }),
+                                }),
+                              ]),
                             ]),
                             _vm._v(" "),
                             _c("td", [
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model.text",
-                                    value: row.routeto,
-                                    expression: "row.routeto",
-                                    modifiers: { text: true },
+                              _c("div", { staticStyle: { width: "300px" } }, [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.routeto,
+                                      expression: "row.routeto",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: { id: "routeto", required: "" },
+                                  domProps: { value: row.routeto },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "routeto",
+                                        $event.target.value
+                                      )
+                                    },
                                   },
-                                ],
-                                staticClass: "form-control",
-                                attrs: { id: "routeto", required: "" },
-                                domProps: { value: row.routeto },
-                                on: {
-                                  input: function ($event) {
-                                    if ($event.target.composing) {
-                                      return
-                                    }
-                                    _vm.$set(
-                                      row,
-                                      "routeto",
-                                      $event.target.value
-                                    )
-                                  },
-                                },
-                              }),
+                                }),
+                              ]),
                             ]),
                             _vm._v(" "),
                             _c("td", [
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model.text",
-                                    value: row.routetonumber,
-                                    expression: "row.routetonumber",
-                                    modifiers: { text: true },
+                              _c("div", { staticStyle: { width: "50px" } }, [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.routetonumber,
+                                      expression: "row.routetonumber",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: { id: " routetonumber", required: "" },
+                                  domProps: { value: row.routetonumber },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "routetonumber",
+                                        $event.target.value
+                                      )
+                                    },
                                   },
-                                ],
-                                staticClass: "form-control",
-                                attrs: { id: " routetonumber", required: "" },
-                                domProps: { value: row.routetonumber },
-                                on: {
-                                  input: function ($event) {
-                                    if ($event.target.composing) {
-                                      return
-                                    }
-                                    _vm.$set(
-                                      row,
-                                      "routetonumber",
-                                      $event.target.value
-                                    )
-                                  },
-                                },
-                              }),
+                                }),
+                              ]),
                             ]),
                             _vm._v(" "),
                             _c("td", [

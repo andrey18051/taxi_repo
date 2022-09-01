@@ -1084,7 +1084,7 @@ class WebOrderController extends Controller
                     'message' => $req->message,
                 ];
 
-                Mail::to('andrey18051@gmail.com')->send(new Feedback($params));
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Feedback($params));
                 return redirect()->route('home')
                     ->with('success',
                     "Повідомлення успішно надіслано адміністратору сайту. Чекайте на відповідь на свій email.");
