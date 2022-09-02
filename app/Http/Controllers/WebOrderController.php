@@ -927,7 +927,7 @@ class WebOrderController extends Controller
         if ($flexible_tariff_name) {
             $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
         };
-        $comment = $req->comment;
+        $comment = $req->comment .  " через смс";
         $add_cost = $req->add_cost;
         $taxiColumnId = config('app.taxiColumnId');
         $payment_type = $req->payment_type;

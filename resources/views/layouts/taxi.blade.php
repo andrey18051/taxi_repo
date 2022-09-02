@@ -114,6 +114,7 @@
         <li class="list-inline-item"><a href="/">Конфіденційність</a></li>
         <li class="list-inline-item"><a href="/">Умови</a></li>
         <li class="list-inline-item"><a href="{{ route('feedback') }}">Підтримка</a></li>
+        <li class="list-inline-item"><a href="https://www.facebook.com/profile.php?id=100085343706349">Сторинка на Фейсбук</a></li>
     </ul>
 </footer>
 </body>
