@@ -94,10 +94,10 @@
     <footer class="my-5 pt-5 text-muted text-center text-small">
         <p class="mb-1">&copy; 2022 Легке замовлення таксі</p>
         <ul class="list-inline">
-            <li class="list-inline-item"><a href="/">Конфіденційність</a></li>
-            <li class="list-inline-item"><a href="/">Умови</a></li>
+            <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}">Конфіденційність</a></li>
+            <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}">Умови</a></li>
             <li class="list-inline-item"><a href="{{ route('feedback') }}">Підтримка</a></li>
-            <li class="list-inline-item"><a href="https://www.facebook.com/profile.php?id=100085343706349">Сторинка на Фейсбук</a></li>
+            <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/">Сторинка на Фейсбук</a></li>
         </ul>
     </footer>
 </body>

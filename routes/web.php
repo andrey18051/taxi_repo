@@ -80,6 +80,15 @@ Route::get('/', function () {
     return view('taxi.home', ['json_arr' => $json_arr]);
 })->name('home');
 
+Route::get('/taxi-gdbr', function () {
+    return view('taxi.gdpr');
+})->name('taxi-gdbr');
+
+Route::get('/taxi-umovy', function () {
+    return view('taxi.umovy');
+})->name('taxi-umovy');
+
+
 Route::get('/homeorder/{id}', function ($id) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();

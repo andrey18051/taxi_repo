@@ -2,9 +2,9 @@
 
 @section('content')
 
-        <div class="text-center">
-            <h1>Таксі Київ (Київська область)</h1>
-       </div>
+     <div class="text-center">
+         <h1>Таксі Київ (Київська область)</h1>
+     </div>
      <div class="container">
          <div class="row">
              <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1 col-4 order-md-last"
