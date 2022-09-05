@@ -628,6 +628,295 @@ class WebOrderController extends Controller
             return view('taxi.homeReqObject', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
+
+    /**
+     * Работа с заказами
+     * Расчет стоимости заказа по объектам
+     * @return string
+     */
+    public function costmap(Request $req)
+    {
+
+        $error = true;
+        $secret = config('app.RECAPTCHA_SECRET_KEY');
+        /**
+         * Параметры запроса
+         */
+        $params['lat'] = $req->lat;
+        $params['lng'] = $req->lng;
+        $params['lat2'] = $req->lat2;
+        $params['lng2'] = $req->lng2;
+
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        /**
+         * Откуда
+         */
+        $url = config('app.taxi2012Url') . '/api/geodata/nearest';
+        $response_from = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'lat' => $params['lat'], //Обязательный. Широта
+            'lng' => $params['lng'], //Обязательный. Долгота
+            /*'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
+        ]);
+        $response_arr_from = json_decode($response_from, true);
+        if ($response_arr_from['geo_streets']['geo_street'] == null) {
+            return redirect()->route('home')->with('error', 'Помилка створення маршруту: Не вірна адреса відправлення');
+        }
+        $params['routefrom'] = $response_arr_from['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
+        $params['routefromnumber'] = $response_arr_from['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
+
+        /**
+         * Куда
+         */
+        $url = config('app.taxi2012Url') . '/api/geodata/nearest';
+        $response_to = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'lat' => $params['lat2'], //Обязательный. Широта
+            'lng' => $params['lng2'], //Обязательный. Долгота
+            /*'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
+        ]);
+        $response_arr_to = json_decode($response_to, true);
+        /**
+         * Проверка адреса назначения
+         */
+
+        if ($response_arr_to['geo_streets']['geo_street'] == null) {
+          return redirect()->route('home')->with('error', 'Помилка створення маршруту: Не вірна адреса призначення або не вибрана опція поїздки по місту');
+        }
+
+
+        $params['routeto'] =  $response_arr_to['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица куда.
+
+        $params['routetonumber'] = $response_arr_to['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом куда.
+
+        $params['user_full_name'] = $req->user_full_name;
+        $params['user_phone'] = $req->user_phone;
+
+
+
+        $params['client_sub_card'] = null;
+        $params['required_time'] = null; //Время подачи предварительного заказа
+
+        $params['route_address_entrance_from'] = null;
+        if ($req->wagon == 'on' || $req->wagon == 1) {
+            $params['wagon'] = 1; //Универсал: True, False
+        } else {
+            $params['wagon'] = 0;
+        };
+        if ($req->minibus == 'on' || $req->minibus == 1) {
+            $params['minibus'] = 1; //Микроавтобус: True, False
+        } else {
+            $params['minibus'] = 0;
+        };
+        if ($req->premium == 'on' || $req->premium == 1) {
+            $params['premium'] = 1; //Машина премиум-класса: True, False
+        } else {
+            $params['premium'] = 0;
+        };
+
+        $params['flexible_tariff_name'] = $req->flexible_tariff_name; //Гибкий тариф
+        $params['comment'] = $req->comment; //Комментарий к заказу
+        $params['add_cost'] = $req->add_cost; //Добавленная стоимость
+        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+
+        if ($req->payment_type == 'готівка') {
+            $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        } else {
+            $params['payment_type'] = '1';
+        };
+
+
+
+        $params['route_undefined'] = $req->route_undefined; //По городу: True, False
+
+        if ($req->route_undefined == 1 || $req->route_undefined == 'on') {
+
+            $params['routeto'] =  $params['routefrom']; //Обязательный. Улица куда.
+            $params['routetonumber'] = $params['routefromnumber']; //Обязательный. Дом куда.
+
+
+            $params['route_undefined'] = 1; //По городу: True, False
+        };
+        $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+
+
+        $WebOrder = new \App\Http\Controllers\WebOrderController();
+        $tariffs = $WebOrder->tariffs();
+        $response_arr = json_decode($tariffs, true);
+        $ii = 0;
+        for ($i = 0; $i < count($response_arr); $i++) {
+            switch ($response_arr[$i]['name']) {
+                case 'Базовый':
+                case 'Бизнес-класс':
+                case 'Эконом-класс':
+
+                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                    $ii++;
+            }
+        }
+
+        if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, 'secret=' . $secret . '&response=' . $_GET['g-recaptcha-response']);
+            $out = curl_exec($curl);
+            curl_close($curl);
+
+
+            $out = json_decode($out);
+            if ($out->success == true) {
+                $error = false;
+                $username = config('app.username');
+                $password = hash('SHA512', config('app.password'));
+                $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $user_full_name = $req->user_full_name;
+                $user_phone = $req->user_phone;
+                $from = $params['routefrom'];
+                $from_number = $params['routefromnumber'];
+
+
+                $auto_type = 'Тип авто: ';
+                if ($req->wagon == 'on' || $req->wagon == '1') {
+                    $wagon = true;
+                    $wagon_type = " Універсал ";
+                    $auto_type = $auto_type . $wagon_type . " ";
+                } else {
+                    $wagon = false;
+                };
+                if ($req->minibus == 'on' || $req->minibus == '1') {
+                    $minibus = true;
+                    $minibus_type = " Мікроавтобус ";
+                    $auto_type = $auto_type . $minibus_type . " ";
+                } else {
+                    $minibus = false;
+                };
+                if ($req->premium == 'on' || $req->premium == '1') {
+                    $premium = true;
+                    $premium_type = " Машина преміум-класса. ";
+                    $auto_type = $auto_type . $premium_type;
+                } else {
+                    $premium = false;
+                };
+                if ($auto_type == 'Тип авто: ') {
+                    $auto_type = 'Тип авто: звичайне. ';
+                };
+                $flexible_tariff_name = $req->flexible_tariff_name;
+                if ($flexible_tariff_name) {
+                    $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+                };
+                $comment = $req->comment;
+                $add_cost = $req->add_cost;
+                $taxiColumnId = config('app.taxiColumnId');
+
+                if ($req->payment_type == 'готівка') {
+                    $payment_type = '0';
+                } else {
+                    $payment_type = '1';
+                };
+
+                $route_undefined = false;
+                $to = $params['routeto'];
+
+                $to_number = $params['routetonumber'];
+           //     dd($params['route_undefined']);
+             if ($params['route_undefined'] == 1) {
+                    $route_undefined = true;
+                    $to = $from;
+                    $to_number = $from_number;
+                };
+
+                $response = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->post($url, [
+                    'user_full_name' => $user_full_name, //Полное имя пользователя
+                    'user_phone' => $user_phone, //Телефон пользователя
+                    'client_sub_card' => null,
+                    'required_time' => null, //Время подачи предварительного заказа
+                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'route_address_entrance_from' => null,
+                    'comment' => $comment, //Комментарий к заказу
+                    'add_cost' => $add_cost,
+                    'wagon' => $wagon, //Универсал: True, False
+                    'minibus' => $minibus, //Микроавтобус: True, False
+                    'premium' => $premium, //Машина премиум-класса: True, False
+                    'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
+                    'route_undefined' => $route_undefined, //По городу: True, False
+                    'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                        ['name' => $from, 'number' => $from_number],
+                        ['name' => $to, 'number' => $to_number],
+                    ],
+                    'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                        'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+                ]);
+
+                if ($response->status() == "200") {
+                    /**
+                     * Сохранние расчетов в базе
+                     */
+                    $order = new Order();
+
+                    $order->user_full_name = $user_full_name;//Полное имя пользователя
+                    $order->user_phone = $user_phone;//Телефон пользователя
+                    $order->client_sub_card = null;
+                    $order->required_time = null; //Время подачи предварительного заказа
+                    $order->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+                    $order->route_address_entrance_from = null;
+                    $order->comment = $comment;  //Комментарий к заказу
+                    $order->add_cost = $add_cost; //Добавленная стоимость
+                    $order->wagon = $wagon; //Универсал: True, False
+                    $order->minibus = $minibus; //Микроавтобус: True, False
+                    $order->premium = $premium; //Машина премиум-класса: True, False
+                    $order->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
+                    $order->route_undefined = $route_undefined; //По городу: True, False
+                    $order->routefrom = $from; //Обязательный. Улица откуда.
+                    $order->routefromnumber = $from_number; //Обязательный. Дом откуда.
+                    $order->routeto = $to; //Обязательный. Улица куда.
+                    $order->routetonumber = $to_number; //Обязательный. Дом куда.
+                    $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+                    $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $order->save();
+                    $id = $order;
+                    $json_arr = json_decode($response, true);
+                    $order_cost  = $json_arr['order_cost'];
+                    if ($route_undefined === true) {
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from по місту. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                    } else {
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from  до $to. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                    };
+
+
+                    return redirect()->route('home-id', ['id' => $id])->with('success', $order);
+
+                } else {
+                    ?>
+                    <script type="text/javascript">
+                        alert("Помилка створення маршруту: Не вірна адреса призначення або не вибрана опція поїздки по місту");
+                    </script>
+                    <?php
+
+                    return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+                }
+            }
+        }
+        if ($error) {
+            ?>
+            <script type="text/javascript">
+                alert("Не пройдено перевірку на робота");
+            </script>
+            <?php
+            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+        }
+    }
+
     /**
      * Работа с заказами
      * Редактирование и расчет стоимости заказа

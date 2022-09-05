@@ -261,6 +261,10 @@ return [
      * reCaptha key
      */
     'RECAPTCHA_SITE_KEY' => '6LdJgrAhAAAAAJnFNzTDLxaaHM1U5-LJLzq1p3G3',
-    'RECAPTCHA_SECRET_KEY' => '6LdJgrAhAAAAABoiRvdHosArI6Pdd6jBVa5Ep5SL'
+    'RECAPTCHA_SECRET_KEY' => '6LdJgrAhAAAAABoiRvdHosArI6Pdd6jBVa5Ep5SL',
 
+    /**
+     *  Google Maps Platform
+     */
+    'Google_Maps_API_KEY' => 'AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc'
 ];

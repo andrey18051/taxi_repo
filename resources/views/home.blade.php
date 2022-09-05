@@ -26,44 +26,83 @@
     <p class="lead">Quick selection of applications and reporting period</p>
 </div>
 
-<!--<div class="container">
 
-        <div class="card-deck mb-3 text-center">
-            <div class="row  align-items-center">
-                <div class="col-md-3 card mb-4   ">
-                    <div class="card-header">
-                        <h4 class="my-0 font-weight-normal">Office 1.00</h4>
-                    </div>
-                    <div class="card-body">
-                        <h1 class="card-title pricing-card-title"> <small class="text-muted"></small></h1>
-                        <ol>01.07.2020 - 31.03.2021</ol>
-                        <a type="button" href="http://office-1-00"  class="btn btn-lg btn-block btn-primary">Get started</a>
-                    </div>
-                </div>
-                <div class="offset-md-1 col-md-3 card mb-4  ">
-                    <div class="card-header">
-                        <h4 class="my-0 font-weight-normal">Office 2.00-2021</h4>
-                    </div>
-                    <div class="card-body">
-                        <h1 class="card-title pricing-card-title"> <small class="text-muted"></small></h1>
-                        <ol>01.04.2021 - 31.12.2021</ol>
-                        <a type="button" href="http://office-2-00-2021" class="btn btn-lg btn-block btn-primary">Get started</a>
-                    </div>
-                </div>
-                <div class="offset-md-1 col-md-3 card mb-4  ">
-                    <div class="card-header">
-                        <h4 class="my-0 font-weight-normal">Office 2.00-2022</h4>
-                    </div>
-                    <div class="card-body">
-                        <h1 class="card-title pricing-card-title"> <small class="text-muted"></small></h1>
-                        <ol>01.12.2022 - 31.12.2022</ol>
-                        <a type="button" href="http://www.korzhov-office.ru" class="btn btn-lg btn-block btn-outline-primary">Get started</a>
-                    </div>
-                </div>
-            </div>
+<div id="coordinates">
+    Click somewhere on the map. Drag the marker to update the coordinates.
+</div>
+<div>
+    <label>
+        lat
+        <input type="text" id="lat"/>
+    </label>
+    <label>
+        lng
+        <input type="text" id="lng"/>
+    </label>
+</div>
 
-        </div>
-    </div>-->
+<div id="map"></div>
+<script>
+    function updateCoordinates(lat, lng) {
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+    }
+
+    function initMap() {
+        var map, marker;
+        var myLatlng = {
+            lat: 55.74,
+            lng: 37.63
+        };
+        document.getElementById('lat').value = myLatlng.lat;
+        document.getElementById('lng').value = myLatlng.lng;
+
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 4,
+            center: myLatlng
+        });
+
+        marker = new google.maps.Marker({
+            position: myLatlng,
+            map: map,
+            draggable: true
+        });
+
+        marker.addListener('dragend', function(e) {
+            var position = marker.getPosition();
+            updateCoordinates(position.lat(), position.lng())
+        });
+
+        map.addListener('click', function(e) {
+            marker.setPosition(e.latLng);
+            updateCoordinates(e.latLng.lat(), e.latLng.lng())
+        });
+
+        map.panTo(myLatlng);
+    }
+</script>
+
+<style>
+    #map {
+        margin: 10px;
+        height: 400px;
+    }
+</style><script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=initMap&libraries=places,geometry&solution_channel=GMP_QB_commutes_v2_c" async defer></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <div class="container">
         <h3>User section</h3>

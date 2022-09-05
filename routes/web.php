@@ -31,6 +31,18 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
+Route::get('/map', function () {
+    return view('map');
+});
+
+Route::get('/map2', function () {
+    return view('map2');
+});
+
+Route::get('/map3', function () {
+    return view('map3');
+});
+
 Auth::routes(['verify' => true]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home-admin');
@@ -254,6 +266,7 @@ Route::get('/autocomplete-search-object', [TypeaheadObjectController::class, 'au
 Route::get('/cost', [WebOrderController::class, 'cost'])->name('cost');
 Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
 Route::get('/search/cost-object', [WebOrderController::class, 'costobject'])->name('search-cost-object');
+Route::get('/search/cost-map', [WebOrderController::class, 'costmap'])->name('search-cost-map');
 /**
  * Расчет стоимости исправленного заказа
  */
