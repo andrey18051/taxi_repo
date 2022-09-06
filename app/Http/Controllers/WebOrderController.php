@@ -114,7 +114,7 @@ class WebOrderController extends Controller
                 $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
                 $response = Http::post($url, [
                 'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-                'taxiColumnId' => '0', //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+                'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
                 'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
                 ]);
 
@@ -159,6 +159,104 @@ class WebOrderController extends Controller
             return redirect()->route('registration-form')->with('error', $response->body());
         }
     }
+
+    /**
+     * Восстановление пароля
+     * Получение кода подтверждения
+     * @return string
+     */
+    public function restoreSendConfirmCode(Request $req)
+    {
+        $error = true;
+        $secret = config('app.RECAPTCHA_SECRET_KEY');
+
+        if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, 'secret=' . $secret . '&response=' . $_GET['g-recaptcha-response']);
+            $out = curl_exec($curl);
+            curl_close($curl);
+
+            $out = json_decode($out);
+            if ($out->success == true) {
+                $url = config('app.taxi2012Url') . '/api/account/restore/sendConfirmCode';
+                $response = Http::post($url, [
+                    'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+                    'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+                    'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
+                ]);
+
+                if ($response->status() == "200") {
+                    return redirect()->route('restore-form')
+                        ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.');
+                } else {
+                    return redirect()->route('restore-form')
+                        ->with('error', 'Помилка. Спробуйте ще раз.');
+                }
+            }
+        }
+        if ($error) {
+            return redirect()->route('restore-sms')->with('error', "Не пройдено перевірку 'Я не робот'");
+
+        }
+    }
+
+
+    /**
+     * Восстановление пароля
+     * @return string
+     */
+
+    public function restorePassword(Request $req)
+    {
+        $url = config('app.taxi2012Url') . '/api/account/restore';
+        $response = Http::post($url, [
+            //Все параметры обязательные
+            'phone' => $req->phone, //Номер мобильного телефона, на который будет отправлен код подтверждения
+            'confirm_code' => $req->confirm_code, //Код подтверждения, полученный в SMS.
+            'password' =>  $req->password, //Пароль.
+            'confirm_password' => $req-> confirm_password, //Пароль (повтор).
+        ]);
+        if ($response->status() == "200") {
+            $username = $req->phone;
+            $password = hash('SHA512', $req->password);
+            $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+            return redirect()->route('profile-view', ['authorization' => $authorization])
+                ->with('success', 'Пароль успішно змінено.');
+        } else {
+
+            $json_arrWeb = json_decode($response, true);
+            $resp_answer = 'Помилка. ';
+
+            $resp_answer = $resp_answer . $json_arrWeb['Message'];
+
+            return redirect()->route('restore-form')->with('error', $resp_answer);
+        }
+    }
+
+
+
+
+
+    /**
+     * Восстановление пароля
+     * Получение кода подтверждения
+     * @return string
+     */
+/*    public function restoreСheckConfirmCode()
+    {
+        $url = config('app.taxi2012Url') . '/api/account/restore/checkConfirmCode';
+        $response = Http::post($url, [
+            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
+            'confirm_code' => '6024' //Обязательный. Код подтверждения.
+        ]);
+        return $response->status();
+    }*/
+
+
+
+
 
     /**
      * Работа с заказами
@@ -1502,51 +1600,6 @@ class WebOrderController extends Controller
         return $response->status();
     }
 
-    /**
-     * Восстановление пароля
-     * Получение кода подтверждения
-     * @return string
-     */
-    public function restoreSendConfirmCode()
-    {
-        $url = config('app.taxi2012Url') . '/api/account/restore/sendConfirmCode';
-        $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-        ]);
-        return $response->status();
-    }
-
-    /**
-     * Восстановление пароля
-     * Получение кода подтверждения
-     * @return string
-     */
-    public function restoreСheckConfirmCode()
-    {
-        $url = config('app.taxi2012Url') . '/api/account/restore/checkConfirmCode';
-        $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
-            'confirm_code' => '6024' //Обязательный. Код подтверждения.
-        ]);
-        return $response->status();
-    }
-
-    /**
-     * Восстановление пароля
-     * @return string
-     */
-    public function restorePassword()
-    {
-        $url = config('app.taxi2012Url') . '/api/account/restore';
-        $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
-            'confirm_code' => '6024', //Обязательный. Код подтверждения.
-            'password' => '11223344', //Новый пароль
-            'confirm_password' => '11223344' //Repeat Новый пароль
-        ]);
-        return $response->status();
-    }
 
 
     /**

@@ -240,13 +240,41 @@ Route::get('/registration/sms', function () {
     return view('taxi.registerSMS');
 })->name('registration-sms');
 
-Route::get('/sendConfirmCode', [WebOrderController::class, 'sendConfirmCode'])->name('sendConfirmCode');
+/**
+ * Запрос смс подтверждения
+ */
+Route::get('/sendConfirmCode', [WebOrderController::class, 'sendConfirmCode'])
+    ->name('sendConfirmCode');
 
 Route::get('/registration/form', function () {
     return view('taxi.register');
 })->name('registration-form');
 
 Route::get('/registration/confirm-code', [WebOrderController::class, 'register'])->name('registration');
+
+/**
+ * Восстановление пароля
+ */
+Route::get('/restore/sms', function () {
+    return view('taxi.restoreSMS');
+})->name('restore-sms');
+/**
+ * Запрос смс подтверждения
+ */
+Route::get('/restoreSendConfirmCode', [WebOrderController::class, 'restoreSendConfirmCode'])
+    ->name('restoreSendConfirmCode');
+
+Route::get('/restore/form', function () {
+    return view('taxi.restore');
+})->name('restore-form');
+
+Route::get('/restore/confirm-code', [WebOrderController::class, 'restorePassword'])->name('restore');
+
+
+
+
+
+
 
 Route::get('/search', function () {
     return view('search');

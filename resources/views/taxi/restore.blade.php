@@ -1,8 +1,6 @@
 @extends('layouts.taxi')
 
 @section('content')
-
-    <!-- Section: Design Block -->
     <section class="">
         <!-- Jumbotron -->
         <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
@@ -21,7 +19,7 @@
                     <div class="col-lg-6 mb-5 mb-lg-0">
                         <div class="card">
                             <div class="card-body py-5 px-md-5">
-                                <form action="{{ route('sendConfirmCode') }}">
+                                <form action="{{ route('restore') }}">
                                 @csrf
 
                                 <!-- 2 column grid layout with text inputs for the first and last names -->
@@ -29,17 +27,28 @@
 
                                         <!-- Phone input -->
                                         <div class="form-outline mb-4">
-                                            <input type="text" class="form-control" name="username" placeholder="0936665544">
+                                            <input type="text" class="form-control" name="phone" placeholder="0936665544">
                                             <label class="form-label" for="username">Телефон</label>
                                         </div>
-                                        <div class="form-outline mb-4">
-                                            <script src="https://www.google.com/recaptcha/api.js"></script>
-                                            <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-                                        </div>
 
+                                        <!-- Password input -->
+                                        <div class="form-outline mb-4">
+                                            <input type="password" class="form-control" name="password" placeholder="1122334455" id="password">
+                                            <label class="form-label" for="password">Пароль</label>
+                                        </div>
+                                        <!-- Password input confirm -->
+                                        <div class="form-outline mb-4">
+                                            <input type="password" class="form-control" name="confirm_password" id="confirm_password" placeholder="1122334455">
+                                            <label class="form-label" for="confirm_password">Підтвердити пароль</label>
+                                        </div>
+                                        <!-- Password input confirm -->
+                                        <div class="form-outline mb-4">
+                                            <input type="password" class="form-control" name="confirm_code" id="confirm_code" placeholder="6201">
+                                            <label class="form-label" for="confirm_code">Код підтвердження з смс</label>
+                                        </div>
                                         <!-- Submit button -->
-                                        <button type="submit" class="btn btn-primary btn-block mb-4" style="margin-top: 10px">
-                                            Отримати смс-код
+                                        <button type="submit" class="btn btn-primary btn-block mb-4">
+                                            Змінити
                                         </button>
 
                                 </form>
