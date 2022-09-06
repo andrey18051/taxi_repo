@@ -1342,7 +1342,7 @@ class WebOrderController extends Controller
             return redirect()->route('homeblank-id', $orderweb)->with('success', $order)
                 ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
                 ->with('back', 'Зробити нове замовлення.')
-                ->with('cancel', 'Скаусвати замовлення.');
+                ->with('cancel', 'Скасувати замовлення.');
 
         } else {
             return redirect()->route('home')->with('error', "Помілка створення заказу")
