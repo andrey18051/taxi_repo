@@ -206,6 +206,10 @@ Route::get('/homeblank', function () {
     return view('taxi.homeblank');
 })->name('homeblank');
 
+Route::get('/homeblank/{id}', function ($id) {
+    return view('taxi.homeblank', ['id' => $id]);
+})->name('homeblank-id');
+
 /**
  * Профиль
  */
@@ -361,8 +365,12 @@ Route::get('/costhistory/orders/neworder/{id}', function ($id) {
      return $WebOrder->costWebOrder($id);
 })->name('costhistory-orders-neworder');
 
+/**
+ * Запрос на отмену заказа
+ */
 
-
+Route::get('/webordersCancel/{id}', [WebOrderController::class, 'webordersCancel'])
+    ->name('webordersCancel');
 
 Route::get('/profile/edit/form/{authorization}', function ($authorization) {
     $response = new WebOrderController();

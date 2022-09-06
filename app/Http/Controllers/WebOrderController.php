@@ -1339,9 +1339,10 @@ class WebOrderController extends Controller
                 $order = "Вітаємо $user_full_name
                 . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
             };
-            return redirect()->route('homeblank')->with('success', $order)
+            return redirect()->route('homeblank-id', $orderweb)->with('success', $order)
                 ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
-                ->with('back', 'Зробити нове замовлення.');
+                ->with('back', 'Зробити нове замовлення.')
+                ->with('cancel', 'Скаусвати замовлення.');
 
         } else {
             return redirect()->route('home')->with('error', "Помілка створення заказу")
@@ -1435,6 +1436,46 @@ class WebOrderController extends Controller
         return $response->body() ;
     }
 
+    /**
+     * Запрос отмены заказа клиентом
+     * @return string
+     */
+    public function webordersCancel($id)
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $orderweb = Orderweb::where('id', $id)->first();
+
+        $uid =  $orderweb->dispatching_order_uid; //идентификатор заказа'5b1e13c458514781881da701583c8ccd'
+
+        $url = config('app.taxi2012Url') . '/api/weborders/cancel/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->put($url);
+
+
+        $json_arrWeb = json_decode($response, true);
+
+        $resp_answer = "Запит на скасування замовлення $uid надіслано. ";
+
+        switch ($json_arrWeb['order_client_cancel_result']) {
+            case '0':
+                $resp_answer = $resp_answer . "Замовлення не вдалося скасувати. ";
+                break;
+            case '1':
+                $resp_answer = $resp_answer . "Замовлення скасоване. ";
+                break;
+            case '2':
+                $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської. ";
+                break;
+        }
+
+        return redirect()->route('homeblank')->with('success', $resp_answer)
+            ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Інформацію можна отримати за номером оператора:")
+            ->with('back', 'Зробити нове замовлення.');
+    }
 
 
 
@@ -1695,24 +1736,6 @@ class WebOrderController extends Controller
         return $response->body() ;
     }
 
-    /**
-     * Запрос отмены заказа клиентом
-     * @return string
-     */
-    public function webordersCancel()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-        $uid = '5b1e13c458514781881da701583c8ccd'; //идентификатор заказа
-
-        $url = config('app.taxi2012Url') . '/api/weborders/cancel/' . $uid;
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->put($url);
-
-        return $response->body() ;
-    }
 
     /**
      * Оценка поездки

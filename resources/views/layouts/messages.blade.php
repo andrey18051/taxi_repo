@@ -81,3 +81,11 @@
         </a>
     </div>
 @endif
+
+@if(session('cancel'))
+    <div class="container" style="margin-top: 10px">
+        <a  class="w-100 btn btn-danger btn-lg" href="{{route('webordersCancel', $id)}}">
+            {{session('cancel')}}
+        </a>
+    </div>
+@endif

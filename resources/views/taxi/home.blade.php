@@ -2,15 +2,13 @@
 
 @section('content')
 
-     <div class="text-center">
-         <h1>Таксі Київ (Київська область)</h1>
-     </div>
+
      <div class="container">
          <div class="row">
-             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1 col-3 order-md-last"
+             <a href="javascript:void(0)" class="btn btn-outline-secondary col-3"
                 onclick="showHide('block_map')">Пошук по мапі</a><br/><br/>
 
-             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1  col-3 order-md-last"
+             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1  col-4 order-md-last"
                 onclick="showHide('block_street')">Пошук за адресою</a><br/><br/>
 
              <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1 col-3 order-md-last"
@@ -18,6 +16,9 @@
          </div>
     </div>
 
+     <div class="text-center">
+         <h1>Таксі Київ (Київська область)</h1>
+     </div>
     <!--     Пошук по мапі.-->
 
      <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map" style="background-color: hsl(0, 0%, 96%); display:block">
@@ -146,7 +147,7 @@
                              </div>
                          </div>
 
-                     </div><button class="w-100 btn btn-primary btn-lg" type="submit" >Розрахувати вартість поїздки</button>
+                     </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                  </form>
              </main>
 
@@ -156,7 +157,7 @@
 
     <!--     Пошук за адресою.-->
 
-     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:none">
+    <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:none">
     <div class="container">
         <main>
             <div class="text-center">
@@ -273,7 +274,7 @@
                         </div>
                     </div>
 
-                </div><button class="w-100 btn btn-primary btn-lg" type="submit" >Розрахувати вартість поїздки</button>
+                </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
             </form>
         </main>
 
@@ -386,7 +387,7 @@
                             </div>
                         </div>
 
-                    </div><button class="w-100 btn btn-primary btn-lg" type="submit" >Розрахувати вартість поїздки</button>
+                    </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </form>
             </main>
 
