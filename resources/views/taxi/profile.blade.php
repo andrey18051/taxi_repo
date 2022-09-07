@@ -27,7 +27,7 @@
                             <a type="button" class="btn btn-primary"
                                href="{{ route('profile-edit-form', $authorization) }}">Оновити</a>
                             <a type="button" class="btn btn-outline-primary ms-1"
-                               href="{{ route('costhistory', $authorization) }}">Мои маршруты</a>
+                               href="{{ route('costhistory', $authorization) }}">Мої маршрути</a>
                         </div>
                     </div>
                 </div>

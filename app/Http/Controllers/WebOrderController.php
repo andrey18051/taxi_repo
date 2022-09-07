@@ -57,7 +57,7 @@ class WebOrderController extends Controller
 
         if ($response->status() == "200") {
             return redirect()->route('profile-view', ['authorization' => $authorization])
-                ->with('success', 'Ласкаво просимо');
+                ->with('success', 'Ласкаво просимо. Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути".');
         } else {
             return redirect()->route('taxi-login')
                 ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
@@ -1334,7 +1334,8 @@ class WebOrderController extends Controller
         if ($resp_phone->status() == '200') {
             return redirect()->route('registration-form')
                 ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.
-                Для замовлення пройдіть реєстрацію. Ваші розрахунки маршруту знайдіть у профілі "Мої маршрути".');
+                Для замовлення пройдіть реєстрацію. Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути"
+                після проходження реєстрації.');
         } else {
             if ($Message !== 'Пользователь с таким номером телефона уже зарегистрирован.') {
                 return redirect()->route('home')->with('error', "Помілка створення заказу. $Message");
