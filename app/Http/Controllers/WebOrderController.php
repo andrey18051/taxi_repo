@@ -235,7 +235,55 @@ class WebOrderController extends Controller
         }
     }
 
+    /**
+     * Проверка телефона на регистрацию в АПИ
+     * если телефон не найден отправит на регистрацию
+     */
+    public function verifyAccount($phone)
+    {
 
+        $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => $phone, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+            'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
+        ]);
+
+         return $response;
+
+    }
+
+
+
+    /**
+     * Верификация телефона
+     * Получение кода подтверждения
+     * @return string
+     */
+    public function approvedPhonesSendConfirmCode($phone)
+    {
+        $url = config('app.taxi2012Url') . '/api/approvedPhones/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => $phone, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+        ]);
+        return $response->status();
+    }
+
+    /**
+     * Верификация телефона
+     * Подтверждение номера телефона
+     * @return string
+     */
+    public function approvedPhones($phone, $confirm_code)
+    {
+        $url = config('app.taxi2012Url') . '/api/approvedPhones/';
+        $response = Http::post($url, [
+            'phone' => $phone, //Обязательный. Номер мобильного телефона
+            'confirm_code' => $confirm_code //Обязательный. Код подтверждения.
+        ]);
+        return $response->status();
+    }
 
 
 
@@ -1274,177 +1322,194 @@ class WebOrderController extends Controller
      */
     public function costWebOrder($id)
     {
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
         $req = Order::where('id', $id)->first();
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
-        $from = $req->routefrom;
-        $from_number = $req->routefromnumber;
 
-        $auto_type = 'Тип авто: ';
-        if ($req->wagon == 1) {
-            $wagon = true;
-            $wagon_type = " Універсал";
-            $auto_type = $auto_type . $wagon_type . " ";
+        $order_phone = new WebOrderController();
+        $resp_phone = $order_phone->verifyAccount($user_phone);
+        $resp_phone_arr = json_decode($resp_phone, true);
+
+        $Message = $resp_phone_arr['Message'];
+        if ($resp_phone->status() == '200') {
+            return redirect()->route('registration-form')
+                ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.
+                Для замовлення пройдіть реєстрацію. Ваші розрахунки маршруту знайдіть у профілі "Мої маршрути".');
         } else {
-            $wagon = false;
-        };
-        if ($req->minibus == 1) {
-            $minibus = true;
-            $minibus_type = " Мікроавтобус";
-            $auto_type = $auto_type . $minibus_type . " ";
-        } else {
-            $minibus = false;
-        };
-        if ($req->premium == 1) {
-            $premium = true;
-            $premium_type = " Машина преміум-класса";
-            $auto_type = $auto_type . $premium_type;
-        } else {
-            $premium = false;
-        };
-        if ($auto_type == 'Тип авто: ') {
-            $auto_type = 'Тип авто: звичайне';
-        };
-
-        $flexible_tariff_name = $req->flexible_tariff_name;
-        if ($flexible_tariff_name) {
-            $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
-        };
-        $comment = $req->comment .  " через смс";
-        $add_cost = $req->add_cost;
-        $taxiColumnId = config('app.taxiColumnId');
-        $payment_type = $req->payment_type;
-
-        $route_undefined = false;
-        $to = $req->routeto;
-        $to_number = $req->routetonumber;
-
-        if ($req->route_undefined == "1") {
-            $route_undefined = true;
-            $to = $req->routefrom;
-            $to_number = $req->routefromnumber;
-        };
-
-        /**
-         * Запрос стоимости
-         */
-
-        $url = config('app.taxi2012Url') . '/api/weborders/cost';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->post($url, [
-            'user_full_name' => $user_full_name, //Полное имя пользователя
-            'user_phone' => $user_phone, //Телефон пользователя
-            'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
-            'route_address_entrance_from' => null,
-            'comment' => $comment, //Комментарий к заказу
-            'add_cost' => $add_cost,
-            'wagon' => $wagon, //Универсал: True, False
-            'minibus' => $minibus, //Микроавтобус: True, False
-            'premium' => $premium, //Машина премиум-класса: True, False
-            'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
-            'route_undefined' => $route_undefined, //По городу: True, False
-            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'number' => $from_number],
-                ['name' => $to, 'number' => $to_number],
-            ],
-            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
-
-        /**
-         * Заказ поездки
-        */
-
-        $url = config('app.taxi2012Url') . '/api/weborders';
-        $responseWeb = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->post($url, [
-            'user_full_name' => $user_full_name, //Полное имя пользователя
-            'user_phone' => $user_phone, //Телефон пользователя
-            'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
-            'route_address_entrance_from' => null,
-            'comment' => $comment, //Комментарий к заказу
-            'add_cost' => $add_cost,
-            'wagon' => $wagon, //Универсал: True, False
-            'minibus' => $minibus, //Микроавтобус: True, False
-            'premium' => $premium, //Машина премиум-класса: True, False
-            'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
-            'route_undefined' => $route_undefined, //По городу: True, False
-            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'number' => $from_number],
-                ['name' => $to, 'number' => $to_number],
-            ],
-            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
-
-        if ($responseWeb->status() == "200") {
-            /**
-             * Сохранние расчетов в базе
-             */
-            $orderweb = new Orderweb();
-            $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
-            $orderweb->user_phone = $user_phone;//Телефон пользователя
-            $orderweb->client_sub_card = null;
-            $orderweb->required_time = null; //Время подачи предварительного заказа
-            $orderweb->reservation = false; //Обязательный. Признак предварительного заказа: True, False
-            $orderweb->route_address_entrance_from = null;
-            $orderweb->comment = $comment;  //Комментарий к заказу
-            $orderweb->add_cost = $add_cost; //Добавленная стоимость
-            $orderweb->wagon = $wagon; //Универсал: True, False
-            $orderweb->minibus = $minibus; //Микроавтобус: True, False
-            $orderweb->premium = $premium; //Машина премиум-класса: True, False
-            $orderweb->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
-            $orderweb->route_undefined = $route_undefined; //По городу: True, False
-            $orderweb->routefrom = $from; //Обязательный. Улица откуда.
-            $orderweb->routefromnumber = $from_number; //Обязательный. Дом откуда.
-            $orderweb->routeto = $to; //Обязательный. Улица куда.
-            $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
-            $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            $json_arr = json_decode($response, true);
-
-            $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
-            $json_arrWeb = json_decode($responseWeb, true);
-            $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
-            $orderweb->save();
-            /**
-             *
-             */
-            if ($req->payment_type == '0') {
-                $payment_type = 'готівка';
+            if ($Message !== 'Пользователь с таким номером телефона уже зарегистрирован.') {
+                return redirect()->route('home')->with('error', "Помілка створення заказу. $Message");
             } else {
-                $payment_type = 'безготівка';
-            };
+                $username = config('app.username');
+                $password = hash('SHA512', config('app.password'));
+                $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-            if ($route_undefined !== false) {
-                $order = "Вітаємо $user_full_name
+                $from = $req->routefrom;
+                $from_number = $req->routefromnumber;
+
+                $auto_type = 'Тип авто: ';
+
+                if ($req->wagon == 1) {
+                    $wagon = true;
+                    $wagon_type = " Універсал";
+                    $auto_type = $auto_type . $wagon_type . " ";
+                } else {
+                    $wagon = false;
+                };
+                if ($req->minibus == 1) {
+                    $minibus = true;
+                    $minibus_type = " Мікроавтобус";
+                    $auto_type = $auto_type . $minibus_type . " ";
+                } else {
+                    $minibus = false;
+                };
+                if ($req->premium == 1) {
+                    $premium = true;
+                    $premium_type = " Машина преміум-класса";
+                    $auto_type = $auto_type . $premium_type;
+                } else {
+                    $premium = false;
+                };
+                if ($auto_type == 'Тип авто: ') {
+                    $auto_type = 'Тип авто: звичайне';
+                };
+
+                $flexible_tariff_name = $req->flexible_tariff_name;
+                if ($flexible_tariff_name) {
+                    $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+                };
+                $comment = $req->comment .  " через смс";
+                $add_cost = $req->add_cost;
+                $taxiColumnId = config('app.taxiColumnId');
+                $payment_type = $req->payment_type;
+
+                $route_undefined = false;
+                $to = $req->routeto;
+                $to_number = $req->routetonumber;
+
+                if ($req->route_undefined == "1") {
+                    $route_undefined = true;
+                    $to = $req->routefrom;
+                    $to_number = $req->routefromnumber;
+                };
+
+                /**
+                 * Запрос стоимости
+                 */
+
+                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $response = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->post($url, [
+                    'user_full_name' => $user_full_name, //Полное имя пользователя
+                    'user_phone' => $user_phone, //Телефон пользователя
+                    'client_sub_card' => null,
+                    'required_time' => null, //Время подачи предварительного заказа
+                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'route_address_entrance_from' => null,
+                    'comment' => $comment, //Комментарий к заказу
+                    'add_cost' => $add_cost,
+                    'wagon' => $wagon, //Универсал: True, False
+                    'minibus' => $minibus, //Микроавтобус: True, False
+                    'premium' => $premium, //Машина премиум-класса: True, False
+                    'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
+                    'route_undefined' => $route_undefined, //По городу: True, False
+                    'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                        ['name' => $from, 'number' => $from_number],
+                        ['name' => $to, 'number' => $to_number],
+                    ],
+                    'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                        'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+                ]);
+
+                /**
+                 * Заказ поездки
+                 */
+
+                $url = config('app.taxi2012Url') . '/api/weborders';
+                $responseWeb = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->post($url, [
+                    'user_full_name' => $user_full_name, //Полное имя пользователя
+                    'user_phone' => $user_phone, //Телефон пользователя
+                    'client_sub_card' => null,
+                    'required_time' => null, //Время подачи предварительного заказа
+                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'route_address_entrance_from' => null,
+                    'comment' => $comment, //Комментарий к заказу
+                    'add_cost' => $add_cost,
+                    'wagon' => $wagon, //Универсал: True, False
+                    'minibus' => $minibus, //Микроавтобус: True, False
+                    'premium' => $premium, //Машина премиум-класса: True, False
+                    'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
+                    'route_undefined' => $route_undefined, //По городу: True, False
+                    'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                        ['name' => $from, 'number' => $from_number],
+                        ['name' => $to, 'number' => $to_number],
+                    ],
+                    'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                        'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+                ]);
+
+                if ($responseWeb->status() == "200") {
+                    /**
+                     * Сохранние расчетов в базе
+                     */
+                    $orderweb = new Orderweb();
+                    $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
+                    $orderweb->user_phone = $user_phone;//Телефон пользователя
+                    $orderweb->client_sub_card = null;
+                    $orderweb->required_time = null; //Время подачи предварительного заказа
+                    $orderweb->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+                    $orderweb->route_address_entrance_from = null;
+                    $orderweb->comment = $comment;  //Комментарий к заказу
+                    $orderweb->add_cost = $add_cost; //Добавленная стоимость
+                    $orderweb->wagon = $wagon; //Универсал: True, False
+                    $orderweb->minibus = $minibus; //Микроавтобус: True, False
+                    $orderweb->premium = $premium; //Машина премиум-класса: True, False
+                    $orderweb->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
+                    $orderweb->route_undefined = $route_undefined; //По городу: True, False
+                    $orderweb->routefrom = $from; //Обязательный. Улица откуда.
+                    $orderweb->routefromnumber = $from_number; //Обязательный. Дом откуда.
+                    $orderweb->routeto = $to; //Обязательный. Улица куда.
+                    $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
+                    $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+                    $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $json_arr = json_decode($response, true);
+
+                    $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
+                    $json_arrWeb = json_decode($responseWeb, true);
+                    $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
+                    $orderweb->save();
+                    /**
+                     *
+                     */
+                    if ($req->payment_type == '0') {
+                        $payment_type = 'готівка';
+                    } else {
+                        $payment_type = 'безготівка';
+                    };
+
+                    if ($route_undefined !== false) {
+                        $order = "Вітаємо $user_full_name
                 . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту. Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
-            } else {
-                $order = "Вітаємо $user_full_name
+                    } else {
+                        $order = "Вітаємо $user_full_name
                 . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
-            };
-            return redirect()->route('homeblank-id', $orderweb)->with('success', $order)
-                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
-                ->with('back', 'Зробити нове замовлення.')
-                ->with('cancel', 'Скасувати замовлення.');
+                    };
+                    return redirect()->route('homeblank-id', $orderweb)->with('success', $order)
+                        ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
+                        ->with('back', 'Зробити нове замовлення.')
+                        ->with('cancel', 'Скасувати замовлення.');
 
-        } else {
-            return redirect()->route('home')->with('error', "Помілка створення заказу")
-                ->with('back', 'Зробити нове замовлення.');
+                } else {
+                    return redirect()->route('home')->with('error', "Помілка створення заказу.")
+                        ->with('back', 'Зробити нове замовлення.');
+                }
+            }
         }
     }
 
@@ -1602,35 +1667,6 @@ class WebOrderController extends Controller
 
 
 
-    /**
-     * Верификация телефона
-     * Получение кода подтверждения
-     * @return string
-     */
-    public function approvedPhonesSendConfirmCode()
-    {
-        $url = config('app.taxi2012Url') . '/api/approvedPhones/sendConfirmCode';
-        $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-        ]);
-        return $response->status();
-    }
-
-    /**
-     * Верификация телефона
-     * Получение кода подтверждения
-     * @return string
-     */
-    public function approvedPhones()
-    {
-        $url = config('app.taxi2012Url') . '/api/approvedPhones/';
-        $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
-            'confirm_code' => '5945' //Обязательный. Код подтверждения.
-        ]);
-        return $response->status();
-    }
 
     /**
      * Запрос версии

@@ -271,11 +271,6 @@ Route::get('/restore/form', function () {
 Route::get('/restore/confirm-code', [WebOrderController::class, 'restorePassword'])->name('restore');
 
 
-
-
-
-
-
 Route::get('/search', function () {
     return view('search');
 });
@@ -458,6 +453,9 @@ Route::get('/feedback', function () {
 })->name('feedback');
 
 Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
+
+
+
 
 /**
  * Работа с объектами
