@@ -33,7 +33,7 @@
                             </div>
                             <div class="col-6" >
                                 <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
-                                <label class="form-label" for="required_time">Время подачі</label>
+                                <label class="form-label" for="required_time">Час подачі</label>
                             </div>
                             <div id="block_city" class="container"
                                  @if( $orderId['0']['route_undefined'] == 1)

@@ -70,7 +70,7 @@
                                      <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                  </div>
                                  <div class="col-9" >
-                                     <label class="form-label" for="required_time">Время подачі</label>
+                                     <label class="form-label" for="required_time">Час подачі</label>
                                      <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
 
                                  </div>
@@ -195,7 +195,7 @@
                                         <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
                                     </div>
                                 <div class="col-9" >
-                                    <label class="form-label" for="required_time">Время подачі</label>
+                                    <label class="form-label" for="required_time">Час подачі</label>
                                     <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
                                 </div>
                                 <div class="col-3" >
@@ -320,7 +320,7 @@
                                     <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                 </div>
                                 <div class="col-9" >
-                                    <label class="form-label" for="required_time">Время подачі</label>
+                                    <label class="form-label" for="required_time">Час подачі</label>
                                     <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
                                 </div>
                                 <div class="col-3" >

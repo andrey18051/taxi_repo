@@ -31,7 +31,7 @@
                                 </div>
 
                                 <div class="col-9" >
-                                    <label class="form-label" for="required_time">Время подачі</label>
+                                    <label class="form-label" for="required_time">Час подачі</label>
                                     <input type="datetime-local" step="any"  id="required_time" value="{{ $params['required_time']}}" name="required_time">
                                 </div>
                                 <div class="col-3" >
