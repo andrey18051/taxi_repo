@@ -21,8 +21,11 @@
                                 <input type="text" class="form-control" id="search2" autocomplete="off" name="search2" value="{{ $orderId['0']['routefrom'] }}" required>
                             </div>
 
-
-                            <div class="col-6" >
+                            <div class="col-9" >
+                                <label class="form-label" for="required_time">Час подачі</label>
+                                <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
+                            </div>
+                            <div class="col-3" >
                                 <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
                                     @if( $orderId['0']['route_undefined'] == 1)
                                         checked
@@ -31,10 +34,7 @@
                                    >
                                 <label class="form-check-label" for="route_undefined">По місту</label>
                             </div>
-                            <div class="col-6" >
-                                <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
-                                <label class="form-label" for="required_time">Час подачі</label>
-                            </div>
+
                             <div id="block_city" class="container"
                                  @if( $orderId['0']['route_undefined'] == 1)
                                  style="display:none"
