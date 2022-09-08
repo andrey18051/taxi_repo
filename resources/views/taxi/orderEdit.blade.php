@@ -26,7 +26,11 @@
                                 <input type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
 
                             </div>
-                            <div class="col-12" >
+                            <div class="col-9" >
+                                <label class="form-label" for="required_time">Время подачі</label>
+                                <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
+                            </div>
+                            <div class="col-3" >
                                 <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
                                     @if( $orderId['0']['route_undefined'] == 1)
                                         checked
@@ -35,6 +39,7 @@
                                    >
                                 <label class="form-check-label" for="route_undefined">По місту</label>
                             </div>
+
                             <div id="block_city" class="container"
                                  @if( $orderId['0']['route_undefined'] == 1)
                                  style="display:none"

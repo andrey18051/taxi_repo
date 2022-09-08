@@ -108,18 +108,9 @@ Route::get('/homeorder/{id}', function ($id) {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-      /*      case '1,5':
-            case '2.0':
-            case 'Универсал':
-            case 'Микроавтобус':
-            case 'Премиум-класс':
-            case 'Манго':
-            case 'Онлайн платный':
-                break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
@@ -454,8 +445,10 @@ Route::get('/feedback', function () {
 
 Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
 
-
-
+/**
+ * Машины в радиусе старта заказа
+ */
+Route::get('/driversPosition', [WebOrderController::class, 'driversPosition'])->name('driversPosition');
 
 /**
  * Работа с объектами

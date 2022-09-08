@@ -35,7 +35,11 @@
                                     <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routefromnumber']}}" required/>
 
                                 </div>
-                                <div class="col-12" >
+                                <div class="col-9" >
+                                    <label class="form-label" for="required_time">Время подачі</label>
+                                    <input type="datetime-local" step="any"  id="required_time" value="{{ $params['required_time']}}" name="required_time">
+                                </div>
+                                <div class="col-3" >
                                     <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
                                            @if($params['route_undefined'] == 1)
                                            checked
@@ -43,13 +47,16 @@
                                         @endif>
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
+
                                 <div id="block_city" class="container"
                                      @if($params['route_undefined'] == 1)
                                      style="display:none"
                                      @else  style="display:block"
                                     @endif
                                 >
-                                    <div class="row">
+
+
+                                 <div class="row">
                                         <div class="col-9">
                                     <label for="search1" class="form-label">Куди</label>
                                     <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" value="{{ $params['routeto']}}" placeholder="Пошук вулиці" >

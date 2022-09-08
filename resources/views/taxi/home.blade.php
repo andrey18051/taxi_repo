@@ -69,11 +69,16 @@
 <!--                                     <label for="search4" class="form-label">Звідки</label>-->
                                      <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                  </div>
+                                 <div class="col-9" >
+                                     <label class="form-label" for="required_time">Время подачі</label>
+                                     <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
 
-                                 <div class="col-12" >
+                                 </div>
+                                 <div class="col-3" >
                                      <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_map')">
                                      <label class="form-check-label" for="route_undefined">По місту</label>
                                  </div>
+
                                  <div id="block_city_map" class="container"  style="display:block">
                                      <div class="col-12">
 <!--                                         <label for="search5" class="form-label">Куди</label>-->
@@ -158,7 +163,7 @@
     <!--     Пошук за адресою.-->
 
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:none">
-    <div class="container">
+      <div class="container">
         <main>
             <div class="text-center">
                 <p class="lead">Пошук за адресою. Заповнити поля для розрахунку вартості поїздки.</p>
@@ -189,11 +194,15 @@
                                         <label for="from_number" class="form-label">Будинок</label>
                                         <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
                                     </div>
-
-                                <div class="col-12" >
+                                <div class="col-9" >
+                                    <label class="form-label" for="required_time">Время подачі</label>
+                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
+                                </div>
+                                <div class="col-3" >
                                     <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
+
                                 <div id="block_city" class="container"  style="display:block">
                                     <div class="row">
                                         <div class="col-9">
@@ -310,11 +319,15 @@
                                     <label for="search" class="form-label">Звідки</label>
                                     <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                 </div>
-
-                                <div class="col-12" >
+                                <div class="col-9" >
+                                    <label class="form-label" for="required_time">Время подачі</label>
+                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
+                                </div>
+                                <div class="col-3" >
                                     <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
                                 </div>
+
                                 <div id="block_city_object" class="container"  style="display:block">
                                     <div class="col-12">
                                         <label for="search1" class="form-label">Куди</label>
@@ -532,6 +545,57 @@
                 draggable: true,
                 label: 'Куди'
             });
+
+/*
+
+            var req = new XMLHttpRequest();
+            req.open("GET", "/driversPosition", false);
+         //   req.responseType = 'json';
+            req.send(null);
+            alert(req.responseText);
+*/
+
+
+
+
+
+/*
+
+            const image =
+                "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png";
+
+            // Set LatLng and title text for the markers. The first marker (Boynton Pass)
+            // receives the initial focus when tab is pressed. Use arrow keys to
+            // move between markers; press tab again to cycle through the map controls.
+            const tourStops = [
+                [{ lat: 50.416525, lng: 30.520825 }, "Мікроавтобус"],
+                [{ lat: 50.43962, lng: 30.51525 }, "Мінібус"],
+
+            ];
+
+            // Create an info window to share between markers.
+            const infoWindow = new google.maps.InfoWindow();
+
+            // Create the markers.
+            tourStops.forEach(([position, title], i) => {
+                const marker = new google.maps.Marker({
+                    position,
+                    map,
+                    title: `${i + 1}. ${title}`,
+                    label: `${i + 1}`,
+                    icon: image,
+                    optimized: false,
+                });
+
+                // Add a click listener for each marker, and set up the info window.
+                marker.addListener("click", () => {
+                    infoWindow.close();
+                    infoWindow.setContent(marker.getTitle());
+                    infoWindow.open(marker.getMap(), marker);
+                });
+            });
+*/
+
 
             marker2.addListener('dragend', function(e) {
                 var position2 = marker2.getPosition();

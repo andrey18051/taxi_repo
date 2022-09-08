@@ -323,9 +323,17 @@ class WebOrderController extends Controller
         $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
         $params['client_sub_card'] = null;
-        $params['required_time'] = null; //Время подачи предварительного заказа
-        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
         $params['route_address_entrance_from'] = null;
+
+        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        /*if ($params['required_time'] !== null) {
+            $params['reservation'] = true;
+        }*/
+        $reservation = $params['reservation'];
+        $required_time = $params['required_time'];
+
         if ($req->wagon == 'on' || $req->wagon == 1) {
             $params['wagon'] = 1; //Универсал: True, False
         } else {
@@ -370,18 +378,9 @@ class WebOrderController extends Controller
         $ii = 0;
         for ($i = 0; $i < count($response_arr); $i++) {
             switch ($response_arr[$i]['name']) {
-                case '1,5':
-                case '2.0':
-                case 'Универсал':
-                case 'Микроавтобус':
-                case 'Премиум-класс':
-                case 'Манго':
-                case 'Онлайн платный':
-                    break;
                 case 'Базовый':
                 case 'Бизнес-класс':
                 case 'Эконом-класс':
-
                     $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                     $ii++;
             }
@@ -462,8 +461,8 @@ class WebOrderController extends Controller
                     'user_full_name' => $user_full_name, //Полное имя пользователя
                     'user_phone' => $user_phone, //Телефон пользователя
                     'client_sub_card' => null,
-                    'required_time' => null, //Время подачи предварительного заказа
-                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'required_time' => $required_time, //Время подачи предварительного заказа
+                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
                     'route_address_entrance_from' => null,
                     'comment' => $comment, //Комментарий к заказу
                     'add_cost' => $add_cost,
@@ -491,8 +490,8 @@ class WebOrderController extends Controller
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
-                    $order->required_time = null; //Время подачи предварительного заказа
-                    $order->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+                    $order->required_time = $required_time; //Время подачи предварительного заказа
+                    $order->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
                     $order->route_address_entrance_from = null;
                     $order->comment = $comment;  //Комментарий к заказу
                     $order->add_cost = $add_cost; //Добавленная стоимость
@@ -523,7 +522,7 @@ class WebOrderController extends Controller
                 } else {
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Не вірна адреса призначення або не вибрана опція поїздки по місту");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
 
@@ -558,7 +557,14 @@ class WebOrderController extends Controller
         $params['routefrom'] = $req->search2; //Обязательный. Улица откуда.
 
         $params['client_sub_card'] = null;
-        $params['required_time'] = null; //Время подачи предварительного заказа
+        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        /*if ($params['required_time'] !== null) {
+            $params['reservation'] = true;
+        }*/
+        $reservation = $params['reservation'];
+        $required_time = $params['required_time'];
 
         $params['route_address_entrance_from'] = null;
         if ($req->wagon == 'on' || $req->wagon == 1) {
@@ -696,8 +702,8 @@ class WebOrderController extends Controller
                     'user_full_name' => $user_full_name, //Полное имя пользователя
                     'user_phone' => $user_phone, //Телефон пользователя
                     'client_sub_card' => null,
-                    'required_time' => null, //Время подачи предварительного заказа
-                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'required_time' => $required_time, //Время подачи предварительного заказа
+                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
                     'route_address_entrance_from' => null,
                     'comment' => $comment, //Комментарий к заказу
                     'add_cost' => $add_cost,
@@ -725,8 +731,8 @@ class WebOrderController extends Controller
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
-                    $order->required_time = null; //Время подачи предварительного заказа
-                    $order->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+                    $order->required_time = $required_time; //Время подачи предварительного заказа
+                    $order->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
                     $order->route_address_entrance_from = null;
                     $order->comment = $comment;  //Комментарий к заказу
                     $order->add_cost = $add_cost; //Добавленная стоимость
@@ -757,7 +763,7 @@ class WebOrderController extends Controller
                 } else {
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Не вірна адреса призначення або не вибрана опція поїздки по місту");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
 
@@ -777,7 +783,7 @@ class WebOrderController extends Controller
 
     /**
      * Работа с заказами
-     * Расчет стоимости заказа по объектам
+     * Расчет стоимости заказа по карте
      * @return string
      */
     public function costmap(Request $req)
@@ -831,7 +837,7 @@ class WebOrderController extends Controller
          */
 
         if ($response_arr_to['geo_streets']['geo_street'] == null) {
-          return redirect()->route('home')->with('error', 'Помилка створення маршруту: Не вірна адреса призначення або не вибрана опція поїздки по місту');
+          return redirect()->route('home')->with('error', 'Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.');
         }
 
 
@@ -845,7 +851,14 @@ class WebOrderController extends Controller
 
 
         $params['client_sub_card'] = null;
-        $params['required_time'] = null; //Время подачи предварительного заказа
+        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        /*if ($params['required_time'] !== null) {
+            $params['reservation'] = true;
+        }*/
+        $reservation = $params['reservation'];
+        $required_time = $params['required_time'];
 
         $params['route_address_entrance_from'] = null;
         if ($req->wagon == 'on' || $req->wagon == 1) {
@@ -984,8 +997,8 @@ class WebOrderController extends Controller
                     'user_full_name' => $user_full_name, //Полное имя пользователя
                     'user_phone' => $user_phone, //Телефон пользователя
                     'client_sub_card' => null,
-                    'required_time' => null, //Время подачи предварительного заказа
-                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'required_time' => $required_time, //Время подачи предварительного заказа
+                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
                     'route_address_entrance_from' => null,
                     'comment' => $comment, //Комментарий к заказу
                     'add_cost' => $add_cost,
@@ -1013,8 +1026,8 @@ class WebOrderController extends Controller
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
-                    $order->required_time = null; //Время подачи предварительного заказа
-                    $order->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+                    $order->required_time = $required_time; //Время подачи предварительного заказа
+                    $order->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
                     $order->route_address_entrance_from = null;
                     $order->comment = $comment;  //Комментарий к заказу
                     $order->add_cost = $add_cost; //Добавленная стоимость
@@ -1045,7 +1058,7 @@ class WebOrderController extends Controller
                 } else {
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Не вірна адреса призначення або не вибрана опція поїздки по місту");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
 
@@ -1078,8 +1091,15 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
         $from = $req->search;
-        $from_number = $req->from_number;
 
+        $from_number = $req->from_number;
+        $required_time = $req->required_time;
+        $reservation = false;
+        /*if ($req->reservation == null){
+            $reservation = true;
+        } else {
+            $reservation = false;
+        }*/
         $auto_type = 'Тип авто: ';
         if ($req->wagon == 'on' || $req->wagon == '1') {
             $wagon = true;
@@ -1133,8 +1153,8 @@ class WebOrderController extends Controller
             'user_full_name' => $user_full_name, //Полное имя пользователя
             'user_phone' => $user_phone, //Телефон пользователя
             'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => $comment, //Комментарий к заказу
             'add_cost' => $add_cost,
@@ -1157,8 +1177,8 @@ class WebOrderController extends Controller
             $order->user_full_name = $user_full_name;//Полное имя пользователя
             $order->user_phone = $user_phone;//Телефон пользователя
             $order->client_sub_card = null;
-            $order->required_time = null; //Время подачи предварительного заказа
-            $order->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+            $order->required_time = $required_time; //Время подачи предварительного заказа
+            $order->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
             $order->route_address_entrance_from = null;
             $order->comment = $comment;  //Комментарий к заказу
             $order->add_cost = $add_cost; //Добавленная стоимость
@@ -1205,8 +1225,13 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
         $from = $req->search2;
-
-
+        $required_time = $req->required_time; //Время подачи предварительного заказа
+        $reservation = false;
+       /* if ($req->reservation == null){
+            $reservation = true;
+        } else {
+            $reservation = false;
+        }*/
         $auto_type = 'Тип авто: ';
         if ($req->wagon == 'on' || $req->wagon == '1') {
             $wagon = true;
@@ -1259,8 +1284,8 @@ class WebOrderController extends Controller
             'user_full_name' => $user_full_name, //Полное имя пользователя
             'user_phone' => $user_phone, //Телефон пользователя
             'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => $comment, //Комментарий к заказу
             'add_cost' => $add_cost,
@@ -1283,8 +1308,8 @@ class WebOrderController extends Controller
             $order->user_full_name = $user_full_name;//Полное имя пользователя
             $order->user_phone = $user_phone;//Телефон пользователя
             $order->client_sub_card = null;
-            $order->required_time = null; //Время подачи предварительного заказа
-            $order->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+            $order->required_time = $required_time; //Время подачи предварительного заказа
+            $order->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
             $order->route_address_entrance_from = null;
             $order->comment = $comment;  //Комментарий к заказу
             $order->add_cost = $add_cost; //Добавленная стоимость
@@ -1346,6 +1371,8 @@ class WebOrderController extends Controller
 
                 $from = $req->routefrom;
                 $from_number = $req->routefromnumber;
+                $required_time = $req->required_time; //Время подачи предварительного заказа
+                $reservation = false; //Обязательный. Признак предварительного заказа: True, False
 
                 $auto_type = 'Тип авто: ';
 
@@ -1404,8 +1431,8 @@ class WebOrderController extends Controller
                     'user_full_name' => $user_full_name, //Полное имя пользователя
                     'user_phone' => $user_phone, //Телефон пользователя
                     'client_sub_card' => null,
-                    'required_time' => null, //Время подачи предварительного заказа
-                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'required_time' => $required_time, //Время подачи предварительного заказа
+                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
                     'route_address_entrance_from' => null,
                     'comment' => $comment, //Комментарий к заказу
                     'add_cost' => $add_cost,
@@ -1435,8 +1462,8 @@ class WebOrderController extends Controller
                     'user_full_name' => $user_full_name, //Полное имя пользователя
                     'user_phone' => $user_phone, //Телефон пользователя
                     'client_sub_card' => null,
-                    'required_time' => null, //Время подачи предварительного заказа
-                    'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+                    'required_time' => $required_time, //Время подачи предварительного заказа
+                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
                     'route_address_entrance_from' => null,
                     'comment' => $comment, //Комментарий к заказу
                     'add_cost' => $add_cost,
@@ -1463,8 +1490,8 @@ class WebOrderController extends Controller
                     $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
                     $orderweb->user_phone = $user_phone;//Телефон пользователя
                     $orderweb->client_sub_card = null;
-                    $orderweb->required_time = null; //Время подачи предварительного заказа
-                    $orderweb->reservation = false; //Обязательный. Признак предварительного заказа: True, False
+                    $orderweb->required_time = $required_time; //Время подачи предварительного заказа
+                    $orderweb->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
                     $orderweb->route_address_entrance_from = null;
                     $orderweb->comment = $comment;  //Комментарий к заказу
                     $orderweb->add_cost = $add_cost; //Добавленная стоимость
@@ -1640,6 +1667,54 @@ class WebOrderController extends Controller
             ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Інформацію можна отримати за номером оператора:")
             ->with('back', 'Зробити нове замовлення.');
     }
+
+
+
+    /**
+     * Получение координат автомобилей в радиусе
+     * @return string
+     */
+    public function driversPosition()
+    {
+
+        $url = config('app.taxi2012Url') . '/api/drivers/position';
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+
+            'lat' => '50.418843668133', //Обязательный. Широта
+            'lng' => '30.539846933016', //Обязательный. Долгота
+            'radius' => '10' //Обязательный. Радиус поиска автомобилей (в км.)
+        ]);
+       $json_arrWeb = json_decode($response, true);
+       dd($json_arrWeb);
+        /*  position, title
+       /* $tourStops = [
+              [ 'lat' => 50.416525, 'lng' => 30.520825 }, "Мікроавтобус"],
+                  [{ lat: 50.43962, lng: 30.51525 }, "Мінібус"],
+
+         const tourStops = [
+                [{ lat: 50.416525, lng: 30.520825 }, "Мікроавтобус"],
+                [{ lat: 50.43962, lng: 30.51525 }, "Мінібус"],
+
+            ];
+
+
+        */
+        return
+            $tourStops;
+    }
+
+
+
+
+
+
+
 
 
 
@@ -2394,26 +2469,5 @@ class WebOrderController extends Controller
         return $response->body() ;
     }
 
-    /**
-     * Получение координат автомобилей в радиусе
-     * @return string
-     */
-    public function driversPosition()
-    {
 
-        $url = config('app.taxi2012Url') . '/api/drivers/position';
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url, [
-            'lat' => '46.4834363079238', //Обязательный. Широта
-            'lng' => '30.6886028410144', //Обязательный. Долгота
-            'radius' => '100' //Обязательный. Радиус поиска автомобилей (в км.)
-        ]);
-
-        return $response->body() ;
-    }
 }
