@@ -3,25 +3,18 @@
 @section('content')
 
 
-     <div class="container">
-         <div class="row">
-             <a href="javascript:void(0)" class="btn btn-outline-secondary col-3"
-                onclick="showHide('block_map')">Пошук по мапі</a><br/><br/>
-
-             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1  col-4 order-md-last"
-                onclick="showHide('block_street')">Пошук за адресою</a><br/><br/>
-
-             <a href="javascript:void(0)" class="btn btn-outline-secondary offset-1 col-3 order-md-last"
-                onclick="showHide('block_object')">Пошук по об'єктах</a><br/><br/>
-         </div>
-    </div>
-
      <div class="text-center">
+         <a  class="btn btn-outline-secondary  col-3 order-md-last"
+                                  onclick="showHide('block_street')">Пошук за адресою</a>
+         <a  class="btn btn-outline-secondary offset-1 col-3 order-md-last"
+             onclick="showHide('block_object')">Пошук по об'єктах</a>
+         <a  class="btn btn-outline-secondary offset-1 col-3"  onclick="showHide('block_map')">Пошук по мапі</a>
+
          <h1>Таксі Київ (Київська область)</h1>
      </div>
     <!--     Пошук по мапі.-->
 
-     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map" style="background-color: hsl(0, 0%, 96%); display:block">
+     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map" style="background-color: hsl(0, 0%, 96%); display:none">
          <div class="container">
              <main>
                  <div class="text-center">
@@ -69,11 +62,7 @@
 <!--                                     <label for="search4" class="form-label">Звідки</label>-->
                                      <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                  </div>
-                                 <div class="col-9" >
-                                     <label class="form-label" for="required_time">Час подачі</label>
-                                     <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
 
-                                 </div>
                                  <div class="col-3" >
                                      <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_map')">
                                      <label class="form-check-label" for="route_undefined">По місту</label>
@@ -110,6 +99,10 @@
 
                              <div id="block_id_map" style="display: none">
                                  <ul class="list-group mb-3">
+                                     <li class="list-group-item d-flex justify-content-between lh-sm">
+                                         <label class="form-label" for="required_time">Час подачі</label>
+                                         <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
+                                     </li>
                                      <li class="list-group-item d-flex justify-content-between lh-sm">
                                          <div class="form-check">
                                              <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
@@ -162,7 +155,7 @@
 
     <!--     Пошук за адресою.-->
 
-    <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:none">
+    <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:block">
       <div class="container">
         <main>
             <div class="text-center">
@@ -194,10 +187,7 @@
                                         <label for="from_number" class="form-label">Будинок</label>
                                         <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
                                     </div>
-                                <div class="col-9" >
-                                    <label class="form-label" for="required_time">Час подачі</label>
-                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
-                                </div>
+
                                 <div class="col-3" >
                                     <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
@@ -241,6 +231,10 @@
 
                         <div id="block_id_street" style="display: none;">
                             <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <label class="form-label" for="required_time">Час подачі</label>
+                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
+                                </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
@@ -319,10 +313,6 @@
                                     <label for="search" class="form-label">Звідки</label>
                                     <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                                 </div>
-                                <div class="col-9" >
-                                    <label class="form-label" for="required_time">Час подачі</label>
-                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
-                                </div>
                                 <div class="col-3" >
                                     <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
@@ -358,6 +348,10 @@
 
                             <div id="block_id_object" style="display: none">
                                 <ul class="list-group mb-3">
+                                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                                        <label class="form-label" for="required_time">Час подачі</label>
+                                        <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
+                                    </li>
                                     <li class="list-group-item d-flex justify-content-between lh-sm">
                                         <div class="form-check">
                                             <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
