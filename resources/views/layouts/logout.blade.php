@@ -3,14 +3,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="google-site-verification" content="EvCZdtAnMAe93bc1OvK2SSBTfq0S3M1nI7qnWqHdyAQ" />
 
     <title>{{ config('app.name') }}</title>
-    <head>
-        <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
-    </head>
+
+    <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
+
+    <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'AW-999615800');
+    </script>
+    <!-- Event snippet for Website traffic conversion page -->
+    <script>
+        gtag('event', 'conversion', {'send_to': 'AW-999615800/bAbGCJLlkNsDELja09wD'});
+    </script>
 
     <!-- Scripts-->
     <script src="{{ asset('js/app.js') }}" defer></script>

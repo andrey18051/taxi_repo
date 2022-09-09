@@ -8,10 +8,18 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="google-site-verification" content="EvCZdtAnMAe93bc1OvK2SSBTfq0S3M1nI7qnWqHdyAQ" />
     <title>{{ config('app.name') }}</title>
-    <head>
-        <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
-    </head>
 
+    <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
+
+    <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'AW-999615800');
+    </script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
