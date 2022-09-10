@@ -1,98 +1,60 @@
 @extends('layouts.taxi')
 
 @section('content')
+    <div class="container" style="text-align: center; margin-top: 5px">
+        <h1>Таксі Київ (Київська область)</h1>
+    </div>
+
+     <div class="container">
+         <div class="text-center">
+             <a  class="btn btn-outline-secondary  col-sm-3 order-md-last"
+                                      onclick="showHide('block_street')">За адресою</a>
+             <a  class="btn btn-outline-secondary offset-1 col-sm-3 order-md-last"
+                 onclick="showHide('block_object')">По об'єктах</a>
+             <a  class="btn btn-outline-secondary offset-1 col-sm-3"  onclick="showHide('block_map')">По мапі</a>
+        </div>
+    </div>
 
 
-     <div class="text-center">
-         <a  class="btn btn-outline-secondary  col-3 order-md-last"
-                                  onclick="showHide('block_street')">Пошук за адресою</a>
-         <a  class="btn btn-outline-secondary offset-1 col-3 order-md-last"
-             onclick="showHide('block_object')">Пошук по об'єктах</a>
-         <a  class="btn btn-outline-secondary offset-1 col-3"  onclick="showHide('block_map')">Пошук по мапі</a>
-
-         <h1>Таксі Київ (Київська область)</h1>
-     </div>
     <!--     Пошук по мапі.-->
 
      <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map" style="background-color: hsl(0, 0%, 96%); display:none">
          <div class="container">
-             <main>
-                 <div class="text-center">
+                  <div class="text-center">
                      <p class="lead">Пошук по мапі. Перемістіть маркери для розрахунку вартості поїздки.</p>
                  </div>
                  <form action="{{route('search-cost-map')}}" id="form_object">
                      @csrf
-                     <div class="row g-5">
-                         <div class="col-md-7 col-lg-8">
-                             <div>
-                                 <label>
-                                     <!--lat-->
-                                     <input type="hidden" id="lat" name="lat"/>
-                                 </label>
-                                 <label>
-                                     <!--lng-->
-                                     <input type="hidden" id="lng" name="lng" />
-                                 </label>
-                             </div>
-                             <div>
-                             <label>
-                                <!-- lat-->
-                                 <input type="hidden" id="lat2" name="lat2" />
-                             </label>
-                             <label>
-                                 <!--lng-->
-                                 <input type="hidden" id="lng2" name="lng2"/>
-                             </label>
+                     <div class="row">
+                         <div class="col-sm-8 col-lg-8">
+                             <input type="hidden" id="lat" name="lat"/>
+                             <input type="hidden" id="lng" name="lng" />
+                             <input type="hidden" id="lat2" name="lat2" />
+                             <input type="hidden" id="lng2" name="lng2"/>
+                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                             <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
+                             <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
+                             <input type="hidden" class="form-control" id="search5" name="search5" autocomplete="off" placeholder="Пошук об'єкта" >
+                             <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+                             <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
-
-                         <div id="googleMap" style="width:100%;height:300px;"></div>
-
-
-                             <div class="row g-3">
-                                 <div class="col-sm-8">
-<!--                                                                 <label for="user_phone" class="form-label">Телефон</label> -->
-                                     <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
-                                 </div>
-                                 <div class="col-sm-4">
-<!--                                                                  <label for="user_full_name" class="form-label">Ім'я</label> -->
-                                     <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
-
-                                 </div>
-                                 <div class="col-12">
-<!--                                     <label for="search4" class="form-label">Звідки</label>-->
-                                     <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
-                                 </div>
-
-                                 <div class="col-3" >
-                                     <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_map')">
-                                     <label class="form-check-label" for="route_undefined">По місту</label>
-                                 </div>
-
-                                 <div id="block_city_map" class="container"  style="display:block">
-                                     <div class="col-12">
-<!--                                         <label for="search5" class="form-label">Куди</label>-->
-                                         <input type="hidden" class="form-control" id="search5" name="search5" autocomplete="off" placeholder="Пошук об'єкта" >
+                             <div id="googleMap" style="width:100%;height:150px;"></div>
+                             <div class="row">
+                                 <div class="container">
+                                     <div class="row">
+                                         <div class="col-3">
+                                             <label class="form-check-label" for="route_undefined">По місту</label>
+                                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_map')">
+                                         </div>
                                      </div>
-                                 </div>
-                                 <div class="col-sm-11">
-<!--                                                                       <label for="comment" class="form-label">Коментар</label>-->
-                                     <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
-<!--                                                                     <textarea type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>-->
-
-                                 </div>
-
-                                 <div class="col-sm-1">
-<!--                                                                      <label for="add_cost" class="form-label">Додати до вартості (грн)</label>-->
-                                     <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                                  </div>
 
                                  <script src="https://www.google.com/recaptcha/api.js"></script>
                                  <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-                             </div>
+                            </div>
+                     </div>
 
-                         </div>
-                         </div>
-                         <div class="col-md-5 col-lg-4 order-md-last">
+                     <div class="col-md-5 col-lg-4 order-md-last">
 
                              <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                                 onclick="showHide('block_id_map')">Додаткові параметри</a><br/><br/>
@@ -147,9 +109,6 @@
 
                      </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                  </form>
-             </main>
-
-
          </div>
      </div>
 
@@ -157,73 +116,57 @@
 
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:block">
       <div class="container">
-        <main>
             <div class="text-center">
                 <p class="lead">Пошук за адресою. Заповнити поля для розрахунку вартості поїздки.</p>
             </div>
             <form action="{{route('search-cost')}}" id="form">
                 @csrf
-                <div class="row g-5">
+                <div class="row">
+                    <div class="col-sm-8 col-lg-8">
+                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                        <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
 
-                    <div class="col-md-7 col-lg-8">
-
-                            <div class="row g-3">
-                                <div class="col-sm-8">
-<!--                                    <label for="user_phone" class="form-label">Телефон</label>-->
-                                    <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
-                                </div>
-                                <div class="col-sm-4">
-<!--                                    <label for="user_full_name" class="form-label">Ім'я</label>-->
-                                    <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
-
-                                </div>
-
-                                    <div class="col-9">
-                                        <label for="search" class="form-label">Звідки</label>
-                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці" value="" required>
+                        <div class="row">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-8 col-lg-8">
+                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці (Звідки)" value="" required>
                                     </div>
-
+                                    <div class="col-4 col-lg-4">
+                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="container">
+                                <div class="row">
                                     <div class="col-3">
-                                        <label for="from_number" class="form-label">Будинок</label>
-                                        <input type="text" id="from_number" name="from_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
-                                    </div>
-
-                                <div class="col-3" >
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
-                                    <label class="form-check-label" for="route_undefined">По місту</label>
-                                </div>
-
-                                <div id="block_city" class="container"  style="display:block">
-                                    <div class="row">
-                                        <div class="col-9">
-                                            <label for="search1" class="form-label">Куди</label>
-                                            <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук вулиці" >
-                                        </div>
-
-                                        <div class="col-3">
-                                            <label for="to_number" class="form-label">Будинок</label>
-                                            <input type="text" id="to_number" name="to_number" placeholder="?" autocomplete="off" class="form-control" style="text-align: center" value="" />
-                                        </div>
+                                        <label class="form-check-label" for="route_undefined">По місту</label>
+                                        <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
                                     </div>
                                 </div>
-
-                                <div class="col-sm-11">
-<!--                                    <label for="comment" class="form-label">Коментар</label>-->
-                                    <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
-<!--                                    <textarea type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>-->
-
+                            </div>
+                            <div id="block_city" class="container"  style="display:block">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук вулиці (Куди)" >
+                                    </div>
+                                    <div class="col-4">
+                                         <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div class="col-sm-1">
-<!--                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>-->
-                                    <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+                            <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+                            <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+
+                            <script src="https://www.google.com/recaptcha/api.js"></script>
+                            <div class="container" style="margin-top: 5px">
+                                <div class="row">
+                                    <div class="col-4 g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                                 </div>
-
-                        <script src="https://www.google.com/recaptcha/api.js"></script>
-                        <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                            </div>
                     </div>
-
-                    </div>
+                </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
 
                             <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
@@ -277,10 +220,9 @@
                         </div>
                     </div>
 
-                </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                </div>
+                <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
             </form>
-        </main>
-
 
     </div>
     </div>
@@ -289,60 +231,52 @@
 
      <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object" style="background-color: hsl(0, 0%, 96%); display:none">
         <div class="container">
-            <main>
                 <div class="text-center">
                     <p class="lead">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>
                 </div>
                 <form action="{{route('search-cost-object')}}" id="form_object">
                     @csrf
-                    <div class="row g-5">
+                    <div class="row">
+                        <div class="col-sm-8 col-lg-8">
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                            <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+                            <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
+                            <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
-                        <div class="col-md-7 col-lg-8">
-
-                            <div class="row g-3">
-                                <div class="col-sm-8">
-                                    <!--                                    <label for="user_phone" class="form-label">Телефон</label>-->
-                                    <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
-                                </div>
-                                <div class="col-sm-4">
-                                    <!--                                    <label for="user_full_name" class="form-label">Ім'я</label>-->
-                                    <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
-
-                                </div>
-                                <div class="col-12">
-                                    <label for="search" class="form-label">Звідки</label>
-                                    <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
-                                </div>
-                                <div class="col-3" >
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
-                                    <label class="form-check-label" for="route_undefined">По місту</label>
-                                </div>
-
-                                <div id="block_city_object" class="container"  style="display:block">
-                                    <div class="col-12">
-                                        <label for="search1" class="form-label">Куди</label>
-                                        <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта" >
+                            <div class="row">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="" required>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-sm-11">
-                                    <!--                                    <label for="comment" class="form-label">Коментар</label>-->
-                                    <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
-                                    <!--                                    <textarea type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання"></textarea>-->
-
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <label class="form-check-label" for="route_undefined">По місту</label>
+                                            <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="block_city_object" class="container"  style="display:block">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" >
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="col-sm-1">
-                                    <!--                                    <label for="add_cost" class="form-label">Додати до вартості (грн)</label>-->
-                                    <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
-                                </div>
 
                                 <script src="https://www.google.com/recaptcha/api.js"></script>
-                                <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-                            </div>
-
+                                <div class="container" style="margin-top: 5px">
+                                    <div class="row">
+                                        <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                                    </div>
+                                </div>
                         </div>
-                        <div class="col-md-5 col-lg-4 order-md-last">
-
+                    </div>
+                            <div class="col-md-5 col-lg-4 order-md-last">
                             <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                                onclick="showHide('block_id_object')">Додаткові параметри</a><br/><br/>
 
@@ -394,12 +328,10 @@
                             </div>
                         </div>
 
-                    </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                    </div>
+                        <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </form>
-            </main>
-
-
-        </div>
+    </div>
     </div>
     <script type="text/javascript">
         /**
