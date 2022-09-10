@@ -31273,7 +31273,7 @@ var render = function () {
                         _vm._l(displayData, function (row) {
                           return _c("tr", { key: row.id }, [
                             _c("td", [
-                              _c("div", { staticStyle: { width: "200px" } }, [
+                              _c("div", { staticStyle: { width: "180px" } }, [
                                 _c("input", {
                                   directives: [
                                     {
@@ -31338,7 +31338,7 @@ var render = function () {
                             ]),
                             _vm._v(" "),
                             _c("td", [
-                              _c("div", { staticStyle: { width: "50px" } }, [
+                              _c("div", { staticStyle: { width: "65px" } }, [
                                 _c("input", {
                                   directives: [
                                     {
@@ -31350,6 +31350,7 @@ var render = function () {
                                     },
                                   ],
                                   staticClass: "form-control",
+                                  staticStyle: { "text-align": "right" },
                                   attrs: {
                                     id: "routefromnumber",
                                     required: "",
@@ -31403,7 +31404,7 @@ var render = function () {
                             ]),
                             _vm._v(" "),
                             _c("td", [
-                              _c("div", { staticStyle: { width: "50px" } }, [
+                              _c("div", { staticStyle: { width: "65px" } }, [
                                 _c("input", {
                                   directives: [
                                     {
@@ -31415,6 +31416,7 @@ var render = function () {
                                     },
                                   ],
                                   staticClass: "form-control",
+                                  staticStyle: { "text-align": "right" },
                                   attrs: { id: " routetonumber", required: "" },
                                   domProps: { value: row.routetonumber },
                                   on: {

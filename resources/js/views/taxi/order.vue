@@ -82,7 +82,7 @@
                                  <td> <input id="minibus" class="form-control" v-model.text="row.minibus" required ></td>
                                  <td><input id="premium" class="form-control" v-model.text="row.premium" required ></td>-->
                                       <td>
-                                            <div style="width: 200px">
+                                            <div style="width: 180px">
                                                 <input id="flexible_tariff_name" class="form-control" v-model.text="row.flexible_tariff_name" required >
                                             </div>
                                       </td>
@@ -92,8 +92,8 @@
                                             </div>
                                       </td>
                                         <td>
-                                            <div style="width: 50px">
-                                                <input id="routefromnumber" class="form-control" v-model.text="row.routefromnumber" required >
+                                            <div style="width: 65px">
+                                                <input id="routefromnumber" class="form-control" style="text-align: right" v-model.text="row.routefromnumber" required >
                                             </div>
                                         </td>
                                         <td>
@@ -102,8 +102,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div style="width: 50px">
-                                                <input id=" routetonumber" class="form-control" v-model.text="row.routetonumber" required >
+                                            <div style="width: 65px">
+                                                <input id=" routetonumber" class="form-control" style="text-align: right" v-model.text="row.routetonumber" required >
                                             </div>
                                         </td>
 
