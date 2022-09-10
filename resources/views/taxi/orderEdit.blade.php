@@ -3,18 +3,16 @@
 @section('content')
     {{-- print_r($orderId) --}}
 
-    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
-    <div class="container">
-        <main>
-            <div class="py-1 text-center">
+    <div class="container" style="background-color: hsl(0, 0%, 96%)">
+            <div class="text-center">
                 <h2>Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
             </div>
             <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">
                 @csrf
-                <div class="row g-5">
+                <div class="row">
                     <div class="col-md-7 col-lg-8">
 
-                        <div class="row g-3">
+                        <div class="row">
 
                             <div class="col-9">
                                 <label for="search" class="form-label">Звідки</label>
@@ -26,18 +24,15 @@
                                 <input type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
 
                             </div>
-                            <div class="col-9" >
-                                <label class="form-label" for="required_time">Час подачі</label>
-                                <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
-                            </div>
+
                             <div class="col-3" >
+                                <label class="form-check-label" for="route_undefined">По місту</label>
                                 <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
                                     @if( $orderId['0']['route_undefined'] == 1)
                                         checked
                                        value="1"
-                                    @endif
-                                   >
-                                <label class="form-check-label" for="route_undefined">По місту</label>
+                                @endif
+                                >
                             </div>
 
                             <div id="block_city" class="container"
@@ -86,6 +81,10 @@
 
                         <div id="block_id" style="display: none">
                             <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <label class="form-label" for="required_time">Час подачі</label>
+                                    <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
+                                </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
@@ -151,10 +150,7 @@
                 <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
 
             </form>
-        </main>
 
-
-    </div>
     </div>
 
     <script type="text/javascript">

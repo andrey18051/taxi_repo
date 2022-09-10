@@ -21,18 +21,15 @@
                                 <input type="text" class="form-control" id="search2" autocomplete="off" name="search2" value="{{ $orderId['0']['routefrom'] }}" required>
                             </div>
 
-                            <div class="col-9" >
-                                <label class="form-label" for="required_time">Час подачі</label>
-                                <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
-                            </div>
+
                             <div class="col-3" >
+                                <label class="form-check-label" for="route_undefined">По місту</label>
                                 <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
                                     @if( $orderId['0']['route_undefined'] == 1)
                                         checked
                                        value="1"
-                                    @endif
-                                   >
-                                <label class="form-check-label" for="route_undefined">По місту</label>
+                                @endif
+                                >
                             </div>
 
                             <div id="block_city" class="container"
@@ -78,6 +75,10 @@
 
                         <div id="block_id" style="display: none">
                             <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <label class="form-label" for="required_time">Час подачі</label>
+                                    <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
+                                </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
