@@ -10,7 +10,7 @@
                 <div class="row align-items-center">
                     <h1  class="text-center">Таксі Київ (Київська область)</h1>
                     <div class="col-lg-6 ">
-                        <p class="lead">
+                        <p class="lead text-center">
                             Реєстрація
                         </p>
                     </div>
