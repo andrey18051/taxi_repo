@@ -12,17 +12,7 @@
         <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
         <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
 
-            gtag('config', 'AW-999615800');
-        </script>
-    <!-- Event snippet for Website traffic conversion page -->
-    <script defer>
-        gtag('event', 'conversion', {'send_to': 'AW-999615800/bAbGCJLlkNsDELja09wD'});
-    </script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
