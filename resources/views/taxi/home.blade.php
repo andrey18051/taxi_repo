@@ -42,7 +42,7 @@
                              <div class="row">
                                  <div class="container">
                                      <div class="row">
-                                         <div class="col-3">
+                                         <div class="col-4">
                                              <label class="form-check-label" for="route_undefined">По місту</label>
                                              <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_map')">
                                          </div>
@@ -139,7 +139,7 @@
                             </div>
                             <div class="container">
                                 <div class="row">
-                                    <div class="col-3">
+                                    <div class="col-4">
                                         <label class="form-check-label" for="route_undefined">По місту</label>
                                         <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
                                     </div>
@@ -253,7 +253,7 @@
                                 </div>
                                 <div class="container">
                                     <div class="row">
-                                        <div class="col-3">
+                                        <div class="col-4">
                                             <label class="form-check-label" for="route_undefined">По місту</label>
                                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
                                         </div>
