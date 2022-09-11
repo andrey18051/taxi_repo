@@ -159,7 +159,7 @@
                             <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                             <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
-                            <script src="https://www.google.com/recaptcha/api.js"></script>
+                            <script defer src="https://www.google.com/recaptcha/api.js"></script>
                             <div class="container" style="margin-top: 5px">
                                 <div class="row">
                                     <div class="col-4 g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
