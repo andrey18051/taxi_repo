@@ -49,7 +49,7 @@
                                      </div>
                                  </div>
 
-                                 <script src="https://www.google.com/recaptcha/api.js"></script>
+                                 <script defer src="https://www.google.com/recaptcha/api.js"></script>
                                  <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                             </div>
                      </div>
@@ -268,7 +268,7 @@
                                 </div>
 
 
-                                <script src="https://www.google.com/recaptcha/api.js"></script>
+                                <script defer src="https://www.google.com/recaptcha/api.js"></script>
                                 <div class="container" style="margin-top: 5px">
                                     <div class="row">
                                         <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
@@ -333,7 +333,7 @@
                 </form>
     </div>
     </div>
-    <script type="text/javascript">
+    <script defer type="text/javascript">
         /**
          * Функция Скрывает/Показывает блок
          * @author ox2.ru дизайн студия

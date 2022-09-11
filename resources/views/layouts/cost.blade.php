@@ -20,7 +20,7 @@
             gtag('config', 'AW-999615800');
         </script>
     <!-- Event snippet for Website traffic conversion page -->
-    <script>
+    <script defer>
         gtag('event', 'conversion', {'send_to': 'AW-999615800/bAbGCJLlkNsDELja09wD'});
     </script>
 
@@ -66,10 +66,10 @@
             @yield('content')
         </main>
     </div>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
+    <script defer src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
     </script>
-    <script type="text/javascript">
+    <script defer type="text/javascript">
         var route = "{{ url('autocomplete-search') }}";
         $('#search').typeahead({
             source: function (query, process) {

@@ -13,7 +13,7 @@
 
     <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
-    <script>
+    <script defer>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -21,7 +21,7 @@
         gtag('config', 'AW-999615800');
     </script>
     <!-- Event snippet for Website traffic conversion page -->
-    <script>
+    <script defer>
         gtag('event', 'conversion', {'send_to': 'AW-999615800/bAbGCJLlkNsDELja09wD'});
     </script>
 

@@ -30,7 +30,7 @@
                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: 0936665544">
                                         </div>
 
-                                        <script src="https://www.google.com/recaptcha/api.js"></script>
+                                        <script defer src="https://www.google.com/recaptcha/api.js"></script>
                                         <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                                     </div>
 
