@@ -5,48 +5,49 @@
 <!-- Section: Design Block -->
 <section class="">
     <!-- Jumbotron -->
-    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+    <div class="text-center" style="background-color: hsl(0, 0%, 96%)">
         <div class="container">
-            <div class="row gx-lg-5 align-items-center">
-                <div class="col-lg-6 mb-5 mb-lg-0">
-                    <h1 class="my-5 display-3 fw-bold ls-tight">
+            <div class="row align-items-center">
+                <h1>Таксі Київ (Київська область)</h1>
+                <div class="col-lg-6 ">
+                    <p class="lead">
                         Найкраща пропозиція<br />
                         <span class="text-primary">для вашої поїздки</span>
-                    </h1>
-                    <p style="color: hsl(217, 10%, 50.8%)">
-                        Максимум можливостей для пошуку найкращого варіанту
                     </p>
                 </div>
 
-                <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="col-lg-6 ">
                     <div class="card">
-                        <div class="card-body py-5 px-md-5">
+                        <div class="card-body">
                             <form action="{{ route('profile') }}">
                             @csrf
 
                             <!-- 2 column grid layout with text inputs for the first and last names -->
-                                <div class="row">
+                                <div class="container">
+                                    <div class="row">
 
-                                <!-- Phone input -->
-                                <div class="form-outline mb-4">
-                                    <input type="text" class="form-control" name="username" placeholder="0936665544" required>
-                                    <label class="form-label" for="username">Телефон</label>
+                                    <!-- Phone input -->
+                                        <div class="form-outline mb-2">
+                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: 0936665544" required>
+                                        </div>
+
+                                        <!-- Password input -->
+                                        <div class="form-outline mb-2">
+                                            <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 6 букв або цифр" id="password" required>
+                                            <a href="{{route('restore-sms')}}">Забули пароль?</a>
+                                        </div>
+
+                                        <!-- Submit button -->
+                                        <div class="container">
+                                           <button type="submit" class="btn btn-primary btn-block mb-2 col-lg-5">
+                                                Увійти
+                                            </button>
+                                            <a  class="btn btn-success btn-block mb-2 col-lg-5" href="{{route('registration-sms')}}">
+                                                Зареєструватись
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <!-- Password input -->
-                                <div class="form-outline mb-4">
-                                    <input type="password" class="form-control" name="password" id="password" required>
-                                    <label class="form-label" for="password">Пароль</label> <a href="{{route('restore-sms')}}">Забули пароль?</a>
-                                </div>
-
-                                <!-- Submit button -->
-                                <button type="submit" class="btn btn-primary btn-block mb-4">
-                                    Увійти
-                                </button>
-                                <a  class="btn btn-success btn-block mb-4" href="{{route('registration-sms')}}">
-                                    Зареєструватись
-                                </a>
-
                             </form>
                         </div>
                     </div>
