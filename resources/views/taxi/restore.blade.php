@@ -39,7 +39,7 @@
                                             </div>
                                             <!-- Password input confirm -->
                                             <div class="form-outline mb-4">
-                                                <input type="password" class="form-control" name="confirm_code" id="confirm_code" placeholder="Код підтвердження з смс? Приклад: 6201">
+                                                <input type="password" class="form-control" name="confirm_code" id="confirm_code" placeholder="Код з смс? Приклад: 6201">
                                             </div>
                                             <!-- Submit button -->
                                             <button type="submit" class="btn btn-primary btn-block mb-4">
