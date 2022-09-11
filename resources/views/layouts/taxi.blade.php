@@ -13,13 +13,6 @@
 
     <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
-    <script defer>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'AW-999615800');
-    </script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -69,11 +62,11 @@
         @yield('content')
     </main>
 </div>
-<script defer src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
 </script>
 
-<script defer type="text/javascript">
+<script type="text/javascript">
     var route = "{{ url('autocomplete-search') }}";
     $('#search').typeahead({
         source: function (query, process) {
