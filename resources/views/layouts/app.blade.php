@@ -10,15 +10,17 @@
     <title>{{ config('app.name') }}</title>
 
         <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
-    <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
+<!--
+    &lt;!&ndash; Global site tag (gtag.js) - Google Ads: 999615800 &ndash;&gt;
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
+-->
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+<!--    <link rel="preload" rel="dns-prefetch" href="//fonts.gstatic.com" as="font">
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">-->
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">

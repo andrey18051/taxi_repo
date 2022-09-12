@@ -1,29 +1,24 @@
 @extends('layouts.taxi')
 
 @section('content')
-    <div class="container" style="text-align: center; margin-top: 5px">
+    <div class="container" style="background-color: hsl(0, 0%, 96%)">
+        <div class="container" style="text-align: center; margin-top: 5px">
         <h1>Таксі Київ (Київська область)</h1>
     </div>
 
-     <div class="container">
-         <div class="text-center">
-             <a  class="btn btn-outline-secondary  col-sm-3 order-md-last"
-                                      onclick="showHide('block_street')">За адресою</a>
-             <a  class="btn btn-outline-secondary offset-1 col-sm-3 order-md-last"
-                 onclick="showHide('block_object')">По об'єктах</a>
-             <a  class="btn btn-outline-secondary offset-1 col-sm-3"  onclick="showHide('block_map')">По мапі</a>
+        <div class="container text-center">
+
+             <a  class="btn btn-outline-secondary  col-3"
+                                      onclick="showHide('block_street')">Вулиці</a>
+             <a  class="btn btn-outline-secondary offset-1 col-3"
+                 onclick="showHide('block_object')">Об'єкти</a>
+             <a  class="btn btn-outline-secondary offset-1 col-3"  onclick="showHide('block_map')">Мапа</a>
         </div>
-    </div>
 
-
-    <!--     Пошук по мапі.-->
-
-     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map" style="background-color: hsl(0, 0%, 96%); display:none">
-         <div class="container">
-                  <div class="text-center">
-                     <p class="lead">Пошук по мапі. Перемістіть маркери для розрахунку вартості поїздки.</p>
-                 </div>
-                 <form action="{{route('search-cost-map')}}" id="form_object">
+        <!--     Пошук по мапі.-->
+        <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map" style="display:none">
+             <p class="text-center">Пошук по мапі. Перемістіть маркери для розрахунку вартості поїздки.</p>
+                  <form action="{{route('search-cost-map')}}" id="form_object">
                      @csrf
                      <div class="row">
                          <div class="col-sm-8 col-lg-8">
@@ -37,26 +32,28 @@
                              <input type="hidden" class="form-control" id="search5" name="search5" autocomplete="off" placeholder="Пошук об'єкта" >
                              <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                              <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
-
-                             <div id="googleMap" style="width:100%;height:150px;"></div>
-                             <div class="row">
-                                 <div class="container">
-                                     <div class="row">
-                                         <div class="col-4">
-                                             <label class="form-check-label" for="route_undefined">По місту</label>
-                                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_map')">
-                                         </div>
+                             <div class="container">
+                                 <div class="row">
+                                     <div class="col-12">
+                                        <div id="googleMap" style="width:100%;height:150px;"></div>
                                      </div>
                                  </div>
+                             </div>
 
+                             <div class="container" style="text-align: left">
+                                <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1">
+                                <label class="form-check-label" for="route_undefined">По місту</label>
+                             </div>
+
+                             <div class="container">
                                  <script defer src="https://www.google.com/recaptcha/api.js"></script>
                                  <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                             </div>
                      </div>
 
-                     <div class="col-md-5 col-lg-4 order-md-last">
+                         <div class="col-sm-4 col-lg-4" style="margin-top: 5px">
 
-                             <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
+                             <a href="javascript:void(0)" class="btn btn-outline-success"
                                 onclick="showHide('block_id_map')">Додаткові параметри</a><br/><br/>
 
                              <div id="block_id_map" style="display: none">
@@ -107,69 +104,63 @@
                              </div>
                          </div>
 
-                     </div><button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                     </div>
+                      <div class="container text-center">
+                          <button class="btn btn-primary" type="submit">Розрахувати вартість поїздки</button>
+                      </div>
                  </form>
          </div>
-     </div>
 
-    <!--     Пошук за адресою.-->
-
-    <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="background-color: hsl(0, 0%, 96%); display:block">
-      <div class="container">
-            <div class="text-center">
-                <p class="lead">Пошук за адресою. Заповнити поля для розрахунку вартості поїздки.</p>
-            </div>
-            <form action="{{route('search-cost')}}" id="form">
+        <!--     Пошук за адресою.-->
+        <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street" style="display:block">
+         <p class="text-center">Пошук за адресою. Заповнити поля для розрахунку вартості поїздки.</p>
+         <form action="{{route('search-cost')}}" id="form">
                 @csrf
                 <div class="row">
-                    <div class="col-sm-8 col-lg-8">
+                    <div class="col-md-7 col-lg-8">
                         <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
+                        <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+                        <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
 
-                        <div class="row">
-                            <div class="container">
+                        <div class="container">
                                 <div class="row">
-                                    <div class="col-8 col-lg-8">
+                                    <div class="col-8">
                                         <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці (Звідки)" value="" required>
                                     </div>
-                                    <div class="col-4 col-lg-4">
+                                    <div class="col-4">
                                         <input type="text" id="from_number" name="from_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label class="form-check-label" for="route_undefined">По місту</label>
-                                        <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="block_city" class="container"  style="display:block">
+                        </div>
+
+                        <div class="container" style="text-align: left">
+                            <label class="form-check-label" for="route_undefined">По місту</label>
+                            <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
+                        </div>
+
+                        <div id="block_city" class="container"  style="display:block">
                                 <div class="row">
                                     <div class="col-8">
                                         <input type="text" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук вулиці (Куди)" >
                                     </div>
                                     <div class="col-4">
-                                         <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
+                                        <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
                                     </div>
                                 </div>
-                            </div>
+                        </div>
 
-                            <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
-                            <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
-
-                            <script defer src="https://www.google.com/recaptcha/api.js"></script>
-                            <div class="container" style="margin-top: 5px">
-                                <div class="row">
+                        <script defer src="https://www.google.com/recaptcha/api.js"></script>
+                        <div class="container" style="margin-top: 5px">
+                             <div class="row">
                                     <div class="col-4 g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                                 </div>
-                            </div>
+                       </div>
                     </div>
-                </div>
-                    <div class="col-md-5 col-lg-4 order-md-last">
 
-                            <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
+                    <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
+
+                        <a href="javascript:void(0)" class="btn btn-outline-success"
                                onclick="showHide('block_id_street')">Додаткові параметри</a><br/><br/>
 
                         <div id="block_id_street" style="display: none;">
@@ -219,22 +210,18 @@
                             </ul>
                         </div>
                     </div>
-
                 </div>
-                <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+
+             <div class="container text-center">
+                 <button class="btn btn-primary" type="submit">Розрахувати вартість поїздки</button>
+             </div>
             </form>
-
-    </div>
     </div>
 
-     <!--     Пошук по об'єктах.-->
-
-     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object" style="background-color: hsl(0, 0%, 96%); display:none">
-        <div class="container">
-                <div class="text-center">
-                    <p class="lead">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>
-                </div>
-                <form action="{{route('search-cost-object')}}" id="form_object">
+         <!--     Пошук по об'єктах.-->
+        <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object" style="display:none">
+            <p class="text-center">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>
+            <form action="{{route('search-cost-object')}}" id="form_object">
                     @csrf
                     <div class="row">
                         <div class="col-sm-8 col-lg-8">
@@ -243,23 +230,21 @@
                             <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                             <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
-                            <div class="row">
-                                <div class="container">
+
+                            <div class="container">
                                     <div class="row">
                                         <div class="col-12">
                                             <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="" required>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-4">
-                                            <label class="form-check-label" for="route_undefined">По місту</label>
-                                            <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
-                                        </div>
-                                    </div>
+
+                            <div class="container" style="text-align: left">
+                                    <label class="form-check-label" for="route_undefined">По місту</label>
+                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
                                 </div>
-                                <div id="block_city_object" class="container"  style="display:block">
+
+                            <div id="block_city_object" class="container"  style="display:block">
                                     <div class="row">
                                         <div class="col-12">
                                             <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" >
@@ -267,17 +252,16 @@
                                     </div>
                                 </div>
 
-
-                                <script defer src="https://www.google.com/recaptcha/api.js"></script>
-                                <div class="container" style="margin-top: 5px">
-                                    <div class="row">
+                            <script defer src="https://www.google.com/recaptcha/api.js"></script>
+                            <div class="container" style="margin-top: 5px">
+                                 <div class="row">
                                         <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                                     </div>
-                                </div>
+                            </div>
                         </div>
-                    </div>
-                            <div class="col-md-5 col-lg-4 order-md-last">
-                            <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
+                        <div class="col-sm-4 col-lg-4" style="margin-top: 5px">
+
+                            <a href="javascript:void(0)" class="btn btn-outline-success"
                                onclick="showHide('block_id_object')">Додаткові параметри</a><br/><br/>
 
                             <div id="block_id_object" style="display: none">
@@ -326,13 +310,16 @@
                                     </li>
                                 </ul>
                             </div>
-                        </div>
-
                     </div>
-                        <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                    </div>
+
+                    <div class="container text-center">
+                        <button class="btn btn-primary" type="submit">Розрахувати вартість поїздки</button>
+                    </div>
                 </form>
+        </div>
     </div>
-    </div>
+
     <script defer type="text/javascript">
         /**
          * Функция Скрывает/Показывает блок
@@ -472,57 +459,6 @@
                 label: 'Куди'
             });
 
-/*
-
-            var req = new XMLHttpRequest();
-            req.open("GET", "/driversPosition", false);
-         //   req.responseType = 'json';
-            req.send(null);
-            alert(req.responseText);
-*/
-
-
-
-
-
-/*
-
-            const image =
-                "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png";
-
-            // Set LatLng and title text for the markers. The first marker (Boynton Pass)
-            // receives the initial focus when tab is pressed. Use arrow keys to
-            // move between markers; press tab again to cycle through the map controls.
-            const tourStops = [
-                [{ lat: 50.416525, lng: 30.520825 }, "Мікроавтобус"],
-                [{ lat: 50.43962, lng: 30.51525 }, "Мінібус"],
-
-            ];
-
-            // Create an info window to share between markers.
-            const infoWindow = new google.maps.InfoWindow();
-
-            // Create the markers.
-            tourStops.forEach(([position, title], i) => {
-                const marker = new google.maps.Marker({
-                    position,
-                    map,
-                    title: `${i + 1}. ${title}`,
-                    label: `${i + 1}`,
-                    icon: image,
-                    optimized: false,
-                });
-
-                // Add a click listener for each marker, and set up the info window.
-                marker.addListener("click", () => {
-                    infoWindow.close();
-                    infoWindow.setContent(marker.getTitle());
-                    infoWindow.open(marker.getMap(), marker);
-                });
-            });
-*/
-
-
             marker2.addListener('dragend', function(e) {
                 var position2 = marker2.getPosition();
                 updateCoordinates2(position2.lat(), position2.lng())
@@ -544,6 +480,6 @@
             document.getElementById('lng2').value = lng;
         }
     </script>
-     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=myMap"></script>
+     <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=myMap"></script>
 
 @endsection

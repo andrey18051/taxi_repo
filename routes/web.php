@@ -31,7 +31,7 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
-Route::get('/map', function () {
+/*Route::get('/map', function () {
     return view('map');
 });
 
@@ -41,7 +41,7 @@ Route::get('/map2', function () {
 
 Route::get('/map3', function () {
     return view('map3');
-});
+});*/
 
 Auth::routes(['verify' => true]);
 

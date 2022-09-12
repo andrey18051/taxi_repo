@@ -1,4 +1,4 @@
-@extends('layouts.cost')
+@extends('layouts.taxi')
 
 @section('content')
     {{-- print_r($orderId) --}}
@@ -11,59 +11,69 @@
                 @csrf
                 <div class="row">
                     <div class="col-md-7 col-lg-8">
+                        <div class="container">
+                             <div class="row">
+                                <div class="col-8">
+                                    <label for="search" class="form-label">Звідки</label>
+                                    <input type="text" class="form-control" id="search" autocomplete="off" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
+                                </div>
+                                <div class="col-4">
+                                    <label for="from_number" class="form-label">Будинок</label>
+                                    <input type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
+                                </div>
+                             </div>
+                        </div>
 
-                        <div class="row">
-
-                            <div class="col-9">
-                                <label for="search" class="form-label">Звідки</label>
-                                <input type="text" class="form-control" id="search" autocomplete="off" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
+                        <div class="container">
+                                <div class="row">
+                                    <div class="col-12">
+                                    <label class="form-check-label" for="route_undefined">По місту</label>
+                                    <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
+                                        @if( $orderId['0']['route_undefined'] == 1)
+                                            checked
+                                           value="1"
+                                    @endif
+                                    >
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-3">
-                                <label for="from_number" class="form-label">Будинок</label>
-                                <input type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
-
-                            </div>
-
-                            <div class="col-3" >
-                                <label class="form-check-label" for="route_undefined">По місту</label>
-                                <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
-                                    @if( $orderId['0']['route_undefined'] == 1)
-                                        checked
-                                       value="1"
-                                @endif
-                                >
-                            </div>
-
-                            <div id="block_city" class="container"
+                        <div id="block_city" class="container"
                                  @if( $orderId['0']['route_undefined'] == 1)
                                  style="display:none"
                                  @else  style="display:block"
                                  @endif
                                 >
                                 <div class="row">
-                                    <div class="col-9">
+                                    <div class="col-8">
                                         <label for="search1" class="form-label">Куди</label>
                                         <input type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
                                     </div>
 
-                                    <div class="col-3">
+                                    <div class="col-4">
                                         <label for="to_number" class="form-label" >Будинок</label>
                                         <input type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-8">
-                                    <label for="user_phone" class="form-label">Телефон</label>
-                                    <input type="tel" class="form-control" id="user_phone" name="user_phone"  value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
-                                </div>
-                                <div class="col-sm-4">
-                                    <label for="user_full_name" class="form-label">Ім'я</label>
-                                    <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
 
+                        <div class="container" style="margin-top: 5px">
+                            <div class="row">
+                                <div class="col-12">
+                                    <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="container" style="margin-top: 5px">
+                            <div class="row">
+                                <div class="col-12">
+                                    <input type="tel" class="form-control" id="user_phone" name="user_phone"   placeholder="Телефон? Приклад: 0936665544" value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-8">
                                     <label for="comment" class="form-label">Коментар</label>
@@ -71,14 +81,14 @@
 
                                 </div>
                                 <div class="col-4">
-                                    <label for="add_cost" class="form-label"  >Додати до вартості (грн)</label>
+                                    <label for="add_cost" class="form-label"  >Додати (грн)</label>
                                     <input type="text" id="add_cost" name="add_cost" style="text-align: center" class="form-control" value="{{ $orderId['0']['add_cost'] }}" />
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
-
+                        <br/>
                         <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 

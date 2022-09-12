@@ -15,12 +15,12 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
 
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+<!--   <link rel="preload" rel="dns-prefetch" href="//fonts.gstatic.com" as="font">
+   <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">-->
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/left-nav-style.css') }}">
+<!--    <link rel="stylesheet" href="{{ asset('css/left-nav-style.css') }}">-->
 </head>
 <body>
 <div id="app">
