@@ -4,7 +4,7 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <div class="container" style="text-align: center; margin-top: 5px">
         <h1>Таксі Київ (Київська область)</h1>
-    </div>
+        </div>
 
         <div class="container text-center">
 
@@ -154,7 +154,7 @@
                         <div class="container" style="margin-top: 5px">
                              <div class="row">
                                     <div class="col-4 g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-                                </div>
+                             </div>
                        </div>
                     </div>
 
@@ -162,8 +162,8 @@
 
                         <a href="javascript:void(0)" class="btn btn-outline-success"
                                onclick="showHide('block_id_street')">Додаткові параметри</a><br/><br/>
-
-                        <div id="block_id_street" style="display: none;">
+                        <div class="container">
+                            <div id="block_id_street" style="display: none;">
                             <ul class="list-group mb-3">
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <label class="form-label" for="required_time">Час подачі</label>
@@ -208,6 +208,7 @@
                                     </div>
                                 </li>
                             </ul>
+                        </div>
                         </div>
                     </div>
                 </div>

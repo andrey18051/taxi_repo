@@ -1534,7 +1534,9 @@ class WebOrderController extends Controller
                         ->with('cancel', 'Скасувати замовлення.');
 
                 } else {
-                    return redirect()->route('home')->with('error', "Помілка створення заказу.")
+                    $json_arr = json_decode($responseWeb, true);
+                    $message_error = $json_arr['description'];
+                    return redirect()->route('home')->with('error', "Помілка створення заказу. $message_error")
                         ->with('back', 'Зробити нове замовлення.');
                 }
             }

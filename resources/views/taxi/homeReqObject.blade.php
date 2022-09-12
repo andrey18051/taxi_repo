@@ -2,13 +2,14 @@
 
 @section('content')
     {{-- print_r($params) --}}
-    <div class="container" style="text-align: center; margin-top: 5px">
+    <div class="container" style="background-color: hsl(0, 0%, 96%)">
+        <div class="container" style="text-align: center; margin-top: 5px">
         <h1>Таксі Київ (Київська область)</h1>
-        <p class="lead">Заповнити поля для розрахунку вартості поїздки.</p>
     </div>
 
-    <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object" style="background-color: hsl(0, 0%, 96%)">
-        <div class="container">
+        <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
+            <p class="text-center">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>
+
             <form action="{{route('search-cost-object')}}" id="form_object">
                 @csrf
                 <div class="row">
@@ -18,27 +19,23 @@
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
-                        <div class="row">
-                            <div class="container">
-                                <div class="row">
+                        <div class="container">
+                              <div class="row">
                                     <div class="col-12">
                                         <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="{{ $params['routefrom']}}" required>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <label class="form-check-label" for="route_undefined">По місту</label>
-                                        <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
+                              </div>
+                        </div>
+                        <div class="container" style="text-align: left">
+                             <label class="form-check-label" for="route_undefined">По місту</label>
+                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
                                                @if($params['route_undefined'] == 1)
                                                checked
                                                value="1"
                                             @endif>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="block_city_object" class="container"
+
+                        </div>
+                        <div id="block_city" class="container"
                                  @if($params['route_undefined'] == 1)
                                     style="display:none"
                                  @else  style="display:block"
@@ -50,17 +47,16 @@
                                 </div>
                             </div>
 
-
-                            <script src="https://www.google.com/recaptcha/api.js"></script>
-                            <div class="container" style="margin-top: 5px">
+                        <script defer src="https://www.google.com/recaptcha/api.js"></script>
+                         <div class="container" style="margin-top: 5px">
                                 <div class="row">
                                     <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                                 </div>
-                            </div>
-                        </div>
+                         </div>
                     </div>
-                    <div class="col-md-5 col-lg-4 order-md-last">
-                        <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
+
+                    <div class="col-md-5 col-lg-4" style="margin-top: 5px">
+                        <a href="javascript:void(0)" class="btn btn-outline-success"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
                         <div id="block_id" style="display: none">
@@ -131,11 +127,13 @@
                     </div>
 
                 </div>
-                <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                <div class="container text-center">
+                    <button class="w-100 btn btn-primary" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                </div>
             </form>
         </div>
     </div>
-
+    </div>
     <script type="text/javascript">
         /**
          * Функция Скрывает/Показывает блок
