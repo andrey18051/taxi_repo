@@ -320,6 +320,7 @@ class WebOrderController extends Controller
          */
         $params['user_full_name'] = $req->user_full_name;
         $params['user_phone'] = $req->user_phone;
+
         $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
         $params['client_sub_card'] = null;
@@ -401,9 +402,10 @@ class WebOrderController extends Controller
                 $password = hash('SHA512', config('app.password'));
                 $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+
                 $user_full_name = $req->user_full_name;
                 $user_phone = $req->user_phone;
+
                 $from = $req->search;
                 $from_number = $req->from_number;
                 $auto_type = 'Тип авто: ';
@@ -454,12 +456,12 @@ class WebOrderController extends Controller
                     $to = $from;
                     $to_number = $from_number;
                 };
-
+                $url = config('app.taxi2012Url') . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
-                    'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => $user_phone, //Телефон пользователя
+                    'user_full_name' => null, //Полное имя пользователя
+                    'user_phone' => null, //Телефон пользователя
                     'client_sub_card' => null,
                     'required_time' => $required_time, //Время подачи предварительного заказа
                     'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
@@ -554,6 +556,7 @@ class WebOrderController extends Controller
          */
         $params['user_full_name'] = $req->user_full_name;
         $params['user_phone'] = $req->user_phone;
+
         $params['routefrom'] = $req->search2; //Обязательный. Улица откуда.
 
         $params['client_sub_card'] = null;
@@ -643,9 +646,10 @@ class WebOrderController extends Controller
                 $password = hash('SHA512', config('app.password'));
                 $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+
                 $user_full_name = $req->user_full_name;
                 $user_phone = $req->user_phone;
+
                 $from = $req->search2;
 
                 $auto_type = 'Тип авто: ';
@@ -695,12 +699,12 @@ class WebOrderController extends Controller
                     $to = $from;
 
                 };
-
+                $url = config('app.taxi2012Url') . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
-                    'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => $user_phone, //Телефон пользователя
+                    'user_full_name' => null, //Полное имя пользователя
+                    'user_phone' => null, //Телефон пользователя
                     'client_sub_card' => null,
                     'required_time' => $required_time, //Время подачи предварительного заказа
                     'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
@@ -848,8 +852,6 @@ class WebOrderController extends Controller
         $params['user_full_name'] = $req->user_full_name;
         $params['user_phone'] = $req->user_phone;
 
-
-
         $params['client_sub_card'] = null;
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
@@ -934,9 +936,10 @@ class WebOrderController extends Controller
                 $password = hash('SHA512', config('app.password'));
                 $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+
                 $user_full_name = $req->user_full_name;
                 $user_phone = $req->user_phone;
+
                 $from = $params['routefrom'];
                 $from_number = $params['routefromnumber'];
 
@@ -990,12 +993,12 @@ class WebOrderController extends Controller
                     $to = $from;
                     $to_number = $from_number;
                 };
-
+                $url = config('app.taxi2012Url') . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
-                    'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => $user_phone, //Телефон пользователя
+                    'user_full_name' => null, //Полное имя пользователя
+                    'user_phone' => null, //Телефон пользователя
                     'client_sub_card' => null,
                     'required_time' => $required_time, //Время подачи предварительного заказа
                     'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
@@ -1087,9 +1090,11 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/weborders/cost';
+
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
+
+
         $from = $req->search;
 
         $from_number = $req->from_number;
@@ -1146,12 +1151,12 @@ class WebOrderController extends Controller
             $to = $from;
             $to_number = $from_number;
         };
-
+        $url = config('app.taxi2012Url') . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
-            'user_full_name' => $user_full_name, //Полное имя пользователя
-            'user_phone' => $user_phone, //Телефон пользователя
+            'user_full_name' => null, //Полное имя пользователя
+            'user_phone' => null, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
             'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
@@ -1221,9 +1226,10 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/weborders/cost';
+
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
+
         $from = $req->search2;
         $required_time = $req->required_time; //Время подачи предварительного заказа
         $reservation = false;
@@ -1277,12 +1283,12 @@ class WebOrderController extends Controller
             $route_undefined = true;
             $to = $req->search2;
         };
-
+        $url = config('app.taxi2012Url') . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
-            'user_full_name' => $user_full_name, //Полное имя пользователя
-            'user_phone' => $user_phone, //Телефон пользователя
+            'user_full_name' => null, //Полное имя пользователя
+            'user_phone' => null, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
             'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
@@ -1428,8 +1434,8 @@ class WebOrderController extends Controller
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
-                    'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => $user_phone, //Телефон пользователя
+                    'user_full_name' => null, //Полное имя пользователя
+                    'user_phone' => null, //Телефон пользователя
                     'client_sub_card' => null,
                     'required_time' => $required_time, //Время подачи предварительного заказа
                     'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
