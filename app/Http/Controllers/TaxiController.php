@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -891,8 +892,8 @@ class TaxiController extends Controller
      */
     public function streets()
     {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/geodata/streets';
@@ -902,6 +903,20 @@ class TaxiController extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
 
+        $json_arr = json_decode($response, true);
+        //  dd ($json_arr['geo_street'][1100]["localizations"]);
+        $i =0;
+        do {
+    $streets = $json_arr['geo_street'][$i]["localizations"];
+            foreach ($streets as $val) {
+              if ($val["locale"] == "UK") {
+
+                $street[$i] = $val['name'];}
+            }
+            $i++;
+        }
+        while ($i < count($json_arr['geo_street']));
+        dd ($street);
         return $response->body() ;
     }
 

@@ -40,22 +40,27 @@ class TypeaheadController extends Controller
 
         $svd = Config::where('id', '1')->first();
         //Проверка версии геоданных и обновление или создание базы адресов
+
         if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
             $svd->streetVersionDate = $json_arr['version_date'];
             $svd->save();
-            echo $svd->streetVersionDate;
             DB::table('streets')->truncate();
             $i = 0;
             do {
-                $streets = new Street();
-                $streets->name = $json_arr['geo_street'][$i]['name'];
-                $streets->old_name = $json_arr['geo_street'][$i]['old_name'];
-                $streets->save();
-                $i++;
-            }
-            while ($i < count($json_arr['geo_street']));
-        }
+                $streets = $json_arr['geo_street'][$i]["localizations"];
+                foreach ($streets as $val) {
+                    if ($val["locale"] == "UK") {
+                        $street = new Street();
+                        $street->name = $val['name'];
+                        $street->save();
 
+                    }
+                }
+                    $i++;
+                }
+                while ($i < count($json_arr['geo_street'])) ;
+
+        }
         $filterResult = Street::where('name', 'LIKE', '%' . $query . '%')->get();
 
         return  response()->json($filterResult);
