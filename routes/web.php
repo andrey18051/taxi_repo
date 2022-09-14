@@ -31,18 +31,6 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
-/*Route::get('/map', function () {
-    return view('map');
-});
-
-Route::get('/map2', function () {
-    return view('map2');
-});
-
-Route::get('/map3', function () {
-    return view('map3');
-});*/
-
 Auth::routes(['verify' => true]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home-admin');
@@ -73,24 +61,86 @@ Route::get('/', function () {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-    /*        case '1,5':
-            case '2.0':
-            case 'Универсал':
-            case 'Микроавтобус':
-            case 'Премиум-класс':
-            case 'Манго':
-            case 'Онлайн платный':
-                break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
     }
     return view('taxi.home', ['json_arr' => $json_arr]);
 })->name('home');
+
+
+/*Route::get('/', function () {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    return view('taxi.home', ['json_arr' => $json_arr]);
+})->name('home');*/
+
+
+Route::get('/', function () {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    return view('taxi.homeStreet', ['json_arr' => $json_arr]);
+})->name('home');
+
+Route::get('/home-Object', function () {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    return view('taxi.homeObject', ['json_arr' => $json_arr]);
+})->name('homeObject');
+
+Route::get('/home-Map', function () {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    return view('taxi.homeMap', ['json_arr' => $json_arr]);
+})->name('homeMap');
+
 
 Route::get('/taxi-gdbr', function () {
     return view('taxi.gdpr');
@@ -455,6 +505,8 @@ Route::get('/driversPosition', [WebOrderController::class, 'driversPosition'])->
  */
 Route::get('/taxi-objects', [WebOrderController::class, 'objects'])->name('objects');
 
+
+/*
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');
 Route::get('/taxi/restoreSendConfirmCode', [TaxiController::class, 'restoreSendConfirmCode'])->name('taxi-restoreSendConfirmCode');
@@ -508,4 +560,4 @@ Route::get('/taxi/settings', [TaxiController::class, 'settings'])->name('taxi-se
 Route::get('/taxi/addCostIncrementValue', [TaxiController::class, 'addCostIncrementValue'])->name('taxi-addCostIncrementValue');
 Route::get('/taxi/time', [TaxiController::class, 'time'])->name('taxi-time');
 Route::get('/taxi/tnVersion', [TaxiController::class, 'tnVersion'])->name('taxi-tnVersion');
-Route::get('/taxi/driversPosition', [TaxiController::class, 'driversPosition'])->name('taxi-driversPosition');
+Route::get('/taxi/driversPosition', [TaxiController::class, 'driversPosition'])->name('taxi-driversPosition');*/
