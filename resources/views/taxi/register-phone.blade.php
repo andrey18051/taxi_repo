@@ -24,12 +24,12 @@
                                         <div class="row">
                                             <!-- Phone input -->
                                             <div class="form-outline mb-4">
-                                                <input type="text" class="form-control" name="phone" placeholder="Телефон? Приклад: 0936665544">
+                                                <input type="text" class="form-control" name="phone" autocomplete="off" value="{{$phone}}">
                                             </div>
 
                                             <!-- Password input -->
                                             <div class="form-outline mb-4">
-                                                <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 6 букв або цифр" id="password">
+                                                <input type="password" class="form-control" name="password" autocomplete="off" placeholder="Пароль? Мінімально 6 букв або цифр" id="password">
                                             </div>
                                             <!-- Password input confirm -->
                                             <div class="form-outline mb-4">

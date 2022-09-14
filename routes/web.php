@@ -291,8 +291,12 @@ Route::get('/registration/form', function () {
     return view('taxi.register');
 })->name('registration-form');
 
-Route::get('/registration/confirm-code', [WebOrderController::class, 'register'])->name('registration');
+Route::get('/registration/form/{phone}', function ($phone) {
+    return view('taxi.register-phone', ['phone' => $phone]);
+})->name('registration-form-phone');
 
+
+Route::get('/registration/confirm-code', [WebOrderController::class, 'register'])->name('registration');
 /**
  * Восстановление пароля
  */

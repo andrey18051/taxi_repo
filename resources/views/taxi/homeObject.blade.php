@@ -35,10 +35,10 @@
 
                             <div class="container" style="text-align: left">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
-                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city_object')">
+                                    <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
                                 </div>
 
-                            <div id="block_city_object" class="container"  style="display:block">
+                            <div id="block_city" class="container"  style="display:block">
                                     <div class="row">
                                         <div class="col-12">
                                             <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" >
@@ -125,7 +125,12 @@
                 //Записываем ссылку на элемент в переменную obj
                 var obj = document.getElementById(element_id);
                 //Если css-свойство display не block, то:
-
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
                 if (element_id == "block_id") {
                     if (obj.style.display != "block") {
                         obj.style.display = "block"; //Показываем элемент

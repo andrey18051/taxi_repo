@@ -149,7 +149,8 @@ class WebOrderController extends Controller
             'confirm_password' => $req-> confirm_password, //Пароль (повтор).
             'user_first_name' => 'Новий користувач', // Необязательный. Имя клиента
         ]);
-        if ($response->status() == "200") {
+       // dd($response->status());
+        if ($response->status() == "201" || $response->status() == "200") {
             $username = $req->phone;
             $password = hash('SHA512', $req->password);
             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
@@ -1363,7 +1364,7 @@ class WebOrderController extends Controller
 
         $Message = $resp_phone_arr['Message'];
         if ($resp_phone->status() == '200') {
-            return redirect()->route('registration-form')
+            return redirect()->route('registration-form-phone', ['phone' => $user_phone])
                 ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.
                 Для замовлення пройдіть реєстрацію. Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути"
                 після проходження реєстрації.');

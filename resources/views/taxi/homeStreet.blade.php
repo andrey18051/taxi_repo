@@ -133,7 +133,12 @@
                 //Записываем ссылку на элемент в переменную obj
                 var obj = document.getElementById(element_id);
                 //Если css-свойство display не block, то:
-
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
                 if (element_id == "block_id") {
                     if (obj.style.display != "block") {
                         obj.style.display = "block"; //Показываем элемент
