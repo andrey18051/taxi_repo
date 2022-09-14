@@ -86,11 +86,11 @@ Route::get('/', function () {
                 $ii++;
         }
     }
-    return view('taxi.homeWellcome', ['json_arr' => $json_arr]);
+    return view('taxi.homeWellcome', ['json_arr' => $json_arr, 'phone' => '0936665544']);
 })->name('home');
 
 
-Route::get('/home-Street', function () {
+Route::get('/home-Street/{phone}', function ($phone) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -104,10 +104,10 @@ Route::get('/home-Street', function () {
                 $ii++;
         }
     }
-    return view('taxi.homeStreet', ['json_arr' => $json_arr]);
+    return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone]);
 })->name('homeStreet');
 
-Route::get('/home-Object', function () {
+Route::get('/home-Object/{phone}', function ($phone){
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -121,10 +121,10 @@ Route::get('/home-Object', function () {
                 $ii++;
         }
     }
-    return view('taxi.homeObject', ['json_arr' => $json_arr]);
+    return view('taxi.homeObject', ['json_arr' => $json_arr, 'phone' => $phone]);
 })->name('homeObject');
 
-Route::get('/home-Map', function () {
+Route::get('/home-Map/{phone}', function ($phone) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -138,7 +138,7 @@ Route::get('/home-Map', function () {
                 $ii++;
         }
     }
-    return view('taxi.homeMap', ['json_arr' => $json_arr]);
+    return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone]);
 })->name('homeMap');
 
 
@@ -224,14 +224,6 @@ Route::get('/homeorder/afterorder/{id}', function ($id) {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            /*case '1,5':
-            case '2.0':
-            case 'Универсал':
-            case 'Микроавтобус':
-            case 'Премиум-класс':
-            case 'Манго':
-            case 'Онлайн платный':
-                break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':

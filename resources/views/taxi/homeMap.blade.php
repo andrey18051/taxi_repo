@@ -7,9 +7,9 @@
         </div>
 
         <div class="container text-center">
-            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet')}}" target="_blank">Вулиці</a>
-            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject')}}" target="_blank">Об'єкти</a>
-            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap')}}" target="_blank">Мапа</a>
+            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet', $phone)}}" target="_blank">Вулиці</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject', $phone)}}" target="_blank">Об'єкти</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap', $phone)}}" target="_blank">Мапа</a>
         </div>
 
         <!--     Пошук по мапі.-->
@@ -23,7 +23,7 @@
                              <input type="hidden" id="lng" name="lng" />
                              <input type="hidden" id="lat2" name="lat2" />
                              <input type="hidden" id="lng2" name="lng2"/>
-                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$phone}}">
                              <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                              <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                              <input type="hidden" class="form-control" id="search5" name="search5" autocomplete="off" placeholder="Пошук об'єкта" >

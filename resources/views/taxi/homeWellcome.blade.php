@@ -10,9 +10,9 @@
             <p>Ви можете легко  замовити поїздку по Київу та Київській області, скориставшись пошуком по вулицях, об'єктах та карті Google map.</p>
         </div>
         <div class="container text-center">
-            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet')}}" target="_blank">Вулиці</a>
-            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject')}}" target="_blank">Об'єкти</a>
-            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap')}}" target="_blank">Мапа</a>
+            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet', $phone)}}" target="_blank">Вулиці</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject', $phone)}}" target="_blank">Об'єкти</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap', $phone)}}" target="_blank">Мапа</a>
         </div>
 
 @endsection

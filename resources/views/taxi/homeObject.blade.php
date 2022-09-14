@@ -7,9 +7,9 @@
         </div>
 
         <div class="container text-center">
-            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet')}}" target="_blank">Вулиці</a>
-            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject')}}" target="_blank">Об'єкти</a>
-            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap')}}" target="_blank">Мапа</a>
+            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet', $phone)}}" target="_blank">Вулиці</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject', $phone)}}" target="_blank">Об'єкти</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap', $phone)}}" target="_blank">Мапа</a>
         </div>
 
         <!--     Пошук по об'єктах.-->
@@ -19,7 +19,7 @@
                     @csrf
                     <div class="row">
                         <div class="col-sm-8 col-lg-8">
-                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$phone}}">
                             <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                             <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                             <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />

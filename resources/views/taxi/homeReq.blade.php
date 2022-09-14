@@ -72,7 +72,7 @@
 
                              <div id="block_id" style="display: none;">
                                 <ul class="list-group">
-                                    <li class="list-group-item d-flex justify-content-between>
+                                    <li class="list-group-item d-flex justify-content-between lh-sm">
                                         <label class="form-label" for="required_time">Час подачі</label>
                                         <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="{{ $params['required_time']}}">
                                     </li>

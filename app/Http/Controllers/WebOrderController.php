@@ -1436,7 +1436,7 @@ class WebOrderController extends Controller
                     'Authorization' => $authorization,
                 ])->post($url, [
                     'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => $user_phone, //Телефон пользователя
+                    'user_phone' => null, //Телефон пользователя
                     'client_sub_card' => null,
                     'required_time' => $required_time, //Время подачи предварительного заказа
                     'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
