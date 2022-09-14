@@ -72,24 +72,6 @@ Route::get('/', function () {
 })->name('home');
 
 
-/*Route::get('/', function () {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
-    return view('taxi.home', ['json_arr' => $json_arr]);
-})->name('home');*/
-
-
 Route::get('/', function () {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
@@ -104,8 +86,26 @@ Route::get('/', function () {
                 $ii++;
         }
     }
-    return view('taxi.homeStreet', ['json_arr' => $json_arr]);
+    return view('taxi.homeWellcome', ['json_arr' => $json_arr]);
 })->name('home');
+
+
+Route::get('/home-Street', function () {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    return view('taxi.homeStreet', ['json_arr' => $json_arr]);
+})->name('homeStreet');
 
 Route::get('/home-Object', function () {
     $WebOrder = new \App\Http\Controllers\WebOrderController();

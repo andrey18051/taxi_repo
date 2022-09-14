@@ -7,9 +7,9 @@
         </div>
 
         <div class="container text-center">
-             <a  class="btn btn-outline-secondary  col-3" href="{{route('home')}}">Вулиці</a>
-             <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject')}}">Об'єкти</a>
-             <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap')}}">Мапа</a>
+            <a  class="btn btn-outline-secondary  col-3" href="{{route('homeStreet')}}">Вулиці</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject')}}">Об'єкти</a>
+            <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap')}}">Мапа</a>
         </div>
 
         <!--     Пошук за адресою.-->
