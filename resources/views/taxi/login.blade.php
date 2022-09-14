@@ -34,7 +34,7 @@
                                         <!-- Password input -->
                                         <div class="form-outline mb-2">
                                             <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 6 букв або цифр" id="password" required>
-                                            <a href="{{route('restore-sms')}}">Забули пароль?</a>
+                                            <a href="{{route('restore-sms')}}" target="_blank">Забули пароль?</a>
                                         </div>
 
                                         <!-- Submit button -->
@@ -42,7 +42,7 @@
                                            <button type="submit" class="btn btn-primary btn-block mb-2 col-lg-5">
                                                 Увійти
                                             </button>
-                                            <a  class="btn btn-success btn-block mb-2 col-lg-5" href="{{route('registration-sms')}}">
+                                            <a  class="btn btn-success btn-block mb-2 col-lg-5" target="_blank" href="{{route('registration-sms')}}">
                                                 Зареєструватись
                                             </a>
                                         </div>

@@ -7,7 +7,7 @@
             <div class="col">
                 <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="/">Нове замовлення</a></li>
+                        <li class="breadcrumb-item"><a href="/" target="_blank">Нове замовлення</a></li>
                     </ol>
                 </nav>
             </div>
@@ -25,9 +25,9 @@
                         </h5>
                     <div class="d-flex justify-content-center mb-2">
                             <a type="button" class="btn btn-primary"
-                               href="{{ route('profile-edit-form', $authorization) }}">Оновити</a>
+                               href="{{ route('profile-edit-form', $authorization) }}" target="_blank">Оновити</a>
                             <a type="button" class="btn btn-outline-primary ms-1"
-                               href="{{ route('costhistory', $authorization) }}">Мої маршрути</a>
+                               href="{{ route('costhistory', $authorization) }}" target="_blank">Мої маршрути</a>
                         </div>
                     </div>
                 </div>

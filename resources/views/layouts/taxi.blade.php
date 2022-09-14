@@ -27,7 +27,7 @@
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
 
-            <a class="navbar-brand" href="{{ url('/') }}">
+            <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
                 <img src="{{ asset('img/logo.jpg') }}" style="width: 50px; height: 50px">
                 {{ config('app.name', 'Laravel') }}
             </a>
@@ -40,12 +40,12 @@
                     <!-- Authentication Links -->
 
                     <li class="nav-item dropdown">
-                        <a id="navbar" class="nav-link" href="{{ route('login-taxi') }}" role="button" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="navbar" class="nav-link" href="{{ route('login-taxi') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ __('Вхід') }}
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a id="navbar" class="nav-link" href="{{ route('registration-sms') }}" role="button" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="navbar" class="nav-link" href="{{ route('registration-sms') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ __('Реєстрація') }}
                         </a>
                     </li>
@@ -112,10 +112,10 @@
 <footer class="text-muted text-center text-small">
     <p class="mb-1">&copy; 2022 Легке замовлення таксі</p>
     <ul class="list-inline">
-        <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}">Конфіденційність</a></li>
-        <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}">Умови</a></li>
-        <li class="list-inline-item"><a href="{{ route('feedback') }}">Підтримка</a></li>
-        <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/">Сторинка на Фейсбук</a></li>
+        <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}" target="_blank">Конфіденційність</a></li>
+        <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}" target="_blank">Умови</a></li>
+        <li class="list-inline-item"><a href="{{ route('feedback') }}" target="_blank">Підтримка</a></li>
+        <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank">Сторинка на Фейсбук</a></li>
     </ul>
 </footer>
 </body>
