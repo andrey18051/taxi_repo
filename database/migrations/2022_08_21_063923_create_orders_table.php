@@ -15,6 +15,7 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('IP_ADDR')->nullable();//IP пользователя
             $table->string('user_full_name');//Полное имя пользователя
             $table->string('user_phone');//Телефон пользователя
             $table->string('client_sub_card')->nullable();

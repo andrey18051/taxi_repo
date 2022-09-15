@@ -503,7 +503,7 @@ class WebOrderController extends Controller
                      * Сохранние расчетов в базе
                      */
                     $order = new Order();
-
+                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -738,7 +738,7 @@ class WebOrderController extends Controller
                      * Сохранние расчетов в базе
                      */
                     $order = new Order();
-
+                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -1032,7 +1032,7 @@ class WebOrderController extends Controller
                      * Сохранние расчетов в базе
                      */
                     $order = new Order();
-
+                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
