@@ -54,7 +54,7 @@ Route::get('/admin/{any}', function () {
 /***********************************************************************************************************************
 */
 
-Route::get('/', function () {
+/*Route::get('/', function () {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -69,7 +69,7 @@ Route::get('/', function () {
         }
     }
     return view('taxi.home', ['json_arr' => $json_arr]);
-})->name('home');
+})->name('home');*/
 
 
 Route::get('/', function () {
@@ -86,11 +86,12 @@ Route::get('/', function () {
                 $ii++;
         }
     }
-    return view('taxi.homeWellcome', ['json_arr' => $json_arr, 'phone' => '0936665544']);
+    return view('taxi.homeWellcome',
+            ['json_arr' => $json_arr, 'phone' => '0936665544', 'user_name' => "Новий замовник"]);
 })->name('home');
 
 
-Route::get('/home-Street/{phone}', function ($phone) {
+Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -104,10 +105,10 @@ Route::get('/home-Street/{phone}', function ($phone) {
                 $ii++;
         }
     }
-    return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone]);
+    return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeStreet');
 
-Route::get('/home-Object/{phone}', function ($phone){
+Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -121,10 +122,10 @@ Route::get('/home-Object/{phone}', function ($phone){
                 $ii++;
         }
     }
-    return view('taxi.homeObject', ['json_arr' => $json_arr, 'phone' => $phone]);
+    return view('taxi.homeObject', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeObject');
 
-Route::get('/home-Map/{phone}', function ($phone) {
+Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -138,7 +139,7 @@ Route::get('/home-Map/{phone}', function ($phone) {
                 $ii++;
         }
     }
-    return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone]);
+    return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeMap');
 
 

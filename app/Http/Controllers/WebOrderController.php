@@ -192,8 +192,13 @@ class WebOrderController extends Controller
                     return redirect()->route('restore-form')
                         ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.');
                 } else {
-                    return redirect()->route('restore-form')
-                        ->with('error', 'Помилка. Спробуйте ще раз.');
+                    $json_arrWeb = json_decode($response->body(), true);
+
+                    $resp_answer = 'Помилка. ';
+
+                    $resp_answer = $resp_answer . $json_arrWeb['Message'];
+                    return redirect()->route('restore-sms')
+                        ->with('error', $resp_answer);
                 }
             }
         }
@@ -227,12 +232,13 @@ class WebOrderController extends Controller
                 ->with('success', 'Пароль успішно змінено.');
         } else {
 
-            $json_arrWeb = json_decode($response, true);
+            $json_arrWeb = json_decode($response->body(), true);
+          //  dd($json_arrWeb);
             $resp_answer = 'Помилка. ';
 
             $resp_answer = $resp_answer . $json_arrWeb['Message'];
 
-            return redirect()->route('restore-form')->with('error', $resp_answer);
+            return redirect()->route('restore-sms')->with('error', $resp_answer);
         }
     }
 
@@ -615,14 +621,6 @@ class WebOrderController extends Controller
         $ii = 0;
         for ($i = 0; $i < count($response_arr); $i++) {
             switch ($response_arr[$i]['name']) {
-                case '1,5':
-                case '2.0':
-                case 'Универсал':
-                case 'Микроавтобус':
-                case 'Премиум-класс':
-                case 'Манго':
-                case 'Онлайн платный':
-                    break;
                 case 'Базовый':
                 case 'Бизнес-класс':
                 case 'Эконом-класс':

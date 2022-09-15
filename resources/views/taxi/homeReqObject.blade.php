@@ -14,9 +14,13 @@
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
-                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                        @if ($params['user_phone'] == '0936665544')
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
+                        @else
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
+                        @endif
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
-                        <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
+                        <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
                         <div class="container">
