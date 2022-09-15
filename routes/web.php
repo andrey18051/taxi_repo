@@ -86,8 +86,10 @@ Route::get('/', function () {
                 $ii++;
         }
     }
+    $IP_ADDR = $WebOrder->getIP ();
     return view('taxi.homeWellcome',
-            ['json_arr' => $json_arr, 'phone' => '0936665544', 'user_name' => "Новий замовник"]);
+            ['json_arr' => $json_arr, 'phone' => '0936665544', 'user_name' => "Новий замовник", 'IP_ADDR' => $IP_ADDR])
+            ->with('error', 'Ghbdkjhkjshksd');
 })->name('home');
 
 

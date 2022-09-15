@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Mail;
 class WebOrderController extends Controller
 {
     /**
+     *
+     */
+    public function getIP () {
+        $IP_ADDR = getenv("REMOTE_ADDR") ;
+        return $IP_ADDR;
+    }
+
+    /**
      * Авторизация пользователя
      * @return string
      */
