@@ -158,7 +158,7 @@ class WebOrderController extends Controller
             'user_first_name' => 'Новий користувач', // Необязательный. Имя клиента
         ]);
        // dd($response->status());
-        if ($response->status() == "201" || $response->status() == "200") {
+        if ($response->status() == "201") {
             $username = $req->phone;
             $password = hash('SHA512', $req->password);
             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
@@ -202,9 +202,7 @@ class WebOrderController extends Controller
                 } else {
                     $json_arrWeb = json_decode($response->body(), true);
 
-                    $resp_answer = 'Помилка. ';
-
-                    $resp_answer = $resp_answer . $json_arrWeb['Message'];
+                    $resp_answer = 'Помилка. ' . $json_arrWeb['Message'];
                     return redirect()->route('restore-sms')
                         ->with('error', $resp_answer);
                 }
@@ -242,9 +240,9 @@ class WebOrderController extends Controller
 
             $json_arrWeb = json_decode($response->body(), true);
           //  dd($json_arrWeb);
-            $resp_answer = 'Помилка. ';
 
-            $resp_answer = $resp_answer . $json_arrWeb['Message'];
+
+            $resp_answer = 'Помилка. ' . $json_arrWeb['Message'];
 
             return redirect()->route('restore-sms')->with('error', $resp_answer);
         }
