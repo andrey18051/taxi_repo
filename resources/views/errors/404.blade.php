@@ -43,7 +43,7 @@
         </div>
     </div>
     <div class="container">
-        <a  class="w-100 btn btn-outline-danger btn-lg" href="{{route('home')}}">
+        <a  class="w-100 btn btn-outline-success btn-lg" href="{{route('home')}}">
             Замовити таксі
         </a>
     </div>

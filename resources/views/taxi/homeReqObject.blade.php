@@ -60,7 +60,7 @@
                     </div>
 
                     <div class="col-md-5 col-lg-4" style="margin-top: 5px">
-                        <a href="javascript:void(0)" class="btn btn-outline-success"
+                        <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
                         <div id="block_id" style="display: none">
@@ -132,7 +132,7 @@
 
                 </div>
                 <div class="container text-center">
-                    <button class="w-100 btn btn-primary" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                    <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </div>
             </form>
         </div>

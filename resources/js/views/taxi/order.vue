@@ -1,14 +1,17 @@
 <template>
 
-            <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
-            <div class="container">
-                <div class="container">
-                    <div class="py-5 text-center">
-                        <h2>Ваші попередні розрахунки</h2>
-                        <p class="lead">Виберіть варіант і уточніть при необхідності параметри замовлення.</p>
-                    </div>
-                </div>
-            </div>
+
+
+
+    <!-- Попередні розрахунки.-->
+
+
+
+       <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+           <div class="container" style="text-align: center; margin-top: 5px">
+               <h1>Таксі Київ (Київська область)</h1>
+                <p class="text-center">Виберіть варіант і уточніть при необхідності параметри замовлення.</p>
+           </div>
        <div class="container" style="display: block;
                   overflow: auto;
                   max-width: 100%;">

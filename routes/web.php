@@ -86,9 +86,8 @@ Route::get('/', function () {
                 $ii++;
         }
     }
-    $IP_ADDR = $WebOrder->getIP ();
     return view('taxi.homeWellcome',
-            ['json_arr' => $json_arr, 'phone' => '0936665544', 'user_name' => "Новий замовник", 'IP_ADDR' => $IP_ADDR])
+            ['json_arr' => $json_arr, 'phone' => '000', 'user_name' => "Новий замовник"])
             ->with('error', 'Ghbdkjhkjshksd');
 })->name('home');
 
@@ -179,14 +178,6 @@ Route::get('/homeorder-object/{id}', function ($id) {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            /*      case '1,5':
-                  case '2.0':
-                  case 'Универсал':
-                  case 'Микроавтобус':
-                  case 'Премиум-класс':
-                  case 'Манго':
-                  case 'Онлайн платный':
-                      break;*/
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':

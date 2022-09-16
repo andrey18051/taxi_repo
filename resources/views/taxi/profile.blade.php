@@ -1,4 +1,4 @@
-@extends('layouts.logout')
+@extends('layouts.profile')
 
 @section('content')
 <section style="background-color: #eee;">

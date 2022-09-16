@@ -1,4 +1,4 @@
-@extends('layouts.taxi')
+@extends('layouts.logout')
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
@@ -23,7 +23,7 @@
                              <input type="hidden" id="lng" name="lng" />
                              <input type="hidden" id="lat2" name="lat2" />
                              <input type="hidden" id="lng2" name="lng2"/>
-                             @if ($phone == '0936665544')
+                             @if ($phone == '000')
                                  <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
                              @else
                                  <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$phone}}">
@@ -112,7 +112,7 @@
                  </form>
          </div>
 
-
+        <br>
     </div>
 
     <script defer type="text/javascript">

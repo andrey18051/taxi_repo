@@ -5,7 +5,8 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <div class="container" style="text-align: center; margin-top: 5px">
         <h1>Таксі Київ (Київська область)</h1>
-    </div>
+        </div>
+
 
     <!--     Пошук за адресою.-->
 
@@ -15,7 +16,7 @@
                 @csrf
             <div class="row">
                 <div class="col-md-7 col-lg-8">
-                    @if ($params['user_phone'] == '0936665544')
+                    @if ($params['user_phone'] == '000')
                         <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
                     @else
                         <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
@@ -71,7 +72,7 @@
                 <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
                     <div class="container">
 
-                            <a href="javascript:void(0)" class="btn btn-outline-success"
+                            <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                             onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
                              <div id="block_id" style="display: none;">
@@ -145,7 +146,7 @@
 
             </div>
             <div class="container text-center">
-                <button class="btn btn-primary" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
             </div>
             </form>
         </div>

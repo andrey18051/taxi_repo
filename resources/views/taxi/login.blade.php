@@ -54,8 +54,8 @@
                 </div>
             </div>
         </div>
+        <br>
     </div>
-    <!-- Jumbotron -->
 </section>
 <!-- Section: Design Block -->
 

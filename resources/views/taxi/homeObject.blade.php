@@ -1,4 +1,4 @@
-@extends('layouts.taxi')
+@extends('layouts.logout')
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
@@ -19,7 +19,7 @@
                     @csrf
                     <div class="row">
                         <div class="col-sm-8 col-lg-8">
-                            @if ($phone == '0936665544')
+                            @if ($phone == '000')
                                 <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
                             @else
                                 <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$phone}}">
@@ -116,6 +116,7 @@
                     </div>
                 </form>
         </div>
+        <br>
     </div>
 
     <script defer type="text/javascript">

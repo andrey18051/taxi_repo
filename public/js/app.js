@@ -5550,6 +5550,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Order",
@@ -31596,19 +31599,22 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "container" }, [
-        _c("div", { staticClass: "py-5 text-center" }, [
-          _c("h2", [_vm._v("Ваші попередні розрахунки")]),
-          _vm._v(" "),
-          _c("p", { staticClass: "lead" }, [
-            _vm._v(
-              "Виберіть варіант і уточніть при необхідності параметри замовлення."
-            ),
-          ]),
+    return _c(
+      "div",
+      {
+        staticClass: "container",
+        staticStyle: { "text-align": "center", "margin-top": "5px" },
+      },
+      [
+        _c("h1", [_vm._v("Таксі Київ (Київська область)")]),
+        _vm._v(" "),
+        _c("p", { staticClass: "text-center" }, [
+          _vm._v(
+            "Виберіть варіант і уточніть при необхідності параметри замовлення."
+          ),
         ]),
-      ]),
-    ])
+      ]
+    )
   },
 ]
 render._withStripped = true

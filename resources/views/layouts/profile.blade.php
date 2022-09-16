@@ -14,7 +14,7 @@
 <!--    &lt;!&ndash; Global site tag (gtag.js) - Google Ads: 999615800 &ndash;&gt;
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>-->
     <!-- Scripts-->
-<!--    <script src="{{ asset('js/app.js') }}" defer></script>-->
+    <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
 <!--    <link rel="preload" rel="dns-prefetch" href="//fonts.gstatic.com" as="font">
@@ -57,51 +57,6 @@
             @yield('content')
         </main>
     </div>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
-    </script>
-
-    <script type="text/javascript">
-        var route = "{{ url('autocomplete-search') }}";
-        $('#search').typeahead({
-            source: function (query, process) {
-                return $.get(route, {
-                    query: query
-                }, function (data) {
-                    return process(data);
-                });
-            }
-        });
-        $('#search1').typeahead({
-            source: function (query, process) {
-                return $.get(route, {
-                    query: query
-                }, function (data) {
-                    return process(data);
-                });
-            }
-        });
-        var route2 = "{{ url('autocomplete-search-object') }}";
-        $('#search2').typeahead({
-            source: function (query, process) {
-                return $.get(route2, {
-                    query: query
-                }, function (data) {
-                    return process(data);
-                });
-            }
-        });
-        $('#search3').typeahead({
-            source: function (query, process) {
-                return $.get(route2, {
-                    query: query
-                }, function (data) {
-                    return process(data);
-                });
-            }
-        });
-
-    </script>
     <footer class="text-muted text-center text-small">
         <p class="mb-1">&copy; 2022 Легке замовлення таксі</p>
         <ul class="list-inline">
