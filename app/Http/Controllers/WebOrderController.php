@@ -127,16 +127,16 @@ class WebOrderController extends Controller
                 ]);
 
                 if ($response->status() == "200") {
-                    return redirect()->route('registration-form')
+                    return redirect()->route('registration-form-phone', ['phone' => $req->username])
                     ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон');
                 } else {
-                    return redirect()->route('login-taxi')
+                    return redirect()->route('login-taxi-phone', ['phone' => $req->username])
                     ->with('error', 'Пользователь с таким номером телефона уже зарегистрирован');
                 }
             }
         }
         if ($error) {
-            return redirect()->route('registration-sms')->with('error', "Не пройдено перевірку 'Я не робот'");
+            return redirect()->route('registration-sms-phone', ['phone' => $req->username])->with('error', "Не пройдено перевірку 'Я не робот'");
 
         }
     }
@@ -197,7 +197,7 @@ class WebOrderController extends Controller
                 ]);
 
                 if ($response->status() == "200") {
-                    return redirect()->route('restore-form')
+                    return redirect()->route('restore-form-phone', ['phone' => $req->username])
                         ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.');
                 } else {
                     $json_arrWeb = json_decode($response->body(), true);

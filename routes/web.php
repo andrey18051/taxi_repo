@@ -244,6 +244,10 @@ Route::get('/login-taxi', function () {
     return view('taxi.login');
 })->name('login-taxi');
 
+Route::get('/login-taxi/{phone}', function ($phone) {
+    return view('taxi.login-phone', ['phone' => $phone]);
+})->name('login-taxi-phone');
+
 Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
 
 Route::get('/profile/view/{authorization}', function ($authorization) {
@@ -266,6 +270,11 @@ Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('pr
 Route::get('/registration/sms', function () {
     return view('taxi.registerSMS');
 })->name('registration-sms');
+
+Route::get('/registration/sms/{phone}', function ($phone) {
+    return view('taxi.registerSMS-phone', ['phone' => $phone]);
+})->name('registration-sms-phone');
+
 
 /**
  * Запрос смс подтверждения
@@ -296,8 +305,13 @@ Route::get('/restoreSendConfirmCode', [WebOrderController::class, 'restoreSendCo
     ->name('restoreSendConfirmCode');
 
 Route::get('/restore/form', function () {
-    return view('taxi.restore');
+    return view('taxi.restore-phone', ['phone' => $phone]);
 })->name('restore-form');
+
+Route::get('/restore/form/{phone}', function ($phone) {
+    return view('taxi.restore-phone');
+})->name('restore-form-phone');
+
 
 Route::get('/restore/confirm-code', [WebOrderController::class, 'restorePassword'])->name('restore');
 

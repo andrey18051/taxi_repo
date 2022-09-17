@@ -28,7 +28,7 @@
 
                                     <!-- Phone input -->
                                         <div class="form-outline mb-2">
-                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: 0936665544" required>
+                                             <input type="text" class="form-control" name="username" value="{{$phone}}" required>
                                         </div>
 
                                         <!-- Password input -->

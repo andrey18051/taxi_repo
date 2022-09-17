@@ -9,27 +9,29 @@
                     <h1>Таксі Київ (Київська область)</h1>
                     <div class="col-lg-6 ">
                         <p class="lead">
-                            Реєстрація
+                            Відновлення доступу
                         </p>
                     </div>
 
                     <div class="col-lg-6">
                         <div class="card">
-                            <div class="card-body">
-                                <form action="{{ route('registration') }}">
+                            <div class="card-body py-5 px-md-5">
+                                <form action="{{ route('restore') }}">
                                 @csrf
 
                                 <!-- 2 column grid layout with text inputs for the first and last names -->
                                     <div class="container">
                                         <div class="row">
+
                                             <!-- Phone input -->
                                             <div class="form-outline mb-4">
-                                                <input type="text" class="form-control" name="phone" placeholder="Телефон? Приклад: 0936665544">
+                                                <input type="text" class="form-control" name="phone" value="{{$phone}}">
                                             </div>
 
                                             <!-- Password input -->
                                             <div class="form-outline mb-4">
-                                                <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 7 букв або цифр" id="password">
+                                                <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 6 букв або цифр" id="password">
+
                                             </div>
                                             <!-- Password input confirm -->
                                             <div class="form-outline mb-4">
@@ -41,7 +43,7 @@
                                             </div>
                                             <!-- Submit button -->
                                             <button type="submit" class="btn btn-primary btn-block mb-4">
-                                                Зареєструватись
+                                                Змінити
                                             </button>
                                         </div>
                                     </div>
