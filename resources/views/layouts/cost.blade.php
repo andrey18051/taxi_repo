@@ -61,7 +61,7 @@
     <script defer src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.1/bootstrap3-typeahead.min.js">
     </script>
-    <script defer type="text/javascript">
+    <script type="text/javascript">
         var route = "{{ url('autocomplete-search') }}";
         $('#search').typeahead({
             source: function (query, process) {
@@ -73,14 +73,34 @@
             }
         });
         $('#search1').typeahead({
-            source: function (query, process) {
+            source: function (query1, process1) {
                 return $.get(route, {
-                    query: query
-                }, function (data) {
-                    return process(data);
+                    query: query1
+                }, function (data1) {
+                    return process1(data1);
                 });
             }
         });
+        var route2 = "{{ url('autocomplete-search-object') }}";
+        $('#search2').typeahead({
+            source: function (query2, process2) {
+                return $.get(route2, {
+                    query: query2
+                }, function (data2) {
+                    return process2(data2);
+                });
+            }
+        });
+        $('#search3').typeahead({
+            source: function (query3, process3) {
+                return $.get(route2, {
+                    query: query3
+                }, function (data3) {
+                    return process3(data3);
+                });
+            }
+        });
+
     </script>
     <!-- Scripts
     <script src="{{ asset('js/app.js') }}" defer></script>-->
