@@ -130,7 +130,7 @@ class WebOrderController extends Controller
                     return redirect()->route('registration-form')
                     ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон');
                 } else {
-                    return redirect()->route('registration-sms')
+                    return redirect()->route('login-taxi')
                     ->with('error', 'Пользователь с таким номером телефона уже зарегистрирован');
                 }
             }

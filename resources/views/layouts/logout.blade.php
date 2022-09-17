@@ -33,22 +33,18 @@
                     <img src="{{ asset('img/logo.jpg') }}" style="width: 50px; height: 50px">
                     {{ config('app.name', 'Laravel') }}
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="navbar" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto">
                         <!-- Authentication Links -->
 
-                            <li class="nav-item dropdown">
-                                <a id="navbar" class="nav-link" href="/" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ "Вихід" }}
-                                </a>
-                            </li>
-
+                        <li class="nav-item dropdown">
+                            <a id="navbar" class="nav-link" href="/" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                                {{ "Вихід" }}
+                            </a>
+                        </li>
                     </ul>
                 </div>
+
             </div>
         </nav>
 

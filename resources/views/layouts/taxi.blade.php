@@ -45,13 +45,10 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a id="navbar" class="nav-link" href="{{ route('registration-sms') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="navbar" class="nav-link" href="{{ route('registration-sms', '000') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ __('Реєстрація') }}
                         </a>
                     </li>
-
-
-
                 </ul>
             </div>
         </div>
