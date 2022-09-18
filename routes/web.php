@@ -109,6 +109,26 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
     return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeStreet');
 
+
+/*Route::get('/home-Street-New', function () {
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+    for ($i = 0; $i < count($response_arr); $i++) {
+        switch ($response_arr[$i]['name']) {
+            case 'Базовый':
+            case 'Бизнес-класс':
+            case 'Эконом-класс':
+                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                $ii++;
+        }
+    }
+    return view('taxi.homeStreetNew', ['json_arr' => $json_arr]);
+})->name('homeStreet');*/
+
+
+
 Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
@@ -324,6 +344,7 @@ Route::get('/search', function () {
  */
 Route::get('/search-home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
+Route::get('/autocomplete-search2', [TypeaheadController::class, 'autocompleteSearch2']);
 /**
  * Поиск по объектам
  */

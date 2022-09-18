@@ -1,4 +1,4 @@
-@extends('layouts.logout')
+@extends('layouts.taxi2')
 
 @section('content')
     {{-- $phone --}}
@@ -12,7 +12,10 @@
             <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Об'єкти</a>
             <a  class="btn btn-outline-secondary offset-1 col-3" href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Мапа</a>
         </div>
-
+<!--        <div>
+            <label for="acInput">Выберите название цветка: </label>
+            <input id="acInput"/>
+        </div>-->
         <!--     Пошук за адресою.-->
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
          <p class="text-center">Пошук за адресою. Заповнити поля для розрахунку вартості поїздки.</p>
