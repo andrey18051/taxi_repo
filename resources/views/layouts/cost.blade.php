@@ -42,7 +42,7 @@
                         <!-- Authentication Links -->
                         <li class="nav-item dropdown">
                             <a id="navbar" class="nav-link" href="{{ route('callBackForm') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ __('Діспетчер') }}
+                                {{ __('Диспетчер') }}
                             </a>
                         </li>
                         <li class="nav-item dropdown">
