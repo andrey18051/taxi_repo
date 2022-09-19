@@ -11,12 +11,12 @@
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
 
-    <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
+    <!-- Global site tag (gtag.js) - Google Ads: 999615800-->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
 
 
 <!-- Scripts-->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+<!--    <script src="{{ asset('js/app.js') }}" defer></script>-->
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
