@@ -1547,12 +1547,81 @@ class WebOrderController extends Controller
                 } else {
                     $json_arr = json_decode($responseWeb, true);
                     $message_error = $json_arr['description'];
-                    return redirect()->route('home')->with('error', "Помілка створення заказу. $message_error")
+                    return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $message_error")
                         ->with('back', 'Зробити нове замовлення.');
                 }
             }
         }
     }
+
+    /**
+    * Закща звонка
+    * @return string
+    */
+    public function callBack(Request $req)
+    {
+        $error = true;
+        $secret = config('app.RECAPTCHA_SECRET_KEY');
+
+        if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, 'secret=' . $secret . '&response=' . $_GET['g-recaptcha-response']);
+            $out = curl_exec($curl);
+            curl_close($curl);
+
+            $out = json_decode($out);
+            if ($out->success == true) {
+                $username = config('app.username');
+                $password = hash('SHA512', config('app.password'));
+                $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+                $user_phone = $req->user_phone;
+                $comment =  "Набрать Клиента для оформления заказа Оператору";
+                $taxiColumnId = config('app.taxiColumnId');
+
+                $url = config('app.taxi2012Url') . '/api/weborders';
+                $responseWeb = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->post($url, [
+                    'user_full_name' => 'Новий замовник',
+                    'user_phone' => $user_phone, //Телефон пользователя
+                    'comment' => $comment, //Комментарий к заказу
+                    'reservation' => False, //Обязательный. Признак предварительного заказа: True,
+                    'route_undefined' => False, //По городу: True, False
+
+                    'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                        ['name' => 'ДЖОНА МАККЕЙНА УЛ.', 'number' => '28/25'],
+                        ['name' => 'САДОВАЯ 62-Я УЛ.(ОСОКОРКИ ДАЧИ)', 'number' => '58'],
+                    ],
+                    'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
+                ]);
+
+                if ($responseWeb->status() == "200") {
+                    return redirect()->route('homeblank')->with('success', 'Ваш телефон успішно надіслано. ')
+                        ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення.
+                        Уточнити інформацію можливо за номером оператора:")
+                        ->with('back', 'Зробити нове замовлення.');
+
+                } else {
+                    $json_arr = json_decode($responseWeb, true);
+                    $message_error = $json_arr['description'];
+                    return redirect()->route('homeblank')->with('error', "Помілка. $message_error")
+                        ->with('back', 'Зробити нове замовлення.');
+                }
+            }
+        }
+        if ($error) {
+            ?>
+            <script type="text/javascript">
+                alert("Не пройдено перевірку на робота");
+            </script>
+            <?php
+            return view('taxi.callBackReq', ['user_phone' => $req->user_phone]);
+        }
+    }
+
 
     /**
      *Отправка почты с сайта

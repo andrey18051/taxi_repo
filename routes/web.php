@@ -434,14 +434,6 @@ Route::get('/costhistory/orders/neworder/{id}', function ($id) {
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            case '1,5':
-            case '2.0':
-            case 'Универсал':
-            case 'Микроавтобус':
-            case 'Премиум-класс':
-            case 'Манго':
-            case 'Онлайн платный':
-                break;
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
@@ -519,6 +511,12 @@ Route::get('/feedback', function () {
 })->name('feedback');
 
 Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
+
+Route::get('/callBackForm', function () {
+    return view('taxi.callBack');
+})->name('callBackForm');
+Route::get('/callBack', [WebOrderController::class, 'callBack'])->name('callBack');
+
 
 /**
  * Машины в радиусе старта заказа
