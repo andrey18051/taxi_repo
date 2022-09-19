@@ -1,4 +1,4 @@
-@extends('layouts.logout')
+@extends('layouts.logout2')
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">

@@ -1,4 +1,4 @@
-@extends('layouts.profile')
+@extends('layouts.logout2')
 
 @section('content')
     {{-- print_r($response) --}}

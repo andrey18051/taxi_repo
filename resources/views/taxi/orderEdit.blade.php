@@ -1,4 +1,4 @@
-@extends('layouts.logout')
+@extends('layouts.logout2')
 
 @section('content')
     {{-- print_r($orderId) --}}

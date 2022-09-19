@@ -350,7 +350,7 @@ Route::get('/autocomplete-search2', [TypeaheadController::class, 'autocompleteSe
  */
 Route::get('/search-home-object', [TypeaheadObjectController::class, 'index'])->name('search-home-object');
 Route::get('/autocomplete-search-object', [TypeaheadObjectController::class, 'autocompleteSearch']);
-
+Route::get('/autocomplete-search-object-2', [TypeaheadObjectController::class, 'autocompleteSearch2']);
 
 /**
  * Расчет стоимости

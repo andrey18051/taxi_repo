@@ -45,27 +45,6 @@
             }
         });
 
-        var route = "{{ url('autocomplete-search-object-2') }}";
-        $.ajax({
-            url: route,         /* Куда пойдет запрос */
-            method: 'get',             /* Метод передачи (post или get) */
-            dataType: 'json',          /* Тип данных в ответе (xml, json, script, html). */
-            data: {text: 'Текст'},     /* Параметры передаваемые в запросе. */
-            success: function(data2){   /* функция которая будет выполнена после успешного запроса.  */
-
-                $(function() {
-                    $('#search2').autocomplete({
-                        source: data2
-                    })
-                });
-                $(function() {
-                    $('#search3').autocomplete({
-                        source: data2
-                    })
-                });
-            }
-        });
-
     </script>
 
 
@@ -88,13 +67,8 @@
                     <!-- Links -->
 
                     <li class="nav-item dropdown">
-                        <a id="navbar" class="nav-link" href="{{ route('login-taxi') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Вхід') }}
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a id="navbar" class="nav-link" href="{{ route('registration-sms', '000') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Реєстрація') }}
+                        <a id="navbar" class="nav-link" href="/" role="button" data-bs-toggle="#" target="_blank" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ "Вихід" }}
                         </a>
                     </li>
 

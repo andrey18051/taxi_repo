@@ -115,9 +115,9 @@ class TypeaheadController extends Controller
         $i = 0;
         $objects = Street::all();
         foreach ($objects as $object) {
-            $streats[$i] = $object->name;
+            $data[$i] = $object->name;
             $i++;
         }
-        return  $streats;
+        return  $data;
     }
 }
