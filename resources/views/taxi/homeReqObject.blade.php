@@ -2,10 +2,9 @@
 
 @section('content')
     {{-- print_r($params) --}}
-    <div class="container" style="background-color: hsl(0, 0%, 96%)">
-        <div class="container" style="text-align: center; margin-top: 5px">
-        <h1>Таксі Київ (Київська область)</h1>
-    </div>
+        <div class="container text-center">
+            <p><b>Київ та область</b></p>
+        </div>
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
             <p class="text-center">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>

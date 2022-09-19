@@ -2,22 +2,24 @@
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
-        <div class="container" style="text-align: center; margin-top: 5px">
-        <h1>Таксі Київ (Київська область)</h1>
-        </div>
+
         <div class="container text-center">
-            <h4 class="text-primary">Ласкаво просимо до нашої служби таксі.</h4>
+            <p><b>Київ та область</b></p>
+        </div>
+
             <div class="container text-center card">
-                   <small>Продовжуючи користуватися послугами на сайті, Ви автоматично погоджуєтесь на використання файлів cookie.
+                   <small>Оставаючись на сайті,  Ви погоджуєтесь
+                       <br><a href="{{ route('taxi-gdbr') }}">на умови використання  особистой інформації.</a>
                    </small>
             </div>
+        <br>
 
-            <p>Ви можете легко  замовити поїздку по Київу та Київській області, скориставшись пошуком по вулицях, об'єктах та карті Google map.</p>
-        </div>
+<!--            <p>Скористайтеся пошуком вулиць, об'єктів або картою Google map.</p>-->
+
         <div class="container text-center">
-            <a  class="btn btn-outline-success  col-3" href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Вулиці</a>
-            <a  class="btn btn-outline-success offset-1 col-3" href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Об'єкти</a>
-            <a  class="btn btn-outline-success offset-1 col-3" href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Мапа</a>
+            <a  class="btn btn-outline-success btn-sm col-3" href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Вулиці</a>
+            <a  class="btn btn-outline-success btn-sm offset-1 col-3" href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Об'єкти</a>
+            <a  class="btn btn-outline-success btn-sm offset-1 col-3" href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Мапа</a>
         </div>
         <br>
     </div>

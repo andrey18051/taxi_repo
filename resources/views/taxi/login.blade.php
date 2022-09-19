@@ -8,7 +8,7 @@
     <div class="text-center" style="background-color: hsl(0, 0%, 96%)">
         <div class="container">
             <div class="row align-items-center">
-                <h1>Таксі Київ (Київська область)</h1>
+
                 <div class="col-lg-6 ">
                     <p class="lead">
                         Найкраща пропозиція<br />

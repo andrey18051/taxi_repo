@@ -30,7 +30,7 @@
             <div class="container">
 
                 <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
-                    <img src="{{ asset('img/logo.jpg') }}" style="width: 50px; height: 50px">
+                    <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -105,12 +105,12 @@
     <!-- Scripts
     <script src="{{ asset('js/app.js') }}" defer></script>-->
     <footer class="text-muted text-center text-small">
-        <p class="mb-1">&copy; 2022 Легке замовлення таксі</p>
+        <p class="mb-1">&copy; 2022</p> <!-- Легке замовлення таксі-->
         <ul class="list-inline">
-            <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}" target="_blank">Конфіденційність</a></li>
+        <!--        <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}" target="_blank">Конфіденційність</a></li>-->
             <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}" target="_blank">Умови</a></li>
             <li class="list-inline-item"><a href="{{ route('feedback') }}" target="_blank">Підтримка</a></li>
-            <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank">Сторинка на Фейсбук</a></li>
+            <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank">Ми на Фейсбук</a></li>
         </ul>
     </footer>
 </body>
