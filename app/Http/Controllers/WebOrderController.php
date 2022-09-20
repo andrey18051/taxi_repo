@@ -1541,14 +1541,14 @@ class WebOrderController extends Controller
                     };
                     return redirect()->route('homeblank-id', $orderweb)->with('success', $order)
                         ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
-                        ->with('back', 'Зробити нове замовлення.')
+                        ->with('back', 'Зробити нове замовлення')
                         ->with('cancel', 'Скасувати замовлення.');
 
                 } else {
                     $json_arr = json_decode($responseWeb, true);
                     $message_error = $json_arr['description'];
                     return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $message_error")
-                        ->with('back', 'Зробити нове замовлення.');
+                        ->with('back', 'Зробити нове замовлення');
                 }
             }
         }
@@ -1588,27 +1588,26 @@ class WebOrderController extends Controller
                     'user_full_name' => 'Новий замовник',
                     'user_phone' => $user_phone, //Телефон пользователя
                     'comment' => $comment, //Комментарий к заказу
-                    'reservation' => False, //Обязательный. Признак предварительного заказа: True,
-                    'route_undefined' => False, //По городу: True, False
-
+                    'reservation' => false, //Обязательный. Признак предварительного заказа: True,
+                    'route_undefined' => true, //По городу: True, False
+                    'add_cost' => '15', //Добавленная стоимость
                     'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                        ['name' => 'ДЖОНА МАККЕЙНА УЛ.', 'number' => '28/25'],
-                        ['name' => 'САДОВАЯ 62-Я УЛ.(ОСОКОРКИ ДАЧИ)', 'number' => '58'],
+                         ['name' => 'ОПЕРАТОР! НАБЕРИТЕ КЛИЕНТА на этот номер', 'lat' => '50.418843668133', 'lng' => '30.539846933016' ],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
                 ]);
 
                 if ($responseWeb->status() == "200") {
                     return redirect()->route('homeblank')->with('success', 'Ваш телефон успішно надіслано. ')
-                        ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення.
-                        Уточнити інформацію можливо за номером оператора:")
-                        ->with('back', 'Зробити нове замовлення.');
+                        ->with('tel', "Чекайте або наберіть диспетчера:")
+                        ->with('back', 'Зробити нове замовлення');
 
                 } else {
                     $json_arr = json_decode($responseWeb, true);
+
                     $message_error = $json_arr['description'];
                     return redirect()->route('homeblank')->with('error', "Помілка. $message_error")
-                        ->with('back', 'Зробити нове замовлення.');
+                        ->with('back', 'Зробити нове замовлення');
                 }
             }
         }
@@ -1747,7 +1746,7 @@ class WebOrderController extends Controller
 
         return redirect()->route('homeblank')->with('success', $resp_answer)
             ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Інформацію можна отримати за номером оператора:")
-            ->with('back', 'Зробити нове замовлення.');
+            ->with('back', 'Зробити нове замовлення');
     }
 
 
