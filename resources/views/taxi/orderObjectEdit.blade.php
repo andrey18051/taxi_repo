@@ -4,6 +4,7 @@
     {{-- print_r($orderId) --}}
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
+        <br>
         <div class="text-center">
             <h2>Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
         </div>

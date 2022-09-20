@@ -6,6 +6,7 @@
 <section class="">
     <!-- Jumbotron -->
     <div class="text-center" style="background-color: hsl(0, 0%, 96%)">
+        <br>
         <div class="container">
             <div class="row align-items-center">
                 <p>Заповнити поля для входу</p>

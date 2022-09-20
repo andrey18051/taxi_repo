@@ -3,7 +3,7 @@
 @section('content')
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
-
+        <br>
         <div class="container text-center">
             <p><b>Київ та область</b></p>
         </div>

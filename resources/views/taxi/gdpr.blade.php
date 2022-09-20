@@ -3,6 +3,7 @@
 @section('content')
 
     <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+        <br>
         <div class="text-center">
             <h1>Політика конфіденційності</h1>
         </div>
@@ -19,6 +20,7 @@
                 </div>
             </div>
         </div>
+        <br>
     </div>
 
 

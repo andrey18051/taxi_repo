@@ -4,6 +4,7 @@
     <section class="">
         <!-- Jumbotron -->
         <div class="text-center" style="background-color: hsl(0, 0%, 96%)">
+            <br>
             <div class="container">
                 <div class="row align-items-center">
 
@@ -53,6 +54,7 @@
                     </div>
                 </div>
             </div>
+            <br>
         </div>
         <!-- Jumbotron -->
     </section>
