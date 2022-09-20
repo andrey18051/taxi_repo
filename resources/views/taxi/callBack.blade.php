@@ -1,4 +1,4 @@
-@extends('layouts.taxi2')
+@extends('layouts.logout2')
 
 @section('content')
 

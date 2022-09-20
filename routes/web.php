@@ -325,11 +325,11 @@ Route::get('/restoreSendConfirmCode', [WebOrderController::class, 'restoreSendCo
     ->name('restoreSendConfirmCode');
 
 Route::get('/restore/form', function () {
-    return view('taxi.restore-phone', ['phone' => $phone]);
+    return view('taxi.restore-phone');
 })->name('restore-form');
 
 Route::get('/restore/form/{phone}', function ($phone) {
-    return view('taxi.restore-phone');
+    return view('taxi.restore-phone', ['phone' => $phone]);
 })->name('restore-form-phone');
 
 
@@ -392,12 +392,7 @@ Route::get('/costhistory/orders/edit/{id}', function ($id){
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            case '1,5':
-            case '2.0':
-            case 'Универсал':
-            case 'Микроавтобус':
-            case 'Премиум-класс':
-                break;
+
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
@@ -472,14 +467,6 @@ Route::get('/costhistory/orders/{id}', function ($id){
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-            case '1,5':
-            case '2.0':
-            case 'Универсал':
-            case 'Микроавтобус':
-            case 'Премиум-класс':
-            case 'Манго':
-            case 'Онлайн платный':
-                break;
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
