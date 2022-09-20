@@ -130,7 +130,7 @@
         <br>
         <div class="container text-center">
             <a class="btn btn-outline-danger btn-circle"
-               @if (!$phone)
+               @if ($phone == '000')
                href="{{ route('callBackForm') }}"
                @else
                href="{{ route('callBackForm-phone', $phone) }}"
