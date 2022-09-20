@@ -502,6 +502,11 @@ Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->nam
 Route::get('/callBackForm', function () {
     return view('taxi.callBack');
 })->name('callBackForm');
+
+Route::get('/callBackForm/{phone}', function ($phone) {
+    return view('taxi.callBack-phone', ['phone' => $phone]);
+})->name('callBackForm-phone');
+
 Route::get('/callBack', [WebOrderController::class, 'callBack'])->name('callBack');
 
 
