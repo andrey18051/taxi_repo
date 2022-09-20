@@ -144,7 +144,6 @@
                     </div>
                 </div>
 
-            </div>
             <div class="container text-center">
                 <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
             </div>
