@@ -266,5 +266,13 @@ return [
     /**
      *  Google Maps Platform
      */
-    'Google_Maps_API_KEY' => 'AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc'
+    'Google_Maps_API_KEY' => 'AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc',
+
+    /**
+     * Комендантська година
+     * 23:00 05:00
+     */
+
+     'start_time' => '23:00',
+     'end_time' => '05:00'
 ];

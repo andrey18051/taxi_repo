@@ -73,23 +73,49 @@ Route::get('/admin/{any}', function () {
 
 
 Route::get('/', function () {
+
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
+
+    date_default_timezone_set("Europe/Kiev");
+    // Время интервала
+    $start_time = strtotime(config('app.start_time')); // начальное время
+    $end_time = strtotime(config('app.end_time')); // конечное время
+
+    $time = strtotime(date("h:i:sa")); // проверяемое время
+
+    // Выполняем проверку
+    if ($time >= $start_time && $time <= $end_time) {
+         return view('taxi.homeWellcomeWar', ['phone' => '000']);
+    } else {
+         return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник"]);
     }
-    return view('taxi.homeWellcome',
-            ['json_arr' => $json_arr, 'phone' => '000', 'user_name' => "Новий замовник"])
-            ->with('error', 'Ghbdkjhkjshksd');
 })->name('home');
+
+Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
+
+    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $tariffs = $WebOrder->tariffs();
+    $response_arr = json_decode($tariffs, true);
+    $ii = 0;
+
+    date_default_timezone_set("Europe/Kiev");
+    // Время интервала
+    $start_time = strtotime(config('app.start_time')); // начальное время
+    $end_time = strtotime(config('app.end_time')); // конечное время
+
+    $time = strtotime(date("h:i:sa")); // проверяемое время
+
+    // Выполняем проверку
+    if ($time >= $start_time && $time <= $end_time) {
+        return view('taxi.homeWellcomeWar', ['phone' => $phone]);
+    } else {
+        return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name]);
+    }
+})->name('home-phone-user_name');
+
 
 
 Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
