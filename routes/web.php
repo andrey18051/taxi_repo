@@ -325,7 +325,7 @@ Route::get('/registration/sms/{phone}', function ($phone) {
 /**
  * Запрос смс подтверждения
  */
-Route::get('/sendConfirmCode', [WebOrderController::class, 'sendConfirmCode'])
+Route::middleware('throttle:1,1')->get('/sendConfirmCode', [WebOrderController::class, 'sendConfirmCode'])
     ->name('sendConfirmCode');
 
 Route::get('/registration/form', function () {
@@ -347,7 +347,7 @@ Route::middleware('throttle:1,1')->get('/restore/sms', function () {
 /**
  * Запрос смс подтверждения
  */
-Route::get('/restoreSendConfirmCode', [WebOrderController::class, 'restoreSendConfirmCode'])
+Route::middleware('throttle:1,1')->get('/restoreSendConfirmCode', [WebOrderController::class, 'restoreSendConfirmCode'])
     ->name('restoreSendConfirmCode');
 
 Route::get('/restore/form', function () {
