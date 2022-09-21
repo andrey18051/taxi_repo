@@ -1569,7 +1569,7 @@ class WebOrderController extends Controller
     }
 
     /**
-    * Закща звонка
+    * Заказ звонка
     * @return string
     */
     public function callBack(Request $req)
