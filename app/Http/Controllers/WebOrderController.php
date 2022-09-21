@@ -828,7 +828,6 @@ class WebOrderController extends Controller
         }
         $params['routefrom'] = $response_arr_from['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $response_arr_from['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
-
         /**
          * Куда
          */
@@ -841,18 +840,15 @@ class WebOrderController extends Controller
             /*'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
         ]);
         $response_arr_to = json_decode($response_to, true);
-        /**
-         * Проверка адреса назначения
-         */
 
-        if ($response_arr_to['geo_streets']['geo_street'] == null) {
-          return redirect()->route('home')->with('error', 'Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.');
+        if ($response_arr_to['geo_streets']['geo_street'] != null) {
+            $params['routeto'] = $response_arr_to['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица куда.
+            $params['routetonumber'] = $response_arr_to['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом куда.
+        } else {
+            $params['routeto'] = null;
+            $params['routetonumber'] = null;
         }
 
-
-        $params['routeto'] =  $response_arr_to['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица куда.
-
-        $params['routetonumber'] = $response_arr_to['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом куда.
 
         $params['user_full_name'] = $req->user_full_name;
         $params['user_phone'] = $req->user_phone;
@@ -910,6 +906,7 @@ class WebOrderController extends Controller
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
 
+
         $WebOrder = new \App\Http\Controllers\WebOrderController();
         $tariffs = $WebOrder->tariffs();
         $response_arr = json_decode($tariffs, true);
@@ -924,8 +921,23 @@ class WebOrderController extends Controller
                     $ii++;
             }
         }
+        /**
+         * Проверка адреса назначения
+         */
 
-        if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+        if ($response_arr_to['geo_streets']['geo_street'] == null) {
+            ?>
+            <script type="text/javascript">
+                alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
+            </script>
+            <?php
+            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+        }
+        /**
+         * проверка на робота
+         */
+
+        if (!empty($_GET['g-recaptcha-response'])) {
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -1064,6 +1076,7 @@ class WebOrderController extends Controller
                     return redirect()->route('home-id', ['id' => $id])->with('success', $order);
 
                 } else {
+
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");

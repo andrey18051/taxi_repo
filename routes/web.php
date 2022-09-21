@@ -460,7 +460,7 @@ Route::get('/costhistory/orders', function (){
 })->name('costhistory-orders');
 
 Route::get('/costhistory/orders/{id}', function ($id){
- //   return ;
+
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -520,6 +520,13 @@ Route::get('/driversPosition', [WebOrderController::class, 'driversPosition'])->
  */
 Route::get('/taxi-objects', [WebOrderController::class, 'objects'])->name('objects');
 
+
+/**
+ * Модальные окна
+ */
+Route::get('/modal-error', function () {
+    return view('modal.error');
+})->name('modal-error');
 
 /*
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
