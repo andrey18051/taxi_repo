@@ -341,7 +341,7 @@ Route::get('/registration/confirm-code', [WebOrderController::class, 'register']
 /**
  * Восстановление пароля
  */
-Route::middleware('throttle:1,1')->get('/restore/sms', function () {
+Route::get('/restore/sms', function () {
     return view('taxi.restoreSMS');
 })->name('restore-sms');
 /**
