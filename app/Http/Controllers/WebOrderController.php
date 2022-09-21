@@ -1561,7 +1561,7 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($responseWeb, true);
                     $message_error = $json_arr['Message'];
                     return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $message_error")
-                        ->with('tel2', "Для уточнення деталей наберіть диспетчера:")
+                        ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:")
                         ->with('back', 'Зробити нове замовлення');
                 }
             }
