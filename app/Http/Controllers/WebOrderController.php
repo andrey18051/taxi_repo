@@ -1386,9 +1386,11 @@ class WebOrderController extends Controller
                 Для замовлення пройдіть реєстрацію. Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути"
                 після проходження реєстрації.');
         } else {
-            if ($Message !== 'Пользователь с таким номером телефона уже зарегистрирован.') {
-                return redirect()->route('home')->with('error', "Помілка створення заказу. $Message");
-            } else {
+           if ($Message == "Слишком много запросов") {
+                return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $Message");
+            }
+
+        if ($Message == 'Пользователь с таким номером телефона уже зарегистрирован.'){
                 $username = config('app.username');
                 $password = hash('SHA512', config('app.password'));
                 $authorization = 'Basic ' . base64_encode($username . ':' . $password);
@@ -1565,6 +1567,8 @@ class WebOrderController extends Controller
                         ->with('back', 'Зробити нове замовлення');
                 }
             }
+
+
         }
     }
 

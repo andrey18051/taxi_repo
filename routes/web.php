@@ -54,24 +54,6 @@ Route::get('/admin/{any}', function () {
 /***********************************************************************************************************************
 */
 
-/*Route::get('/', function () {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
-    return view('taxi.home', ['json_arr' => $json_arr]);
-})->name('home');*/
-
-
 Route::get('/', function () {
 
     $WebOrder = new \App\Http\Controllers\WebOrderController();
@@ -382,10 +364,10 @@ Route::get('/autocomplete-search-object-2', [TypeaheadObjectController::class, '
  * Расчет стоимости
  */
 
-Route::get('/cost', [WebOrderController::class, 'cost'])->name('cost');
-Route::get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
-Route::get('/search/cost-object', [WebOrderController::class, 'costobject'])->name('search-cost-object');
-Route::get('/search/cost-map', [WebOrderController::class, 'costmap'])->name('search-cost-map');
+Route::middleware('throttle:6,1')->get('/cost', [WebOrderController::class, 'cost'])->name('cost');
+Route::middleware('throttle:6,1')->get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
+Route::middleware('throttle:6,1')->get('/search/cost-object', [WebOrderController::class, 'costobject'])->name('search-cost-object');
+Route::middleware('throttle:6,1')->get('/search/cost-map', [WebOrderController::class, 'costmap'])->name('search-cost-map');
 /**
  * Расчет стоимости исправленного заказа
  */
@@ -418,7 +400,6 @@ Route::get('/costhistory/orders/edit/{id}', function ($id){
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
         switch ($response_arr[$i]['name']) {
-
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
@@ -448,7 +429,7 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
 /**
  * Отправка заказа
  */
-Route::get('/costhistory/orders/neworder/{id}', function ($id) {
+Route::middleware('throttle:1,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -458,7 +439,6 @@ Route::get('/costhistory/orders/neworder/{id}', function ($id) {
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
