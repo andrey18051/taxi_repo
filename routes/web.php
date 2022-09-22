@@ -429,7 +429,7 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
 /**
  * Отправка заказа
  */
-Route::middleware('throttle:1,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
+Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
     $WebOrder = new \App\Http\Controllers\WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
