@@ -69,11 +69,22 @@ Route::get('/', function () {
     $time = strtotime(date("h:i:sa")); // проверяемое время
 
     // Выполняем проверку
-    if ($time >= $start_time && $time <= $end_time) {
-         return view('taxi.homeWellcomeWar', ['phone' => '000']);
+
+    if ($start_time  <= $end_time) {
+        if ($time >= $start_time && $time <= $end_time) {
+            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+        }
     } else {
-         return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник"]);
+        if ($time >= $start_time || $time <= $end_time) {
+            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+        }
     }
+
+
 })->name('home');
 
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {

@@ -7,7 +7,7 @@
         <div class="container text-center">
             <p><b>Київ та область</b></p>
         </div>
-
+{{$time}}
 
             <div class="container text-center card">
                    <small>Оставаючись на сайті,  Ви погоджуєтесь
