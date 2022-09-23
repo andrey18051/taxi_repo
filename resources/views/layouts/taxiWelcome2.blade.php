@@ -33,7 +33,7 @@
 
         .but_vart {
             position: absolute;
-            margin-top: 150px;
+            margin-top: 100px;
             right: 2px;
             top: 2px;
         }
