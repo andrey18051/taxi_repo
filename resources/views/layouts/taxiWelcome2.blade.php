@@ -79,7 +79,7 @@
     </nav>
 
 
-    <br>
+
     <div class="container ">
         <a class="btn btn-outline-success but_vart  btn-circle" href="{{route('homeStreet', [$phone, $user_name])}}" title="Розрахунок вартості">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
@@ -87,7 +87,7 @@
             </svg>
         </a>
     </div>
-    <br>
+
 
     <main class="py-4">
         @yield('content')
