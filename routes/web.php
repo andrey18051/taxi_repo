@@ -526,6 +526,15 @@ Route::get('/callBackForm/{phone}', function ($phone) {
 
 Route::get('/callBack', [WebOrderController::class, 'callBack'])->name('callBack');
 
+/**
+ * Работа в такси
+ */
+
+Route::get('/callWorkForm', function () {
+    return view('driver.callWork');
+})->name('callWorkForm');
+
+Route::get('/callWork', [WebOrderController::class, 'callWork'])->name('callWork');
 
 /**
  * Машины в радиусе старта заказа

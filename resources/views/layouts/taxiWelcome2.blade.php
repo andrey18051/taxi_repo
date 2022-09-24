@@ -103,6 +103,7 @@
         <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}" target="_blank">Умови</a></li>
         <li class="list-inline-item"><a href="{{ route('feedback') }}" target="_blank">Підтримка</a></li>
         <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank">Ми на Фейсбук</a></li>
+        <li class="list-inline-item"><a href="{{ route('callWorkForm') }}" target="_blank">Шукаю роботу водієм</a></li>
     </ul>
 </footer>
 </body>
