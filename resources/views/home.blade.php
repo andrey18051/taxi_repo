@@ -26,7 +26,7 @@
     <p class="lead">Quick selection of applications and reporting period</p>
 </div>
 
-
+<!--
 <div id="coordinates">
     Click somewhere on the map. Drag the marker to update the coordinates.
 </div>
@@ -80,14 +80,22 @@
 
         map.panTo(myLatlng);
     }
-</script>
+</script>-->
 
 <style>
     #map {
         margin: 10px;
         height: 400px;
     }
-</style><script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=initMap&libraries=places,geometry&solution_channel=GMP_QB_commutes_v2_c" async defer></script>
+</style>
+<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=initMap&libraries=places,geometry&solution_channel=GMP_QB_commutes_v2_c" async defer></script>-->
+
+
+
+<div class="container">
+    <h3>Quite section</h3>
+    <a type="button" href="{{ route('admin-quite') }}" class="btn">Quite</a>
+</div>
 
 
 
@@ -97,11 +105,7 @@
 
 
 
-
-
-
-
-
+<!--
 
 
     <div class="container">
@@ -178,5 +182,5 @@
         <a type="button" href="{{ route('taxi-addCostIncrementValue') }}" class="btn">AddCostIncrementValue</a>
         <a type="button" href="{{ route('taxi-time') }}" class="btn">Time</a>
         <a type="button" href="{{ route('taxi-tnVersion') }}" class="btn">TnVersion</a>
-    </div>
+    </div>-->
 @endsection

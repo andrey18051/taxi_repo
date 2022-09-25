@@ -50,6 +50,15 @@ Route::get('/admin/{any}', function () {
     return view('admin.home');
 })->where('any', '.*')->middleware('role:superadministrator');
 
+
+Route::get('/quite', function () {
+    return view('admin.quite');
+})->name('admin-quite')->middleware('role:superadministrator');
+
+
+Route::get('/quite-save', [TaxiController::class, 'quite'])
+    ->name('quite-save');
+
 /**
 /***********************************************************************************************************************
 */
@@ -554,7 +563,7 @@ Route::get('/modal-error', function () {
     return view('modal.error');
 })->name('modal-error');
 
-/*
+
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');
 Route::get('/taxi/restoreSendConfirmCode', [TaxiController::class, 'restoreSendConfirmCode'])->name('taxi-restoreSendConfirmCode');
@@ -608,4 +617,4 @@ Route::get('/taxi/settings', [TaxiController::class, 'settings'])->name('taxi-se
 Route::get('/taxi/addCostIncrementValue', [TaxiController::class, 'addCostIncrementValue'])->name('taxi-addCostIncrementValue');
 Route::get('/taxi/time', [TaxiController::class, 'time'])->name('taxi-time');
 Route::get('/taxi/tnVersion', [TaxiController::class, 'tnVersion'])->name('taxi-tnVersion');
-Route::get('/taxi/driversPosition', [TaxiController::class, 'driversPosition'])->name('taxi-driversPosition');*/
+Route::get('/taxi/driversPosition', [TaxiController::class, 'driversPosition'])->name('taxi-driversPosition');

@@ -2,12 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Quite;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class TaxiController extends Controller
 {
+
+    /**
+     * Цитаты
+     */
+    public function quite(Request $req)
+    {
+        $quite = new Quite();
+        $quite->name = $req->name;
+        $quite->author = $req->author;
+        $quite->save();
+        return view('admin.quite');
+    }
+
+
     /**
      * Авторизация пользователя
      * @return string
