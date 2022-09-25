@@ -28,14 +28,21 @@
 
                                         <!-- Phone input -->
                                         <div class="form-outline mb-2 col-12"  >
-                                            <input type="text" class="form-control" name="user_phone" placeholder="Телефон? Приклад: 0936665544" required>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="text" class="form-control" name="user_phone" placeholder="Телефон? Приклад: 0936665544" required>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="email" id="email" name="email" placeholder="Email?" autocomplete="off" class="form-control" required/>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="form-outline mb-2 col-12" >
                                             <div class="row">
-                                                <div class="col-8">
+                                                <div class="col-6">
                                                     <input type="text" class="form-control" id="user_full_name" name="user_full_name" autocomplete="off" placeholder="Ваше ім'я?" required>
                                                 </div>
-                                                <div class="col-4">
+                                                <div class="col-6">
                                                     <input type="text" id="time_work" name="time_work" placeholder="Стаж (років)?" autocomplete="off" class="form-control" style="text-align: center"/>
                                                 </div>
                                             </div>

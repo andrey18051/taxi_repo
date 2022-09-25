@@ -854,8 +854,8 @@ class TaxiController extends Controller
      */
     public function objects()
     {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $url = config('app.taxi2012Url') . '/api/geodata/objects';
@@ -864,7 +864,7 @@ class TaxiController extends Controller
         ])->get($url, [
             'versionDateGratherThan' => '', //Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
-
+dd($response->body());
         return $response->body() ;
     }
 

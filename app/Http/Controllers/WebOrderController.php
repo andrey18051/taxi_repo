@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Driver;
 use App\Mail\Feedback;
 use App\Models\Order;
 use App\Models\Orderweb;
@@ -1665,9 +1666,22 @@ class WebOrderController extends Controller
                 $user_full_name = $req->user_full_name;
                 $user_phone = $req->user_phone;
                 $time_work = $req->time_work;
+                $email = $req->email;
+                $subject = 'Анкета водія';
+                $message = 'Доброго часу доби, $user_full_name!
+                    Якщо Вам потрібна робота в таксі в Києві та Київській області заповніть анткету у вкладенні та
+                    надішліть за адресою cartaxi4@gmail.com. Будемо раді бачити Вас у нашій команді професіоналів.';
+                $params = [
+                        'email' => $email,
+                        'subject' => $subject,
+                        'message' => $message,
+                    ];
+
+                    Mail::to($email)->send(new Driver($params));
+
 
                 $comment =  "ОПЕРАТОР! Перезвоните новому водителю по имени $user_full_name. Ему нужна работа.
-                            Водительский стаж $time_work лет.";
+                            Водительский стаж $time_work лет. Анкета отправлено ему на почту";
                 $taxiColumnId = config('app.taxiColumnId');
 
                 $url = config('app.taxi2012Url') . '/api/weborders';
