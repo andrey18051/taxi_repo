@@ -4,7 +4,7 @@
 {{ $message}}
 
 @component('mail::button', ['url' => 'mailto:' . $email])
- Ответить
+ Написать письмо кандидату
 @endcomponent
 
 @endcomponent

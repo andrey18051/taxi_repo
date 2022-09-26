@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class Driver extends Mailable
+class Admin extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -28,6 +28,6 @@ class Driver extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.driver')->with($this->params)->subject('Анкета для роботи у Таксі Лайт')->attach('../questionnaire.docx');
+        return $this->markdown('emails.admin')->with($this->params)->subject('Новий кандидат для роботи у Таксі Лайт');
     }
 }

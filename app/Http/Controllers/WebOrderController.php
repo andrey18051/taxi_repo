@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Admin;
 use App\Mail\Driver;
 use App\Mail\Feedback;
 use App\Models\Order;
@@ -502,7 +503,7 @@ class WebOrderController extends Controller
                      * Сохранние расчетов в базе
                      */
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;;//IP пользователя
+                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -1677,11 +1678,24 @@ class WebOrderController extends Controller
                         'message' => $message,
                     ];
 
-                    Mail::to($email)->send(new Driver($params));
+                Mail::to($email)->send(new Driver($params));
 
+                $IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+                $subject = 'Новий кандидат у водії.';
+                $messageAdmin = "ОПЕРАТОР! Зв'яжіться з новим кандидатом-водієм на ім'я $user_full_name. Йому потрібна робота.
+                            Водійський стаж: $time_work років. Анкету надіслано йому на пошту: $email. IP кандидата: $IP_ADDR.
+                            Телефон: $user_phone.";
+                $paramsAdmin = [
+                    'email' => $email,
+                    'subject' => $subject,
+                    'message' => $messageAdmin,
+                ];
+
+                Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
+                Mail::to('andrey18051@gmail.com')->send(new Admin($paramsAdmin));
 
                 $comment =  "ОПЕРАТОР! Перезвоните новому водителю по имени $user_full_name. Ему нужна работа.
-                            Водительский стаж $time_work лет. Анкета отправлено ему на почту";
+                            Водительский стаж $time_work лет. Анкета отправлена ему на почту";
                 $taxiColumnId = config('app.taxiColumnId');
 
                 $url = config('app.taxi2012Url') . '/api/weborders';
@@ -1701,16 +1715,16 @@ class WebOrderController extends Controller
                 ]);
 
                 if ($responseWeb->status() == "200") {
-                    return redirect()->route('homeblank')->with('success', 'Ваш телефон успішно надіслано. ')
-                        ->with('tel', "Чекайте або наберіть диспетчера:")
-                        ->with('back', 'Зробити нове замовлення');
+                    return redirect()->route('homeblank')->with('success', "$user_full_name, Ваш телефон успішно надіслано у нашу службу.
+                                Анкету чекайте на Вашій пошті. Заповніть її та надішліть за вказаною адресою.")
+                        ->with('tel', "Для уточнення чекайте або наберіть диспетчера:");
 
                 } else {
                     $json_arr = json_decode($responseWeb, true);
 
                     $message_error = $json_arr['description'];
                     return redirect()->route('homeblank')->with('error', "Помілка. $message_error")
-                        ->with('back', 'Зробити нове замовлення');
+                        ->with('back', 'Зробити нову спробу');
                 }
             }
         }
