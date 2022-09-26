@@ -1692,7 +1692,7 @@ class WebOrderController extends Controller
                 ];
 
                 Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
-                Mail::to('andrey18051@gmail.com')->send(new Admin($paramsAdmin));
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Admin($paramsAdmin));
 
                 $comment =  "ОПЕРАТОР! Перезвоните новому водителю по имени $user_full_name. Ему нужна работа.
                             Водительский стаж $time_work лет. Анкета отправлена ему на почту";
