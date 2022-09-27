@@ -8,7 +8,11 @@
     <meta name="google-site-verification" content="EvCZdtAnMAe93bc1OvK2SSBTfq0S3M1nI7qnWqHdyAQ" />
 
     <title>{{ config('app.name') }}</title>
-
+    <meta name="description" content="Швидкі та надійні поїздки &#129523 по місту Київ та Київській області.
+        Подання таксі &#128662 за 4-6 хвилин. Працюємо більше 10 років. Доступні низькі тарифи &#127974.
+        Замовлення на новому та швідкому сайті та у смартфоні &#128241 надійного та перевіреного роками Таксі Лайт Юа.
+        Підібрати комфортний автомобіль &#128662 за найкращою ціною &#127974.
+        Кур'єрська доставка. Доставка документів &#128462 та посилок &#128230.">
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" >
 
 <!--    &lt;!&ndash; Global site tag (gtag.js) - Google Ads: 999615800 &ndash;&gt;
