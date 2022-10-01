@@ -96,6 +96,10 @@ Route::get('/', function () {
 
 })->name('home');
 
+Route::get('/home-news', function () {
+    return view('taxi.homeNews');
+})->name('home-news');
+
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 
     $WebOrder = new \App\Http\Controllers\WebOrderController();
