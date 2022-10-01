@@ -5,6 +5,7 @@ use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebOrderController;
+use App\Models\NewsList;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -50,7 +51,9 @@ Route::get('/admin/{any}', function () {
     return view('admin.home');
 })->where('any', '.*')->middleware('role:superadministrator');
 
-
+/**
+ * Цитаты
+ */
 Route::get('/quite', function () {
     return view('admin.quite');
 })->name('admin-quite')->middleware('role:superadministrator');
@@ -58,6 +61,21 @@ Route::get('/quite', function () {
 
 Route::get('/quite-save', [TaxiController::class, 'quite'])
     ->name('quite-save');
+/**
+* Новости
+*/
+Route::get('/news', function () {
+    return view('admin.news');
+})->name('admin-news')->middleware('role:superadministrator');
+
+Route::get('/news-save', [TaxiController::class, 'news'])
+    ->name('news-save');
+
+
+Route::get('/news-short', function () {
+    return response()->json(NewsList::all());
+})->name('news-short');
+
 
 /**
 /***********************************************************************************************************************
@@ -97,7 +115,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/home-news', function () {
-    return view('taxi.homeNews');
+    return view('taxi.homeNewsVue');
 })->name('home-news');
 
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
