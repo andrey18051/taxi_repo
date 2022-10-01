@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NewsList;
 use App\Models\Quite;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -22,7 +23,18 @@ class TaxiController extends Controller
         return view('admin.quite');
     }
 
-
+    /**
+     * Новости
+     */
+    public function news(Request $req)
+    {
+        $news = new NewsList();
+        $news->short = $req->short;
+        $news->full = $req->full;
+        $news->author = $req->author;
+        $news->save();
+        return view('admin.news');
+    }
     /**
      * Авторизация пользователя
      * @return string

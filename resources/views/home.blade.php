@@ -97,7 +97,10 @@
     <a type="button" href="{{ route('admin-quite') }}" class="btn">Quite</a>
 </div>
 
-
+<div class="container">
+    <h3>News section</h3>
+    <a type="button" href="{{ route('admin-news') }}" class="btn">News</a>
+</div>
 
 
 
