@@ -147,14 +147,14 @@
         }
         .but_vart {
             position: absolute;
-            margin-top: 10px;
+            margin-top: 70px;
             right: 2px;
             top: 2px;
         }
 
         .but_vart_vart {
             position: absolute;
-            margin-top: 50px;
+            margin-top: 105px;
             right: 2px;
             top: 2px;
         }
@@ -165,7 +165,36 @@
 </head>
 <body>
 <div id="app">
+    <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <div class="container">
 
+            <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
+                <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
+                {{ config('app.name', 'Laravel') }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Links -->
+
+                    <li class="nav-item dropdown">
+                        <a id="navbar" class="nav-link" href="{{ route('login-taxi') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ __('Вхід') }}
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a id="navbar" class="nav-link" href="{{ route('registration-sms', '000') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ __('Реєстрація') }}
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
     <main class="py-4">
         @include ('layouts.messages')
         @yield('content')
