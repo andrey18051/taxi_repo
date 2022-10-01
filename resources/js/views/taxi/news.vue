@@ -13,7 +13,10 @@
                 @totalPagesChanged="totalPages = $event"
                 >
                 <tbody slot="body" slot-scope="{displayData}">
+                    <thead slot="head">
+                      <v-th sortKey="id" defaultSort="desc" ></v-th>
 
+                    </thead>
                     <tr v-for="row in displayData" :key="row.short">
                         <div class="container">
                         <div class="row">

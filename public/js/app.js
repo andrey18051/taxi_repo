@@ -5466,6 +5466,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "News",
@@ -31343,36 +31346,49 @@ var render = function () {
               return _c(
                 "tbody",
                 {},
-                _vm._l(displayData, function (row) {
-                  return _c("tr", { key: row.short }, [
-                    _c("div", { staticClass: "container" }, [
-                      _c("div", { staticClass: "row" }, [
-                        _c("div", { staticClass: "col-12" }, [
-                          _c("td", [
-                            _c("b", [_vm._v(" " + _vm._s(row.short))]),
+                [
+                  _c(
+                    "thead",
+                    { attrs: { slot: "head" }, slot: "head" },
+                    [
+                      _c("v-th", {
+                        attrs: { sortKey: "id", defaultSort: "desc" },
+                      }),
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _vm._l(displayData, function (row) {
+                    return _c("tr", { key: row.short }, [
+                      _c("div", { staticClass: "container" }, [
+                        _c("div", { staticClass: "row" }, [
+                          _c("div", { staticClass: "col-12" }, [
+                            _c("td", [
+                              _c("b", [_vm._v(" " + _vm._s(row.short))]),
+                            ]),
                           ]),
-                        ]),
-                        _vm._v(" "),
-                        _c("div", { staticClass: "col-12" }, [
-                          _c("td", [
-                            _c("div", { staticClass: "container" }, [
-                              _c("h5", { staticClass: "marquee" }, [
-                                _c("span", [
-                                  _vm._v(
-                                    "\n                                      " +
-                                      _vm._s(row.full) +
-                                      "\n                                  "
-                                  ),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-12" }, [
+                            _c("td", [
+                              _c("div", { staticClass: "container" }, [
+                                _c("h5", { staticClass: "marquee" }, [
+                                  _c("span", [
+                                    _vm._v(
+                                      "\n                                      " +
+                                        _vm._s(row.full) +
+                                        "\n                                  "
+                                    ),
+                                  ]),
                                 ]),
                               ]),
                             ]),
                           ]),
                         ]),
                       ]),
-                    ]),
-                  ])
-                }),
-                0
+                    ])
+                  }),
+                ],
+                2
               )
             },
           },
