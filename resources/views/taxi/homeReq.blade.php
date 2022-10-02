@@ -1,4 +1,4 @@
-@extends('layouts.taxi2')
+@extends('layouts.logout21')
 
 @section('content')
     {{-- print_r($params) --}}
