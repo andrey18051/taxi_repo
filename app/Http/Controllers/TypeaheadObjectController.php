@@ -63,9 +63,7 @@ class TypeaheadObjectController extends Controller
 
     public function autocompleteSearch2(Request $request)
     {
-        $query = $request->get('query');
-
-        $username = config('app.username');
+        /*$username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -79,9 +77,9 @@ class TypeaheadObjectController extends Controller
 
         $json_arr = json_decode($response,true);
 
-        $svd = Config::where('id', '1')->first();
+        $svd = Config::where('id', '1')->first();*/
         //Проверка версии геоданных и обновление или создание базы адресов
-        if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
+       /* if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
             $svd->objectVersionDate = $json_arr['version_date'];
             $svd->save();
 
@@ -101,7 +99,7 @@ class TypeaheadObjectController extends Controller
             }
             while ($i < count($json_arr['geo_object'])) ;
 
-        }
+        }*/
 
         $i = 0;
         $objects = Objecttaxi::all();

@@ -84,9 +84,9 @@ Route::get('/news-short', function () {
 Route::get('/', function () {
 
     $WebOrder = new \App\Http\Controllers\WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
+
+    $WebOrder->version_street();
+    $WebOrder->version_object();
 
     date_default_timezone_set("Europe/Kiev");
     // Время интервала

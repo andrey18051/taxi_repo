@@ -68,7 +68,7 @@ class TypeaheadController extends Controller
 
     public function autocompleteSearch2()
     {
-        $username = config('app.username');
+       /* $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -79,7 +79,7 @@ class TypeaheadController extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
 
-        $json_arr = json_decode($json_str, true);
+        $json_arr = json_decode($json_str, true);*/
 
         /**
          * Проверка версии геоданных и обновление или создание базы адресов
@@ -87,7 +87,7 @@ class TypeaheadController extends Controller
          * config('app.streetVersionDate') - дата версии в конфиге
          */
 
-        $svd = Config::where('id', '1')->first();
+        /*$svd = Config::where('id', '1')->first();
         //Проверка версии геоданных и обновление или создание базы адресов
 
         if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
@@ -109,7 +109,7 @@ class TypeaheadController extends Controller
             }
             while ($i < count($json_arr['geo_street'])) ;
 
-        }
+        }*/
 
 
         $i = 0;

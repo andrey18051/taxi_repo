@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Mail\Admin;
 use App\Mail\Driver;
 use App\Mail\Feedback;
+use App\Models\Config;
+use App\Models\Objecttaxi;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Street;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -1806,6 +1809,99 @@ class WebOrderController extends Controller
         return $response->body();
     }
 
+    /**
+     * Контроль версии улиц
+     */
+    public function version_street()
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/geodata/streets';
+        $json_str = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
+        ]);
+
+        $json_arr = json_decode($json_str, true);
+
+        /**
+         * Проверка версии геоданных и обновление или создание базы адресов
+         * $json_arr['version_date'] - текущая версия улиц в базе
+         * config('app.streetVersionDate') - дата версии в конфиге
+         */
+
+        $svd = Config::where('id', '1')->first();
+        //Проверка версии геоданных и обновление или создание базы адресов
+
+        if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
+            $svd->streetVersionDate = $json_arr['version_date'];
+            $svd->save();
+            DB::table('streets')->truncate();
+            $i = 0;
+            do {
+                $streets = $json_arr['geo_street'][$i]["localizations"];
+                foreach ($streets as $val) {
+                    if ($val["locale"] == "UK") {
+                        $street = new Street();
+                        $street->name = $val['name'];
+                        $street->save();
+
+                    }
+                }
+                $i++;
+            }
+            while ($i < count($json_arr['geo_street'])) ;
+
+        }
+
+    }
+
+    /**
+     * Контроль версии объектов
+     */
+    public function version_object()
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+
+        $url = config('app.taxi2012Url') . '/api/geodata/objects';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
+        ]);
+
+        $json_arr = json_decode($response,true);
+
+        $svd = Config::where('id', '1')->first();
+        //Проверка версии геоданных и обновление или создание базы адресов
+        if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
+             $svd->objectVersionDate = $json_arr['version_date'];
+             $svd->save();
+
+             DB::table('objecttaxis')->truncate();
+             $i = 0;
+             do {
+                 $streets = $json_arr['geo_object'][$i]["localizations"];
+                 foreach ($streets as $val) {
+                     if ($val["locale"] == "UK") {
+                         $objects = new Objecttaxi();
+                         $objects->name = $val['name'];
+                         $objects->save();
+
+                     }
+                 }
+                 $i++;
+             }
+             while ($i < count($json_arr['geo_object'])) ;
+
+         }
+    }
 
     /**
      * Гео данные
