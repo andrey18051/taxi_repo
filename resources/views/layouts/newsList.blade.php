@@ -66,12 +66,10 @@
             </div>
         </div>
     </nav>
-    <main class="py-4">
-        @include ('layouts.messages')
-        @yield('content')
-    </main>
 </div>
 
+@include ('layouts.messages')
+@yield('content')
 
 <footer class="text-muted text-center text-small">
     <p class="mb-1">&copy; 2022</p> <!-- Легке замовлення таксі-->

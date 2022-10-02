@@ -7,22 +7,22 @@
         <div class="row">
             <div class="col-2">
                 <p class="gradient">Корисні посилання</p>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Дешевое такси онлайн расчет</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Онлайн свободные авто такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Онлайн такси заказ Киев и обл</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Онлайн такси заказ Киев и обл</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Заказ такси Киев и область</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Онлайн дешевле можно только пешком. Закажите украинское такси и дайте свою оценку</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Эконом служба Киев - быстро, доступно, недорого</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Мы не ложим болт на заказчиков, при дешевых ценах</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Качественный сервис по низким ценам быстрее чем через оператор</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник">Тариф узнайте на сайте такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Дешевое такси онлайн расчет</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн свободные авто такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн такси заказ Киев и обл</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн такси заказ Киев и обл</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Заказ такси Киев и область</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн дешевле можно только пешком. Закажите украинское такси и дайте свою оценку</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Эконом служба Киев - быстро, доступно, недорого</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Мы не ложим болт на заказчиков, при дешевых ценах</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Качественный сервис по низким ценам быстрее чем через оператор</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
             </div>
-         <div class="col-8">
+             <div class="col-8">
             <div class="container">
                 <a class="but_vart" href="http://taxi2012" target="_blank" title="Версія сайту для мобільних">
                     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-phone" viewBox="0 0 16 16">
@@ -107,7 +107,6 @@
 
          </div>
         </div>
-
     </div>
     </body>
 
