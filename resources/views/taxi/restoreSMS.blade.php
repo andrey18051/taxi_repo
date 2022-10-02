@@ -5,14 +5,14 @@
     <!-- Section: Design Block -->
     <section class="">
         <!-- Jumbotron -->
-        <div class="text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+        <div class="container text-center" style="background-color: hsl(0, 0%, 96%)">
             <br>
             <div class="container">
                 <div class="row  align-items-center">
 
 
                     <div class="col-lg-6 ">
-                        <p class="lead text-center">
+                        <p class="lead text-center gradient">
                             Відновлення доступу
                         </p>
                     </div>

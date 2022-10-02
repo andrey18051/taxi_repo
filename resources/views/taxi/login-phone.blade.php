@@ -11,7 +11,7 @@
             <div class="row align-items-center">
                 <p>Заповнити поля для входу</p>
                 <div class="col-lg-6 ">
-                    <p class="lead">
+                    <p class="lead gradient">
                         Найкраща пропозиція<br />
                         <span class="text-primary">для вашої поїздки</span>
                     </p>
