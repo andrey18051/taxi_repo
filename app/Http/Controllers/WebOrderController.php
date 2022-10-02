@@ -1650,6 +1650,11 @@ class WebOrderController extends Controller
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
 
+        $paramReq['user_full_name'] = $req->user_full_name;
+        $paramReq['user_phone'] = $req->user_phone;
+        $paramReq['time_work'] = $req->time_work;
+        $paramReq['email'] = $req->email;
+
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -1723,7 +1728,7 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($responseWeb, true);
 
                     $message_error = $json_arr['description'];
-                    return redirect()->route('homeblank')->with('error', "Помілка. $message_error")
+                    return view('driver.callWorkReq', ['paramReq' => $paramReq])->with('error', "Помілка. $message_error")
                         ->with('back', 'Зробити нову спробу');
                 }
             }
@@ -1734,7 +1739,7 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
-            return view('taxi.callBackReq', ['user_phone' => $req->user_phone]);
+            return view('driver.callWorkReq', ['paramReq' => $paramReq]);
         }
     }
     /**

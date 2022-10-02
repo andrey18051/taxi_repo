@@ -30,20 +30,20 @@
                                         <div class="form-outline mb-2 col-12"  >
                                             <div class="row">
                                                 <div class="col-6">
-                                                    <input type="text" class="form-control" name="user_phone" placeholder="Телефон? Приклад: 0936665544" required>
+                                                    <input type="text" class="form-control" name="user_phone" value="{{$paramReq['user_phone']}}" required>
                                                 </div>
                                                 <div class="col-6">
-                                                    <input type="email" id="email" name="email" placeholder="Email?" autocomplete="off" class="form-control" required/>
+                                                    <input type="email" id="email" name="email" class="form-control" value="{{$paramReq['email']}}" required/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="form-outline mb-2 col-12" >
                                             <div class="row">
                                                 <div class="col-6">
-                                                    <input type="text" class="form-control" id="user_full_name" name="user_full_name" autocomplete="off" placeholder="Ваше ім'я?" required>
+                                                    <input type="text" class="form-control" id="user_full_name" name="user_full_name" autocomplete="off" value="{{$paramReq['user_full_name']}}" required>
                                                 </div>
                                                 <div class="col-6">
-                                                    <input type="text" id="time_work" name="time_work" placeholder="Стаж (років)?" autocomplete="off" class="form-control" style="text-align: center"/>
+                                                    <input type="text" id="time_work" name="time_work" value="{{$paramReq['time_work']}}" autocomplete="off" class="form-control" style="text-align: center"/>
                                                 </div>
                                             </div>
                                         </div>
