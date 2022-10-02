@@ -6,7 +6,7 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="text-center">
-            <h2>Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
+            <h2 class="gradient">Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
         </div>
         <form action="{{route('search-cost-edit-object', $orderId['0']['id']) }}">
                 @csrf

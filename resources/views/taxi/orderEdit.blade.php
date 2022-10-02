@@ -1,12 +1,12 @@
-@extends('layouts.logout2')
+@extends('layouts.logoutObject2')
 
 @section('content')
     {{-- print_r($orderId) --}}
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
-        <br>
+            <br>
             <div class="text-center">
-                <h2>Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
+                <h2 class="gradient">Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
             </div>
             <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">
                 @csrf
