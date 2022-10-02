@@ -11,8 +11,8 @@
                 <div class="row align-items-center">
 
                     <div class="col-lg-6 ">
-                        <p class="lead text-center">
-                            Дзвінок диспетчеру
+                        <p class="lead text-center gradient">
+                            Екстренна допомога
                         </p>
                     </div>
 
