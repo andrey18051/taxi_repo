@@ -46,33 +46,32 @@
     foreach ($quites_order as $item) {
         $i_order++;
         $quitesArr_order[$i_order] =  $item['routefrom'] . " - " . $item['routeto'] . "-" . $item['web_cost'] . "грн " ;
-
     }
-
     ?>
 
-    <div style="text-align:center" >
-        <h1 class="gradient">Таксі Лайт Юа</h1>
+    <br>
+    <div class="container" style="text-align: center">
+        <h2 class="gradient"><b>Київ та область</b></h2>
     </div>
-
-    <p class="marquee gradient"><span><?php
-            $i_order_view = 0;
-            do {
+    <p class="marquee gradient"><span>
+            <?php
+                $i_order_view = 0;
+                do {
                 $rand_order =  rand(0, $i_order);
                 echo $quitesArr_order[$rand_order];
                 $i_order_view++;
-            }
+                }
             while ($i_order_view <= 3);
             ?></span>
     </p>
-    <h3 class="gradient" style="text-align:center">Швидкі та надійні поїздки по місту Київ та Київській області</h3>
+    <h3 class="gradient" style="text-align:center">Швидкі та надійні поїздки на комфортних авто.</h3>
 
     <news-component></news-component>
 
 
     <div style="text-align:center">
-        <a href="https://easy-order-taxi.site/mainpage" class="gradient-button" target="_blank">Замовити таксі</a>
-    <!-- <a href="http://taxi2012" class="gradient-button" target="_blank">Замовити таксі</a>-->
+        <!--   <a href="https://easy-order-taxi.site/mainpage" class="gradient-button" target="_blank">Замовити таксі</a>-->
+     <a href="http://taxi2012" class="gradient-button" target="_blank">Замовити таксі</a>
     </div>
 
 

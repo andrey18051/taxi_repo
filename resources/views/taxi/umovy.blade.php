@@ -2,10 +2,9 @@
 
 @section('content')
 
-    <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
-        <br>
+    <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <div class="text-center">
-            <h1>Умови користування (оферта).</h1>
+            <h1 class="gradient">Умови користування (оферта).</h1>
         </div>
         <div class="container">
             <div class="row gx-lg-5 align-items-center">

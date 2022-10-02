@@ -14,19 +14,8 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <style>
-        /* CSS */
-        .btn-circle {
-            width: 38px;
-            height: 38px;
-            border-radius: 19px;
-            text-align: center;
-            padding-left: 0;
-            padding-right: 0;
-            font-size: 16px;
-        }
-    </style>
-<!--    <link rel="stylesheet" href="{{ asset('css/left-nav-style.css') }}">-->
+    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
+
 </head>
 <body>
     <div id="app">

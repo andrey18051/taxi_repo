@@ -4,8 +4,9 @@
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
-        <div class="container text-center">
-            <p><b>Київ та область</b></p>
+        <div class="container" style="text-align: center">
+            <h2 class="gradient"><b>Київ та область</b></h2>
+            <p class="text-center gradient">Виберіть варіант пошуку для замовлення.</p>
         </div>
 {{$time}}
 

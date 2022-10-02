@@ -4,15 +4,14 @@
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
-
-        <div class="container text-center">
-            <p><b>Київ та область</b></p>
+        <div class="container" style="text-align: center">
+            <h2 class="gradient"><b>Київ та область</b></h2>
+            <p class="text-center gradient">Залишіть свій телефон і обов'язково передзвонимо Вам.</p>
         </div>
         {{$time}}
         <div class="container text-center card">
             <p>
-                <span class="text-danger"><b>Комендантська година з {{config('app.start_time')}} по {{config('app.end_time')}}</b></span>
-                <br>Залишіть свій телефон і обов'язково передзвонимо Вам
+                <span class="text-danger"><b>Комендантська година з {{config('app.start_time')}} по {{config('app.end_time')}}.</b></span>
             </p>
         </div>
 

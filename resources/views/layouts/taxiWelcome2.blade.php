@@ -20,25 +20,7 @@
      <script src="{{ asset('js/app.js') }}" defer></script>
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <style>
-        /* CSS */
-        .btn-circle {
-            width: 38px;
-            height: 38px;
-            border-radius: 19px;
-            text-align: center;
-            padding-left: 0;
-            padding-right: 0;
-            font-size: 16px;
-        }
-
-        .but_vart {
-            position: absolute;
-            margin-top: 100px;
-            right: 2px;
-            top: 2px;
-        }
-    </style>
+    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
 
 </head>
 <body>

@@ -23,25 +23,8 @@
     <!-- Styles -->
     <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/base/jquery-ui.css">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <style>
-        /* CSS */
-        .btn-circle {
-            width: 38px;
-            height: 38px;
-            border-radius: 19px;
-            text-align: center;
-            padding-left: 0;
-            padding-right: 0;
-            font-size: 16px;
-        }
+    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
 
-        .but_vart {
-            position: absolute;
-            margin-top: 100px;
-            right: 2px;
-            top: 2px;
-        }
-    </style>
     <script type="text/javascript">
         var route = "{{ url('autocomplete-search2') }}";
         $.ajax({

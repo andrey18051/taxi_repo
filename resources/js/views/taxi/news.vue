@@ -69,7 +69,7 @@ export default {
         news: [],
         currentPage: 1,
         totalPages: 0,
-        maxPageLinks: 15,
+        maxPageLinks: 5,
         filters: {
             short: { value: "", keys: ["short"] },
             }

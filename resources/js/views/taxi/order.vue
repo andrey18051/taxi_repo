@@ -1,10 +1,12 @@
 <template>
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
-           <div class="container" style="text-align: center; margin-top: 5px">
-               <h2><b>Київ та область</b></h2>
-               <p class="text-center">Виберіть варіант і уточніть при необхідності параметри замовлення.</p>
-           </div>
-       <div class="container" style="display: block;
+        <br>
+        <div class="container" style="text-align: center">
+            <h2 class="gradient"><b>Київ та область</b></h2>
+            <p class="text-center gradient">Виберіть варіант і уточніть при необхідності параметри замовлення.</p>
+        </div>
+
+        <div class="container" style="display: block;
                   overflow: auto;
                   max-width: 100%;">
 

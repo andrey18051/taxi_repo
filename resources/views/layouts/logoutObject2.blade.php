@@ -23,19 +23,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/base/jquery-ui.css">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
-    <style>
-        /* CSS */
-        .btn-circle {
-            width: 38px;
-            height: 38px;
-            border-radius: 19px;
-            text-align: center;
-            padding-left: 0;
-            padding-right: 0;
-            font-size: 16px;
-        }
-    </style>
+    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
 
     <script type="text/javascript">
 

@@ -4,11 +4,7 @@
     {{-- $phone --}}
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
-        <div class="container text-center">
-            <p><b>Київ та область</b></p>
-        </div>
-
-        <div class="container text-center">
+         <div class="container text-center">
             <a  class="btn btn-outline-secondary btn-sm col-3" href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Вулиці</a>
             <a  class="btn btn-outline-secondary btn-sm offset-1 col-3" href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Об'єкти</a>
             <a  class="btn btn-outline-secondary btn-sm offset-1 col-3" href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Мапа</a>
@@ -16,8 +12,12 @@
 
         <!--     Пошук за адресою.-->
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
-         <p class="text-center">Пошук за адресою. Заповнити поля для розрахунку вартості поїздки.</p>
-         <form action="{{route('search-cost')}}" id="form">
+            <div class="container" style="text-align: center">
+                <h2 class="gradient"><b>Київ та область</b></h2>
+                <p class="text-center gradient">Заповнити поля для розрахунку вартості поїздки.</p>
+            </div>
+
+            <form action="{{route('search-cost')}}" id="form">
                 @csrf
                 <div class="row">
                     <div class="col-md-7 col-lg-8">

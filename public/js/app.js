@@ -5477,7 +5477,7 @@ __webpack_require__.r(__webpack_exports__);
       news: [],
       currentPage: 1,
       totalPages: 0,
-      maxPageLinks: 15,
+      maxPageLinks: 5,
       filters: {
         "short": {
           value: "",
@@ -5516,6 +5516,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
 //
 //
 //
@@ -31408,6 +31410,8 @@ var render = function () {
       staticStyle: { "background-color": "hsl(0, 0%, 96%)" },
     },
     [
+      _c("br"),
+      _vm._v(" "),
       _vm._m(0),
       _vm._v(" "),
       _c(
@@ -31875,14 +31879,13 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c(
       "div",
-      {
-        staticClass: "container",
-        staticStyle: { "text-align": "center", "margin-top": "5px" },
-      },
+      { staticClass: "container", staticStyle: { "text-align": "center" } },
       [
-        _c("h2", [_c("b", [_vm._v("Київ та область")])]),
+        _c("h2", { staticClass: "gradient" }, [
+          _c("b", [_vm._v("Київ та область")]),
+        ]),
         _vm._v(" "),
-        _c("p", { staticClass: "text-center" }, [
+        _c("p", { staticClass: "text-center gradient" }, [
           _vm._v(
             "Виберіть варіант і уточніть при необхідності параметри замовлення."
           ),

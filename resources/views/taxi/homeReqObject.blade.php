@@ -4,12 +4,12 @@
     {{-- print_r($params) --}}
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
-        <div class="container text-center">
-            <p><b>Київ та область</b></p>
+        <div class="container" style="text-align: center">
+            <h2 class="gradient"><b>Київ та область</b></h2>
+            <p class="text-center gradient">Заповнити поля для розрахунку вартості поїздки.</p>
         </div>
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
-            <p class="text-center">Пошук по об'єктах. Заповнити поля для розрахунку вартості поїздки.</p>
 
             <form action="{{route('search-cost-object')}}" id="form_object">
                 @csrf

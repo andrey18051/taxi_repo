@@ -36,6 +36,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/left-nav-style.css') }}">
+    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
 </head>
 <body>
     <div id="app">
