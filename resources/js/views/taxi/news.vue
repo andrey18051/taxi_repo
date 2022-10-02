@@ -21,7 +21,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <td>
-                                   <b> {{row.short}}</b>
+                                   <h4><b> {{row.short}}</b></h4>
 
                                 </td>
 
@@ -33,6 +33,7 @@
                                              {{row.full}}
                                          </span>
                                         </h5>
+                                        <i> Джерело: {{row.author}}</i>
                                     </div>
                                 </td>
 

@@ -1,4 +1,4 @@
-@extends('layouts.logout2')
+@extends('layouts.profile')
 
 @section('content')
 
@@ -11,7 +11,10 @@
             <div class="col">
                 <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="/" target="_blank">Нове замовлення</a></li>
+                        <li class="breadcrumb-item"><a href="{{route('home-phone-user_name',
+                            [substr($response["user_phone"], 3), $response["user_first_name"] . " " . $response["user_last_name"]])
+                            }}" target="_blank">Нове замовлення</a>
+                        </li>
                     </ol>
                 </nav>
             </div>

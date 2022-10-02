@@ -1,16 +1,8 @@
 <template>
-
-
-
-
-    <!-- Попередні розрахунки.-->
-
-
-
-       <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
+    <div class="px-1 py-1 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
            <div class="container" style="text-align: center; margin-top: 5px">
                <h2><b>Київ та область</b></h2>
-                <p class="text-center">Виберіть варіант і уточніть при необхідності параметри замовлення.</p>
+               <p class="text-center">Виберіть варіант і уточніть при необхідності параметри замовлення.</p>
            </div>
        <div class="container" style="display: block;
                   overflow: auto;
@@ -26,8 +18,6 @@
                 @totalPagesChanged="totalPages = $event"
             >
                     <thead slot="head">
-<!--                    <v-th sortKey="id" defaultSort="desc" >#</v-th>
-                    <v-th sortKey="routefromnumber">Будинок</v-th>-->
                     <v-th sortKey="flexible_tariff_name">Тариф </v-th>
                     <v-th sortKey="routefrom" >Звідки</v-th>
                     <v-th sortKey="routefromnumber">Будинок</v-th>
@@ -36,83 +26,46 @@
                     </thead>
                 <tbody slot="body" slot-scope="{displayData}">
                 <tr>
-                    <!--    <td><input class="form-input input-sm" v-model="filters.id.value" placeholder="Select by id"></td>
-                     !--                    <td><input class="form-input input-lg" v-model="filters.user_full_name.value" placeholder="Sey name"></td>
-                                         <td> <input class="form-input input-lg" v-model="filters.user_phone.value"  placeholder="Select by email"></td>
-                                           <td><input class="form-input input-sm" v-model="filters.route_address_entrance_from.value" placeholder="Select by route_address_entrance_from"></td>
-                                           <td><input class="form-input input-lg" v-model="filters.comment.value" placeholder="Select by comment"></td>
-                                           <td> <input class="form-input input-lg" v-model="filters.add_cost.value"  placeholder="Select by add_cost"></td>
-                                           <td><input class="form-input input-sm" v-model="filters.wagon.value" placeholder="Select by wagon"></td>
-                                           <td><input class="form-input input-lg" v-model="filters.minibus.value" placeholder="Select by minibus"></td>
-                                           <td> <input class="form-input input-lg" v-model="filters.premium.value"  placeholder="Select by premium"></td>-->
                     <td>
-
-                            <input class="form-input input-sm" v-model="filters.flexible_tariff_name.value" placeholder="Пошук">
-
+                        <input class="form-input input-sm" v-model="filters.flexible_tariff_name.value" placeholder="Пошук">
                     </td>
                     <td>
-
-                            <input class="form-input input-lg" v-model="filters.routefrom.value" placeholder="Пошук">
-
+                        <input class="form-input input-lg" v-model="filters.routefrom.value" placeholder="Пошук">
                     </td>
+                    <td></td>
                     <td>
-
-<!--                            <input class="form-input input-lg" v-model="filters.routefromnumber.value"  placeholder="Пошук">-->
-
+                        <input class="form-input input-sm" v-model="filters.routeto.value" placeholder="Пошук">
                     </td>
-                    <td>
-                            <input class="form-input input-sm" v-model="filters.routeto.value" placeholder="Пошук">
-
-                    </td>
-                    <td>
-
-<!--                            <input class="form-input input-lg" v-model="filters.routetonumber.value" placeholder="Пошук">-->
-
-                    </td>
-
-
-                    <!--     <td> <input class="form-input input-lg" v-model="filters.payment_type.value"  placeholder="Нал/безнал"></td>-->
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr v-for="row in displayData" :key="row.id">
-                    <!--             <td>{{ row.id }}</td>
-                             <td> <input id="user_full_name" class="form-control" v-model.text="row.user_full_name" required ></td>
-                                 <td><input id="user_phone" class="form-control" v-model.terow.user_phone" required ></td>
-                               <td> <input id="route_address_entrance_from" class="form-control" v-model.text="row.route_address_entrance_from" required ></td>
-                                 <td><input id="comment" class="form-control" v-model.text="row.comment" required ></td>
-                                 <td> <input id="add_cost" class="form-control" v-model.text="row.add_cost" required ></td>
-                                 <td><input id="wagon" class="form-control" v-model.text="row.wagon" required ></td>
-                                 <td> <input id="minibus" class="form-control" v-model.text="row.minibus" required ></td>
-                                 <td><input id="premium" class="form-control" v-model.text="row.premium" required ></td>-->
-                                      <td>
-                                            <div style="width: 180px">
-                                                <input id="flexible_tariff_name" class="form-control" v-model.text="row.flexible_tariff_name" required >
-                                            </div>
-                                      </td>
-                                      <td>
-                                             <div style="width: 300px">
-                                                <input id="routefrom" class="form-control" v-model.text="row.routefrom" required >
-                                            </div>
-                                      </td>
-                                        <td>
-                                            <div style="width: 65px">
-                                                <input id="routefromnumber" class="form-control" style="text-align: right" v-model.text="row.routefromnumber" required >
-                                            </div>
-                                        </td>
-                                        <td>
+                     <td>
+                        <div style="width: 180px">
+                            <input id="flexible_tariff_name" class="form-control" v-model.text="row.flexible_tariff_name" required >
+                        </div>
+                     </td>
+                     <td>
+                        <div style="width: 300px">
+                            <input id="routefrom" class="form-control" v-model.text="row.routefrom" required >
+                        </div>
+                     </td>
+                     <td>
+                        <div style="width: 65px">
+                            <input id="routefromnumber" class="form-control" style="text-align: right" v-model.text="row.routefromnumber" required >
+                        </div>
+                     </td>
+                     <td>
                                             <div style="width: 300px">
                                                 <input id="routeto" class="form-control" v-model.text="row.routeto" required >
                                             </div>
                                         </td>
-                                        <td>
-                                            <div style="width: 65px">
-                                                <input id=" routetonumber" class="form-control" style="text-align: right" v-model.text="row.routetonumber" required >
-                                            </div>
-                                        </td>
-
-<!--                                      <td><input id="payment_type" class="form-control" v-model.text="row.payment_type" required ></td>-->
-
-                    <td>
+                     <td>
+                        <div style="width: 65px">
+                            <input id=" routetonumber" class="form-control" style="text-align: right" v-model.text="row.routetonumber" required >
+                        </div>
+                     </td>
+                     <td>
                         <div class="btn-group" role="group">
                             <router-link :to="{name: 'editOrder', params: { id: row.id }}" class="btn btn-success" target="_blank" title="Переглянути">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-binoculars" viewBox="0 0 16 16">
@@ -137,13 +90,8 @@
                 :maxPageLinks="maxPageLinks"
             />
         </div>
-
-
-    </div>
-
+   </div>
 </template>
-
-
 
 <script>
 import axios from 'axios';

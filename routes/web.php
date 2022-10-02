@@ -134,9 +134,9 @@ Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 
     // Выполняем проверку
     if ($time >= $start_time && $time <= $end_time) {
-        return view('taxi.homeWellcomeWar', ['phone' => $phone]);
+        return view('taxi.homeWellcomeWar', ['phone' => $phone,  'time' => date("h:i:sa")]);
     } else {
-        return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name]);
+        return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name,  'time' => date("h:i:sa")]);
     }
 })->name('home-phone-user_name');
 

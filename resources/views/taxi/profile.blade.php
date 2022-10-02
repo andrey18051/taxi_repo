@@ -1,4 +1,4 @@
-@extends('layouts.logout2')
+@extends('layouts.profile')
 
 @section('content')
 <section style="background-color: #eee;">
@@ -9,7 +9,8 @@
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{route('home-phone-user_name',
                             [substr($response["user_phone"], 3), $response["user_first_name"] . " " . $response["user_last_name"]])
-                            }}" target="_blank">Нове замовлення</a></li>
+                            }}" target="_blank">Нове замовлення</a>
+                        </li>
                     </ol>
                 </nav>
             </div>
