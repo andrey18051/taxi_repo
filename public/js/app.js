@@ -31274,7 +31274,7 @@ var render = function () {
           filters: _vm.filters,
           hideSortIcons: true,
           currentPage: _vm.currentPage,
-          pageSize: 1,
+          pageSize: 3,
         },
         on: {
           "update:currentPage": function ($event) {
@@ -31313,7 +31313,7 @@ var render = function () {
                         _c("div", { staticClass: "row" }, [
                           _c("div", { staticClass: "col-12" }, [
                             _c("td", [
-                              _c("h4", [
+                              _c("h5", [
                                 _c("b", [_vm._v(" " + _vm._s(row.short))]),
                               ]),
                             ]),
@@ -31322,14 +31322,12 @@ var render = function () {
                           _c("div", { staticClass: "col-12" }, [
                             _c("td", [
                               _c("div", { staticClass: "container" }, [
-                                _c("h5", { staticClass: "marquee" }, [
-                                  _c("span", [
-                                    _vm._v(
-                                      "\n                                      " +
-                                        _vm._s(row.full) +
-                                        "\n                                  "
-                                    ),
-                                  ]),
+                                _c("p", { staticClass: "gradient" }, [
+                                  _vm._v(
+                                    "\n                                      " +
+                                      _vm._s(row.full) +
+                                      "\n\n                                 "
+                                  ),
                                 ]),
                                 _vm._v(" "),
                                 _c("i", [

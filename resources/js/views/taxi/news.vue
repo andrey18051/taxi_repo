@@ -9,7 +9,7 @@
                 :hideSortIcons="true"
                 class="my-2 table table-striped"
                 :currentPage.sync="currentPage"
-                :pageSize="1"
+                :pageSize="3"
                 @totalPagesChanged="totalPages = $event"
                 >
                 <tbody slot="body" slot-scope="{displayData}">
@@ -21,7 +21,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <td>
-                                   <h4><b> {{row.short}}</b></h4>
+                                   <h5><b> {{row.short}}</b></h5>
 
                                 </td>
 
@@ -29,10 +29,10 @@
                             <div class="col-12">
                                 <td>
                                     <div class="container">
-                                        <h5 class="marquee"><span>
+                                        <p class="gradient">
                                              {{row.full}}
-                                         </span>
-                                        </h5>
+
+                                        </p>
                                         <i> Джерело: {{row.author}}</i>
                                     </div>
                                 </td>

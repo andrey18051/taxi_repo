@@ -4,20 +4,18 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-2">
+                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">
+                    <img src="{{ asset('img/kiyv2.jpg') }}" style="width: 100%; height: auto"></a>
+
                 <p class="gradient">Корисні посилання</p>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Дешевое такси онлайн расчет</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн свободные авто такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн такси заказ Киев и обл</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн такси заказ Киев и обл</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Заказ такси Киев и область</a>
+
+                <a href="https://m.easy-order-taxi.site/" target="_blank">Дешевое такси онлайн расчет</a>
+                <a href="https://m.easy-order-taxi.site/home-Object/000/Новий%20замовник" target="_blank">Онлайн свободные авто такси</a>
+                <a href="https://m.easy-order-taxi.site/home-Map/000/Новий%20замовник" target="_blank">Онлайн такси заказ Киев и обл</a>
                 <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Онлайн дешевле можно только пешком. Закажите украинское такси и дайте свою оценку</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Эконом служба Киев - быстро, доступно, недорого</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Мы не ложим болт на заказчиков, при дешевых ценах</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Качественный сервис по низким ценам быстрее чем через оператор</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
-                <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
+                <a href="https:///m.easy-order-taxi.site/" target="_blank">Эконом служба Киев - быстро, доступно, недорого</a>
+                <a href="https://m.easy-order-taxi.site/home-Object/000/Новий%20замовник" target="_blank">Мы не ложим болт на заказчиков, при дешевых ценах</a>
+                <a href="https://m.easy-order-taxi.site/home-Map/000/Новий%20замовник" target="_blank">Качественный сервис по низким ценам быстрее чем через оператор</a>
                 <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">Тариф узнайте на сайте такси</a>
             </div>
              <div class="col-10">
@@ -75,31 +73,34 @@
                 <div class="container" style="text-align: center">
                     <h2 class="gradient"><b>Київ та область</b></h2>
                 </div>
-                <p class="marquee gradient"><span>
-                        <?php
-                            $i_order_view = 0;
-                            do {
-                            $rand_order =  rand(0, $i_order);
-                            echo $quitesArr_order[$rand_order];
-                            $i_order_view++;
-                            }
-                        while ($i_order_view <= 3);
-                        ?></span>
-                </p>
+                 <div class="container" style="text-align: center">
+                    <p class="marquee gradient"><span>
+                            <?php
+                                $i_order_view = 0;
+                                do {
+                                $rand_order =  rand(0, $i_order);
+                                echo $quitesArr_order[$rand_order];
+                                $i_order_view++;
+                                }
+                            while ($i_order_view <= 3);
+                            ?></span>
+                    </p>
+                 </div>
                 <h3 class="gradient" style="text-align:center">Швидкі та надійні поїздки на комфортних авто.</h3>
 
-                <news-component></news-component>
 
 
-                <div style="text-align:center">
-                      <a href="https://easy-order-taxi.site/mainpage" class="gradient-button" target="_blank">Замовити таксі</a>
-                <!--<a href="http://taxi2012" class="gradient-button" target="_blank">Замовити таксі</a>-->
-                </div>
-
-                <blockquote class="blockquote-3">
-                    <p> <?php echo $quitesArr[$rand] ?></p>
-                    <cite>Цитата дня</cite>
-                </blockquote>
+                 <div style="text-align:center">
+                     <a href="https://easy-order-taxi.site/mainpage" class="gradient-button" target="_blank">Замовити таксі</a>
+                     <!--<a href="http://taxi2012" class="gradient-button" target="_blank">Замовити таксі</a>-->
+                 </div>
+                 <news-component></news-component>
+                 <div class="container" style="text-align: center">
+                    <blockquote class="blockquote-3">
+                        <p> <?php echo $quitesArr[$rand] ?></p>
+                        <cite>Цитата дня</cite>
+                    </blockquote>
+                 </div>
 
          </div>
         </div>
