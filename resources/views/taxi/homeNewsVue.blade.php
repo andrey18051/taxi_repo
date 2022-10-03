@@ -6,7 +6,7 @@
             <div class="col-2">
                 <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank">
                     <img src="{{ asset('img/kiyv2.jpg') }}" style="width: 100%; height: auto"></a>
-
+                <br>
                 <p class="gradient">Корисні посилання</p>
 
                 <a href="https://m.easy-order-taxi.site/" target="_blank">Дешевое такси онлайн расчет</a>
@@ -20,7 +20,7 @@
             </div>
              <div class="col-10">
                 <div class="container">
-                    <a class="but_vart" href="http://taxi2012" target="_blank" title="Версія сайту для мобільних">
+                    <a class="but_vart" href="https://easy-order-taxi.site" target="_blank" title="Версія сайту для мобільних">
                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-phone" viewBox="0 0 16 16">
                             <path d="M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z"/>
                             <path d="M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
@@ -71,7 +71,9 @@
 
                 <br>
                 <div class="container" style="text-align: center">
-                    <h2 class="gradient"><b>Київ та область</b></h2>
+                    <a href="https://m.easy-order-taxi.site/" target="_blank" style="text-decoration: none;">
+                        <h2 class="gradient"><b>Київ та область</b></h2></a>
+
                 </div>
                  <div class="container" style="text-align: center">
                     <p class="marquee gradient"><span>
@@ -86,7 +88,9 @@
                             ?></span>
                     </p>
                  </div>
-                <h3 class="gradient" style="text-align:center">Швидкі та надійні поїздки на комфортних авто.</h3>
+                 <a href="https://m.easy-order-taxi.site/" target="_blank" style="text-decoration: none;">
+                     <h3 class="gradient" style="text-align:center">Швидкі та надійні поїздки на комфортних авто.</h3></a>
+
 
 
 
