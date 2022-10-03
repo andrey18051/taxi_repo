@@ -6,10 +6,8 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="google-site-verification" content="Z1-43YUiiD2LBZX56nU25zqN1HOdBHfeZs8TzF3RYRM" />
-    <meta name="robots" content="all" />
-    <link rel="canonical" href="https://m.easy-order-taxi.site/home-news" />
-    <title>Служба Таксі &#128662 від 40 грн по місту (Києв та Київська область)</title>
+
+   <title>Служба Таксі &#128662 від 40 грн по місту (Києв та Київська область)</title>
     <meta name="description" content="Швидкі та надійні поїздки &#129523.  Подання таксі &#128662 за 4-6 хвилин. Працюємо більше 10 років. Доступні низькі тарифи &#127974. Замовлення на сайті та у смартфоні &#128241 комфортного таксі &#128662.  Кур'єрська доставка документів &#128462 та посилок &#128230.">
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
@@ -68,10 +66,12 @@
             </div>
         </div>
     </nav>
+    <main class="py-4">
+        @include ('layouts.messages')
+        @yield('content')
+    </main>
 </div>
 
-@include ('layouts.messages')
-@yield('content')
 
 <footer class="text-muted text-center text-small">
     <p class="mb-1">&copy; 2022</p> <!-- Легке замовлення таксі-->

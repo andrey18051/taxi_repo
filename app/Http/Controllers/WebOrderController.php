@@ -9,6 +9,7 @@ use App\Models\Config;
 use App\Models\Objecttaxi;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Quite;
 use App\Models\Street;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -17,6 +18,20 @@ use Illuminate\Support\Facades\Mail;
 
 class WebOrderController extends Controller
 {
+    /**
+     * Цитаты
+     */
+
+    public function quites_all() {
+        $quites = Quite::all();
+        return $quites;
+    }
+
+    public function query_all() {
+        $querys = Orderweb::all();
+        return $querys;
+    }
+
     /**
      *
      */
