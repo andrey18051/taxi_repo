@@ -1,2 +1,3 @@
-User-agent: *
-Disallow:
+User-agent: Googlebot
+Disallow: /img/
+Sitemap: https://m.easy-order-taxi.site/sitemap.xml
