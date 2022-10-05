@@ -548,10 +548,17 @@ class WebOrderController extends Controller
                     $id = $order;
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
+                    $order_cost_min = round($order_cost * config('app.order_cost_min'), 0);
+                    $order_cost_max = round($order_cost * config('app.order_cost_max'), 0);
                     if ($route_undefined === true) {
-                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від
+                        $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.";
                     } else {
-                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від
+                        $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.
+                        Діапазон цін інших служб таксі $order_cost_min - $order_cost_max грн.";
                     };
 
 
@@ -783,15 +790,20 @@ class WebOrderController extends Controller
                     $id = $order;
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
+                    $order_cost_min = round($order_cost * config('app.order_cost_min'), 0);
+                    $order_cost_max = round($order_cost * config('app.order_cost_max'), 0);
+
                     if ($route_undefined === true) {
-                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from по місту. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від
+                        $from по місту. Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.";
                     } else {
-                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from  до $to. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від
+                        $from  до $to. Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.
+                        Діапазон цін інших служб таксі $order_cost_min - $order_cost_max грн.";
                     };
-
-
                     return redirect()->route('home-object-id', ['id' => $id])->with('success', $order);
-
                 } else {
 
                     $WebOrder->version_object();
@@ -1029,7 +1041,7 @@ class WebOrderController extends Controller
                 $to = $params['routeto'];
 
                 $to_number = $params['routetonumber'];
-           //     dd($params['route_undefined']);
+
              if ($params['route_undefined'] == 1) {
                     $route_undefined = true;
                     $to = $from;
@@ -1091,10 +1103,18 @@ class WebOrderController extends Controller
                     $id = $order;
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
+                    $order_cost_min = round($order_cost * config('app.order_cost_min'), 0);
+                    $order_cost_max = round($order_cost * config('app.order_cost_max'), 0);
+
                     if ($route_undefined === true) {
-                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from по місту. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від
+                        $from по місту. Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.";
                     } else {
-                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від $from  до $to. Оплата $req->payment_type. $auto_type Вартість поїздки становитиме: $order_cost грн.";
+                        $order = "Вітаємо $user_full_name на нашому сайті. Ви зробили розрахунок за маршрутом від
+                        $from  до $to. Оплата $req->payment_type. $auto_type
+                        Вартість поїздки становитиме: $order_cost грн.
+                        Діапазон цін інших служб таксі $order_cost_min - $order_cost_max грн.";
                     };
 
 

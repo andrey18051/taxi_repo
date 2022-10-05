@@ -276,5 +276,12 @@ return [
      */
 
      'start_time' => '23:00',
-     'end_time' => '05:00'
+     'end_time' => '05:00',
+
+    /**
+     * Коэфициенты диапазона цен
+     */
+
+     'order_cost_min' => 1.25,
+     'order_cost_max' => 1.78
 ];
