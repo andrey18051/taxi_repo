@@ -22,12 +22,14 @@ class WebOrderController extends Controller
      * Цитаты
      */
 
-    public function quites_all() {
+    public function quites_all()
+    {
         $quites = Quite::all();
         return $quites;
     }
 
-    public function query_all() {
+    public function query_all()
+    {
         $querys = Orderweb::all();
         return $querys;
     }
@@ -406,20 +408,21 @@ class WebOrderController extends Controller
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
 
-        $WebOrder = new \App\Http\Controllers\WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
+
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $WebOrder = new \App\Http\Controllers\WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -555,9 +558,10 @@ class WebOrderController extends Controller
                     return redirect()->route('home-id', ['id' => $id])->with('success', $order);
 
                 } else {
+                    $WebOrder->version_street();
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
 
@@ -640,22 +644,21 @@ class WebOrderController extends Controller
         };
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
-
-        $WebOrder = new \App\Http\Controllers\WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
+            $WebOrder = new \App\Http\Controllers\WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -790,9 +793,11 @@ class WebOrderController extends Controller
                     return redirect()->route('home-object-id', ['id' => $id])->with('success', $order);
 
                 } else {
+
+                    $WebOrder->version_object();
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
 
@@ -948,7 +953,7 @@ class WebOrderController extends Controller
         if ($response_arr_to['geo_streets']['geo_street'] == null) {
             ?>
             <script type="text/javascript">
-                alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
+                alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
             </script>
             <?php
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
@@ -1099,7 +1104,7 @@ class WebOrderController extends Controller
 
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
 
