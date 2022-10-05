@@ -100,10 +100,12 @@
                  </div>
                  <news-component></news-component>
                  <div class="container" style="text-align: center">
-                    <blockquote class="blockquote-3">
-                        <p> <?php echo $quitesArr[$rand] ?></p>
-                        <cite>Цитата дня</cite>
-                    </blockquote>
+                     <a href="https://m.easy-order-taxi.site/" target="_blank" style="text-decoration: none;">
+                        <blockquote class="blockquote-3">
+                            <p> <?php echo $quitesArr[$rand] ?></p>
+                            <cite>Цитата дня</cite>
+                        </blockquote>
+                     </a>
                  </div>
 
          </div>
