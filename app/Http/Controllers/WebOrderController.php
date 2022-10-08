@@ -1118,7 +1118,7 @@ class WebOrderController extends Controller
                     };
 
 
-                    return redirect()->route('home-id', ['id' => $id])->with('success', $order);
+                    return redirect()->route('home-id', ['id' => $id, 'order_cost' => $order_cost])->with('success', $order);
 
                 } else {
 

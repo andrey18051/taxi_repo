@@ -75,17 +75,41 @@
                         </div>
 
                         <div class="container" style="margin-top: 5px">
-                            <div class="row">
-                                <div class="col-8">
+
+                                <div class="col-12">
                                     <label for="comment" class="form-label">Коментар</label>
                                     <textarea class="form-control" id="comment" name="comment"  >{{ $orderId['0']['comment'] }}</textarea>
 
                                 </div>
-                                <div class="col-4">
+<!--                                 <div class="col-12 slidecontainer">
                                     <label for="add_cost" class="form-label"  >Додати (грн)</label>
-                                    <input type="text" id="add_cost" name="add_cost" style="text-align: center" class="form-control" value="{{ $orderId['0']['add_cost'] }}" />
-                                </div>
+                                     <p></p>
+                                     Min <span id="rangeValue">{{--round($order_cost * config('app.order_cost_min'), 0)}}</span>
+                                     Max <span id="rangeValue">{{round($order_cost * config('app.order_cost_max'), 0)}}</span>
+                                    <input type="range"
+
+                                           min="{{-- $order_cost --}}"
+                                           max="{{-- round($order_cost * config('app.order_cost_max'), 0)*1.5 --}}"
+
+                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
+                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;"
+                                           class="slider" value="{{-- $orderId['0']['add_cost'] --}}" />
+                                     <span id="rangeValue">{{-- $order_cost --}}</span>
+                                </div>-->
+
+                            <div class="col-12 slidecontainer">
+                                <label for="add_cost" class="form-label"  >Додати до вартости: <span id="rangeValue"> 0 </span>грн</label>
+                                       <input type="range"
+
+                                           min="0"
+                                           max="100"
+
+                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
+                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;"
+                                           class="slider" />
+
                             </div>
+
                         </div>
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
@@ -181,11 +205,7 @@
         <br>
     </div>
 
-    <script defer type="text/javascript">
-        /**
-         * Функция Скрывает/Показывает блок
-         * @author ox2.ru дизайн студия
-         **/
+    <script>
         function showHide(element_id) {
             //Если элемент с id-шником element_id существует
             if (document.getElementById(element_id)) {
