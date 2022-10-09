@@ -19,13 +19,6 @@
     </div>
 @endif
 
-@if(session('cost'))
-    <div class="container">
-
-            {{session('cost')}}
-
-    </div>
-@endif
 
 @if(session('tel'))
     <div class="container text-center">

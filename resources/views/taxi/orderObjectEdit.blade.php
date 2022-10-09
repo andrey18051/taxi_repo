@@ -6,7 +6,7 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="text-center">
-            <h2 class="gradient">Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
+            <p class="gradient">Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</p>
         </div>
         <form action="{{route('search-cost-edit-object', $orderId['0']['id']) }}">
                 @csrf
@@ -68,22 +68,29 @@
                         <div class="container" style="margin-top: 5px">
 
                                 <div class="col-12">
-                                    <label for="comment" class="form-label">Коментар</label>
-                                    <textarea class="form-control" id="comment" name="comment"  >{{ $orderId['0']['comment'] }}</textarea>
+                                    <textarea class="form-control" id="comment" name="comment" placeholder="Коментар" ></textarea>
                                 </div>
 
-                                <div class="col-12 slidecontainer">
-                                    <label for="add_cost" class="form-label"  >Додати до вартости: <span id="rangeValue"> 0 </span>грн</label>
-                                    <input type="range"
+                            <div class="col-12 slidecontainer">
+                                <label for="add_cost" class="form-label" >
+                                    Додати до вартости: <span id="rangeValue"> 0 </span>грн.
+                                </label>
+                                <input type="range"
 
-                                           min="0"
-                                           max="100"
+                                       min="0"
+                                       max="1000"
+                                       step="5"
+                                       value="0" id="add_cost" name="add_cost" style="text-align: center"
+                                       onchange="document.getElementById('rangeValue').innerHTML = this.value;
+                                           let  order_cost = Number(this.value) + Number({{session('order_cost')}});
+                                           document.getElementById('rangeValueСost').innerHTML = order_cost;"
+                                       class="slider" />
 
-                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;"
-                                           class="slider" />
+                            </div>
+                            <h4> Вартість поїздки: <span id="rangeValueСost"> {{session('order_cost')}} </span>грн.</h4>
+                            (Діапазон цін інших служб таксі {{round (session('order_cost') * config('app.order_cost_min'), 0)}}
+                            - {{round (session('order_cost') * config('app.order_cost_max'), 0)}} грн).
 
-                                </div>
 
                         </div>
                     </div>
@@ -160,8 +167,10 @@
                         </div>
                     </div>
                 </div>
-                <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
 
+                <div class="container text-center">
+                    <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
+                </div>
             </form>
         <br>
         <div class="container text-center">

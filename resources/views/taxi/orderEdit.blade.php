@@ -1,4 +1,4 @@
-@extends('layouts.logoutObject2')
+@extends('layouts.logout2')
 
 @section('content')
     {{-- print_r($orderId) --}}
@@ -6,7 +6,7 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
             <br>
             <div class="text-center">
-                <h2 class="gradient">Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</h2>
+                <p class="gradient"><b>Увага!!!</b> Перевірте дані про майбутню подорож та підтвердіть замовлення.</p>
             </div>
             <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">
                 @csrf
@@ -16,11 +16,11 @@
                              <div class="row">
                                 <div class="col-8">
                                     <label for="search" class="form-label">Звідки</label>
-                                    <input type="text" class="form-control" id="search" autocomplete="off" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
+                                    <input readonly type="text" class="form-control" id="search" autocomplete="off" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
                                 </div>
                                 <div class="col-4">
                                     <label for="from_number" class="form-label">Будинок</label>
-                                    <input type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
+                                    <input readonly type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
                                 </div>
                              </div>
                         </div>
@@ -29,7 +29,7 @@
                                 <div class="row">
                                     <div class="col-12">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
-                                    <input type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
+                                    <input readonly type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
                                         @if( $orderId['0']['route_undefined'] == 1)
                                             checked
                                            value="1"
@@ -48,12 +48,12 @@
                                 <div class="row">
                                     <div class="col-8">
                                         <label for="search1" class="form-label">Куди</label>
-                                        <input type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
+                                        <input readonly type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
                                     </div>
 
                                     <div class="col-4">
                                         <label for="to_number" class="form-label" >Будинок</label>
-                                        <input type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
+                                        <input readonly type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
                                     </div>
                                 </div>
                             </div>
@@ -61,7 +61,7 @@
                         <div class="container" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
-                                    <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
+                                    <input  type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
                                 </div>
                             </div>
                         </div>
@@ -77,39 +77,28 @@
                         <div class="container" style="margin-top: 5px">
 
                                 <div class="col-12">
-                                    <label for="comment" class="form-label">Коментар</label>
-                                    <textarea class="form-control" id="comment" name="comment"  >{{ $orderId['0']['comment'] }}</textarea>
-
+                                    <textarea class="form-control" id="comment" name="comment"  placeholder="Коментар"></textarea>
                                 </div>
-<!--                                 <div class="col-12 slidecontainer">
-                                    <label for="add_cost" class="form-label"  >Додати (грн)</label>
-                                     <p></p>
-                                     Min <span id="rangeValue">{{--round($order_cost * config('app.order_cost_min'), 0)}}</span>
-                                     Max <span id="rangeValue">{{round($order_cost * config('app.order_cost_max'), 0)}}</span>
-                                    <input type="range"
-
-                                           min="{{-- $order_cost --}}"
-                                           max="{{-- round($order_cost * config('app.order_cost_max'), 0)*1.5 --}}"
-
-                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;"
-                                           class="slider" value="{{-- $orderId['0']['add_cost'] --}}" />
-                                     <span id="rangeValue">{{-- $order_cost --}}</span>
-                                </div>-->
 
                             <div class="col-12 slidecontainer">
-                                <label for="add_cost" class="form-label"  >Додати до вартости: <span id="rangeValue"> 0 </span>грн</label>
+                                <label for="add_cost" class="form-label" >
+                                    Додати до вартости: <span id="rangeValue"> 0 </span>грн.
+                                </label>
                                        <input type="range"
 
                                            min="0"
-                                           max="100"
-
+                                           max="1000"
+                                            step="5"
                                            value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;"
+                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;
+                                           let  order_cost = Number(this.value) + Number({{session('order_cost')}});
+                                                     document.getElementById('rangeValueСost').innerHTML = order_cost;"
                                            class="slider" />
 
                             </div>
-
+                            <h4> Вартість поїздки: <span id="rangeValueСost"> {{session('order_cost')}} </span>грн.</h4>
+                            (Діапазон цін інших служб таксі {{round (session('order_cost') * config('app.order_cost_min'), 0)}}
+                            - {{round (session('order_cost') * config('app.order_cost_max'), 0)}} грн).
                         </div>
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last">
@@ -117,7 +106,7 @@
                         <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
-                        <div id="block_id" style="display: none">
+                        <div id="block_id" style="display: none" >
                             <ul class="list-group mb-3">
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <label class="form-label" for="required_time">Час подачі</label>
@@ -185,7 +174,9 @@
                         </div>
                     </div>
                 </div>
-                <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
+                <div class="container text-center">
+                    <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
+                </div>
 
             </form>
         <br>
