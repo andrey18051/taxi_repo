@@ -6,13 +6,13 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="text-center">
-            <p class="gradient">Увага!!! Перевірте дані про майбутню подорож та підтвердіть замовлення.</p>
+            <p class="gradient"><b>Увага!!!</b> Перевірте дані про майбутню подорож та підтвердіть замовлення.</p>
         </div>
         <form action="{{route('search-cost-edit-object', $orderId['0']['id']) }}">
                 @csrf
                 <div class="row">
-                    <div class="col-md-7 col-lg-8">
-                        <div class="container">
+
+                        <div class="container" style="display: none;">
                             <div class="row">
                                 <div class="col-12">
                                     <label for="search" class="form-label">Звідки</label>
@@ -21,7 +21,7 @@
                             </div>
                         </div>
 
-                        <div class="container">
+                        <div class="container" style="display: none;">
                                 <div class="row">
                                     <div class="col-12">
                                         <label class="form-check-label" for="route_undefined">По місту</label>
@@ -30,6 +30,7 @@
                                                 checked
                                                value="1"
                                         @endif
+                                        style="display: none;"
                                         >
                                     </div>
                                 </div>
@@ -40,15 +41,16 @@
                              style="display:none"
                              @else  style="display:block"
                             @endif
+                             style="display: none;"
                             >
-                                <div class="row">
+                                <div class="row" style="display: none;">
                                     <div class="col-12">
                                         <label for="search1" class="form-label">Куди</label>
                                         <input type="text" class="form-control" id="search3" autocomplete="off" name="search3" value="{{ $orderId['0']['routeto'] }}" required>
                                     </div>
                                 </div>
                         </div>
-
+                    <div class="col-lg-12 col-sm-12 ">
                         <div class="container" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
@@ -94,7 +96,7 @@
 
                         </div>
                     </div>
-                    <div class="col-md-5 col-lg-4 order-md-last">
+                    <div class="col-md-5 col-lg-4 order-md-last" style="display: none;" >
                         <br/>
                         <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
@@ -169,7 +171,7 @@
                 </div>
 
                 <div class="container text-center">
-                    <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
+                    <button class="btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
                 </div>
             </form>
         <br>
@@ -189,7 +191,7 @@
         <br>
    </div>
 
-    <script type="text/javascript">
+<!--    <script type="text/javascript">
         /**
          * Функция Скрывает/Показывает блок
          * @author ox2.ru дизайн студия
@@ -219,5 +221,5 @@
             else alert("Элемент с id: " + element_id + " не найден!");
         }
 
-    </script>
+    </script>-->
 @endsection

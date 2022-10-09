@@ -10,9 +10,9 @@
             </div>
             <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">
                 @csrf
-                <div class="row">
-                    <div class="col-md-7 col-lg-8">
-                        <div class="container">
+                <div class="row" >
+
+                        <div class="container" style="display: none;">
                              <div class="row">
                                 <div class="col-8">
                                     <label for="search" class="form-label">Звідки</label>
@@ -25,7 +25,7 @@
                              </div>
                         </div>
 
-                        <div class="container">
+                        <div class="container" style="display: none;">
                                 <div class="row">
                                     <div class="col-12">
                                     <label class="form-check-label" for="route_undefined">По місту</label>
@@ -44,8 +44,9 @@
                                  style="display:none"
                                  @else  style="display:block"
                                  @endif
+                                 style="display: none;"
                                 >
-                                <div class="row">
+                                <div class="row" style="display: none;">
                                     <div class="col-8">
                                         <label for="search1" class="form-label">Куди</label>
                                         <input readonly type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
@@ -57,8 +58,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                        <div class="container" style="margin-top: 5px">
+                    <div class="col-lg-12 col-sm-12 ">
+                        <div class="container text-center" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
                                     <input  type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
@@ -101,7 +102,7 @@
                             - {{round (session('order_cost') * config('app.order_cost_max'), 0)}} грн).
                         </div>
                     </div>
-                    <div class="col-md-5 col-lg-4 order-md-last">
+                    <div class="col-md-5 col-lg-4 order-md-last" style="display: none;">
                         <br/>
                         <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
                            onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
@@ -175,7 +176,7 @@
                     </div>
                 </div>
                 <div class="container text-center">
-                    <button class="w-100 btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
+                    <button class="btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
                 </div>
 
             </form>
@@ -196,7 +197,7 @@
         <br>
     </div>
 
-    <script>
+<!--    <script>
         function showHide(element_id) {
             //Если элемент с id-шником element_id существует
             if (document.getElementById(element_id)) {
@@ -222,5 +223,5 @@
             else alert("Элемент с id: " + element_id + " не найден!");
         }
 
-    </script>
+    </script>-->
 @endsection

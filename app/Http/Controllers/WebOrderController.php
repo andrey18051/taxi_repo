@@ -559,7 +559,7 @@ class WebOrderController extends Controller
 
 
                     return redirect()->route('home-id', ['id' => $id])
-                       /* ->with('success', $order)*/
+                        ->with('success', $order) 
                         ->with('order_cost', $order_cost);
 
                 } else {
@@ -813,7 +813,7 @@ class WebOrderController extends Controller
                        ";
                     };
                     return redirect()->route('home-object-id', ['id' => $id])
-                        /*->with('success', $order)*/
+                        ->with('success', $order)
                         ->with('order_cost', $order_cost);;
                 } else {
 
