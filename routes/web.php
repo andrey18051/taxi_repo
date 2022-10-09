@@ -128,10 +128,18 @@ Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
     $time = strtotime(date("h:i:sa")); // проверяемое время
 
     // Выполняем проверку
-    if ($time >= $start_time && $time <= $end_time) {
-        return view('taxi.homeWellcomeWar', ['phone' => $phone,  'time' => date("h:i:sa")]);
+
+    if ($start_time  <= $end_time) {
+        if ($time >= $start_time && $time <= $end_time) {
+            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name,  'time' => date("h:i:sa")]);  }
     } else {
-        return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name,  'time' => date("h:i:sa")]);
+        if ($time >= $start_time || $time <= $end_time) {
+            return view('taxi.homeWellcomeWar', ['phone' => '000', 'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name, 'time' => date("h:i:sa")]);
+        }
     }
 })->name('home-phone-user_name');
 
@@ -148,24 +156,33 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
     $time = strtotime(date("h:i:sa")); // проверяемое время
 
     // Выполняем проверку
-    if ($time >= $start_time && $time <= $end_time) {
-        return view('taxi.homeWellcomeWar', ['phone' => $phone,  'time' => date("h:i:sa")]);
-    } else {
-        $WebOrder = new WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
+
+    if ($start_time  <= $end_time) {
+        if ($time >= $start_time && $time <= $end_time) {
+            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
         }
-        return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
+    } else {
+        if ($time >= $start_time || $time <= $end_time) {
+            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            $WebOrder = new WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
+            return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);}
     }
+
 })->name('homeStreet');
 
 
