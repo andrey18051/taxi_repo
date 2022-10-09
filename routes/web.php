@@ -83,7 +83,7 @@ Route::get('/news-short', function () {
 
 Route::get('/', function () {
 
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
 /*
     $WebOrder->version_street();
     $WebOrder->version_object();*/
@@ -120,11 +120,6 @@ Route::get('/home-news', function () {
 
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
     $start_time = strtotime(config('app.start_time')); // начальное время
@@ -143,20 +138,34 @@ Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 
 
 Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
+
+
+    date_default_timezone_set("Europe/Kiev");
+    // Время интервала
+    $start_time = strtotime(config('app.start_time')); // начальное время
+    $end_time = strtotime(config('app.end_time')); // конечное время
+
+    $time = strtotime(date("h:i:sa")); // проверяемое время
+
+    // Выполняем проверку
+    if ($time >= $start_time && $time <= $end_time) {
+        return view('taxi.homeWellcomeWar', ['phone' => $phone,  'time' => date("h:i:sa")]);
+    } else {
+        $WebOrder = new WebOrderController();
+        $tariffs = $WebOrder->tariffs();
+        $response_arr = json_decode($tariffs, true);
+        $ii = 0;
+        for ($i = 0; $i < count($response_arr); $i++) {
+            switch ($response_arr[$i]['name']) {
+                case 'Базовый':
+                case 'Бизнес-класс':
+                case 'Эконом-класс':
+                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                    $ii++;
+            }
         }
+        return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
     }
-    return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeStreet');
 
 
@@ -180,7 +189,7 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 
 
 Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -197,7 +206,7 @@ Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeObject');
 
 Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -224,7 +233,7 @@ Route::get('/taxi-umovy', function () {
 
 
 Route::get('/homeorder/{id}', function ($id) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -242,7 +251,7 @@ Route::get('/homeorder/{id}', function ($id) {
 })->name('home-id');
 
 Route::get('/homeorder-object/{id}', function ($id) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -262,7 +271,7 @@ Route::get('/homeorder-object/{id}', function ($id) {
 
 
 Route::get('/homeorder-object/{id}', function ($id) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -282,7 +291,7 @@ Route::get('/homeorder-object/{id}', function ($id) {
 
 
 Route::get('/homeorder/afterorder/{id}', function ($id) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -436,7 +445,7 @@ Route::get('/costhistory/{authorization}', function ($authorization) {
  */
 Route::get('/costhistory/orders/edit/{id}', function ($id){
     //   return ;
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -472,7 +481,7 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
  * Отправка заказа
  */
 Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
@@ -509,7 +518,7 @@ Route::get('/costhistory/orders', function (){
 
 Route::get('/costhistory/orders/{id}', function ($id){
 
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
+    $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
