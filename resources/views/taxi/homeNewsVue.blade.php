@@ -81,7 +81,7 @@
                                 $i_order_view = 0;
                                 do {
                                 $rand_order =  rand(0, $i_order);
-                                echo $quitesArr_order[$rand_order];
+                                echo "&#128662 " . $quitesArr_order[$rand_order];
                                 $i_order_view++;
                                 }
                             while ($i_order_view <= 3);

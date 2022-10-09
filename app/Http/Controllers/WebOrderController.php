@@ -572,6 +572,7 @@ class WebOrderController extends Controller
                     </script>
                     <?php
 
+
                     return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
               }
             }
@@ -582,6 +583,19 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
+            $WebOrder = new WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
@@ -823,6 +837,19 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
+            $WebOrder = new WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
             return view('taxi.homeReqObject', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
@@ -1138,6 +1165,19 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
+            $WebOrder = new WebOrderController();
+            $tariffs = $WebOrder->tariffs();
+            $response_arr = json_decode($tariffs, true);
+            $ii = 0;
+            for ($i = 0; $i < count($response_arr); $i++) {
+                switch ($response_arr[$i]['name']) {
+                    case 'Базовый':
+                    case 'Бизнес-класс':
+                    case 'Эконом-класс':
+                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                        $ii++;
+                }
+            }
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
