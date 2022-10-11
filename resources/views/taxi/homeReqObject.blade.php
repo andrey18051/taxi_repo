@@ -1,4 +1,4 @@
-@extends('layouts.logoutObject2')
+@extends('layouts.taxiNewObjectReq')
 
 @section('content')
     {{-- print_r($params) --}}

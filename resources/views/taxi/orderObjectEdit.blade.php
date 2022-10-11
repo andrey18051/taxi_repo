@@ -1,4 +1,4 @@
-@extends('layouts.logoutObject2')
+@extends('layouts.taxiNewObjectEdit')
 
 @section('content')
     {{-- print_r($orderId) --}}

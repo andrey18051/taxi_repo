@@ -1,4 +1,4 @@
-@extends('layouts.logoutObject2')
+@extends('layouts.taxiNewObject')
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">

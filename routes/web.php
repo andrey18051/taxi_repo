@@ -83,11 +83,6 @@ Route::get('/news-short', function () {
 
 Route::get('/', function () {
 
-    $WebOrder = new WebOrderController();
-/*
-    $WebOrder->version_street();
-    $WebOrder->version_object();*/
-
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
     $start_time = strtotime(config('app.start_time')); // начальное время
@@ -99,19 +94,17 @@ Route::get('/', function () {
 
     if ($start_time  <= $end_time) {
         if ($time >= $start_time && $time <= $end_time) {
-            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
-            return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
         }
     } else {
         if ($time >= $start_time || $time <= $end_time) {
-            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
-            return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
         }
     }
-
-
 })->name('home');
 
 Route::get('/home-news', function () {
@@ -131,14 +124,14 @@ Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 
     if ($start_time  <= $end_time) {
         if ($time >= $start_time && $time <= $end_time) {
-            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
-            return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name,  'time' => date("h:i:sa")]);  }
+            return view('taxi.homeWelcome', ['phone' => $phone, 'user_name' => $user_name,  'time' => date("h:i:sa")]);  }
     } else {
         if ($time >= $start_time || $time <= $end_time) {
-            return view('taxi.homeWellcomeWar', ['phone' => '000', 'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWar', ['phone' => '000', 'time' => date("h:i:sa")]);
         } else {
-            return view('taxi.homeWellcome', ['phone' => $phone, 'user_name' => $user_name, 'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcome', ['phone' => $phone, 'user_name' => $user_name, 'time' => date("h:i:sa")]);
         }
     }
 })->name('home-phone-user_name');
@@ -159,13 +152,13 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 
     if ($start_time  <= $end_time) {
         if ($time >= $start_time && $time <= $end_time) {
-            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
-            return view('taxi.homeWellcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
         }
     } else {
         if ($time >= $start_time || $time <= $end_time) {
-            return view('taxi.homeWellcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
             $WebOrder = new WebOrderController();
             $tariffs = $WebOrder->tariffs();
@@ -277,7 +270,6 @@ Route::get('/homeorder-object/{id}', function ($id) {
             case 'Базовый':
             case 'Бизнес-класс':
             case 'Эконом-класс':
-
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
@@ -460,7 +452,7 @@ Route::get('/costhistory/{authorization}', function ($authorization) {
 /**
  * Редактирование расчета
  */
-Route::get('/costhistory/orders/edit/{id}', function ($id){
+/*Route::get('/costhistory/orders/edit/{id}', function ($id){
     //   return ;
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
@@ -480,8 +472,11 @@ Route::get('/costhistory/orders/edit/{id}', function ($id){
 
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
-    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])->with('success', 'Уважно перевірте та підтвердіть замовлення');
-})->name('costhistory-orders-id');
+    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])
+        ->with('success', 'Уважно перевірте та підтвердіть замовлення');
+})->name('costhistory-orders-id');*/
+
+Route::get('/costhistory/orders/edit/{id}',  [WebOrderController::class, 'costHistory'])->name('costhistory-orders-id');
 
 /**
  * Удаление расчета

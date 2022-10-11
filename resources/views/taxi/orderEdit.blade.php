@@ -1,4 +1,4 @@
-@extends('layouts.logout2')
+@extends('layouts.taxiNewStreetEdit')
 
 @section('content')
     {{-- print_r($orderId) --}}
@@ -197,31 +197,5 @@
         <br>
     </div>
 
-<!--    <script>
-        function showHide(element_id) {
-            //Если элемент с id-шником element_id существует
-            if (document.getElementById(element_id)) {
-                //Записываем ссылку на элемент в переменную obj
-                var obj = document.getElementById(element_id);
-                //Если css-свойство display не block, то:
 
-                if (element_id == "block_city") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
-
-                if (element_id == "block_id") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
-        }
-            //Если элемент с id-шником element_id не найден, то выводим сообщение
-            else alert("Элемент с id: " + element_id + " не найден!");
-        }
-
-    </script>-->
 @endsection

@@ -1,4 +1,4 @@
-@extends('layouts.logout2')
+@extends('layouts.taxiNewHistory')
 
 @section('content')
     {{-- print_r($response) --}}
