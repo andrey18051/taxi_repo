@@ -30,9 +30,10 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
 
-                <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
+                <a class="navbar-brand" href="{{ url('/') }}" target="_blank"  title="Вихід">
                     <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                     {{ config('app.name', 'Laravel') }}
+
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>

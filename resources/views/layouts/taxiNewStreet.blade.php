@@ -53,12 +53,12 @@
                 @if( $user_name != 'Новий замовник' )
                     <a class="navbar-brand" href="{{route('home-phone-user_name',
                             ['phone' => $phone, 'user_name' => $user_name])
-                            }}" target="_blank">
+                            }}" target="_blank" title="На головну">
                         <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                         {{ config('app.name', 'Laravel') }}
                     </a>
                 @else
-                    <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
+                    <a class="navbar-brand" href="{{ url('/') }}" target="_blank" title="На головну">
                         <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                         {{ config('app.name', 'Laravel') }}
                     </a>

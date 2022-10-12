@@ -32,7 +32,7 @@
 
                 <a class="navbar-brand" href="{{route('home-phone-user_name',
                             [substr($response["user_phone"], 3), $response["user_first_name"]])
-                            }}" target="_blank">
+                            }}" target="_blank" title="Нове замовлення">
                     <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                     {{ config('app.name', 'Laravel') }}
                 </a>
