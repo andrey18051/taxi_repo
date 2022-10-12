@@ -158,13 +158,13 @@
         function myMap() {
             var marker;
             var myLatlng = {
-                lat: 50.418843668133,
-                lng: 30.539846933016
+                lat: 50.568235937668135,
+                lng: 30.26999524844567
             };
             var marker2;
             var myLatlng2 = {
-                lat: 50.376733115795,
-                lng: 30.609379358341
+                lat: 50.51499815972034,
+                lng: 30.23909620059411
             };
 
             var mapProp= {
