@@ -1819,10 +1819,10 @@ class WebOrderController extends Controller
 
                 } else {
                     $json_arr = json_decode($responseWeb, true);
-
-                    $message_error = $json_arr['description'];
+                    $message_error = $json_arr['Message'];
                     return redirect()->route('homeblank2')->with('error', "Помілка. $message_error")
-                        ->with('back', 'Зробити нове замовлення');
+                        ->with('back', 'Зробити нове замовлення')
+                        ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:");
                 }with('back', 'Зробити нове замовлення');
 
             }
