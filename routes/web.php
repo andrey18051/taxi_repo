@@ -317,6 +317,12 @@ Route::get('/homeorder/afterorder/{id}', function ($id) {
     return view('taxi.homeblank', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
 })->name('home-id-afterorder');
 
+Route::get('/homeorder/afterorder/web/{id}', function ($id) {
+    $orderId = json_decode(\App\Models\Orderweb::where('id', $id)->get(), true);
+    return view('taxi.homeblank', ['orderId' => $orderId, 'id' => $id]);
+})->name('home-id-afterorder-web');
+
+
 Route::get('/homeblank', function () {
     return view('taxi.homeblank');
 })->name('homeblank');

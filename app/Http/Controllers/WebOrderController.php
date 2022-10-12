@@ -1703,68 +1703,66 @@ class WebOrderController extends Controller
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
                     'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                    /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                        'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-                ]);
+                    ]);
 
-                if ($responseWeb->status() == "200") {
+                    if ($responseWeb->status()  == "200") {
                     /**
                      * Сохранние расчетов в базе
                      */
-                    $orderweb = new Orderweb();
-                    $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
-                    $orderweb->user_phone = $user_phone;//Телефон пользователя
-                    $orderweb->client_sub_card = null;
-                    $orderweb->required_time = $required_time; //Время подачи предварительного заказа
-                    $orderweb->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
-                    $orderweb->route_address_entrance_from = null;
-                    $orderweb->comment = $comment;  //Комментарий к заказу
-                    $orderweb->add_cost = $add_cost; //Добавленная стоимость
-                    $orderweb->wagon = $wagon; //Универсал: True, False
-                    $orderweb->minibus = $minibus; //Микроавтобус: True, False
-                    $orderweb->premium = $premium; //Машина премиум-класса: True, False
-                    $orderweb->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
-                    $orderweb->route_undefined = $route_undefined; //По городу: True, False
-                    $orderweb->routefrom = $from; //Обязательный. Улица откуда.
-                    $orderweb->routefromnumber = $from_number; //Обязательный. Дом откуда.
-                    $orderweb->routeto = $to; //Обязательный. Улица куда.
-                    $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
-                    $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                    $json_arr = json_decode($response, true);
+                        $orderweb = new Orderweb();
+                        $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
+                        $orderweb->user_phone = $user_phone;//Телефон пользователя
+                        $orderweb->client_sub_card = null;
+                        $orderweb->required_time = $required_time; //Время подачи предварительного заказа
+                        $orderweb->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
+                        $orderweb->route_address_entrance_from = null;
+                        $orderweb->comment = $comment;  //Комментарий к заказу
+                        $orderweb->add_cost = $add_cost; //Добавленная стоимость
+                        $orderweb->wagon = $wagon; //Универсал: True, False
+                        $orderweb->minibus = $minibus; //Микроавтобус: True, False
+                        $orderweb->premium = $premium; //Машина премиум-класса: True, False
+                        $orderweb->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
+                        $orderweb->route_undefined = $route_undefined; //По городу: True, False
+                        $orderweb->routefrom = $from; //Обязательный. Улица откуда.
+                        $orderweb->routefromnumber = $from_number; //Обязательный. Дом откуда.
+                        $orderweb->routeto = $to; //Обязательный. Улица куда.
+                        $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
+                        $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+                        $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                        $json_arr = json_decode($response, true);
 
-                    $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
-                    $json_arrWeb = json_decode($responseWeb, true);
-                    $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
-                    $orderweb->save();
-                    /**
-                     *
-                     */
-                    if ($req->payment_type == '0') {
-                        $payment_type = 'готівка';
+                        $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
+                        $json_arrWeb = json_decode($responseWeb, true);
+                        $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
+                        $orderweb->save();
+                        /**
+                         *
+                         */
+                        if ($req->payment_type == '0') {
+                            $payment_type = 'готівка';
+                        } else {
+                            $payment_type = 'безготівка';
+                        };
+
+                        if ($route_undefined !== false) {
+                            $order = "Вітаємо $user_full_name
+                    . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту. Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
+                        } else {
+                            $order = "Вітаємо $user_full_name
+                    . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
+                        };
+                        return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
+                            ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
+                            ->with('back', 'Зробити нове замовлення')
+                            ->with('cancel', 'Скасувати замовлення.');
+
                     } else {
-                        $payment_type = 'безготівка';
-                    };
-
-                    if ($route_undefined !== false) {
-                        $order = "Вітаємо $user_full_name
-                . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту. Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
-                    } else {
-                        $order = "Вітаємо $user_full_name
-                . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
-                    };
-                    return redirect()->route('homeblank-id', $orderweb)->with('success', $order)
-                        ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
-                        ->with('back', 'Зробити нове замовлення')
-                        ->with('cancel', 'Скасувати замовлення.');
-
-                } else {
-                    $json_arr = json_decode($responseWeb, true);
-                    $message_error = $json_arr['Message'];
-                    return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $message_error")
-                        ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:")
-                        ->with('back', 'Зробити нове замовлення');
-                }
+                        $json_arr = json_decode($responseWeb, true);
+                        $message_error = $json_arr['Message'];
+                        return redirect()->route('home-id-afterorder', $id)->with('error', "Помілка створення заказу. $message_error")
+                            ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:")
+                            ->with('back', 'Зробити нове замовлення');
+                    }
             }
 
 
@@ -2154,7 +2152,7 @@ class WebOrderController extends Controller
                 break;
         }
 
-        return redirect()->route('homeblank')->with('success', $resp_answer)
+        return redirect()->route('home-id-afterorder-web', ['id' => $id])->with('success', $resp_answer)
             ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Інформацію можна отримати за номером оператора:")
             ->with('back', 'Зробити нове замовлення');
     }

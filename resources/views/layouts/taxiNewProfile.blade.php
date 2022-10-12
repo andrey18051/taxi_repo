@@ -30,7 +30,9 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
 
-                <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
+                <a class="navbar-brand" href="{{route('home-phone-user_name',
+                            [substr($response["user_phone"], 3), $response["user_first_name"]])
+                            }}" target="_blank">
                     <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                     {{ config('app.name', 'Laravel') }}
                 </a>

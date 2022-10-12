@@ -50,11 +50,20 @@
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
+                @if($params['user_full_name'] != 'Новий замовник' )
+                    <a class="navbar-brand" href="{{route('home-phone-user_name',
+                            ['phone' => $params['user_phone'], 'user_name' =>$params['user_full_name']])
+                            }}" target="_blank">
+                        <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                @else
+                    <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
+                        <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                @endif
 
-                <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
-                    <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>

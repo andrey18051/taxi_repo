@@ -26,10 +26,19 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
 
-                <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
-                    <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
+                @if($orderId[0]['user_full_name'] !== "Новий замовник")
+                    <a class="navbar-brand" href="{{route('home-phone-user_name',
+                            ['phone' => $orderId['0']['user_phone'], 'user_name' => $orderId['0']['user_full_name']])
+                            }}" target="_blank">
+                        <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                @else
+                    <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
+                        <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                @endif
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -39,12 +48,11 @@
                         <!-- Authentication Links -->
                         <ul class="navbar-nav ms-auto">
                             <!-- Authentication Links -->
-
-
-                                    <li class="nav-item dropdown">
+                            @if( $orderId['0']['user_full_name'] != 'Новий замовник' )
+                                <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
 
-                                        {{$orderId[0]['user_full_name']}}
+                                        {{ $orderId['0']['user_full_name'] }}
 
                                     </a>
 
@@ -64,8 +72,26 @@
                                         </form>
                                     </div>
                                 </li>
+                            @else
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('login-taxi') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0v-2z"/>
+                                            <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                                        </svg>
+                                        {{ __('Вхід') }}
+                                    </a>
+                                </li>
 
-
+                                <li class="nav-item">
+                                    <a id="navbar" class="nav-link" href="{{ route('registration-sms', '000') }}" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-r-circle" viewBox="0 0 16 16">
+                                            <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8Zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM5.5 4.002h3.11c1.71 0 2.741.973 2.741 2.46 0 1.138-.667 1.94-1.495 2.24L11.5 12H9.98L8.52 8.924H6.836V12H5.5V4.002Zm1.335 1.09v2.777h1.549c.995 0 1.573-.463 1.573-1.36 0-.913-.596-1.417-1.537-1.417H6.835Z"/>
+                                        </svg>
+                                        {{ __('Реєстрація') }}
+                                    </a>
+                                </li>
+                            @endif
                         </ul>
 
 
