@@ -327,6 +327,10 @@ Route::get('/homeblank', function () {
     return view('taxi.homeblank');
 })->name('homeblank');
 
+Route::get('/homeblank2', function () {
+    return view('taxi.homeblank2');
+})->name('homeblank2');
+
 Route::get('/homeblank/{id}', function ($id) {
     return view('taxi.homeblank', ['id' => $id]);
 })->name('homeblank-id');

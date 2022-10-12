@@ -1807,14 +1807,13 @@ class WebOrderController extends Controller
                     'route_undefined' => true, //По городу: True, False
                     'add_cost' => '-35', //Добавленная стоимость
                     'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-
-                         ['name' => 'ОПЕРАТОР! НАБЕРИТЕ КЛИЕНТА на этот номер', 'lat' => '50.568235937668135', 'lng' => '30.26999524844567' ],
+                         ['name' => 'ОПЕРАТОР! НАБЕРИТЕ КЛИЕНТА на этот номер', 'lat' => '50.376733115795', 'lng' => '30.609379358341' ],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
                 ]);
 
                 if ($responseWeb->status() == "200") {
-                    return redirect()->route('homeblank')->with('success', 'Ваш телефон успішно надіслано. ')
+                    return redirect()->route('homeblank2')->with('success', 'Ваш телефон успішно надіслано. ')
                         ->with('tel', "Чекайте або наберіть диспетчера:")
                         ->with('back', 'Зробити нове замовлення');
 
@@ -1822,9 +1821,10 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($responseWeb, true);
 
                     $message_error = $json_arr['description'];
-                    return redirect()->route('homeblank')->with('error', "Помілка. $message_error")
+                    return redirect()->route('homeblank2')->with('error', "Помілка. $message_error")
                         ->with('back', 'Зробити нове замовлення');
-                }
+                }with('back', 'Зробити нове замовлення');
+
             }
         }
         if ($error) {
