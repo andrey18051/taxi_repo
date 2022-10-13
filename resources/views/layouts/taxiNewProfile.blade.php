@@ -16,14 +16,36 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>-->
     <!-- Scripts-->
     <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+
 
     <!-- Fonts -->
 <!--    <link rel="preload" rel="dns-prefetch" href="//fonts.gstatic.com" as="font">
     <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">-->
 
     <!-- Styles -->
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/base/jquery-ui.css">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
+    <script type="text/javascript">
+        var route = "{{ url('autocomplete-search2') }}";
+        $.ajax({
+            url: route,         /* Куда пойдет запрос */
+            method: 'get',             /* Метод передачи (post или get) */
+            dataType: 'json',          /* Тип данных в ответе (xml, json, script, html). */
+            data: {text: 'Текст'},     /* Параметры передаваемые в запросе. */
+            success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+
+                $(function() {
+                    $('#route_address_from').autocomplete({
+                        source: data
+                    })
+                });
+            }
+        });
+
+    </script>
 </head>
 <body>
     <div id="app">
@@ -46,10 +68,10 @@
                         <ul class="navbar-nav ms-auto">
                             <!-- Authentication Links -->
 
-                                @if (session('user_first_name') !== null)
+                                 @if ($response["user_first_name"] !== null)
                                     <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                        {{ session('user_first_name') }}
+                                        {{$response["user_first_name"]}}
                                     </a>
 
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

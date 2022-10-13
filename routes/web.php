@@ -354,11 +354,8 @@ Route::get('/profile/view/{authorization}', function ($authorization) {
     return view('taxi.profile', ['authorization' => $authorization, 'response' => $response]);
 })->name('profile-view');
 
-Route::get('/profile/edit/form/{authorization}', function ($authorization) {
-    $response = new WebOrderController();
-    $response = $response->account($authorization);
-    return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
-})->name('profile-edit-form');
+Route::get('/profile/edit/form/{authorization}', [WebOrderController::class, 'profileEditForm'])
+    ->name('profile-edit-form');
 
 Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('profile-edit');
 
@@ -527,11 +524,11 @@ Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', func
 Route::get('/webordersCancel/{id}', [WebOrderController::class, 'webordersCancel'])
     ->name('webordersCancel');
 
-Route::get('/profile/edit/form/{authorization}', function ($authorization) {
+/*Route::get('/profile/edit/form/{authorization}', function ($authorization) {
     $response = new WebOrderController();
     $response = $response->account($authorization);
     return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
-})->name('profile-edit-form');
+})->name('profile-edit-form');*/
 
 
 Route::get('/costhistory/orders', function (){

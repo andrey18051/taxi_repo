@@ -91,14 +91,30 @@ class WebOrderController extends Controller
         if ($response->status() == "200") {
             $user_first_name = $response_arr['user_first_name'];
             return redirect()->route('profile-view', ['authorization' => $authorization])
-                ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".")
-                ->with('user_first_name', $user_first_name)
-                ->with('user_phone', $response_arr['user_login']);
+                ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
         } else {
             return redirect()->route('taxi-login')
                 ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
         }
     }
+
+    /**
+     * Форма редактирования профиля клиента
+     * @return string
+     */
+    public function profileEditForm ($authorization)
+    {
+        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        $response_arr = json_decode($response, true);
+        $user_first_name = $response_arr['user_first_name'];
+
+        //dd($user_first_name);
+        return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
+    }
+
     /**
      * Обновление профиля клиента
      * @return int
