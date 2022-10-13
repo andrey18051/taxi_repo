@@ -457,33 +457,20 @@ Route::get('/costhistory/{authorization}', function ($authorization) {
 })->name('costhistory');
 
 /**
- * Редактирование расчета
+ * Редактирование расчета из Истории поездок
  */
-/*Route::get('/costhistory/orders/edit/{id}', function ($id){
-    //   return ;
-    $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-            case 'Манго':
-            case 'Онлайн платный':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
 
-    $orderId = json_decode(Order::where('id', $id)->get(), true);
+Route::get('/costhistory/orders/edit/{id}', [WebOrderController::class, 'costHistory'])
+    ->name('costhistory-orders-id');
 
-    return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId])
-        ->with('success', 'Уважно перевірте та підтвердіть замовлення');
-})->name('costhistory-orders-id');*/
 
-Route::get('/costhistory/orders/edit/{id}',  [WebOrderController::class, 'costHistory'])->name('costhistory-orders-id');
+/**
+ * Редактирование расчета из Дома
+ */
+
+Route::get('/costhome/{route_address_from}/{route_address_number_from}/{authorization}', [WebOrderController::class, 'costHome'])
+    ->name('costhome');
+
 
 /**
  * Удаление расчета
