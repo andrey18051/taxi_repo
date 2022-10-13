@@ -78,8 +78,11 @@
                                     Додати до вартости: <span id="rangeValue"> 0 </span>грн.
                                 </label>
                                 <input type="range"
-
-                                       min="0"
+                                       @if(config('app.server') == 'Одесса')
+                                            min="-30"
+                                       @else
+                                            min="0"
+                                       @endif
                                        max="1000"
                                        step="5"
                                        value="0" id="add_cost" name="add_cost" style="text-align: center"

@@ -13,6 +13,7 @@ use App\Models\Quite;
 use App\Models\Street;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -996,6 +997,7 @@ class WebOrderController extends Controller
                 alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
             </script>
             <?php
+            $WebOrder->version_street();
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
         /**
@@ -2028,28 +2030,47 @@ class WebOrderController extends Controller
 
         $svd = Config::where('id', '1')->first();
         //Проверка версии геоданных и обновление или создание базы адресов
+        if (config('app.server') == 'Киев') {
+            if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
+                $svd->streetVersionDate = $json_arr['version_date'];
+                $svd->save();
+                DB::table('streets')->truncate();
+                $i = 0;
+                do {
+                    $streets = $json_arr['geo_street'][$i]["localizations"];
+                    foreach ($streets as $val) {
+                        if ($val["locale"] == "UK") {
+                            $street = new Street();
+                            $street->name = $val['name'];
+                            $street->save();
 
-        if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
-            $svd->streetVersionDate = $json_arr['version_date'];
-            $svd->save();
-            DB::table('streets')->truncate();
-            $i = 0;
-            do {
-                $streets = $json_arr['geo_street'][$i]["localizations"];
-                foreach ($streets as $val) {
-                    if ($val["locale"] == "UK") {
-                        $street = new Street();
-                        $street->name = $val['name'];
-                        $street->save();
-
+                        }
                     }
+                    $i++;
                 }
-                $i++;
+                while ($i < count($json_arr['geo_street'])) ;
+
             }
-            while ($i < count($json_arr['geo_street'])) ;
-
         }
+        if (config('app.server') == 'Одесса') {
+            if ($json_arr['version_date'] !== $svd->streetVersionDate || Street::all()->count() === 0) {
+                $svd->streetVersionDate = $json_arr['version_date'];
+                $svd->save();
+                DB::table('streets')->truncate();
+                $i = 0;
 
+                do {
+
+                            $street = new Street();
+                            $street->name = $json_arr['geo_street'][$i]["name"];
+                            $street->save();
+
+                    $i++;
+                }
+                while ($i < count($json_arr['geo_street'])) ;
+
+            }
+        }
     }
 
     /**
@@ -2073,27 +2094,49 @@ class WebOrderController extends Controller
 
         $svd = Config::where('id', '1')->first();
         //Проверка версии геоданных и обновление или создание базы адресов
-        if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
-             $svd->objectVersionDate = $json_arr['version_date'];
-             $svd->save();
+        if (config('app.server') == 'Киев') {
+            if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
+                $svd->objectVersionDate = $json_arr['version_date'];
+                $svd->save();
 
-             DB::table('objecttaxis')->truncate();
-             $i = 0;
-             do {
-                 $streets = $json_arr['geo_object'][$i]["localizations"];
-                 foreach ($streets as $val) {
-                     if ($val["locale"] == "UK") {
-                         $objects = new Objecttaxi();
-                         $objects->name = $val['name'];
-                         $objects->save();
+                DB::table('objecttaxis')->truncate();
+                $i = 0;
+                do {
+                    $streets = $json_arr['geo_object'][$i]["localizations"];
+                    foreach ($streets as $val) {
+                        if ($val["locale"] == "UK") {
+                            $objects = new Objecttaxi();
+                            $objects->name = $val['name'];
+                            $objects->save();
 
-                     }
-                 }
-                 $i++;
-             }
-             while ($i < count($json_arr['geo_object'])) ;
+                        }
+                    }
+                    $i++;
+                }
+                while ($i < count($json_arr['geo_object'])) ;
 
-         }
+            }
+        }
+        if (config('app.server') == 'Одесса') {
+            if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
+                $svd->objectVersionDate = $json_arr['version_date'];
+                $svd->save();
+                DB::table('objecttaxis')->truncate();
+                $i = 0;
+
+                do {
+
+                    $objects = new Objecttaxi();
+                    $objects->name = $json_arr['geo_object'][$i]["name"];
+                    $objects->save();
+
+                    $i++;
+                }
+                while ($i < count($json_arr['geo_object'])) ;
+
+            }
+        }
+
     }
 
     /**

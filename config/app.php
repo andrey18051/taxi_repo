@@ -237,7 +237,7 @@ return [
      * Одесса http://31.43.107.151:7303
      * Киев http://31.43.107.151:7306
      */
-    'taxi2012Url' => 'http://31.43.107.151:7306', //
+    'taxi2012Url' => 'http://31.43.107.151:7303',
 
     /**
      * Номер колоны, в которую будут приходить заказы. 0, 1 или 2
@@ -246,17 +246,22 @@ return [
 
     /**
      * Мастер логин и пароль Одесса
+     * 'server' => 'Одесса',
      * 'username' => '0936734488',
      * 'password' => '22223344',
      */
 
+    'server' => 'Одесса',
+    'username' => '0936734488',
+    'password' => '22223344',
 
     /**
      * Мастер логин и пароль Киев
+     *   'server' => 'Киев',
+     *   'username' => 'ONLINE56',
+     *   'password' => 'gggdsh5+',
      */
 
-    'username' => 'ONLINE56',
-    'password' => 'gggdsh5+',
     /**
      * reCaptha key
      * 6LeE07AhAAAAAFVS8gtRKce0L76F8U1JzADOiho9
