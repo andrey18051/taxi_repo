@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebOrderController;
 use App\Models\NewsList;
 use App\Models\Order;
+use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -301,24 +302,17 @@ Route::get('/homeorder-object/{id}', function ($id) {
 
 Route::get('/homeorder/afterorder/{id}', function ($id) {
     $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
+
     $orderId = json_decode(Order::where('id', $id)->get(), true);
-    return view('taxi.homeblank', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
+
+    $routeArr['from'] = $WebOrder->geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
+    $routeArr['to'] = $WebOrder->geodataSearch($orderId[0]["routeto"], $orderId[0]["routetonumber"]);
+
+    return view('taxi.homeblankMap', [ 'orderId' => $orderId, 'id' => $id, 'routeArr' => $routeArr]);
 })->name('home-id-afterorder');
 
 Route::get('/homeorder/afterorder/web/{id}', function ($id) {
-    $orderId = json_decode(\App\Models\Orderweb::where('id', $id)->get(), true);
+    $orderId = json_decode(Orderweb::where('id', $id)->get(), true);
     return view('taxi.homeblank', ['orderId' => $orderId, 'id' => $id]);
 })->name('home-id-afterorder-web');
 
@@ -488,7 +482,7 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
  */
 Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
     $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
+   /* $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
     $ii = 0;
     for ($i = 0; $i < count($response_arr); $i++) {
@@ -499,7 +493,7 @@ Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', func
                 $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                 $ii++;
         }
-    }
+    }*/
 
      return $WebOrder->costWebOrder($id);
 })->name('costhistory-orders-neworder');

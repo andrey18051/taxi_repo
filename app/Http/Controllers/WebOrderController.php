@@ -2225,7 +2225,51 @@ class WebOrderController extends Controller
 
 
 
+    /**
+     * Гео данные
+     * Поиск гео-данных (улиц и объектов) по нескольким буквам
+     * @return string
+     */
+    public function geodataSearch($q, $house)
+    {
 
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = config('app.taxi2012Url') . '/api/geodata/search';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'q' => $q, //Обязательный. Несколько букв для поиска объекта.
+            'offset' => 0, //Смещение при выборке (сколько пропустить).
+            'limit' => 10, //Кол-во возвращаемых записей (предел).
+            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
+            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
+            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
+                Возможные значения:
+                * (возвращает все поля)
+                name
+                old_name
+                houses
+                lat
+                lng
+                locale*/
+        ]);
+        $response_arr = json_decode($response, true);
+  //dd($response_arr["geo_objects"]["geo_object"][0]["lat"]);
+
+        if ($house !== null) {
+            $LatLng["lat"] = $response_arr["geo_streets"]["geo_street"][0]["houses"][$house]["lat"];
+            $LatLng["lng"] = $response_arr["geo_streets"]["geo_street"][0]["houses"][$house]["lng"];
+        }
+        else {
+            $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
+            $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
+        }
+
+        return $LatLng;
+    }
 
 
 
@@ -2855,39 +2899,7 @@ class WebOrderController extends Controller
         return $response->body() ;
     }
 
-    /**
-     * Гео данные
-     * Поиск гео-данных (улиц и объектов) по нескольким буквам
-     * @return string
-     */
-    public function geodataSearch()
-    {
-        $username = '0936734455';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/search';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url, [
-            'q' => 'Оде', //Обязательный. Несколько букв для поиска объекта.
-            'offset' => 0, //Смещение при выборке (сколько пропустить).
-            'limit' => 10, //Кол-во возвращаемых записей (предел).
-            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
-            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
-            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
-                Возможные значения:
-                * (возвращает все поля)
-                name
-                old_name
-                houses
-                lat
-                lng
-                locale*/
-        ]);
-
-        return $response->body() ;
-    }
 
     /**
      * Гео данные
