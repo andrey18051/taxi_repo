@@ -82,7 +82,7 @@ Route::get('/news-short', function () {
 /***********************************************************************************************************************
 */
 
-Route::get('/', function () {
+Route::get('/homeWelcome', function () {
 
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
@@ -108,7 +108,7 @@ Route::get('/', function () {
     }
 })->name('home');
 
-Route::get('/home-news', function () {
+Route::get('/', function () {
     return view('taxi.homeNewsVue');
 })->name('home-news');
 

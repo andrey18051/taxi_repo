@@ -40,15 +40,17 @@
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
-
-            <a class="navbar-brand" href="{{ url('/') }}" target="_blank">
-                <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
+            <img src="{{ asset('img/logo.jpg') }}" style="width: 100px; height: auto">
+            <a class="navbar-brand gradient" href="{{ url('/') }}" target="_blank">
                 {{ config('app.name', 'Laravel') }}
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                <span class="navbar-toggler-icon"></span>
-            </button>
 
+
+
+            <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" class="gradient"
+                target="_blank" title="Розрахунок вартості"
+                style="text-decoration: none; margin-top: 20px">Низька ціна та Швидка подача таксі Києва та області.  <br>
+                Розрахуйте вартість поїздки онлайн.</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto">
                     <!-- Links -->
