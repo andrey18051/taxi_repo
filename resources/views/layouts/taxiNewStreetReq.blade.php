@@ -51,7 +51,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
 
-                @if($params['user_full_name'] != 'Новий замовник' )
+                @if($params['user_phone'] != '000')
                     <a class="navbar-brand" href="{{route('home-phone-user_name',
                             ['phone' => $params['user_phone'], 'user_name' =>$params['user_full_name']])
                             }}" target="_blank" title="На головну">
@@ -74,7 +74,7 @@
                         <ul class="navbar-nav ms-auto">
                             <!-- Authentication Links -->
 
-                            @if($params['user_full_name'] != 'Новий замовник' )
+                            @if($params['user_phone'] != '000')
                                     <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
 

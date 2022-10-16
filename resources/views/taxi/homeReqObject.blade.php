@@ -1,7 +1,7 @@
 @extends('layouts.taxiNewObjectReq')
 
 @section('content')
-    {{-- print_r($params) --}}
+    {{-- $params['user_phone'] --}}
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -15,7 +15,7 @@
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
-                        @if ($params['user_phone'] == '0936665544')
+                        @if ($params['user_phone'] == '000')
                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
                         @else
                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
