@@ -595,6 +595,37 @@ Route::get('/modal-error', function () {
 })->name('modal-error');
 
 
+/**
+ * Реклама
+ */
+
+Route::get('/orderReklama', function () {
+    return view('reklama.oderReklama');
+})->name('orderReklama');
+
+Route::get('/driverReklama', function () {
+    return view('reklama.driverReklama');
+})->name('driverReklama');
+
+Route::get('/stationReclama', function () {
+    return view('reklama.stationReklama');
+})->name('stationReklama');
+
+Route::get('/airportReklama', function () {
+    return view('reklama.airportReklama');
+})->name('airportReklama');
+
+Route::get('/regionReklama', function () {
+    return view('reklama.regionReklama');
+})->name('regionReklama');
+
+Route::get('/tableReklama', function () {
+    return view('reklama.tableReklama');
+})->name('tableReklama');
+
+
+
+
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
 Route::get('/taxi/changePassword', [TaxiController::class, 'changePassword'])->name('taxi-changePassword');
 Route::get('/taxi/restoreSendConfirmCode', [TaxiController::class, 'restoreSendConfirmCode'])->name('taxi-restoreSendConfirmCode');
