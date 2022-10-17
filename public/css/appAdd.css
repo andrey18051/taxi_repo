@@ -194,9 +194,9 @@ div.btn {
 }
 .older a:before {
     display: inline-block;
-    /*content: counter(li);
+    content: counter(li);
     counter-increment: li;
-    height: 30px;*/
+    height: 30px;
     width: 30px;
     text-align: center;
     border: solid 1px #dedede;
