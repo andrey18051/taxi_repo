@@ -173,48 +173,11 @@
             </div>
         </div>
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-3 col-sm-6 col-md-6">
 
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank"
-                               style="text-decoration: none;">Дешевое такси онлайн расчет</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https://m.easy-order-taxi.site/home-Object/000/Новий%20замовник" target="_blank"
-                               style="text-decoration: none;">Онлайн свободные авто такси</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https://m.easy-order-taxi.site/home-Map/000/Новий%20замовник" target="_blank"
-                               style="text-decoration: none;">Онлайн такси заказ Киев и обл</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank"
-                               style="text-decoration: none;">Онлайн дешевле можно только пешком. Закажите украинское такси и дайте свою оценку</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https:///m.easy-order-taxi.site/" target="_blank"
-                               style="text-decoration: none;">Эконом служба Киев - быстро, доступно, недорого</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https://m.easy-order-taxi.site/home-Object/000/Новий%20замовник" target="_blank"
-                               style="text-decoration: none;">Мы не ложим болт на заказчиков при дешевых ценах</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https://m.easy-order-taxi.site/home-Map/000/Новий%20замовник" target="_blank"
-                               style="text-decoration: none;">Качественный сервис по низким ценам быстрее чем через оператор</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="https://m.easy-order-taxi.site/home-Street/000/Новий%20замовник" target="_blank"
-                               style="text-decoration: none;">Тариф узнайте на сайте такси</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-lg-9 col-sm-6 col-md-6">
-                    <news-component></news-component>
-                </div>
-                <div class="container" style="text-align: center">
+
+                <news-component></news-component>
+
+                <div class="container">
                     <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                         <blockquote class="blockquote-3">
                             <p> <?php echo $quitesArr[$rand] ?></p>
@@ -223,8 +186,6 @@
                     </a>
                 </div>
 
-
-            </div>
         </div>
 
 
