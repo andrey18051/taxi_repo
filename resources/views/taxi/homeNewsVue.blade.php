@@ -173,7 +173,7 @@
             </div>
         </div>
         <div class="container-fluid">
-
+            <div class="offset-lg-3">
 
                 <news-component></news-component>
 
@@ -185,7 +185,7 @@
                         </blockquote>
                     </a>
                 </div>
-
+            </div>
         </div>
 
 

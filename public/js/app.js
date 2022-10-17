@@ -5468,6 +5468,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "News",
@@ -31267,6 +31268,10 @@ var render = function () {
       staticStyle: { display: "block", overflow: "auto", "max-width": "100%" },
     },
     [
+      _c("br"),
+      _vm._v(" "),
+      _vm._m(0),
+      _vm._v(" "),
       _c("v-table", {
         staticClass: "my-2 table table-striped",
         attrs: {
@@ -31378,7 +31383,16 @@ var render = function () {
     1
   )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("h5", { staticClass: "gradient" }, [
+      _c("b", [_vm._v("Останні новини")]),
+    ])
+  },
+]
 render._withStripped = true
 
 

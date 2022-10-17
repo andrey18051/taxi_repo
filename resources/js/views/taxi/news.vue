@@ -2,7 +2,8 @@
 
 
         <div class="container" style="display: block; overflow: auto; max-width: 100%;">
-
+            <br>
+            <h5 class="gradient"><b>Останні новини</b></h5>
                 <v-table
                 :data="news"
                 :filters="filters"
