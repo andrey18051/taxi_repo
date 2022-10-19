@@ -1,7 +1,7 @@
 @extends('layouts.taxiNewStreetReq')
 
 @section('content')
-    {{-- $params['user_phone'] --}}
+    {{-- dd($params)  --}}
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -23,14 +23,8 @@
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+                        <input type="hidden" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="{{ $params['routeto']}}" required>
 
-<!--                        <div class="container">
-                              <div class="row">
-                                    <div class="col-12">
-                                        <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="{{ $params['routefrom']}}" required>
-                                    </div>
-                              </div>
-                        </div>-->
                             <div class="container">
                                 <div class="row">
                                     <div class="col-8">

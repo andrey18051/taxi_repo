@@ -1214,8 +1214,8 @@ class WebOrderController extends Controller
         /**
          * Параметры запроса
          */
-        $params['user_full_name'] = '000';
-        $params['user_phone'] = "Новий замовник";
+        $params['user_full_name'] = "Новий замовник";
+        $params['user_phone'] = '000' ;
 
         $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
@@ -1346,13 +1346,9 @@ class WebOrderController extends Controller
 
                 $route_undefined = false;
                 $to = $req->search1;
-                $to_number = $req->to_number;
 
-                if ($req->route_undefined == 1 || $req->route_undefined == 'on') {
-                    $route_undefined = true;
-                    $to = $from;
-                    $to_number = $from_number;
-                };
+                $to_number = '';
+
                 $url = config('app.taxi2012Url') . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
@@ -1372,7 +1368,7 @@ class WebOrderController extends Controller
                     'route_undefined' => $route_undefined, //По городу: True, False
                     'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                         ['name' => $from, 'number' => $from_number],
-                        ['name' => $to, 'number' => $to_number],
+                        ['name' => $to],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
                     'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
@@ -1410,14 +1406,8 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
-                    if ($route_undefined === true) {
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
-                    } else {
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                    };
-
+                    $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом   від
+                        $from (будинок $from_number) до аеропорту Бориспіль. Оплата $req->payment_type. $auto_type";
 
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
@@ -1591,7 +1581,14 @@ class WebOrderController extends Controller
             if ($route_undefined === true) {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
             } else {
-                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                if ($to == 'Відділення поліції в аеропорту Бориспіль (Бориспіль)') {
+                    $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                    до аеропорту Бориспіль. Оплата $req->payment_type. $auto_type";
+
+                } else {
+                    $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                     до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                }
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -1723,7 +1720,8 @@ class WebOrderController extends Controller
             if ($route_undefined === true) {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from по місту. Оплата $req->payment_type. $auto_type";
             } else {
-                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from  до $to. Оплата $req->payment_type. $auto_type";
+                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from  до $to.
+                Оплата $req->payment_type. $auto_type";
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -1731,7 +1729,6 @@ class WebOrderController extends Controller
         } else {
             return redirect()->route('home-id-object', ['id' => $id])->with('error', "Помилка створення маршруту.");
         }
-
     }
 
     /**
@@ -1834,18 +1831,7 @@ class WebOrderController extends Controller
                     $ii++;
             }
         }
-        /*     $username = config('app.username');
-             $password = hash('SHA512', config('app.password'));
-             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-             $url = config('app.taxi2012Url') . '/api/clients/profile';
-             $response = Http::withHeaders([
-                 'Authorization' => $authorization,
-           ])->get($url);
 
-             $response_arr = json_decode($response, true);
-
-             $params['user_phone'] = substr($response["user_phone"], 3);
-              $params['user_full_name'] = $response_arr ['user_first_name'];*/
         $params['user_phone'] = '000';
         $params['user_full_name'] = 'Новий замовник';
         $params['routefrom'] = null;
