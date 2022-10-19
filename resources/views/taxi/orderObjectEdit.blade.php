@@ -62,7 +62,14 @@
                         <div class="container" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
-                                    <input type="tel" class="form-control" id="user_phone" name="user_phone" placeholder="Телефон? Приклад: 0936665544" value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
+                                    @if($orderId['0']['user_phone'] !== '000')
+                                    <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                           placeholder="Телефон? Приклад: 0936665544"
+                                           value="{{ $orderId['0']['user_phone'] }}"  autofocus required>
+                                    @else
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                               placeholder="Телефон? Приклад: 0936665544"    autofocus required>
+                                    @endif
                                 </div>
                             </div>
                         </div>

@@ -425,10 +425,18 @@ Route::get('/autocomplete-search-object-2', [TypeaheadObjectController::class, '
  * Расчет стоимости
  */
 
-Route::middleware('throttle:6,1')->get('/cost', [WebOrderController::class, 'cost'])->name('cost');
-Route::middleware('throttle:6,1')->get('/search/cost', [WebOrderController::class, 'cost'])->name('search-cost');
-Route::middleware('throttle:6,1')->get('/search/cost-object', [WebOrderController::class, 'costobject'])->name('search-cost-object');
-Route::middleware('throttle:6,1')->get('/search/cost-map', [WebOrderController::class, 'costmap'])->name('search-cost-map');
+Route::middleware('throttle:6,1')->get('/cost', [WebOrderController::class, 'cost'])
+    ->name('cost');
+Route::middleware('throttle:6,1')->get('/search/cost', [WebOrderController::class, 'cost'])
+    ->name('search-cost');
+Route::middleware('throttle:6,1')->get('/search/cost-object', [WebOrderController::class, 'costobject'])
+    ->name('search-cost-object');
+Route::middleware('throttle:6,1')->get('/search/cost-map', [WebOrderController::class, 'costmap'])
+    ->name('search-cost-map');
+Route::middleware('throttle:6,1')->get('/search/cost-transfer/{page}',
+    [WebOrderController::class, 'costtransfer'])
+    ->name('search-cost-transfer');
+
 /**
  * Расчет стоимости исправленного заказа
  */
@@ -465,6 +473,12 @@ Route::get('/costhistory/orders/edit/{id}', [WebOrderController::class, 'costHis
 Route::get('/costhome/{route_address_from}/{route_address_number_from}/{authorization}', [WebOrderController::class, 'costHome'])
     ->name('costhome');
 
+/**
+ * Трансфер в Борисполь
+ */
+
+Route::get('/transfer/{routeto}/{page}', [WebOrderController::class, 'transfer'])
+    ->name('transfer');
 
 /**
  * Удаление расчета

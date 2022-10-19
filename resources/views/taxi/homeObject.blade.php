@@ -19,11 +19,7 @@
                     @csrf
                     <div class="row">
                         <div class="col-sm-8 col-lg-8">
-                            @if ($phone == '000')
-                                <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
-                            @else
-                                <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$phone}}">
-                            @endif
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$phone}}">
                             <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                             <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$user_name}}">
                             <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />

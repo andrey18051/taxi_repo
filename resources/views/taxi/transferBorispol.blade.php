@@ -1,33 +1,48 @@
-@extends('layouts.taxiNewObjectReq')
+@extends('layouts.taxiNewStreetReq')
 
 @section('content')
     {{-- $params['user_phone'] --}}
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
-            <h2 class="gradient"><b>Київ та область</b></h2>
+            <h2 class="gradient"><b>Трансфер до аеропорту "Бориспіль"</b></h2>
             <p class="text-center gradient">Заповнити поля для розрахунку вартості поїздки.</p>
         </div>
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
 
-            <form action="{{route('search-cost-object')}}" id="form_object">
+            <form action="{{route('search-cost-transfer', "taxi.transferBorispol")}}" id="form_object">
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
-                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
+                        @if ($params['user_phone'] == '000')
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
+                        @else
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
+                        @endif
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
 
-                        <div class="container">
+<!--                        <div class="container">
                               <div class="row">
                                     <div class="col-12">
                                         <input type="text" class="form-control" id="search2" name="search2" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="{{ $params['routefrom']}}" required>
                                     </div>
                               </div>
-                        </div>
-                        <div class="container" style="text-align: left">
+                        </div>-->
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці (Звідки)" value="{{ $params['routefrom']}}" required>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routefromnumber']}}" required/>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <div style="display: none" class="container" style="text-align: left">
                              <label class="form-check-label" for="route_undefined">По місту</label>
                              <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
                                                @if($params['route_undefined'] == 1)
@@ -36,7 +51,7 @@
                                             @endif>
 
                         </div>
-                        <div id="block_city" class="container"
+                        <div style="display: none" id="block_city" class="container"
                                  @if($params['route_undefined'] == 1)
                                     style="display:none"
                                  @else  style="display:block"

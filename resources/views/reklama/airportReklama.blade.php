@@ -88,15 +88,31 @@
             <div class="col-lg-9 col-sm-6">
                 <div class="row">
                     <ul class="olderOne">
-                        <li>
-                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}">
+                         <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}">
                                 <b><h5 class="text-center">Таксі в аеропорт Бориспіль та Жуляни</h5></b>
 
-                                <p style="text-align: justify">
+                                <p class="text-center">
                                     Оцініть  найвигідніші ціни та якісний сервіс на поїздку в аеропорти міста Києва.
                                     Розрахуйте вартість онлайн.
                                 </p>
+<!--                                <div class="container-fluid" style="margin-top: -75px">
+                                    <div class="row">
+                                        <a class="col-6 text-center" href="{{route('transfer',
+                                                     ["Відділення поліції в аеропорту Бориспіль (Бориспіль)", "taxi.transferBorispol"])}}">
+                                            <img src="{{-- asset('img/borispol.png') }}" style="width: 80%; height: auto"
+                                                 title="Трансфер до аеропорту Бориспіль">
+                                        </a>
 
+                                        <a   class="col-6 text-center" href="{{route('transfer',
+                                                     ["Відділення поліції в аеропорту Бориспіль (Бориспіль)", ""])}}">
+                                            <img src="{{ asset('img/sikorskogo.JPG') --}}" style="width: 80%; height: auto"
+                                                 title="Трансфер до аеропорту Київ">
+                                        </a>
+
+
+
+                                    </div>
+                                </div>-->
                                 <p style="text-align: justify">
                                     Кожна поїздка в аеропорт є дуже важливою . Кожен з нас заздалегідь прагне
                                     все спланувати, щоб не виникло неприємних сюрпризів, адже ніяк не можна запізнитися

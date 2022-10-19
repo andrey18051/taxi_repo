@@ -47,14 +47,17 @@
     </script>
 </head>
 <body>
+
+
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
 
-                @if($params['user_phone'] != '000')
+               @if($params['user_phone'] != '000')
                     <a class="navbar-brand" href="{{route('home-phone-user_name',
-                            ['phone' => $params['user_phone'], 'user_name' =>$params['user_full_name']])
-                            }}" target="_blank" title="На головну">
+                            ['phone' => $params['user_phone'], 'user_name' => $params['user_full_name']])
+                            }}"
+                             target="_blank" title="На головну">
                         <img src="{{ asset('img/logo.jpg') }}" style="width: 40px; height: 40px">
                         {{ config('app.name', 'Laravel') }}
                     </a>

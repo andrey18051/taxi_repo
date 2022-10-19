@@ -1,7 +1,6 @@
 @extends('layouts.taxiNewStreetReq')
 
 @section('content')
-    {{-- print_r($params) --}}
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -18,11 +17,9 @@
                 @csrf
             <div class="row">
                 <div class="col-md-7 col-lg-8">
-                    @if ($params['user_phone'] == '000')
-                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
-                    @else
-                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
-                    @endif
+
+                     <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
+
                     <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                     <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                     <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
@@ -36,7 +33,7 @@
                                         <input type="text" id="from_number" name="from_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routefromnumber']}}" required/>
                                     </div>
                             </div>
-                        </div>
+                    </div>
 
                     <div class="container" style="text-align: left">
                             <label class="form-check-label" for="route_undefined">По місту</label>
