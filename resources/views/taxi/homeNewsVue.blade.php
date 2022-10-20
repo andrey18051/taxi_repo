@@ -172,19 +172,38 @@
             </div>
         </div>
         <div class="container-fluid">
-            <div class="offset-lg-3">
+            <div class="row">
+                <div class="col-lg-3 col-sm-6">
+                    <p  class="gradient text-opacity-25">
+                        <b>Замовити трансфер</b>
+                    </p>
 
-                <news-component></news-component>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('airportReklama')}}" target="_blank"
+                               style="text-decoration: none;">До аеропорту "Бориспіль"</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('airportReklama')}}" target="_blank"
+                               style="text-decoration: none;">До аеропорту "Киів" (Жуляни)</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-9 col-sm-6">
 
-                <div class="container">
-                    <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
-                        <blockquote class="blockquote-3">
-                            <p> <?php echo $quitesArr[$rand] ?></p>
-                            <cite>Цитата дня</cite>
-                        </blockquote>
-                    </a>
+                    <news-component></news-component>
+
+                    <div class="container">
+                        <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                            <blockquote class="blockquote-3">
+                                <p> <?php echo $quitesArr[$rand] ?></p>
+                                <cite>Цитата дня</cite>
+                            </blockquote>
+                        </a>
+                    </div>
                 </div>
             </div>
+
         </div>
 
 

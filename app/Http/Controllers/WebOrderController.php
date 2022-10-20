@@ -1225,9 +1225,6 @@ class WebOrderController extends Controller
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        /*if ($params['required_time'] !== null) {
-            $params['reservation'] = true;
-        }*/
         $reservation = $params['reservation'];
         $required_time = $params['required_time'];
 
@@ -1406,8 +1403,16 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
-                    $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом   від
-                        $from (будинок $from_number) до аеропорту Бориспіль. Оплата $req->payment_type. $auto_type";
+                    switch ($to) {
+                        case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                            break;
+                    }
 
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
@@ -1581,14 +1586,17 @@ class WebOrderController extends Controller
             if ($route_undefined === true) {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
             } else {
-                if ($to == 'Відділення поліції в аеропорту Бориспіль (Бориспіль)') {
-                    $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                    до аеропорту Бориспіль. Оплата $req->payment_type. $auto_type";
-
-                } else {
-                    $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                     до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                switch ($to) {
+                    case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                        break;
                 }
+
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -2549,7 +2557,7 @@ class WebOrderController extends Controller
         ])->get($url, [
             'q' => $q, //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
-            'limit' => 10, //Кол-во возвращаемых записей (предел).
+            'limit' => 1000, //Кол-во возвращаемых записей (предел).
             'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
             'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
             'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
@@ -2563,13 +2571,26 @@ class WebOrderController extends Controller
                 locale*/
         ]);
         $response_arr = json_decode($response, true);
-  //dd($response_arr["geo_objects"]["geo_object"][0]["lat"]);
+  //dd($response_arr["geo_streets"]["geo_street"][0]["houses"][$house]);
 
         if ($house !== null) {
-            $LatLng["lat"] = $response_arr["geo_streets"]["geo_street"][0]["houses"][$house]["lat"];
-            $LatLng["lng"] = $response_arr["geo_streets"]["geo_street"][0]["houses"][$house]["lng"];
+            if (isset($response_arr["geo_streets"]["geo_street"][0]["houses"][$house])) {
+                $LatLng["lat"] = $response_arr["geo_streets"]["geo_street"][0]["houses"][$house]["lat"];
+                $LatLng["lng"] = $response_arr["geo_streets"]["geo_street"][0]["houses"][$house]["lng"];
+            } else {
+                $LatLng["lat"] = 0;
+                $LatLng["lng"] = 0;
+            }
+
         }
         else {
+            if (isset($response_arr["geo_objects"]["geo_object"])) {
+                $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
+                $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
+            } else {
+                $LatLng["lat"] = 0;
+                $LatLng["lng"] = 0;
+            }
             $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
             $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
         }

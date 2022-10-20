@@ -30,7 +30,7 @@
                 <div type="hidden" id="lat2"  value ={{$routeArr["to"]["lat"]}} />
                 <div type="hidden" id="lng2" value ={{$routeArr["to"]["lng"]}}/>
 
-
+@if($routeArr["from"]["lat"] !== 0)
     <script defer type="text/javascript">
 
         /**
@@ -72,4 +72,5 @@
 
     </script>
     <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=myMap"></script>
+@endif
 @endsection
