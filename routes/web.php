@@ -460,11 +460,19 @@ Route::get('/costhome/{route_address_from}/{route_address_number_from}/{authoriz
     ->name('costhome');
 
 /**
- * Трансфер в Борисполь
+ * Трансфер в аэропорты и вокзалы
  */
 
 Route::get('/transfer/{routeto}/{page}', [WebOrderController::class, 'transfer'])
     ->name('transfer');
+
+/**
+ * Встреча в аэропортах и вокзалах
+ */
+
+Route::get('/transferfrom/{routefrom}/{page}', [WebOrderController::class, 'transferFrom'])
+    ->name('transferFrom');
+
 
 /**
  * Удаление расчета

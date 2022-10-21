@@ -98,28 +98,28 @@
                                 </p>
                                 <div class="container-fluid" style="margin-top: -75px">
                                     <div class="row">
-                                        <a class="col-3 text-center" href="{{route('transfer',
-                                                     ["Відділення поліції в аеропорту Бориспіль (Бориспіль)", "taxi.transferBorispol"])}}">
+                                        <a class="col-3 text-center" href="{{route('transferFrom',
+                                                     ["Відділення поліції в аеропорту Бориспіль (Бориспіль)", "taxi.transferFromBorispol"])}}">
                                             <img src="{{ asset('img/borispol.png') }}" style="width: 80%; height: auto"
-                                                 title="Трансфер до аеропорту Бориспіль">
+                                                 title="Зустріч в аеропорту Бориспіль">
                                         </a>
 
-                                        <a   class="col-3 text-center" href="{{route('transfer',
-                                                     ["АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)", "taxi.transferJulyany"])}}">
+                                        <a   class="col-3 text-center" href="{{route('transferFrom',
+                                                     ["АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)", "taxi.transferFromJulyany"])}}">
                                             <img src="{{ asset('img/sikorskogo.JPG') }}" style="width: 80%; height: auto"
-                                                 title="Трансфер до аеропорту Київ">
+                                                 title="Зустріч в аеропорту Київ">
                                         </a>
 
-                                        <a class="col-3 text-center" href="{{route('transfer',
-                                                     ["Баджет (Київ, Вокзальна пл., 1)", "taxi.transferUZ"])}}">
+                                        <a class="col-3 text-center" href="{{route('transferFrom',
+                                                     ["Баджет (Київ, Вокзальна пл., 1)", "taxi.transferFromUZ"])}}">
                                             <img src="{{ asset('img/UZ.png') }}" style="width: 80%; height: auto"
-                                                 title="Трансфер до залізничного вокзалу">
+                                                 title="Зустріч на залізничному вокзалі">
                                         </a>
 
-                                        <a   class="col-3 text-center" href="{{route('transfer',
-                                                     ["НОВА ПОШТА № 361 (ПР. НАУКИ, 1)", "taxi.transferAuto"])}}">
+                                        <a   class="col-3 text-center" href="{{route('transferFrom',
+                                                     ["НОВА ПОШТА № 361 (ПР. НАУКИ, 1)", "taxi.transferFromAuto"])}}">
                                             <img src="{{ asset('img/auto.jpeg') }}" style="width: 80%; height: auto"
-                                                 title="Трансфер до автовокзалу">
+                                                 title="Зустріч на автовокзалі">
                                         </a>
                                     </div>
                                 </div>

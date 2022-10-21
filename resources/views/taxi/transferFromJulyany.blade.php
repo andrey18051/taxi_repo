@@ -5,13 +5,13 @@
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
-            <h2 class="gradient"><b>Зустріч в аеропорту "Бориспіль"</b></h2>
+            <h2 class="gradient"><b>Зустріч в аеропорту "Киів" (Жуляни)</b></h2>
             <p class="text-center gradient">Заповнити поля для розрахунку вартості поїздки.</p>
         </div>
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
 
-            <form action="{{route('search-cost-transfer-from', "taxi.transferFromBorispol")}}" id="form_object">
+            <form action="{{route('search-cost-transfer-from', "taxi.transferFromJulyany")}}" id="form_object">
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
@@ -23,7 +23,7 @@
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
-                        <input type="hidden" class="form-control" id="routefrom" name="routefrom" autocomplete="off" value="{{ $params['routefrom']}}" required>
+                            <input type="hidden" class="form-control" id="routefrom" name="routefrom" autocomplete="off" value="{{ $params['routefrom']}}" required>
 
                             <div class="container">
                                 <div class="row">
