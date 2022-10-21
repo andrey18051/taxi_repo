@@ -180,24 +180,6 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeStreet');
 
 
-/*Route::get('/home-Street-New', function () {
-    $WebOrder = new \App\Http\Controllers\WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
-    return view('taxi.homeStreetNew', ['json_arr' => $json_arr]);
-})->name('homeStreet');*/
-
-
 
 Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
     $WebOrder = new WebOrderController();
@@ -436,6 +418,10 @@ Route::middleware('throttle:6,1')->get('/search/cost-map', [WebOrderController::
 Route::middleware('throttle:6,1')->get('/search/cost-transfer/{page}',
     [WebOrderController::class, 'costtransfer'])
     ->name('search-cost-transfer');
+Route::middleware('throttle:6,1')->get('/search/cost-transfer-from/{page}',
+    [WebOrderController::class, 'costtransferfrom'])
+    ->name('search-cost-transfer-from');
+
 
 /**
  * Расчет стоимости исправленного заказа
@@ -496,20 +482,7 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
  */
 Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
     $WebOrder = new WebOrderController();
-   /* $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }*/
-
-     return $WebOrder->costWebOrder($id);
+    return $WebOrder->costWebOrder($id);
 })->name('costhistory-orders-neworder');
 
 /**

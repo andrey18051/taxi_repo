@@ -92,11 +92,25 @@
                             <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}">
                                 <b><h5 class="text-center">Таксі на вокзал</h5></b>
 
-                                <p style="text-align: justify">
+                                <p style="text-align: center">
                                     Можливість оформити замовлення таксі на бажаний час та день при поїздках до
                                     вокзалів Києва та області. Швидко, надійно та недорого. Розрахуйте точну вартість на сайті.
                                 </p>
+                                <div class="container-fluid" style="margin-top: -75px">
+                                    <div class="row">
+                                        <a class="col-6 text-center" href="{{route('transfer',
+                                                     ["Баджет (Київ, Вокзальна пл., 1)", "taxi.transferUZ"])}}">
+                                            <img src="{{ asset('img/UZ.png') }}" style="width: 80%; height: auto"
+                                                 title="Трансфер до залізничного вокзалу">
+                                        </a>
 
+                                        <a   class="col-6 text-center" href="{{route('transfer',
+                                                     ["НОВА ПОШТА № 361 (ПР. НАУКИ, 1)", "taxi.transferAuto"])}}">
+                                            <img src="{{ asset('img/auto.jpeg') }}" style="width: 80%; height: auto"
+                                                 title="Трансфер до автовокзалу">
+                                        </a>
+                                    </div>
+                                </div>
                                 <p style="text-align: justify">
                                     Кожна поїздка на вокзал є дуже важливою . Кожен з нас заздалегідь прагне
                                     все спланувати, щоб не виникло неприємних сюрпризів, адже ніяк не можна запізнитися

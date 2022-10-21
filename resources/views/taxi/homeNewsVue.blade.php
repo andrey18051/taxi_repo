@@ -187,6 +187,14 @@
                             <a href="{{route('airportReklama')}}" target="_blank"
                                style="text-decoration: none;">До аеропорту "Киів" (Жуляни)</a>
                         </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('stationReklama')}}" target="_blank"
+                               style="text-decoration: none;">До залізничного вокзалу</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('stationReklama')}}" target="_blank"
+                               style="text-decoration: none;">До автовокзалу</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-lg-9 col-sm-6">

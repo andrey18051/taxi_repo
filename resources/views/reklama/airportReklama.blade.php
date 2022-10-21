@@ -108,9 +108,6 @@
                                             <img src="{{ asset('img/sikorskogo.JPG') }}" style="width: 80%; height: auto"
                                                  title="Трансфер до аеропорту Київ">
                                         </a>
-
-
-
                                     </div>
                                 </div>
                                 <p style="text-align: justify">
