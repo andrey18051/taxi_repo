@@ -11,7 +11,7 @@
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
 
-            <form action="{{route('search-cost-transfer', "taxi.transferBorispol")}}" id="form_object">
+            <form action="{{route('search-cost-transfer-from', "taxi.transferFromBorispol")}}" id="form_object">
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
@@ -23,7 +23,7 @@
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
-                        <input type="hidden" class="form-control" id="search1" name="search1" autocomplete="off" placeholder="Пошук об'єкта (Звідки)" value="{{ $params['routefrom']}}" required>
+                        <input type="hidden" class="form-control" id="routefrom" name="routefrom" autocomplete="off" value="{{ $params['routefrom']}}" required>
 
                             <div class="container">
                                 <div class="row">
@@ -31,7 +31,7 @@
                                         <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці (Куди)" value="{{ $params['routeto']}}" required>
                                     </div>
                                     <div class="col-4">
-                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routetonumber']}}" required/>
+                                        <input type="text" id="routetonumber" name="routetonumber" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routetonumber']}}" required/>
                                     </div>
                                 </div>
                             </div>

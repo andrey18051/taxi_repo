@@ -1471,8 +1471,8 @@ class WebOrderController extends Controller
         $params['user_full_name'] = "Новий замовник";
         $params['user_phone'] = '000' ;
 
-        $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
-        $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
+        $params['routefrom'] = $req->routefrom; //Обязательный. Улица куда.
+        $params['routefromnumber'] = null; //Обязательный. Дом куда.
         $params['client_sub_card'] = null;
         $params['route_address_entrance_from'] = null;
 
@@ -1509,8 +1509,8 @@ class WebOrderController extends Controller
             $params['payment_type'] = '1';
         };
 
-        $params['routeto'] = $req->search1; //Обязательный. Улица куда.
-        $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
+        $params['routeto'] = $req->search; //Обязательный. Улица куда.
+        $params['routetonumber'] = $req->routetonumber; //Обязательный. Дом куда.
         $params['route_undefined'] = false; //По городу: True, False
 
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
@@ -1592,9 +1592,9 @@ class WebOrderController extends Controller
                 };
 
                 $route_undefined = false;
-                $to = $req->search1;
+                $to = $req->search;
 
-                $to_number = '';
+                $to_number = $req->routetonumber;
 
                 $url = config('app.taxi2012Url') . '/api/weborders/cost';
                 $response = Http::withHeaders([
@@ -1614,8 +1614,8 @@ class WebOrderController extends Controller
                     'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
                     'route_undefined' => $route_undefined, //По городу: True, False
                     'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                        ['name' => $from, 'number' => $from_number],
-                        ['name' => $to],
+                        ['name' => $from],
+                        ['name' => $to, 'number' => $to_number],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
                     'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
@@ -1653,22 +1653,22 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
-                    switch ($to) {
+                    switch ($from) {
                         case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                             break;
                         case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                             break;
                         case 'Баджет (Київ, Вокзальна пл., 1)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                             break;
                         case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до автовокзалу. Оплата $req->payment_type. $auto_type";
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                             break;
                     }
 
@@ -1859,6 +1859,33 @@ class WebOrderController extends Controller
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до автовокзалу. Оплата $req->payment_type. $auto_type";
                         break;
+                    default:
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
+                            від $from (будинок $from_number) до $to (будинок $to_number).
+                             Оплата $req->payment_type. $auto_type";
+                }
+
+                switch ($from) {
+                    case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'Баджет (Київ, Вокзальна пл., 1)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    default:
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
+                            від $from (будинок $from_number) до $to (будинок $to_number).
+                             Оплата $req->payment_type. $auto_type";
                 }
 
             };
