@@ -466,6 +466,10 @@ Route::get('/costhome/{route_address_from}/{route_address_number_from}/{authoriz
 Route::get('/transfer/{routeto}/{page}', [WebOrderController::class, 'transfer'])
     ->name('transfer');
 
+Route::get('/transfer/{routeto}/{page}/{user_phone}/{user_first_name}/{route_address_from}/{route_address_number_from}',
+    [WebOrderController::class, 'transferProfile'])
+    ->name('transfer-profile');
+
 /**
  * Встреча в аэропортах и вокзалах
  */

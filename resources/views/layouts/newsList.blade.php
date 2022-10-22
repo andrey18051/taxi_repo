@@ -40,11 +40,12 @@
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
-            <img src="{{ asset('img/logo.jpg') }}" style="width: 100px; height: auto">
-            <a class="navbar-brand gradient" href="{{ url('/') }}" target="_blank">
-                {{ config('app.name', 'Laravel') }}
-            </a>
-
+            <div>
+                <a class="navbar-brand gradient" href="{{ url('/') }}" target="_blank">
+                    {{ config('app.name', 'Laravel') }}
+                    <img src="{{ asset('img/logo.jpg') }}" style="width: 100px; height: auto">
+                </a>
+            </div>
 
 
             <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" class="gradient"

@@ -1841,6 +1841,9 @@ class WebOrderController extends Controller
             if ($route_undefined === true) {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
             } else {
+                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
+                            від $from (будинок $from_number) до $to (будинок $to_number).
+                             Оплата $req->payment_type. $auto_type";
                 switch ($to) {
                     case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
@@ -1858,10 +1861,6 @@ class WebOrderController extends Controller
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до автовокзалу. Оплата $req->payment_type. $auto_type";
                         break;
-                    default:
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
-                            від $from (будинок $from_number) до $to (будинок $to_number).
-                             Оплата $req->payment_type. $auto_type";
                 }
 
                 switch ($from) {
@@ -1881,12 +1880,7 @@ class WebOrderController extends Controller
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
                             до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                         break;
-                    default:
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
-                            від $from (будинок $from_number) до $to (будинок $to_number).
-                             Оплата $req->payment_type. $auto_type";
                 }
-
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -2021,6 +2015,7 @@ class WebOrderController extends Controller
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from  до $to.
                 Оплата $req->payment_type. $auto_type";
             };
+
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
 
@@ -2131,6 +2126,45 @@ class WebOrderController extends Controller
         $params['user_full_name'] = 'Новий замовник';
         $params['routefrom'] = null;
         $params['routefromnumber'] =  null;
+        $params['route_undefined'] = 0;
+        $params['routeto'] = $routeto;
+        $params['routetonumber'] = null;
+        $params['required_time'] = null;
+        $params['wagon'] = 0;
+        $params['minibus'] = 0;
+        $params['premium'] = 0;
+        $params['flexible_tariff_name'] = null;
+        $params['payment_type'] = 0;
+
+        return view($page, ['json_arr' => $json_arr, 'params' => $params]);
+
+    }
+
+    /**
+     * Работа с заказами
+     * Редактирование и расчет стоимости заказа до вокзала и аэропортов из кабинета пользователя
+     * @return string
+     */
+    public function transferProfile($routeto, $page, $user_phone, $user_first_name, $route_address_from, $route_address_number_from)
+    {
+        $WebOrder = new WebOrderController();
+        $tariffs = $WebOrder->tariffs();
+        $response_arr = json_decode($tariffs, true);
+        $ii = 0;
+        for ($i = 0; $i < count($response_arr); $i++) {
+            switch ($response_arr[$i]['name']) {
+                case 'Базовый':
+                case 'Бизнес-класс':
+                case 'Эконом-класс':
+                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                    $ii++;
+            }
+        }
+
+        $params['user_phone'] = $user_phone;
+        $params['user_full_name'] = $user_first_name;
+        $params['routefrom'] = $route_address_from;
+        $params['routefromnumber'] = $route_address_number_from;
         $params['route_undefined'] = 0;
         $params['routeto'] = $routeto;
         $params['routetonumber'] = null;
