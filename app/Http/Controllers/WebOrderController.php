@@ -2403,8 +2403,56 @@ class WebOrderController extends Controller
                             $order = "Вітаємо $user_full_name
                     . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту. Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
                         } else {
-                            $order = "Вітаємо $user_full_name
-                    . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
+                            $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                            до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                $json_arrWeb['dispatching_order_uid'];
+
+                            switch ($to) {
+                                case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Бориспіль\". Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Киів\" (Жуляни). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'Баджет (Київ, Вокзальна пл., 1)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до залізничного вокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до автовокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                            }
+
+                            switch ($from) {
+                                case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від аеропорту \"Бориспіль\"
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від \"Киів\" (Жуляни)
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'Баджет (Київ, Вокзальна пл., 1)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від залізничного вокзалу
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від автовокзалу
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                            }
+
                         };
                         return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
                             ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
