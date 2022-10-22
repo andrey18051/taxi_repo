@@ -2,12 +2,16 @@
 
 @section('content')
     {{-- dd($response) --}}
-<section style="background-color: #eee;">
-    <div class="container py-5">
+<section>
+    <div class="container text-center" style="background-color: hsl(0, 0%, 96%)">
+        <br>
+        <div class="container" style="text-align: center">
+            <h2 class="gradient"><b>Особистий кабінет</b></h2>
+        </div>
         <div class="row">
             <div class="col">
-
                 <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm rounded-3 p-3 mb-4">
+
                     <div class="container">
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" target="_blank" data-bs-target="#navbarTarget" aria-controls="navbarTarget" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                             <span class="navbar-toggler-icon"></span>
@@ -88,8 +92,6 @@
                         </div>
                     </div>
                 </nav>
-
-
             </div>
         </div>
 
@@ -215,6 +217,7 @@
                 </svg>
             </a>
         </div>
+        <br>
     </div>
 </section>
 
