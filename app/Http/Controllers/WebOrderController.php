@@ -1397,6 +1397,25 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
+                    switch ($to) {
+                        case 'Аэропорт Борисполь терминал Д':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'Баджет (Київ, Вокзальна пл., 1)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до автовокзалу. Оплата $req->payment_type. $auto_type";
+                            break;
+                    }
+
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
                         ->with('order_cost', $order_cost);
@@ -1633,6 +1652,25 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
+                    switch ($from) {
+                        case 'Аэропорт Борисполь терминал Д':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'ЖД Южный':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            break;
+                        case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            break;
+                    }
+
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
                         ->with('order_cost', $order_cost);
@@ -1806,6 +1844,43 @@ class WebOrderController extends Controller
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
                             від $from (будинок $from_number) до $to (будинок $to_number).
                              Оплата $req->payment_type. $auto_type";
+                switch ($to) {
+                    case 'Аэропорт Борисполь терминал Д':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'ЖД Южный':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
+                             до автовокзалу. Оплата $req->payment_type. $auto_type";
+                        break;
+                }
+
+                switch ($from) {
+                    case 'Аэропорт Борисполь терминал Д':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'ЖД Южный':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                    case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
+                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        break;
+                }
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -2331,6 +2406,53 @@ class WebOrderController extends Controller
                             $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                             до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                 $json_arrWeb['dispatching_order_uid'];
+
+                            switch ($to) {
+                                case 'Аэропорт Борисполь терминал Д':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Бориспіль\". Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до аеропорту \"Киів\" (Жуляни). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'ЖД Южный':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до залізничного вокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+                             до автовокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                            }
+
+                            switch ($from) {
+                                case 'Аэропорт Борисполь терминал Д':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від аеропорту \"Бориспіль\"
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від \"Киів\" (Жуляни)
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'ЖД Южный':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від залізничного вокзалу
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                                case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від автовокзалу
+                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                                        $json_arrWeb['dispatching_order_uid'];
+                                    break;
+                            }
+
                         };
                         return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
                             ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")

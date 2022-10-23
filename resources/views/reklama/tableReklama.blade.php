@@ -99,25 +99,25 @@
                                 <div class="container-fluid" style="margin-top: -75px">
                                     <div class="row">
                                         <a class="col-3 text-center" href="{{route('transferFrom',
-                                                     ["Баджет (Київ, Вокзальна пл., 1)", "taxi.transferFromUZ"])}}">
+                                                     ["ЖД Южный", "taxi.transferFromUZ"])}}">
                                             <img src="{{ asset('img/UZ.png') }}" style="width: 80%; height: auto"
                                                  title="Зустріч на залізничному вокзалі">
                                         </a>
                                         <a class="col-3 text-center" href="{{route('transferFrom',
-                                        ["Відділення поліції в аеропорту Бориспіль (Бориспіль)", "taxi.transferFromBorispol"])}}">
+                                        ["Аэропорт Борисполь терминал Д", "taxi.transferFromBorispol"])}}">
                                             <img src="{{ asset('img/borispol.png') }}" style="width: 80%; height: auto"
                                                  title="Зустріч в аеропорту Бориспіль">
                                         </a>
 
                                         <a   class="col-3 text-center" href="{{route('transferFrom',
-                                        ["АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)", "taxi.transferFromJulyany"])}}">
+                                        ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferFromJulyany"])}}">
                                             <img src="{{ asset('img/sikorskogo.png') }}" style="width: 80%; height: auto"
                                                  title="Зустріч в аеропорту Київ">
                                         </a>
 
 
                                         <a   class="col-3 text-center" href="{{route('transferFrom',
-                                                     ["НОВА ПОШТА № 361 (ПР. НАУКИ, 1)", "taxi.transferFromAuto"])}}">
+                                                     ["Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)", "taxi.transferFromAuto"])}}">
                                             <img src="{{ asset('img/auto.jpeg') }}" style="width: 80%; height: auto"
                                                  title="Зустріч на автовокзалі">
                                         </a>
