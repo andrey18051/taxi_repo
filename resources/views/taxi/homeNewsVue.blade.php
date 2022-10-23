@@ -92,35 +92,35 @@
 
                             <div class="mySlides fade">
                                 <a href="{{route('home')}}" target="_blank" style="text-decoration: none;">
-                                    <img src="{{ asset('img/kiyv2.jpg') }}" style="width:95%">
+                                    <img src="{{ asset('img/kiyv2.jpg') }}" style="width:100%">
 
                                 </a>
                             </div>
 
                             <div class="mySlides fade">
                                 <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
-                                    <img src="{{ asset('img/UZ.png') }}" style="width:95%">
+                                    <img src="{{ asset('img/UZ.png') }}" style="width:100%">
 
                                 </a>
                             </div>
 
                             <div class="mySlides fade">
                                 <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
-                                    <img src="{{ asset('img/borispol.png') }}" style="width:95%">
+                                    <img src="{{ asset('img/borispol.png') }}" style="width:100%">
 
                                 </a>
                             </div>
 
                             <div class="mySlides fade">
                                 <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
-                                    <img src="{{ asset('img/sikorskogo.png') }}" style="width:95%">
+                                    <img src="{{ asset('img/sikorskogo.png') }}" style="width:100%">
 
                                 </a>
                             </div>
 
                             <div class="mySlides fade">
                                 <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
-                                    <img src="{{ asset('img/auto.jpeg') }}" style="width:95%">
+                                    <img src="{{ asset('img/auto.jpeg') }}" style="width:100%">
 
                                 </a>
                             </div>
@@ -240,12 +240,8 @@
                         </ul>
                     </div>
                     <div class="row">
-
-
-
-                            <news-component></news-component>
-
-                            <div class="container">
+                        <news-component></news-component>
+                        <div class="container">
                                 <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                                     <blockquote class="blockquote-3">
                                         <p> <?php echo $quitesArr[$rand] ?></p>
@@ -253,7 +249,6 @@
                                     </blockquote>
                                 </a>
                             </div>
-
                     </div>
                 </div>
             </div>
@@ -261,26 +256,6 @@
 
 
         </div>
-        <div class="container-fluid">
-            <div class="row">
-
-                <div class="offset-lg-3 col-lg-9 col-sm-6">
-
-                    <news-component></news-component>
-
-                    <div class="container">
-                        <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
-                            <blockquote class="blockquote-3">
-                                <p> <?php echo $quitesArr[$rand] ?></p>
-                                <cite>Цитата дня</cite>
-                            </blockquote>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
 
     <div class="container">
         <a class="but_vart" href="https://easy-order-taxi.site" target="_blank" title="Версія сайту для мобільних"
