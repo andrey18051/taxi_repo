@@ -83,65 +83,59 @@
                 <div class="text-center">
                     <a href="{{route('home')}}" class="gradient-button" target="_blank">Замовити таксі</a>
                 </div>
-            </div>
 
-            <div class="col-lg-9 col-sm-6">
-                <div class="row">
-                    <div class="slideshow-container">
-
-                        <div class="mySlides fade">
-                            <a href="{{route('home')}}" target="_blank" style="text-decoration: none;">
-                                <img src="{{ asset('img/kiyv2.jpg') }}" style="width:95%">
-                                <div class="text">Замовити таксі</div>
-                            </a>
-                        </div>
-
-                        <div class="mySlides fade">
-                            <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
-                                <img src="{{ asset('img/UZ.png') }}" style="width:95%">
-                                <div class="text" >Таксі на залізничний вокзал</div>
-                            </a>
-                        </div>
-
-                        <div class="mySlides fade">
-                            <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
-                                <img src="{{ asset('img/borispol.png') }}" style="width:95%">
-                                <div class="text" style="color: #1a1e21">Трансфер до аеропорту "Бориспіль" </div>
-                            </a>
-                        </div>
-
-                        <div class="mySlides fade">
-                            <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
-                                <img src="{{ asset('img/sikorskogo.png') }}" style="width:95%">
-                                <div class="text" style="color: #1a1e21">Трансфер до аеропорту "Киів"</div>
-                            </a>
-                        </div>
-
-                        <div class="mySlides fade">
-                            <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
-                                <img src="{{ asset('img/auto.jpeg') }}" style="width:95%">
-                                <div class="text">Таксі на автовокзал</div>
-                            </a>
-                        </div>
-
-                    </div>
-                    <br>
-
-                    <div style="text-align:left">
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="row" >
-                <div class="col-lg-3 col-sm-6">
                     <p  class="gradient text-opacity-25">
                         <b>Замовити трансфер</b>
                     </p>
+                    <div class="row">
+                        <div class="slideshow-container">
 
+                            <div class="mySlides fade">
+                                <a href="{{route('home')}}" target="_blank" style="text-decoration: none;">
+                                    <img src="{{ asset('img/kiyv2.jpg') }}" style="width:95%">
+
+                                </a>
+                            </div>
+
+                            <div class="mySlides fade">
+                                <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
+                                    <img src="{{ asset('img/UZ.png') }}" style="width:95%">
+
+                                </a>
+                            </div>
+
+                            <div class="mySlides fade">
+                                <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
+                                    <img src="{{ asset('img/borispol.png') }}" style="width:95%">
+
+                                </a>
+                            </div>
+
+                            <div class="mySlides fade">
+                                <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
+                                    <img src="{{ asset('img/sikorskogo.png') }}" style="width:95%">
+
+                                </a>
+                            </div>
+
+                            <div class="mySlides fade">
+                                <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
+                                    <img src="{{ asset('img/auto.jpeg') }}" style="width:95%">
+
+                                </a>
+                            </div>
+
+                        </div>
+                        <br>
+
+                        <div style="text-align:left">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                    </div>
                     <ul class="list-group mb-3">
                         <li class="list-group-item d-flex justify-content-between lh-sm">
                             <a href="{{route('airportReklama')}}" target="_blank"
@@ -245,8 +239,26 @@
                             </div>
                         </ul>
                     </div>
+                    <div class="row">
+
+
+
+                            <news-component></news-component>
+
+                            <div class="container">
+                                <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                                    <blockquote class="blockquote-3">
+                                        <p> <?php echo $quitesArr[$rand] ?></p>
+                                        <cite>Цитата дня</cite>
+                                    </blockquote>
+                                </a>
+                            </div>
+
+                    </div>
                 </div>
             </div>
+
+
 
         </div>
         <div class="container-fluid">
