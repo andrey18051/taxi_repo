@@ -113,7 +113,7 @@
                         <div class="mySlides fade">
                             <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
                                 <img src="{{ asset('img/sikorskogo.png') }}" style="width:95%">
-                                <div class="text" style="color: #1a1e21">Трансфер до аеропорту "Киів" (Жуляни)</div>
+                                <div class="text" style="color: #1a1e21">Трансфер до аеропорту "Киів"</div>
                             </a>
                         </div>
 
@@ -161,7 +161,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="col-lg-9 col-sm-6" style="margin-top: -80px">
+                <div class="col-lg-9 col-sm-6" >
                     <div class="row">
                         <ul class="older">
                             <div class="container-fluid">
