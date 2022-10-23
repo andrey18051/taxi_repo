@@ -1397,25 +1397,6 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
-                    switch ($to) {
-                        case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
-                            break;
-                        case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
-                            break;
-                        case 'Баджет (Київ, Вокзальна пл., 1)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
-                            break;
-                        case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до автовокзалу. Оплата $req->payment_type. $auto_type";
-                            break;
-                    }
-
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
                         ->with('order_cost', $order_cost);
@@ -1652,25 +1633,6 @@ class WebOrderController extends Controller
                     $json_arr = json_decode($response, true);
                     $order_cost  = $json_arr['order_cost'];
 
-                    switch ($from) {
-                        case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                            break;
-                        case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                            break;
-                        case 'Баджет (Київ, Вокзальна пл., 1)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                            break;
-                        case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                            $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                            break;
-                    }
-
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
                         ->with('order_cost', $order_cost);
@@ -1844,43 +1806,6 @@ class WebOrderController extends Controller
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
                             від $from (будинок $from_number) до $to (будинок $to_number).
                              Оплата $req->payment_type. $auto_type";
-                switch ($to) {
-                    case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
-                        break;
-                    case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
-                        break;
-                    case 'Баджет (Київ, Вокзальна пл., 1)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
-                        break;
-                    case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до автовокзалу. Оплата $req->payment_type. $auto_type";
-                        break;
-                }
-
-                switch ($from) {
-                    case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                        break;
-                    case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                        break;
-                    case 'Баджет (Київ, Вокзальна пл., 1)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                        break;
-                    case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
-                        break;
-                }
             };
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
@@ -2406,53 +2331,6 @@ class WebOrderController extends Controller
                             $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                             до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                 $json_arrWeb['dispatching_order_uid'];
-
-                            switch ($to) {
-                                case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Бориспіль\". Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Киів\" (Жуляни). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'Баджет (Київ, Вокзальна пл., 1)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
-                             до залізничного вокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
-                             до автовокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                            }
-
-                            switch ($from) {
-                                case 'Відділення поліції в аеропорту Бориспіль (Бориспіль)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від аеропорту \"Бориспіль\"
-                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від \"Киів\" (Жуляни)
-                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'Баджет (Київ, Вокзальна пл., 1)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від залізничного вокзалу
-                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'НОВА ПОШТА № 361 (ПР. НАУКИ, 1)':
-                                    $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від автовокзалу
-                            до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                        $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                            }
-
                         };
                         return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
                             ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
@@ -2748,9 +2626,15 @@ class WebOrderController extends Controller
                         }
                     }
                     $i++;
-                }
-                while ($i < count($json_arr['geo_street'])) ;
+                } while ($i < count($json_arr['geo_street']));
+                $i = 0;
+                do {
+                    $street = new Street();
+                    $street->name = $json_arr['geo_street'][$i]["name"];
+                    $street->save();
 
+                    $i++;
+                } while ($i < count($json_arr['geo_street']));
             }
         }
         if (config('app.server') == 'Одесса') {
@@ -2761,14 +2645,12 @@ class WebOrderController extends Controller
                 $i = 0;
 
                 do {
-
-                            $street = new Street();
-                            $street->name = $json_arr['geo_street'][$i]["name"];
-                            $street->save();
+                    $street = new Street();
+                    $street->name = $json_arr['geo_street'][$i]["name"];
+                    $street->save();
 
                     $i++;
-                }
-                while ($i < count($json_arr['geo_street'])) ;
+                } while ($i < count($json_arr['geo_street']));
 
             }
         }
@@ -2813,9 +2695,16 @@ class WebOrderController extends Controller
                         }
                     }
                     $i++;
-                }
-                while ($i < count($json_arr['geo_object'])) ;
+                } while ($i < count($json_arr['geo_object']));
+                $i = 0;
 
+                do {
+                    $objects = new Objecttaxi();
+                    $objects->name = $json_arr['geo_object'][$i]["name"];
+                    $objects->save();
+
+                    $i++;
+                } while ($i < count($json_arr['geo_object']));
             }
         }
         if (config('app.server') == 'Одесса') {
@@ -2826,14 +2715,12 @@ class WebOrderController extends Controller
                 $i = 0;
 
                 do {
-
                     $objects = new Objecttaxi();
                     $objects->name = $json_arr['geo_object'][$i]["name"];
                     $objects->save();
 
                     $i++;
-                }
-                while ($i < count($json_arr['geo_object'])) ;
+                } while ($i < count($json_arr['geo_object']));
 
             }
         }

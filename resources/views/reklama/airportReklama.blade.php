@@ -100,13 +100,13 @@
                                <div class="container-fluid" style="margin-top: -75px">
                                     <div class="row">
                                         <a class="col-6 text-center" href="{{route('transfer',
-                                                     ["Відділення поліції в аеропорту Бориспіль (Бориспіль)", "taxi.transferBorispol"])}}">
+                                                     ["Аэропорт Борисполь терминал Д", "taxi.transferBorispol"])}}">
                                             <img src="{{ asset('img/borispol.png') }}" style="width: 80%; height: auto"
                                                  title="Трансфер до аеропорту Бориспіль">
                                         </a>
 
                                         <a   class="col-6 text-center" href="{{route('transfer',
-                                                     ["АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)", "taxi.transferJulyany"])}}">
+                                                     ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferJulyany"])}}">
                                             <img src="{{ asset('img/sikorskogo.png') }}" style="width: 80%; height: auto"
                                                  title="Трансфер до аеропорту Київ">
                                         </a>

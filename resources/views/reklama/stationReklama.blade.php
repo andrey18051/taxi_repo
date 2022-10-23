@@ -99,13 +99,13 @@
                                 <div class="container-fluid" style="margin-top: -75px">
                                     <div class="row">
                                         <a class="col-6 text-center" href="{{route('transfer',
-                                                     ["Баджет (Київ, Вокзальна пл., 1)", "taxi.transferUZ"])}}">
+                                                     ["ЖД Южный", "taxi.transferUZ"])}}">
                                             <img src="{{ asset('img/UZ.png') }}" style="width: 80%; height: auto"
                                                  title="Трансфер до залізничного вокзалу">
                                         </a>
 
                                         <a   class="col-6 text-center" href="{{route('transfer',
-                                                     ["НОВА ПОШТА № 361 (ПР. НАУКИ, 1)", "taxi.transferAuto"])}}">
+                                                     ["Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)", "taxi.transferAuto"])}}">
                                             <img src="{{ asset('img/auto.jpeg') }}" style="width: 80%; height: auto"
                                                  title="Трансфер до автовокзалу">
                                         </a>
