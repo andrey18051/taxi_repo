@@ -117,7 +117,7 @@
 
 
                                         <a   class="col-3 text-center" href="{{route('transferFrom',
-                                                     ["Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)", "taxi.transferFromAuto"])}}">
+                                                     ["Центральный автовокзал (у шлагбаума пл.Московская 3)", "taxi.transferFromAuto"])}}">
                                             <img src="{{ asset('img/auto.jpeg') }}" style="width: 80%; height: auto"
                                                  title="Зустріч на автовокзалі">
                                         </a>

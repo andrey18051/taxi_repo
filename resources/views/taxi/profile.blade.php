@@ -30,7 +30,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{route('transfer-profile',
-                                                     ["Відділення поліції в аеропорту Бориспіль (Бориспіль)",
+                                                     ["Аэропорт Борисполь терминал Д",
                                                         "taxi.transferBorispol",
                                                         substr($response["user_phone"], 3),
                                                         $response["user_first_name"],
@@ -44,7 +44,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{route('transfer-profile',
-                                                     ["АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)",
+                                                     ["Аэропорт Жуляны новый (ул.Медовая 2)",
                                                         "taxi.transferJulyany",
                                                         substr($response["user_phone"], 3),
                                                         $response["user_first_name"],
@@ -58,7 +58,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{route('transfer-profile',
-                                                     ["Баджет (Київ, Вокзальна пл., 1)",
+                                                     ["ЖД Южный",
                                                         "taxi.transferUZ",
                                                         substr($response["user_phone"], 3),
                                                         $response["user_first_name"],
@@ -73,7 +73,7 @@
 
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{route('transfer-profile',
-                                                     ["НОВА ПОШТА № 361 (ПР. НАУКИ, 1)",
+                                                     ["Центральный автовокзал (у шлагбаума пл.Московская 3)",
                                                         "taxi.transferAuto",
                                                         substr($response["user_phone"], 3),
                                                         $response["user_first_name"],

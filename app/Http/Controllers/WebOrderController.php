@@ -1410,7 +1410,7 @@ class WebOrderController extends Controller
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
                             break;
-                        case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                        case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до автовокзалу. Оплата $req->payment_type. $auto_type";
                             break;
@@ -1665,7 +1665,7 @@ class WebOrderController extends Controller
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
                             до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                             break;
-                        case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                        case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
                             до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                             break;
@@ -1857,7 +1857,7 @@ class WebOrderController extends Controller
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
                         break;
-                    case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                    case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до автовокзалу. Оплата $req->payment_type. $auto_type";
                         break;
@@ -1876,7 +1876,7 @@ class WebOrderController extends Controller
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу
                             до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                         break;
-                    case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                    case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
                             до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                         break;
@@ -2423,7 +2423,7 @@ class WebOrderController extends Controller
                              до залізничного вокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                                     break;
-                                case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                                case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                              до автовокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
@@ -2446,7 +2446,7 @@ class WebOrderController extends Controller
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                                     break;
-                                case 'Центральный автовокзал (у Мак Дональдза пл.Московская 1/3)':
+                                case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від автовокзалу
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
@@ -2738,25 +2738,29 @@ class WebOrderController extends Controller
                 DB::table('streets')->truncate();
                 $i = 0;
                 do {
+                    $street = new Street();
+                    $street->name = $json_arr['geo_street'][$i]["name"];
+                    $street->save();
+
                     $streets = $json_arr['geo_street'][$i]["localizations"];
                     foreach ($streets as $val) {
+
                         if ($val["locale"] == "UK") {
                             $street = new Street();
                             $street->name = $val['name'];
                             $street->save();
-
                         }
                     }
                     $i++;
                 } while ($i < count($json_arr['geo_street']));
-                $i = 0;
+              /*  $i = 0;
                 do {
                     $street = new Street();
                     $street->name = $json_arr['geo_street'][$i]["name"];
                     $street->save();
 
                     $i++;
-                } while ($i < count($json_arr['geo_street']));
+                } while ($i < count($json_arr['geo_street']));*/
             }
         }
         if (config('app.server') == 'Одесса') {
@@ -2807,8 +2811,12 @@ class WebOrderController extends Controller
                 DB::table('objecttaxis')->truncate();
                 $i = 0;
                 do {
+                    $objects = new Objecttaxi();
+                    $objects->name = $json_arr['geo_object'][$i]["name"];
+                    $objects->save();
                     $streets = $json_arr['geo_object'][$i]["localizations"];
                     foreach ($streets as $val) {
+
                         if ($val["locale"] == "UK") {
                             $objects = new Objecttaxi();
                             $objects->name = $val['name'];
@@ -2818,7 +2826,7 @@ class WebOrderController extends Controller
                     }
                     $i++;
                 } while ($i < count($json_arr['geo_object']));
-                $i = 0;
+  /*              $i = 0;
 
                 do {
                     $objects = new Objecttaxi();
@@ -2826,7 +2834,7 @@ class WebOrderController extends Controller
                     $objects->save();
 
                     $i++;
-                } while ($i < count($json_arr['geo_object']));
+                } while ($i < count($json_arr['geo_object']));*/
             }
         }
         if (config('app.server') == 'Одесса') {
