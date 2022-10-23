@@ -22,7 +22,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <td>
-                                   <h5><b> {{row.short}}</b></h5>
+                                   <p><b> {{row.short}}</b></p>
 
                                 </td>
 

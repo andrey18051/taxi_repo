@@ -107,7 +107,7 @@
 
                                         <a   class="col-6 text-center" href="{{route('transfer',
                                                      ["АЗС Авіас плюс (Київ, Повітрофлотський просп., 77)", "taxi.transferJulyany"])}}">
-                                            <img src="{{ asset('img/sikorskogo.JPG') }}" style="width: 80%; height: auto"
+                                            <img src="{{ asset('img/sikorskogo.png') }}" style="width: 80%; height: auto"
                                                  title="Трансфер до аеропорту Київ">
                                         </a>
                                     </div>

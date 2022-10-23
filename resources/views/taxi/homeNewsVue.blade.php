@@ -87,9 +87,85 @@
 
             <div class="col-lg-9 col-sm-6">
                 <div class="row">
-                    <ul class="older">
-                        <div class="container-fluid">
-                            <div class="row">
+                    <div class="slideshow-container">
+
+                        <div class="mySlides fade">
+                            <a href="{{route('home')}}" target="_blank" style="text-decoration: none;">
+                                <img src="{{ asset('img/kiyv2.jpg') }}" style="width:95%">
+                                <div class="text">Замовити таксі</div>
+                            </a>
+                        </div>
+
+                        <div class="mySlides fade">
+                            <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
+                                <img src="{{ asset('img/UZ.png') }}" style="width:95%">
+                                <div class="text" >Таксі на залізничний вокзал</div>
+                            </a>
+                        </div>
+
+                        <div class="mySlides fade">
+                            <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
+                                <img src="{{ asset('img/borispol.png') }}" style="width:95%">
+                                <div class="text" style="color: #1a1e21">Трансфер до аеропорту "Бориспіль" </div>
+                            </a>
+                        </div>
+
+                        <div class="mySlides fade">
+                            <a href="{{route('airportReklama')}}" target="_blank" style="text-decoration: none;">
+                                <img src="{{ asset('img/sikorskogo.png') }}" style="width:95%">
+                                <div class="text" style="color: #1a1e21">Трансфер до аеропорту "Киів" (Жуляни)</div>
+                            </a>
+                        </div>
+
+                        <div class="mySlides fade">
+                            <a href="{{route('stationReklama')}}" target="_blank" style="text-decoration: none;">
+                                <img src="{{ asset('img/auto.jpeg') }}" style="width:95%">
+                                <div class="text">Таксі на автовокзал</div>
+                            </a>
+                        </div>
+
+                    </div>
+                    <br>
+
+                    <div style="text-align:left">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-lg-3 col-sm-6">
+                    <p  class="gradient text-opacity-25">
+                        <b>Замовити трансфер</b>
+                    </p>
+
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('airportReklama')}}" target="_blank"
+                               style="text-decoration: none;">До аеропорту "Бориспіль"</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('airportReklama')}}" target="_blank"
+                               style="text-decoration: none;">До аеропорту "Киів" (Жуляни)</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('stationReklama')}}" target="_blank"
+                               style="text-decoration: none;">До залізничного вокзалу</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <a href="{{route('stationReklama')}}" target="_blank"
+                               style="text-decoration: none;">До автовокзалу</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-9 col-sm-6" style="margin-top: -80px">
+                    <div class="row">
+                        <ul class="older">
+                            <div class="container-fluid">
+                                <div class="row">
                                     <div class="col-lg-4 col-sm-6 col-md-6">
                                         <li>
                                             <a href="{{route('orderReklama')}}">
@@ -125,79 +201,58 @@
                                         </li>
                                     </div>
 
-                            </div>
-
-                        </div>
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-lg-4 col-sm-6 col-md-6">
-                                    <li>
-                                        <a href="{{route('airportReklama')}}">
-                                            <h5 class="text-center"><b>Таксі в аеропорти Бориспіль та Жуляни</b></h5>
-                                            <small style="text-align: left">
-                                                Оцініть  найвигідніші ціни та якісний сервіс на поїздку в аеропорти міста Києва.
-                                                Розрахуйте вартість онлайн.
-                                            </small>
-                                        </a>
-                                    </li>
-                                </div>
-                                <div class="col-lg-4 col-sm-6 col-md-6">
-                                    <li>
-                                        <a href="{{route('regionReklama')}}">
-                                            <h5 class="text-center"><b>Дешеве обласне міжміське таксі</b></h5>
-                                            <small style="text-align: left">
-                                                Великий парк комфортабельних автомобілів для міжміських поїздок.
-                                                Дізнайтесь на сайті.
-                                            </small>
-                                        </a>
-                                    </li>
-                                </div>
-                                <div class="col-lg-4 col-sm-6 col-md-6">
-                                    <li>
-                                        <a href="{{route('tableReklama')}}">
-                                            <h5 class="text-center"><b>Зустріч водієм таксі з табличкою</b></h5>
-                                            <small style="text-align: left">
-                                                Водій зустріне вас з табличкою біля виходу з паспортного контролю
-                                                або біля виходу з вагона на вокзалі.
-                                            </small>
-                                        </a>
-                                    </li>
                                 </div>
 
                             </div>
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-lg-4 col-sm-6 col-md-6">
+                                        <li>
+                                            <a href="{{route('airportReklama')}}">
+                                                <h5 class="text-center"><b>Таксі в аеропорти Бориспіль та Жуляни</b></h5>
+                                                <small style="text-align: left">
+                                                    Оцініть  найвигідніші ціни та якісний сервіс на поїздку в аеропорти міста Києва.
+                                                    Розрахуйте вартість онлайн.
+                                                </small>
+                                            </a>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-4 col-sm-6 col-md-6">
+                                        <li>
+                                            <a href="{{route('regionReklama')}}">
+                                                <h5 class="text-center"><b>Дешеве обласне міжміське таксі</b></h5>
+                                                <small style="text-align: left">
+                                                    Великий парк комфортабельних автомобілів для міжміських поїздок.
+                                                    Дізнайтесь на сайті.
+                                                </small>
+                                            </a>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-4 col-sm-6 col-md-6">
+                                        <li>
+                                            <a href="{{route('tableReklama')}}">
+                                                <h5 class="text-center"><b>Зустріч водієм таксі з табличкою</b></h5>
+                                                <small style="text-align: left">
+                                                    Водій зустріне вас з табличкою біля виходу з паспортного контролю
+                                                    або біля виходу з вагона на вокзалі.
+                                                </small>
+                                            </a>
+                                        </li>
+                                    </div>
 
-                        </div>
-                    </ul>
+                                </div>
+
+                            </div>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
         </div>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-3 col-sm-6">
-                    <p  class="gradient text-opacity-25">
-                        <b>Замовити трансфер</b>
-                    </p>
 
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="{{route('airportReklama')}}" target="_blank"
-                               style="text-decoration: none;">До аеропорту "Бориспіль"</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="{{route('airportReklama')}}" target="_blank"
-                               style="text-decoration: none;">До аеропорту "Киів" (Жуляни)</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="{{route('stationReklama')}}" target="_blank"
-                               style="text-decoration: none;">До залізничного вокзалу</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a href="{{route('stationReklama')}}" target="_blank"
-                               style="text-decoration: none;">До автовокзалу</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-lg-9 col-sm-6">
+                <div class="offset-lg-3 col-lg-9 col-sm-6">
 
                     <news-component></news-component>
 
@@ -232,5 +287,25 @@
             </svg>
         </a>
     </div>
+        <script>
+            let slideIndex = 0;
+            showSlides();
 
+            function showSlides() {
+                let i;
+                let slides = document.getElementsByClassName("mySlides");
+                let dots = document.getElementsByClassName("dot");
+                for (i = 0; i < slides.length; i++) {
+                    slides[i].style.display = "none";
+                }
+                slideIndex++;
+                if (slideIndex > slides.length) {slideIndex = 1}
+                for (i = 0; i < dots.length; i++) {
+                    dots[i].className = dots[i].className.replace(" active", "");
+                }
+                slides[slideIndex-1].style.display = "block";
+                dots[slideIndex-1].className += " active";
+                setTimeout(showSlides, 2000); // Change image every 5 seconds
+            }
+        </script>
 @endsection
