@@ -20,7 +20,7 @@
                 @totalPagesChanged="totalPages = $event"
             >
                     <thead slot="head">
-                    <v-th sortKey="flexible_tariff_name">Тариф </v-th>
+<!--                    <v-th sortKey="flexible_tariff_name">Тариф </v-th>-->
                     <v-th sortKey="routefrom" >Звідки</v-th>
                     <v-th sortKey="routefromnumber">Будинок</v-th>
                     <v-th sortKey="routeto" >Куди</v-th>
@@ -28,9 +28,9 @@
                     </thead>
                 <tbody slot="body" slot-scope="{displayData}">
                 <tr>
-                    <td>
+<!--                    <td>
                         <input class="form-input input-sm" v-model="filters.flexible_tariff_name.value" placeholder="Пошук">
-                    </td>
+                    </td>-->
                     <td>
                         <input class="form-input input-lg" v-model="filters.routefrom.value" placeholder="Пошук">
                     </td>
@@ -42,11 +42,11 @@
                     <td></td>
                 </tr>
                 <tr v-for="row in displayData" :key="row.id">
-                     <td>
+<!--                     <td>
                         <div style="width: 180px">
                             <input id="flexible_tariff_name" class="form-control" v-model.text="row.flexible_tariff_name" required >
                         </div>
-                     </td>
+                     </td>-->
                      <td>
                         <div style="width: 300px">
                             <input id="routefrom" class="form-control" v-model.text="row.routefrom" required >

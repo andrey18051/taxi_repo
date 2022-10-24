@@ -31475,37 +31475,6 @@ var render = function () {
                                 {
                                   name: "model",
                                   rawName: "v-model",
-                                  value: _vm.filters.flexible_tariff_name.value,
-                                  expression:
-                                    "filters.flexible_tariff_name.value",
-                                },
-                              ],
-                              staticClass: "form-input input-sm",
-                              attrs: { placeholder: "Пошук" },
-                              domProps: {
-                                value: _vm.filters.flexible_tariff_name.value,
-                              },
-                              on: {
-                                input: function ($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.filters.flexible_tariff_name,
-                                    "value",
-                                    $event.target.value
-                                  )
-                                },
-                              },
-                            }),
-                          ]),
-                          _vm._v(" "),
-                          _c("td", [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
                                   value: _vm.filters.routefrom.value,
                                   expression: "filters.routefrom.value",
                                 },
@@ -31565,40 +31534,6 @@ var render = function () {
                         _vm._v(" "),
                         _vm._l(displayData, function (row) {
                           return _c("tr", { key: row.id }, [
-                            _c("td", [
-                              _c("div", { staticStyle: { width: "180px" } }, [
-                                _c("input", {
-                                  directives: [
-                                    {
-                                      name: "model",
-                                      rawName: "v-model.text",
-                                      value: row.flexible_tariff_name,
-                                      expression: "row.flexible_tariff_name",
-                                      modifiers: { text: true },
-                                    },
-                                  ],
-                                  staticClass: "form-control",
-                                  attrs: {
-                                    id: "flexible_tariff_name",
-                                    required: "",
-                                  },
-                                  domProps: { value: row.flexible_tariff_name },
-                                  on: {
-                                    input: function ($event) {
-                                      if ($event.target.composing) {
-                                        return
-                                      }
-                                      _vm.$set(
-                                        row,
-                                        "flexible_tariff_name",
-                                        $event.target.value
-                                      )
-                                    },
-                                  },
-                                }),
-                              ]),
-                            ]),
-                            _vm._v(" "),
                             _c("td", [
                               _c("div", { staticStyle: { width: "300px" } }, [
                                 _c("input", {
@@ -31838,10 +31773,6 @@ var render = function () {
                 "thead",
                 { attrs: { slot: "head" }, slot: "head" },
                 [
-                  _c("v-th", { attrs: { sortKey: "flexible_tariff_name" } }, [
-                    _vm._v("Тариф "),
-                  ]),
-                  _vm._v(" "),
                   _c("v-th", { attrs: { sortKey: "routefrom" } }, [
                     _vm._v("Звідки"),
                   ]),
