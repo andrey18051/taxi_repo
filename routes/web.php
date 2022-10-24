@@ -11,6 +11,7 @@ use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -109,7 +110,10 @@ Route::get('/homeWelcome', function () {
 })->name('home');
 
 Route::get('/', function () {
-    return view('taxi.homeNewsVue');
+        WebOrderController::connectAPI();
+
+        return view('taxi.homeNewsVue');
+
 })->name('home-news');
 
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
@@ -161,6 +165,12 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
         if ($time >= $start_time || $time <= $end_time) {
             return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
+
+            $connectAPI = WebOrderController::connectApi();
+            if ($connectAPI == 400) {
+                return redirect()->route('home-news')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            }
             $WebOrder = new WebOrderController();
             $tariffs = $WebOrder->tariffs();
             $response_arr = json_decode($tariffs, true);
@@ -182,6 +192,11 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 
 
 Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
+    $connectAPI = WebOrderController::connectApi();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -199,6 +214,11 @@ Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeObject');
 
 Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
+    $connectAPI = WebOrderController::connectApi();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -226,6 +246,11 @@ Route::get('/taxi-umovy', function () {
 
 
 Route::get('/homeorder/{id}', function ($id) {
+    $connectAPI = WebOrderController::connectApi();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -244,6 +269,11 @@ Route::get('/homeorder/{id}', function ($id) {
 })->name('home-id');
 
 Route::get('/homeorder-object/{id}', function ($id) {
+    $connectAPI = WebOrderController::connectApi();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -263,6 +293,11 @@ Route::get('/homeorder-object/{id}', function ($id) {
 
 
 Route::get('/homeorder-object/{id}', function ($id) {
+    $connectAPI = WebOrderController::connectApi();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);
@@ -516,7 +551,11 @@ Route::get('/costhistory/orders', function (){
 })->name('costhistory-orders');
 
 Route::get('/costhistory/orders/{id}', function ($id){
-
+    $connectAPI = WebOrderController::connectApi();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
     $WebOrder = new WebOrderController();
     $tariffs = $WebOrder->tariffs();
     $response_arr = json_decode($tariffs, true);

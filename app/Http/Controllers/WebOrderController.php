@@ -20,6 +20,44 @@ use Illuminate\Support\Facades\Mail;
 class WebOrderController extends Controller
 {
     /**
+     * Проверка подключения к АПИ
+     */
+    public function connectAPI()
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $api = 'http://31.43.107.151:7306';
+        $url = $api . '/api/clients/profile';
+        $response_31_43_107_151_7306 =Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        if ($response_31_43_107_151_7306->status() == '200') {
+            return $api;
+        } else {
+            $api = 'http://134.249.181.173:7208';
+            $url = $api . '/api/clients/profile';
+            $response_134_249_181_173_7208 =Http::withHeaders([
+                'Authorization' => $authorization,
+            ])->get($url);
+            if ($response_134_249_181_173_7208->status() == '200') {
+                return $api;
+            } else {
+                $api = 'http://91.205.17.153:7208';
+                $url = $api . '/api/clients/profile';
+                $response_91_205_17_153_7208 = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->get($url);
+                if ($response_91_205_17_153_7208->status() == '200') {
+                    return $api;
+                } else {
+                    return '400';
+                }
+            }
+        }
+    }
+    /**
      * Цитаты
      */
 
@@ -49,7 +87,12 @@ class WebOrderController extends Controller
      */
     public function account($authorization)
     {
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -81,7 +124,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', $req->password);
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -104,7 +152,12 @@ class WebOrderController extends Controller
      */
     public function profileEditForm ($authorization)
     {
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -120,7 +173,12 @@ class WebOrderController extends Controller
     public function profileput(Request $req)
     {
         $authorization = $req->authorization;
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $req->authorization])->put($url, [
             'patch' => 'name, address', /*Обновление патчем.- является необязательным параметром и позволяет выполнить частичное обновление (обновить только имя клиента, только адрес клиента, или и то и другое).
@@ -161,7 +219,12 @@ class WebOrderController extends Controller
 
             $out = json_decode($out);
             if ($out->success == true) {
-                $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/register/sendConfirmCode';
                 $response = Http::post($url, [
                 'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
                 'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -190,7 +253,12 @@ class WebOrderController extends Controller
      */
     public function register(Request $req)
     {
-        $url = config('app.taxi2012Url') . '/api/account/register';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/register';
         $response = Http::post($url, [
             //Все параметры обязательные
             'phone' => $req->phone, //Номер мобильного телефона, на который будет отправлен код подтверждения
@@ -231,7 +299,12 @@ class WebOrderController extends Controller
 
             $out = json_decode($out);
             if ($out->success == true) {
-                $url = config('app.taxi2012Url') . '/api/account/restore/sendConfirmCode';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/restore/sendConfirmCode';
                 $response = Http::post($url, [
                     'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
                     'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -264,7 +337,12 @@ class WebOrderController extends Controller
 
     public function restorePassword(Request $req)
     {
-        $url = config('app.taxi2012Url') . '/api/account/restore';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/restore';
         $response = Http::post($url, [
             //Все параметры обязательные
             'phone' => $req->phone, //Номер мобильного телефона, на который будет отправлен код подтверждения
@@ -297,7 +375,12 @@ class WebOrderController extends Controller
     public function verifyAccount($phone)
     {
 
-        $url = config('app.taxi2012Url') . '/api/account/register/sendConfirmCode';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/register/sendConfirmCode';
         $response = Http::post($url, [
             'phone' => $phone, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -317,7 +400,12 @@ class WebOrderController extends Controller
      */
     public function approvedPhonesSendConfirmCode($phone)
     {
-        $url = config('app.taxi2012Url') . '/api/approvedPhones/sendConfirmCode';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/approvedPhones/sendConfirmCode';
         $response = Http::post($url, [
             'phone' => $phone, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -332,7 +420,12 @@ class WebOrderController extends Controller
      */
     public function approvedPhones($phone, $confirm_code)
     {
-        $url = config('app.taxi2012Url') . '/api/approvedPhones/';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/approvedPhones/';
         $response = Http::post($url, [
             'phone' => $phone, //Обязательный. Номер мобильного телефона
             'confirm_code' => $confirm_code //Обязательный. Код подтверждения.
@@ -349,7 +442,12 @@ class WebOrderController extends Controller
      */
 /*    public function restoreСheckConfirmCode()
     {
-        $url = config('app.taxi2012Url') . '/api/account/restore/checkConfirmCode';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/restore/checkConfirmCode';
         $response = Http::post($url, [
             'phone' => '0936734488', //Обязательный. Номер мобильного телефона
             'confirm_code' => '6024' //Обязательный. Код подтверждения.
@@ -513,7 +611,12 @@ class WebOrderController extends Controller
                     $to = $from;
                     $to_number = $from_number;
                 };
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -770,7 +873,12 @@ class WebOrderController extends Controller
                     $to = $from;
 
                 };
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -899,7 +1007,12 @@ class WebOrderController extends Controller
         /**
          * Откуда
          */
-        $url = config('app.taxi2012Url') . '/api/geodata/nearest';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/nearest';
         $response_from = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -916,7 +1029,12 @@ class WebOrderController extends Controller
         /**
          * Куда
          */
-        $url = config('app.taxi2012Url') . '/api/geodata/nearest';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/nearest';
         $response_to = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -1096,7 +1214,12 @@ class WebOrderController extends Controller
                     $to = $from;
                     $to_number = $from_number;
                 };
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -1340,7 +1463,12 @@ class WebOrderController extends Controller
 
                 $to_number = '';
 
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -1596,7 +1724,12 @@ class WebOrderController extends Controller
 
                 $to_number = $req->routetonumber;
 
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -1788,7 +1921,12 @@ class WebOrderController extends Controller
             $to = $from;
             $to_number = $from_number;
         };
-        $url = config('app.taxi2012Url') . '/api/weborders/cost';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -1959,7 +2097,12 @@ class WebOrderController extends Controller
             $route_undefined = true;
             $to = $req->search2;
         };
-        $url = config('app.taxi2012Url') . '/api/weborders/cost';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -2076,7 +2219,12 @@ class WebOrderController extends Controller
             }
         }
 
-        $url = config('app.taxi2012Url') . '/api/clients/profile';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -2304,7 +2452,12 @@ class WebOrderController extends Controller
                  * Запрос стоимости
                  */
 
-                $url = config('app.taxi2012Url') . '/api/weborders/cost';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -2335,7 +2488,12 @@ class WebOrderController extends Controller
                  * Заказ поездки
                  */
 
-                $url = config('app.taxi2012Url') . '/api/weborders';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -2499,7 +2657,12 @@ class WebOrderController extends Controller
                 $comment =  "Набрать Клиента для оформления заказа Оператору";
                 $taxiColumnId = config('app.taxiColumnId');
 
-                $url = config('app.taxi2012Url') . '/api/weborders';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -2602,7 +2765,12 @@ class WebOrderController extends Controller
                             Водительский стаж $time_work лет. Анкета отправлена ему на почту";
                 $taxiColumnId = config('app.taxiColumnId');
 
-                $url = config('app.taxi2012Url') . '/api/weborders';
+                $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -2697,7 +2865,13 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/tariffs';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+
+        $url = $connectAPI . '/api/tariffs';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -2714,7 +2888,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/streets';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -2792,7 +2971,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
 
-        $url = config('app.taxi2012Url') . '/api/geodata/objects';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/objects';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -2868,7 +3052,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/objects';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/objects';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -2892,7 +3081,12 @@ class WebOrderController extends Controller
 
         $uid =  $orderweb->dispatching_order_uid; //идентификатор заказа'5b1e13c458514781881da701583c8ccd'
 
-        $url = config('app.taxi2012Url') . '/api/weborders/cancel/' . $uid;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->put($url);
@@ -2928,7 +3122,12 @@ class WebOrderController extends Controller
     public function driversPosition()
     {
 
-        $url = config('app.taxi2012Url') . '/api/drivers/position';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/drivers/position';
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
@@ -2974,7 +3173,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/search';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3037,7 +3241,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/account/changepassword';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/account/changepassword';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->put($url, [
@@ -3058,7 +3267,12 @@ class WebOrderController extends Controller
      */
     public function version()
     {
-        $url = config('app.taxi2012Url') . '/api/version';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/version';
         $response = Http::get($url);
         return $response->body();
     }
@@ -3082,7 +3296,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/' . $uid;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -3101,7 +3320,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/driver';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/' . $uid . '/driver';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -3121,7 +3345,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -3140,7 +3369,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -3161,7 +3395,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->put($url, [
@@ -3183,7 +3422,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/' . $uid . '/cost/additional';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->delete($url);
@@ -3201,7 +3445,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/drivercarposition/' . $uid;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/drivercarposition/' . $uid;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -3221,7 +3470,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = '5b1e13c458514781881da701583c8ccd'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/rate/' . $uid;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/rate/' . $uid;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -3243,7 +3497,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $uid = 'f719e712ad0545a38ab5650ce71d5138'; //идентификатор заказа
 
-        $url = config('app.taxi2012Url') . '/api/weborders/hide/' . $uid;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/weborders/hide/' . $uid;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->put($url);
@@ -3261,7 +3520,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/ordersreport';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/ordersreport';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3281,7 +3545,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/ordershistory';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/ordershistory';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3306,7 +3575,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/bonusreport';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/bonusreport';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3327,7 +3601,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/lastaddresses';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/lastaddresses';
         $response = Http::withHeaders([
             'Authorization' => $authorization, ])->get($url);
         return $response->body();
@@ -3344,7 +3623,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/credential';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/credential';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             //X-WO-API-APP-ID: App_name
@@ -3365,7 +3649,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/changePhone/sendConfirmCode';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/changePhone/sendConfirmCode';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -3385,7 +3674,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/changePhone/';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/changePhone/';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->put($url, [
@@ -3421,7 +3715,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/balance/transactions/';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/balance/transactions/';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -3441,7 +3740,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $id = 37867;
 
-        $url = config('app.taxi2012Url') . '/api/clients/balance/transaction/' . $id;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/balance/transaction/' . $id;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -3458,7 +3762,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/clients/balance/transactions/';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/balance/transactions/';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3479,7 +3788,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/client/addresses';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
@@ -3496,7 +3810,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/client/addresses';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->post($url, [
@@ -3524,7 +3843,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/client/addresses';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/client/addresses';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->put($url, [
@@ -3554,7 +3878,12 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
         $favorite_address_uid = '7deb3fed-767e-4fe6-b8d8-2f8ad4b0fd14';
 
-        $url = config('app.taxi2012Url') . '/api/client/addresses/' . $favorite_address_uid;
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/client/addresses/' . $favorite_address_uid;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->delete($url);
@@ -3573,7 +3902,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/objects/search';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/objects/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3605,7 +3939,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/streets';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/streets';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3626,7 +3965,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/streets/search';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/streets/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3662,7 +4006,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/search';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3685,7 +4034,12 @@ class WebOrderController extends Controller
         $password = hash('SHA512', '11223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $url = config('app.taxi2012Url') . '/api/geodata/nearest';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/geodata/nearest';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url, [
@@ -3703,7 +4057,12 @@ class WebOrderController extends Controller
      */
     public function settings()
     {
-        $url = config('app.taxi2012Url') . '/api/settings';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/settings';
         $response = Http::get($url);
 
         return $response->body() ;
@@ -3715,7 +4074,12 @@ class WebOrderController extends Controller
      */
     public function addCostIncrementValue()
     {
-        $url = config('app.taxi2012Url') . '/api/settings/addCostIncrementValue';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/settings/addCostIncrementValue';
         $response = Http::get($url);
 
         return $response->body() ;
@@ -3727,7 +4091,12 @@ class WebOrderController extends Controller
      */
     public function time()
     {
-        $url = config('app.taxi2012Url') . '/api/time';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/time';
         $response = Http::get($url);
 
         return $response->body() ;
@@ -3739,7 +4108,12 @@ class WebOrderController extends Controller
      */
     public function tnVersion()
     {
-        $url = config('app.taxi2012Url') . '/api/tnVersion';
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/tnVersion';
         $response = Http::get($url);
 
         return $response->body() ;
