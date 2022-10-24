@@ -1135,6 +1135,7 @@ class WebOrderController extends Controller
             </script>
             <?php
             $WebOrder->version_street();
+
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
         /**
