@@ -12,6 +12,7 @@ use App\Models\Orderweb;
 use App\Models\Quite;
 use App\Models\Street;
 use App\Mail\Server;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,52 +29,42 @@ class WebOrderController extends Controller
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $subject = 'Отсутствует доступ к серверу.';
 
-        $api_1 = config('app.taxi2012Url_1');
-        $url = $api_1 . '/api/clients/profile';
-        $response_1 = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url);
-        if ($response_1->status() == '200') {
-            return $api_1;
-        } else {
-            $api_2 = config('app.taxi2012Url_2');
-            $url = $api_2 . '/api/clients/profile';
-            $response_2 = Http::withHeaders([
+        try {
+            $url = config('app.taxi2012Url_1') . '/api/clients/profile';
+            Http::withHeaders([
                 'Authorization' => $authorization,
             ])->get($url);
-            $subject = 'Отсутствует доступ к серверу.';
-            if ($response_2->status() == '200') {
-                $messageAdmin = "Ошибка подключения к серверу $api_1.   " . PHP_EOL .
-                            "Произведено подключение к серверу $api_2.";
+            return config('app.taxi2012Url_1');
+        } catch (Exception $e) {
+            try {
+                $url = config('app.taxi2012Url_2') . '/api/clients/profile';
+                Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->get($url);
+
+                $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
+                    "Произведено подключение к серверу " . config('app.taxi2012Url_2') . ".";
                 $paramsAdmin = [
                     'subject' => $subject,
                     'message' => $messageAdmin,
                 ];
-           //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                 Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                return $api_2;
-            } else {
-                $api_3 = config('app.taxi2012Url_3');
-                $url = $api_3 . '/api/clients/profile';
-                $response_3 = Http::withHeaders([
-                    'Authorization' => $authorization,
-                ])->get($url);
-                if ($response_3->status() == '200') {
-                    $messageAdmin = "Ошибка подключения к серверу $api_1.   " . PHP_EOL .
-                        "Ошибка подключения к серверу $api_2.   " . PHP_EOL .
-                        "Произведено подключение к серверу $api_3.";
-                    $paramsAdmin = [
-                        'subject' => $subject,
-                        'message' => $messageAdmin,
-                    ];
-                    //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                    return $api_3;
-                } else {
-                    $messageAdmin = "Ошибка подключения к серверу $api_1.   " . PHP_EOL .
-                        "Ошибка подключения к серверу $api_2. " . PHP_EOL .
-                        "Ошибка подключения к серверу $api_3.";
+
+                return config('app.taxi2012Url_2');
+            } catch (Exception $e) {
+                try {
+                    $url = config('app.taxi2012Url_3') . '/api/clients/profile';
+                    Http::withHeaders([
+                        'Authorization' => $authorization,
+                    ])->get($url);
+                    return config('app.taxi2012Url_3');
+                } catch (Exception $e) {
+                    $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
+                        "Ошибка подключения к серверу" . config('app.taxi2012Url_2') . ". " . PHP_EOL .
+                        "Ошибка подключения к серверу" . config('app.taxi2012Url_3') . ".";
                     $paramsAdmin = [
                         'subject' => $subject,
                         'message' => $messageAdmin,
@@ -85,6 +76,45 @@ class WebOrderController extends Controller
             }
         }
     }
+
+    public function connectAPInoEmail()
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $api_1 = config('app.taxi2012Url_1');
+        $url = $api_1 . '/api/clients/profile';
+     //   dd('easdas');
+
+        try {
+            $url = config('app.taxi2012Url_1') . '/api/clients/profile';
+            Http::withHeaders([
+                'Authorization' => $authorization,
+            ])->get($url);
+            return config('app.taxi2012Url_1');
+        } catch (Exception $e) {
+            try {
+                $url = config('app.taxi2012Url_2') . '/api/clients/profile';
+                Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->get($url);
+                return config('app.taxi2012Url_2');
+            } catch (Exception $e) {
+                try {
+                    $url = config('app.taxi2012Url_3') . '/api/clients/profile';
+                    Http::withHeaders([
+                        'Authorization' => $authorization,
+                    ])->get($url);
+                    return config('app.taxi2012Url_3');
+                } catch (Exception $e) {
+                    return '400';
+                }
+            }
+        }
+    }
+
+
     /**
      * Цитаты
      */
@@ -2894,7 +2924,7 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $connectAPI = WebOrderController::connectApi();
+        $connectAPI = WebOrderController::connectAPInoEmail();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
