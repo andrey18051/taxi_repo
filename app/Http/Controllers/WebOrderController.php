@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\Quite;
 use App\Models\Street;
+use App\Mail\Server;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,30 +29,57 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $api = 'http://31.43.107.151:7306';
-        $url = $api . '/api/clients/profile';
-        $response_31_43_107_151_7306 =Http::withHeaders([
+        $api_1 = config('app.taxi2012Url_1');
+        $url = $api_1 . '/api/clients/profile';
+        $response_1 = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
-        if ($response_31_43_107_151_7306->status() == '200') {
-            return $api;
+        if ($response_1->status() == '200') {
+            return $api_1;
         } else {
-            $api = 'http://134.249.181.173:7208';
-            $url = $api . '/api/clients/profile';
-            $response_134_249_181_173_7208 =Http::withHeaders([
+            $api_2 = config('app.taxi2012Url_2');
+            $url = $api_2 . '/api/clients/profile';
+            $response_2 = Http::withHeaders([
                 'Authorization' => $authorization,
             ])->get($url);
-            if ($response_134_249_181_173_7208->status() == '200') {
-                return $api;
+            $subject = 'Отсутствует доступ к серверу.';
+            if ($response_2->status() == '200') {
+                $messageAdmin = "Ошибка подключения к серверу $api_1.   " . PHP_EOL .
+                            "Произведено подключение к серверу $api_2.";
+                $paramsAdmin = [
+                    'subject' => $subject,
+                    'message' => $messageAdmin,
+                ];
+           //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+                return $api_2;
             } else {
-                $api = 'http://91.205.17.153:7208';
-                $url = $api . '/api/clients/profile';
-                $response_91_205_17_153_7208 = Http::withHeaders([
+                $api_3 = config('app.taxi2012Url_3');
+                $url = $api_3 . '/api/clients/profile';
+                $response_3 = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->get($url);
-                if ($response_91_205_17_153_7208->status() == '200') {
-                    return $api;
+                if ($response_3->status() == '200') {
+                    $messageAdmin = "Ошибка подключения к серверу $api_1.   " . PHP_EOL .
+                        "Ошибка подключения к серверу $api_2.   " . PHP_EOL .
+                        "Произведено подключение к серверу $api_3.";
+                    $paramsAdmin = [
+                        'subject' => $subject,
+                        'message' => $messageAdmin,
+                    ];
+                    //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+                    return $api_3;
                 } else {
+                    $messageAdmin = "Ошибка подключения к серверу $api_1.   " . PHP_EOL .
+                        "Ошибка подключения к серверу $api_2. " . PHP_EOL .
+                        "Ошибка подключения к серверу $api_3.";
+                    $paramsAdmin = [
+                        'subject' => $subject,
+                        'message' => $messageAdmin,
+                    ];
+                    //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
                     return '400';
                 }
             }
