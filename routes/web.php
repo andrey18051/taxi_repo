@@ -166,6 +166,7 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
             return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
         } else {
             $connectAPI = WebOrderController::connectAPInoEmail();
+            //dd($connectAPI);
             if ($connectAPI == 400) {
                 return redirect()->route('home-news')
                     ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');

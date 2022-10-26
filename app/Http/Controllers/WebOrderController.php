@@ -84,10 +84,8 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $api_1 = config('app.taxi2012Url_1');
-        $url = $api_1 . '/api/clients/profile';
-     //   dd('easdas');
 
-        try {
+         try {
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
             Http::withHeaders([
                 'Authorization' => $authorization,
