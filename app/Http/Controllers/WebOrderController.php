@@ -187,12 +187,14 @@ class WebOrderController extends Controller
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
         }
+
+
         $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url);
         $response_arr = json_decode($response, true);
- //dd($response_arr);
+
 
         if ($response->status() == "200") {
             $user_first_name = $response_arr['user_first_name'];
@@ -325,7 +327,7 @@ class WebOrderController extends Controller
             'confirm_password' => $req-> confirm_password, //Пароль (повтор).
             'user_first_name' => 'Новий користувач', // Необязательный. Имя клиента
         ]);
-       // dd($response->status());
+        dd($response->status());
         if ($response->status() == "201") {
             $username = $req->phone;
             $password = hash('SHA512', $req->password);
@@ -358,11 +360,11 @@ class WebOrderController extends Controller
             $out = json_decode($out);
             if ($out->success == true) {
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/account/restore/sendConfirmCode';
+            if ($connectAPI == 400) {
+                return redirect()->route('home-news')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            }
+            $url = $connectAPI . '/api/account/restore/sendConfirmCode';
                 $response = Http::post($url, [
                     'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
                     'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).

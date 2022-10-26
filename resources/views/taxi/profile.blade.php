@@ -2,6 +2,12 @@
 
 @section('content')
     {{-- dd($response) --}}
+    @if($response["route_address_from"] == null)
+        @php
+            $response["route_address_from"] = 'adress';
+            $response["route_address_number_from"] = '1'
+        @endphp
+    @endif
 <section>
     <div class="container text-center" style="background-color: hsl(0, 0%, 96%)">
         <br>
