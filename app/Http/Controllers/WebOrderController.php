@@ -33,14 +33,17 @@ class WebOrderController extends Controller
 
         try {
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
-            Http::withHeaders([
+
+
+            Http::timeout(2)->withHeaders([
                 'Authorization' => $authorization,
             ])->get($url);
             return config('app.taxi2012Url_1');
         } catch (Exception $e) {
             try {
+
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
-                Http::withHeaders([
+                Http::timeout(2)->withHeaders([
                     'Authorization' => $authorization,
                 ])->get($url);
 
@@ -57,7 +60,7 @@ class WebOrderController extends Controller
             } catch (Exception $e) {
                 try {
                     $url = config('app.taxi2012Url_3') . '/api/clients/profile';
-                    Http::withHeaders([
+                    Http::timeout(2)->withHeaders([
                         'Authorization' => $authorization,
                     ])->get($url);
                     return config('app.taxi2012Url_3');
@@ -71,6 +74,7 @@ class WebOrderController extends Controller
                     ];
                     //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                     Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+                   // dd('400');
                     return '400';
                 }
             }
@@ -83,25 +87,23 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $api_1 = config('app.taxi2012Url_1');
-
-         try {
+        try {
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
-            Http::withHeaders([
+            Http::timeout(2)->withHeaders([
                 'Authorization' => $authorization,
             ])->get($url);
             return config('app.taxi2012Url_1');
         } catch (Exception $e) {
             try {
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
-                Http::withHeaders([
+                Http::timeout(2)->withHeaders([
                     'Authorization' => $authorization,
                 ])->get($url);
                 return config('app.taxi2012Url_2');
             } catch (Exception $e) {
                 try {
                     $url = config('app.taxi2012Url_3') . '/api/clients/profile';
-                    Http::withHeaders([
+                    Http::timeout(2)->withHeaders([
                         'Authorization' => $authorization,
                     ])->get($url);
                     return config('app.taxi2012Url_3');
@@ -4163,13 +4165,13 @@ class WebOrderController extends Controller
      * Запрос версии TaxiNavigator
      * @return string
      */
-    public function tnVersion()
+    public function tnVersion($connectAPI)
     {
-        $connectAPI = WebOrderController::connectApi();
+       /* $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
+        }*/
         $url = $connectAPI . '/api/tnVersion';
         $response = Http::get($url);
 
