@@ -88,7 +88,7 @@
                 <div class="row">
                     <ul class="olderOne">
                         <li>
-                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}">
+                            <a href="{{ route('callBackForm') }}">
                                 <b><h5 class="text-center">Послуга "тверезий водій"</h5></b>
 
                                 <p style="text-align: justify">
