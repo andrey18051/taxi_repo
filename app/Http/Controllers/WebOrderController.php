@@ -12,9 +12,12 @@ use App\Models\Orderweb;
 use App\Models\Quite;
 use App\Models\Street;
 use App\Mail\Server;
+use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -176,10 +179,12 @@ class WebOrderController extends Controller
      * Запрос профиля клиента
      * @return string
      */
-    public function profile(Request $req)
+    public function profile()
     {
-        $username = $req->username;
-        $password = hash('SHA512', $req->password);
+        $username = substr(Auth::user()->user_phone, 3);
+
+        $password = hash('SHA512', Crypt::decryptString(Auth::user()->password_taxi));
+
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $connectAPI = WebOrderController::connectApi();
@@ -201,10 +206,45 @@ class WebOrderController extends Controller
             return redirect()->route('profile-view', ['authorization' => $authorization])
                 ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
         } else {
-            return redirect()->route('taxi-login')
+            return view('taxi.login-phone', ['phone' => $username])
                 ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
         }
     }
+
+    /**
+     * Запрос профиля клиента при смене пароля
+     * @return string
+     */
+    public function profileApi(Request $req)
+    {
+        $username = substr($req->username, 3);
+        $password = hash('SHA512', $req->password);
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $url = $connectAPI . '/api/clients/profile';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+        $response_arr = json_decode($response, true);
+
+        if ($response->status() == "200") {
+            $finduser = User::where('user_phone', $req->username)->first();
+            $finduser->password_taxi = Crypt::encryptString($req->password);
+            $finduser->save();
+            $user_first_name = $response_arr['user_first_name'];
+            return redirect()->route('profile-view', ['authorization' => $authorization])
+                ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
+        } else {
+            return view('taxi.login-phone', ['phone' => $username])
+                ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
+        }
+    }
+
 
     /**
      * Форма редактирования профиля клиента
@@ -280,11 +320,11 @@ class WebOrderController extends Controller
             $out = json_decode($out);
             if ($out->success == true) {
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/account/register/sendConfirmCode';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/account/register/sendConfirmCode';
                 $response = Http::post($url, [
                 'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
                 'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -327,7 +367,7 @@ class WebOrderController extends Controller
             'confirm_password' => $req-> confirm_password, //Пароль (повтор).
             'user_first_name' => 'Новий користувач', // Необязательный. Имя клиента
         ]);
-        dd($response->status());
+     //   dd($response->status());
         if ($response->status() == "201") {
             $username = $req->phone;
             $password = hash('SHA512', $req->password);
@@ -360,11 +400,11 @@ class WebOrderController extends Controller
             $out = json_decode($out);
             if ($out->success == true) {
                 $connectAPI = WebOrderController::connectApi();
-            if ($connectAPI == 400) {
-                return redirect()->route('home-news')
-                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-            }
-            $url = $connectAPI . '/api/account/restore/sendConfirmCode';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/account/restore/sendConfirmCode';
                 $response = Http::post($url, [
                     'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
                     'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -414,6 +454,11 @@ class WebOrderController extends Controller
             $username = $req->phone;
             $password = hash('SHA512', $req->password);
             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+            $finduser = User::where('user_phone', $req->phone)->first();
+            $finduser->password_taxi = Crypt::encryptString($req->password);
+            $finduser->save();
+
             return redirect()->route('profile-view', ['authorization' => $authorization])
                 ->with('success', 'Пароль успішно змінено.');
         } else {

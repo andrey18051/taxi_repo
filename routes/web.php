@@ -353,7 +353,7 @@ Route::get('/homeblank/{id}', function ($id) {
  * Профиль
  */
 Route::get('/login-taxi', function () {
-    return view('taxi.login');
+    return view('auth.login');
 })->name('login-taxi');
 
 Route::get('/login-taxi/{phone}', function ($phone) {
@@ -361,6 +361,7 @@ Route::get('/login-taxi/{phone}', function ($phone) {
 })->name('login-taxi-phone');
 
 Route::get('/profile', [WebOrderController::class, 'profile'])->name('profile');
+Route::get('/profileApi', [WebOrderController::class, 'profileApi'])->name('profileApi');
 
 Route::get('/profile/view/{authorization}', function ($authorization) {
     $response = new WebOrderController();

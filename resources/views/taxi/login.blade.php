@@ -21,7 +21,7 @@
                 <div class="col-lg-6 ">
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ route('profile') }}">
+                            <form action="{{ route('profileApi') }}">
                             @csrf
 
                             <!-- 2 column grid layout with text inputs for the first and last names -->
@@ -30,12 +30,12 @@
 
                                     <!-- Phone input -->
                                         <div class="form-outline mb-2">
-                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: 0936665544" required>
+                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: +380936665544" required>
                                         </div>
 
                                         <!-- Password input -->
                                         <div class="form-outline mb-2">
-                                            <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 7 букв або цифр" id="password" required>
+                                            <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 8 букв або цифр" id="password" required>
                                             <a href="{{route('restore-sms')}}" target="_blank">Забули пароль?</a>
                                         </div>
 
@@ -51,6 +51,15 @@
                                     </div>
                                 </div>
                             </form>
+                           {{-- <div class="flex items-center justify-end mt-4">
+
+                                <a href="{{ url('auth/google') }}">
+
+                                    <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" style="margin-left: 3em;">
+
+                                </a>
+
+                            </div>--}}
                         </div>
                     </div>
                 </div>

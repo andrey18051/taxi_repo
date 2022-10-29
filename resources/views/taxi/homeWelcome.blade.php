@@ -1,4 +1,4 @@
-@extends('layouts.taxiNew')
+@extends('layouts.newsList')
 
 @section('content')
 

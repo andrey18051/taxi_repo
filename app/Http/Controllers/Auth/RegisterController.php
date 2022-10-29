@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
+use App\Rules\PhoneNumber;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -51,6 +53,7 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
+            'user_phone' => ['required', new PhoneNumber],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -66,8 +69,10 @@ class RegisterController extends Controller
     {
         return User::create([
             'name' => $data['name'],
+            'user_phone' => $data['user_phone'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'password_taxi' => Crypt::encryptString($data['password'])
         ]);
     }
 }

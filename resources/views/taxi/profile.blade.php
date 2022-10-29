@@ -1,4 +1,4 @@
-@extends('layouts.taxiNewProfile')
+@extends('layouts.newsList')
 
 @section('content')
     {{-- dd($response) --}}
@@ -108,8 +108,7 @@
                         <img src="{{ asset('img/logo-profile.jpg')}}" alt="avatar"
                              class="rounded-circle img-fluid" style="width: 150px;">
                         <h5 class="my-3">
-                            {{$response["user_first_name"]}}
-                            {{$response["user_last_name"]}}
+                            {{ Auth::user()->name }}
                         </h5>
                     <div class="d-flex justify-content-center mb-2">
                             <a type="button" class="btn btn-primary"

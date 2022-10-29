@@ -40,10 +40,44 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
+<!--                    <ul class="navbar-nav ms-auto">
+                        &lt;!&ndash; Authentication Links &ndash;&gt;
+                        @guest
+                            @if (Route::has('login'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                </li>
+                            @endif
+
+                            @if (Route::has('register'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                </li>
+                            @endif
+                        @else
+                            <li class="nav-item dropdown">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    {{ Auth::user()->name }}
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('logout') }}"
+                                       onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                        {{ __('Logout') }}
+                                    </a>
+
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                        @csrf
+                                    </form>
+                                </div>
+                            </li>
+                        @endguest
+                    </ul>-->
+<!--                    <ul class="navbar-nav ms-auto">
+                        &lt;!&ndash; Authentication Links &ndash;&gt;
                         <ul class="navbar-nav ms-auto">
-                            <!-- Authentication Links -->
+                            &lt;!&ndash; Authentication Links &ndash;&gt;
 
                                 @if (session('user_first_name') !== null || $user_name !== null && $user_name !== "Новий замовник")
                                     <li class="nav-item dropdown">
@@ -97,7 +131,7 @@
                             @endif
                         </ul>
 
-                        <!--                       <li class="nav-item dropdown">
+                        &lt;!&ndash;                       <li class="nav-item dropdown">
                                 <a id="navbar" class="nav-link" href="/" role="button" target="_blank" data-bs-toggle="#" aria-haspopup="true" aria-expanded="false" v-pre>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-door-open" viewBox="0 0 16 16">
                                         <path d="M8.5 10c-.276 0-.5-.448-.5-1s.224-1 .5-1 .5.448.5 1-.224 1-.5 1z"/>
@@ -105,9 +139,9 @@
                                     </svg>
                                     {{ "Вихід" }}
                                 </a>
-                            </li>-->
+                            </li>&ndash;&gt;
 
-                    </ul>
+                    </ul>-->
                 </div>
             </div>
         </nav>
