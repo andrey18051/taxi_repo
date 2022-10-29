@@ -38,7 +38,7 @@ class WebOrderController extends Controller
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
 
 
-            Http::timeout(2)->withHeaders([
+            Http::timeout(20)->withHeaders([
                 'Authorization' => $authorization,
             ])->get($url);
             return config('app.taxi2012Url_1');
@@ -46,7 +46,7 @@ class WebOrderController extends Controller
             try {
 
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
-                Http::timeout(2)->withHeaders([
+                Http::timeout(20)->withHeaders([
                     'Authorization' => $authorization,
                 ])->get($url);
 
@@ -63,7 +63,7 @@ class WebOrderController extends Controller
             } catch (Exception $e) {
                 try {
                     $url = config('app.taxi2012Url_3') . '/api/clients/profile';
-                    Http::timeout(2)->withHeaders([
+                    Http::timeout(20)->withHeaders([
                         'Authorization' => $authorization,
                     ])->get($url);
                     return config('app.taxi2012Url_3');
@@ -77,7 +77,7 @@ class WebOrderController extends Controller
                     ];
                     //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                     Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                   // dd('400');
+
                     return '400';
                 }
             }
@@ -92,21 +92,21 @@ class WebOrderController extends Controller
 
         try {
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
-            Http::timeout(2)->withHeaders([
+            Http::timeout(20)->withHeaders([
                 'Authorization' => $authorization,
             ])->get($url);
             return config('app.taxi2012Url_1');
         } catch (Exception $e) {
             try {
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
-                Http::timeout(2)->withHeaders([
+                Http::timeout(20)->withHeaders([
                     'Authorization' => $authorization,
                 ])->get($url);
                 return config('app.taxi2012Url_2');
             } catch (Exception $e) {
                 try {
                     $url = config('app.taxi2012Url_3') . '/api/clients/profile';
-                    Http::timeout(2)->withHeaders([
+                    Http::timeout(20)->withHeaders([
                         'Authorization' => $authorization,
                     ])->get($url);
                     return config('app.taxi2012Url_3');
