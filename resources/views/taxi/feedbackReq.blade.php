@@ -1,4 +1,4 @@
-@extends('layouts.taxi2')
+@extends('layouts.newsList')
 
 @section('content')
 {{-- print_r($params) --}}
@@ -29,7 +29,7 @@
                                   </svg>
                                  0933242525
                               </a>
-                            </span class="col-lg-4 col-sm-12">
+                            </span>
                             <span>
                                 <a class="btn btn-outline-success" href="tel:+380504115575">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-inbound" viewBox="0 0 16 16">

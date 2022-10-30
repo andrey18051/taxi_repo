@@ -8,13 +8,24 @@
             <h2 class="gradient"><b>Київ та область</b></h2>
             <p class="text-center gradient">Виберіть варіант пошуку для замовлення.</p>
         </div>
-{{$time}}
 
-            <div class="container text-center card">
-                   <small>Оставаючись на сайті,  Ви погоджуєтесь
-                       <br><a href="{{ route('taxi-gdbr') }}">на умови використання  особистой інформації.</a>
-                   </small>
+        <div class="container" style="text-align: center">
+            <div class="center gradient" style="background-color: hsl(0, 0%, 96%); padding:5px;">
+                <span style="color:black">Сьогодні:</span>
+                <span style="color:black;; font-size:14px;">
+                  <script>
+                      document.write(date+" ");
+                      document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
+                  </script>
+                  (<span id="clockdat" style="color:blue;"></span>)
+                  </span>
             </div>
+        </div>
+        <div class="container text-center card">
+            <small>Оставаючись на сайті,  Ви погоджуєтесь
+                <br><a href="{{ route('taxi-gdbr') }}">на умови використання  особистой інформації.</a>
+            </small>
+        </div>
         <br>
 
         <div class="container text-center">

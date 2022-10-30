@@ -1,4 +1,4 @@
-@extends('layouts.logout21')
+@extends('layouts.newsList')
 
 @section('content')
 

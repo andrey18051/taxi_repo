@@ -1,4 +1,4 @@
-@extends('layouts.taxiNewHistory')
+@extends('layouts.newsList')
 
 @section('content')
     {{-- print_r($response) --}}
