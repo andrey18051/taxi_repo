@@ -377,6 +377,11 @@ Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('pr
 /**
  * Регистрация
  */
+Route::get('/registerSocial', function () {
+    return view('auth.registerSocial');
+})->name('registerSocial');
+
+
 Route::get('/registration/sms', function () {
     return view('taxi.registerSMS');
 })->name('registration-sms');

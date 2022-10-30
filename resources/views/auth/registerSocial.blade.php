@@ -1,6 +1,6 @@
 @extends('layouts.newsList')
 
-@section('content') {{ $newUser ?? dd($newUser) }}
+@section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -15,7 +15,9 @@
                             <label for="name" class="col-md-4 col-form-label text-md-end">{{ __("Ім'я") }}</label>
 
                             <div class="col-md-6">
-                                <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+                                <input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                                       name="name"
+                                       value="{{ $newUser["name"] }}" required autocomplete="name" autofocus>
 
                                 @error('name')
                                     <span class="invalid-feedback" role="alert">
@@ -43,7 +45,8 @@
                             <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Адреса електронної пошти') }}</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
+                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                                       name="email" value="{{ $newUser['email'] }}" required autocomplete="email">
 
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
@@ -52,7 +55,7 @@
                                 @enderror
                             </div>
                         </div>
-
+                        <input type="hidden" id="google_id" name="google_id" value="{{ $newUser['google_id'] }}">
                         <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Пароль') }}</label>
 
