@@ -717,11 +717,11 @@ class WebOrderController extends Controller
                     $to_number = $from_number;
                 };
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders/cost';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -905,7 +905,6 @@ class WebOrderController extends Controller
                     case 'Базовый':
                     case 'Бизнес-класс':
                     case 'Эконом-класс':
-
                         $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                         $ii++;
                 }
@@ -979,11 +978,11 @@ class WebOrderController extends Controller
 
                 };
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders/cost';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
