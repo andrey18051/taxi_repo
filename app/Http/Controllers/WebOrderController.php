@@ -1639,7 +1639,7 @@ class WebOrderController extends Controller
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
                             break;
-                        case 'Баджет (Київ, Вокзальна пл., 1)':
+                        case 'ЖД Южный':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
                              до залізничного вокзалу. Оплата $req->payment_type. $auto_type";
                             break;
