@@ -50,34 +50,32 @@
                                     </div>
                                 </div>
                         </div>
-                    <div class="col-lg-12 col-sm-12 ">
-                        <div class="container" style="margin-top: 5px">
-                            <div class="row">
-                                <div class="col-12">
-                                    @guest
-                                        <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
-                                    @else
-                                        <input type="name" id="user_full_name" name="user_full_name"
-                                               value="{{Auth::user()->name}}"  class="form-control"  required/>
-                                    @endguest
-                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="container" style="margin-top: 5px">
-                            <div class="row">
-                                <div class="col-12">
-                                    @guest
-                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                               placeholder="Телефон? Приклад: 0936665544" autofocus required>
-                                    @else
-                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                               value="{{ substr(Auth::user()->user_phone, 3)}}"    autofocus required>
-                                    @endguest
-
+                        <div class="col-lg-12 col-sm-12 ">
+                             <div class="container" style="margin-top: 5px">
+                                 <div class="row">
+                                         @guest
+                                            <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
+                                         @else
+                                            <input type="name" id="user_full_name" name="user_full_name"
+                                                   value="{{Auth::user()->name}}"  class="form-control"  required/>
+                                         @endguest
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="container" style="margin-top: 5px">
+                                <div class="row">
+                                     <div class="col-12">
+                                        @guest
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                            placeholder="Телефон? Приклад: 0936665544" autofocus required>
+                                        @else
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                            value="{{ substr(Auth::user()->user_phone, 3)}}"    autofocus required>
+                                        @endguest
+
+                                    </div>
+                                </div>
+                            </div>
 
                         <div class="container" style="margin-top: 5px">
 

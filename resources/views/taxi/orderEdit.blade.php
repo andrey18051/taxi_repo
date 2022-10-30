@@ -58,69 +58,63 @@
                                     </div>
                                 </div>
                             </div>
-
-                        <div class="col-lg-12 col-sm-12 ">
-                            <div class="container" style="margin-top: 5px">
-                                <div class="row">
-                                    <div class="col-12">
-                                        @guest
-                                            <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
-                                        @else
-                                            <input type="name" id="user_full_name" name="user_full_name"
-                                                   value="{{Auth::user()->name}}"  class="form-control"  required/>
-                                        @endguest
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="container" style="margin-top: 5px">
-                                <div class="row">
-                                    <div class="col-12">
-                                        @guest
-                                            <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                                   placeholder="Телефон? Приклад: 0936665544"  autofocus required>
-                                        @else
-                                            <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                                   value="{{ substr(Auth::user()->user_phone, 3)}}"  autofocus required>
-                                        @endguest
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="container" style="margin-top: 5px">
-
+                    <div class="col-lg-12 col-sm-12 ">
+                        <div class="container text-center" style="margin-top: 5px">
+                            <div class="row">
                                 <div class="col-12">
-                                    <textarea class="form-control" id="comment" name="comment" placeholder="Коментар" ></textarea>
+                                    @guest
+                                        <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
+                                    @else
+                                        <input type="name" id="user_full_name" name="user_full_name"
+                                               value="{{Auth::user()->name}}"  class="form-control"  required/>
+                                    @endguest
                                 </div>
-
-                                <div class="col-12 slidecontainer">
-                                    <label for="add_cost" class="form-label" >
-                                        Додати до вартости: <span id="rangeValue"> 0 </span>грн.
-                                    </label>
-                                    <input type="range"
-                                           @if(config('app.server') == 'Одесса')
-                                           min="-30"
-                                           @else
-                                           min="0"
-                                           @endif
-                                           max="1000"
-                                           step="5"
-                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;
-                                               let  order_cost = Number(this.value) + Number({{session('order_cost')}});
-                                               document.getElementById('rangeValueСost').innerHTML = order_cost;"
-                                           class="slider" />
-
-                                </div>
-                                <h4> Вартість поїздки: <span id="rangeValueСost"> {{session('order_cost')}} </span>грн.</h4>
-                                (Діапазон цін інших служб таксі {{round (session('order_cost') * config('app.order_cost_min'), 0)}}
-                                - {{round (session('order_cost') * config('app.order_cost_max'), 0)}} грн).
-
-
                             </div>
                         </div>
 
+                        <div class="container" style="margin-top: 5px">
+                            <div class="row">
+                                <div class="col-12">
+                                    @guest
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                               placeholder="Телефон? Приклад: 0936665544"  autofocus required>
+                                    @else
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                               value="{{ substr(Auth::user()->user_phone, 3)}}"  autofocus required>
+                                    @endguest
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container" style="margin-top: 5px">
+
+                                <div class="col-12">
+                                    <textarea class="form-control" id="comment" name="comment"  placeholder="Коментар"></textarea>
+                                </div>
+
+                            <div class="col-12 slidecontainer">
+                                <label for="add_cost" class="form-label" >
+                                    Додати до вартости: <span id="rangeValue"> 0 </span>грн.
+                                </label>
+                                       <input type="range"
+                                              @if(config('app.server') == 'Одесса')
+                                              min="-30"
+                                              @else
+                                              min="0"
+                                              @endif
+                                           max="1000"
+                                            step="5"
+                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
+                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;
+                                           let  order_cost = Number(this.value) + Number({{session('order_cost')}});
+                                                     document.getElementById('rangeValueСost').innerHTML = order_cost;"
+                                           class="slider" />
+
+                            </div>
+                            <h4> Вартість поїздки: <span id="rangeValueСost"> {{session('order_cost')}} </span>грн.</h4>
+                            (Діапазон цін інших служб таксі {{round (session('order_cost') * config('app.order_cost_min'), 0)}}
+                            - {{round (session('order_cost') * config('app.order_cost_max'), 0)}} грн).
+                        </div>
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last" style="display: none;">
                         <br/>
