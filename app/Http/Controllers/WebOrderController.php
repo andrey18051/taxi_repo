@@ -295,8 +295,11 @@ class WebOrderController extends Controller
             'route_address_entrance_from' => $req->route_address_entrance_from, //Подъезд
             'route_address_apartment_from' => $req->route_address_apartment_from, //Квартира
             ]);
-
-       return redirect()->route('profile-view', ['authorization' => $authorization])
+        $finduser = User::where('email', Auth::user()->email)->first();
+        $finduser->name = $req->user_first_name;
+        $finduser->save();
+        Auth::login($finduser);
+        return redirect()->route('profile-view', ['authorization' => $authorization])
            ->with('success', 'Особисті дані успішно оновлено');
     }
     /**
