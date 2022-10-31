@@ -25,7 +25,7 @@
                                         <div class="row">
                                             <!-- Phone input -->
                                             <div class="form-outline mb-4">
-                                                <input type="text" class="form-control" name="phone" placeholder="Телефон? Приклад: 0936665544">
+                                                <input type="text" class="form-control" name="phone" placeholder="Телефон? Приклад: +380936665544">
                                             </div>
 
                                             <!-- Password input -->

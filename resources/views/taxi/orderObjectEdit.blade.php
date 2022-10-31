@@ -67,7 +67,7 @@
                                      <div class="col-12">
                                         @guest
                                         <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                            placeholder="Телефон? Приклад: 0936665544" autofocus required>
+                                            placeholder="Телефон? Приклад: +380936665544" autofocus required>
                                         @else
                                         <input type="tel" class="form-control" id="user_phone" name="user_phone"
                                             value="{{ substr(Auth::user()->user_phone, 3)}}"    autofocus required>

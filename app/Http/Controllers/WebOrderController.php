@@ -168,7 +168,7 @@ class WebOrderController extends Controller
      */
     public function authorization($req)
     {
-        $username = $req->username;
+        $username = substr($req->username, 3);
         $password = hash('SHA512', $req->password);
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -361,7 +361,7 @@ class WebOrderController extends Controller
         $url = $connectAPI . '/api/account/register';
         $response = Http::post($url, [
             //Все параметры обязательные
-            'phone' => $req->phone, //Номер мобильного телефона, на который будет отправлен код подтверждения
+            'phone' => substr($req->phone, 3), //Номер мобильного телефона, на который будет отправлен код подтверждения
             'confirm_code' => $req->confirm_code, //Код подтверждения, полученный в SMS.
             'password' =>  $req->password, //Пароль.
             'confirm_password' => $req-> confirm_password, //Пароль (повтор).
@@ -369,7 +369,7 @@ class WebOrderController extends Controller
         ]);
      //   dd($response->status());
         if ($response->status() == "201") {
-            $username = $req->phone;
+            $username = substr($req->phone, 3);
             $password = hash('SHA512', $req->password);
             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
             return redirect()->route('profile-view', ['authorization' => $authorization])
@@ -445,13 +445,13 @@ class WebOrderController extends Controller
         $url = $connectAPI . '/api/account/restore';
         $response = Http::post($url, [
             //Все параметры обязательные
-            'phone' => $req->phone, //Номер мобильного телефона, на который будет отправлен код подтверждения
+            'phone' => substr($req->phone, 3), //Номер мобильного телефона, на который будет отправлен код подтверждения
             'confirm_code' => $req->confirm_code, //Код подтверждения, полученный в SMS.
             'password' =>  $req->password, //Пароль.
             'confirm_password' => $req-> confirm_password, //Пароль (повтор).
         ]);
         if ($response->status() == "200") {
-            $username = $req->phone;
+            $username = substr($req->phone, 3);
             $password = hash('SHA512', $req->password);
             $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 

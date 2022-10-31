@@ -28,7 +28,7 @@
 
                                         <!-- Phone input -->
                                         <div class="form-outline mb-2 col-12"  >
-                                            <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: 0936665544">
+                                            <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: +380936665544">
                                         </div>
 
                                         <script defer src="https://www.google.com/recaptcha/api.js"></script>

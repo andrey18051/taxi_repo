@@ -27,7 +27,7 @@
                              <input type="hidden" id="lng" name="lng" />
                              <input type="hidden" id="lat2" name="lat2" />
                              <input type="hidden" id="lng2" name="lng2"/>
-                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                             <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="+380936665544" value="">
                              <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                              <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
                              <input type="hidden" class="form-control" id="search5" name="search5" autocomplete="off" placeholder="Пошук об'єкта" >
@@ -119,7 +119,7 @@
                 @csrf
                 <div class="row">
                     <div class="col-md-7 col-lg-8">
-                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                        <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="+380936665544" value="">
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
@@ -227,7 +227,7 @@
                     @csrf
                     <div class="row">
                         <div class="col-sm-8 col-lg-8">
-                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="0936665544" value="">
+                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" placeholder="+380936665544" value="">
                             <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
                             <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="Новий замовник">
                             <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />

@@ -30,7 +30,7 @@
                                         <div class="form-outline mb-2 col-12"  >
                                             <div class="row">
                                                 <div class="col-12">
-                                                    <input type="text" class="form-control" name="user_phone" placeholder="Телефон? Приклад: 0936665544" required>
+                                                    <input type="text" class="form-control" name="user_phone" placeholder="Телефон? Приклад: +380936665544" required>
                                                 </div>
                                                 <br><br>
                                                 <div class="col-12">
