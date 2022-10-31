@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a576fed75becdb9fcffe15721b7d037c",
+    "content-hash": "a381f8726abce5fa311d868ffbc3bf47",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -5929,16 +5929,16 @@
         },
         {
             "name": "laravel-lang/lang",
-            "version": "11.0.7",
+            "version": "12.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laravel-Lang/lang.git",
-                "reference": "7b9c41d06615a0a35e568979cbbd44d9431ecc55"
+                "reference": "8c3385164e9b0d7ed364957b617a4a7d9e24ecb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/7b9c41d06615a0a35e568979cbbd44d9431ecc55",
-                "reference": "7b9c41d06615a0a35e568979cbbd44d9431ecc55",
+                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/8c3385164e9b0d7ed364957b617a4a7d9e24ecb5",
+                "reference": "8c3385164e9b0d7ed364957b617a4a7d9e24ecb5",
                 "shasum": ""
             },
             "require": {
@@ -5955,11 +5955,10 @@
                 "symfony/var-dumper": "^5.0 || ^6.0"
             },
             "suggest": {
-                "arcanedev/laravel-lang": "Translations manager and checker for Laravel 5",
+                "arcanedev/laravel-lang": "Translations manager and checker for Laravel",
                 "laravel-lang/attributes": "Translations for field names of the forms",
                 "laravel-lang/http-statuses": "Translations for HTTP statuses",
-                "laravel-lang/publisher": "Easy installation and update of translation files for your project",
-                "overtrue/laravel-lang": "Command to add languages in your project"
+                "laravel-lang/publisher": "Easy installation and update of translation files for your project"
             },
             "type": "library",
             "extra": {
@@ -6001,7 +6000,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2022-07-21T19:16:09+00:00"
+            "time": "2022-10-28T17:51:27+00:00"
         },
         {
             "name": "laravel/sail",

@@ -1,6 +1,6 @@
 @extends('layouts.newsList')
 
-@section('content') {{ $newUser ?? dd($newUser) }}
+@section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
