@@ -38,19 +38,29 @@ class GoogleController extends Controller
                 Auth::login($finduser);
                 return redirect()->intended('/homeWelcome');
             } else {
-                $newUser['name'] = $user->name;
-                $newUser['email'] = $user->email;
-                $newUser['google_id'] = $user->id;
+                try {
+                    $finduser = User::where('email', $user->email)->first();
+                    $finduser->google_id = $user->id;
+                    $finduser->save();
+                    Auth::login($finduser);
+                    return redirect()->intended('/homeWelcome');
+                }
+                catch (Exception $e) {
+                    $newUser['name'] = $user->name;
+                    $newUser['email'] = $user->email;
+                    $newUser['google_id'] = $user->id;
 
-               /* $newUser = User::create([
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'google_id' => $user->id,
-                    'password' => encrypt('123456dummy'),
-                    'password_taxi' => Crypt::encryptString('123456dummy')
-                ]);
-                Auth::login($newUser);*/
-                return view('auth.registerSocial', ['newUser' => $newUser]);
+                    /* $newUser = User::create([
+                         'name' => $user->name,
+                         'email' => $user->email,
+                         'google_id' => $user->id,
+                         'password' => encrypt('123456dummy'),
+                         'password_taxi' => Crypt::encryptString('123456dummy')
+                     ]);
+                     Auth::login($newUser);*/
+                    return view('auth.registerSocial', ['newUser' => $newUser]);
+                }
+
             }
         } catch (Exception $e) {
             dd($e->getMessage());
