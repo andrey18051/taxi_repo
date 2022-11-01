@@ -30,7 +30,7 @@
 
                                     <!-- Phone input -->
                                         <div class="form-outline mb-2">
-                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: +38+380936665544" required>
+                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: +380936665544" required>
                                         </div>
 
                                         <!-- Password input -->

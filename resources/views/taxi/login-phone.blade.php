@@ -20,7 +20,7 @@
                 <div class="col-lg-6 ">
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ route('profile') }}">
+                            <form action="{{ route('profileApi') }}">
                             @csrf
 
                             <!-- 2 column grid layout with text inputs for the first and last names -->

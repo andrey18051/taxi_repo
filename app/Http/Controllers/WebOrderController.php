@@ -182,33 +182,39 @@ class WebOrderController extends Controller
     public function profile()
     {
         $username = substr(Auth::user()->user_phone, 3);
+        try {
+            $password = hash('SHA512', Crypt::decryptString(Auth::user()->password_taxi));
 
-        $password = hash('SHA512', Crypt::decryptString(Auth::user()->password_taxi));
+            $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+            $connectAPI = WebOrderController::connectApi();
+            if ($connectAPI == 400) {
+                return redirect()->route('home-news')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            }
 
-        $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+
+            $url = $connectAPI . '/api/clients/profile';
+            $response = Http::withHeaders([
+                'Authorization' => $authorization,
+            ])->get($url);
+            $response_arr = json_decode($response, true);
+
+
+            if ($response->status() == "200") {
+                $user_first_name = $response_arr['user_first_name'];
+                return redirect()->route('profile-view', ['authorization' => $authorization])
+                    ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
+            } else {
+                return view('taxi.login-phone', ['phone' => $username])
+                    ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
+            }
         }
-
-
-        $url = $connectAPI . '/api/clients/profile';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url);
-        $response_arr = json_decode($response, true);
-
-
-        if ($response->status() == "200") {
-            $user_first_name = $response_arr['user_first_name'];
-            return redirect()->route('profile-view', ['authorization' => $authorization])
-                ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
-        } else {
-            return view('taxi.login-phone', ['phone' => $username])
+        catch (Exception $e) {
+            return view('taxi.login-phone', ['phone' => Auth::user()->user_phone])
                 ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
         }
+
     }
 
     /**
@@ -409,7 +415,7 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/account/restore/sendConfirmCode';
                 $response = Http::post($url, [
-                    'phone' => $req->username, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+                    'phone' =>  substr($req->username, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
                     'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
                     'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
                 ]);
@@ -482,7 +488,6 @@ class WebOrderController extends Controller
      */
     public function verifyAccount($phone)
     {
-
         $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
@@ -494,12 +499,8 @@ class WebOrderController extends Controller
             'taxiColumnId' => config('app.taxiColumnId'), //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
             'appHash' => '' //Хэш Android приложения для автоматической подстановки смс кода. 11 символов.
         ]);
-
          return $response;
-
     }
-
-
 
     /**
      * Верификация телефона
@@ -542,31 +543,6 @@ class WebOrderController extends Controller
     }
 
 
-
-    /**
-     * Восстановление пароля
-     * Получение кода подтверждения
-     * @return string
-     */
-/*    public function restoreСheckConfirmCode()
-    {
-        $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/account/restore/checkConfirmCode';
-        $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
-            'confirm_code' => '6024' //Обязательный. Код подтверждения.
-        ]);
-        return $response->status();
-    }*/
-
-
-
-
-
     /**
      * Работа с заказами
      * Расчет стоимости заказа по улицам
@@ -591,9 +567,6 @@ class WebOrderController extends Controller
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        /*if ($params['required_time'] !== null) {
-            $params['reservation'] = true;
-        }*/
         $reservation = $params['reservation'];
         $required_time = $params['required_time'];
 
@@ -789,7 +762,6 @@ class WebOrderController extends Controller
                         $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
                     };
 
-
                     return redirect()->route('home-id', ['id' => $id])
                         ->with('success', $order)
                         ->with('order_cost', $order_cost);
@@ -801,10 +773,8 @@ class WebOrderController extends Controller
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
-
-
                     return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
-              }
+                }
             }
         }
         if ($error) {
@@ -826,8 +796,6 @@ class WebOrderController extends Controller
                         $ii++;
                 }
             }
-
-
 
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
@@ -854,9 +822,6 @@ class WebOrderController extends Controller
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        /*if ($params['required_time'] !== null) {
-            $params['reservation'] = true;
-        }*/
         $reservation = $params['reservation'];
         $required_time = $params['required_time'];
 
@@ -1159,7 +1124,6 @@ class WebOrderController extends Controller
             $params['routetonumber'] = null;
         }
 
-
         $params['user_full_name'] = $req->user_full_name;
         $params['user_phone'] = $req->user_phone;
 
@@ -1167,9 +1131,6 @@ class WebOrderController extends Controller
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        /*if ($params['required_time'] !== null) {
-            $params['reservation'] = true;
-        }*/
         $reservation = $params['reservation'];
         $required_time = $params['required_time'];
 
@@ -1201,21 +1162,14 @@ class WebOrderController extends Controller
             $params['payment_type'] = '1';
         };
 
-
-
         $params['route_undefined'] = $req->route_undefined; //По городу: True, False
 
         if ($req->route_undefined == 1 || $req->route_undefined == 'on') {
-
             $params['routeto'] =  $params['routefrom']; //Обязательный. Улица куда.
             $params['routetonumber'] = $params['routefromnumber']; //Обязательный. Дом куда.
-
-
             $params['route_undefined'] = 1; //По городу: True, False
         };
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-
-
 
         $WebOrder = new \App\Http\Controllers\WebOrderController();
         $tariffs = $WebOrder->tariffs();
@@ -1226,7 +1180,6 @@ class WebOrderController extends Controller
                 case 'Базовый':
                 case 'Бизнес-класс':
                 case 'Эконом-класс':
-
                     $json_arr[$ii]['name'] = $response_arr[$i]['name'];
                     $ii++;
             }
@@ -1316,18 +1269,17 @@ class WebOrderController extends Controller
                 $to = $params['routeto'];
 
                 $to_number = $params['routetonumber'];
-
-             if ($params['route_undefined'] == 1) {
+                if ($params['route_undefined'] == 1) {
                     $route_undefined = true;
                     $to = $from;
                     $to_number = $from_number;
                 };
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders/cost';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -1572,11 +1524,11 @@ class WebOrderController extends Controller
                 $to_number = '';
 
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders/cost';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -1833,11 +1785,11 @@ class WebOrderController extends Controller
                 $to_number = $req->routetonumber;
 
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders/cost';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -1863,7 +1815,7 @@ class WebOrderController extends Controller
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
-                 if ($response->status() == "200") {
+                if ($response->status() == "200") {
                     /**
                      * Сохранние расчетов в базе
                      */
@@ -1953,10 +1905,6 @@ class WebOrderController extends Controller
     }
 
 
-
-
-
-
     /**
      * Работа с заказами
      * Редактирование и расчет стоимости заказа
@@ -1972,17 +1920,11 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
 
-
         $from = $req->search;
-
         $from_number = $req->from_number;
         $required_time = $req->required_time;
         $reservation = false;
-        /*if ($req->reservation == null){
-            $reservation = true;
-        } else {
-            $reservation = false;
-        }*/
+
         $auto_type = 'Тип авто: ';
         if ($req->wagon == 'on' || $req->wagon == '1') {
             $wagon = true;
@@ -2060,7 +2002,6 @@ class WebOrderController extends Controller
         ]);
 
         if ($response->status() == "200") {
-
             $order = Order::where ('id', $id)->first();
             $order->user_full_name = $user_full_name;//Полное имя пользователя
             $order->user_phone = $user_phone;//Телефон пользователя
@@ -2155,11 +2096,7 @@ class WebOrderController extends Controller
         $from = $req->search2;
         $required_time = $req->required_time; //Время подачи предварительного заказа
         $reservation = false;
-       /* if ($req->reservation == null){
-            $reservation = true;
-        } else {
-            $reservation = false;
-        }*/
+
         $auto_type = 'Тип авто: ';
         if ($req->wagon == 'on' || $req->wagon == '1') {
             $wagon = true;
@@ -2471,7 +2408,6 @@ class WebOrderController extends Controller
         $params['payment_type'] = 0;
 
         return view($page, ['json_arr' => $json_arr, 'params' => $params]);
-
     }
 
     /**
@@ -2485,7 +2421,7 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
 
-        $order_phone = new WebOrderController();
+/*        $order_phone = new WebOrderController();
         $resp_phone = $order_phone->verifyAccount($user_phone);
         $resp_phone_arr = json_decode($resp_phone, true);
 
@@ -2498,182 +2434,186 @@ class WebOrderController extends Controller
         } else {
            if ($Message == "Слишком много запросов") {
                 return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $Message");
-            }
+            }*/
 
-        if ($Message == 'Пользователь с таким номером телефона уже зарегистрирован.'){
-                $username = config('app.username');
-                $password = hash('SHA512', config('app.password'));
-                $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $finduser = User::where('user_phone', $user_phone)->first();
+        if ($finduser) {
+            Auth::login($finduser);
+        } else {
+            return view('auth.login');
+        }
 
-                $from = $req->routefrom;
-                $from_number = $req->routefromnumber;
-                $required_time = $req->required_time; //Время подачи предварительного заказа
-                $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-                $auto_type = 'Тип авто: ';
+        $from = $req->routefrom;
+        $from_number = $req->routefromnumber;
+        $required_time = $req->required_time; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
 
-                if ($req->wagon == 1) {
-                    $wagon = true;
-                    $wagon_type = " Універсал";
-                    $auto_type = $auto_type . $wagon_type . " ";
-                } else {
-                    $wagon = false;
-                };
-                if ($req->minibus == 1) {
-                    $minibus = true;
-                    $minibus_type = " Мікроавтобус";
-                    $auto_type = $auto_type . $minibus_type . " ";
-                } else {
-                    $minibus = false;
-                };
-                if ($req->premium == 1) {
-                    $premium = true;
-                    $premium_type = " Машина преміум-класса";
-                    $auto_type = $auto_type . $premium_type;
-                } else {
-                    $premium = false;
-                };
-                if ($auto_type == 'Тип авто: ') {
-                    $auto_type = 'Тип авто: звичайне';
-                };
+        $auto_type = 'Тип авто: ';
 
-                $flexible_tariff_name = $req->flexible_tariff_name;
-                if ($flexible_tariff_name) {
-                    $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
-                };
-                $comment = $req->comment .  " через смс";
-                $add_cost = $req->add_cost;
-                $taxiColumnId = config('app.taxiColumnId');
-                $payment_type = $req->payment_type;
+        if ($req->wagon == 1) {
+            $wagon = true;
+            $wagon_type = " Універсал";
+            $auto_type = $auto_type . $wagon_type . " ";
+        } else {
+            $wagon = false;
+        };
+        if ($req->minibus == 1) {
+            $minibus = true;
+            $minibus_type = " Мікроавтобус";
+            $auto_type = $auto_type . $minibus_type . " ";
+        } else {
+            $minibus = false;
+        };
+        if ($req->premium == 1) {
+            $premium = true;
+            $premium_type = " Машина преміум-класса";
+            $auto_type = $auto_type . $premium_type;
+        } else {
+            $premium = false;
+        };
+        if ($auto_type == 'Тип авто: ') {
+            $auto_type = 'Тип авто: звичайне';
+        };
 
-                $route_undefined = false;
-                $to = $req->routeto;
-                $to_number = $req->routetonumber;
+        $flexible_tariff_name = $req->flexible_tariff_name;
+        if ($flexible_tariff_name) {
+            $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
+        };
+        $comment = $req->comment .  " через смс";
+        $add_cost = $req->add_cost;
+        $taxiColumnId = config('app.taxiColumnId');
+        $payment_type = $req->payment_type;
 
-                if ($req->route_undefined == "1") {
-                    $route_undefined = true;
-                    $to = $req->routefrom;
-                    $to_number = $req->routefromnumber;
-                };
+        $route_undefined = false;
+        $to = $req->routeto;
+        $to_number = $req->routetonumber;
 
-                /**
-                 * Запрос стоимости
-                 */
+        if ($req->route_undefined == "1") {
+            $route_undefined = true;
+            $to = $req->routefrom;
+            $to_number = $req->routefromnumber;
+        };
 
-                $connectAPI = WebOrderController::connectApi();
+        /**
+         * Запрос стоимости
+         */
+
+        $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
         }
         $url = $connectAPI . '/api/weborders/cost';
-                $response = Http::withHeaders([
-                    'Authorization' => $authorization,
-                ])->post($url, [
-                    'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => null, //Телефон пользователя
-                    'client_sub_card' => null,
-                    'required_time' => $required_time, //Время подачи предварительного заказа
-                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
-                    'route_address_entrance_from' => null,
-                    'comment' => $comment, //Комментарий к заказу
-                    'add_cost' => $add_cost,
-                    'wagon' => $wagon, //Универсал: True, False
-                    'minibus' => $minibus, //Микроавтобус: True, False
-                    'premium' => $premium, //Машина премиум-класса: True, False
-                    'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
-                    'route_undefined' => $route_undefined, //По городу: True, False
-                    'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                        ['name' => $from, 'number' => $from_number],
-                        ['name' => $to, 'number' => $to_number],
-                    ],
-                    'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                    /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                        'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-                ]);
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'user_full_name' => $user_full_name, //Полное имя пользователя
+            'user_phone' => null, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => $comment, //Комментарий к заказу
+            'add_cost' => $add_cost,
+            'wagon' => $wagon, //Универсал: True, False
+            'minibus' => $minibus, //Микроавтобус: True, False
+            'premium' => $premium, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'number' => $from_number],
+                ['name' => $to, 'number' => $to_number],
+            ],
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ]);
 
-                /**
-                 * Заказ поездки
-                 */
+        /**
+         * Заказ поездки
+         */
 
-                $connectAPI = WebOrderController::connectApi();
+        $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
         }
         $url = $connectAPI . '/api/weborders';
-                $responseWeb = Http::withHeaders([
-                    'Authorization' => $authorization,
-                ])->post($url, [
-                    'user_full_name' => $user_full_name, //Полное имя пользователя
-                    'user_phone' => $user_phone, //Телефон пользователя
-                    'client_sub_card' => null,
-                    'required_time' => $required_time, //Время подачи предварительного заказа
-                    'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
-                    'route_address_entrance_from' => null,
-                    'comment' => $comment, //Комментарий к заказу
-                    'add_cost' => $add_cost,
-                    'wagon' => $wagon, //Универсал: True, False
-                    'minibus' => $minibus, //Микроавтобус: True, False
-                    'premium' => $premium, //Машина премиум-класса: True, False
-                    'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
-                    'route_undefined' => $route_undefined, //По городу: True, False
-                    'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                        ['name' => $from, 'number' => $from_number],
-                        ['name' => $to, 'number' => $to_number],
-                    ],
-                    'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                    ]);
+        $responseWeb = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->post($url, [
+            'user_full_name' => $user_full_name, //Полное имя пользователя
+            'user_phone' => $user_phone, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => $comment, //Комментарий к заказу
+            'add_cost' => $add_cost,
+            'wagon' => $wagon, //Универсал: True, False
+            'minibus' => $minibus, //Микроавтобус: True, False
+            'premium' => $premium, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $flexible_tariff_name, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'number' => $from_number],
+                ['name' => $to, 'number' => $to_number],
+            ],
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        ]);
 
-                    if ($responseWeb->status()  == "200") {
-                    /**
-                     * Сохранние расчетов в базе
-                     */
-                        $orderweb = new Orderweb();
-                        $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
-                        $orderweb->user_phone = $user_phone;//Телефон пользователя
-                        $orderweb->client_sub_card = null;
-                        $orderweb->required_time = $required_time; //Время подачи предварительного заказа
-                        $orderweb->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
-                        $orderweb->route_address_entrance_from = null;
-                        $orderweb->comment = $comment;  //Комментарий к заказу
-                        $orderweb->add_cost = $add_cost; //Добавленная стоимость
-                        $orderweb->wagon = $wagon; //Универсал: True, False
-                        $orderweb->minibus = $minibus; //Микроавтобус: True, False
-                        $orderweb->premium = $premium; //Машина премиум-класса: True, False
-                        $orderweb->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
-                        $orderweb->route_undefined = $route_undefined; //По городу: True, False
-                        $orderweb->routefrom = $from; //Обязательный. Улица откуда.
-                        $orderweb->routefromnumber = $from_number; //Обязательный. Дом откуда.
-                        $orderweb->routeto = $to; //Обязательный. Улица куда.
-                        $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
-                        $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                        $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                        $json_arr = json_decode($response, true);
+        if ($responseWeb->status()  == "200") {
+            /**
+             * Сохранние расчетов в базе
+             */
+            $orderweb = new Orderweb();
+            $orderweb->user_full_name = $user_full_name;//Полное имя пользователя
+            $orderweb->user_phone = $user_phone;//Телефон пользователя
+            $orderweb->client_sub_card = null;
+            $orderweb->required_time = $required_time; //Время подачи предварительного заказа
+            $orderweb->reservation = $reservation; //Обязательный. Признак предварительного заказа: True, False
+            $orderweb->route_address_entrance_from = null;
+            $orderweb->comment = $comment;  //Комментарий к заказу
+            $orderweb->add_cost = $add_cost; //Добавленная стоимость
+            $orderweb->wagon = $wagon; //Универсал: True, False
+            $orderweb->minibus = $minibus; //Микроавтобус: True, False
+            $orderweb->premium = $premium; //Машина премиум-класса: True, False
+            $orderweb->flexible_tariff_name = $flexible_tariff_name; //Гибкий тариф
+            $orderweb->route_undefined = $route_undefined; //По городу: True, False
+            $orderweb->routefrom = $from; //Обязательный. Улица откуда.
+            $orderweb->routefromnumber = $from_number; //Обязательный. Дом откуда.
+            $orderweb->routeto = $to; //Обязательный. Улица куда.
+            $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
+            $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            $json_arr = json_decode($response, true);
 
-                        $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
-                        $json_arrWeb = json_decode($responseWeb, true);
-                        $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
-                        $orderweb->save();
-                        /**
-                         *
-                         */
-                        if ($req->payment_type == '0') {
-                            $payment_type = 'готівка';
-                        } else {
-                            $payment_type = 'безготівка';
-                        };
+            $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
+            $json_arrWeb = json_decode($responseWeb, true);
+            $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа, присвоенный в БД ТН
+            $orderweb->save();
 
-                        if ($route_undefined !== false) {
-                            $order = "Вітаємо $user_full_name
+            if ($req->payment_type == '0') {
+                $payment_type = 'готівка';
+            } else {
+                $payment_type = 'безготівка';
+            };
+
+            if ($route_undefined !== false) {
+                $order = "Вітаємо $user_full_name
                     . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту. Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
-                        } else {
-                            $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
+            } else {
+                $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                             до $to (будинок $to_number). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
-                                $json_arrWeb['dispatching_order_uid'];
+                    $json_arrWeb['dispatching_order_uid'];
 
-                            switch ($to) {
+                switch ($to) {
                                 case 'Аэропорт Борисполь терминал Д':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                              до аеропорту \"Бориспіль\". Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
@@ -2696,7 +2636,7 @@ class WebOrderController extends Controller
                                     break;
                             }
 
-                            switch ($from) {
+                switch ($from) {
                                 case 'Аэропорт Борисполь терминал Д':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від аеропорту \"Бориспіль\"
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
@@ -2719,22 +2659,18 @@ class WebOrderController extends Controller
                                     break;
                             }
 
-                        };
-                        return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
-                            ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
-                            ->with('back', 'Зробити нове замовлення')
-                            ->with('cancel', 'Скасувати замовлення.');
+            };
 
-                    } else {
-                        $json_arr = json_decode($responseWeb, true);
-                        $message_error = $json_arr['Message'];
-                        return redirect()->route('home-id-afterorder', $id)->with('error', "Помілка створення заказу. $message_error")
-                            ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:")
-                            ->with('back', 'Зробити нове замовлення');
-                    }
-            }
-
-
+            return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
+                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
+                ->with('back', 'Зробити нове замовлення')
+                ->with('cancel', 'Скасувати замовлення.');
+        } else {
+            $json_arr = json_decode($responseWeb, true);
+            $message_error = $json_arr['Message'];
+            return redirect()->route('home-id-afterorder', $id)->with('error', "Помілка створення заказу. $message_error")
+                ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:")
+                ->with('back', 'Зробити нове замовлення');
         }
     }
 
