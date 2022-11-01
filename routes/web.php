@@ -413,6 +413,11 @@ Route::get('/registration/confirm-code', [WebOrderController::class, 'register']
 Route::get('/restore/sms', function () {
     return view('taxi.restoreSMS');
 })->name('restore-sms');
+
+Route::get('/restore/sms/{phone}', function ($phone) {
+    return view('taxi.restoreSMS-phone', ['phone' => $phone]);
+})->name('restore-sms-phone');
+
 /**
  * Запрос смс подтверждения
  */

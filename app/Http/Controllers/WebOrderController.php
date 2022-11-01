@@ -202,16 +202,18 @@ class WebOrderController extends Controller
 
 
             if ($response->status() == "200") {
-                $user_first_name = $response_arr['user_first_name'];
+                $user_first_name = Auth::user()->name;
                 return redirect()->route('profile-view', ['authorization' => $authorization])
                     ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
             } else {
-                return view('taxi.login-phone', ['phone' => $username])
+
+                return redirect()->route('login-taxi-phone', ['phone' => Auth::user()->user_phone])
                     ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
             }
         }
         catch (Exception $e) {
-            return view('taxi.login-phone', ['phone' => Auth::user()->user_phone])
+
+            return redirect()->route('login-taxi-phone', ['phone' => Auth::user()->user_phone])
                 ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
         }
 
@@ -239,14 +241,16 @@ class WebOrderController extends Controller
         $response_arr = json_decode($response, true);
 
         if ($response->status() == "200") {
-            $finduser = User::where('user_phone', $req->username)->first();
+            $finduser = User::where('name', Auth::user()->name)->first();
+            $finduser->user_phone = $req->username;
             $finduser->password_taxi = Crypt::encryptString($req->password);
             $finduser->save();
-            $user_first_name = $response_arr['user_first_name'];
+
+            $user_first_name = Auth::user()->name;
             return redirect()->route('profile-view', ['authorization' => $authorization])
                 ->with('success', "Ласкаво просимо $user_first_name! Ваші розрахунки маршруту знайдіть натиснувши кнопку \"Мої маршрути\".");
         } else {
-            return view('taxi.login-phone', ['phone' => $username])
+            return redirect()->route('login-taxi-phone', ['phone' => $req->username])
                 ->with('error', 'Перевірте дані та спробуйте ще раз або пройдіть реєстрацію');
         }
     }
@@ -427,13 +431,13 @@ class WebOrderController extends Controller
                     $json_arrWeb = json_decode($response->body(), true);
 
                     $resp_answer = 'Помилка. ' . $json_arrWeb['Message'];
-                    return redirect()->route('restore-sms')
+                    return redirect()->route('profile')
                         ->with('error', $resp_answer);
                 }
             }
         }
         if ($error) {
-            return redirect()->route('restore-sms')->with('error', "Не пройдено перевірку 'Я не робот'");
+            return redirect()->route('restore-sms-phone', ['phone' => $req->username])->with('error', "Не пройдено перевірку 'Я не робот'");
 
         }
     }
@@ -478,7 +482,7 @@ class WebOrderController extends Controller
 
             $resp_answer = 'Помилка. ' . $json_arrWeb['Message'];
 
-            return redirect()->route('restore-sms')->with('error', $resp_answer);
+            return redirect()->route('restore-sms-phone', ['phone' => $req->phone])->with('error', $resp_answer);
         }
     }
 

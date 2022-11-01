@@ -35,7 +35,7 @@
                                         <!-- Password input -->
                                         <div class="form-outline mb-2">
                                             <input type="password" class="form-control" name="password" placeholder="Пароль? Мінімально 7 букв або цифр" id="password" required>
-                                            <a href="{{route('restore-sms')}}" target="_blank">Забули пароль?</a>
+                                            <a href="{{route('restore-sms-phone', $phone)}}" target="_blank">Забули пароль?</a>
                                         </div>
 
                                         <!-- Submit button -->
