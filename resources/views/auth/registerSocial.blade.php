@@ -55,7 +55,17 @@
                                 @enderror
                             </div>
                         </div>
+
+                        @if($newUser['google_id'])
                         <input type="hidden" id="google_id" name="google_id" value="{{ $newUser['google_id'] }}">
+                        @else
+                            <input type="hidden" id="google_id" name="google_id" value="">
+                        @endif
+                        @if($newUser['facebook_id'])
+                            <input type="hidden" id="facebook_id" name="facebook_id" value="{{ $newUser['facebook_id'] }}">
+                        @else
+                            <input type="hidden" id="facebook_id" name="facebook_id" value="">
+                        @endif
                         <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Пароль') }}</label>
 

@@ -49,7 +49,7 @@ class GoogleController extends Controller
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
                     $newUser['google_id'] = $user->id;
-
+                    $newUser['facebook_id'] = null;
                     /* $newUser = User::create([
                          'name' => $user->name,
                          'email' => $user->email,

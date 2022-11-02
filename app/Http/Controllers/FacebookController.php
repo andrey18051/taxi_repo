@@ -49,7 +49,7 @@ class FacebookController extends Controller
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
                     $newUser['facebook_id'] = $user->id;
-
+                    $newUser['google_id'] = null;
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 
