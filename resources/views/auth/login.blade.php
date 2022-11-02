@@ -2,6 +2,7 @@
 
 @section('content')
 
+
 <!-- Section: Design Block -->
 <section class="">
     <!-- Jumbotron -->
@@ -68,18 +69,24 @@
                                             </a>
                                         @endif
                                     </div>
+                                    <div class="col-md-8 offset-md-4 flex items-center justify-end mt-4">
+
+                                        <a href="{{ url('auth/google') }}" title="Авторизуватися через Google">
+                                            <img src="{{ asset('img/icons8-google-48.png') }}">
+                                        </a>
+
+                                        <a href="{{ url('auth/facebook') }}" title="Авторизуватися через Facebook">
+                                            <img src="{{ asset('img/icons8-facebook-circled-48.png') }}">
+                                        </a>
+
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center justify-end mt-4">
 
-                                    <a href="{{ url('auth/google') }}">
-
-                                        <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" style="margin-left: 3em;">
-
-                                    </a>
-
-                                </div>
-
+<!--                                <div class="fb-login-button" data-width="" data-size="large"
+                                     data-button-type="continue_with" data-layout="default"
+                                     data-auto-logout-link="false" data-use-continue-as="false">
+                                </div>-->
                             </form>
                         </div>
                     </div>

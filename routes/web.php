@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TypeaheadController;
@@ -25,11 +26,18 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-
+//**********************************************************************************************************************
+/**
+ * Google
+ */
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
-
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+/**
+ * Facebook
+ */
+Route::get('auth/facebook', [FacebookController::class, 'redirectToFacebook']);
+Route::get('auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
 
 
 
