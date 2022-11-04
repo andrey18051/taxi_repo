@@ -182,20 +182,9 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
                 return redirect()->route('home-news')
                     ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             }
-            $WebOrder = new WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
-            return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);}
+            $json_arr = WebOrderController::tariffs();
+            return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
+        }
     }
 
 })->name('homeStreet');
@@ -208,19 +197,7 @@ Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
         return redirect()->route('home-news')
             ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
     }
-    $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
+    $json_arr = WebOrderController::tariffs();
     return view('taxi.homeObject', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeObject');
 
@@ -230,19 +207,7 @@ Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
         return redirect()->route('home-news')
             ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
     }
-    $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
+    $json_arr = WebOrderController::tariffs();
     return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeMap');
 
@@ -257,24 +222,7 @@ Route::get('/taxi-umovy', function () {
 
 
 Route::get('/homeorder/{id}', function ($id) {
-    /*$connectAPI = WebOrderController::connectAPInoEmail();
-    if ($connectAPI == 400) {
-        return redirect()->route('home-news')
-            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-    }*/
-    $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
+    $json_arr = WebOrderController::tariffs();
     $orderId = json_decode(Order::where('id', $id)->get(), true);
     return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
 })->name('home-id');
@@ -285,19 +233,7 @@ Route::get('/homeorder-object/{id}', function ($id) {
         return redirect()->route('home-news')
             ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
     }*/
-    $WebOrder = new WebOrderController();
-    $tariffs = $WebOrder->tariffs();
-    $response_arr = json_decode($tariffs, true);
-    $ii = 0;
-    for ($i = 0; $i < count($response_arr); $i++) {
-        switch ($response_arr[$i]['name']) {
-            case 'Базовый':
-            case 'Бизнес-класс':
-            case 'Эконом-класс':
-                $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                $ii++;
-        }
-    }
+    $json_arr = WebOrderController::tariffs();
     $orderId = json_decode(Order::where('id', $id)->get(), true);
     return view('taxi.orderObjectEdit', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
 })->name('home-id-object');

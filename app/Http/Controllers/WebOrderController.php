@@ -614,19 +614,7 @@ class WebOrderController extends Controller
 
 
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
-            $WebOrder = new \App\Http\Controllers\WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -787,19 +775,7 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
-            $WebOrder = new WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
 
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
@@ -868,19 +844,7 @@ class WebOrderController extends Controller
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
-            $WebOrder = new \App\Http\Controllers\WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -1042,19 +1006,7 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
-            $WebOrder = new WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             return view('taxi.homeReqObject', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
@@ -1175,19 +1127,7 @@ class WebOrderController extends Controller
         };
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
-        $WebOrder = new \App\Http\Controllers\WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
+        $json_arr = WebOrderController::tariffs();
         /**
          * Проверка адреса назначения
          */
@@ -1372,19 +1312,7 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
-            $WebOrder = new WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
@@ -1449,19 +1377,7 @@ class WebOrderController extends Controller
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
-            $WebOrder = new \App\Http\Controllers\WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -1631,19 +1547,7 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
-            $WebOrder = new WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             return view($page, ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
@@ -1710,19 +1614,7 @@ class WebOrderController extends Controller
 
 
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
-            $WebOrder = new \App\Http\Controllers\WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, true);
@@ -1891,19 +1783,7 @@ class WebOrderController extends Controller
                 alert("Не пройдено перевірку на робота");
             </script>
             <?php
-            $WebOrder = new WebOrderController();
-            $tariffs = $WebOrder->tariffs();
-            $response_arr = json_decode($tariffs, true);
-            $ii = 0;
-            for ($i = 0; $i < count($response_arr); $i++) {
-                switch ($response_arr[$i]['name']) {
-                    case 'Базовый':
-                    case 'Бизнес-класс':
-                    case 'Эконом-класс':
-                        $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                        $ii++;
-                }
-            }
+            $json_arr = WebOrderController::tariffs();
             return view($page, ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
@@ -2225,23 +2105,10 @@ class WebOrderController extends Controller
     {
         $req = Order::where('id', $id)->first();
 
-        $WebOrder = new WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
-        if($req->routefromnumber == 0 ) {
+        $json_arr = WebOrderController::tariffs();
+        if ($req->routefromnumber == 0) {
             return view('taxi.homeReqObject', ['json_arr' => $json_arr, 'params' => $req]);
-        }
-        else {
+        } else {
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $req]);
         }
     }
@@ -2254,19 +2121,7 @@ class WebOrderController extends Controller
      */
     public function costHome($route_address_from, $route_address_number_from, $authorization)
     {
-        $WebOrder = new WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
+        $json_arr = WebOrderController::tariffs();
 
         $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
@@ -2305,19 +2160,7 @@ class WebOrderController extends Controller
      */
     public function transfer($routeto, $page)
     {
-        $WebOrder = new WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
+        $json_arr = WebOrderController::tariffs();
 
         $params['user_phone'] = '000';
         $params['user_full_name'] = 'Новий замовник';
@@ -2344,19 +2187,7 @@ class WebOrderController extends Controller
      */
     public function transferProfile($routeto, $page, $user_phone, $user_first_name, $route_address_from, $route_address_number_from)
     {
-        $WebOrder = new WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
+        $json_arr = WebOrderController::tariffs();
 
         $params['user_phone'] = $user_phone;
         $params['user_full_name'] = $user_first_name;
@@ -2373,7 +2204,6 @@ class WebOrderController extends Controller
         $params['payment_type'] = 0;
 
         return view($page, ['json_arr' => $json_arr, 'params' => $params]);
-
     }
 
     /**
@@ -2383,19 +2213,7 @@ class WebOrderController extends Controller
      */
     public function transferFrom($routefrom, $page)
     {
-        $WebOrder = new WebOrderController();
-        $tariffs = $WebOrder->tariffs();
-        $response_arr = json_decode($tariffs, true);
-        $ii = 0;
-        for ($i = 0; $i < count($response_arr); $i++) {
-            switch ($response_arr[$i]['name']) {
-                case 'Базовый':
-                case 'Бизнес-класс':
-                case 'Эконом-класс':
-                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
-                    $ii++;
-            }
-        }
+        $json_arr = WebOrderController::tariffs();
 
         $params['user_phone'] = '000';
         $params['user_full_name'] = 'Новий замовник';
@@ -2924,7 +2742,19 @@ class WebOrderController extends Controller
             'Authorization' => $authorization,
         ])->get($url);
 
-        return $response->body();
+        $response_arr = json_decode($response, true);
+        $ii = 0;
+        for ($i = 0; $i < count($response_arr); $i++) {
+            switch ($response_arr[$i]['name']) {
+                case 'Базовый':
+                case 'Бизнес-класс':
+                case 'Эконом-класс':
+                    $json_arr[$ii]['name'] = $response_arr[$i]['name'];
+                    $ii++;
+            }
+        }
+
+        return $json_arr;
     }
 
     /**
