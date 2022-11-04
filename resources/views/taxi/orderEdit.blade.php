@@ -80,7 +80,7 @@
                                                placeholder="Телефон? Приклад: +380936665544"  autofocus required>
                                     @else
                                         <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                               value="{{ substr(Auth::user()->user_phone, 3)}}"  autofocus required>
+                                               value="{{ Auth::user()->user_phone}}"  autofocus required>
                                     @endguest
                                 </div>
                             </div>

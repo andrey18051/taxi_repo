@@ -333,6 +333,11 @@ Route::get('/homeorder/afterorder/{id}', function ($id) {
 
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
+    $finduser = User::where('user_phone', $orderId[0]["user_phone"])->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+
     $routeArr['from'] = $WebOrder->geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
     $routeArr['to'] = $WebOrder->geodataSearch($orderId[0]["routeto"], $orderId[0]["routetonumber"]);
 
