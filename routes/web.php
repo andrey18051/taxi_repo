@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
@@ -27,6 +28,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //**********************************************************************************************************************
+
+
+/**
+ * linkedin
+ */
+Route::get('auth/linkedin', [LinkedinController::class, 'redirectToLinkedin']);
+Route::get('auth/linkedin/callback', [LinkedinController::class, 'handleLinkedinCallback']);
+
 /**
  * Google
  */
@@ -257,11 +266,6 @@ Route::get('/homeorder/afterorder/{id}', function ($id) {
     $WebOrder = new WebOrderController();
 
     $orderId = json_decode(Order::where('id', $id)->get(), true);
-
-    $finduser = User::where('user_phone', $orderId[0]["user_phone"])->first();
-    if ($finduser) {
-        Auth::login($finduser);
-    }
 
     $routeArr['from'] = $WebOrder->geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
     $routeArr['to'] = $WebOrder->geodataSearch($orderId[0]["routeto"], $orderId[0]["routetonumber"]);

@@ -2244,9 +2244,7 @@ class WebOrderController extends Controller
         $user_phone = $req->user_phone;
 
         $finduser = User::where('user_phone', $user_phone)->first();
-        if ($finduser) {
-            Auth::login($finduser);
-        } else {
+        if (!$finduser) {
             return view('auth.login');
         }
 

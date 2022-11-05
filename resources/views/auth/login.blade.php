@@ -79,6 +79,9 @@
                                             <img src="{{ asset('img/icons8-facebook-circled-48.png') }}">
                                         </a>
 
+                                        <a href="{{ url('auth/linkedin') }}" title="Авторизуватися через Linkedin">
+                                            <img src="{{ asset('img/icons8-linkedin-48.png') }}">
+                                        </a>
                                     </div>
                                 </div>
 

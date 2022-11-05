@@ -66,6 +66,12 @@
                         @else
                             <input type="hidden" id="facebook_id" name="facebook_id" value="">
                         @endif
+                        @if($newUser['linkedin_id'])
+                            <input type="hidden" id="linkedin_id" name="linkedin_id" value="{{ $newUser['linkedin_id'] }}">
+                        @else
+                            <input type="hidden" id="linkedin_id" name="linkedin_id" value="">
+                        @endif
+
                         <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Пароль') }}</label>
 

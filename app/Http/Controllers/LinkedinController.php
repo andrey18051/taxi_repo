@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 
-class GoogleController extends Controller
+class LinkedinController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -18,9 +18,9 @@ class GoogleController extends Controller
      * @return void
      */
 
-    public function redirectToGoogle()
+    public function redirectToLinkedin()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('linkedin')->redirect();
     }
 
     /**
@@ -29,28 +29,28 @@ class GoogleController extends Controller
      * @return void
      */
 
-    public function handleGoogleCallback()
+
+    public function handleLinkedinCallback()
     {
         try {
-            $user = Socialite::driver('google')->user();
-            $finduser = User::where('google_id', $user->id)->first();
+            $user = Socialite::driver('linkedin')->user();
+            $finduser = User::where('linkedin_id', $user->id)->first();
             if ($finduser) {
                 Auth::login($finduser);
                 return redirect()->intended('/homeWelcome');
             } else {
                 try {
                     $finduser = User::where('email', $user->email)->first();
-                    $finduser->google_id = $user->id;
+                    $finduser->linkedin_id = $user->id;
                     $finduser->save();
                     Auth::login($finduser);
                     return redirect()->intended('/homeWelcome');
-                }
-                catch (Exception $e) {
+                } catch (Exception $e) {
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
-                    $newUser['google_id'] = $user->id;
+                    $newUser['linkedin_id'] = $user->id;
+                    $newUser['google_id'] = null;
                     $newUser['facebook_id'] = null;
-                    $newUser['linkedin_id'] = null;
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 

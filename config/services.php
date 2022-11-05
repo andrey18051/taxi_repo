@@ -58,5 +58,14 @@ return [
         'redirect' => '/auth/facebook/callback',
     ],
 
+    /**
+     * Linkedin
+     */
+    'linkedin' => [
+    'client_id' => '77u506g57pz2vx',
+    'client_secret' => 'SdNOUJMZ3gZxscIP',
+    'redirect' => '/auth/linkedin/callback',
+    ],
+
 
 ];
