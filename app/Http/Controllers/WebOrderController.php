@@ -12,6 +12,7 @@ use App\Models\Orderweb;
 use App\Models\Quite;
 use App\Models\Street;
 use App\Mail\Server;
+use App\Models\Tarif;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -759,7 +760,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    $WebOrder->version_street();
+                    WebOrderController::version_street();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
@@ -989,7 +990,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);;
                 } else {
 
-                    $WebOrder->version_object();
+                    WebOrderController::version_object();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
@@ -1138,7 +1139,7 @@ class WebOrderController extends Controller
                 alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
             </script>
             <?php
-            $WebOrder->version_street();
+            WebOrderController::version_street();
 
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
@@ -1529,7 +1530,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    $WebOrder->version_street();
+                    WebOrderController::version_street();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
@@ -1765,7 +1766,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    $WebOrder->version_street();
+                    WebOrderController::version_street();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
@@ -1959,7 +1960,6 @@ class WebOrderController extends Controller
         } else {
             return redirect()->route('home-id', ['id' => $id])->with('error', "Помилка створення маршруту.");
         }
-
     }
 
     /**
@@ -2243,21 +2243,6 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
 
-/*        $order_phone = new WebOrderController();
-        $resp_phone = $order_phone->verifyAccount($user_phone);
-        $resp_phone_arr = json_decode($resp_phone, true);
-
-        $Message = $resp_phone_arr['Message'];
-        if ($resp_phone->status() == '200') {
-            return redirect()->route('registration-form-phone', ['phone' => $user_phone])
-                ->with('success', 'Код підтвердження успішно надіслано на вказаний телефон.
-                Для замовлення пройдіть реєстрацію. Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути"
-                після проходження реєстрації.');
-        } else {
-           if ($Message == "Слишком много запросов") {
-                return redirect()->route('homeblank')->with('error', "Помілка створення заказу. $Message");
-            }*/
-
         $finduser = User::where('user_phone', $user_phone)->first();
         if ($finduser) {
             Auth::login($finduser);
@@ -2436,50 +2421,50 @@ class WebOrderController extends Controller
                     $json_arrWeb['dispatching_order_uid'];
 
                 switch ($to) {
-                                case 'Аэропорт Борисполь терминал Д':
+                    case 'Аэропорт Борисполь терминал Д':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                              до аеропорту \"Бориспіль\". Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                    break;
+                    case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                              до аеропорту \"Киів\" (Жуляни). Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'ЖД Южный':
+                    break;
+                    case 'ЖД Южный':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                              до залізничного вокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
+                    break;
+                    case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number)
                              до автовокзалу.  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                            }
+                    break;
+                    }
 
                 switch ($from) {
-                                case 'Аэропорт Борисполь терминал Д':
+                    case 'Аэропорт Борисполь терминал Д':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від аеропорту \"Бориспіль\"
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'Аэропорт Жуляны новый (ул.Медовая 2)':
+                    break;
+                    case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від \"Киів\" (Жуляни)
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'ЖД Южный':
+                    break;
+                    case 'ЖД Южный':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від залізничного вокзалу
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                                case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
+                    break;
+                    case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від автовокзалу
                             до $to (будинок $to_number).  Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                                    break;
-                            }
+                    break;
+                }
 
             };
 
@@ -2524,11 +2509,11 @@ class WebOrderController extends Controller
                 $taxiColumnId = config('app.taxiColumnId');
 
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -2632,11 +2617,11 @@ class WebOrderController extends Controller
                 $taxiColumnId = config('app.taxiColumnId');
 
                 $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders';
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+                $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [
@@ -2727,22 +2712,7 @@ class WebOrderController extends Controller
      */
     public function tariffs()
     {
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
-        $connectAPI = WebOrderController::connectAPInoEmail();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-
-        $url = $connectAPI . '/api/tariffs';
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url);
-
-        $response_arr = json_decode($response, true);
+        $response_arr = Tarif::all()->collect();
         $ii = 0;
         for ($i = 0; $i < count($response_arr); $i++) {
             switch ($response_arr[$i]['name']) {
@@ -2771,6 +2741,20 @@ class WebOrderController extends Controller
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
         }
+        //Обновление списка тарифов
+        $url = $connectAPI . '/api/tariffs';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        $response_arr = json_decode($response, true);
+        DB::table('tarifs')->truncate();
+        for ($i = 0; $i < count($response_arr); $i++) {
+            $new_tarif = new Tarif();
+            $new_tarif->name = $response_arr[$i]['name'];
+            $new_tarif->save();
+        }
+
         $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
             'Authorization' => $authorization,
@@ -2801,7 +2785,6 @@ class WebOrderController extends Controller
 
                     $streets = $json_arr['geo_street'][$i]["localizations"];
                     foreach ($streets as $val) {
-
                         if ($val["locale"] == "UK") {
                             $street = new Street();
                             $street->name = $val['name'];
@@ -2810,14 +2793,6 @@ class WebOrderController extends Controller
                     }
                     $i++;
                 } while ($i < count($json_arr['geo_street']));
-              /*  $i = 0;
-                do {
-                    $street = new Street();
-                    $street->name = $json_arr['geo_street'][$i]["name"];
-                    $street->save();
-
-                    $i++;
-                } while ($i < count($json_arr['geo_street']));*/
             }
         }
         if (config('app.server') == 'Одесса') {
@@ -2854,6 +2829,19 @@ class WebOrderController extends Controller
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
         }
+        //Обновление списка тарифов
+        $url = $connectAPI . '/api/tariffs';
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        $response_arr = json_decode($response, true);
+        DB::table('tarifs')->truncate();
+        for ($i = 0; $i < count($response_arr); $i++) {
+            $new_tarif = new Tarif();
+            $new_tarif->name = $response_arr[$i]['name'];
+            $new_tarif->save();
+        }
         $url = $connectAPI . '/api/geodata/objects';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -2861,7 +2849,7 @@ class WebOrderController extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
 
-        $json_arr = json_decode($response,true);
+        $json_arr = json_decode($response, true);
 
         $svd = Config::where('id', '1')->first();
         //Проверка версии геоданных и обновление или создание базы адресов
