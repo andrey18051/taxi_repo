@@ -214,7 +214,7 @@
         <div class="container text-center">
             <a class="btn btn-outline-danger btn-circle"
 
-               href="{{ route('callBackForm-phone', substr($response["user_phone"], 3)) }}"
+               href="{{ route('callBackForm-phone', $response["user_phone"]) }}"
 
                title="Екстренна допомога">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  fill="currentColor" class="bi bi-telephone-inbound" viewBox="0 0 16 16">
