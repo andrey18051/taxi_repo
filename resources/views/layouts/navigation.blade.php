@@ -1,3 +1,15 @@
+<div class="container" style="text-align: center">
+    <div class="center gradient">
+        <span style="color:black">Сьогодні:</span>
+        <span style="color:black;; font-size:14px;">
+                                                  <script>
+                                                      document.write(date+" ");
+                                                      document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
+                                                  </script>
+                                                  (<span id="clockdat" style="color:blue;"></span>)
+                                                  </span>
+    </div>
+</div>
 <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
     <div class="container">
         <div>
@@ -6,7 +18,6 @@
                 <img src="{{ asset('img/logo.jpg') }}" style="width: 100px; height: auto">
             </a>
         </div>
-
 
         <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" class="gradient"
             target="_blank" title="Розрахунок вартості"

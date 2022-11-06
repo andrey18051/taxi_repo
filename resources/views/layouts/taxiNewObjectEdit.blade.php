@@ -13,6 +13,36 @@
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" >
 
     <!-- Scripts-->
+    <script>
+        var months = new Array(13);
+        months[1]="січня"; months[2]="лютого"; months[3]="березня"; months[4]="квітня"; months[5]="травня";
+        months[6]="червня"; months[7]="липня"; months[8]="серпня"; months[9]="вересня"; months[10]="жовтня";
+        months[11]="листопада"; months[12]="грудня";
+
+        var time = new Date();
+        var thismonth = months[time.getMonth() + 1];
+        var date = time.getDate();
+        var thisyear = time.getYear();
+        var day = time.getDay() + 1;
+
+        if (thisyear < 2000)
+            thisyear = thisyear + 1900;
+        if (day == 1) DayofWeek = "Неділя";
+        if (day == 2) DayofWeek = "Понеділок";
+        if (day == 3) DayofWeek = "Вівторок";
+        if (day == 4) DayofWeek = "Середа";
+        if (day == 5) DayofWeek = "Четвер";
+        if (day == 6) DayofWeek = "П'ятниця";
+        if (day == 7) DayofWeek = "Субота";
+
+    </script>
+    <script>
+        setInterval(function() {
+            var cd = new Date();
+            var clockdat = document.getElementById("clockdat");
+            clockdat.innerHTML = cd.toLocaleTimeString();
+        }, 1000);
+    </script>
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Styles -->

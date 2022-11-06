@@ -24,6 +24,8 @@
 
     <!-- Global site tag (gtag.js) - Google Ads: 999615800 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-999615800"></script>
+
+    <!-- Scripts-->
     <script>
         var months = new Array(13);
         months[1]="січня"; months[2]="лютого"; months[3]="березня"; months[4]="квітня"; months[5]="травня";
@@ -47,7 +49,6 @@
         if (day == 7) DayofWeek = "Субота";
 
     </script>
-
     <script>
         setInterval(function() {
             var cd = new Date();
@@ -55,10 +56,6 @@
             clockdat.innerHTML = cd.toLocaleTimeString();
         }, 1000);
     </script>
-
-
-
-<!-- Scripts-->
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>

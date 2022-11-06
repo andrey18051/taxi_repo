@@ -184,24 +184,11 @@
              <div class="col-lg-9 col-sm-6 col-md-9" >
 
                     <div class="container-fluid">
-
-                                <div class="container" style="text-align: center">
-                                    <div class="center gradient">
-                                        <span style="color:black">Сьогодні:</span>
-                                        <span style="color:black;; font-size:14px;">
-                                                  <script>
-                                                      document.write(date+" ");
-                                                      document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
-                                                  </script>
-                                                  (<span id="clockdat" style="color:blue;"></span>)
-                                                  </span>
-                                    </div>
-                                </div>
-                                <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}"
+                        <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}"
                                 style="text-decoration: none">
-                                    <h4 class="text-center text-primary"> <b>Пропонуємо Вам найсучасніший
-                                            сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h4>
-                                </a>
+                            <h4 class="text-center text-primary"> <b>Пропонуємо Вам найсучасніший
+                            сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h4>
+                        </a>
 
                     </div>
 
