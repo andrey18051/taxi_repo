@@ -1,5 +1,3 @@
-
-
 @extends('layouts.newsList')
 
 @section('content')

@@ -82,6 +82,20 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="col-md-8 offset-md-4 flex items-center justify-end mt-4">
+
+                            <a href="{{ url('auth/google') }}" title="Авторизуватися через Google">
+                                <img src="{{ asset('img/icons8-google-48.png') }}">
+                            </a>
+
+                            <a href="{{ url('auth/facebook') }}" title="Авторизуватися через Facebook">
+                                <img src="{{ asset('img/icons8-facebook-circled-48.png') }}">
+                            </a>
+
+                            <a href="{{ url('auth/linkedin') }}" title="Авторизуватися через Linkedin">
+                                <img src="{{ asset('img/icons8-linkedin-48.png') }}">
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
