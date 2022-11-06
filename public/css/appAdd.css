@@ -120,14 +120,14 @@ div.btn {
 }
 .but_vart {
     position: absolute;
-    margin-top: 70px;
+    margin-top: 10px;
     right: 2px;
     top: 2px;
 }
 
 .but_vart_vart {
     position: absolute;
-    margin-top: 105px;
+    margin-top: 5px;
     right: 2px;
     top: 2px;
 }
