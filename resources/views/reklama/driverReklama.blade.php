@@ -27,19 +27,20 @@
     }
 
     ?>
-
-    <div class="container-fluid" style="text-align: center">
-        <p class="marquee gradient"><span>
-            <?php
-            $i_order_view = 0;
-            do {
-                $rand_order =  rand(0, $i_order);
-                echo "&#128662 " . $quitesArr_order[$rand_order];
-                $i_order_view++;
-            } while ($i_order_view <= 3);
-            ?></span>
-        </p>
-    </div>
+    @if($i_order !== -1)
+        <div class="container-fluid" style="text-align: center">
+            <p class="marquee gradient"><span>
+                <?php
+                $i_order_view = 0;
+                do {
+                    $rand_order =  rand(0, $i_order);
+                    echo "&#128662 " . $quitesArr_order[$rand_order];
+                    $i_order_view++;
+                } while ($i_order_view <= 3);
+                ?></span>
+            </p>
+        </div>
+    @endif
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-3 col-sm-6">

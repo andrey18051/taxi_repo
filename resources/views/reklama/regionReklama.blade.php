@@ -29,7 +29,7 @@
     }
 
     ?>
-
+    @if($i_order !== -1)
     <div class="container-fluid" style="text-align: center">
         <p class="marquee gradient"><span>
             <?php
@@ -42,7 +42,7 @@
             ?></span>
         </p>
     </div>
-
+    @endif
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-3 col-sm-6">
