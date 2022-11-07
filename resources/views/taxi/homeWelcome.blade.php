@@ -15,55 +15,41 @@
             <br>
             <p class="text-center gradient">Виберіть варіант пошуку для замовлення.</p>
         </div>
-        <div class="col">
-            <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm rounded-3 p-3 mb-4">
 
                 <div class="container text-center">
-                    <ul class="navbar-nav ms-auto">
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('transfer',
+                    <div class="row">
+                        <div class="col-lg-3 col-12">
+                            <a href="{{route('transfer',
                                                      ["Аэропорт Борисполь терминал Д", "taxi.transferBorispol"])}}">
-                                <img src="{{ asset('img/borispol.png') }}" style="width: 250px; height: auto"
+                                <img src="{{ asset('img/borispol.png') }}" style="width: 200px; height: auto"
                                      title="Трансфер до аеропорту Бориспіль">
-                                {{ __('Бориспіль') }}
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('transfer',
+                        </div>
+                        <div class="col-lg-3 col-12">
+                            <a href="{{route('transfer',
                                                      ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferJulyany"])}}">
-                                <img src="{{ asset('img/sikorskogo.png') }}" style="width: 250px; height: auto"
+                                <img src="{{ asset('img/sikorskogo.png') }}" style="width: 200px; height: auto"
                                      title="Трансфер до аеропорту Київ">
-                                 {{ __('Жуляни') }}
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link"  href="{{route('transfer',
+                        </div>
+                        <div class="col-lg-3 col-12">
+                            <a href="{{route('transfer',
                                                      ["ЖД Южный", "taxi.transferUZ"])}}">
-                                <img src="{{ asset('img/UZ.png') }}" style="width: 250px; height: auto"
+                                <img src="{{ asset('img/UZ.png') }}" style="width: 200px; height: auto"
                                      title="Трансфер до залізничного вокзалу">
-                               {{ __('Південний вокзал') }}
                             </a>
-                        </li>
+                        </div>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('transfer',
+                        <div class="col-lg-3 col-12">
+                            <a href="{{route('transfer',
                                                      ["Центральный автовокзал (у шлагбаума пл.Московская 3)", "taxi.transferAuto"])}}">
-                                <img src="{{ asset('img/auto.jpeg') }}" style="width: 250px; height: auto"
+                                <img src="{{ asset('img/auto.jpeg') }}" style="width: 200px; height: auto"
                                      title="Трансфер до автовокзалу">
-                                {{ __('Автовокзал') }}
                             </a>
-                        </li>
-
-                    </ul>
+                        </div>
+                    </div>
                 </div>
-
-        </nav>
-    </div>
-
-
-
-
+        <br>
         <div class="container text-center">
             <a  class="btn btn-outline-success btn-sm col-3" href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Вулиці</a>
             <a  class="btn btn-outline-success btn-sm offset-1 col-3" href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Об'єкти</a>
@@ -71,7 +57,7 @@
         </div>
 
 
-
+        <br>
         <div class="container-fluid" style="margin-top: 10px">
             <p  class="gradient text-opacity-25">
                 <b>Замовити зустріч зі табличкою</b>
