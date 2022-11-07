@@ -135,6 +135,25 @@
                             </a>
                         </li>
                     </ul>
+                    <div class="container-fluid" style="margin-top: 10px">
+                        <p  class="gradient text-opacity-25">
+                            <b>Вам також буде цікаво:</b>
+                        </p>
+
+                        <div class="header gradient" >
+                            <a href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Шукати адресу</a>
+                            <a href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Пошук по мапи</a>
+                            <a href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Якщо Ви у кафе або у спортклубі</a>
+                            <a  @guest
+                                href="{{ route('callBackForm') }}"
+                                @else
+                                href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
+                                @endguest>
+                                Допомога у складний час</a>
+                            <a href="{{route('callWorkForm')}}" target="_blank">Робота у таксі</a>
+                            <a href="{{route('home-news')}}" target="_blank">Новини</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
