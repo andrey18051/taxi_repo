@@ -1,4 +1,4 @@
-@extends('layouts.newsList')
+@extends('layouts.Canonical')
 
 @section('content')
     <?php
