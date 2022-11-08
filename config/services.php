@@ -67,5 +67,13 @@ return [
     'redirect' => '/auth/linkedin/callback',
     ],
 
+    /**
+     * Github
+     */
+    'github' => [
+    'client_id' => '1522b13c28b84a7e6f86',
+    'client_secret' => '04e51fca26b5514aaaefaf03bb5f59d98af11ae7',
+    'redirect' => '/auth/github/callback',
+    ],
 
 ];

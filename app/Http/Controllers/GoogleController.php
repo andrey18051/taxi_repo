@@ -51,6 +51,7 @@ class GoogleController extends Controller
                     $newUser['google_id'] = $user->id;
                     $newUser['facebook_id'] = null;
                     $newUser['linkedin_id'] = null;
+                    $newUser['github_id'] = null;
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 

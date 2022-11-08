@@ -82,14 +82,13 @@
                                         <a href="{{ url('auth/linkedin') }}" title="Авторизуватися через Linkedin">
                                             <img src="{{ asset('img/icons8-linkedin-48.png') }}">
                                         </a>
+
+                                        <a href="{{ url('auth/github') }}" title="Авторизуватися через Linkedin">
+                                            <img src="{{ asset('img/icons8-github-48.png') }}">
+                                        </a>
                                     </div>
                                 </div>
 
-
-<!--                                <div class="fb-login-button" data-width="" data-size="large"
-                                     data-button-type="continue_with" data-layout="default"
-                                     data-auto-logout-link="false" data-use-continue-as="false">
-                                </div>-->
                             </form>
                         </div>
                     </div>

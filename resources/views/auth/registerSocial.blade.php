@@ -71,6 +71,11 @@
                         @else
                             <input type="hidden" id="linkedin_id" name="linkedin_id" value="">
                         @endif
+                        @if($newUser['github_id'])
+                            <input type="hidden" id="github_id" name="github_id" value="{{ $newUser['github_id'] }}">
+                        @else
+                            <input type="hidden" id="github_id" name="github_id" value="">
+                        @endif
 
                         <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Пароль') }}</label>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FacebookController;
+use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\TaxiController;
@@ -28,6 +29,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //**********************************************************************************************************************
+
+/**
+ * Github
+ */
+Route::get('auth/github', [GithubController::class, 'redirectToGithub']);
+Route::get('auth/github/callback', [GithubController::class, 'handleGithubCallback']);
+
 
 
 /**
