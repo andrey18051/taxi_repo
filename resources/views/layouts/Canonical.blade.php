@@ -2,13 +2,13 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9RPQKDB2T9"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9KNVGMXW35"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
 
-        gtag('config', 'G-9RPQKDB2T9');
+        gtag('config', 'G-9KNVGMXW35');
     </script>
 
     <meta charset="utf-8">
