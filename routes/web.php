@@ -5,6 +5,7 @@ use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\TaxiController;
+use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UserController;
@@ -29,6 +30,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //**********************************************************************************************************************
+
+/**
+ * Twitter
+ */
+Route::get('auth/twitter', [TwitterController::class, 'redirectToTwitter']);
+Route::get('auth/twitter/callback', [TwitterController::class, 'handleTwitterCallback']);
 
 /**
  * Github

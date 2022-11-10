@@ -76,4 +76,15 @@ return [
     'redirect' => '/auth/github/callback',
     ],
 
+    /**
+     * Twitter
+     * Bearer Token
+     * AAAAAAAAAAAAAAAAAAAAAAqXjAEAAAAA5SyAPUTr5dnGEjDdBTI7dzlptgc%3DYIeMkzm92UAh7X4U3G3QFVxE6d6T00kwoOrxgxwzj7kwQ7JJss
+     */
+    'twitter' => [
+        'client_id' => '8bMImTM999qg1KcrUOPCZNCQF',
+        'client_secret' => '9yXk05UyYgTnoZsTA0Fa0vHnoLHs66YonDio0iGP2xOxpaK7p7',
+        'redirect' => 'https://m.easy-order-taxi.site/auth/twitter/callback',
+    ],
+
 ];

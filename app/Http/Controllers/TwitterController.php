@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 
-class LinkedinController extends Controller
+class TwitterController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -18,9 +18,9 @@ class LinkedinController extends Controller
      * @return void
      */
 
-    public function redirectToLinkedin()
+    public function redirectToTwitter()
     {
-        return Socialite::driver('linkedin')->redirect();
+        return Socialite::driver('twitter')->redirect();
     }
 
     /**
@@ -30,29 +30,29 @@ class LinkedinController extends Controller
      */
 
 
-    public function handleLinkedinCallback()
+    public function handleTwitterCallback()
     {
         try {
-            $user = Socialite::driver('linkedin')->user();
-            $finduser = User::where('linkedin_id', $user->id)->first();
+            $user = Socialite::driver('twitter')->user();
+            $finduser = User::where('twitter_id', $user->id)->first();
             if ($finduser) {
                 Auth::login($finduser);
                 return redirect()->intended('/homeWelcome');
             } else {
                 try {
                     $finduser = User::where('email', $user->email)->first();
-                    $finduser->linkedin_id = $user->id;
+                    $finduser->twitter_id = $user->id;
                     $finduser->save();
                     Auth::login($finduser);
                     return redirect()->intended('/homeWelcome');
                 } catch (Exception $e) {
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
-                    $newUser['linkedin_id'] = $user->id;
+                    $newUser['twitter_id'] = $user->id;
                     $newUser['google_id'] = null;
                     $newUser['facebook_id'] = null;
                     $newUser['github_id'] = null;
-                    $newUser['twitter_id'] = null;
+                    $newUser['linkedin_id'] = null;
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 

@@ -52,6 +52,7 @@ class FacebookController extends Controller
                     $newUser['google_id'] = null;
                     $newUser['linkedin_id'] = null;
                     $newUser['github_id'] = null;
+                    $newUser['twitter_id'] = null;
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 

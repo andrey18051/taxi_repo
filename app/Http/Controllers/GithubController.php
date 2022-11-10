@@ -52,6 +52,7 @@ class GithubController extends Controller
                     $newUser['facebook_id'] = null;
                     $newUser['google_id'] = null;
                     $newUser['linkedin_id'] = null;
+                    $newUser['twitter_id'] = null;
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 

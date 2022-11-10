@@ -96,8 +96,12 @@
                                 <img src="{{ asset('img/icons8-linkedin-48.png') }}">
                             </a>
 
-                            <a href="{{ url('auth/github') }}" title="Авторизуватися через Linkedin">
+                            <a href="{{ url('auth/github') }}" title="Авторизуватися через Github">
                                 <img src="{{ asset('img/icons8-github-48.png') }}">
+                            </a>
+
+                            <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">
+                                <img src="{{ asset('img/icons8-twitter-48.png') }}">
                             </a>
                         </div>
                     </form>
