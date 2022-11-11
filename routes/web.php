@@ -213,7 +213,9 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 
 })->name('homeStreet');
 
-
+Route::get('/map', function () {
+    return view('map3');
+});
 
 Route::get('/home-Object/{phone}/{user_name}', function ($phone, $user_name) {
     $connectAPI = WebOrderController::connectAPInoEmail();
@@ -252,11 +254,7 @@ Route::get('/homeorder/{id}', function ($id) {
 })->name('home-id');
 
 Route::get('/homeorder-object/{id}', function ($id) {
-    /*$connectAPI = WebOrderController::connectAPInoEmail();
-    if ($connectAPI == 400) {
-        return redirect()->route('home-news')
-            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-    }*/
+
     $json_arr = WebOrderController::tariffs();
     $orderId = json_decode(Order::where('id', $id)->get(), true);
     return view('taxi.orderObjectEdit', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
@@ -278,15 +276,26 @@ Route::get('/homeorder-object/{id}', function ($id) {
 
 
 Route::get('/homeorder/afterorder/{id}', function ($id) {
-    $WebOrder = new WebOrderController();
 
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
-    $routeArr['from'] = $WebOrder->geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
-    $routeArr['to'] = $WebOrder->geodataSearch($orderId[0]["routeto"], $orderId[0]["routetonumber"]);
-
+    $routeArr['from'] = WebOrderController::geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
+    $routeArr['to'] = WebOrderController::geodataSearch($orderId[0]["routeto"], $orderId[0]["routetonumber"]);
+    $routeArr["driver"]["lat"] = null;
     return view('taxi.homeblankMap', [ 'orderId' => $orderId, 'id' => $id, 'routeArr' => $routeArr]);
 })->name('home-id-afterorder');
+
+Route::get('/homeorder/afterorder/uid/{id}', function ($id) {
+
+    $orderId = json_decode(Orderweb::where('id', $id)->get(), true);
+
+    $routeArr['from'] = WebOrderController::geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
+    $routeArr['to'] = WebOrderController::geodataSearch($orderId[0]["routeto"], $orderId[0]["routetonumber"]);
+    $routeArr['driver'] = WebOrderController::driversPositionUid($orderId[0]['dispatching_order_uid']);
+
+    return view('taxi.homeblankMap', [ 'orderId' => $orderId, 'id' => $id, 'routeArr' => $routeArr]);
+})->name('home-id-afterorder-uid');
+
 
 Route::get('/homeorder/afterorder/web/{id}', function ($id) {
     $orderId = json_decode(Orderweb::where('id', $id)->get(), true);
@@ -510,11 +519,12 @@ Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', func
 Route::get('/webordersCancel/{id}', [WebOrderController::class, 'webordersCancel'])
     ->name('webordersCancel');
 
-/*Route::get('/profile/edit/form/{authorization}', function ($authorization) {
-    $response = new WebOrderController();
-    $response = $response->account($authorization);
-    return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
-})->name('profile-edit-form');*/
+/**
+ * Запрос состояния заказа
+ */
+
+Route::get('/webordersUid/{id}', [WebOrderController::class, 'webordersUid'])
+    ->name('webordersUid');
 
 
 Route::get('/costhistory/orders', function (){

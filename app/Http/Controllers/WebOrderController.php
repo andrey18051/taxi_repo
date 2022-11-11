@@ -946,13 +946,13 @@ class WebOrderController extends Controller
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
-
+//dd($response->body());
                 if ($response->status() == "200") {
                     /**
                      * Сохранние расчетов в базе
                      */
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;;//IP пользователя
+                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -2493,13 +2493,15 @@ class WebOrderController extends Controller
                 'subject' => $subject,
                 'message' => $order,
             ];
+            $user = User::where('user_phone', $user_phone)->first();
 
-            Mail::to(Auth::user()->email)->send(new Check($paramsCheck));
+            Mail::to($user->email)->send(new Check($paramsCheck));
 
-            return redirect()->route('home-id-afterorder-web', $orderweb)->with('success', $order)
+            return redirect()->route('home-id-afterorder-uid', $orderweb)->with('success', $order)
                 ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
                 ->with('back', 'Зробити нове замовлення')
-                ->with('cancel', 'Скасувати замовлення.');
+                ->with('cancel', 'Скасувати замовлення.')
+                ->with('uid', 'Отримати інформацію');
         } else {
             $json_arr = json_decode($responseWeb, true);
             $message_error = $json_arr['Message'];
@@ -2932,7 +2934,6 @@ class WebOrderController extends Controller
 
             }
         }
-
     }
 
     /**
@@ -3007,8 +3008,78 @@ class WebOrderController extends Controller
             ->with('back', 'Зробити нове замовлення');
     }
 
+    /**
+     * Запрос состояния заказа
+     * @return string
+     */
+    public function webordersUid($id)
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+        $orderweb = Orderweb::where('id', $id)->first();
 
+        $uid =  $orderweb->dispatching_order_uid; //идентификатор заказа
+
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        try {
+            $url = $connectAPI . '/api/weborders/' . $uid;
+            $response = Http::withHeaders([
+                'Authorization' => $authorization,
+            ])->put($url);
+            $json_arrWeb = json_decode($response, true);
+            $dispatching_order_uid = $json_arrWeb['dispatching_order_uid'];
+            $order_cost = $json_arrWeb['order_cost'];
+            $order_car_info = $json_arrWeb['order_car_info'];
+            $message_success = "Замовлення №$dispatching_order_uid. Вартість:$order_cost грн. Автомобіль:$order_car_info.";
+
+            return redirect()->route('home-id-afterorder', $id)->with('success', $message_success)
+                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Інформацію можна отримати за номером оператора:")
+                ->with('tel_driver', $json_arrWeb['driver_phone'])
+                ->with('cancel', 'Скасувати замовлення.');
+        } catch (Exception $e) {
+            $message_error = 'Вибачте. Машину ще не знайдено. Спробуйте трохи згодом.';
+            return redirect()->route('home-id-afterorder', $id)->with('error', $message_error)
+                ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення.
+                Інформацію можна отримати за номером оператора:")
+                ->with('uid', 'Отримати інформацію')
+                ->with('cancel', 'Скасувати замовлення.');
+        }
+    }
+
+    /**
+     * Получение координат автомобиля в заказе
+     * @return string
+     */
+    public function driversPositionUid($uid)
+    {
+
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        try {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+            $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+            $url = $connectAPI . '/api/weborders/' . $uid;
+            $response = Http::withHeaders([
+                'Authorization' => $authorization,
+            ])->put($url);
+            $json_arrWeb = json_decode($response, true);
+
+            return $json_arrWeb["drivercar_position"];
+        } catch (Exception $e) {
+            return null;
+        }
+    }
     /**
      * Получение координат автомобилей в радиусе
      * @return string
@@ -3183,25 +3254,7 @@ class WebOrderController extends Controller
      * Создание заказа
      * @return string
      */
-    public function webordersUid()
-    {
-        $username = '0936734488';
-        $password = hash('SHA512', '11223344');
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-        $uid = '9a1051aaf1654cd28d97a87c7ff8398a'; //идентификатор заказа
 
-        $connectAPI = WebOrderController::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
-        $url = $connectAPI . '/api/weborders/' . $uid;
-        $response = Http::withHeaders([
-            'Authorization' => $authorization,
-        ])->get($url);
-
-        return $response->body() ;
-    }
 
     /**
      * Запрос информации о позывном

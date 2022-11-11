@@ -55,11 +55,15 @@
         document.getElementById('lat2').value = myLatlng.lat;
         document.getElementById('lng2').value = myLatlng.lng;
 
+        const image =
+            "{{ asset('img/taxiMarker.png') }}";
+
+
         marker = new google.maps.Marker({
             position: myLatlng,
             map: map,
             draggable: true,
-            label: 'Звідки'
+            icon: image,
         });
 
         marker.addListener('dragend', function(e) {
