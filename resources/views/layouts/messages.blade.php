@@ -81,7 +81,7 @@
         </a>
     </div>
     <div class="container" style="margin-top: 10px">
-        <a  class="w-100 btn btn-danger btn-lg" href="{{route('home')}}">
+        <a  class="w-100 btn btn-danger btn-lg" href="{{route('homeCombo')}}">
             {{'Відмовитися'}}
         </a>
     </div>
@@ -131,7 +131,7 @@
 @endif
 @if(session('back'))
     <div class="container">
-        <a  class="w-100 btn btn-secondary btn-lg" href="{{route('home')}}">
+        <a  class="w-100 btn btn-secondary btn-lg" href="{{route('homeCombo')}}">
             {{session('back')}}
         </a>
     </div>

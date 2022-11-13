@@ -145,7 +145,7 @@ Route::get('/homeWelcome', function () {
 })->name('home');
 
 
-Route::get('/homeWelcomeCombo', function () {
+/*Route::get('/homeWelcomeCombo', function () {
 
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
@@ -158,18 +158,18 @@ Route::get('/homeWelcomeCombo', function () {
 
     if ($start_time  <= $end_time) {
         if ($time >= $start_time && $time <= $end_time) {
-            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWarCombo');
         } else {
-            return view('taxi.homeWelcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+            return view('taxi.homeCombo');
         }
     } else {
         if ($time >= $start_time || $time <= $end_time) {
-            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+            return view('taxi.homeWelcomeWarCombo');
         } else {
-            return view('taxi.homeWelcomeCombo');
+            return view('taxi.homeCombo');
         }
     }
-})->name('homeCombo');
+})->name('homeCombo');*/
 
 
 
