@@ -1,4 +1,4 @@
-@extends('layouts.taxiNewStreetReq')
+@extends('layouts.taxiNewCombo')
 
 @section('content')
     {{-- dd($params)  --}}
@@ -15,23 +15,31 @@
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
-                        @if ($params['user_phone'] == '000')
-                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="">
+                        @guest
+                            <input type="hidden" id="user_phone" name="user_phone"  value="+380936665544">
+                            <input type="hidden" id="user_full_name" name="user_full_name"  value="Гість">
                         @else
-                            <input type="hidden" class="form-control" id="user_phone" name="user_phone" pattern="[0-9]{10}" value="{{$params['user_phone']}}">
-                        @endif
+                            <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
+                            <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
+                        @endguest
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
-                        <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$params['user_full_name']}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+
                         <input type="hidden" class="form-control" id="routefrom" name="routefrom" autocomplete="off" value="{{ $params['routefrom']}}" required>
 
                             <div class="container">
                                 <div class="row">
                                     <div class="col-8">
-                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці (Куди)"  required>
+                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off"
+                                               placeholder="Куди?"  value="{{ $params['routeto']}}"
+                                               autocomplete="off" placeholder="Звідки?" value=""
+                                               onchange="hidFrom(this.value)"
+                                               required>
                                     </div>
                                     <div class="col-4">
-                                        <input type="text" id="routetonumber" name="routetonumber" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" required/>
+                                        <input type="text" id="routetonumber" name="routetonumber" placeholder="Будинок?"
+                                               autocomplete="off" class="form-control" style="text-align: center"
+                                               value="{{ $params['routetonumber']}}" />
                                     </div>
                                 </div>
                             </div>
@@ -188,6 +196,28 @@
             else alert("Элемент с id: " + element_id + " не найден!");
         }
 
+        function hidFrom(value) {
+            var route = "/autocomplete-search-combo-hid/" + value;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+                    if (data == 0) {
+                        document.getElementById('routetonumber').style.display='none';
+                    }
+                    if (data == 1) {
+                        document.getElementById('routetonumber').style.display='block';
+                    }
+
+                }
+            });
+
+
+
+        }
     </script>
 
 

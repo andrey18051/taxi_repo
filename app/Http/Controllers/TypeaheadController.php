@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\Combo;
 use App\Models\Config;
 use App\Models\Street;
 use Illuminate\Database\Eloquent\Model;
@@ -119,5 +120,22 @@ class TypeaheadController extends Controller
             $i++;
         }
         return  $data;
+    }
+
+    public function autocompleteSearchCombo()
+    {
+        $i = 0;
+        $combos = Combo::all();
+        foreach ($combos as $object) {
+            $data[$i] = $object->name;
+            $i++;
+        }
+        return  $data;
+    }
+
+    public function autocompleteSearchComboHid($name)
+    {
+        $combos = Combo::where('name', $name)->first();
+        return  $combos->street;
     }
 }

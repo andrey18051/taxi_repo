@@ -1,4 +1,4 @@
-@extends('layouts.newsList')
+@extends('layouts.taxiNewCombo')
 
 @section('content')
     <?php
@@ -46,7 +46,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-3 col-sm-6">
-                <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                <a href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
                     <h2 class="gradient text-primary">
                         <b>Найкраща пропозиція Таксі Києва та області </b>
                     </h2>
@@ -81,7 +81,7 @@
                      </li>
                  </ul>
                 <div class="text-center">
-                    <a href="{{route('home')}}" class="gradient-button" target="_blank">Замовити таксі</a>
+                    <a href="{{route('homeCombo')}}" class="gradient-button" target="_blank">Замовити таксі</a>
                 </div>
             </div>
 
@@ -89,7 +89,7 @@
                 <div class="row">
                     <ul class="olderOne">
                         <li>
-                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}">
+                            <a href="{{route('homeCombo')}}">
                                 <b><h5 class="text-center">Попереднє замовлення</h5></b>
                                 <p style="text-align: justify">
                                     Можливість оформити замовлення таксі на бажаний час та день.
@@ -127,9 +127,8 @@
                         </p>
 
                         <div class="header gradient" >
-                            <a href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Шукати адресу</a>
-                            <a href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Пошук по мапи</a>
-                            <a href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Якщо Ви у кафе або у спортклубі</a>
+                            <a href="{{route('homeCombo')}}" target="_blank">Шукати адресу</a>
+                            <a href="{{route('homeMapCombo')}}" target="_blank">Пошук по мапи</a>
                             <a  @guest
                                 href="{{ route('callBackForm') }}"
                                 @else

@@ -6,6 +6,7 @@ use App\Mail\Admin;
 use App\Mail\Check;
 use App\Mail\Driver;
 use App\Mail\Feedback;
+use App\Models\Combo;
 use App\Models\Config;
 use App\Models\Objecttaxi;
 use App\Models\Order;
@@ -761,13 +762,15 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    WebOrderController::version_street();
+                    WebOrderController::version_combo();
+                  //  WebOrderController::version_street();
+
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
                     </script>
                     <?php
-                    return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+                    return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
                 }
             }
         }
@@ -779,7 +782,7 @@ class WebOrderController extends Controller
             <?php
             $json_arr = WebOrderController::tariffs();
 
-            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
     /**
@@ -2114,7 +2117,7 @@ class WebOrderController extends Controller
         if ($req->routefromnumber == 0) {
             return view('taxi.homeReqObject', ['json_arr' => $json_arr, 'params' => $req]);
         } else {
-            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $req]);
+            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $req]);
         }
     }
 
@@ -2937,6 +2940,184 @@ class WebOrderController extends Controller
             }
         }
     }
+
+    /**
+     * Контроль версии улиц и объектов
+     */
+    public function version_combo()
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        /**
+         * Проверка подключения к серверам
+         */
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        /**
+         * Проверка даты геоданных в АПИ
+         */
+
+        $url = $connectAPI . '/api/geodata/streets';
+        $json_str = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
+        ]);
+
+        $json_arr = json_decode($json_str, true);
+
+        $url_ob = $connectAPI . '/api/geodata/objects';
+        $response_ob = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url_ob, [
+            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
+        ]);
+
+        $json_arr_ob = json_decode($response_ob, true);
+
+        /**
+         * Проверка версии геоданных и обновление или создание базы адресов
+         * $json_arr['version_date'] - текущая версия улиц в базе
+         * config('app.streetVersionDate') - дата версии в конфиге
+         * $json_arr_ob['version_date'] - текущая версия объектов в базе
+         * config('app.objectVersionDate') - дата версии в конфиге
+         */
+
+        $svd = Config::where('id', '1')->first();
+        //Проверка версии геоданных и обновление или создание базы адресов
+        if (config('app.server') == 'Киев') {
+            if ($json_arr['version_date'] !== $svd->streetVersionDate ||
+                $json_arr_ob['version_date'] !== $svd->objectVersionDate || Combo::all()->count() === 0)
+            {
+                //Обновление списка тарифов
+                $url = $connectAPI . '/api/tariffs';
+                $response = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->get($url);
+
+                $response_arr = json_decode($response, true);
+                DB::table('tarifs')->truncate();
+                for ($i = 0; $i < count($response_arr); $i++) {
+                    $new_tarif = new Tarif();
+                    $new_tarif->name = $response_arr[$i]['name'];
+                    $new_tarif->save();
+                }
+
+                $svd->streetVersionDate = $json_arr['version_date'];
+                $svd->objectVersionDate = $json_arr_ob['version_date'];
+                $svd->save();
+
+                DB::table('combos')->truncate();
+                $i = 0;
+                do {
+                    $combo = new Combo();
+                    $combo->name = $json_arr['geo_street'][$i]["name"];
+                    $combo->street = 1;
+                    $combo->save();
+
+                    $geo_street = $json_arr['geo_street'][$i]["localizations"];
+                    foreach ($geo_street as $val) {
+                        if ($val["locale"] == "UK") {
+                            $combo = new Combo();
+                            $combo->name = $val['name'];
+                            $combo->street = 1;
+                            $combo->save();
+                        }
+                    }
+
+                    $combo = new Combo();
+                    $combo->name = $json_arr_ob['geo_object'][$i]["name"];
+                    $combo->street = 0;
+                    $combo->save();
+                    $geo_object = $json_arr_ob['geo_object'][$i]["localizations"];
+                    foreach ($geo_object as $val) {
+                        if ($val["locale"] == "UK") {
+                            $combo = new Combo();
+                            $combo->name = $val['name'];
+                            $combo->street = 0;
+                            $combo->save();
+                        }
+                    }
+                    $i++;
+                } while ($i < count($json_arr['geo_street']));
+            }
+        }
+     /*   if (config('app.server') == 'Одесса') {
+            if ($json_arr['version_date'] !== $svd->streetVersionDate || Combo::all()->count() === 0) {
+                $svd->streetVersionDate = $json_arr['version_date'];
+                $svd->save();
+                DB::table('combos')->truncate();
+                $i = 0;
+
+                do {
+                    $street = new Street();
+                    $street->name = $json_arr['geo_street'][$i]["name"];
+                    $street->save();
+
+                    $i++;
+                } while ($i < count($json_arr['geo_street']));
+
+            }
+        }
+
+        *******************************
+
+        $svd = Config::where('id', '1')->first();
+        //Проверка версии геоданных и обновление или создание базы адресов
+        if (config('app.server') == 'Киев') {
+            if ($json_arr['version_date'] !== $svd->objectVersionDate || Combo::all()->count() === 0) {
+                $svd->objectVersionDate = $json_arr['version_date'];
+                $svd->save();
+
+                DB::table('objecttaxis')->truncate();
+                $i = 0;
+                do {
+                    $objects = new Objecttaxi();
+                    $objects->name = $json_arr['geo_object'][$i]["name"];
+                    $objects->save();
+                    $streets = $json_arr['geo_object'][$i]["localizations"];
+                    foreach ($streets as $val) {
+
+                        if ($val["locale"] == "UK") {
+                            $objects = new Objecttaxi();
+                            $objects->name = $val['name'];
+                            $objects->save();
+
+                        }
+                    }
+                    $i++;
+                } while ($i < count($json_arr['geo_object']));
+            }
+        }
+        if (config('app.server') == 'Одесса') {
+            if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
+                $svd->objectVersionDate = $json_arr['version_date'];
+                $svd->save();
+                DB::table('objecttaxis')->truncate();
+                $i = 0;
+
+                do {
+                    $objects = new Objecttaxi();
+                    $objects->name = $json_arr['geo_object'][$i]["name"];
+                    $objects->save();
+
+                    $i++;
+                } while ($i < count($json_arr['geo_object']));
+
+            }
+        }
+
+
+        */
+
+    }
+
+
+
 
     /**
      * Гео данные

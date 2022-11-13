@@ -144,11 +144,38 @@ Route::get('/homeWelcome', function () {
     }
 })->name('home');
 
+
+Route::get('/homeWelcomeCombo', function () {
+
+    date_default_timezone_set("Europe/Kiev");
+    // Время интервала
+    $start_time = strtotime(config('app.start_time')); // начальное время
+    $end_time = strtotime(config('app.end_time')); // конечное время
+
+    $time = strtotime(date("h:i:sa")); // проверяемое время
+
+    // Выполняем проверку
+
+    if ($start_time  <= $end_time) {
+        if ($time >= $start_time && $time <= $end_time) {
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWelcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
+        }
+    } else {
+        if ($time >= $start_time || $time <= $end_time) {
+            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
+        } else {
+            return view('taxi.homeWelcomeCombo');
+        }
+    }
+})->name('homeCombo');
+
+
+
 Route::get('/', function () {
         WebOrderController::connectAPI();
-
-        return view('taxi.homeNewsVue');
-
+        return view('taxi.homeNewsCombo');
 })->name('home-news');
 
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
@@ -213,6 +240,48 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 
 })->name('homeStreet');
 
+Route::get('/home-Combo', function () {
+
+    date_default_timezone_set("Europe/Kiev");
+    // Время интервала
+    $start_time = strtotime(config('app.start_time')); // начальное время
+    $end_time = strtotime(config('app.end_time')); // конечное время
+
+    $time = strtotime(date("h:i:sa")); // проверяемое время
+
+    // Выполняем проверку
+
+    if ($start_time  <= $end_time) {
+        if ($time >= $start_time && $time <= $end_time) {
+            return view('taxi.homeWelcomeWarCombo');
+        } else {
+            $connectAPI = WebOrderController::connectAPInoEmail();
+
+            if ($connectAPI == 400) {
+                return view('taxi.homeWelcomeCombo')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            }
+            $json_arr = WebOrderController::tariffs();
+            return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+        }
+    } else {
+        if ($time >= $start_time || $time <= $end_time) {
+            return view('taxi.homeWelcomeWarCombo');
+        } else {
+            $connectAPI = WebOrderController::connectAPInoEmail();
+
+            if ($connectAPI == 400) {
+                return view('taxi.homeWelcomeCombo')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            }
+            $json_arr = WebOrderController::tariffs();
+            return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+        }
+    }
+})->name('homeCombo');
+
+
+
 Route::get('/map', function () {
     return view('map3');
 });
@@ -236,6 +305,16 @@ Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
     $json_arr = WebOrderController::tariffs();
     return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeMap');
+
+Route::get('/home-Map-Combo', function () {
+    $connectAPI = WebOrderController::connectAPInoEmail();
+    if ($connectAPI == 400) {
+        return redirect()->route('home-news')
+            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+    }
+    $json_arr = WebOrderController::tariffs();
+    return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
+})->name('homeMapCombo');
 
 
 Route::get('/taxi-gdbr', function () {
@@ -411,6 +490,10 @@ Route::get('/search', function () {
 Route::get('/search-home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
 Route::get('/autocomplete-search2', [TypeaheadController::class, 'autocompleteSearch2']);
+Route::get('/autocomplete-search-combo', [TypeaheadController::class, 'autocompleteSearchCombo']);
+Route::get('/autocomplete-search-combo-hid/{name}', [TypeaheadController::class, 'autocompleteSearchComboHid'])
+->name('autocomplete-search-combo-hid');
+
 /**
  * Поиск по объектам
  */

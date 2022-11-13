@@ -1,4 +1,4 @@
-@extends('layouts.newsList')
+@extends('layouts.taxiNewCombo')
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">

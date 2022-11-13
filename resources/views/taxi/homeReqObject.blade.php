@@ -1,4 +1,4 @@
-@extends('layouts.taxiNewObjectReq')
+@extends('layouts.taxiNewCombo')
 
 @section('content')
     {{-- $params['user_phone'] --}}
@@ -129,6 +129,7 @@
 
                 </div>
                 <div class="container text-center">
+                    <a class="w-100 btn btn-danger btn-lg" href="{{route('homeCombo')}}" style="margin-top: 5px">Очистити форму</a>
                     <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </div>
             </form>

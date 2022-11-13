@@ -1,4 +1,4 @@
-@extends('layouts.taxiNewProfile')
+@extends('layouts.taxiNewCombo')
 
 @section('content')
 
