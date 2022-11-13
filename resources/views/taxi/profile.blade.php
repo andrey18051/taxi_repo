@@ -113,7 +113,7 @@
                     <div class="d-flex justify-content-center mb-2">
                             <a type="button" class="btn btn-primary"
                                href="{{ route('profile-edit-form', $authorization) }}" target="_blank">Оновити</a>
-                            <a type="button" class="btn btn-outline-primary ms-1"
+                            <a type="button" class="btn btn-outline-primary ms-1 animate-fading"
                                href="{{ route('costhistory', $authorization) }}" target="_blank">Мої маршрути</a>
                         </div>
                     </div>

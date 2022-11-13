@@ -27,6 +27,7 @@
                         <input type="hidden" id="user_full_name" name="user_full_name" placeholder="Андрій"  class="form-control" value="{{$user_name}}">
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                         <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+                        <input type="hidden" class="form-control" id="street" name="street" value="1" />
 
                         <div class="container">
                                 <div class="row">
@@ -34,11 +35,17 @@
                                         <input type="text" class="form-control" id="search" name="search" autocomplete="off" placeholder="Пошук вулиці (Звідки)" value="" required>
                                     </div>
                                     <div class="col-4">
-                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" required/>
+                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
+                                               autocomplete="off" class="form-control" style="text-align: center; display: none" value="" required/>
                                     </div>
                                 </div>
                         </div>
 
+                        <script>
+                            if( document.getElementById("street").value == 1) {
+                                document.getElementById("from_number").style.display='block';
+                            }
+                        </script>
                         <div class="container" style="text-align: left">
                             <label class="form-check-label" for="route_undefined">По місту</label>
                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">

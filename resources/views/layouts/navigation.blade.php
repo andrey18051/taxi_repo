@@ -20,7 +20,7 @@
         </div>
 
         <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}"
-            class="gradient animate-fading"
+            class="gradient"
             target="_blank" title="Розрахунок вартості"
             style="text-decoration: none; margin-top: 20px">Низька ціна та Швидка подача таксі Києва та області.  <br>
             Розрахуйте вартість поїздки онлайн.</a>

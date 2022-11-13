@@ -53,7 +53,7 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'user_phone' => ['required', new PhoneNumber],
+            'user_phone' => ['required', new PhoneNumber()],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -73,6 +73,9 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'google_id' => $data['google_id'],
             'facebook_id' => $data['facebook_id'],
+            'linkedin_id' => $data['linkedin_id'],
+            'github_id' => $data['github_id'],
+            'twitter_id' => $data['twitter_id'],
             'password' => Hash::make($data['password']),
             'password_taxi' => Crypt::encryptString($data['password'])
         ]);

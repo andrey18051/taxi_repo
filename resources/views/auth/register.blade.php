@@ -29,7 +29,9 @@
                             <label for="user_phone" class="col-md-4 col-form-label text-md-end">{{ __("Телефон") }}</label>
 
                             <div class="col-md-6">
-                                <input id="user_phone" type="text" class="form-control @error('user_phone') is-invalid @enderror" name="user_phone" value="{{ old('user_phone') }}" required autocomplete="user_phone">
+                                <input id="user_phone" type="text"
+                                       class="form-control @error('user_phone') is-invalid @enderror" name="user_phone"
+                                       value="{{ old('user_phone') }}" required autocomplete="user_phone" placeholder="+380936665544">
 
                                 @error('user_phone')
                                 <span class="invalid-feedback" role="alert">

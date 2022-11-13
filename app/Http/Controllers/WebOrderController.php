@@ -2250,7 +2250,9 @@ class WebOrderController extends Controller
 
         $finduser = User::where('user_phone', $user_phone)->first();
         if (!$finduser) {
-            return view('auth.login');
+            return redirect()->route('register')->with('error', 'Ваш телефон не знайдено у базі.
+             Будь ласка, пройдіть реєстрацію для замовлення поїздки або перевірте номер.
+             Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути" в Особистому кабінеті.');
         }
 
         $username = config('app.username');
