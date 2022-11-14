@@ -37,14 +37,14 @@ class LinkedinController extends Controller
             $finduser = User::where('linkedin_id', $user->id)->first();
             if ($finduser) {
                 Auth::login($finduser);
-                return redirect()->intended('/homeWelcome');
+                return redirect()->intended('/home-Combo');
             } else {
                 try {
                     $finduser = User::where('email', $user->email)->first();
                     $finduser->linkedin_id = $user->id;
                     $finduser->save();
                     Auth::login($finduser);
-                    return redirect()->intended('/homeWelcome');
+                    return redirect()->intended('/home-Combo');
                 } catch (Exception $e) {
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
@@ -53,6 +53,8 @@ class LinkedinController extends Controller
                     $newUser['facebook_id'] = null;
                     $newUser['github_id'] = null;
                     $newUser['twitter_id'] = null;
+                    $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
+                    $newUser['password'] = substr(str_shuffle($chars), 0, 8);
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 

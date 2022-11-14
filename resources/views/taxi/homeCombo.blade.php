@@ -15,14 +15,14 @@
                     <div class="col-lg-3 col-6">
                         <a href="{{route('transfer',
                                                      ["Аэропорт Борисполь терминал Д", "taxi.transferBorispol"])}}">
-                            <img src="{{ asset('img/borispol.png') }}" style="width: 200px; height: auto"
+                            <img src="{{ asset('img/borispol.png') }}" style="width: 150px; height: auto"
                                  title="Трансфер до аеропорту Бориспіль">
                         </a>
                     </div>
                     <div class="col-lg-3 col-6">
                         <a href="{{route('transfer',
                                                      ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferJulyany"])}}">
-                            <img src="{{ asset('img/sikorskogo.png') }}" style="width: 200px; height: auto"
+                            <img src="{{ asset('img/sikorskogo.png') }}" style="width: 150px; height: auto"
                                  title="Трансфер до аеропорту Київ">
                         </a>
                     </div>
@@ -30,7 +30,7 @@
                     <div class="col-lg-3 col-6">
                         <a href="{{route('transfer',
                                                      ["ЖД Южный", "taxi.transferUZ"])}}">
-                            <img src="{{ asset('img/UZ.png') }}" style="width: 200px; height: auto"
+                            <img src="{{ asset('img/UZ.png') }}" style="width: 150px; height: auto"
                                  title="Трансфер до залізничного вокзалу">
                         </a>
                     </div>
@@ -38,7 +38,7 @@
                     <div class="col-lg-3 col-6">
                         <a href="{{route('transfer',
                                                      ["Центральный автовокзал (у шлагбаума пл.Московская 3)", "taxi.transferAuto"])}}">
-                            <img src="{{ asset('img/auto.jpeg') }}" style="width: 200px; height: auto"
+                            <img src="{{ asset('img/auto.jpeg') }}" style="width: 150px; height: auto"
                                  title="Трансфер до автовокзалу">
                         </a>
                     </div>
@@ -62,14 +62,14 @@
 
                         <div class="container">
                                 <div class="row">
-                                    <div class="col-8">
+                                    <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search" name="search"
                                                autocomplete="off" placeholder="Звідки?" value=""
                                                onchange="hidFrom(this.value)"
                                                required>
                                     </div>
 
-                                    <div class="col-4">
+                                    <div class="col-lg-4 col-12" >
                                         <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
                                                autocomplete="off" class="form-control" style="text-align: center;" value="" />
                                     </div>
@@ -84,12 +84,12 @@
 
                         <div id="block_city" class="container"  style="display:block">
                                 <div class="row">
-                                    <div class="col-8">
+                                    <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search1" name="search1"
                                                autocomplete="off" placeholder="Куди?"
                                                onchange="hidTo(this.value)">
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-lg-4 col-12" >
                                         <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
                                     </div>
                                 </div>
