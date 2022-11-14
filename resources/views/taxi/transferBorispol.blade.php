@@ -28,14 +28,14 @@
 
                             <div class="container">
                                 <div class="row">
-                                    <div class="col-8">
+                                    <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search" name="search" autocomplete="off"
                                                placeholder="Звідки?" value="{{ $params['routefrom']}}"
                                                autocomplete="off" placeholder="Звідки?" value=""
-                                               onchange="hidFrom(this.value)"
+                                               onblur="hidFrom(this.value)"
                                                required>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
                                                autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routefromnumber']}}" />
                                     </div>
@@ -206,10 +206,10 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('div_from_number').style.display='none';
                     }
                     if (data == 1) {
-                        document.getElementById('from_number').style.display='block';
+                        document.getElementById('div_from_number').style.display='block';
                     }
 
                 }

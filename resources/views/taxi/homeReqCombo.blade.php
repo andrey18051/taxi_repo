@@ -1,6 +1,7 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
+
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -26,16 +27,18 @@
 
                     <div class="container">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search" name="search"
                                                autocomplete="off"
+
                                                value="{{ $params['routefrom']}}"
-                                               onchange="hidFrom(this.value)"
+                                               onblur="hidFrom(this.value)"
                                                required>
                                     </div>
-                                <div class="col-4">
+                                <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number"
                                                autocomplete="off" class="form-control"
+                                               placeholder="Будинок?"
                                                style="text-align: center" value="{{ $params['routefromnumber']}}" />
                                     </div>
                             </div>
@@ -56,12 +59,12 @@
                             @else  style="display:block"
                             @endif>
                             <div class="row">
-                                    <div class="col-8">
+                                    <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search1"
                                                name="search1" autocomplete="off" value="{{ $params['routeto']}}"
-                                               onchange="hidTo(this.value)">
+                                               onblur="hidTo(this.value)">
                                     </div>
-                                    <div class="col-4">
+                                <div class="col-lg-4 col-12" id="div_to_number">
                                         <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center"  value="{{ $params['routetonumber']}}" />
                                     </div>
                                 </div>
@@ -174,6 +177,10 @@
         <br>
     </div>
     <script type="text/javascript">
+        window.onload = function() {
+            hidFrom('{{ $params['routefrom']}}');
+            hidTo('{{ $params['routeto']}}');
+        };
         /**
          * Функция Скрывает/Показывает блок
          * @author ox2.ru дизайн студия
@@ -213,10 +220,10 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('div_from_number').style.display='none';
                     }
                     if (data == 1) {
-                        document.getElementById('from_number').style.display='block';
+                        document.getElementById('div_from_number').style.display='block';
                     }
 
                 }
@@ -236,10 +243,10 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('to_number').style.display='none';
+                        document.getElementById('div_to_number').style.display='none';
                     }
                     if (data == 1) {
-                        document.getElementById('to_number').style.display='block';
+                        document.getElementById('div_to_number').style.display='block';
                     }
 
                 }

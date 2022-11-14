@@ -65,11 +65,11 @@
                                     <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search" name="search"
                                                autocomplete="off" placeholder="Звідки?" value=""
-                                               onchange="hidFrom(this.value)"
+                                               onblur="hidFrom(this.value)"
                                                required>
                                     </div>
 
-                                    <div class="col-lg-4 col-12" >
+                                    <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
                                                autocomplete="off" class="form-control" style="text-align: center;" value="" />
                                     </div>
@@ -87,9 +87,9 @@
                                     <div class="col-lg-8 col-12">
                                         <input type="text" class="form-control" id="search1" name="search1"
                                                autocomplete="off" placeholder="Куди?"
-                                               onchange="hidTo(this.value)">
+                                               onblur="hidTo(this.value)">
                                     </div>
-                                    <div class="col-lg-4 col-12" >
+                                    <div class="col-lg-4 col-12" id="div_to_number">
                                         <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
                                     </div>
                                 </div>
@@ -257,10 +257,10 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                          document.getElementById('from_number').style.display='none';
+                          document.getElementById('div_from_number').style.display='none';
                     }
                     if (data == 1) {
-                        document.getElementById('from_number').style.display='block';
+                        document.getElementById('div_from_number').style.display='block';
                     }
 
                 }
@@ -280,10 +280,10 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('to_number').style.display='none';
+                        document.getElementById('div_to_number').style.display='none';
                     }
                     if (data == 1) {
-                        document.getElementById('to_number').style.display='block';
+                        document.getElementById('div_to_number').style.display='block';
                     }
 
                 }

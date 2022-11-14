@@ -105,7 +105,7 @@
                                            max="1000"
                                             step="5"
                                            value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;
+                                           onblur="document.getElementById('rangeValue').innerHTML = this.value;
                                            let  order_cost = Number(this.value) + Number({{session('order_cost')}});
                                                      document.getElementById('rangeValueСost').innerHTML = order_cost;"
                                            class="slider" />

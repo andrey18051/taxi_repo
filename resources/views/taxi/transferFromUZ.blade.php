@@ -29,14 +29,14 @@
 
                         <div class="container">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-lg-8 col-12">
                                     <input type="text" class="form-control" id="search" name="search" autocomplete="off"
                                            placeholder="Куди?"  value="{{ $params['routeto']}}"
                                            autocomplete="off" placeholder="Звідки?" value=""
-                                           onchange="hidFrom(this.value)"
+                                           onblur="hidFrom(this.value)"
                                            required>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-lg-4 col-12" id="div_routetonumber">
                                     <input type="text" id="routetonumber" name="routetonumber" placeholder="Будинок?"
                                            autocomplete="off" class="form-control" style="text-align: center"
                                            value="{{ $params['routetonumber']}}" />
@@ -205,10 +205,10 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('routetonumber').style.display='none';
+                        document.getElementById('div_routetonumber').style.display='none';
                     }
                     if (data == 1) {
-                        document.getElementById('routetonumber').style.display='block';
+                        document.getElementById('div_routetonumber').style.display='block';
                     }
 
                 }
