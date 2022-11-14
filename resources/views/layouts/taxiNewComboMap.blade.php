@@ -51,7 +51,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
 
-    <script type="text/javascript">
+<!--    <script type="text/javascript">
         var route = "{{ url('autocomplete-search-combo') }}";
         $.ajax({
             url: route,         /* Куда пойдет запрос */
@@ -60,19 +60,27 @@
             data: {text: 'Текст'},     /* Параметры передаваемые в запросе. */
             success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
 
-                $(function() {
-                    $('#search').autocomplete({
-                        source: data
-                    })
+                var allPositions = data;
+
+                $("#search").autocomplete({
+                    source: function(request, response) {
+                        var results = $.ui.autocomplete.filter(allPositions, request.term);
+                        response(results.slice(0, 10));
+                    }
                 });
+
+
                 $(function() {
                     $('#search1').autocomplete({
-                        source: data
+                        source: function(request, response) {
+                            var results = $.ui.autocomplete.filter(allPositions, request.term);
+                            response(results.slice(0, 10));
+                        }
                     })
                 });
             }
         });
-    </script>
+    </script>-->
 </head>
 <body>
 <div id="app">
