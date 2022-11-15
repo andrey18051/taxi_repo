@@ -125,7 +125,8 @@ class TypeaheadController extends Controller
     public function autocompleteSearchCombo()
     {
         $i = 0;
-        $combos = Combo::all();
+
+        $combos = Combo::get()->sortByDesc('street');
         foreach ($combos as $object) {
             $data[$i] = $object->name;
             $i++;
