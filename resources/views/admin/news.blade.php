@@ -38,17 +38,19 @@
                         <div class="form-outline mb-2 col-12" >
                             <div class="row">
                                 <div class="col-4">
-                                    <input type="text" id="short" name="short" autocomplete="off" class="form-control" placeholder="Анонс" />
+                                    <input type="text" id="short" name="short" autocomplete="off" class="form-control"
+                                           value="📢 " />
                                 </div>
 
                                 <div class="col-4">
-                                    <textarea class="form-control" id="full" name="full" autocomplete="off"  required>
-
+                                    <textarea class="form-control" id="full" name="full" autocomplete="off" rows="10">
+🚧
                                     </textarea>
                                </div>
 
                                 <div class="col-4">
-                                    <input type="text" id="author" name="author" autocomplete="off" class="form-control" placeholder="Автор" />
+                                    <input type="text" id="author" name="author" autocomplete="off" class="form-control"
+                                           value="&#128662 Таксі Лайт Юа" />
                                 </div>
                             </div>
                         </div>
