@@ -103,17 +103,38 @@
                                               min="0"
                                               @endif
                                            max="1000"
-                                            step="5"
+                                            step="1"
                                            value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onblur="document.getElementById('rangeValue').innerHTML = this.value;
+                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;
                                            let  order_cost = Number(this.value) + Number({{session('order_cost')}});
                                                      document.getElementById('rangeValueСost').innerHTML = order_cost;"
                                            class="slider" />
 
                             </div>
+
+
                             <h4> Вартість поїздки: <span id="rangeValueСost"> {{session('order_cost')}} </span>грн.</h4>
-                            (Діапазон цін інших служб таксі {{round (session('order_cost') * config('app.order_cost_min'), 0)}}
-                            - {{round (session('order_cost') * config('app.order_cost_max'), 0)}} грн).
+                            Рекомендована вартість на підставі цін інших служб таксі в діапазоні з
+                            <a class="btn btn-success"
+                            onclick="document.getElementById('add_cost').innerHTML = {{round (session('order_cost') * config('app.order_cost_min'), 0)}};
+                                let  order_cost = {{round (session('order_cost') * config('app.order_cost_min'), 0)}};
+                                let rangeValue = {{round (session('order_cost') * config('app.order_cost_min'), 0) - session('order_cost')}};
+                                document.getElementById('rangeValue').innerHTML = rangeValue;
+                                document.getElementById('add_cost').value = rangeValue;
+                                document.getElementById('rangeValueСost').innerHTML = order_cost;"
+
+                            >{{round (session('order_cost') * config('app.order_cost_min'), 0)}}</a>
+                            по
+                            <a class="btn btn-success"
+                               onclick="document.getElementById('add_cost').innerHTML = {{round (session('order_cost') * config('app.order_cost_max'), 0)}};
+                                   let  order_cost = {{round (session('order_cost') * config('app.order_cost_max'), 0)}};
+                                   let rangeValue = {{round (session('order_cost') * config('app.order_cost_max'), 0) - session('order_cost')}};
+                                   document.getElementById('rangeValue').innerHTML = rangeValue;
+                                   document.getElementById('add_cost').value = rangeValue;
+                                   document.getElementById('rangeValueСost').innerHTML = order_cost;"
+
+
+                            >{{round (session('order_cost') * config('app.order_cost_max'), 0)}}</a> грн.
                         </div>
                     </div>
                     <div class="col-md-5 col-lg-4 order-md-last" style="display: none;">
