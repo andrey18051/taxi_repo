@@ -10,7 +10,7 @@
                 :hideSortIcons="true"
                 class="my-2 table table-striped"
                 :currentPage.sync="currentPage"
-                :pageSize="3"
+                :pageSize="10"
                 @totalPagesChanged="totalPages = $event"
                 >
                 <tbody slot="body" slot-scope="{displayData}">

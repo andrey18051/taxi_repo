@@ -31279,7 +31279,7 @@ var render = function () {
           filters: _vm.filters,
           hideSortIcons: true,
           currentPage: _vm.currentPage,
-          pageSize: 3,
+          pageSize: 10,
         },
         on: {
           "update:currentPage": function ($event) {
