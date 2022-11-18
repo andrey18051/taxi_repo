@@ -186,7 +186,7 @@
                     <div class="container-fluid">
                         <a href="{{route('homeCombo')}}"
                                 style="text-decoration: none">
-                            <h4 class="text-center text-primary"> <b>Пропонуємо Вам найсучасніший
+                            <h4 class="text-center text-primary gradient"> <b>Пропонуємо Вам найсучасніший
                             сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h4>
                         </a>
 
@@ -195,7 +195,7 @@
 
                  <div class="container-fluid">
                      <div class="row">
-                         <ul class="older">
+                         <ul class="olderOne">
                              <div class="container-fluid">
                                  <div class="row">
                                      <li class="col-lg-6 col-sm-12">
@@ -271,188 +271,214 @@
                      </div>
 
                  </div>
+                 <div class="container-fluid" style="margin: 10px">
+                     <a href="{{route('homeCombo')}}"
+                        target="_blank" style="text-decoration: none; color: black">
+                         <h5 style="text-align: center; " class="gradient">
+                             <b>Служба Таксі Лайт Юа – це завжди надійно, комфортно та вигідно. <br>
+                                 Замовьте таксі прям зараз.</b>
+                         </h5>
+                     </a>
+                 </div>
 
+                 <div class="accordion" id="accordionExample">
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingOne">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                 На якому таксі дешевше?
+                             </button>
+                         </h2>
+                         <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('homeCombo')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Таксі Лайт Юа - це завжди найнижча онлайн ціна таксі
+                                         Києва та області. Як викликати таксі у місті Києві? Замовити
+                                         найкращу службу таксі Києва та області онлайн на зручний час?
+                                         За допомогою нашої служби Таксі Лайт Юа можна заздалегідь легко
+                                         та швидко зробити замовлення вільного авто таксі на нашому сайті та
+                                         зробити це дешевше онлайн. Швидше пересуватися Києвом -
+                                         це тільки не пішки. Замовте українське таксі та дайте свою
+                                         оцінки. Уклон у Таксі Лайт Юа онлайн ми робимо на якість.
+                                         Працює підтримка 24/7.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingTwo">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                 Як зробити замовлення на убер - послуги з перевезення, кур'єрської
+                                 доставки та отримати високу якість обслуговування?
+                             </button>
+                         </h2>
+                         <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="#" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Служба Таксі Лайт Юа - це економ служба поїздок у Києві та по
+                                         міжміську і це завжди швидко, доступно та недорого.
+                                         Таксі Лайт Юа – це понад 10 років комфортні поїздки. Свій тариф
+                                         дізнайтесь на сайті таксі та отримайте якісний сервіс
+                                         професійних водіїв на комфортних, чистих та свіжих авто,
+                                         ввічливих операторів та за низькими цінами швидше, ніж через дзвінок оператору.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingThree">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                 Яке таксі краще замовити у Києві та які є таксі?
+                             </button>
+                         </h2>
+                         <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('homeCombo')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Служба Таксі Лайт Юа - це найкращий вибір завжди дешевого таксі,
+                                         онлайн розрахунок вартості послуг завжди можна зробити на сайті швидше,
+                                         ніж через дзвінок оператору.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingFour">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                 Коли таксі дешевше у Києві?
+                             </button>
+                         </h2>
+                         <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('homeCombo')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Є періоди, коли через знижений попит на послугу перевізники
+                                         ставлять мінімальні тарифи на поїздки до таксі. Це будні дні
+                                         (крім п'ятниці) з 11.00 до 15.00, а також вихідні. Нестрокові
+                                         подорожі краще планувати в цей час.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingFive">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                 Скільки коштує таксі в Києві зараз, яке таксі в Києві найдешевше
+                                 і які розцінки на послуги таксі?
+                             </button>
+                         </h2>
+                         <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('homeCombo')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Служба Таксі Лайт Юа – це поїздки містом від 40 грн.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingSix">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                 Яке таксі зараз працює у Києві у воєнний час?
+                             </button>
+                         </h2>
+                         <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('callBackForm')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         У комендантську годину Ви можете залишити свій телефон на сайті
+                                         служби Таксі Лайт Юа та наш оператор зв'яжеться з Вами у зручний для Вас час.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingSeven">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                 Як замовити таксі вигідно?
+                             </button>
+                         </h2>
+                         <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('homeCombo')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p>
+                                         За допомогою служби Таксі Лайт Юа
+                                         Ви комфортно та швидко дістанетеся до будь-якої точки Києва та області.
+                                     </p>
+                                     <ul style="text-align: justify">
+                                         <li>Вибирайте правильний час подачі</li>
+                                         <li>Не переміщайтеся в годину пік пробками</li>
+                                         <li>Вибирайте таксі з фіксованим тарифом</li>
+                                         <li>Порівнюйте ціни в різних службах</li>
+                                         <li>Замовляйте машину заздалегідь</li>
+                                         <li>Правильно будуйте маршрут</li>
+                                         <li>Не забувайте про безкоштовний час очікування</li>
+                                         <li>Не їздити з приватними «бомбілами»</li>
+                                         <li>Беріть із собою попутників</li>
+                                         <li>Користуйтесь програмою лояльності</li>
+                                         <li>Не ловіть авто на вулиці</li>
+                                         <li>Дізнайтеся ціну маршруту заздалегідь</li>
+                                     </ul>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingEight">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                                 Ознайомтеся з додатковими послугами нашої служби таксі.
+                             </button>
+                         </h2>
+                         <div id="collapseEight" class="accordion-collapse collapse" aria-labelledby="headingEight" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="#poslugy" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Таксі Лайт Юа - це замовлення таксі та трансферів в аеропорт, на залізничний
+                                         вокзал та автовокзал, а також зустріч із табличкою. Втомилися від
+                                         водіння або не можете сісти за кермо - замовте послугу
+                                         "тверезий водій" і ми акуратно та швидко доставимо Ваш
+                                         автомобіль до місця стоянки.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="accordion-item">
+                         <h2 class="accordion-header" id="headingNine">
+                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNine" aria-expanded="false" aria-controls="collapseNine">
+                                 Пропонуємо роботу водіям у нашій службі таксі.
+                             </button>
+                         </h2>
+                         <div id="collapseNine" class="accordion-collapse collapse" aria-labelledby="headingNine" data-bs-parent="#accordionExample">
+                             <div class="accordion-body">
+                                 <a href="{{route('callWorkForm')}}" target="_blank"
+                                    style="text-decoration: none; color: black">
+                                     <p style="text-align: justify">
+                                         Залишіть телефон на сайті і зв'яжемося з Вами.
+                                     </p>
+                                 </a>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
 
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <ul class="olderOne">
+                 <news-component></news-component>
 
-
-
-                                        <li>
-                                            <a href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
-                                                <h5>
-                                                    <i><b>На якому таксі дешевше?</b></i>
-                                                </h5>
-                                                <p style="text-align: justify">
-                                                    Таксі Лайт Юа - це завжди найнижча онлайн ціна таксі
-                                                    Києва та області. Як викликати таксі у місті Києві? Замовити
-                                                    найкращу службу таксі Києва та області онлайн на зручний час?
-                                                    За допомогою нашої служби Таксі Лайт Юа можна заздалегідь легко
-                                                    та швидко зробити замовлення вільного авто таксі на нашому сайті та
-                                                    зробити це дешевше онлайн. Швидше пересуватися Києвом -
-                                                    це тільки не пішки. Замовте українське таксі та дайте свою
-                                                    оцінки. Ухил у Таксі Лайт Юа онлайн ми робимо на якість.
-                                                    Працює підтримка 24/7.
-                                               </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="#">
-                                                <h5>
-                                                    <i><b>Як зробити замовлення на убер - послуги з перевезення, кур'єрської
-                                                    доставки та отримати високу якість обслуговування?</b></i>
-                                                </h5>
-                                                <p style="text-align: justify">
-                                                    Служба Таксі Лайт Юа - це економ служба поїздок у Києві та по
-                                                    міжміську і це завжди швидко, доступно та недорого.
-                                                    Таксі Лайт Юа – це понад 10 років комфортні поїздки. Свій тариф
-                                                    дізнайтесь на сайті таксі та отримайте якісний сервіс
-                                                    професійних водіїв на комфортних, чистих та свіжих авто,
-                                                    ввічливих операторів та за низькими цінами швидше, ніж через дзвінок оператору.
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="#poslugy">
-                                                <h5>
-                                                    <i><b>Як зробити замовлення на убер - послуги з перевезення, кур'єрської
-                                                            доставки та отримати високу якість обслуговування?</b></i>
-                                                </h5>
-                                                <p style="text-align: justify">
-                                                    Служба Таксі Лайт Юа - це економ служба поїздок у Києві та по
-                                                    міжміську і це завжди швидко, доступно та недорого.
-                                                    Таксі Лайт Юа – це понад 10 років комфортні поїздки. Свій тариф
-                                                    дізнайтесь на сайті таксі та отримайте якісний сервіс
-                                                    професійних водіїв на комфортних, чистих та свіжих авто,
-                                                    ввічливих операторів та за низькими цінами швидше, ніж через дзвінок оператору.
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
-                                                <h5>
-                                                    <i><b>Яке таксі краще замовити у Києві та які є таксі?</b></i>
-                                                </h5>
-                                                <p style="text-align: justify">
-                                                    Служба Таксі Лайт Юа - це найкращий вибір завжди дешевого таксі,
-                                                    онлайн розрахунок вартості послуг завжди можна зробити на сайті швидше,
-                                                    ніж через дзвінок оператору.
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
-                                                <h5>
-                                                    <i><b>Коли таксі дешевше у Києві?</b></i>
-                                                </h5>
-                                                <p style="text-align: justify">
-                                                    Є періоди, коли через знижений попит на послугу перевізники
-                                                    ставлять мінімальні тарифи на поїздки до таксі. Це будні дні
-                                                    (крім п'ятниці) з 11.00 до 15.00, а також вихідні. Нестрокові
-                                                    подорожі краще планувати в цей час.
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
-                                                <h5>
-                                                    <i><b>Скільки коштує таксі в Києві зараз, яке таксі в Києві найдешевше
-                                                            і які розцінки на послуги таксі?</b></i>
-                                                </h5>
-                                                <p style="text-align: justify">
-                                                    Служба Таксі Лайт Юа – це поїздки містом від 40 грн.
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{{route('callBackForm') }}" target="_blank">
-                                            <h5>
-                                                <i><b>Яке таксі зараз працює у Києві у воєнний час?</b></i>
-                                            </h5>
-                                            <p style="text-align: justify">
-                                                У комендантську годину Ви можете залишити свій телефон на сайті
-                                                служби Таксі Лайт Юа та наш оператор зв'яжеться з Вами у зручний для Вас час.
-                                            </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="#">
-                                                <h5>
-                                                    <i><b>Як замовити таксі вигідно?</b></i>
-                                                </h5>
-                                                <p>
-                                                    За допомогою служби Таксі Лайт Юа
-                                                    Ви комфортно та швидко дістанетеся до будь-якої точки Києва та області.
-                                                </p>
-                                                <ul style="text-align: justify">
-                                                    <li>Вибирайте правильний час подачі</li>
-                                                    <li>Не переміщайтеся в годину пік пробками</li>
-                                                    <li>Вибирайте таксі з фіксованим тарифом</li>
-                                                    <li>Порівнюйте ціни в різних службах</li>
-                                                    <li>Замовляйте машину заздалегідь</li>
-                                                    <li>Правильно будуйте маршрут</li>
-                                                    <li>Не забувайте про безкоштовний час очікування</li>
-                                                    <li>Не їздити з приватними «бомбілами»</li>
-                                                    <li>Беріть із собою попутників</li>
-                                                    <li>Користуйтесь програмою лояльності</li>
-                                                    <li>Не ловіть авто на вулиці</li>
-                                                    <li>Дізнайтеся ціну маршруту заздалегідь</li>
-                                                </ul>
-                                            </a>
-                                        </li>
-
-                                        <li>
-
-                                            <a href="#poslugy">
-                                            <h5>
-                                                <i><b>Ознайомтеся з додатковими послугами нашої служби таксі.</b></i>
-                                            </h5>
-                                            <p style="text-align: justify">
-                                                Таксі Лайт Юа - це замовлення таксі та трансферів в аеропорт, на залізничний
-                                                вокзал та автовокзал, а також зустріч із табличкою. Втомилися від
-                                                водіння або не можете сісти за кермо - замовте послугу
-                                                "тверезий водій" і ми акуратно та швидко доставимо Ваш
-                                                автомобіль до місця стоянки.
-                                            </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{{route('callWorkForm')}}" target="_blank"
-                                            style="text-decoration: none;">
-                                            <h5>
-                                                <i><b>Пропонуємо роботу водіям у нашій службі таксі.</b></i>
-                                            </h5>
-                                            <p style="text-align: justify">
-                                                Залишіть телефон на сайті і зв'яжемося з Вами.
-                                            </p>
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{{route('homeCombo')}}"
-                                               target="_blank">
-                                            <h5 style="text-align: center">
-                                                <b>Служба Таксі Лайт Юа – це завжди надійно, комфортно та вигідно. <br>
-                                                    Замовьте таксі прям зараз.</b>
-                                            </h5>
-                                            </a>
-                                        </li>
-
-
-                                    </ul>
-                                </div>
-                            </div>
-
-                <news-component></news-component>
                  <a  href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
                      <blockquote class="blockquote-3">
                          <p> <?php echo $quitesArr[$rand] ?></p>

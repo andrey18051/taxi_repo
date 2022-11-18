@@ -106,6 +106,7 @@
 
 </head>
 <body>
+
 <div id="app">
     @include ('layouts.navigationCombo')
     <main class="py-4">
