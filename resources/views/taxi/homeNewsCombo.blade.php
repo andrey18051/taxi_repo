@@ -178,8 +178,86 @@
                            style="text-decoration: none;">Ми на Фейсбук</a>
                     </li>
                 </ul>
+                <p  class="gradient text-opacity-25">
+                    <b>Теги</b>
+                </p>
+                <div class="container-fluid">
+                    <div class="row">
+                            <div class="borderElement"> такси </div>
+                            <div class="borderElement"> uklon </div>
+                            <div class="borderElement"> болт такси </div>
+                            <div class="borderElement"> уклон такси </div>
+                            <div class="borderElement"> такси болт </div>
+                            <div class="borderElement"> убер </div>
+                            <div class="borderElement"> такси макси </div>
+                            <div class="borderElement"> такси уклон </div>
+                            <div class="borderElement"> 838 такси </div>
+                            <div class="borderElement"> такси 838 </div>
+                            <div class="borderElement"> убер такси </div>
+                            <div class="borderElement"> такси белая церковь </div>
+                            <div class="borderElement"> он такси </div>
+                            <div class="borderElement"> уклон телефон </div>
+                            <div class="borderElement"> номер такси </div>
+                            <div class="borderElement"> bolt такси </div>
+                            <div class="borderElement"> uklon номер телефона </div>
+                            <div class="borderElement"> заказать такси </div>
+                            <div class="borderElement"> такси десятка </div>
+                            <div class="borderElement"> такси болт номер телефона </div>
+                            <div class="borderElement"> такси уклон телефон </div>
+                            <div class="borderElement"> uklon драйвер </div>
+                            <div class="borderElement"> вызвать такси </div>
+                            <div class="borderElement"> такси онлайн </div>
+                            <div class="borderElement"> эконом таксиg </div>
+                            <div class="borderElement"> uklon такси </div>
+                            <div class="borderElement"> такси болт номер </div>
+                            <div class="borderElement"> 292 такси </div>
+                            <div class="borderElement"> такси максим номер </div>
+                            <div class="borderElement"> такси 292 </div>
+                            <div class="borderElement"> служба поддержки болт </div>
+                            <div class="borderElement"> uber такси </div>
+                            <div class="borderElement"> такси убер </div>
+                            <div class="borderElement"> дешевое такси </div>
+                            <div class="borderElement"> болт такси телефон </div>
+                            <div class="borderElement"> 579 такси </div>
+                            <div class="borderElement"> уклон для водителей </div>
+                            <div class="borderElement"> любимое такси  </div>
+                            <div class="borderElement"> таксометр </div>
+                            <div class="borderElement"> служба такси </div>
+                            <div class="borderElement"> желтое такси </div>
+                            <div class="borderElement"> мое такси </div>
+                            <div class="borderElement"> оптима такси </div>
+                            <div class="borderElement"> uklon личный кабинет </div>
+                            <div class="borderElement"> uklon онлайн </div>
+                            <div class="borderElement"> такси эконом </div>
+                            <div class="borderElement"> такси межгород </div>
+                            <div class="borderElement"> экспресс такси </div>
+                            <div class="borderElement"> shark taxi </div>
+                            <div class="borderElement"> номер такси болт </div>
+                            <div class="borderElement"> вызов такси </div>
+                            <div class="borderElement"> самое дешевое такси </div>
+                            <div class="borderElement"> такси оптимальное </div>
+                            <div class="borderElement"> такси uber </div>
+                            <div class="borderElement"> такси заказать </div>
+                            <div class="borderElement"> онлайн такси </div>
+                    </div>
+               </div>
+                <div class="container-fluid" style="margin-top: 10px">
+                    <p  class="gradient">
+                        <b>Вам також буде цікаво:</b>
+                    </p>
 
+                    <div class="header gradient" >
+                        <a href="{{route('homeCombo')}}" target="_blank">Онлайн замовлення за адресою</a>
+                        <a href="{{route('homeMapCombo')}}" target="_blank">Замовлення таксі по мапи</a>
+                        <a  @guest
+                            href="{{ route('callBackForm') }}"
+                            @else
+                            href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
+                            @endguest>
+                            Допомога у складний час</a>
+                    </div>
                 </div>
+            </div>
 
              <div class="col-lg-9 col-sm-6 col-md-9" >
 

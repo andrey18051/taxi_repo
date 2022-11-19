@@ -358,3 +358,12 @@ img {vertical-align: middle;}
     padding:8px;
     color: black;
 }
+
+.borderElement {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 25px;
+    width: auto;
+    margin-left: 3px;
+    display: inline;
+}
