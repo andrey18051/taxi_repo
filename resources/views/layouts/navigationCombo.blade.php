@@ -86,10 +86,21 @@
             </ul>
         </div>
 
-            <a class="but_vart_vart" href="{{route('homeMapCombo')}}"
-               target="_blank" title="Пошук по Google maps">
-                <img src="{{ asset('img/icons8-google-maps-64.png') }}">
-            </a>
+        <a  href="{{route('home-news')}}" target="_blank" title="Повна версія сайту"
+            style="z-index: 101; position: fixed; margin-top: -100px; right: 0px; ">
+            <img src="{{ asset('img/icons8-computer-64.png') }}">
+        </a>
+        <a    href="{{route('homeCombo')}}" target="_blank" title="Розрахунок вартості"
+              style="z-index: 101; position: fixed; margin-top: 0px; right: 0px">
+            <img src="{{ asset('img/icons8-money-bag-94.png') }}">
+        </a>
+        <a    href="{{route('homeMapCombo')}}"
+              target="_blank" title="Пошук по Google maps"
+              style="z-index: 101; position: fixed; margin-top: 100px; right: 0px">
+            <img src="{{ asset('img/icons8-google-maps-64.png') }}">
+        </a>
+
+
 
     </div>
 </nav>
