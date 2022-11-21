@@ -4,6 +4,7 @@ use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LinkedinController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
@@ -711,7 +712,10 @@ Route::get('/tableReklama', function () {
     return view('reklama.tableReklama');
 })->name('tableReklama');
 
-
+/**
+ * Отчеты
+ */
+Route::get('/reportIP', [ReportController::class, 'reportIP'])->name('reportIP');
 
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
