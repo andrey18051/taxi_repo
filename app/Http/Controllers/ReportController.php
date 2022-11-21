@@ -72,7 +72,7 @@ class ReportController extends Controller
             $sheet->setCellValue('B' . $i, $value ['page']);
               $i++;
         }
-        $sheet->setCellValue('A' . $i, 'Это список IP, с которых делали расчеты маршрутов');
+        $sheet->setCellValue('A' . $i, 'Это список IP,которые посещали конкретные страницы');
         $reportIP = new Xlsx($spreadsheet);
         $reportIP->save($reportIP_path);
         return response()->download($reportIP_path);
