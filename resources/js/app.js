@@ -18,8 +18,8 @@ window.Vue = require('vue').default;
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
 
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
+// const reports = require.context('./', true, /\.vue$/i)
+// reports.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], reports(key).default))
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('user-component', require('./views/user/UserHome.vue').default);

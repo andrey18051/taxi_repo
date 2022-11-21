@@ -15,7 +15,8 @@
         "laravel/ui": "^3.4",
         "phpoffice/phpspreadsheet": "^1.25",
         "santigarcor/laratrust": "^7.1",
-        "squizlabs/php_codesniffer": "3.7.1"
+        "squizlabs/php_codesniffer": "3.7.1",
+        "ext-zip": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

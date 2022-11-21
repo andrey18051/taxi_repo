@@ -3,6 +3,7 @@
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\IPController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TaxiController;
@@ -175,8 +176,9 @@ Route::get('/homeWelcome', function () {
 
 
 Route::get('/', function () {
-        WebOrderController::connectAPI();
-        return view('taxi.homeNewsCombo');
+    IPController::getIP();
+    WebOrderController::connectAPI();
+    return view('taxi.homeNewsCombo');
 })->name('home-news');
 
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
@@ -242,7 +244,7 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeStreet');
 
 Route::get('/home-Combo', function () {
-
+    IPController::getIPhomeCombo();
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
     $start_time = strtotime(config('app.start_time')); // начальное время
@@ -308,6 +310,7 @@ Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeMap');
 
 Route::get('/home-Map-Combo', function () {
+    IPController::getIPhomeMapcombo();
     $connectAPI = WebOrderController::connectAPInoEmail();
     if ($connectAPI == 400) {
         return redirect()->route('home-news')
@@ -715,7 +718,7 @@ Route::get('/tableReklama', function () {
 /**
  * Отчеты
  */
-Route::get('/reportIP', [ReportController::class, 'reportIP'])->name('reportIP');
+Route::get('/reportIP', [ReportController::class, 'reportIP'])->middleware('role:superadministrator')->name('reportIP');
 
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');

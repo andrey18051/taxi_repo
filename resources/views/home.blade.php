@@ -90,7 +90,10 @@
 </style>
 <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=initMap&libraries=places,geometry&solution_channel=GMP_QB_commutes_v2_c" async defer></script>-->
 
-
+<div class="container">
+    <h3>Отчет по IP</h3>
+    <a type="button" href="{{ route('reportIP') }}" class="btn">Скачать</a>
+</div>
 
 <div class="container">
     <h3>Quite section</h3>

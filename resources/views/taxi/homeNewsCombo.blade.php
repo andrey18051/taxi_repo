@@ -178,7 +178,7 @@
                            style="text-decoration: none;">Ми на Фейсбук</a>
                     </li>
                 </ul>
-                <p  class="gradient text-opacity-25">
+<!--                <p  class="gradient text-opacity-25">
                     <b>Теги</b>
                 </p>
                 <div class="container-fluid">
@@ -240,7 +240,7 @@
                             <div class="borderElement"> такси заказать </div>
                             <div class="borderElement"> онлайн такси </div>
                     </div>
-               </div>
+               </div>-->
                 <div class="container-fluid" style="margin-top: 10px">
                     <p  class="gradient">
                         <b>Вам також буде цікаво:</b>
