@@ -28,8 +28,13 @@ class ReportController extends Controller
 
         foreach ($orders as $value) {
             if ($value->IP_ADDR !== null) {
-                $orders_unic[$i] = $value->IP_ADDR;
-                $i++;
+                switch ($value->IP_ADDR) {
+                    case '31.202.139.47':
+                        break;
+                    default:
+                        $orders_unic[$i] = $value->IP_ADDR;
+                        $i++;
+                };
             }
         }
 
@@ -55,9 +60,15 @@ class ReportController extends Controller
 
         foreach ($IPs as $value) {
             if ($value->IP_ADDR !== null) {
-                $IPs_unic[$i]['IP_ADDR'] = $value->IP_ADDR;
-                $IPs_unic[$i]['page'] = $value->page;
-                $i++;
+                switch ($value->IP_ADDR) {
+                    case '31.202.139.47':
+                        break;
+                    default:
+                        $IPs_unic[$i]['IP_ADDR'] = $value->IP_ADDR;
+                        $IPs_unic[$i]['page'] = $value->page;
+                        $IPs_unic[$i]['created_at'] = $value->created_at;
+                        $i++;
+                };
             }
         }
 
@@ -65,11 +76,14 @@ class ReportController extends Controller
         $i = 2;
         $sheet->getColumnDimension('A')->setAutoSize(true);
         $sheet->getColumnDimension('B')->setAutoSize(true);
+        $sheet->getColumnDimension('C')->setAutoSize(true);
         $sheet->setCellValue('A1', 'IP');
         $sheet->setCellValue('B1', 'Page');
+        $sheet->setCellValue('C1', 'DateTime');
         foreach ($IPs_unic as $value) {
             $sheet->setCellValue('A' . $i, $value ['IP_ADDR']);
             $sheet->setCellValue('B' . $i, $value ['page']);
+            $sheet->setCellValue('C' . $i, $value ['created_at']);
               $i++;
         }
         $sheet->setCellValue('A' . $i, 'Это список IP,которые посещали конкретные страницы');
