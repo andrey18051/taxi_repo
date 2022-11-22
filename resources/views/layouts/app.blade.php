@@ -41,12 +41,6 @@
                     <nav class="nav">
                         <label for="nav-toggle" class="nav-toggle" onclick></label>
                         <ul class="navbar-nav">
-<!--                            <li><a href="https://next.privat24.ua/">Приват24</a>
-                            <li><a href="https://online.pravex.ua/user?ReturnUrl=%2F">Правекс</a>
-                            <li><a href="https://vchasno.ua/auth/login">Вчасно</a>
-                            <li><a href="https://sota-buh.com.ua/account/login?ReturnUrl=%2Fedo">Сота</a>
-                            <li><a href="https://pa.zbutenergo.kharkov.ua/frontend/web/index.php/uk/changed-acc/information">Харэнерго</a>
-                            <li><a href="https://www.mdoffice.com.ua">MD Office</a>-->
                             <li><a href="{{ route('admin') }}">Admin</a>
                         </ul>
                     </nav>
@@ -93,14 +87,6 @@
             @yield('content')
         </main>
     </div>
-    <footer class="text-muted text-center text-small">
-        <p class="mb-1">&copy; 2022 Легке замовлення таксі</p>
-        <ul class="list-inline">
-            <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}" target="_blank">Конфіденційність</a></li>
-            <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}" target="_blank">Умови</a></li>
-            <li class="list-inline-item"><a href="{{ route('feedback') }}" target="_blank">Підтримка</a></li>
-            <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank">Сторинка на Фейсбук</a></li>
-        </ul>
-    </footer>
+
 </body>
 </html>

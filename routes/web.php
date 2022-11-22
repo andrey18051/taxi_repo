@@ -73,7 +73,7 @@ Route::get('/welcome', function () {
 
 Auth::routes(['verify' => true]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home-admin');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home-admin')->middleware('role:superadministrator');
 
 
 Route::get('/users/all', [UserController::class,'index']);

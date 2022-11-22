@@ -55,14 +55,9 @@
                     <nav class="nav">
                         <label for="nav-toggle" class="nav-toggle" onclick></label>
                         <ul class="navbar-nav">
-<!--                            <li><a href="https://176.57.71.92:8083">VestaCP</a>
-                            <li><a href="https://176.57.71.92:8083/list/filemanager/">FileManager</a>
-                            <li><a href="http://176.57.71.92/phpmyadmin/">PhpMyadmin</a>
-                            <li><a href="https://cp.zomro.com/billmgr">Zomro</a>-->
                             <li><a href="{{ asset('/laratrust') }}">Roles</a>
                             <li><router-link to="/admin/users">Users</router-link></li>
                             <li><a href="{{ asset('/') }}">Taxi</a>
-                            <li><a href="{{ route('home') }}">Home</a>
                         </ul>
                     </nav>
                     <!-- Right Side Of Navbar -->
