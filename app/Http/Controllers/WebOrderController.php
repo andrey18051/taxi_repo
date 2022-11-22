@@ -763,8 +763,6 @@ class WebOrderController extends Controller
 
                 } else {
                     WebOrderController::version_combo();
-                  //  WebOrderController::version_street();
-
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
@@ -1143,7 +1141,7 @@ class WebOrderController extends Controller
                 alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
             </script>
             <?php
-            WebOrderController::version_street();
+            WebOrderController::version_combo();
 
             return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
         }
@@ -1538,7 +1536,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    WebOrderController::version_street();
+                    WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
@@ -1774,7 +1772,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    WebOrderController::version_street();
+                    WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");

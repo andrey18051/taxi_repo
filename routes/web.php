@@ -176,7 +176,7 @@ Route::get('/homeWelcome', function () {
 
 
 Route::get('/', function () {
-    IPController::getIP();
+    IPController::getIP('/');
     WebOrderController::connectAPI();
     return view('taxi.homeNewsCombo');
 })->name('home-news');
@@ -244,7 +244,7 @@ Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeStreet');
 
 Route::get('/home-Combo', function () {
-    IPController::getIPhomeCombo();
+    IPController::getIP('/home-Combo');
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
     $start_time = strtotime(config('app.start_time')); // начальное время
@@ -310,7 +310,7 @@ Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('homeMap');
 
 Route::get('/home-Map-Combo', function () {
-    IPController::getIPhomeMapcombo();
+    IPController::getIP('/home-Map-Combo');
     $connectAPI = WebOrderController::connectAPInoEmail();
     if ($connectAPI == 400) {
         return redirect()->route('home-news')
@@ -331,6 +331,7 @@ Route::get('/taxi-umovy', function () {
 
 
 Route::get('/homeorder/{id}', function ($id) {
+    IPController::getIP('/homeorder/' . $id);
     $json_arr = WebOrderController::tariffs();
     $orderId = json_decode(Order::where('id', $id)->get(), true);
     return view('taxi.orderEdit', ['json_arr' => $json_arr, 'orderId' => $orderId, 'id' => $id]);
@@ -359,7 +360,7 @@ Route::get('/homeorder-object/{id}', function ($id) {
 
 
 Route::get('/homeorder/afterorder/{id}', function ($id) {
-
+    IPController::getIP('/homeorder/afterorder/' . $id);
     $orderId = json_decode(Order::where('id', $id)->get(), true);
 
     $routeArr['from'] = WebOrderController::geodataSearch($orderId[0]["routefrom"], $orderId[0]["routefromnumber"]);
@@ -402,6 +403,7 @@ Route::get('/homeblank/{id}', function ($id) {
  * Профиль
  */
 Route::get('/login-taxi', function () {
+    IPController::getIP('/login-taxi');
     return view('auth.login');
 })->name('login-taxi');
 
@@ -427,6 +429,7 @@ Route::get('/profile/edit', [WebOrderController::class, 'profileput'])->name('pr
  * Регистрация
  */
 Route::get('/registerSocial', function () {
+    IPController::getIP('/register');
     return view('auth.registerSocial');
 })->name('registerSocial');
 
