@@ -322,10 +322,12 @@ Route::get('/home-Map-Combo', function () {
 
 
 Route::get('/taxi-gdbr', function () {
+    IPController::getIP('/taxi-gdbr');
     return view('taxi.gdpr');
 })->name('taxi-gdbr');
 
 Route::get('/taxi-umovy', function () {
+    IPController::getIP('/taxi-umovy');
     return view('taxi.umovy');
 })->name('taxi-umovy');
 
@@ -646,6 +648,7 @@ Route::get('/account/edit/', [WebOrderController::class, 'profileput'])->name('a
  */
 
 Route::get('/feedback', function () {
+    IPController::getIP('/feedback');
     return view('taxi.feedback');
 })->name('feedback');
 
