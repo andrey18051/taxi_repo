@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Stevebauman\Location\Facades\Location;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //**********************************************************************************************************************
+
+/**
+ *
+ */
+Route::get('/get-ip-details', function () {
+    $ip = '34.145.8.204';
+    $data = Location::get($ip);
+    dd($data);
+});
+
 
 /**
  * Twitter

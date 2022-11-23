@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Stevebauman\Location\Facades\Location;
 
 class ReportController extends Controller
 {
@@ -44,6 +47,42 @@ class ReportController extends Controller
         $orders_unic = array_unique($orders_unic);
 
         $sheet->setCellValue('B' . 1, 'Это список IP, с которых делали расчеты маршрутов');
+
+        $sheet->getStyle('A2')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => '808080'
+                    ]
+                ],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ]
+        ]);
+
+        $coordN = count($orders_unic) + 2;
+
+        $sheet->getStyle('A2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+        $sheet->getStyle('A3:A' . $coordN)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ]
+        ]);
+
+
+
         $i = 3;
         $sheet->getColumnDimension('A')->setAutoSize(true);
         $sheet->setCellValue('A2', 'IP');
@@ -79,7 +118,7 @@ class ReportController extends Controller
             }
         }
 
-        $sheet->setCellValue('D' . 1, 'Это список IP,которые посещали конкретные страницы');
+        $sheet->setCellValue('B' . 1, 'Это список IP,которые посещали конкретные страницы');
 
         $sheet->getColumnDimension('A')->setAutoSize(true);
         $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -87,6 +126,40 @@ class ReportController extends Controller
         $sheet->setCellValue('A2', 'IP');
         $sheet->setCellValue('B2', 'Page');
         $sheet->setCellValue('C2', 'DateTime');
+
+        $sheet->getStyle('A2:C2')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => '808080'
+                    ]
+                ],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ]
+        ]);
+
+        $coordN = count($IPs_page) + 2;
+
+        $sheet->getStyle('A2:C2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+        $sheet->getStyle('A3:C' . $coordN)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ]
+        ]);
+
         $i = 3;
 
         foreach ($IPs_page as $value) {
@@ -121,14 +194,89 @@ class ReportController extends Controller
 
         $IPs_page_unic = array_unique($IPs_page);
 
-        $sheet->setCellValue('B' . 1, 'Это список уникальных IP,которые поcетили сайт');
 
         $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+        $sheet->getColumnDimension('D')->setAutoSize(true);
+        $sheet->getColumnDimension('E')->setAutoSize(true);
+        $sheet->getColumnDimension('F')->setAutoSize(true);
+        $sheet->getColumnDimension('G')->setAutoSize(true);
+        $sheet->getColumnDimension('H')->setAutoSize(true);
+        $sheet->getColumnDimension('I')->setAutoSize(true);
+        $sheet->getColumnDimension('J')->setAutoSize(true);
+        $sheet->getColumnDimension('K')->setAutoSize(true);
+        $sheet->getColumnDimension('L')->setAutoSize(true);
+        $sheet->getColumnDimension('M')->setAutoSize(true);
+        $sheet->getColumnDimension('N')->setAutoSize(true);
+
+        $sheet->setCellValue('B1', 'Это список уникальных IP,которые поcетили сайт');
         $sheet->setCellValue('A2', 'IP');
+        $sheet->setCellValue('B2', 'countryName');
+        $sheet->setCellValue('C2', 'countryCode');
+        $sheet->setCellValue('D2', 'regionCode');
+        $sheet->setCellValue('E2', 'regionName');
+        $sheet->setCellValue('F2', 'cityName');
+        $sheet->setCellValue('G2', 'zipCode');
+        $sheet->setCellValue('H2', 'isoCode');
+        $sheet->setCellValue('I2', 'postalCode');
+        $sheet->setCellValue('J2', 'latitude');
+        $sheet->setCellValue('K2', 'longitude');
+        $sheet->setCellValue('L2', 'metroCode');
+        $sheet->setCellValue('M2', 'areaCode');
+        $sheet->setCellValue('N2', 'timezone');
+
+
+        $sheet->getStyle('A2:N2')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => '808080'
+                    ]
+                ],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ]
+        ]);
+
+        $coordN = count($IPs_page_unic) + 2;
+
+        $sheet->getStyle('A2:N2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+                $sheet->getStyle('A3:N' . $coordN)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+                ]);
 
         $i = 3;
         foreach ($IPs_page_unic as $value) {
             $sheet->setCellValue('A' . $i, $value);
+            $LocationData = Location::get($value);
+            $sheet->setCellValue('B' . $i, $LocationData->countryName);
+            $sheet->setCellValue('C' . $i, $LocationData->countryCode);
+            $sheet->setCellValue('D' . $i, $LocationData->regionCode);
+            $sheet->setCellValue('E' . $i, $LocationData->regionName);
+            $sheet->setCellValue('F' . $i, $LocationData->cityName);
+            $sheet->setCellValue('G' . $i, $LocationData->zipCode);
+            $sheet->setCellValue('H' . $i, $LocationData->isoCode);
+            $sheet->setCellValue('I' . $i, $LocationData->postalCode);
+            $sheet->setCellValue('J' . $i, $LocationData->latitude);
+            $sheet->setCellValue('K' . $i, $LocationData->longitude);
+            $sheet->setCellValue('L' . $i, $LocationData->metroCode);
+            $sheet->setCellValue('M' . $i, $LocationData->areaCode);
+            $sheet->setCellValue('N' . $i, $LocationData->timezone);
             $i++;
         }
 
