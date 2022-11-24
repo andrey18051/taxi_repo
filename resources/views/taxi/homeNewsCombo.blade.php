@@ -247,14 +247,34 @@
                     </p>
 
                     <div class="header gradient" >
-                        <a href="{{route('homeCombo')}}" target="_blank">Онлайн замовлення за адресою</a>
-                        <a href="{{route('homeMapCombo')}}" target="_blank">Замовлення таксі по мапи</a>
-                        <a  @guest
+                        <a  class="borderElement"
+                            href="{{route('homeCombo')}}" target="_blank">Експрес таксі</a>
+                        <a  class="borderElement"
+                            href="{{route('homeCombo')}}" target="_blank">Дешеве таксі</a>
+                        <a  class="borderElement"
+                            href="{{route('homeCombo')}}" target="_blank">Виклик таксі</a>
+                        <a  class="borderElement"
+                            href="{{route('homeCombo')}}" target="_blank">Таксі міжмісто</a>
+                        <a  class="borderElement"
+                            href="{{route('homeCombo')}}" target="_blank">Онлайн таксі</a>
+                        <a  class="borderElement"
+                            href="{{route('homeCombo')}}" target="_blank">Моє таксі</a>
+                        <a  class="borderElement"
+                            href="{{route('homeMapCombo')}}" target="_blank">Замовлення таксі по мапи</a>
+                        <a  class="borderElement"
+                            @guest
                             href="{{ route('callBackForm') }}"
                             @else
                             href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
                             @endguest>
                             Допомога у складний час</a>
+                        <a  class="borderElement"
+                            @guest
+                            href="{{ route('callBackForm') }}"
+                            @else
+                            href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
+                            @endguest>
+                            Служба підтримки</a>
                     </div>
                 </div>
             </div>

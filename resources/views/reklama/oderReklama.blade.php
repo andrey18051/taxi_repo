@@ -127,16 +127,16 @@
                         </p>
 
                         <div class="header gradient" >
-                            <a href="{{route('homeCombo')}}" target="_blank">Шукати адресу</a>
-                            <a href="{{route('homeMapCombo')}}" target="_blank">Пошук по мапи</a>
-                            <a  @guest
-                                href="{{ route('callBackForm') }}"
+                            <a class="borderElement" href="{{route('homeCombo')}}" target="_blank">Шукати адресу</a>
+                            <a class="borderElement" href="{{route('homeMapCombo')}}" target="_blank">Пошук по мапи</a>
+                            <a  class="borderElement" @guest
+                            href="{{ route('callBackForm') }}"
                                 @else
                                 href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
                                 @endguest>
                                 Допомога у складний час</a>
-                            <a href="{{route('callWorkForm')}}" target="_blank">Робота у таксі</a>
-                            <a href="{{route('home-news')}}" target="_blank">Новини</a>
+                            <a class="borderElement" href="{{route('callWorkForm')}}" target="_blank">Робота у таксі</a>
+                            <a class="borderElement" href="{{route('home-news')}}" target="_blank">Новини</a>
                         </div>
                     </div>
                 </div>
