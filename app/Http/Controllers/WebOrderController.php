@@ -765,7 +765,9 @@ class WebOrderController extends Controller
                     WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                            "Правильно вводьте або зверніться до оператора.");
                     </script>
                     <?php
                     return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
@@ -995,7 +997,9 @@ class WebOrderController extends Controller
                     WebOrderController::version_object();
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                            "Правильно вводьте або зверніться до оператора.");
                     </script>
                     <?php
 
@@ -1053,7 +1057,7 @@ class WebOrderController extends Controller
         ]);
         $response_arr_from = json_decode($response_from, true);
         if ($response_arr_from['geo_streets']['geo_street'] == null) {
-            return redirect()->route('homeMapCombo')->with('error', 'Помилка створення маршруту: Не вірна адреса відправлення');
+            return redirect()->route('homeMapCombo')->with('error', 'Помилка створення маршруту: Не вірна адреса відправлення.');
         }
         $params['routefrom'] = $response_arr_from['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $response_arr_from['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
@@ -1138,7 +1142,9 @@ class WebOrderController extends Controller
         if ($response_arr_to['geo_streets']['geo_street'] == null) {
             ?>
             <script type="text/javascript">
-                alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
+                alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                "Правильно вводьте або зверніться до оператора.");
             </script>
             <?php
             WebOrderController::version_combo();
@@ -1301,7 +1307,9 @@ class WebOrderController extends Controller
 
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                            "Правильно вводьте або зверніться до оператора.");
                     </script>
                     <?php
 
@@ -1539,7 +1547,9 @@ class WebOrderController extends Controller
                     WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                            "Правильно вводьте або зверніться до оператора.");
                     </script>
                     <?php
 
@@ -1775,7 +1785,9 @@ class WebOrderController extends Controller
                     WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу відправлення/призначення або не вибрана опція поїздки по місту.");
+                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                            "Правильно вводьте або зверніться до оператора.");
                     </script>
                     <?php
 

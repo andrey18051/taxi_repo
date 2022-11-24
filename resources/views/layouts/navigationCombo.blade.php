@@ -107,8 +107,15 @@
               style="z-index: 101; position: fixed; margin-top: 100px; right: 0px">
             <img src="{{ asset('img/icons8-google-maps-64.png') }}">
         </a>
-
-
+        <a    target="_blank" title="Екстрена допомога"
+              @guest
+              href="{{ route('callBackForm') }}"
+              @else
+              href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
+              @endguest
+              style="z-index: 101; position: fixed; margin-top: 200px; right: 0px">
+            <img src="{{ asset('img/icons8-phone-64.png') }}">
+        </a>
 
     </div>
 </nav>
