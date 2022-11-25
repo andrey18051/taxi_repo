@@ -1149,7 +1149,7 @@ class WebOrderController extends Controller
             <?php
             WebOrderController::version_combo();
 
-            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
         }
         /**
          * проверка на робота
@@ -1313,7 +1313,7 @@ class WebOrderController extends Controller
                     </script>
                     <?php
 
-                    return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+                    return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
                 }
             }
         }
@@ -1324,7 +1324,7 @@ class WebOrderController extends Controller
             </script>
             <?php
             $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
         }
     }
 
@@ -2167,7 +2167,7 @@ class WebOrderController extends Controller
         $params['flexible_tariff_name'] = null;
         $params['payment_type'] = 0;
 
-        return view('taxi.homeReq', ['json_arr' => $json_arr, 'params' => $params]);
+        return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
 
     }
 

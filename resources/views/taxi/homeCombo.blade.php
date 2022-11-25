@@ -164,7 +164,6 @@
             </form>
 
         <div class="container-fluid" style="margin-top: 10px">
-
             <div class="header gradient" >
                 <b>Зустріч -> </b>
                 <a class="borderElement" href="{{route('transferFrom',  ["Аэропорт Борисполь терминал Д", "taxi.transferFromBorispol"])}}" style="text-decoration: none" target="_blank">

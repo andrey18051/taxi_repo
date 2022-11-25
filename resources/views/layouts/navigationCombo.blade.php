@@ -93,29 +93,31 @@
                 @endguest
             </ul>
         </div>
+<div style="margin-top: auto">
+    <a  href="{{route('home-news')}}" target="_blank" title="Повна версія сайту"
+        style="z-index: 101; position: fixed; margin-top: 0px; right: 0px; ">
+        <img src="{{ asset('img/icons8-computer-64.png') }}" style="width:30px;">
+    </a>
+    <a    href="{{route('homeCombo')}}" target="_blank" title="Розрахунок вартості"
+          style="z-index: 101; position: fixed; margin-top: 31px; right: 0px">
+        <img src="{{ asset('img/icons8-money-bag-94.png') }}" style="width:30px;">
+    </a>
+    <a    href="{{route('homeMapCombo')}}"
+          target="_blank" title="Пошук по Google maps"
+          style="z-index: 101; position: fixed; margin-top: 62px; right: 0px">
+        <img src="{{ asset('img/icons8-google-maps-64.png') }}" style="width:30px;">
+    </a>
+    <a    target="_blank" title="Екстрена допомога"
+          @guest
+          href="{{ route('callBackForm') }}"
+          @else
+          href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
+          @endguest
+          style="z-index: 101; position: fixed; margin-top: 93px; right: 0px">
+        <img src="{{ asset('img/icons8-phone-64.png') }}" style="width:30px;">
+    </a>
+</div>
 
-        <a  href="{{route('home-news')}}" target="_blank" title="Повна версія сайту"
-            style="z-index: 101; position: fixed; margin-top: -100px; right: 0px; ">
-            <img src="{{ asset('img/icons8-computer-64.png') }}">
-        </a>
-        <a    href="{{route('homeCombo')}}" target="_blank" title="Розрахунок вартості"
-              style="z-index: 101; position: fixed; margin-top: 0px; right: 0px">
-            <img src="{{ asset('img/icons8-money-bag-94.png') }}">
-        </a>
-        <a    href="{{route('homeMapCombo')}}"
-              target="_blank" title="Пошук по Google maps"
-              style="z-index: 101; position: fixed; margin-top: 100px; right: 0px">
-            <img src="{{ asset('img/icons8-google-maps-64.png') }}">
-        </a>
-        <a    target="_blank" title="Екстрена допомога"
-              @guest
-              href="{{ route('callBackForm') }}"
-              @else
-              href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
-              @endguest
-              style="z-index: 101; position: fixed; margin-top: 200px; right: 0px">
-            <img src="{{ asset('img/icons8-phone-64.png') }}">
-        </a>
 
     </div>
 </nav>
