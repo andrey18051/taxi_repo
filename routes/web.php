@@ -218,44 +218,10 @@ Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 })->name('home-phone-user_name');
 
 
-
-Route::get('/home-Street/{phone}/{user_name}', function ($phone, $user_name) {
-
-
-    date_default_timezone_set("Europe/Kiev");
-    // Время интервала
-    $start_time = strtotime(config('app.start_time')); // начальное время
-    $end_time = strtotime(config('app.end_time')); // конечное время
-
-    $time = strtotime(date("h:i:sa")); // проверяемое время
-
-    // Выполняем проверку
-
-    if ($start_time  <= $end_time) {
-        if ($time >= $start_time && $time <= $end_time) {
-            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
-        } else {
-            return view('taxi.homeWelcome', ['phone' => '000', 'user_name' => "Новий замовник",  'time' => date("h:i:sa")]);
-        }
-    } else {
-        if ($time >= $start_time || $time <= $end_time) {
-            return view('taxi.homeWelcomeWar', ['phone' => '000',   'time' => date("h:i:sa")]);
-        } else {
-            $connectAPI = WebOrderController::connectAPInoEmail();
-
-            if ($connectAPI == 400) {
-                return redirect()->route('home-news')
-                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-            }
-            $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeStreet', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
-        }
-    }
-
-})->name('homeStreet');
-
 Route::get('/home-Combo', function () {
     IPController::getIP('/home-Combo');
+    $json_arr = WebOrderController::tariffs();
+
     date_default_timezone_set("Europe/Kiev");
     // Время интервала
     $start_time = strtotime(config('app.start_time')); // начальное время
@@ -272,11 +238,11 @@ Route::get('/home-Combo', function () {
             $connectAPI = WebOrderController::connectAPInoEmail();
 
             if ($connectAPI == 400) {
-                return view('taxi.homeWelcomeCombo')
-                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                return redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             }
-            $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+            else {
+                return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+            }
         }
     } else {
         if ($time >= $start_time || $time <= $end_time) {
@@ -285,11 +251,10 @@ Route::get('/home-Combo', function () {
             $connectAPI = WebOrderController::connectAPInoEmail();
 
             if ($connectAPI == 400) {
-                return view('taxi.homeWelcomeCombo')
-                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                return  redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            } else {
+                return view('taxi.homeCombo', ['json_arr' => $json_arr]);
             }
-            $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeCombo', ['json_arr' => $json_arr]);
         }
     }
 })->name('homeCombo');
