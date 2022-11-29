@@ -610,4 +610,5 @@
                 setTimeout(showSlides, 2000); // Change image every 5 seconds
             }
         </script>
+
 @endsection
