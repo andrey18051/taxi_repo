@@ -16,6 +16,7 @@ use App\Models\Street;
 use App\Mail\Server;
 use App\Models\Tarif;
 use App\Models\User;
+use App\Rules\ComboName;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -557,6 +558,12 @@ class WebOrderController extends Controller
      */
     public function cost(Request $req)
     {
+        $req->validate([
+            'search' => new ComboName(),
+            'search1' => ['nullable', new ComboName()],
+        ]);
+
+
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
         /**
@@ -566,10 +573,30 @@ class WebOrderController extends Controller
         $params['user_full_name'] = $req->user_full_name;
         $params['user_phone'] = $req->user_phone;
 
+        /**
+         * Откуда
+         */
         $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
         $params['client_sub_card'] = null;
         $params['route_address_entrance_from'] = null;
+
+        /**
+         * Куда
+         */
+        $params['routeto'] = $req->search1; //Обязательный. Улица куда.
+        $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
+
+        /**
+         * По городу
+         */
+        $params['route_undefined'] = false; //По городу: True, False
+        if ($req->route_undefined == 1 || $req->route_undefined == 'on') {
+            $params['routeto'] = $req->search; //Обязательный. Улица куда.
+            $params['routetonumber'] =  $req->from_number; //Обязательный. Дом куда.
+            $params['route_undefined'] = 1; //По городу: True, False
+        };
+
 
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
@@ -604,14 +631,7 @@ class WebOrderController extends Controller
             $params['payment_type'] = '1';
         };
 
-        $params['routeto'] = $req->search1; //Обязательный. Улица куда.
-        $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
-        $params['route_undefined'] = false; //По городу: True, False
-        if ($req->route_undefined == 1 || $req->route_undefined == 'on') {
-            $params['routeto'] = $req->search; //Обязательный. Улица куда.
-            $params['routetonumber'] =  $req->from_number; //Обязательный. Дом куда.
-            $params['route_undefined'] = 1; //По городу: True, False
-        };
+
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
 
@@ -3126,7 +3146,204 @@ class WebOrderController extends Controller
 
     }
 
+    /**
+     * Проверка адресов
+     * $params - массив название улицы + дом (или просто объект) + по городу
+     */
+    public function nameCombo ($params)
+    {
+        $username = config('app.username');
+        $password = hash('SHA512', config('app.password'));
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        /**
+         * Проверка подключения к серверам
+         */
+        $connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        /**
+         * Проверка адреса в базе
+         */
+        $comboArr = Combo::where('name', $params['routefrom'])->first();
+        dd($comboArr);
 
+
+
+
+
+
+
+
+
+
+
+
+        /**
+         * Проверка даты геоданных в АПИ
+         */
+
+        $url = $connectAPI . '/api/geodata/streets';
+        $json_str = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url);
+
+        $json_arr = json_decode($json_str, true);
+
+        $url_ob = $connectAPI . '/api/geodata/objects';
+        $response_ob = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url_ob);
+
+        $json_arr_ob = json_decode($response_ob, true);
+
+
+
+
+
+
+
+
+
+
+
+        /**
+         * Проверка версии геоданных и обновление или создание базы адресов
+         * $json_arr['version_date'] - текущая версия улиц в базе
+         * config('app.streetVersionDate') - дата версии в конфиге
+         * $json_arr_ob['version_date'] - текущая версия объектов в базе
+         * config('app.objectVersionDate') - дата версии в конфиге
+         */
+
+        $svd = Config::where('id', '1')->first();
+        //Проверка версии геоданных и обновление или создание базы адресов
+        if (config('app.server') == 'Киев') {
+            if ($json_arr['version_date'] !== $svd->streetVersionDate ||
+                $json_arr_ob['version_date'] !== $svd->objectVersionDate || Combo::all()->count() === 0)
+            {
+                //Обновление списка тарифов
+                $url = $connectAPI . '/api/tariffs';
+                $response = Http::withHeaders([
+                    'Authorization' => $authorization,
+                ])->get($url);
+
+                $response_arr = json_decode($response, true);
+                DB::table('tarifs')->truncate();
+                for ($i = 0; $i < count($response_arr); $i++) {
+                    $new_tarif = new Tarif();
+                    $new_tarif->name = $response_arr[$i]['name'];
+                    $new_tarif->save();
+                }
+
+                $svd->streetVersionDate = $json_arr['version_date'];
+                $svd->objectVersionDate = $json_arr_ob['version_date'];
+                $svd->save();
+
+                DB::table('combos')->truncate();
+                $i = 0;
+                do {
+                    $combo = new Combo();
+                    $combo->name = $json_arr['geo_street'][$i]["name"];
+                    $combo->street = 1;
+                    $combo->save();
+
+                    $geo_street = $json_arr['geo_street'][$i]["localizations"];
+                    foreach ($geo_street as $val) {
+                        if ($val["locale"] == "UK") {
+                            $combo = new Combo();
+                            $combo->name = $val['name'];
+                            $combo->street = 1;
+                            $combo->save();
+                        }
+                    }
+
+                    $combo = new Combo();
+                    $combo->name = $json_arr_ob['geo_object'][$i]["name"];
+                    $combo->street = 0;
+                    $combo->save();
+                    $geo_object = $json_arr_ob['geo_object'][$i]["localizations"];
+                    foreach ($geo_object as $val) {
+                        if ($val["locale"] == "UK") {
+                            $combo = new Combo();
+                            $combo->name = $val['name'];
+                            $combo->street = 0;
+                            $combo->save();
+                        }
+                    }
+                    $i++;
+                } while ($i < count($json_arr['geo_street']));
+            }
+        }
+        /*   if (config('app.server') == 'Одесса') {
+               if ($json_arr['version_date'] !== $svd->streetVersionDate || Combo::all()->count() === 0) {
+                   $svd->streetVersionDate = $json_arr['version_date'];
+                   $svd->save();
+                   DB::table('combos')->truncate();
+                   $i = 0;
+
+                   do {
+                       $street = new Street();
+                       $street->name = $json_arr['geo_street'][$i]["name"];
+                       $street->save();
+
+                       $i++;
+                   } while ($i < count($json_arr['geo_street']));
+
+               }
+           }
+
+           *******************************
+
+           $svd = Config::where('id', '1')->first();
+           //Проверка версии геоданных и обновление или создание базы адресов
+           if (config('app.server') == 'Киев') {
+               if ($json_arr['version_date'] !== $svd->objectVersionDate || Combo::all()->count() === 0) {
+                   $svd->objectVersionDate = $json_arr['version_date'];
+                   $svd->save();
+
+                   DB::table('objecttaxis')->truncate();
+                   $i = 0;
+                   do {
+                       $objects = new Objecttaxi();
+                       $objects->name = $json_arr['geo_object'][$i]["name"];
+                       $objects->save();
+                       $streets = $json_arr['geo_object'][$i]["localizations"];
+                       foreach ($streets as $val) {
+
+                           if ($val["locale"] == "UK") {
+                               $objects = new Objecttaxi();
+                               $objects->name = $val['name'];
+                               $objects->save();
+
+                           }
+                       }
+                       $i++;
+                   } while ($i < count($json_arr['geo_object']));
+               }
+           }
+           if (config('app.server') == 'Одесса') {
+               if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
+                   $svd->objectVersionDate = $json_arr['version_date'];
+                   $svd->save();
+                   DB::table('objecttaxis')->truncate();
+                   $i = 0;
+
+                   do {
+                       $objects = new Objecttaxi();
+                       $objects->name = $json_arr['geo_object'][$i]["name"];
+                       $objects->save();
+
+                       $i++;
+                   } while ($i < count($json_arr['geo_object']));
+
+               }
+           }
+
+
+           */
+
+    }
 
 
     /**

@@ -1,13 +1,21 @@
 @if($errors->any())
+    @if (!$errors->has('search') && !$errors->has('search1'))
     <div class="container">
         <div class="alert alert-danger text-center">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
-                @endforeach
-            </ul>
+        <ul>
+            @foreach($errors->all() as $error)
+                {{$error}}
+            @endforeach
+        </ul>
         </div>
     </div>
+    @else
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                {{'Перевірте правильність введення адреси.'}}
+            </div>
+        </div>
+    @endif
 @endif
 
 @if(session('success'))

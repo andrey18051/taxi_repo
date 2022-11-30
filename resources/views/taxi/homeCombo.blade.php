@@ -63,10 +63,20 @@
                         <div class="container">
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
-                                        <input type="text" class="form-control" id="search" name="search"
-                                               autocomplete="off" placeholder="Звідки?" value=""
+                                        <input type="text"
+                                               id="search"
+                                               class="form-control @error('search') is-invalid @enderror"
+                                               name="search" value="{{ old('search') }}"
+                                               placeholder="Звідки?"
                                                onblur="hidFrom(this.value)"
+                                               autocomplete="off"
                                                required>
+
+                                        @error('search')
+                                        <span class="invalid-feedback" role="alert">
+                                             <strong>{{ $message }}</strong>
+                                        </span>
+                                        @enderror
                                     </div>
 
                                     <div class="col-lg-4 col-12" id="div_from_number">
@@ -85,9 +95,17 @@
                         <div id="block_city" class="container"  style="display:block">
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
-                                        <input type="text" class="form-control" id="search1" name="search1"
-                                               autocomplete="off" placeholder="Куди?"
+                                        <input type="text" id="search1" name="search1"
+                                               class="form-control @error('search1') is-invalid @enderror"
+                                               value="{{ old('search1') }}"
+                                               placeholder="Куди?"
                                                onblur="hidTo(this.value)">
+
+                                        @error('search1')
+                                        <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                                </span>
+                                        @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_to_number">
                                         <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
@@ -158,9 +176,19 @@
                     </div>
                 </div>
 
-             <div class="container text-center">
-                 <button class="w-100 btn btn-primary btn-lg" type="submit">Розрахувати вартість поїздки</button>
-             </div>
+                <div class="container text-center">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <a class="w-100 btn btn-danger btn-lg" href="{{route('homeCombo')}}" style="margin-top: 5px">Очистити форму</a>
+                        </div>
+                        <div class="col-lg-6">
+                            <button class="w-100 btn btn-primary btn-lg col-lg-6" type="submit">
+                                Розрахувати вартість поїздки
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
             </form>
 
         <div class="container-fluid" style="margin-top: 10px">
