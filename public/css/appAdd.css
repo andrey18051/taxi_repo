@@ -499,3 +499,31 @@ img {vertical-align: middle;}
     from { opacity: 0; }
     to { opacity: 1 }
 }
+
+
+.wrapper {
+    height: auto;
+    width: auto;
+    border-radius: 15px;
+    text-align: center;
+    position: absolute;
+    color: white;
+    background-color: #d64259;
+    top:30px;
+    left: 40%;
+    animation: fade 6s forwards;
+}
+@keyframes fade{
+    0%{
+        transform: translateY(-300px);
+    }
+    20% {
+        transform: translateY(0px);
+    }
+    80% {
+        transform: translateY(0px);
+    }
+    100%{
+        transform: translateY(-300px);
+    }
+}

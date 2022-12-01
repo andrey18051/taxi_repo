@@ -1,5 +1,59 @@
 @if($errors->any())
-    @if (!$errors->has('search') && !$errors->has('search1'))
+
+    @switch($errors)
+
+        @case($errors->has('search'))
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                <ul>
+                    {{'Перевірте правильність введення адреси відправлення.'}}
+                </ul>
+            </div>
+        </div>
+        @break
+
+        @case($errors->has('search1'))
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                <ul>
+                    {{'Перевірте правильність введення адреси призначення.'}}
+                </ul>
+            </div>
+        </div>
+        @break
+
+        @case($errors->has('from_number'))
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                <ul>
+                    {{'Не вказано номер будинку відправлення.'}}
+                </ul>
+            </div>
+        </div>
+        @break
+
+        @case($errors->has('to_number'))
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                <ul>
+                    {{'Не вказано номер будинку призначення.'}}
+                </ul>
+            </div>
+        </div>
+        @break
+
+        @default
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                @foreach($errors->all() as $error)
+                    {{$error}}
+                @endforeach
+            </div>
+        </div>
+
+    @endswitch
+
+    {{--@if (!$errors->has('search') && !$errors->has('search1'))
     <div class="container">
         <div class="alert alert-danger text-center">
         <ul>
@@ -15,7 +69,7 @@
                 {{'Перевірте правильність введення адреси.'}}
             </div>
         </div>
-    @endif
+    @endif--}}
 @endif
 
 @if(session('success'))

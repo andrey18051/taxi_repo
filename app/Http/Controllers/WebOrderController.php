@@ -558,11 +558,26 @@ class WebOrderController extends Controller
      */
     public function cost(Request $req)
     {
+        /**
+         * Проверка адресов в базе
+         */
         $req->validate([
             'search' => new ComboName(),
+            'from_number' => ['nullable'],
             'search1' => ['nullable', new ComboName()],
+            'to_number' => ['nullable'],
         ]);
+        /**
+         * Если адреса есть, проверяем заполненность номера дома "откуда"
+         */
 
+        $arrCombo = Combo::where('name', $req->search)->first();
+
+        if ($arrCombo->street == 1) {
+            $req->validate([
+                'from_number' => ['nullable', 'required']
+            ]);
+        }
 
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
@@ -582,12 +597,6 @@ class WebOrderController extends Controller
         $params['route_address_entrance_from'] = null;
 
         /**
-         * Куда
-         */
-        $params['routeto'] = $req->search1; //Обязательный. Улица куда.
-        $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
-
-        /**
          * По городу
          */
         $params['route_undefined'] = false; //По городу: True, False
@@ -596,6 +605,31 @@ class WebOrderController extends Controller
             $params['routetonumber'] =  $req->from_number; //Обязательный. Дом куда.
             $params['route_undefined'] = 1; //По городу: True, False
         };
+
+        /**
+         * Проверка адреса "Куда"
+         */
+        if ($params['route_undefined'] == false) {
+            $req->validate([
+                'search1' => [new ComboName()],
+                'to_number' => ['nullable'],
+            ]);
+            /**
+             * Если адрес "Куда" есть, проверяем заполненность номера дома "куда"
+             */
+            $arrCombo = Combo::where('name', $req->search1)->first();
+
+            if ($arrCombo) {
+                if ($arrCombo->street == 1) {
+                    $req->validate([
+                        'to_number' => ['required']
+                    ]);
+                }
+            }
+        }
+
+        $params['routeto'] = $req->search1; //Обязательный. Улица куда.
+        $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
 
 
         $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
@@ -795,14 +829,9 @@ class WebOrderController extends Controller
             }
         }
         if ($error) {
-            ?>
-            <script type="text/javascript">
-                alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
             $json_arr = WebOrderController::tariffs();
-
-            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
+            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params])
+                ->with('info', 'Не пройдено перевірку на робота.');
         }
     }
     /**

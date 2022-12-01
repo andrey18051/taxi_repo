@@ -1,9 +1,9 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-    {{-- $phone --}}
-    <div class="container" style="background-color: hsl(0, 0%, 96%)">
 
+    <div class="container" style="background-color: hsl(0, 0%, 96%)">
+        <br>
         <!--     Пошук за адресою.-->
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
             <div class="container" style="text-align: center">
@@ -80,8 +80,17 @@
                                     </div>
 
                                     <div class="col-lg-4 col-12" id="div_from_number">
-                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
-                                               autocomplete="off" class="form-control" style="text-align: center;" value="" />
+                                        <input type="text" id="from_number" name="from_number"
+                                               class="form-control @error('from_number') is-invalid @enderror"
+                                               value="{{ old('from_number') }}"
+                                               placeholder="Будинок?"
+                                               autocomplete="off"
+                                               style="text-align: center" >
+                                        @error('from_number')
+                                        <span class="invalid-feedback" role="alert">
+                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
+                                                </span>
+                                        @enderror
                                     </div>
                                 </div>
                         </div>
@@ -89,7 +98,9 @@
 
                         <div class="container" style="text-align: left">
                             <label class="form-check-label" for="route_undefined">По місту</label>
-                            <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1" onclick="showHide('block_city')">
+                            <input type="checkbox" class="form-check-input" id="route_undefined"
+                                   name="route_undefined" value="1"
+                                   onclick="showHide('block_city')">
                         </div>
 
                         <div id="block_city" class="container"  style="display:block">
@@ -99,6 +110,7 @@
                                                class="form-control @error('search1') is-invalid @enderror"
                                                value="{{ old('search1') }}"
                                                placeholder="Куди?"
+                                               autocomplete="off"
                                                onblur="hidTo(this.value)">
 
                                         @error('search1')
@@ -108,7 +120,17 @@
                                         @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_to_number">
-                                        <input type="text" id="to_number" name="to_number" placeholder="Будинок?" autocomplete="off" class="form-control" style="text-align: center" value="" />
+                                        <input type="text" id="to_number" name="to_number"
+                                               class="form-control @error('to_number') is-invalid @enderror"
+                                               value="{{ old('to_number') }}"
+                                               placeholder="Будинок?"
+                                               autocomplete="off"
+                                               style="text-align: center" >
+                                        @error('to_number')
+                                        <span class="invalid-feedback" role="alert">
+                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
+                                                </span>
+                                        @enderror
                                     </div>
                                 </div>
                         </div>
@@ -116,18 +138,19 @@
                         <script defer src="https://www.google.com/recaptcha/api.js"></script>
                         <div class="container" style="margin-top: 5px">
                              <div class="row">
-                                    <div class="col-4 g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                                    <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                              </div>
                        </div>
+                       <br>
                     </div>
 
                     <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
 
-                        <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
-                               onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
+                        <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
+                               onclick="showHide('block_id')">Додаткові параметри</a><br/>
                         <div class="container">
                             <div id="block_id" style="display: none;">
-                            <ul class="list-group mb-3">
+                                <ul class="list-group mb-3">
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <label class="form-label" for="required_time">Час подачі</label>
                                     <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
@@ -171,7 +194,7 @@
                                     </div>
                                 </li>
                             </ul>
-                        </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -179,10 +202,10 @@
                 <div class="container text-center">
                     <div class="row">
                         <div class="col-lg-6">
-                            <a class="w-100 btn btn-danger btn-lg" href="{{route('homeCombo')}}" style="margin-top: 5px">Очистити форму</a>
+                            <button class="w-100 btn btn-danger btn-lg" href="{{route('homeCombo')}}" style="margin-top: 5px">Очистити форму</button>
                         </div>
                         <div class="col-lg-6">
-                            <button class="w-100 btn btn-primary btn-lg col-lg-6" type="submit">
+                            <button class="w-100 btn btn-primary btn-lg" style="margin-top: 5px" type="submit">
                                 Розрахувати вартість поїздки
                             </button>
                         </div>

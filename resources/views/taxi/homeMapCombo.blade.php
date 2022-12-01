@@ -2,13 +2,12 @@
 
 @section('content')
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
-
-        <!--     Пошук по мапі.-->
-        <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_map">
-
+        <br>
+        <!--     Пошук за адресою.-->
+        <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
             <div class="container" style="text-align: center">
                 <h2 class="gradient"><b>Київ та область</b></h2>
-                <p class="text-center gradient">Пересуньте маркери щоб відзначити звідки та куди їхати.</p>
+                <p class="text-center gradient">Заповнити поля для розрахунку вартості поїздки.</p>
             </div>
             <div class="container text-center">
                 <div class="row">
@@ -83,11 +82,12 @@
                                  <script defer src="https://www.google.com/recaptcha/api.js"></script>
                                  <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
                             </div>
+                             <br>
                      </div>
 
                          <div class="col-sm-4 col-lg-4" style="margin-top: 5px">
 
-                             <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
+                             <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
                                 onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
                              <div id="block_id" style="display: none">
@@ -140,7 +140,13 @@
 
                      </div>
                       <div class="container text-center">
-                          <button class="w-100 btn btn-primary btn-lg"  type="submit">Розрахувати вартість поїздки</button>
+                          <div class="row">
+                              <div>
+                                  <button class="w-100 btn btn-primary btn-lg" type="submit">
+                                      Розрахувати вартість поїздки
+                                  </button>
+                              </div>
+                          </div>
                       </div>
                  </form>
             <div class="container-fluid" style="margin-top: 10px">

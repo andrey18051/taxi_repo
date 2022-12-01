@@ -46,11 +46,7 @@
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
-    <!-- Styles -->
-    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/base/jquery-ui.css">
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
-
+    <script type="text/javascript" src="{{ asset('js/jquery.cookie.js') }}"></script>
     <script type="text/javascript">
         var route = "{{ url('autocomplete-search-combo') }}";
         $.ajax({
@@ -81,6 +77,12 @@
             }
         });
     </script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/base/jquery-ui.css">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
+
+
 </head>
 <body>
 <div id="app">
@@ -90,6 +92,21 @@
         @yield('content')
     </main>
 </div>
+
+<script>
+
+    if ($.cookie('robot') == 'value' ) {
+
+        var delay_popup = 10;
+        setTimeout("document.getElementById('overlay').style.display='block'", delay_popup);
+    }
+    //создаем куки
+    $.cookie('robot', 'value1', {
+        expires: 1,
+    });
+
+</script>
+
 @include ('layouts.footerCombo')
 </body>
 </html>
