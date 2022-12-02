@@ -511,9 +511,9 @@ img {vertical-align: middle;}
     background-color: #d64259;
     top:30px;
     left: 40%;
-    animation: fade 6s forwards;
+    animation: fadeCooke 6s forwards;
 }
-@keyframes fade{
+@keyframes fadeCooke{
     0%{
         transform: translateY(-300px);
     }
