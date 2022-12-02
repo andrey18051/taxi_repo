@@ -572,11 +572,12 @@ class WebOrderController extends Controller
          */
 
         $arrCombo = Combo::where('name', $req->search)->first();
-
+        $params['routefromnumberBlockNone'] = 'none'; //Скрываем поле дома
         if ($arrCombo->street == 1) {
             $req->validate([
-                'from_number' => ['nullable', 'required']
+                'from_number' => ['required']
             ]);
+            $params['routefromnumberBlockNone'] = 'block'; // Открываем поле дома для улиц
         }
 
         $error = true;
@@ -618,12 +619,14 @@ class WebOrderController extends Controller
              * Если адрес "Куда" есть, проверяем заполненность номера дома "куда"
              */
             $arrCombo = Combo::where('name', $req->search1)->first();
+            $params['routetonumberBlockNone'] = 'none'; // Скрываем поле дома для улиц
 
             if ($arrCombo) {
                 if ($arrCombo->street == 1) {
                     $req->validate([
                         'to_number' => ['required']
                     ]);
+                    $params['routetonumberBlockNone'] = 'block'; // Открываем поле дома для улиц
                 }
             }
         }
@@ -1367,13 +1370,11 @@ class WebOrderController extends Controller
             }
         }
         if ($error) {
-            ?>
-            <script type="text/javascript">
-                alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
+            $params['routefromnumberBlockNone'] = 'block';
+            $params['routetonumberBlockNone'] = 'block';
             $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
+            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params])
+            ->with('info', 'Не пройдено перевірку на робота.');
         }
     }
 

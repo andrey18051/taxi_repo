@@ -71,19 +71,41 @@
                                <div class="col-lg-8 col-12">
                                    <input type="text"
                                           id="search"
-                                          class="form-control"
+                                          class="form-control @error('search') is-invalid @enderror"
                                           name="search"
+                                          @error('search')
+                                          value="{{ old('search') }}"
+                                          @else
                                           value="{{ $params['routefrom']}}"
-                                          readonly>
+                                          @enderror
+                                          placeholder="Звідки?"
+                                          onblur="hidFrom(this.value)"
+                                          autocomplete="off"
+                                          required>
 
+                                   @error('search')
+                                   <span class="invalid-feedback" role="alert">
+                                             <strong>{{ $message }}</strong>
+                                        </span>
+                                   @enderror
                                </div>
 
                                <div class="col-lg-4 col-12" id="div_from_number">
                                    <input type="text" id="from_number" name="from_number"
-                                          class="form-control"
+                                          class="form-control @error('from_number') is-invalid @enderror"
+                                          @error('from_number')
+                                          value="{{ old('from_number') }}"
+                                          @else
                                           value="{{ $params['routefromnumber']}}"
-                                          style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
-                                          readonly>
+                                          @enderror
+                                          placeholder="Будинок?"
+                                          autocomplete="off"
+                                          style="text-align: center" >
+                                   @error('from_number')
+                                   <span class="invalid-feedback" role="alert">
+                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
+                                                </span>
+                                   @enderror
                                </div>
                            </div>
                        </div>
@@ -94,27 +116,26 @@
                                       @if($params['route_undefined'] == 1)
                                       checked
                                       value="1"
-                                      @endif
-                                      readonly>
+                                   @endif>
                        </div>
 
                        <div id="block_city" class="container"  style="display:block">
-                           <div class="row">
-                               <div class="col-lg-8 col-12">
-                                   <input type="text" id="search1" name="search1"
-                                          class="form-control"
-                                          value="{{ $params['routeto']}}"
-                                          readonly>
-                               </div>
-                               <div class="col-lg-4 col-12" id="div_to_number">
-                                   <input type="text" id="to_number" name="to_number"
-                                          class="form-control"
-                                          value="{{ $params['routetonumber']}}"
-                                          style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
-                                          readonly>
+                               <div class="row">
+                                   <div class="col-lg-8 col-12">
+                                       <input type="text" id="search1" name="search1"
+                                              class="form-control"
+                                              value="{{ $params['routeto']}}"
+                                              readonly>
+                                   </div>
+                                   <div class="col-lg-4 col-12" id="div_to_number">
+                                       <input type="text" id="to_number" name="to_number"
+                                              class="form-control"
+                                              value="{{ $params['routetonumber']}}"
+                                              style="text-align: center; display: {{params['routetonumberBlockNone']}}"
+                                              readonly>
+                                   </div>
                                </div>
                            </div>
-                       </div>
 
                        <script defer src="https://www.google.com/recaptcha/api.js"></script>
                        <div class="container" style="margin-top: 5px">
@@ -126,72 +147,51 @@
                    </div>
 
                    <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
+
+                       <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
+                          onclick="showHide('block_id')">Додаткові параметри</a><br/>
                        <div class="container">
-
-                           <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
-                              onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
-
                            <div id="block_id" style="display: none;">
-                               <ul class="list-group">
+                               <ul class="list-group mb-3">
                                    <li class="list-group-item d-flex justify-content-between lh-sm">
                                        <label class="form-label" for="required_time">Час подачі</label>
-                                       <input type="datetime-local" step="any"  id="required_time"
-                                              name="required_time" value="{{ $params['required_time']}}"
-                                              readonly>
+                                       <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
                                    </li>
-                                   <li class="list-group-item d-flex justify-content-between">
+                                   <li class="list-group-item d-flex justify-content-between lh-sm">
                                        <div class="form-check">
-                                           <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
-                                                  @if( $params['wagon'] == 1)
-                                                  checked
-                                                  value="1"
-                                                  @endif
-                                                  readonly>
+                                           <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
                                            <label class="form-check-label" for="wagon">Универсал</label>
                                        </div>
                                    </li>
-                                   <li class="list-group-item d-flex justify-content-between ">
+                                   <li class="list-group-item d-flex justify-content-between lh-sm">
                                        <div class="form-check">
-                                           <input type="checkbox" class="form-check-input" id="minibus" name="minibus"
-                                                  @if( $params['minibus'] == 1)
-                                                  checked
-                                                  value="1"
-                                                  @endif
-                                                  readonly>
+                                           <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
                                            <label class="form-check-label" for="minibus">Мікроавтобус</label>
                                        </div>
                                    </li>
-                                   <li class="list-group-item d-flex justify-content-between ">
+                                   <li class="list-group-item d-flex justify-content-between lh-sm">
                                        <div class="form-check">
-                                           <input type="checkbox" class="form-check-input" id="premium" name="premium"
-                                                  @if( $params['premium'] == 1)
-                                                  checked
-                                                  value="1"
-                                                  @endif
-                                                  readonly>
+                                           <input type="checkbox" class="form-check-input" id="premium" name="premium">
                                            <label class="form-check-label" for="premium">Машина преміум-класса</label>
                                        </div>
                                    </li>
-                                   <li class="list-group-item d-flex justify-content-between ">
+                                   <li class="list-group-item d-flex justify-content-between lh-sm">
                                        <div class="col-md-12">
                                            <label for="$flexible_tariff_name" class="form-label">Тариф</label>
-                                           <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name"
-                                                   readonly>
-                                               <option>{{$params['flexible_tariff_name']}}</option>
+                                           <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" >
+                                               <option></option>
+                                               @for ($i = 0; $i < count($json_arr); $i++)
+                                                   <option>{{$json_arr[$i]['name']}}</option>
+                                               @endfor
                                            </select>
                                        </div>
                                    </li>
-                                   <li class="list-group-item d-flex justify-content-between ">
+                                   <li class="list-group-item d-flex justify-content-between lh-sm">
                                        <div class="col-md-12">
                                            <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
-                                           <select class="form-select" id="flexible_tariff_name" name="payment_type" readonly>
-                                               @if( $params['payment_type'] == 1)
-                                                   {{--   <option>безготівка</option>--}}
-                                                   <option>готівка</option>
-                                               @else
-                                                   <option>готівка</option>
-                                                   <!--                                                <option>безготівка</option>-->
-                                               @endif
+                                           <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                               <option>готівка</option>
+                                               <!--                                            <option>безготівка</option>-->
                                            </select>
                                        </div>
                                    </li>
