@@ -33,7 +33,7 @@
                                     <input type="text" class="form-control" id="search" name="search" autocomplete="off"
                                            placeholder="Куди?"  value="{{ $params['routeto']}}"
                                            autocomplete="off" placeholder="Звідки?" value=""
-                                           onblur="hidFrom(this.value)"
+                                           onkeydown="hidFrom(this.value)"
                                            required>
                                 </div>
                                 <div class="col-lg-4 col-12" id="div_routetonumber">

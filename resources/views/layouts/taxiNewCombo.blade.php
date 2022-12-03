@@ -61,7 +61,12 @@
                 $("#search").autocomplete({
                     source: function(request, response) {
                         var results = $.ui.autocomplete.filter(allPositions, request.term);
-                        response(results.slice(0, 10));
+                        if (results.length !== 0) {
+                            response(results.slice(0, 10));
+                        } else {
+                            var results = ['Збігів не знайдено. Змініть умови пошуку адреси.'];
+                            response(results);
+                        }
                     }
                 });
 
@@ -70,7 +75,12 @@
                     $('#search1').autocomplete({
                         source: function(request, response) {
                             var results = $.ui.autocomplete.filter(allPositions, request.term);
-                            response(results.slice(0, 10));
+                            if (results.length !== 0) {
+                                response(results.slice(0, 10));
+                            } else {
+                                var results = ['Збігів не знайдено. Змініть умови пошуку адреси.'];
+                                response(results);
+                            }
                         }
                     })
                 });
