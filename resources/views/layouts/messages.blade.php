@@ -40,6 +40,15 @@
                 </ul>
             </div>
         </div>
+
+        @case($errors->has('routetonumber'))
+        <div class="container">
+            <div class="alert alert-danger text-center">
+                <ul>
+                    {{'Не вказано номер будинку призначення.'}}
+                </ul>
+            </div>
+        </div>
         @break
 
         @default
@@ -53,23 +62,6 @@
 
     @endswitch
 
-    {{--@if (!$errors->has('search') && !$errors->has('search1'))
-    <div class="container">
-        <div class="alert alert-danger text-center">
-        <ul>
-            @foreach($errors->all() as $error)
-                {{$error}}
-            @endforeach
-        </ul>
-        </div>
-    </div>
-    @else
-        <div class="container">
-            <div class="alert alert-danger text-center">
-                {{'Перевірте правильність введення адреси.'}}
-            </div>
-        </div>
-    @endif--}}
 @endif
 
 @if(session('success'))

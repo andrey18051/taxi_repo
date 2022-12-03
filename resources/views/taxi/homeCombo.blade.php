@@ -68,7 +68,7 @@
                                                class="form-control @error('search') is-invalid @enderror"
                                                name="search" value="{{ old('search') }}"
                                                placeholder="Звідки?"
-                                               onkeydown="hidFrom(this.value)"
+                                               onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                                autocomplete="off"
                                                required>
 
@@ -109,9 +109,9 @@
                                         <input type="text" id="search1" name="search1"
                                                class="form-control @error('search1') is-invalid @enderror"
                                                value="{{ old('search1') }}"
+                                               onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
                                                placeholder="Куди?"
-                                               autocomplete="off"
-                                               onkeydown="hidTo(this.value)">
+                                               autocomplete="off">
 
                                         @error('search1')
                                         <span class="invalid-feedback" role="alert">

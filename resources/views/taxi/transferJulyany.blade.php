@@ -1,7 +1,18 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-    {{-- dd($params)  --}}
+
+    @empty($params['routefromnumberBlockNone'])
+        @php
+            $params['routefromnumberBlockNone'] = 'display: block;'
+        @endphp
+    @endempty
+
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -26,50 +37,72 @@
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                         <input type="hidden" id="search1" name="search1" value="{{ $params['routeto']}}" required>
 
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-lg-8 col-12">
-                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off"
-                                               placeholder="Звідки?" value="{{ $params['routefrom']}}"
-                                               autocomplete="off" placeholder="Звідки?" value=""
-                                               onkeydown="hidFrom(this.value)"
-                                               required>
-                                    </div>
-                                    <div class="col-lg-4 col-12" id="div_from_number">
-                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
-                                               autocomplete="off" class="form-control" style="text-align: center"
-                                               value="{{ $params['routefromnumber']}}" />
-                                    </div>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-8 col-12">
+                                    <input type="text" class="form-control  @error('search') is-invalid @enderror"
+                                           id="search" name="search" autocomplete="off"
+                                           placeholder="Звідки?"
+
+                                           @if($params['routefrom'])
+                                           value="{{ $params['routefrom']}}"
+                                           @else('search')
+                                           value="{{ old('search') }}"
+                                           @endif
+                                           onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
+                                           required>
+                                    @error('search')
+                                    <span class="invalid-feedback" role="alert">
+                                             <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                                <div class="col-lg-4 col-12" id="div_from_number">
+                                    <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
+                                           autocomplete="off" class="form-control @error('from_number') is-invalid @enderror"
+                                           style="text-align: center; {{$params['routefromnumberBlockNone']}}"
+
+                                           value="{{ $params['routefromnumber']}}"
+                                           @error('from_number')
+                                           value="{{ old('from_number') }}"
+                                        @enderror
+                                    />
+                                    @error('from_number')
+                                    <span class="invalid-feedback" role="alert">
+                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
+                                                </span>
+                                    @enderror
                                 </div>
                             </div>
+                        </div>
 
                         <div style="display: none" class="container" style="text-align: left">
-                             <label class="form-check-label" for="route_undefined">По місту</label>
-                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
-                                               @if($params['route_undefined'] == 1)
-                                               checked
-                                               value="1"
-                                            @endif>
+                            <label class="form-check-label" for="route_undefined">По місту</label>
+                            <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
+                                   @if($params['route_undefined'] == 1)
+                                   checked
+                                   value="1"
+                                @endif>
 
                         </div>
                         <div style="display: none" id="block_city" class="container"
-                                 @if($params['route_undefined'] == 1)
-                                    style="display:none"
-                                 @else  style="display:block"
-                                @endif>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" value="{{ $params['routeto']}}">
-                                    </div>
+                             @if($params['route_undefined'] == 1)
+                             style="display:none"
+                             @else  style="display:block"
+                            @endif>
+                            <div class="row">
+                                <div class="col-12">
+                                    <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" value="{{ $params['routeto']}}">
                                 </div>
                             </div>
+                        </div>
 
                         <script defer src="https://www.google.com/recaptcha/api.js"></script>
-                         <div class="container" style="margin-top: 5px">
-                                <div class="row">
-                                    <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-                                </div>
-                         </div>
+                        <div class="container" style="margin-top: 5px">
+                            <div class="row">
+                                <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-5 col-lg-4" style="margin-top: 5px">
@@ -106,7 +139,7 @@
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="premium" name="premium"
                                                @if( $params['premium'] == 1)
-                                                    checked
+                                               checked
                                                value="1"
                                             @endif>
                                         <label class="form-check-label" for="premium">Машина преміум-класса</label>
@@ -145,8 +178,8 @@
 
                 </div>
                 <div class="container text-center">
-                    <a class="w-100 btn btn-danger btn-lg"href="{{route('transfer',
-                                                     ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferJulyany"])}}" style="margin-top: 5px">Очистити форму</a>
+                    <a class="w-100 btn btn-danger btn-lg" href="{{route('transfer',
+                                                     ["Центральный автовокзал (у шлагбаума пл.Московская 3)", "taxi.transferAuto"])}}" style="margin-top: 5px">Очистити форму</a>
                     <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </div>
             </form>
@@ -208,3 +241,5 @@
 
 
 @endsection
+
+

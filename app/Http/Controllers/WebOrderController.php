@@ -1385,6 +1385,28 @@ class WebOrderController extends Controller
      */
     public function costtransfer($page, Request $req)
     {
+        /**
+         * Проверка адресов в базе
+         */
+        $req->validate([
+            'search' => new ComboName(),
+            'from_number' => ['nullable'],
+        ]);
+        /**
+         * Если адреса есть, проверяем заполненность номера дома "откуда"
+         */
+
+        $arrCombo = Combo::where('name', $req->search)->first();
+        $params['routefromnumberBlockNone'] = 'display: none;'; //Скрываем поле дома
+        $params['routefromnumber'] = null; //Обязательный. Дом куда.
+        if ($arrCombo->street == 1) {
+            $req->validate([
+                'from_number' => ['required']
+            ]);
+            $params['routefromnumberBlockNone'] = 'display: block;'; // Открываем поле дома для улиц
+            $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
+        }
+
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
         /**
@@ -1394,7 +1416,7 @@ class WebOrderController extends Controller
         $params['user_phone'] = '000' ;
 
         $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
-        $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
+
         $params['client_sub_card'] = null;
         $params['route_address_entrance_from'] = null;
 
@@ -1609,13 +1631,9 @@ class WebOrderController extends Controller
             }
         }
         if ($error) {
-            ?>
-            <script type="text/javascript">
-                alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
             $json_arr = WebOrderController::tariffs();
-            return view($page, ['json_arr' => $json_arr, 'params' => $params]);
+            return view($page, ['json_arr' => $json_arr, 'params' => $params,
+                'info' => "Не пройдено перевірку на робота."]);
         }
     }
 
@@ -1626,6 +1644,30 @@ class WebOrderController extends Controller
      */
     public function costtransferfrom($page, Request $req)
     {
+        /**
+         * Проверка адресов в базе
+         */
+        $req->validate([
+            'search' => new ComboName(),
+            'routetonumber' => ['nullable'],
+        ]);
+        /**
+         * Если адреса есть, проверяем заполненность номера дома "откуда"
+         */
+
+        $arrCombo = Combo::where('name', $req->search)->first();
+        $params['routetonumberBlockNone'] = 'display: none;'; //Скрываем поле дома
+        $params['routetonumber'] = null; //Обязательный. Дом куда.
+        if ($arrCombo->street == 1) {
+            $req->validate([
+                'routetonumber' => ['required']
+            ]);
+            $params['routetonumberBlockNone'] = 'display: block;'; // Открываем поле дома для улиц
+            $params['routetonumber'] = $req->routetonumber; //Обязательный. Дом куда.
+        }
+
+        $params['routeto'] = $req->search; //Обязательный. Улица куда.
+
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
         /**
@@ -1672,8 +1714,7 @@ class WebOrderController extends Controller
             $params['payment_type'] = '1';
         };
 
-        $params['routeto'] = $req->search; //Обязательный. Улица куда.
-        $params['routetonumber'] = $req->routetonumber; //Обязательный. Дом куда.
+
         $params['route_undefined'] = false; //По городу: True, False
 
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
@@ -1842,18 +1883,14 @@ class WebOrderController extends Controller
                     <?php
 
 
-                    return view($page, ['json_arr' => $json_arr, 'params' => $params]);
+                    return view($page, ['json_arr' => $json_arr, 'params' => $params,]);
                 }
             }
         }
         if ($error) {
-            ?>
-            <script type="text/javascript">
-                alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
             $json_arr = WebOrderController::tariffs();
-            return view($page, ['json_arr' => $json_arr, 'params' => $params]);
+            return view($page, ['json_arr' => $json_arr, 'params' => $params,
+                'info' => 'Не пройдено перевірку на робота.']);
         }
     }
 

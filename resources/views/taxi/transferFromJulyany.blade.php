@@ -1,7 +1,11 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-    {{-- dd($params)  --}}
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -30,16 +34,36 @@
                         <div class="container">
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
-                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off"
-                                               placeholder="Куди?"  value="{{ $params['routeto']}}"
-                                               autocomplete="off" placeholder="Звідки?" value=""
-                                               onkeydown="hidFrom(this.value)"
+                                        <input type="text" class="form-control  @error('search') is-invalid @enderror"
+                                               id="search" name="search" autocomplete="off"
+                                               autocomplete="off"
+                                               @if($params['routeto'])
+                                               value="{{ $params['routeto']}}"
+                                               @else('search')
+                                               value="{{ old('search') }}"
+                                               @endif
+                                               onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                                required>
+                                        @error('search')
+                                        <span class="invalid-feedback" role="alert">
+                                             <strong>{{ $message }}</strong>
+                                        </span>
+                                        @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_routetonumber">
-                                        <input type="text" id="routetonumber" name="routetonumber" placeholder="Будинок?"
-                                               autocomplete="off" class="form-control" style="text-align: center"
-                                               value="{{ $params['routetonumber']}}" />
+                                        <input type="text" id="routetonumber" name="routetonumber"
+                                               autocomplete="off"
+                                               class="form-control @error('to_number') is-invalid @enderror"
+                                               style="text-align: center"
+                                               value="{{ $params['routetonumber']}}"
+                                               @error('to_number')
+                                               value="{{ old('to_number') }}"
+                                            @enderror/>
+                                        @error('to_number')
+                                        <span class="invalid-feedback" role="alert">
+                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
+                                                </span>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>

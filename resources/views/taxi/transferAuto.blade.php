@@ -1,7 +1,18 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-    {{-- dd($params)  --}}
+
+    @empty($params['routefromnumberBlockNone'])
+        @php
+        $params['routefromnumberBlockNone'] = 'display: block;'
+        @endphp
+    @endempty
+
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <div class="container" style="text-align: center">
@@ -26,18 +37,41 @@
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                         <input type="hidden" id="search1" name="search1" value="{{ $params['routeto']}}" required>
 
-                            <div class="container">
+                        <div class="container">
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
-                                        <input type="text" class="form-control" id="search" name="search" autocomplete="off"
-                                               placeholder="Звідки?" value="{{ $params['routefrom']}}"
-                                               autocomplete="off" placeholder="Звідки?" value=""
-                                               onkeydown="hidFrom(this.value)"
+                                        <input type="text" class="form-control  @error('search') is-invalid @enderror"
+                                               id="search" name="search" autocomplete="off"
+                                               placeholder="Звідки?"
+
+                                               @if($params['routefrom'])
+                                               value="{{ $params['routefrom']}}"
+                                               @else('search')
+                                               value="{{ old('search') }}"
+                                               @endif
+                                               onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                                required>
+                                        @error('search')
+                                        <span class="invalid-feedback" role="alert">
+                                             <strong>{{ $message }}</strong>
+                                        </span>
+                                        @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
-                                               autocomplete="off" class="form-control" style="text-align: center" value="{{ $params['routefromnumber']}}" />
+                                               autocomplete="off" class="form-control @error('from_number') is-invalid @enderror"
+                                               style="text-align: center; {{$params['routefromnumberBlockNone']}}"
+
+                                               value="{{ $params['routefromnumber']}}"
+                                               @error('from_number')
+                                               value="{{ old('from_number') }}"
+                                            @enderror
+                                        />
+                                        @error('from_number')
+                                        <span class="invalid-feedback" role="alert">
+                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
+                                                </span>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>

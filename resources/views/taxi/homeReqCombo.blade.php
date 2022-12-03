@@ -3,11 +3,9 @@
 @section('content')
    @if($info)
       <div class="container  wrapper">
-
-                      {{$info}}
-
+            {{$info}}
       </div>
-    @endif
+   @endif
    <div class="container" style="background-color: hsl(0, 0%, 96%)">
        <br>
        <!--     Пошук за адресою.-->
