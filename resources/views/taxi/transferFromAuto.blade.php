@@ -1,6 +1,11 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
+    @empty($params['routetonumberBlockNone'])
+        @php
+            $params['routetonumberBlockNone'] = 'display: block;'
+        @endphp
+    @endempty
     @isset($info)
         <div class="container  wrapper">
             {{$info}}
@@ -54,7 +59,7 @@
                                         <input type="text" id="routetonumber" name="routetonumber"
                                                autocomplete="off"
                                                class="form-control @error('to_number') is-invalid @enderror"
-                                               style="text-align: center"
+                                               style="text-align: center; {{$params['routetonumberBlockNone']}}"
                                                value="{{ $params['routetonumber']}}"
                                                @error('to_number')
                                                value="{{ old('to_number') }}"
