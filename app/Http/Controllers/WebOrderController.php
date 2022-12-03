@@ -48,7 +48,6 @@ class WebOrderController extends Controller
             return config('app.taxi2012Url_1');
         } catch (Exception $e) {
             try {
-
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
                 Http::timeout(2)->withHeaders([
                     'Authorization' => $authorization,
@@ -60,7 +59,7 @@ class WebOrderController extends Controller
                     'subject' => $subject,
                     'message' => $messageAdmin,
                 ];
-                //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                 Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
 
                 return config('app.taxi2012Url_2');
@@ -79,7 +78,7 @@ class WebOrderController extends Controller
                         'subject' => $subject,
                         'message' => $messageAdmin,
                     ];
-                    //     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                     Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
 
                     return '400';
