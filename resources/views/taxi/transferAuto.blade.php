@@ -65,7 +65,7 @@
                                                value="{{ $params['routefromnumber']}}"
                                                @error('from_number')
                                                value="{{ old('from_number') }}"
-                                            @enderror
+                                               @enderror
                                         />
                                         @error('from_number')
                                         <span class="invalid-feedback" role="alert">

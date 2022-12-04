@@ -819,21 +819,19 @@ class WebOrderController extends Controller
 
                 } else {
                     WebOrderController::version_combo();
-                    ?>
-                    <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                    $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу " +
                             "відправлення/призначення або не вибрана опція поїздки по місту. " +
-                            "Правильно вводьте або зверніться до оператора.");
-                    </script>
-                    <?php
-                    return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
+                            "Правильно вводьте або зверніться до оператора.";
+                    $json_arr = WebOrderController::tariffs();
+                    return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
+                        'info' => $info]);
                 }
             }
         }
         if ($error) {
             $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params])
-                ->with('info', 'Не пройдено перевірку на робота.');
+            return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
+                'info' => 'Не пройдено перевірку на робота.']);
         }
     }
     /**
@@ -1191,16 +1189,13 @@ class WebOrderController extends Controller
          */
 
         if ($response_arr_to['geo_streets']['geo_street'] == null) {
-            ?>
-            <script type="text/javascript">
-                alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
-                "відправлення/призначення або не вибрана опція поїздки по місту. " +
-                "Правильно вводьте або зверніться до оператора.");
-            </script>
-            <?php
             WebOrderController::version_combo();
-
-            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
+            $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу " +
+                "відправлення/призначення або не вибрана опція поїздки по місту. " +
+                "Правильно вводьте або зверніться до оператора.";
+            $json_arr = WebOrderController::tariffs();
+            return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
+                'info' => $info]);
         }
         /**
          * проверка на робота
@@ -1372,8 +1367,8 @@ class WebOrderController extends Controller
             $params['routefromnumberBlockNone'] = 'block';
             $params['routetonumberBlockNone'] = 'block';
             $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params])
-            ->with('info', 'Не пройдено перевірку на робота.');
+            return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
+                'info' => 'Не пройдено перевірку на робота.']);
         }
     }
 

@@ -1,13 +1,11 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-
     @isset($info)
         <div class="container  wrapper">
             {{$info}}
         </div>
     @endisset
-
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
         <br>
         <!--     Пошук за адресою.-->
@@ -76,7 +74,9 @@
                                                @isset($params['routefrom'])
                                                value="{{ $params['routefrom']}}"
                                                @endisset
+                                               @error('search')
                                                value="{{ old('search') }}"
+                                               @enderror
                                                placeholder="Звідки?"
                                                onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                                autocomplete="off"
@@ -92,14 +92,20 @@
                                     <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number"
                                                class="form-control @error('from_number') is-invalid @enderror"
-
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
                                                @endisset
+                                               @error('from_number')
                                                value="{{ old('from_number') }}"
+                                               @enderror
                                                placeholder="Будинок?"
                                                autocomplete="off"
-                                               style="text-align: center" >
+                                               @isset($params['routefromnumberBlockNone'])
+                                               style="text-align: center; {{$params['routefromnumberBlockNone']}}"
+                                               @else
+                                               style="text-align: center"
+                                               @endisset
+                                        >
                                         @error('from_number')
                                         <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
@@ -113,27 +119,20 @@
                         <div class="container" style="text-align: left">
                             <label class="form-check-label" for="route_undefined">По місту</label>
                             <input type="checkbox" class="form-check-input" id="route_undefined"
-                                   name="route_undefined"
+                                   name="route_undefined" value="1"
                                    @isset($params['route_undefined'])
-                                        @if($params['route_undefined'] == true)
-                                        checked
-                                        @endif
+                                   checked
+                                   value="{{$params['route_undefined']}}"
                                    @endisset
-                                   nochecked
                                    onclick="showHide('block_city')">
                         </div>
 
                         <div id="block_city" class="container"
                              @isset($params['route_undefined'])
-                                 @if($params['route_undefined'] == true)
-                                 style="display:none"
-                                 @else
-                                 style="display:block"
-                                 @endif
-                            @else
+                             style="{{$params['route_undefined']}}"
+                             @else
                              style="display:block"
-                            @endisset
-                            >
+                             @endisset>
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
                                         <input type="text" id="search1" name="search1"
@@ -141,11 +140,13 @@
                                                @isset($params['routeto'])
                                                value="{{ $params['routeto']}}"
                                                @endisset
+                                               @error('search1')
                                                value="{{ old('search1') }}"
+                                               @enderror
                                                onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
                                                placeholder="Куди?"
-                                               autocomplete="off">
-
+                                               autocomplete="off"
+                                        >
                                         @error('search1')
                                         <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -158,10 +159,17 @@
                                                @isset($params['routetonumber'])
                                                value="{{ $params['routetonumber']}}"
                                                @endisset
+                                               @error('to_number')
                                                value="{{ old('to_number') }}"
+                                               @enderror
                                                placeholder="Будинок?"
                                                autocomplete="off"
-                                               style="text-align: center" >
+                                               @isset($params['routetonumberBlockNone'])
+                                               style="text-align: center; {{$params['routetonumberBlockNone']}}"
+                                               @else
+                                               style="text-align: center"
+                                               @endisset
+                                        >
                                         @error('to_number')
                                         <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
@@ -189,43 +197,23 @@
                                 <ul class="list-group mb-3">
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <label class="form-label" for="required_time">Час подачі</label>
-                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time"
-                                           @isset($params['required_time'])
-                                           value="{{ $params['required_time']}}"
-                                           @endisset
-                                           value="null">
+                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
-                                                @isset($params['wagon'])
-                                                @if($params['wagon'] == true)
-                                                checked
-                                                @endif
-                                                @endisset>
+                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
                                         <label class="form-check-label" for="wagon">Универсал</label>
                                     </div>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus"
-                                               @isset($params['minibus'])
-                                               @if($params['minibus'] == true)
-                                               checked
-                                               @endif
-                                               @endisset>
+                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
                                         <label class="form-check-label" for="minibus">Мікроавтобус</label>
                                     </div>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between lh-sm">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="premium" name="premium"
-                                               @isset($params['premium'])
-                                               @if($params['premium'] == true)
-                                               checked
-                                               @endif
-                                               @endisset
-                                        >
+                                        <input type="checkbox" class="form-check-input" id="premium" name="premium">
                                         <label class="form-check-label" for="premium">Машина преміум-класса</label>
                                     </div>
                                 </li>
@@ -233,20 +221,10 @@
                                     <div class="col-md-12">
                                         <label for="$flexible_tariff_name" class="form-label">Тариф</label>
                                         <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" >
-                                            @isset($params['flexible_tariff_name'])
-                                                <option>{{$params['flexible_tariff_name']}}</option>
-                                                @for ($i = 0; $i < count($json_arr); $i++)
-                                                    @if($json_arr[$i]['name'] !== $params['flexible_tariff_name'])
-                                                        <option>{{$json_arr[$i]['name']}}</option>
-                                                    @endif
-                                                @endfor
-                                            @else
-                                                <option></option>
-                                                @for ($i = 0; $i < count($json_arr); $i++)
-                                                    <option>{{$json_arr[$i]['name']}}</option>
-                                                @endfor
-                                            @endisset
-
+                                            <option></option>
+                                            @for ($i = 0; $i < count($json_arr); $i++)
+                                                <option>{{$json_arr[$i]['name']}}</option>
+                                            @endfor
                                         </select>
                                     </div>
                                 </li>
@@ -267,19 +245,19 @@
 
                 <div class="container text-center">
                     <div class="row">
-                         <button class="w-100 btn btn-primary btn-lg" style="margin-top: 5px" type="submit">
-                                 Розрахувати вартість поїздки
-                         </button>
+                        <div class="col-lg-6">
+                            <button class="w-100 btn btn-danger btn-lg" href="{{route('homeCombo')}}" style="margin-top: 5px">Очистити форму</button>
+                        </div>
+                        <div class="col-lg-6">
+                            <button class="w-100 btn btn-primary btn-lg" style="margin-top: 5px" type="submit">
+                                Розрахувати вартість поїздки
+                            </button>
+                        </div>
                     </div>
+
                 </div>
             </form>
-            <div class="container text-center">
-                <div class="row">
-                    <button class="w-100 btn btn-danger btn-lg" style="margin-top: 5px" onclick="location.reload()">
-                        Очистити форму
-                    </button>
-                </div>
-            </div>
+
         <div class="container-fluid" style="margin-top: 10px">
             <div class="header gradient" >
                 <b>Зустріч -> </b>
