@@ -58,15 +58,18 @@
                                         @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_from_number">
-                                        <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
-                                               autocomplete="off" class="form-control @error('from_number') is-invalid @enderror"
-                                               style="text-align: center; {{$params['routefromnumberBlockNone']}}"
-
+                                        <input type="text" id="from_number" name="from_number"
+                                               class="form-control @error('from_number') is-invalid @enderror"
+                                               @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
-                                               @error('from_number')
+                                               @endisset
                                                value="{{ old('from_number') }}"
-                                               @enderror
-                                        />
+                                               placeholder="Будинок?"
+                                               autocomplete="off"
+                                               @isset($params)
+                                               style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
+                                               @endisset
+                                               style="text-align: center" >
                                         @error('from_number')
                                         <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
@@ -74,7 +77,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                            </div>
+                        </div>
 
                         <div style="display: none" class="container" style="text-align: left">
                              <label class="form-check-label" for="route_undefined">По місту</label>
@@ -225,12 +228,12 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('div_from_number').style.display='none';
+                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('from_number').value=null;
                     }
                     if (data == 1) {
-                        document.getElementById('div_from_number').style.display='block';
+                        document.getElementById('from_number').style.display='block';
                     }
-
                 }
             });
 

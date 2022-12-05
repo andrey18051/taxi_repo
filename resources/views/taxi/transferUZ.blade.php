@@ -38,43 +38,46 @@
                         <input type="hidden" id="search1" name="search1" value="{{ $params['routeto']}}" required>
 
                         <div class="container">
-                            <div class="row">
-                                <div class="col-lg-8 col-12">
-                                    <input type="text" class="form-control  @error('search') is-invalid @enderror"
-                                           id="search" name="search" autocomplete="off"
-                                           placeholder="Звідки?"
+                                <div class="row">
+                                    <div class="col-lg-8 col-12">
+                                        <input type="text" class="form-control  @error('search') is-invalid @enderror"
+                                               id="search" name="search" autocomplete="off"
+                                               placeholder="Звідки?"
 
-                                           @if($params['routefrom'])
-                                           value="{{ $params['routefrom']}}"
-                                           @else('search')
-                                           value="{{ old('search') }}"
-                                           @endif
-                                           onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
-                                           required>
-                                    @error('search')
-                                    <span class="invalid-feedback" role="alert">
+                                               @if($params['routefrom'])
+                                               value="{{ $params['routefrom']}}"
+                                               @else('search')
+                                               value="{{ old('search') }}"
+                                               @endif
+                                               onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
+                                               required>
+                                        @error('search')
+                                        <span class="invalid-feedback" role="alert">
                                              <strong>{{ $message }}</strong>
                                         </span>
-                                    @enderror
-                                </div>
-                                <div class="col-lg-4 col-12" id="div_from_number">
-                                    <input type="text" id="from_number" name="from_number" placeholder="Будинок?"
-                                           autocomplete="off" class="form-control @error('from_number') is-invalid @enderror"
-                                           style="text-align: center; {{$params['routefromnumberBlockNone']}}"
-
-                                           value="{{ $params['routefromnumber']}}"
-                                           @error('from_number')
-                                           value="{{ old('from_number') }}"
                                         @enderror
-                                    />
-                                    @error('from_number')
-                                    <span class="invalid-feedback" role="alert">
+                                    </div>
+                                    <div class="col-lg-4 col-12" id="div_from_number">
+                                        <input type="text" id="from_number" name="from_number"
+                                               class="form-control @error('from_number') is-invalid @enderror"
+                                               @isset($params['routefromnumber'])
+                                               value="{{ $params['routefromnumber']}}"
+                                               @endisset
+                                               value="{{ old('from_number') }}"
+                                               placeholder="Будинок?"
+                                               autocomplete="off"
+                                               @isset($params)
+                                               style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
+                                               @endisset
+                                               style="text-align: center" >
+                                        @error('from_number')
+                                        <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
                                                 </span>
-                                    @enderror
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
                         <div style="display: none" class="container" style="text-align: left">
                             <label class="form-check-label" for="route_undefined">По місту</label>
@@ -225,10 +228,11 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('div_from_number').style.display='none';
+                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('from_number').value=null;
                     }
                     if (data == 1) {
-                        document.getElementById('div_from_number').style.display='block';
+                        document.getElementById('from_number').style.display='block';
                     }
 
                 }

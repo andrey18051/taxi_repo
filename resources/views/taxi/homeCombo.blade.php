@@ -368,14 +368,11 @@
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
                         document.getElementById('from_number').style.display='none';
-
                         document.getElementById('from_number').value=null;
                     }
                     if (data == 1) {
-
                         document.getElementById('from_number').style.display='block';
                     }
-
                 }
             });
 

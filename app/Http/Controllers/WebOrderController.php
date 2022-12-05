@@ -1401,13 +1401,13 @@ class WebOrderController extends Controller
          */
 
         $arrCombo = Combo::where('name', $req->search)->first();
-        $params['routefromnumberBlockNone'] = 'display: none;'; //Скрываем поле дома
+        $params['routefromnumberBlockNone'] = 'none;'; //Скрываем поле дома
         $params['routefromnumber'] = null; //Обязательный. Дом куда.
         if ($arrCombo->street == 1) {
             $req->validate([
                 'from_number' => ['required']
             ]);
-            $params['routefromnumberBlockNone'] = 'display: block;'; // Открываем поле дома для улиц
+            $params['routefromnumberBlockNone'] = 'block;'; // Открываем поле дома для улиц
             $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
         }
 
@@ -1660,13 +1660,13 @@ class WebOrderController extends Controller
          */
 
         $arrCombo = Combo::where('name', $req->search)->first();
-        $params['routetonumberBlockNone'] = 'display: none;'; //Скрываем поле дома
+        $params['routetonumberBlockNone'] = 'none;'; //Скрываем поле дома
         $params['routetonumber'] = null; //Обязательный. Дом куда.
         if ($arrCombo->street == 1) {
             $req->validate([
                 'routetonumber' => ['required']
             ]);
-            $params['routetonumberBlockNone'] = 'display: block;'; // Открываем поле дома для улиц
+            $params['routetonumberBlockNone'] = 'block;'; // Открываем поле дома для улиц
             $params['routetonumber'] = $req->routetonumber; //Обязательный. Дом куда.
         }
 

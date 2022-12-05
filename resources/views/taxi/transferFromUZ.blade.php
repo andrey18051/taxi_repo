@@ -20,7 +20,7 @@
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
 
-            <form action="{{route('search-cost-transfer-from', "taxi.transferFromUZ")}}" id="form_object">
+            <form action="{{route('search-cost-transfer-from', "taxi.transferFromAuto")}}" id="form_object">
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
@@ -39,32 +39,39 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-lg-8 col-12">
-                                    <input type="text" class="form-control  @error('search') is-invalid @enderror"
-                                           id="search" name="search" autocomplete="off"
-                                           autocomplete="off"
-                                           @if($params['routeto'])
+                                    <input type="text"
+                                           id="search"
+                                           class="form-control @error('search') is-invalid @enderror"
+                                           name="search"
+                                           @isset($params['routeto'])
                                            value="{{ $params['routeto']}}"
-                                           @else('search')
+                                           @endisset
                                            value="{{ old('search') }}"
-                                           @endif
+                                           placeholder="Звідки?"
                                            onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
+                                           autocomplete="off"
                                            required>
+
                                     @error('search')
                                     <span class="invalid-feedback" role="alert">
                                              <strong>{{ $message }}</strong>
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="col-lg-4 col-12" id="div_routetonumber">
+                                <div class="col-lg-4 col-12" id="div_to_number">
                                     <input type="text" id="routetonumber" name="routetonumber"
-                                           autocomplete="off"
-                                           class="form-control @error('to_number') is-invalid @enderror"
-                                           style="text-align: center; {{$params['routetonumberBlockNone']}}"
+                                           class="form-control @error('routetonumber') is-invalid @enderror"
+                                           @isset($params['routetonumber'])
                                            value="{{ $params['routetonumber']}}"
-                                           @error('to_number')
-                                            value="{{ old('to_number') }}"
-                                           @enderror/>
-                                    @error('to_number')
+                                           @endisset
+                                           value="{{ old('routetonumber') }}"
+                                           placeholder="Будинок?"
+                                           autocomplete="off"
+                                           @isset($params)
+                                           style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
+                                           @endisset
+                                           style="text-align: center" >
+                                    @error('routetonumber')
                                     <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
                                                 </span>
@@ -74,32 +81,32 @@
                         </div>
 
                         <div style="display: none" class="container" style="text-align: left">
-                             <label class="form-check-label" for="route_undefined">По місту</label>
-                             <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
-                                               @if($params['route_undefined'] == 1)
-                                               checked
-                                               value="1"
-                                            @endif>
+                            <label class="form-check-label" for="route_undefined">По місту</label>
+                            <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" onclick="showHide('block_city')"
+                                   @if($params['route_undefined'] == 1)
+                                   checked
+                                   value="1"
+                                @endif>
 
                         </div>
                         <div style="display: none" id="block_city" class="container"
-                                 @if($params['route_undefined'] == 1)
-                                    style="display:none"
-                                 @else  style="display:block"
-                                @endif>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" value="{{ $params['routeto']}}">
-                                    </div>
+                             @if($params['route_undefined'] == 1)
+                             style="display:none"
+                             @else  style="display:block"
+                            @endif>
+                            <div class="row">
+                                <div class="col-12">
+                                    <input type="text" class="form-control" id="search3" name="search3" autocomplete="off" placeholder="Пошук об'єкта (Куди)" value="{{ $params['routeto']}}">
                                 </div>
                             </div>
+                        </div>
 
                         <script defer src="https://www.google.com/recaptcha/api.js"></script>
-                         <div class="container" style="margin-top: 5px">
-                                <div class="row">
-                                    <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
-                                </div>
-                         </div>
+                        <div class="container" style="margin-top: 5px">
+                            <div class="row">
+                                <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-5 col-lg-4" style="margin-top: 5px">
@@ -136,7 +143,7 @@
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="premium" name="premium"
                                                @if( $params['premium'] == 1)
-                                                    checked
+                                               checked
                                                value="1"
                                             @endif>
                                         <label class="form-check-label" for="premium">Машина преміум-класса</label>
@@ -180,6 +187,7 @@
             </form>
         </div>
     </div>
+
     <script type="text/javascript">
         /**
          * Функция Скрывает/Показывает блок
@@ -219,19 +227,14 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
-                        document.getElementById('div_routetonumber').style.display='none';
+                        document.getElementById('routetonumber').style.display='none';
+                        document.getElementById('routetonumber').value=null;
                     }
                     if (data == 1) {
-                        document.getElementById('div_routetonumber').style.display='block';
+                        document.getElementById('routetonumber').style.display='block';
                     }
-
                 }
             });
-
-
-
         }
     </script>
-
-
 @endsection
