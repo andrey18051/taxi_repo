@@ -7,18 +7,7 @@
         <div class="container" style="text-align: center">
             <h2 class="gradient"><b>Київ та область</b></h2>
         </div>
-        <div class="container" style="text-align: center">
-            <div class="center gradient" style="background-color: hsl(0, 0%, 96%); padding:5px;">
-                <span style="color:black">Сьогодні:</span>
-                <span style="color:black;; font-size:14px;">
-                  <script>
-                      document.write(date+" ");
-                      document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
-                  </script>
-                  (<span id="clockdat" style="color:blue;"></span>)
-                  </span>
-            </div>
-        </div>
+
         <div class="container text-center card">
             <p>
                 <span class="text-danger"><b>Комендантська година з {{config('app.start_time')}} по {{config('app.end_time')}}.</b></span>

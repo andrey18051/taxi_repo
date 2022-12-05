@@ -510,20 +510,20 @@ img {vertical-align: middle;}
     color: white;
     background-color: #d64259;
     top:30px;
-    left: 40%;
-    animation: fadeCooke 6s forwards;
+    margin-left: 10%;
+    animation: fadeCooke 10s forwards;
 }
 @keyframes fadeCooke{
     0%{
-        transform: translateY(-300px);
+        transform: translateX(-20000px);
     }
     20% {
-        transform: translateY(0px);
+        transform: translateX(0px);
     }
     80% {
-        transform: translateY(0px);
+        transform: translateX(0px);
     }
     100%{
-        transform: translateY(-300px);
+        transform: translateX(-20000px);
     }
 }

@@ -2,6 +2,8 @@
 
 @section('content')
 
+
+
     @isset($info)
         <div class="container  wrapper">
             {{$info}}
@@ -66,20 +68,43 @@
                         <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                         <input type="hidden" id="comment" name="comment" placeholder="Додати побажання" />
 
-                        <div class="container">
+                         @isset($params)
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-lg-8 col-12">
+                                            <input type="text"
+                                                   id="search"
+                                                   class="form-control"
+                                                   name="search"
+                                                   value="{{ $params['routefrom']}}"
+                                                   readonly
+                                                   >
+                                        </div>
+
+                                        <div class="col-lg-4 col-12" id="div_from_number">
+                                            <input type="text" id="from_number" name="from_number"
+                                                   class="form-control"
+                                                   placeholder="Будинок?"
+                                                   value="{{ $params['routefromnumber']}}"
+                                                   style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
+                                                   readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                            <div class="container">
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
                                         <input type="text"
                                                id="search"
                                                class="form-control @error('search') is-invalid @enderror"
                                                name="search"
-                                               @isset($params['routefrom'])
-                                               value="{{ $params['routefrom']}}"
-                                               @endisset
+                                               onkeyup="hidFrom(this.value);"
+                                               onblur="hidFrom(this.value);"
+                                               onchange="hidFrom(this.value);"
+                                               autocomplete="off"
                                                value="{{ old('search') }}"
                                                placeholder="Звідки?"
-                                               onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
-                                               autocomplete="off"
                                                required>
 
                                         @error('search')
@@ -92,14 +117,11 @@
                                     <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number"
                                                class="form-control @error('from_number') is-invalid @enderror"
-
-                                               @isset($params['routefromnumber'])
-                                               value="{{ $params['routefromnumber']}}"
-                                               @endisset
-                                               value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
-                                               autocomplete="off"
-                                               style="text-align: center" >
+                                               value="{{ old('from_number') }}"
+                                               style="text-align: center; "
+                                               >
+
                                         @error('from_number')
                                         <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
@@ -108,6 +130,7 @@
                                     </div>
                                 </div>
                         </div>
+                        @endisset
 
 
                         <div class="container" style="text-align: left">
@@ -161,7 +184,10 @@
                                                value="{{ old('to_number') }}"
                                                placeholder="Будинок?"
                                                autocomplete="off"
-                                               style="text-align: center" >
+                                               @isset($params['routetonumberBlockNone'])
+                                                style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
+                                                @endisset
+                                               style="text-align: center; display: block">
                                         @error('to_number')
                                         <span class="invalid-feedback" role="alert">
                                                 <strong>{{ 'Це поле обов`язкове.' }}</strong>
@@ -273,13 +299,7 @@
                     </div>
                 </div>
             </form>
-            <div class="container text-center">
-                <div class="row">
-                    <button class="w-100 btn btn-danger btn-lg" style="margin-top: 5px" onclick="location.reload()">
-                        Очистити форму
-                    </button>
-                </div>
-            </div>
+
         <div class="container-fluid" style="margin-top: 10px">
             <div class="header gradient" >
                 <b>Зустріч -> </b>
