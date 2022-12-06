@@ -3,63 +3,85 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     <url>
-
         <loc>https://m.easy-order-taxi.site/</loc>
-
-        <lastmod>2022-09-27</lastmod>
-
+        <lastmod>2022-12-06</lastmod>
         <changefreq>monthly</changefreq>
-
         <priority>0.8</priority>
-
     </url>
 
     <url>
-
-        <loc>https://m.easy-order-taxi.site/homeWelcome</loc>
-
+        <loc>https://m.easy-order-taxi.site/home-Combo</loc>
         <changefreq>daily</changefreq>
-
     </url>
 
     <url>
-
-        <loc>https://m.easy-order-taxi.site/home-Street/000/%D0%9D%D0%BE%D0%B2%D0%B8%D0%B9%20%D0%B7%D0%B0%D0%BC%D0%BE%D0%B2%D0%BD%D0%B8%D0%BA</loc>
-
+        <loc>https://m.easy-order-taxi.site/home-Map-Combo</loc>
         <changefreq>weekly</changefreq>
-
     </url>
 
     <url>
-
-        <loc>https://m.easy-order-taxi.site/home-Object/000/%D0%9D%D0%BE%D0%B2%D0%B8%D0%B9%20%D0%B7%D0%B0%D0%BC%D0%BE%D0%B2%D0%BD%D0%B8%D0%BA</loc>
-
-        <changefreq>weekly</changefreq>
-
-    </url>
-
-    <url>
-
-        <loc>https://m.easy-order-taxi.site/home-Map/000/%D0%9D%D0%BE%D0%B2%D0%B8%D0%B9%20%D0%B7%D0%B0%D0%BC%D0%BE%D0%B2%D0%BD%D0%B8%D0%BA</loc>
-
-        <changefreq>weekly</changefreq>
-
-    </url>
-
-    <url>
-
         <loc>https://m.easy-order-taxi.site/login-taxi</loc>
-
-        <changefreq>weekly</changefreq>
-
+        <changefreq>monthly</changefreq>
     </url>
 
     <url>
+        <loc>https://m.easy-order-taxi.site/register</loc>
+        <changefreq>monthly</changefreq>
+    </url>
 
-        <loc>https://m.easy-order-taxi.site/registration/sms</loc>
+    <url>
+    <loc>https://m.easy-order-taxi.site/feedback</loc>
+        <changefreq>monthly</changefreq>
+    </url>
 
-        <changefreq>weekly</changefreq>
+    <url>
+        <loc>https://m.easy-order-taxi.site/taxi-gdbr</loc>
+        <changefreq>monthly</changefreq>
+    </url>
 
+    <url>
+        <loc>https://m.easy-order-taxi.site/taxi-umovy</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transfer/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferBorispol</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transfer/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferJulyany</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transfer/ЖД%20Южный/taxi.transferUZ</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transfer/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferAuto</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferFromBorispol</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferFromJulyany</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transferfrom/ЖД%20Южный/taxi.transferFromUZ</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://m.easy-order-taxi.site/transferfrom/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferFromAuto</loc>
+        <changefreq>monthly</changefreq>
     </url>
 
 </urlset>
