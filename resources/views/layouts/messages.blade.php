@@ -26,7 +26,7 @@
         <div class="container">
             <div class="alert alert-danger text-center">
                 <ul>
-                    {{'Не вказано номер будинку відправлення.'}}
+                    {{'Не вказано номер будинку.'}}
                 </ul>
             </div>
         </div>
@@ -36,7 +36,7 @@
         <div class="container">
             <div class="alert alert-danger text-center">
                 <ul>
-                    {{'Не вказано номер будинку призначення.'}}
+                    {{'Не вказано номер будинку.'}}
                 </ul>
             </div>
         </div>
@@ -46,7 +46,7 @@
         <div class="container">
             <div class="alert alert-danger text-center">
                 <ul>
-                    {{'Не вказано номер будинку призначення.'}}
+                    {{'Не вказано номер будинку.'}}
                 </ul>
             </div>
         </div>
