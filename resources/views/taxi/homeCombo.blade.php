@@ -89,14 +89,12 @@
                                                class="form-control @error('from_number') is-invalid @enderror"
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
+                                               style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
                                                readonly
                                                @else
                                                value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
                                                autocomplete="off"
-                                               @isset($params)
-                                               style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
-                                               @endisset
                                                style="text-align: center"
                                                @endisset>
                                     </div>
@@ -113,8 +111,9 @@
                                         @if($params['route_undefined'] == true)
                                         checked
                                         @endif
+                                   disabled
                                    @endisset
-                                   nochecked
+                                   value="1"
                                    onclick="showHide('block_city')">
                         </div>
 
@@ -266,13 +265,7 @@
                     </div>
                 </div>
             </form>
-<!--            <div class="container text-center">
-                <div class="row">
-                    <button class="w-100 btn btn-danger btn-lg" style="margin-top: 5px" onclick="location.reload()">
-                        Очистити форму
-                    </button>
-                </div>
-            </div>-->
+
         <div class="container-fluid" style="margin-top: 10px">
             <div class="header gradient" >
                 <b>Зустріч -> </b>
