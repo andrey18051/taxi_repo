@@ -1142,7 +1142,8 @@ class WebOrderController extends Controller
         ]);
         $response_arr_from = json_decode($response_from, true);
         if ($response_arr_from['geo_streets']['geo_street'] == null) {
-            return redirect()->route('homeMapCombo')->with('error', 'Помилка створення маршруту: Не вірна адреса відправлення.');
+            return redirect()->route('homeMapCombo')->with('error', 'Помилка створення маршруту:
+                Перевірьте адресу відправлення або зверніться до оператора.');
         }
         $params['routefrom'] = $response_arr_from['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
         $params['routefromnumber'] = $response_arr_from['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
@@ -1225,14 +1226,11 @@ class WebOrderController extends Controller
          */
 
         if ($response_arr_to['geo_streets']['geo_street'] == null) {
-            WebOrderController::version_combo();
-            $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу " +
-                "відправлення/призначення або не вибрана опція поїздки по місту. " +
-                "Правильно вводьте або зверніться до оператора.";
-            $json_arr = WebOrderController::tariffs();
-            return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
-                'info' => $info]);
+            return redirect()->route('homeMapCombo')->with('error', "Помилка створення маршруту:
+                Перевірьте адресу призначення або не вибрана опція поїздки по місту.
+                Правильно вводьте або зверніться до оператора.");
         }
+
         /**
          * проверка на робота
          */
