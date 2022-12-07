@@ -515,7 +515,7 @@ img {vertical-align: middle;}
 }
 @keyframes fadeCooke{
     0%{
-        transform: translateX(-20000px);
+        transform: translateX(-2000px);
     }
     20% {
         transform: translateX(0px);
@@ -524,6 +524,6 @@ img {vertical-align: middle;}
         transform: translateX(0px);
     }
     100%{
-        transform: translateX(-20000px);
+        transform: translateX(-2000px);
     }
 }

@@ -548,101 +548,7 @@ class WebOrderController extends Controller
         ]);
         return $response->status();
     }
-    /**
-     * Проверка адреса
-     */
 
-    public function adressValidate($req)
-    {
-        /**
-         * По городу
-         */
-
-        if ($req->route_undefined == 1 || $req->route_undefined == 'on') { //По городу
-
-            $paramsAdress['route_undefined'] = true;
-            /**
-             * Проверяем только адрес Откуда
-             */
-            $req->validate([
-                'search' => [new ComboName()],
-            ]);
-
-            $arrComboFrom = Combo::where('name', $req->search)->first();
-
-            if ($arrComboFrom->street == 1) { //Проверка на признак улицы
-                $req->validate([
-                    'from_number' => ['required']
-                ]);
-                $paramsAdress['routefromnumberBlockNone'] = 'block'; // Открываем поле дома для улиц
-                $paramsAdress['routetonumberBlockNone'] = 'block'; //Скрываем поле дома
-                $paramsAdress['routefrom'] = $req->search; //Обязательный. Улица откуда.
-                $paramsAdress['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
-            } else {
-                $paramsAdress['routefromnumberBlockNone'] = 'none'; //Скрываем поле дома
-                $paramsAdress['routetonumberBlockNone'] = 'none'; //Скрываем поле дома
-                $paramsAdress['routefrom'] = $req->search; //Обязательный. Улица откуда.
-                $paramsAdress['routefromnumber'] = null; //Обязательный. Обнуляем поле Дом откуда.
-            }
-
-            $paramsAdress['routeto'] = $req->search; //Обязательный. Улица куда.
-            $paramsAdress['routetonumber'] =  $req->from_number; //Обязательный. Дом куда.
-            $paramsAdress['route_undefined'] = true; //По городу: True, False
-
-        } else { //Не по городу
-            $paramsAdress['route_undefined'] = false; //По городу: True, False
-
-            $req->validate([
-                'search' => [new ComboName()],
-                'search1' => [new ComboName()],
-            ]);
-
-            /**
-             * Проверяем заполненность номера дома
-             */
-            $arrComboFrom = Combo::where('name', $req->search)->first();
-            $arrComboTo = Combo::where('name', $req->search1)->first();
-
-            if ($arrComboFrom->street == 1) { //Проверка на признак улицы
-                $paramsAdress['routefromnumberBlockNone'] = 'block'; // Открываем поле дома для улиц
-                $paramsAdress['routefrom'] = $req->search; //Обязательный. Улица откуда.
-                $paramsAdress['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
-            } else {
-                $paramsAdress['routefromnumberBlockNone'] = 'none'; //Скрываем поле дома
-                $paramsAdress['routefrom'] = $req->search; //Обязательный. Улица откуда.
-                $paramsAdress['routefromnumber'] = null; //Обязательный. Обнуляем поле Дом откуда.
-            }
-
-            if ($arrComboTo->street == 1) {
-                $paramsAdress['routetonumberBlockNone'] = 'block'; // Открываем поле дома для улиц
-                $paramsAdress['routeto'] = $arrComboTo->name; //Обязательный. Улица куда.
-                $paramsAdress['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
-            } else {
-                $paramsAdress['routetonumberBlockNone'] = 'none'; // Скрываем поле дома для улиц
-                $paramsAdress['routeto'] = $arrComboTo->name; //Обязательный. Улица куда.
-                $paramsAdress['routetonumber'] = null; //Обязательный. Обнуляем поле Дом куда.
-            }
-
-            if ($arrComboFrom->street == 1 && $arrComboTo->street == 1) {
-                $req->validate([
-                    'from_number' => ['required'],
-                    'to_number' => ['required']
-                ]);
-            } else {
-                if ($arrComboFrom->street == 1 && $arrComboTo->street !== 1) {
-                    $req->validate([
-                        'from_number' => ['required'],
-                    ]);
-                }
-                if ($arrComboFrom->street !== 1 && $arrComboTo->street == 1) {
-                    $req->validate([
-                        'to_number' => ['required']
-                    ]);
-                }
-            }
-        };
-        return $paramsAdress;
-    }
 
     /**
      * Работа с заказами
@@ -654,7 +560,76 @@ class WebOrderController extends Controller
         /**
          * Проверка адресов в базе
          */
-        $params = WebOrderController::adressValidate($req);
+        $req->validate([
+            'search' => new ComboName(),
+            'from_number' => ['nullable'],
+            'search1' => ['nullable', new ComboName()],
+            'to_number' => ['nullable'],
+        ]);
+        /**
+         * Если адреса есть, проверяем заполненность номера дома "откуда"
+         */
+
+
+
+        $arrComboFrom = Combo::where('name', $req->search)->first();
+
+        if ($arrComboFrom->street == 1) { //Проверка на признак улицы
+             $req->validate([
+                'search' => new ComboName(),
+                'from_number' => ['required']
+            ]);
+            $params['routefromnumberBlockNone'] = 'block'; // Открываем поле дома для улиц
+            $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
+            $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
+        } else {
+            $req->validate([
+                'from_number' => ['nullable']
+            ]);
+            $params['routefromnumberBlockNone'] = 'none'; //Скрываем поле дома
+            $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
+            $params['routefromnumber'] = ''; //Обязательный. Обнуляем поле Дом откуда.
+        }
+
+        /**
+         * По городу
+         */
+        $params['route_undefined'] = false; //По городу: True, False
+        if ($req->route_undefined == 1 || $req->route_undefined == 'on') {
+            $params['routeto'] = $params['routefrom']; //Обязательный. Улица куда.
+            $params['routetonumber'] =  $params['routefromnumber']; //Обязательный. Дом куда.
+            $params['route_undefined'] = true; //По городу: True, False
+        };
+       // dd($params);
+        /**
+         * Проверка адреса "Куда"
+         */
+        if ($params['route_undefined'] == false) {
+            $req->validate([
+                'search1' => [new ComboName()],
+                'to_number' => ['nullable'],
+            ]);
+
+            /**
+             * Если адрес "Куда" есть, проверяем заполненность номера дома "куда"
+             */
+            $arrComboTo = Combo::where('name', $req->search1)->first();
+
+            if ($arrComboTo) {
+                if ($arrComboTo->street == 1) {
+                    $params['routetonumberBlockNone'] = 'block'; // Открываем поле дома для улиц
+                    $params['routeto'] = $arrComboTo->name; //Обязательный. Улица куда.
+                    $req->validate([
+                        'to_number' => ['required']
+                    ]);
+                    $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
+                } else {
+                    $params['routetonumberBlockNone'] = 'none'; // Скрываем поле дома для улиц
+                    $params['routeto'] = $arrComboTo->name; //Обязательный. Улица куда.
+                    $params['routetonumber'] = null; //Обязательный. Обнуляем поле Дом куда.
+                }
+            }
+        }
 
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
@@ -783,7 +758,6 @@ class WebOrderController extends Controller
                         ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
                 }
                 $url = $connectAPI . '/api/weborders/cost';
-
                 $response = Http::withHeaders([
                     'Authorization' => $authorization,
                 ])->post($url, [

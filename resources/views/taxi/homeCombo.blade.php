@@ -78,6 +78,7 @@
                                                name="search"
                                                @isset($params['routefrom'])
                                                value="{{ $params['routefrom']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('search') }}"
                                                placeholder="Звідки?"
@@ -97,13 +98,14 @@
                                                class="form-control @error('from_number') is-invalid @enderror"
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
                                                autocomplete="off"
-                                                @isset($params)
-                                                       style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
-                                                @endisset
+                                               @isset($params)
+                                               style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
+                                               @endisset
                                                style="text-align: center" >
                                         @error('from_number')
                                         <span class="invalid-feedback" role="alert">
@@ -136,6 +138,7 @@
                                  @else
                                  style="display:block"
                                  @endif
+                            readonly
                             @else
                              style="display:block"
                             @endisset
@@ -146,6 +149,7 @@
                                                class="form-control @error('search1') is-invalid @enderror"
                                                @isset($params['routeto'])
                                                value="{{ $params['routeto']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('search1') }}"
                                                onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
@@ -163,6 +167,7 @@
                                                class="form-control @error('to_number') is-invalid @enderror"
                                                @isset($params['routetonumber'])
                                                value="{{ $params['routetonumber']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('to_number') }}"
                                                placeholder="Будинок?"
@@ -276,8 +281,11 @@
 
                 <div class="container text-center">
                     <div class="row">
+                        <a class="w-100 btn btn-danger btn-lg" style="margin-top: 5px" href="{{route('homeCombo')}}">
+                            Очистити поля форми
+                        </a>
                          <button class="w-100 btn btn-primary btn-lg" style="margin-top: 5px" type="submit">
-                                 Розрахувати вартість поїздки
+                            Розрахувати вартість поїздки
                          </button>
                     </div>
                 </div>
