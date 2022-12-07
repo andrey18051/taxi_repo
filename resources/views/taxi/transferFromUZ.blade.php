@@ -20,7 +20,7 @@
 
         <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_object">
 
-            <form action="{{route('search-cost-transfer-from', "taxi.transferFromAuto")}}" id="form_object">
+            <form action="{{route('search-cost-transfer-from', "taxi.transferFromUz")}}" id="form_object">
                 @csrf
                 <div class="row">
                     <div class="col-sm-8 col-lg-8">
@@ -37,48 +37,39 @@
                         <input type="hidden" class="form-control" id="routefrom" name="routefrom" autocomplete="off" value="{{ $params['routefrom']}}" required>
 
                         <div class="container">
-                            <div class="row">
-                                <div class="col-lg-8 col-12">
-                                    <input type="text"
-                                           id="search"
-                                           class="form-control @error('search') is-invalid @enderror"
-                                           name="search"
-                                           @isset($params['routeto'])
-                                           value="{{ $params['routeto']}}"
-                                           @endisset
-                                           value="{{ old('search') }}"
-                                           placeholder="Звідки?"
-                                           onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
-                                           autocomplete="off"
-                                           required>
-
-                                    @error('search')
-                                    <span class="invalid-feedback" role="alert">
-                                             <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                                <div class="col-lg-4 col-12" id="div_to_number">
-                                    <input type="text" id="routetonumber" name="routetonumber"
-                                           class="form-control @error('routetonumber') is-invalid @enderror"
-                                           @isset($params['routetonumber'])
-                                           value="{{ $params['routetonumber']}}"
-                                           @endisset
-                                           value="{{ old('routetonumber') }}"
-                                           placeholder="Будинок?"
-                                           autocomplete="off"
-                                           @isset($params)
-                                           style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
-                                           @endisset
-                                           style="text-align: center" >
-                                    @error('routetonumber')
-                                    <span class="invalid-feedback" role="alert">
-                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
-                                                </span>
-                                    @enderror
+                                <div class="row">
+                                    <div class="col-lg-8 col-12">
+                                        <input type="text"
+                                               id="search"
+                                               class="form-control @error('search') is-invalid @enderror"
+                                               name="search"
+                                               @isset($params['routeto'])
+                                               value="{{ $params['routeto']}}"
+                                               readonly
+                                               @endisset
+                                               value="{{ old('search') }}"
+                                               placeholder="Звідки?"
+                                               onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
+                                               autocomplete="off"
+                                               required>
+                                    </div>
+                                    <div class="col-lg-4 col-12" id="div_to_number">
+                                        <input type="text" id="routetonumber" name="routetonumber"
+                                               class="form-control @error('routetonumber') is-invalid @enderror"
+                                               @isset($params['routetonumber'])
+                                               value="{{ $params['routetonumber']}}"
+                                               readonly
+                                               @endisset
+                                               value="{{ old('routetonumber') }}"
+                                               placeholder="Будинок?"
+                                               autocomplete="off"
+                                               @isset($params)
+                                               style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
+                                               @endisset
+                                               style="text-align: center" >
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
                         <div style="display: none" class="container" style="text-align: left">
                             <label class="form-check-label" for="route_undefined">По місту</label>
@@ -182,6 +173,9 @@
 
                 </div>
                 <div class="container text-center">
+                    <a class="w-100 btn btn-danger btn-lg"
+                       href="{{route('transferFrom',  ["ЖД Южный", "taxi.transferFromUZ"])}}"
+                       style="margin-top: 5px">Очистити форму</a>
                     <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </div>
             </form>

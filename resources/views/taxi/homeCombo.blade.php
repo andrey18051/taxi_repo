@@ -72,10 +72,8 @@
                         <div class="container">
                                 <div class="row">
                                     <div class="col-lg-8 col-12">
-                                        <input type="text"
-                                               id="search"
+                                        <input type="text"  id="search" name="search"
                                                class="form-control @error('search') is-invalid @enderror"
-                                               name="search"
                                                @isset($params['routefrom'])
                                                value="{{ $params['routefrom']}}"
                                                readonly
@@ -85,33 +83,22 @@
                                                onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                                autocomplete="off"
                                                required>
-
-                                        @error('search')
-                                        <span class="invalid-feedback" role="alert">
-                                             <strong>{{ $message }}</strong>
-                                        </span>
-                                        @enderror
                                     </div>
-
                                     <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number"
                                                class="form-control @error('from_number') is-invalid @enderror"
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
                                                readonly
-                                               @endisset
+                                               @else
                                                value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
                                                autocomplete="off"
                                                @isset($params)
                                                style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
                                                @endisset
-                                               style="text-align: center" >
-                                        @error('from_number')
-                                        <span class="invalid-feedback" role="alert">
-                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
-                                                </span>
-                                        @enderror
+                                               style="text-align: center"
+                                               @endisset>
                                     </div>
 
                                 </div>
@@ -155,12 +142,6 @@
                                                onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
                                                placeholder="Куди?"
                                                autocomplete="off">
-
-                                        @error('search1')
-                                        <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                                </span>
-                                        @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_to_number">
                                         <input type="text" id="to_number" name="to_number"
@@ -176,11 +157,6 @@
                                                style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
                                                @endisset
                                                style="text-align: center" >
-                                        @error('to_number')
-                                        <span class="invalid-feedback" role="alert">
-                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
-                                                </span>
-                                        @enderror
                                     </div>
                                 </div>
                         </div>
@@ -282,7 +258,7 @@
                 <div class="container text-center">
                     <div class="row">
                         <a class="w-100 btn btn-danger btn-lg" style="margin-top: 5px" href="{{route('homeCombo')}}">
-                            Очистити поля форми
+                            Очистити форму
                         </a>
                          <button class="w-100 btn btn-primary btn-lg" style="margin-top: 5px" type="submit">
                             Розрахувати вартість поїздки

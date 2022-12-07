@@ -44,24 +44,20 @@
                                                id="search" name="search" autocomplete="off"
                                                placeholder="Звідки?"
 
-                                               @if($params['routefrom'])
+                                               @isset($params['routefrom'])
                                                value="{{ $params['routefrom']}}"
-                                               @else('search')
+                                               readonly
+                                               @endisset
                                                value="{{ old('search') }}"
-                                               @endif
                                                onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                                required>
-                                        @error('search')
-                                        <span class="invalid-feedback" role="alert">
-                                             <strong>{{ $message }}</strong>
-                                        </span>
-                                        @enderror
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_from_number">
                                         <input type="text" id="from_number" name="from_number"
                                                class="form-control @error('from_number') is-invalid @enderror"
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
@@ -70,11 +66,6 @@
                                                style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
                                                @endisset
                                                style="text-align: center" >
-                                        @error('from_number')
-                                        <span class="invalid-feedback" role="alert">
-                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
-                                                </span>
-                                        @enderror
                                     </div>
                                 </div>
                             </div>

@@ -44,24 +44,20 @@
                                            id="search" name="search" autocomplete="off"
                                            placeholder="Звідки?"
 
-                                           @if($params['routefrom'])
+                                           @isset($params['routefrom'])
                                            value="{{ $params['routefrom']}}"
-                                           @else('search')
+                                           readonly
+                                           @endisset
                                            value="{{ old('search') }}"
-                                           @endif
                                            onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
                                            required>
-                                    @error('search')
-                                    <span class="invalid-feedback" role="alert">
-                                             <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
                                 </div>
                                 <div class="col-lg-4 col-12" id="div_from_number">
                                     <input type="text" id="from_number" name="from_number"
                                            class="form-control @error('from_number') is-invalid @enderror"
                                            @isset($params['routefromnumber'])
                                            value="{{ $params['routefromnumber']}}"
+                                           readonly
                                            @endisset
                                            value="{{ old('from_number') }}"
                                            placeholder="Будинок?"
@@ -70,11 +66,6 @@
                                            style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
                                            @endisset
                                            style="text-align: center" >
-                                    @error('from_number')
-                                    <span class="invalid-feedback" role="alert">
-                                                <strong>{{ 'Це поле обов`язкове.' }}</strong>
-                                                </span>
-                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -181,8 +172,10 @@
 
                 </div>
                 <div class="container text-center">
-                    <a class="w-100 btn btn-danger btn-lg" href="{{route('transfer',
-                                                     ["Центральный автовокзал (у шлагбаума пл.Московская 3)", "taxi.transferAuto"])}}" style="margin-top: 5px">Очистити форму</a>
+                    <a class="w-100 btn btn-danger btn-lg"
+                       href="{{route('transfer',
+                                                     ["Аэропорт Борисполь терминал Д", "taxi.transferBorispol"])}}"
+                       style="margin-top: 5px">Очистити форму</a>
                     <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
                 </div>
             </form>
