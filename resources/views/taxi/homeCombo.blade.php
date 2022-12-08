@@ -54,6 +54,7 @@
                 </div>
             </div>
             <br>
+
             <form action="{{route('search-cost')}}" id="form">
                 @csrf
                 <div class="row">
@@ -76,7 +77,6 @@
                                                class="form-control @error('search') is-invalid @enderror"
                                                @isset($params['routefrom'])
                                                value="{{ $params['routefrom']}}"
-                                               readonly
                                                @endisset
                                                value="{{ old('search') }}"
                                                placeholder="Звідки?"
@@ -90,13 +90,13 @@
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
                                                style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
-                                               readonly
                                                @else
                                                value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
                                                autocomplete="off"
                                                style="text-align: center"
                                                @endisset>
+
                                     </div>
 
                                 </div>
@@ -111,7 +111,6 @@
                                         @if($params['route_undefined'] == true)
                                         checked
                                         @endif
-                                   disabled
                                    @endisset
                                    value="1"
                                    onclick="showHide('block_city')">
@@ -135,7 +134,6 @@
                                                class="form-control @error('search1') is-invalid @enderror"
                                                @isset($params['routeto'])
                                                value="{{ $params['routeto']}}"
-                                               readonly
                                                @endisset
                                                value="{{ old('search1') }}"
                                                onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
@@ -147,7 +145,6 @@
                                                class="form-control @error('to_number') is-invalid @enderror"
                                                @isset($params['routetonumber'])
                                                value="{{ $params['routetonumber']}}"
-                                               readonly
                                                @endisset
                                                value="{{ old('to_number') }}"
                                                placeholder="Будинок?"
@@ -256,7 +253,9 @@
 
                 <div class="container text-center">
                     <div class="row">
-                        <a class="w-100 btn btn-danger btn-lg" style="margin-top: 5px" href="{{route('homeCombo')}}">
+                        <a class="w-100 btn btn-danger btn-lg" style="margin-top: 5px"
+                           onclick="sessionStorage.clear();"
+                           href="{{route('homeCombo')}}">
                             Очистити форму
                         </a>
                          <button class="w-100 btn btn-primary btn-lg" style="margin-top: 5px" type="submit">
@@ -307,7 +306,22 @@
 
     <script defer type="text/javascript">
 
-        /**
+        if (sessionStorage.getItem('hidFrom') == 'none') {
+            document.getElementById('from_number').style.display='none';
+            document.getElementById('from_number').value=null;
+        }
+        if (sessionStorage.getItem('hidFrom') == 'block') {
+            document.getElementById('from_number').style.display='block';
+        }
+
+        if (sessionStorage.getItem('hidTo') == 'none') {
+            document.getElementById('to_number').style.display='none';
+            document.getElementById('to_number').value=null;
+        }
+        if (sessionStorage.getItem('hidTo') == 'block') {
+            document.getElementById('to_number').style.display='block';
+        }
+         /**
          * Функция Скрывает/Показывает блок
          * @author ox2.ru дизайн студия
          **/
@@ -344,10 +358,12 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
+                        sessionStorage.setItem('hidFrom', 'none')
                         document.getElementById('from_number').style.display='none';
                         document.getElementById('from_number').value=null;
                     }
                     if (data == 1) {
+                        sessionStorage.setItem('hidFrom', 'block')
                         document.getElementById('from_number').style.display='block';
                     }
                 }
@@ -367,10 +383,12 @@
 
                 success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
                     if (data == 0) {
+                        sessionStorage.setItem('hidTo', 'none')
                         document.getElementById('to_number').style.display='none';
                         document.getElementById('to_number').value=null;
                     }
                     if (data == 1) {
+                        sessionStorage.setItem('hidTo', 'block')
                         document.getElementById('to_number').style.display='block';
                     }
 
