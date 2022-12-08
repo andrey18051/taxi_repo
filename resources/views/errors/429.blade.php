@@ -1,49 +1,15 @@
-@extends('layouts.taxi')
+@extends('layouts.taxiNewCombo')
 
 @section('content')
-    <style>
-        html, body {
-            background-color: #fff;
-            color: #636b6f;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 100;
-            height: 100vh;
-            margin: 0;
-        }
 
-/*        .full-height {
-            height: 100vh;
-        }*/
 
-        .flex-center {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-        }
-
-        .position-ref {
-            position: relative;
-        }
-
-        .content {
-            text-align: center;
-        }
-
-        .title {
-            font-size: 36px;
-            padding: 20px;
-        }
-    </style>
-
-    <div class="flex-center position-ref full-height">
-        <div class="content">
-            <div class="title">
-                Помилка 429 (Много запитів)
+    <div class="container-fluid">
+            <div class="gradient alert-danger" style="text-align: center">
+                <h1 class="gradient">Помилка 429 (Много запитів)</h1>
             </div>
-        </div>
     </div>
     <div class="container">
-        <a  class="w-100 btn btn-outline-success btn-lg" href="{{route('home')}}">
+        <a  class="w-100 btn btn-outline-success btn-lg" href="{{route('homeCombo')}}">
             Замовити таксі
         </a>
     </div>
