@@ -77,6 +77,7 @@
                                                class="form-control @error('search') is-invalid @enderror"
                                                @isset($params['routefrom'])
                                                value="{{ $params['routefrom']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('search') }}"
                                                placeholder="Звідки?"
@@ -90,6 +91,7 @@
                                                @isset($params['routefromnumber'])
                                                value="{{ $params['routefromnumber']}}"
                                                style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
+                                               readonly
                                                @else
                                                value="{{ old('from_number') }}"
                                                placeholder="Будинок?"
@@ -111,6 +113,7 @@
                                         @if($params['route_undefined'] == true)
                                         checked
                                         @endif
+                                   readonly
                                    @endisset
                                    value="1"
                                    onclick="showHide('block_city')">
@@ -134,6 +137,7 @@
                                                class="form-control @error('search1') is-invalid @enderror"
                                                @isset($params['routeto'])
                                                value="{{ $params['routeto']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('search1') }}"
                                                onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
@@ -145,6 +149,7 @@
                                                class="form-control @error('to_number') is-invalid @enderror"
                                                @isset($params['routetonumber'])
                                                value="{{ $params['routetonumber']}}"
+                                               readonly
                                                @endisset
                                                value="{{ old('to_number') }}"
                                                placeholder="Будинок?"
