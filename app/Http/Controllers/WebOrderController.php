@@ -645,6 +645,38 @@ class WebOrderController extends Controller
     }
 
     /**
+     * Проверка адреса
+     */
+
+    public function adressValidateTransfer($req)
+    {
+        $paramsAdress['route_undefined'] = false; //По городу: True, False
+
+        $req->validate([
+            'search' => [new ComboName()],
+        ]);
+        $paramsAdress['routefrom'] = $req->search; //Обязательный. Улица откуда.
+        $paramsAdress['routefromnumberBlockNone'] = 'none'; //Скрываем поле дома
+        $paramsAdress['routefromnumber'] = null; //Обязательный. Обнуляем поле Дом откуда.
+        /**
+         * Проверяем заполненность номера дома
+         */
+        $arrComboFrom = Combo::where('name', $req->search)->first();
+
+        //Проверка на признак улицы
+        if ($arrComboFrom->street == 1) {
+            $req->validate([
+                'from_number' => ['required'],
+            ]);
+            $paramsAdress['routefromnumberBlockNone'] = 'block'; // Открываем поле дома для улиц
+            $paramsAdress['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
+        }
+
+        return $paramsAdress;
+    }
+
+
+    /**
      * Работа с заказами
      * Расчет стоимости заказа по улицам
      * @return string
@@ -1413,28 +1445,8 @@ class WebOrderController extends Controller
      */
     public function costtransfer($page, Request $req)
     {
-        /**
-         * Проверка адресов в базе
-         */
-        $req->validate([
-            'search' => new ComboName(),
-            'from_number' => ['nullable'],
-        ]);
-        /**
-         * Если адреса есть, проверяем заполненность номера дома "откуда"
-         */
-
-        $arrCombo = Combo::where('name', $req->search)->first();
-        $params['routefromnumberBlockNone'] = 'none;'; //Скрываем поле дома
-        $params['routefromnumber'] = null; //Обязательный. Дом куда.
-        if ($arrCombo->street == 1) {
-            $req->validate([
-                'from_number' => ['required']
-            ]);
-            $params['routefromnumberBlockNone'] = 'block;'; // Открываем поле дома для улиц
-            $params['routefromnumber'] = $req->from_number; //Обязательный. Дом откуда.
-        }
-
+        $params = WebOrderController::adressValidateTransfer($req);
+     // dd($params);
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
         /**
@@ -1442,8 +1454,6 @@ class WebOrderController extends Controller
          */
         $params['user_full_name'] = "Новий замовник";
         $params['user_phone'] = '000' ;
-
-        $params['routefrom'] = $req->search; //Обязательный. Улица откуда.
 
         $params['client_sub_card'] = null;
         $params['route_address_entrance_from'] = null;
@@ -1660,6 +1670,7 @@ class WebOrderController extends Controller
         }
         if ($error) {
             $json_arr = WebOrderController::tariffs();
+            //dd($params);
             return view($page, ['json_arr' => $json_arr, 'params' => $params,
                 'info' => "Не пройдено перевірку на робота."]);
         }
