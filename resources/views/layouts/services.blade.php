@@ -213,6 +213,42 @@
                 href="{{route('homeCombo')}}" target="_blank">Онлайн таксі</a>
             <a  class="borderElement"
                 href="{{route('homeCombo')}}" target="_blank">Моє таксі</a>
+
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Такси максим</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Найдешевше такси Києва</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Дешеве таксі Київ</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Таксі Київ и область</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Таксі Київ недорого телефон</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Номер дешевого таксі в Києве</a>
+
+
+
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Таксі Київ недорого онлайн</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Телефон таксі Київ недорого</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Економ таксі Київ онлайн</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Номера служб таксі в Києве</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Уклон Київ телефон</a>
+            <a  class="borderElement"
+                href="{{route('homeCombo')}}" target="_blank">Убер таксі телефон</a>
+
+
+
+
+
+
+
+
             <a  class="borderElement"
                 href="{{route('homeMapCombo')}}" target="_blank">Замовлення таксі по мапи</a>
             <a  class="borderElement"
