@@ -343,7 +343,7 @@
                  </div>
 
                  <news-component></news-component>
-
+                 <div class="fb-comments" data-href="https://m.easy-order-taxi.site" data-width="auto" data-numposts="5"></div>
                  <a  href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
                      <blockquote class="blockquote-3">
                          <p> <?php echo $quitesArr[$rand] ?></p>
