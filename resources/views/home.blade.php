@@ -28,7 +28,32 @@
 
 <div class="container">
     <h3>Отчет по IP</h3>
-    <a type="button" href="{{ route('reportIP') }}" class="btn">Скачать</a>
+
+    <form action="{{route('reportIP')}}" id="form">
+        @csrf
+        <div class="row card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateFrom" name="dateFrom"
+                               value="{{ date('Y-m-d', strtotime("-1 month")) }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateTo" name="dateTo"
+                               value="{{  date('Y-m-d') }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" type="submit">
+                            Скачать отчет
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
 </div>
 
 <div class="container">

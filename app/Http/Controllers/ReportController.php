@@ -16,8 +16,12 @@ use Stevebauman\Location\Facades\Location;
 
 class ReportController extends Controller
 {
-    public function reportIP()
+    public function reportIP(Request $request)
     {
+
+        $dateFrom = $request->dateFrom;
+        $dateTo = $request->dateTo;
+
         $reportIP_path = Storage::path('public/reports/reportIP.xlsx');
 
         $spreadsheet = new Spreadsheet();
@@ -31,7 +35,7 @@ class ReportController extends Controller
 
         $i = 0;
 
-        $orders = Order::all();
+        $orders = Order::whereBetween('created_at', [$dateFrom, $dateTo])->get();
 
         foreach ($orders as $value) {
             if ($value->IP_ADDR !== null) {
@@ -51,7 +55,8 @@ class ReportController extends Controller
         if($i !== 0) {
             $orders_unic = array_unique($orders_unic);
 
-            $sheet->setCellValue('B' . 1, 'Это список IP, с которых делали расчеты маршрутов');
+            $sheet->setCellValue('B' . 1, 'Это список IP, с которых делали расчеты маршрутов'
+                . ' с ' . $dateFrom . ' по ' . $dateTo);
 
             $sheet->getStyle('A2')->applyFromArray([
                 'borders' => [
@@ -106,7 +111,7 @@ class ReportController extends Controller
 
         $i = 0;
         $IPs_page = null;
-        $IPs = IP::all();
+        $IPs = IP::whereBetween('created_at', [$dateFrom, $dateTo])->get();
 
         foreach ($IPs as $value) {
             if ($value->IP_ADDR !== null) {
@@ -124,7 +129,8 @@ class ReportController extends Controller
             }
         }
         if($i !== 0) {
-            $sheet->setCellValue('B' . 1, 'Это список IP,которые посещали конкретные страницы');
+            $sheet->setCellValue('B' . 1, 'Это список IP,которые посещали конкретные страницы'
+             . ' с ' . $dateFrom . ' по ' . $dateTo);
 
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -220,6 +226,8 @@ class ReportController extends Controller
             $sheet->getColumnDimension('N')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список уникальных IP,которые поcетили сайт');
+            $sheet->setCellValue('C1', 'c ' . $dateFrom);
+            $sheet->setCellValue('D1', 'по ' . $dateTo);
             $sheet->setCellValue('A2', 'IP');
             $sheet->setCellValue('B2', 'countryName');
             $sheet->setCellValue('C2', 'countryCode');
@@ -300,7 +308,7 @@ class ReportController extends Controller
         $spreadsheet->addSheet($myWorkSheet, 3);
         $sheet = $spreadsheet->getSheet(3);
 
-        $orderWebs = Orderweb::all();
+        $orderWebs = Orderweb::whereBetween('created_at', [$dateFrom, $dateTo])->get();
 
         $sheet->getColumnDimension('A')->setAutoSize(true);
         $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -320,6 +328,8 @@ class ReportController extends Controller
         $sheet->getColumnDimension('P')->setAutoSize(true);
 
         $sheet->setCellValue('B1', 'Это список заказов');
+        $sheet->setCellValue('C1', 'c ' . $dateFrom);
+        $sheet->setCellValue('D1', 'по ' . $dateTo);
         $sheet->setCellValue('A2', 'N');
         $sheet->setCellValue('B2', 'Заказчик');
         $sheet->setCellValue('C2', 'Дополнительно, грн');
