@@ -28,8 +28,7 @@
 
 <div class="container">
     <h3>Отчет по IP</h3>
-
-    <form action="{{route('reportIP')}}" id="form">
+    <form action="{{route('reportIpUniqShort')}}" id="form">
         @csrf
         <div class="row card">
             <div class="card-body">
@@ -46,7 +45,7 @@
                     </div>
                     <div class="col-md-2">
                         <button class="btn btn-primary" type="submit">
-                            Скачать отчет
+                            Уникальные IP
                         </button>
                     </div>
                 </div>
@@ -54,6 +53,106 @@
         </div>
     </form>
 
+    <form action="{{route('reportIpRoute')}}" id="form">
+        @csrf
+        <div class="row card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateFrom" name="dateFrom"
+                               value="{{ date('Y-m-d', strtotime("-1 month")) }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateTo" name="dateTo"
+                               value="{{  date('Y-m-d') }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" type="submit">
+                            Расчеты поездок
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <form action="{{route('reportIpPage')}}" id="form">
+        @csrf
+        <div class="row card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateFrom" name="dateFrom"
+                               value="{{ date('Y-m-d', strtotime("-1 month")) }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateTo" name="dateTo"
+                               value="{{  date('Y-m-d') }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" type="submit">
+                            Страницы сайта
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <form action="{{route('reportIpUniq')}}" id="form">
+        @csrf
+        <div class="row card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateFrom" name="dateFrom"
+                               value="{{ date('Y-m-d', strtotime("-1 month")) }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateTo" name="dateTo"
+                               value="{{  date('Y-m-d') }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" type="submit">
+                            Расшифровка IP
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+    <form action="{{route('reportIpOrder')}}" id="form">
+        @csrf
+        <div class="row card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateFrom" name="dateFrom"
+                               value="{{ date('Y-m-d', strtotime("-1 month")) }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-5">
+                        <input class="form-control" type="date" id="dateTo" name="dateTo"
+                               value="{{  date('Y-m-d') }}"
+                               autocomplete="off" placeholder="Начало периода">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" type="submit">
+                            Заказы поездок
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
 <div class="container">

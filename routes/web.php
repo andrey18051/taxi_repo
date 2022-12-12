@@ -700,7 +700,20 @@ Route::get('/tableReklama', function () {
 /**
  * Отчеты
  */
-Route::get('/reportIP', [ReportController::class, 'reportIP'])->middleware('role:superadministrator')->name('reportIP');
+Route::get('/reportIpRoute', [ReportController::class, 'reportIpRoute'])->middleware('role:superadministrator')
+    ->name('reportIpRoute');
+
+Route::get('/reportIpPage', [ReportController::class, 'reportIpPage'])->middleware('role:superadministrator')
+    ->name('reportIpPage');
+
+Route::get('/reportIpUniq', [ReportController::class, 'reportIpUniq'])->middleware('role:superadministrator')
+    ->name('reportIpUniq');
+
+Route::get('/reportIpUniqShort', [ReportController::class, 'reportIpUniqShort'])->middleware('role:superadministrator')
+    ->name('reportIpUniqShort');
+
+Route::get('/reportIpOrder', [ReportController::class, 'reportIpOrder'])->middleware('role:superadministrator')
+    ->name('reportIpOrder');
 
 
 Route::get('/taxi/account', [TaxiController::class, 'account'])->name('taxi-account');
