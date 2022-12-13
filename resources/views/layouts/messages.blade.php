@@ -56,7 +56,9 @@
         <div class="container">
             <div class="alert alert-danger text-center">
                 @foreach($errors->all() as $error)
-                    {{$error}}
+
+                        {{$error}}
+
                 @endforeach
             </div>
         </div>

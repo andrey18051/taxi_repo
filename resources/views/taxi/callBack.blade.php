@@ -33,9 +33,6 @@
                                         <!-- Phone input -->
                                         <div class="form-outline mb-2 col-12"  >
                                             <input type="text" class="form-control  @error('user_phone') is-invalid @enderror" name="user_phone"
-
-
-
                                                    @guest
                                                        @isset($user_phone)
                                                        value="{{$user_phone}}"
@@ -44,7 +41,6 @@
                                                    value="{{ Auth::user()->user_phone }}"
                                                    @endguest
                                                    value="{{ old('user_phone') }}"
-
                                                    placeholder="Телефон? Приклад: +380936665544">
                                         </div>
 

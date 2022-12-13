@@ -2715,7 +2715,8 @@ class WebOrderController extends Controller
             }
         }
         if ($error) {
-            return view('taxi.callBack', ['user_phone' => $req->user_phone, 'info' => 'Не пройдено перевірку на робота.']);
+            return view('taxi.callBack', ['user_phone' => $req->user_phone,
+                'info' => 'Не пройдено перевірку на робота.']);
         }
     }
 
@@ -2725,13 +2726,21 @@ class WebOrderController extends Controller
      */
     public function callWork(Request $req)
     {
+        $req->validate([
+            'user_full_name' => ['string'],
+            'user_phone' => [new PhoneNumber()],
+            'email' => ['email'],
+        ]);
+
+        $params['user_full_name'] = $req->user_full_name;
+        $params['user_phone'] = $req->user_phone;
+        $params['time_work'] = $req->time_work;
+        $params['email'] = $req->email;
+
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
 
-        $paramReq['user_full_name'] = $req->user_full_name;
-        $paramReq['user_phone'] = $req->user_phone;
-        $paramReq['time_work'] = $req->time_work;
-        $paramReq['email'] = $req->email;
+
 
         if (!empty($_GET['g-recaptcha-response'])) { //проверка на робота
             $curl = curl_init('https://www.google.com/recaptcha/api/siteverify');
@@ -2774,9 +2783,9 @@ class WebOrderController extends Controller
                     'message' => $messageAdmin,
                 ];
 
-                Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
                 Mail::to('taxi.easy.ua@gmail.com')->send(new Admin($paramsAdmin));
 
+                Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
                 $comment =  "ОПЕРАТОР! Перезвоните новому водителю по имени $user_full_name. Ему нужна работа.
                             Водительский стаж $time_work лет. Анкета отправлена ему на почту";
                 $taxiColumnId = config('app.taxiColumnId');
@@ -2803,26 +2812,22 @@ class WebOrderController extends Controller
                 ]);
 
                 if ($responseWeb->status() == "200") {
-                    return redirect()->route('homeblank')->with('success', "$user_full_name, Ваш телефон успішно надіслано у нашу службу.
+                    return redirect()->route('home-news')->with('success', "$user_full_name, Ваш телефон успішно надіслано у нашу службу.
                                 Анкету чекайте на Вашій пошті. Заповніть її та надішліть за вказаною адресою.")
-                        ->with('tel', "Для уточнення чекайте або наберіть диспетчера:");
+                        ->with('tel', "Для уточнення чекайте/або наберіть диспетчера:");
 
                 } else {
                     $json_arr = json_decode($responseWeb, true);
 
                     $message_error = $json_arr['description'];
-                    return view('driver.callWorkReq', ['paramReq' => $paramReq])->with('error', "Помілка. $message_error")
-                        ->with('back', 'Зробити нову спробу');
+                    return view('driver.callWork', ['params' => $params,
+                        'info' => 'Помілка. $message_error']);
                 }
             }
         }
         if ($error) {
-            ?>
-            <script type="text/javascript">
-                alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
-            return view('driver.callWorkReq', ['paramReq' => $paramReq]);
+            return view('driver.callWork', ['params' => $params,
+                'info' => 'Не пройдено перевірку на робота.']);
         }
     }
     /**

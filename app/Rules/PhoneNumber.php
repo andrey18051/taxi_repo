@@ -35,6 +35,6 @@ class PhoneNumber implements Rule
      */
     public function message()
     {
-        return 'Невірний формат телефонного номера. Приклад +380936665544';
+        return 'Невірний формат телефонного номера. Приклад +380936665544.';
     }
 }
