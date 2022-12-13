@@ -17,6 +17,7 @@ use App\Mail\Server;
 use App\Models\Tarif;
 use App\Models\User;
 use App\Rules\ComboName;
+use App\Rules\PhoneNumber;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -2658,6 +2659,9 @@ class WebOrderController extends Controller
     */
     public function callBack(Request $req)
     {
+        $req->validate([
+            'user_phone' => [new PhoneNumber()],
+        ]);
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
 
@@ -2699,29 +2703,19 @@ class WebOrderController extends Controller
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
                 ]);
-
                 if ($responseWeb->status() == "200") {
-                    return redirect()->route('homeblank2')->with('success', 'Ваш телефон успішно надіслано. ')
-                        ->with('tel', "Чекайте або наберіть диспетчера:")
-                        ->with('back', 'Зробити нове замовлення');
-
+                    return redirect()->route('home-news')->with('success', 'Ваш телефон успішно надіслано. ');
                 } else {
                     $json_arr = json_decode($responseWeb, true);
                     $message_error = $json_arr['Message'];
-                    return redirect()->route('homeblank2')->with('error', "Помілка. $message_error")
-                        ->with('back', 'Зробити нове замовлення')
+                    return redirect()->route('home-news')->with('error', "Помілка. $message_error")
                         ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:");
-                }with('back', 'Зробити нове замовлення');
+                };
 
             }
         }
         if ($error) {
-            ?>
-            <script type="text/javascript">
-                alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
-            return view('taxi.callBackReq', ['user_phone' => $req->user_phone]);
+            return view('taxi.callBack', ['user_phone' => $req->user_phone, 'info' => 'Не пройдено перевірку на робота.']);
         }
     }
 

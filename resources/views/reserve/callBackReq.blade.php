@@ -2,6 +2,12 @@
 
 @section('content')
 
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
+
     <!-- Section: Design Block -->
     <section class="">
         <!-- Jumbotron -->

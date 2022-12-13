@@ -252,18 +252,10 @@
             <a  class="borderElement"
                 href="{{route('homeMapCombo')}}" target="_blank">Замовлення таксі по мапи</a>
             <a  class="borderElement"
-                @guest
-                href="{{ route('callBackForm') }}"
-                @else
-                href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
-                @endguest>
+                href="{{ route('callBackForm') }}">
                 Допомога у складний час</a>
             <a  class="borderElement"
-                @guest
-                href="{{ route('callBackForm') }}"
-                @else
-                href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
-                @endguest>
+                href="{{ route('callBackForm') }}">
                 Служба підтримки</a>
         </div>
     </div>

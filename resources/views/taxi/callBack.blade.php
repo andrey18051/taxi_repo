@@ -1,7 +1,11 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
     <!-- Section: Design Block -->
     <section class="">
         <!-- Jumbotron -->
@@ -28,7 +32,20 @@
 
                                         <!-- Phone input -->
                                         <div class="form-outline mb-2 col-12"  >
-                                            <input type="text" class="form-control" name="user_phone" placeholder="Телефон? Приклад: +380936665544">
+                                            <input type="text" class="form-control  @error('user_phone') is-invalid @enderror" name="user_phone"
+
+
+
+                                                   @guest
+                                                       @isset($user_phone)
+                                                       value="{{$user_phone}}"
+                                                       @endisset
+                                                   @else
+                                                   value="{{ Auth::user()->user_phone }}"
+                                                   @endguest
+                                                   value="{{ old('user_phone') }}"
+
+                                                   placeholder="Телефон? Приклад: +380936665544">
                                         </div>
 
                                         <script defer src="https://www.google.com/recaptcha/api.js"></script>
