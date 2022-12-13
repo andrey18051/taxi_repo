@@ -2821,7 +2821,7 @@ class WebOrderController extends Controller
 
                     $message_error = $json_arr['description'];
                     return view('driver.callWork', ['params' => $params,
-                        'info' => 'Помілка. $message_error']);
+                        'info' => "Помілка. $message_error"]);
                 }
             }
         }
