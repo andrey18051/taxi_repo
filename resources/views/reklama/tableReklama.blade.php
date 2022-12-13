@@ -153,11 +153,8 @@
                         <div class="header gradient" >
                             <a class="borderElement" href="{{route('homeCombo')}}" target="_blank">Шукати адресу</a>
                             <a class="borderElement" href="{{route('homeMapCombo')}}" target="_blank">Пошук по мапи</a>
-                            <a  class="borderElement" @guest
-                            href="{{ route('callBackForm') }}"
-                                @else
-                                href="{{ route('callBackForm-phone', Auth::user()->user_phone) }}"
-                                @endguest>
+                            <a  class="borderElement"
+                            href="{{ route('callBackForm') }}">
                                 Допомога у складний час</a>
                             <a class="borderElement" href="{{route('callWorkForm')}}" target="_blank">Робота у таксі</a>
                             <a class="borderElement" href="{{route('home-news')}}" target="_blank">Новини</a>
