@@ -50,7 +50,7 @@
 
                                 <div class="col-4">
                                     <input type="text" id="author" name="author" autocomplete="off" class="form-control"
-                                           value="&#128662 Таксі Лайт Юа" />
+                                           value="&#128662 Служба Таксі Лайт Юа" />
                                 </div>
                             </div>
                         </div>
