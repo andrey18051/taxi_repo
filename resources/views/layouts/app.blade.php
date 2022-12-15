@@ -39,10 +39,18 @@
                     <!-- Left Side Of Navbar -->
                     <input type="checkbox" id="nav-toggle" hidden>
                     <nav class="nav">
+
                         <label for="nav-toggle" class="nav-toggle" onclick></label>
                         <ul class="navbar-nav">
-                            <li><a href="{{ route('admin') }}">Admin</a>
-                        </ul>
+                                <li><a href="{{ route('admin') }}">Admin</a>
+                                <li><a href="https://translate.google.com/?hl=ru&sl=ru&tl=uk&op=translate" target="_blank">Translate</a>
+                                <li><a href="https://title.web-canape.ru/" target="_blank">Tagline</a>
+                                <li><a href="http://free-generator.ru/text.html" target="_blank">Generator 1</a>
+                                <li><a href="https://service.webboss.pro/text-generator" target="_blank">Generator 2</a>
+                                <li><a href="{{ route('admin-news') }}" target="_blank">News</a>
+                                <li><a href="{{ route('admin-quite') }}" target="_blank">Quite</a>
+                                <li><a href="{{ asset('/') }}">Main</a>
+                            </ul>
                     </nav>
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">

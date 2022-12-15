@@ -22,8 +22,8 @@
 </div>
 
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h1 class="display-4">Reporting databases</h1>
-    <p class="lead">Quick selection of applications and reporting period</p>
+    <h1 class="display-4">Database reports</h1>
+    <p class="lead">Quick selection of requests and reporting period</p>
 </div>
 
 <div class="container">
@@ -128,7 +128,6 @@
         </div>
     </form>
 
-
     <form action="{{route('reportIpOrder')}}" id="form">
         @csrf
         <div class="row card">
@@ -154,17 +153,6 @@
         </div>
     </form>
 </div>
-
-<div class="container">
-    <h3>Quite section</h3>
-    <a type="button" href="{{ route('admin-quite') }}" class="btn">Quite</a>
-</div>
-
-<div class="container">
-    <h3>News section</h3>
-    <a type="button" href="{{ route('admin-news') }}" class="btn">News</a>
-</div>
-
 
 <script defer src="https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc"></script>
 
