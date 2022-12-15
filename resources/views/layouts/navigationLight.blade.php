@@ -1,4 +1,3 @@
-
 <div style="margin-bottom: 0px;">
     <a  href="{{route('home-news')}}" target="_blank" title="Повна версія сайту"
         style="z-index: 101; position: fixed; margin-top: 0px; right: 0px; ">
@@ -19,6 +18,8 @@
         <img src="{{ asset('img/icons8-phone-64.png') }}" style="width:30px;">
     </a>
 </div>
+
+
 <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
     <div class="container">
         <div>
@@ -27,24 +28,21 @@
                 <img src="{{ asset('img/logo.jpg') }}" style="width: 100px; height: auto">
             </a>
         </div>
+
         <div class="container" style="text-align: center">
-            <a  href="{{route('homeCombo')}}"
-                class="gradient"
-                target="_blank" title="Розрахунок вартості"
-                style="text-decoration: none; margin-top: 20px">Низька ціна та Швидка подача таксі Києва та області.  <br>
-                Розрахуйте вартість поїздки онлайн.</a>
-            <div class="center gradient">
-                <span style="color:black">Сьогодні:</span>
-                <span style="color:black;; font-size:14px;">
+            <div class="container" style="text-align: center">
+                <div class="center gradient">
+                    <span style="color:black">Сьогодні:</span>
+                    <span style="color:black;; font-size:14px;">
               <script>
                    document.write(date+" ");
                    document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
               </script>
               (<span id="clockdat" style="color:blue;"></span>)
         </span>
+                </div>
             </div>
         </div>
-
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"  data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
             <span class="navbar-toggler-icon"></span>
@@ -114,8 +112,7 @@
                 @endguest
             </ul>
         </div>
-
-
-
     </div>
 </nav>
+
+

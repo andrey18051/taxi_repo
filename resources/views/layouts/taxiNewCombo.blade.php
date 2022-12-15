@@ -96,7 +96,7 @@
 </head>
 <body>
 <div id="app">
-    @include ('layouts.navigationCombo')
+    @include ('layouts.navigationLight')
     <main class="py-4">
         @include ('layouts.messages')
         @yield('content')
@@ -117,6 +117,5 @@
 
 </script>
 
-@include ('layouts.footerCombo')
 </body>
 </html>

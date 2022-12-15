@@ -210,8 +210,17 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="container text-center">
-                    <button class="btn btn-danger btn-lg" type="submit" style="margin-top: 30px">Підтвердіть замовлення</button>
+                    <div class="row">
+                        <a class="w-100 btn btn-danger" style="margin-top: 5px"
+                           href="{{route('homeCombo')}}">
+                            Очистити форму
+                        </a>
+                        <button class="w-100 btn btn-primary" style="margin-top: 5px" type="submit">
+                            Розрахувати вартість поїздки
+                        </button>
+                    </div>
                 </div>
 
             </form>

@@ -99,9 +99,9 @@
                         </div>
                     </div>
 
-                    <div class="col-md-5 col-lg-4" style="margin-top: 5px">
-                        <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
-                           onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
+                    <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
+                        <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
+                           onclick="showHide('block_id')">Додаткові параметри</a>
 
                         <div id="block_id" style="display: none">
                             <ul class="list-group mb-3">
@@ -172,11 +172,13 @@
 
                 </div>
                 <div class="container text-center">
-                    <a class="w-100 btn btn-danger btn-lg"
-                       href="{{route('transfer',
-                                                     ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferJulyany"])}}"
-                       style="margin-top: 5px">Очистити форму</a>
-                    <button class="w-100 btn btn-primary btn-lg" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                    <div class="row">
+                        <a class="w-100 btn btn-danger"
+                           href="{{route('transfer',
+                                                         ["Аэропорт Жуляны новый (ул.Медовая 2)", "taxi.transferJulyany"])}}"
+                           style="margin-top: 5px">Очистити форму</a>
+                        <button class="w-100 btn btn-primary" type="submit" style="margin-top: 5px">Розрахувати вартість поїздки</button>
+                    </div>
                 </div>
             </form>
         </div>
