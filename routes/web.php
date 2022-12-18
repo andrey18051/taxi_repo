@@ -32,10 +32,35 @@ use Stevebauman\Location\Facades\Location;
 | contains the "web" middleware group. Now create something great!
 |
 */
-//**********************************************************************************************************************
+
 
 /**
- *
+ * Telegram Bot
+ */
+
+Route::get('/telegramBot', function (\App\Helpers\Telegram $telegram) {
+    $telegram->sendMessage(env('REPORT_TELEGRAM_ID'), 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!');
+    $buttons = [
+        'inline_keyboard' => [
+            [
+                [
+                    'text' => 'Замовити таксі',
+                    'url' => 'https://m.easy-order-taxi.site/home-Combo'
+                ],
+                [
+                    'text' => 'Новини',
+                    'url' => 'https://m.easy-order-taxi.site'
+                ],
+            ]
+        ]
+    ];
+    $telegram->sendButtons(env('REPORT_TELEGRAM_ID'), 'Варианти дій:', json_encode($buttons));
+    return redirect()->route('homeCombo');
+})->name('telegramBot');
+
+
+/**
+ * Расшифровка IP
  */
 Route::get('/get-ip-details', function () {
     $ip = '34.145.8.204';
