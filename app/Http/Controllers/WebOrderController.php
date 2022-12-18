@@ -897,7 +897,6 @@ class WebOrderController extends Controller
             }
         }
         if ($error) {
-
             $json_arr = WebOrderController::tariffs();
             return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
                 'info' => 'Не пройдено перевірку на робота.']);
@@ -2855,7 +2854,7 @@ class WebOrderController extends Controller
                 ];
 
                 Mail::to('taxi.easy.ua@gmail.com')->send(new Feedback($params));
-                return redirect()->route('home')
+                return redirect()->route('homeCombo')
                     ->with('success',
                     "Повідомлення успішно надіслано адміністратору сайту. Чекайте на відповідь на свій email.");
             }
@@ -2866,12 +2865,8 @@ class WebOrderController extends Controller
                 'subject' => $req->subject,
                 'message' => $req->message,
             ];
-            ?>
-            <script type="text/javascript">
-            alert("Не пройдено перевірку на робота");
-            </script>
-            <?php
-            return view('taxi.feedbackReq', ['params' => $params]);
+            return view('taxi.feedback', ['params' => $params,
+                'info' => 'Не пройдено перевірку на робота.']);
         }
 
 }

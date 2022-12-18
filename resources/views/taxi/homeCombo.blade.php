@@ -7,9 +7,7 @@
             {{$info}}
         </div>
     @endisset
-   {{-- @isset($params)
-        {{dd($params)}}
-    @endisset--}}
+
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
         <div class="container" style="text-align: center">
             <h2 class="gradient"><b>Київ та область</b></h2>
