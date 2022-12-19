@@ -130,10 +130,234 @@
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        <p class="text-center gradient">Замовити трансфер</p>
+                        <p class="text-center gradient">Заповнити поля для розрахунку вартості поїздки</p>
                     </button>
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <form action="{{route('search-cost')}}" id="form">
+                            @csrf
+                            <div class="row">
+                                <div class="col-md-7 col-lg-8">
+                                    @guest
+                                        <input type="hidden" id="user_phone" name="user_phone"  value="+380936665544">
+                                        <input type="hidden" id="user_full_name" name="user_full_name"  value="Гість">
+                                    @else
+                                        <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
+                                        <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
+                                    @endguest
+
+                                    <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+                                    <input type="hidden" id="comment" name="comment" placeholder="Додати побажання" />
+
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-lg-8 col-12">
+                                                <input type="text"  id="search" name="search"
+                                                       class="form-control @error('search') is-invalid @enderror"
+                                                       @isset($params['routefrom'])
+                                                       value="{{ $params['routefrom']}}"
+                                                       readonly
+                                                       @endisset
+                                                       value="{{ old('search') }}"
+                                                       placeholder="Звідки?"
+                                                       onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
+                                                       autocomplete="off"
+                                                       required>
+                                            </div>
+                                            <div class="col-lg-4 col-12" id="div_from_number">
+                                                <input type="text" id="from_number" name="from_number"
+                                                       class="form-control @error('from_number') is-invalid @enderror"
+                                                       @isset($params['routefromnumber'])
+                                                       value="{{ $params['routefromnumber']}}"
+                                                       style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
+                                                       readonly
+                                                       @else
+                                                       value="{{ old('from_number') }}"
+                                                       placeholder="Будинок?"
+                                                       autocomplete="off"
+                                                       style="text-align: center"
+                                                    @endisset>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="container" style="text-align: left">
+                                        <label class="form-check-label" for="route_undefined">По місту</label>
+                                        <input type="checkbox" class="form-check-input" id="route_undefined"
+                                               name="route_undefined"
+                                               @isset($params['route_undefined'])
+                                               @if($params['route_undefined'] == true)
+                                               checked
+                                               @endif
+                                               readonly
+                                               @endisset
+                                               value="1"
+                                               onclick="showHide('block_city')">
+                                    </div>
+
+                                    <div id="block_city" class="container"
+                                         @isset($params['route_undefined'])
+                                         @if($params['route_undefined'] == true)
+                                         style="display:none"
+                                         @else
+                                         style="display:block"
+                                         @endif
+                                         readonly
+                                         @else
+                                         style="display:block"
+                                        @endisset
+                                    >
+                                        <div class="row">
+                                            <div class="col-lg-8 col-12">
+                                                <input type="text" id="search1" name="search1"
+                                                       class="form-control @error('search1') is-invalid @enderror"
+                                                       @isset($params['routeto'])
+                                                       value="{{ $params['routeto']}}"
+                                                       readonly
+                                                       @endisset
+                                                       value="{{ old('search1') }}"
+                                                       onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
+                                                       placeholder="Куди?"
+                                                       autocomplete="off">
+                                            </div>
+                                            <div class="col-lg-4 col-12" id="div_to_number">
+                                                <input type="text" id="to_number" name="to_number"
+                                                       class="form-control @error('to_number') is-invalid @enderror"
+                                                       @isset($params['routetonumber'])
+                                                       value="{{ $params['routetonumber']}}"
+                                                       readonly
+                                                       @endisset
+                                                       value="{{ old('to_number') }}"
+                                                       placeholder="Будинок?"
+                                                       autocomplete="off"
+                                                       @isset($params)
+                                                       style="text-align: center; display: {{$params['routetonumberBlockNone']}}"
+                                                       @endisset
+                                                       style="text-align: center" >
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <script defer src="https://www.google.com/recaptcha/api.js"></script>
+                                    <div class="container" style="margin-top: 5px">
+                                        <div class="row">
+                                            <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                </div>
+
+                                <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
+                                    <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
+                                       onclick="showHide('block_id')">Додаткові параметри</a>
+                                    <div class="container">
+                                        <div id="block_id" style="display: none;">
+                                            <ul class="list-group mb-3">
+                                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <label class="form-label" for="required_time">Час подачі</label>
+                                                    <input type="datetime-local" step="any"  id="required_time"  name="required_time"
+                                                           @isset($params['required_time'])
+                                                           value="{{ $params['required_time']}}"
+                                                           @endisset
+                                                           value="null">
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
+                                                               @isset($params['wagon'])
+                                                               @if($params['wagon'] == true)
+                                                               checked
+                                                            @endif
+                                                            @endisset>
+                                                        <label class="form-check-label" for="wagon">Универсал</label>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus"
+                                                               @isset($params['minibus'])
+                                                               @if($params['minibus'] == true)
+                                                               checked
+                                                            @endif
+                                                            @endisset>
+                                                        <label class="form-check-label" for="minibus">Мікроавтобус</label>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" id="premium" name="premium"
+                                                               @isset($params['premium'])
+                                                               @if($params['premium'] == true)
+                                                               checked
+                                                            @endif
+                                                            @endisset
+                                                        >
+                                                        <label class="form-check-label" for="premium">Машина преміум-класса</label>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <div class="col-md-12">
+                                                        <label for="$flexible_tariff_name" class="form-label">Тариф</label>
+                                                        <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" >
+                                                            @isset($params['flexible_tariff_name'])
+                                                                <option>{{$params['flexible_tariff_name']}}</option>
+                                                                @for ($i = 0; $i < count($json_arr); $i++)
+                                                                    @if($json_arr[$i]['name'] !== $params['flexible_tariff_name'])
+                                                                        <option>{{$json_arr[$i]['name']}}</option>
+                                                                    @endif
+                                                                @endfor
+                                                            @else
+                                                                <option></option>
+                                                                @for ($i = 0; $i < count($json_arr); $i++)
+                                                                    <option>{{$json_arr[$i]['name']}}</option>
+                                                                @endfor
+                                                            @endisset
+
+                                                        </select>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <div class="col-md-12">
+                                                        <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                                        <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                                            <option>готівка</option>
+                                                            <!--                                            <option>безготівка</option>-->
+                                                        </select>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="container text-center">
+                                <div class="row">
+                                    <a class="w-100 btn btn-danger" style="margin-top: 5px"
+                                       onclick="sessionStorage.clear();"
+                                       href="{{route('homeCombo')}}">
+                                        Очистити форму
+                                    </a>
+                                    <button class="w-100 btn btn-primary" style="margin-top: 5px" type="submit">
+                                        Розрахувати вартість поїздки
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <p class="text-center gradient">Замовити трансфер</p>
+                    </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div class="container-fluid" style="margin-top: 10px">
                             <div class="header gradient" >
@@ -181,12 +405,12 @@
                 </div>
             </div>
             <div class="accordion-item">
-                <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                <h2 class="accordion-header" id="headingFour">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                         <p class="text-center gradient">Замовити зустрич</p>
                     </button>
                 </h2>
-                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div class="container-fluid" style="margin-top: 10px">
                             <div class="header gradient" >
