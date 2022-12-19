@@ -76,6 +76,7 @@ class RegisterController extends Controller
             'linkedin_id' => $data['linkedin_id'],
             'github_id' => $data['github_id'],
             'twitter_id' => $data['twitter_id'],
+            'telegram_id' => $data['telegram_id'],
             'password' => Hash::make($data['password']),
             'password_taxi' => Crypt::encryptString($data['password'])
         ]);

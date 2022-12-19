@@ -84,6 +84,11 @@
                         @else
                             <input type="hidden" id="twitter_id" name="twitter_id" value="">
                         @endif
+                        @if($newUser['telegram_id'])
+                            <input type="hidden" id="telegram_id" name="telegram_id" value="{{ $newUser['telegram_id'] }}">
+                        @else
+                            <input type="hidden" id="telegram_id" name="telegram_id" value="">
+                        @endif
                         <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Пароль') }}</label>
 

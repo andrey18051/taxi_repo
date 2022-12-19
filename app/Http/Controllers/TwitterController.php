@@ -53,6 +53,7 @@ class TwitterController extends Controller
                     $newUser['facebook_id'] = null;
                     $newUser['github_id'] = null;
                     $newUser['linkedin_id'] = null;
+                    $newUser['telegram_id'] = null;
                     $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
                     $newUser['password'] = substr(str_shuffle($chars), 0, 8);
                     return view('auth.registerSocial', ['newUser' => $newUser]);

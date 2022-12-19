@@ -16,6 +16,7 @@
         "laravel/ui": "^3.4",
         "phpoffice/phpspreadsheet": "^1.25",
         "santigarcor/laratrust": "^7.1",
+        "socialiteproviders/telegram": "^4.1",
         "squizlabs/php_codesniffer": "3.7.1",
         "stevebauman/location": "^6.5"
     },

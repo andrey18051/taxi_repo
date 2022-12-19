@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 
-class FacebookController extends Controller
+class TelegramController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -18,9 +18,9 @@ class FacebookController extends Controller
      * @return void
      */
 
-    public function redirectToFacebook()
+    public function redirectToTelegram()
     {
-        return Socialite::driver('facebook')->redirect();
+        return Socialite::driver('telegram')->redirect();
     }
 
     /**
@@ -30,30 +30,31 @@ class FacebookController extends Controller
      */
 
 
-    public function handleFacebookCallback()
+    public function handleTelegramCallback()
     {
         try {
-            $user = Socialite::driver('facebook')->user();
-            $finduser = User::where('facebook_id', $user->id)->first();
+            $user = Socialite::driver('telegram')->user();
+
+            $finduser = User::where('telegram_id', $user->id)->first();
             if ($finduser) {
                 Auth::login($finduser);
                 return redirect()->intended('/home-Combo');
             } else {
                 try {
                     $finduser = User::where('email', $user->email)->first();
-                    $finduser->facebook_id = $user->id;
+                    $finduser->telegram_id = $user->id;
                     $finduser->save();
                     Auth::login($finduser);
                     return redirect()->intended('/home-Combo');
                 } catch (Exception $e) {
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
-                    $newUser['facebook_id'] = $user->id;
+                    $newUser['telegram_id'] = $user->id;
                     $newUser['google_id'] = null;
-                    $newUser['linkedin_id'] = null;
+                    $newUser['facebook_id'] = null;
                     $newUser['github_id'] = null;
+                    $newUser['linkedin_id'] = null;
                     $newUser['twitter_id'] = null;
-                    $newUser['telegram_id'] = null;
                     $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
                     $newUser['password'] = substr(str_shuffle($chars), 0, 8);
                     return view('auth.registerSocial', ['newUser' => $newUser]);

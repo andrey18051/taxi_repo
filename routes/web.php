@@ -7,6 +7,7 @@ use App\Http\Controllers\IPController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TaxiController;
+use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
@@ -67,6 +68,13 @@ Route::get('/get-ip-details', function () {
     $data = Location::get($ip);
     dd($data);
 });
+
+/**
+ * Telegram
+ */
+Route::get('auth/telegram', [TelegramController::class, 'redirectToTelegram']);
+Route::get('auth/telegram/callback', [TelegramController::class, 'handleTelegramCallback']);
+
 
 
 /**
