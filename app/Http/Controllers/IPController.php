@@ -12,9 +12,12 @@ class IPController extends Controller
 
     public function getIP($page)
     {
-        $IP =  new IP();
-        $IP->IP_ADDR = getenv("REMOTE_ADDR");
-        $IP->page = 'https://m.easy-order-taxi.site' . $page;
-        $IP->save();
+           /* IP::where('IP_ADDR', '31.202.139.47')->delete();*/
+        if (getenv("REMOTE_ADDR") !== '31.202.139.47') {
+            $IP =  new IP();
+            $IP->IP_ADDR = getenv("REMOTE_ADDR");
+            $IP->page = 'https://m.easy-order-taxi.site' . $page;
+            $IP->save();
+        }
     }
 }

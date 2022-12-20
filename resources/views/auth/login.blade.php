@@ -1,7 +1,11 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
 
 <!-- Section: Design Block -->
 <section class="">
@@ -69,35 +73,72 @@
                                             </a>
                                         @endif
                                     </div>
-                                    <div class="col-md-8 offset-md-4 flex items-center justify-end mt-4">
-
-                                        <a href="{{ url('auth/google') }}" title="Авторизуватися через Google">
-                                            <img src="{{ asset('img/icons8-google-48.png') }}">
-                                        </a>
-
-                                        <a href="{{ url('auth/facebook') }}" title="Авторизуватися через Facebook">
-                                            <img src="{{ asset('img/icons8-facebook-circled-48.png') }}">
-                                        </a>
-
-                                        <a href="{{ url('auth/linkedin') }}" title="Авторизуватися через Linkedin">
-                                            <img src="{{ asset('img/icons8-linkedin-48.png') }}">
-                                        </a>
-
-                                        <a href="{{ url('auth/github') }}" title="Авторизуватися через Linkedin">
-                                            <img src="{{ asset('img/icons8-github-48.png') }}">
-                                        </a>
-
-                                        <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">
-                                            <img src="{{ asset('img/icons8-twitter-48.png') }}">
-                                        </a>
-
-                                        <a href="{{ url('auth/telegram') }}" title="Авторизуватися через Telegram">
-                                            <img src="{{ asset('img/icons8-telegram-app-48.png') }}">
-                                        </a>
-                                    </div>
                                 </div>
 
                             </form>
+                            <div class="col-md-8 offset-md-4 flex items-center justify-end mt-4">
+
+                                <a href="{{ url('auth/google') }}" title="Авторизуватися через Google">
+                                    <img src="{{ asset('img/icons8-google-48.png') }}">
+                                </a>
+
+                                <a href="{{ url('auth/facebook') }}" title="Авторизуватися через Facebook">
+                                    <img src="{{ asset('img/icons8-facebook-circled-48.png') }}">
+                                </a>
+
+                                <a href="{{ url('auth/linkedin') }}" title="Авторизуватися через Linkedin">
+                                    <img src="{{ asset('img/icons8-linkedin-48.png') }}">
+                                </a>
+
+                                <a href="{{ url('auth/github') }}" title="Авторизуватися через Linkedin">
+                                    <img src="{{ asset('img/icons8-github-48.png') }}">
+                                </a>
+
+                                <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">
+                                    <img src="{{ asset('img/icons8-twitter-48.png') }}">
+                                </a>
+                                <a type="button"   data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                    <img src="{{ asset('img/icons8-telegram-app-48.png') }}">
+                                </a>
+
+                                <!-- Модальное окно -->
+                                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Укажите Ваш email</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                            </div>
+                                            <div class="modal-body">
+
+
+                                                <form action="{{route('email-Telegram')}}" id="form-Telegram">
+                                                    @csrf
+                                                    <input id="emailTelegram" type="email"
+                                                           class="form-control @error('emailTelegram') is-invalid @enderror"
+                                                           name="emailTelegram" value="{{ old('emailTelegram') }}"
+                                                           required>
+                                                    @error('emailTelegram')
+                                                    <span class="invalid-feedback" role="alert">
+                                                                <strong>{{ $message }}</strong>
+                                                            </span>
+                                                    @enderror
+
+                                                    <button type="submit" class="btn btn-primary" >
+                                                        Отправить
+                                                    </button>
+                                                </form>
+
+                                            </div>
+                                            <!--                                                    <div class="modal-footer">
+                                                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                                                                                    <button type="button" class="btn btn-primary">Сохранить изменения</button>
+                                                                                                </div>-->
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>

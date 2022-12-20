@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
 use Stevebauman\Location\Facades\Location;
 
 /*
@@ -34,29 +35,48 @@ use Stevebauman\Location\Facades\Location;
 |
 */
 
-
 /**
  * Telegram Bot
  */
 
 Route::get('/telegramBot', function (\App\Helpers\Telegram $telegram) {
-    $telegram->sendMessage(env('REPORT_TELEGRAM_ID'), 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!');
+//    $telegram->sendMessage(env('REPORT_TELEGRAM_ID'), 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!');
     $buttons = [
         'inline_keyboard' => [
             [
                 [
-                    'text' => 'Замовити таксі',
+                    'text' => 'Замовити таксі за адресою',
                     'url' => 'https://m.easy-order-taxi.site/home-Combo'
                 ],
+            ],
+            [
+                [
+                    'text' => 'Замовити таксі по мапі',
+                    'url' => 'https://m.easy-order-taxi.site/home-Map-Combo'
+                ],
+            ],
+            [
+                [
+                    'text' => 'Надіслати повідомлення адміністратору',
+                    'url' => 'https://m.easy-order-taxi.site/feedback'
+                ],
+            ],
+            [
                 [
                     'text' => 'Новини',
                     'url' => 'https://m.easy-order-taxi.site'
                 ],
-            ]
+            ],
+            [
+                [
+                    'text' => 'Екстренна допомога',
+                    'url' => 'https://m.easy-order-taxi.site/callBackForm'
+                ],
+            ],
         ]
     ];
-    $telegram->sendButtons(env('REPORT_TELEGRAM_ID'), 'Варианти дій:', json_encode($buttons));
-    return redirect()->route('homeCombo');
+    $telegram->sendButtons(Auth::user()->telegram_id, 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!', json_encode($buttons));
+    return redirect()->intended('/home-Combo');
 })->name('telegramBot');
 
 
@@ -69,10 +89,18 @@ Route::get('/get-ip-details', function () {
     dd($data);
 });
 
+
+/**
+ * Вход через социальные сети
+ */
+
 /**
  * Telegram
  */
-Route::get('auth/telegram', [TelegramController::class, 'redirectToTelegram']);
+
+Route::get('email/telegram', [TelegramController::class, 'emailTelegram'])->name('email-Telegram');
+
+Route::get('auth/telegram', [TelegramController::class, 'redirectToTelegram'])->name('auth-telegram');
 Route::get('auth/telegram/callback', [TelegramController::class, 'handleTelegramCallback']);
 
 
@@ -417,6 +445,11 @@ Route::get('/login-taxi', function () {
     IPController::getIP('/login-taxi');
     return view('auth.login');
 })->name('login-taxi');
+
+Route::get('/login-taxi{info}', function ($info) {
+    return view('auth.login', ['info' => $info]);
+})->name('login-taxi-info');
+
 
 Route::get('/login-taxi/{phone}', function ($phone) {
     return view('taxi.login-phone', ['phone' => $phone]);

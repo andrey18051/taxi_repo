@@ -22,6 +22,22 @@
           style="z-index: 101; position: fixed; margin-top: 124px; right: 0px">
         <img src="{{ asset('img/icons8-mail-48.png') }}" style="width:30px;">
     </a>
+    @guest
+        <a     href="{{ route('login-taxi-info',
+                ['info' => 'Зареєструйтесь через іконку Телеграм для використання функцій Чат-Бота.'])  }}"
+              target="_blank" title="Віртуальний помічник"
+              style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
+            <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
+        </a>
+    @else
+        @if (Auth::user()->telegram_id)
+            <a    href="{{ route('telegramBot') }}"
+                  target="_blank" title="Віртуальний помічник"
+                  style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
+                <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
+            </a>
+        @endif
+    @endauth
 </div>
 
 

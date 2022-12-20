@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Laravel\Socialite\Facades\Socialite;
@@ -12,6 +13,28 @@ use Illuminate\Support\Facades\Auth;
 
 class TelegramController extends Controller
 {
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+
+
+    public function emailTelegram(Request $req)
+    {
+        $req->validate([
+            'emailTelegram' => ['email'],
+        ]);
+
+        $emailTelegram =  Config::where('id', 1)->first();
+
+        $emailTelegram->emailTelegram = $req->emailTelegram;
+        $emailTelegram->save();
+
+        return redirect()->route('auth-telegram');
+    }
+
     /**
      * Create a new controller instance.
      *
@@ -32,6 +55,7 @@ class TelegramController extends Controller
 
     public function handleTelegramCallback()
     {
+        $emailTelegram =  Config::where('id', 1)->first();
         try {
             $user = Socialite::driver('telegram')->user();
 
@@ -41,14 +65,17 @@ class TelegramController extends Controller
                 return redirect()->intended('/home-Combo');
             } else {
                 try {
-                    $finduser = User::where('email', $user->email)->first();
+                    $finduser = User::where('email', $emailTelegram->EmailTelegram)->first();
                     $finduser->telegram_id = $user->id;
                     $finduser->save();
                     Auth::login($finduser);
+                    $emailTelegram->EmailTelegram = null;
+                    $emailTelegram->save();
                     return redirect()->intended('/home-Combo');
                 } catch (Exception $e) {
+
                     $newUser['name'] = $user->name;
-                    $newUser['email'] = $user->email;
+                    $newUser['email'] = $emailTelegram->EmailTelegram ;
                     $newUser['telegram_id'] = $user->id;
                     $newUser['google_id'] = null;
                     $newUser['facebook_id'] = null;
@@ -57,6 +84,10 @@ class TelegramController extends Controller
                     $newUser['twitter_id'] = null;
                     $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
                     $newUser['password'] = substr(str_shuffle($chars), 0, 8);
+
+                    $emailTelegram->EmailTelegram = null;
+                    $emailTelegram->save();
+
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
 
