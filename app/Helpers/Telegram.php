@@ -35,4 +35,13 @@ class Telegram
             'reply_markup' => $button
         ]);
     }
+
+    public function setWebhook()
+    {
+        return $this->http::post(self::url . $this->bot . '/setWebhook', [
+            'url' => 'https://m.easy-order-taxi.site/public/tgWebhook.php',
+        ]);
+    }
+
+
 }

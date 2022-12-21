@@ -138,7 +138,7 @@ class TelegramController extends Controller
                 ],
             ],
         ]
-    ];
+        ];
         $telegram->sendButtons(Auth::user()->telegram_id, 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!', json_encode($buttons));
 
         $buttons = [
@@ -164,7 +164,7 @@ class TelegramController extends Controller
                 ],
             ],
         ]
-    ];
+        ];
         $telegram->sendButtons(Auth::user()->telegram_id, 'Замовити трансфер', json_encode($buttons));
 
         $buttons = [
@@ -195,4 +195,11 @@ class TelegramController extends Controller
 
         return redirect()->intended('/home-Combo');
     }
+
+   /* public function setWebhook(Telegram $telegram)
+    {
+        $ch = $telegram->setWebhook();
+        return $ch;
+    }*/
+
 }

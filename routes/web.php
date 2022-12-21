@@ -40,7 +40,7 @@ use Stevebauman\Location\Facades\Location;
  */
 
 Route::get('/telegramBot', [TelegramController::class, 'chatBotSendKeyboard'])->name('telegramBot');
-
+Route::get('/setWebhook', [TelegramController::class, 'setWebhook'])->name('setWebhook');
 
 /**
  * Расшифровка IP
