@@ -39,45 +39,7 @@ use Stevebauman\Location\Facades\Location;
  * Telegram Bot
  */
 
-Route::get('/telegramBot', function (\App\Helpers\Telegram $telegram) {
-//    $telegram->sendMessage(env('REPORT_TELEGRAM_ID'), 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!');
-    $buttons = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => 'Замовити таксі за адресою',
-                    'url' => 'https://m.easy-order-taxi.site/home-Combo'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Замовити таксі по мапі',
-                    'url' => 'https://m.easy-order-taxi.site/home-Map-Combo'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Надіслати повідомлення адміністратору',
-                    'url' => 'https://m.easy-order-taxi.site/feedback'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Новини',
-                    'url' => 'https://m.easy-order-taxi.site'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Екстренна допомога',
-                    'url' => 'https://m.easy-order-taxi.site/callBackForm'
-                ],
-            ],
-        ]
-    ];
-    $telegram->sendButtons(Auth::user()->telegram_id, 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!', json_encode($buttons));
-    return redirect()->intended('/home-Combo');
-})->name('telegramBot');
+Route::get('/telegramBot', [TelegramController::class, 'chatBotSendKeyboard'])->name('telegramBot');
 
 
 /**
@@ -217,34 +179,6 @@ Route::get('/homeWelcome', function () {
         }
     }
 })->name('home');
-
-
-/*Route::get('/homeWelcomeCombo', function () {
-
-    date_default_timezone_set("Europe/Kiev");
-    // Время интервала
-    $start_time = strtotime(config('app.start_time')); // начальное время
-    $end_time = strtotime(config('app.end_time')); // конечное время
-
-    $time = strtotime(date("h:i:sa")); // проверяемое время
-
-    // Выполняем проверку
-
-    if ($start_time  <= $end_time) {
-        if ($time >= $start_time && $time <= $end_time) {
-            return view('taxi.homeWelcomeWarCombo');
-        } else {
-            return view('taxi.homeCombo');
-        }
-    } else {
-        if ($time >= $start_time || $time <= $end_time) {
-            return view('taxi.homeWelcomeWarCombo');
-        } else {
-            return view('taxi.homeCombo');
-        }
-    }
-})->name('homeCombo');*/
-
 
 
 Route::get('/', function () {
