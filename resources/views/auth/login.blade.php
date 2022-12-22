@@ -97,9 +97,10 @@
                                 <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">
                                     <img src="{{ asset('img/icons8-twitter-48.png') }}">
                                 </a>
-                                <a type="button"   data-bs-toggle="modal" data-bs-target="#exampleModal">
+                               <a type="button"   href="{{ url('auth/telegram') }}" title="Авторизуватися через Telegram"> <!-- data-bs-toggle="modal" data-bs-target="#exampleModal">-->
                                     <img src="{{ asset('img/icons8-telegram-app-48.png') }}">
                                 </a>
+
 
                                 <!-- Модальное окно -->
                                 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
