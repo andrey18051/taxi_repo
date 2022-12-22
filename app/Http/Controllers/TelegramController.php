@@ -104,102 +104,58 @@ class TelegramController extends Controller
 
     public function chatBotSendKeyboard(Telegram $telegram)
     {
-//    $telegram->sendMessage(env('REPORT_TELEGRAM_ID'), 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!');
-        $buttons = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => 'Замовити таксі за адресою',
-                    'url' => 'https://m.easy-order-taxi.site/home-Combo'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Замовити таксі по мапі',
-                    'url' => 'https://m.easy-order-taxi.site/home-Map-Combo'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Надіслати повідомлення адміністратору',
-                    'url' => 'https://m.easy-order-taxi.site/feedback'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Усі послуги',
-                    'url' => 'https://m.easy-order-taxi.site'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Екстренна допомога',
-                    'url' => 'https://m.easy-order-taxi.site/callBackForm'
-                ],
-            ],
-        ]
-        ];
-        $telegram->sendButtons(Auth::user()->telegram_id, 'Привіт, Я віртуальний помічник Служби Таксі Лайт Юа!', json_encode($buttons));
+        $telegram->sendMessage(Auth::user()->telegram_id, ' Привіт 👋! Я віртуальний помічник служби Таксі Лайт Юа &#128661!');
+
 
         $buttons = [
-        'inline_keyboard' => [
-            [
+            'inline_keyboard' => [
                 [
-                    'text' => 'Бориспіль',
-                    'url' => 'https://m.easy-order-taxi.site/transfer/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferBorispol'
-                ],
-                [
-                    'text' => 'Жуляни',
-                    'url' => 'https://m.easy-order-taxi.site/transfer/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferJulyany'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Південний вокзал',
-                    'url' => 'https://m.easy-order-taxi.site/transfer/ЖД%20Южный/taxi.transferUZ'
-                ],
-                [
-                    'text' => 'Автовокзал',
-                    'url' => 'https://m.easy-order-taxi.site/transfer/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferAuto'
-                ],
-            ],
-        ]
-        ];
-        $telegram->sendButtons(Auth::user()->telegram_id, 'Замовити трансфер', json_encode($buttons));
+                    [
+                        'text' => 'Послуги 🚕',
+                        'callback_data' => '0'
+                    ],
+                    [
+                        'text' => 'Трансфер 🏠',
+                        'callback_data' => '1'
+                    ],
+                    [
+                        'text' => 'Зустрич ✈️',
+                        'callback_data' => '2'
+                    ],
+                    [
+                        'text' => 'Робота в 🚕',
+                        'callback_data' => '3'
+                    ],
+                ]
 
-        $buttons = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => 'Бориспіль',
-                    'url' => 'https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferFromBorispol'
-                ],
-                [
-                    'text' => 'Жуляни',
-                    'url' => 'https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferFromJulyany'
-                ],
-            ],
-            [
-                [
-                    'text' => 'Південний вокзал',
-                    'url' => 'https://m.easy-order-taxi.site/transferfrom/ЖД%20Южный/taxi.transferFromUZ'
-                ],
-                [
-                    'text' => 'Автовокзал',
-                    'url' => 'https://m.easy-order-taxi.site/transferfrom/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferFromAuto'
-                ],
-            ],
-        ]
-    ];
-        $telegram->sendButtons(Auth::user()->telegram_id, 'Замовити зустрич', json_encode($buttons));
+            ]
+        ];
+        $telegram->sendButtons(Auth::user()->telegram_id, 'Виберіть потрібне 🧭', json_encode($buttons));
+
 
         return redirect()->intended('/home-Combo');
     }
 
-   /* public function setWebhook(Telegram $telegram)
+    public function setWebhook(Telegram $telegram)
     {
         $ch = $telegram->setWebhook();
-        return $ch;
-    }*/
+        dd(json_decode($ch->body()));
+    }
 
+    public function getWebhook(Telegram $telegram)
+    {
+        $telegram->getWebhook();
+    }
+
+    public function getWebhookInfo(Telegram $telegram)
+    {
+        $ch = $telegram->getWebhookInfo();
+        dd(json_decode($ch->body()));
+    }
+
+    public function sendDocument(Telegram $telegram)
+    {
+        $ch = $telegram->sendDocument(Auth::user()->telegram_id, 'questionnaire.docx');
+        dd($ch->body());
+    }
 }

@@ -4,6 +4,7 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class Telegram
 {
@@ -36,12 +37,28 @@ class Telegram
         ]);
     }
 
-    public function setWebhook()
+    public function sendDocument($chat_id, $file)
     {
-        return $this->http::post(self::url . $this->bot . '/setWebhook', [
-            'url' => 'https://m.easy-order-taxi.site/public/tgWebhook.php',
+        return $this->http::attach('document', Storage::get('/public/' . $file), $file)
+            ->post(self::url . $this->bot . '/sendDocument', [
+            'chat_id' => $chat_id
         ]);
     }
 
 
+    public function setWebhook()
+    {
+        return $this->http::post(self::url . $this->bot . '/setWebhook', [
+            'url' => 'https://m.easy-order-taxi.site/webhook',
+        ]);
+    }
+
+    public function getWebhook()
+    {
+        return $this->http::post(self::url . $this->bot . '/getWebhook');
+    }
+    public function getWebhookInfo()
+    {
+        return $this->http::post(self::url . $this->bot . '/getWebhookInfo');
+    }
 }

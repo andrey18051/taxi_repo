@@ -12,6 +12,7 @@ use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WebOrderController;
 use App\Models\NewsList;
 use App\Models\Order;
@@ -41,6 +42,14 @@ use Stevebauman\Location\Facades\Location;
 
 Route::get('/telegramBot', [TelegramController::class, 'chatBotSendKeyboard'])->name('telegramBot');
 Route::get('/setWebhook', [TelegramController::class, 'setWebhook'])->name('setWebhook');
+Route::get('/getWebhook', [TelegramController::class, 'getWebhook'])->name('getWebhook');
+Route::get('/getWebhookInfo', [TelegramController::class, 'getWebhookInfo'])->name('getWebhookInfo');
+Route::get('/sendDocument', [TelegramController::class, 'sendDocument'])->name('sendDocument');
+
+Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
+    Route::post('/webhook', [WebhookController::class, 'index']);
+});
+
 
 /**
  * Расшифровка IP
