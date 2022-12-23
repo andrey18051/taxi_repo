@@ -56,44 +56,46 @@ class TelegramController extends Controller
 
     public function handleTelegramCallback()
     {
-        $emailTelegram =  Config::where('id', 1)->first();
         try {
             $user = Socialite::driver('telegram')->user();
-
             $finduser = User::where('telegram_id', $user->id)->first();
             if ($finduser) {
                 Auth::login($finduser);
                 return redirect()->intended('/home-Combo');
             } else {
-                try {
-                    $finduser = User::where('email', $emailTelegram->EmailTelegram)->first();
-                    $finduser->telegram_id = $user->id;
-                    $finduser->save();
-                    Auth::login($finduser);
-                    $emailTelegram->EmailTelegram = null;
-                    $emailTelegram->save();
-                    return redirect()->intended('/home-Combo');
-                } catch (Exception $e) {
-                    $newUser['name'] = $user->name;
-                    $newUser['email'] = $emailTelegram->EmailTelegram ;
-                    $newUser['telegram_id'] = $user->id;
-                    $newUser['google_id'] = null;
-                    $newUser['facebook_id'] = null;
-                    $newUser['github_id'] = null;
-                    $newUser['linkedin_id'] = null;
-                    $newUser['twitter_id'] = null;
-                    $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
-                    $newUser['password'] = substr(str_shuffle($chars), 0, 8);
-
-                    $emailTelegram->EmailTelegram = null;
-                    $emailTelegram->save();
-
-                    return view('auth.registerSocial', ['newUser' => $newUser]);
-                }
+               // dd($user);
+                $params ['name'] = $user['first_name'] . ' ' . $user['last_name'];
+                $params ['telegram_id'] = $user['id'];
+                //dd($params);
+                return view('auth.registerTelegram', ['params' => $params, 'info' => 'Вкажіть адресу електронної пошти']);
 
             }
         } catch (Exception $e) {
             dd($e->getMessage());
+        }
+    }
+
+    public function registerTelegram(Request $request)
+    {
+        try {
+            $finduser = User::where('email', $request->email)->first();
+            $finduser->telegram_id = $request->telegram_id;
+            $finduser->save();
+            Auth::login($finduser);
+            return redirect()->intended('/home-Combo');
+        } catch (Exception $e) {
+            $newUser['name'] = $request->name;
+            $newUser['email'] = $request->email ;
+            $newUser['telegram_id'] = $request->telegram_id;
+            $newUser['google_id'] = null;
+            $newUser['facebook_id'] = null;
+            $newUser['github_id'] = null;
+            $newUser['linkedin_id'] = null;
+            $newUser['twitter_id'] = null;
+            $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
+            $newUser['password'] = substr(str_shuffle($chars), 0, 8);
+
+            return view('auth.registerSocial', ['newUser' => $newUser]);
         }
     }
 

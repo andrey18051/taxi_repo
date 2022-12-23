@@ -97,45 +97,9 @@
                                 <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">
                                     <img src="{{ asset('img/icons8-twitter-48.png') }}">
                                 </a>
-                               <a type="button"   href="{{ url('auth/telegram') }}" title="Авторизуватися через Telegram"> <!-- data-bs-toggle="modal" data-bs-target="#exampleModal">-->
+                                <a type="button"   href="{{ url('auth/telegram') }}" title="Авторизуватися через Telegram">
                                     <img src="{{ asset('img/icons8-telegram-app-48.png') }}">
                                 </a>
-
-
-                                <!-- Модальное окно -->
-                                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLabel">Вкажіть Ваш email</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                                            </div>
-                                            <div class="modal-body">
-
-
-                                                <form action="{{route('email-Telegram')}}" id="form-Telegram">
-                                                    @csrf
-                                                    <input id="emailTelegram" type="email"
-                                                           class="form-control @error('emailTelegram') is-invalid @enderror"
-                                                           name="emailTelegram" value="{{ old('emailTelegram') }}"
-                                                           required>
-                                                    @error('emailTelegram')
-                                                    <span class="invalid-feedback" role="alert">
-                                                                <strong>{{ $message }}</strong>
-                                                            </span>
-                                                    @enderror
-                                                    <div class="modal-footer">
-                                                        <button type="submit" class="btn btn-primary" >
-                                                            Відправити
-                                                        </button>
-                                                    </div>
-                                                </form>
-
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
 
                             </div>
                         </div>
