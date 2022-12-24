@@ -11,7 +11,7 @@ class WebhookController extends Controller
 {
     public function index(Request $request, Telegram $telegram)
     {
-        Log::debug($request->all());
+        //Log::debug($request->all());
 
         /**
          * Кнопки
@@ -121,7 +121,6 @@ class WebhookController extends Controller
         $telegram_id_chat = $request->input('message')['from']['id'];
         $first_name = $request->input('message')['from']['first_name'];
         $text = mb_strtolower($request->input('message')['text']);
-
         switch ($text) {
             case 'привіт':
                 $message =  "👋 $first_name! Ось чім я можу допомогти 😺:";

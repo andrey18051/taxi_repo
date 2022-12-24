@@ -109,6 +109,34 @@ class TelegramController extends Controller
         $user_name = Auth::user()->name;
         $message =  "Привіт $user_name 👋! Я віртуальний помічник служби Таксі Лайт Юа &#128661! Я розумію поки що трохи слів (наприклад - Привіт, трансфер, зустрич, робота), але я дуже швидко вчуся 😺";
         $telegram->sendMessage(Auth::user()->telegram_id, $message);
+        $buttons = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => 'Послуги 🚕',
+                        'callback_data' => '0'
+                    ],
+
+                    [
+                        'text' => 'Трансфер 🏠',
+                        'callback_data' => '1'
+                    ],
+                ],
+                [
+                    [
+                        'text' => 'Зустрич ✈️',
+                        'callback_data' => '2'
+                    ],
+
+                    [
+                        'text' => 'Робота в 🚕',
+                        'callback_data' => '3'
+                    ],
+                ]
+
+            ]
+        ];
+        $telegram->sendButtons(Auth::user()->telegram_id, 'Виберіть потрібне 🧭', json_encode($buttons));
 
         return redirect()->intended('/home-Combo');
     }
