@@ -12,6 +12,7 @@ use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WebOrderController;
 use App\Models\NewsList;
@@ -36,6 +37,11 @@ use Stevebauman\Location\Facades\Location;
 |
 */
 
+/**
+ * Погода
+ */
+
+Route::get('/weather', [WeatherController::class, 'temp'])->name('weather');
 /**
  * Telegram Bot
  */

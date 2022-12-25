@@ -60,6 +60,11 @@
                                document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
                           </script>
                           (<span id="clockdat" style="color:blue;"></span>)
+                        <span>
+                        🌡️
+                        {{\App\Http\Controllers\WeatherController::temp()}}
+                        ℃
+                    </span>
                     </span>
                 </div>
             </div>
