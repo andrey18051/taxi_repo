@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Telegram;
+use App\Mail\PromoList;
 use App\Models\Config;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Exception;
 use App\Models\User;
@@ -84,6 +87,23 @@ class TelegramController extends Controller
             Auth::login($finduser);
             return redirect()->intended('/home-Combo');
         } catch (Exception $e) {
+            //Создание промокода 5% при первой регистрации
+            $promoCodeNew = substr($request->email , 0, strripos($request->email , '@'));
+
+            $promo = new Promo();
+            $promo->promoCode = $promoCodeNew;
+            $promo->promoSize = 5;
+            $promo->promoRemark = 'Первая регистрация';
+            $promo->save();
+
+            $subject = "Реєстрація успішна";
+            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+
+            $paramsMail = [
+                'subject' => $subject,
+                'message' => $message,
+            ];
+            Mail::to($request->email)->send(new PromoList($paramsMail));
             $newUser['name'] = $request->name;
             $newUser['email'] = $request->email ;
             $newUser['telegram_id'] = $request->telegram_id;
