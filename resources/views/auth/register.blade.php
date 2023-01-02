@@ -77,6 +77,19 @@
                             </div>
                         </div>
 
+                            <input type="hidden" id="google_id" name="google_id" value="">
+
+                            <input type="hidden" id="facebook_id" name="facebook_id" value="">
+
+                            <input type="hidden" id="linkedin_id" name="linkedin_id" value="">
+
+                            <input type="hidden" id="github_id" name="github_id" value="">
+
+                            <input type="hidden" id="twitter_id" name="twitter_id" value="">
+
+
+                            <input type="hidden" id="telegram_id" name="telegram_id" value="">
+
                         <div class="row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">

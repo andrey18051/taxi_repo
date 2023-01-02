@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PromoList;
+use App\Models\Promo;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
 use App\Rules\PhoneNumber;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -67,6 +71,25 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        //Создание промокода 5% при первой регистрации
+        $promoCodeNew = substr($data['email'], 0, strripos($data['email'], '@'));
+
+        $promo = new Promo();
+        $promo->promoCode = $promoCodeNew;
+        $promo->promoSize = 5;
+        $promo->promoRemark = 'Первая регистрация';
+        $promo->save();
+
+        $subject = "Реєстрація успішна";
+        $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+
+
+        $paramsMail = [
+            'subject' => $subject,
+            'message' => $message,
+        ];
+        Mail::to($data['email'])->send(new PromoList($paramsMail));
+
         return User::create([
             'name' => $data['name'],
             'user_phone' => $data['user_phone'],

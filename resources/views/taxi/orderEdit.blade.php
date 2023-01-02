@@ -63,9 +63,9 @@
                             <div class="row">
                                 <div class="col-12">
                                     @guest
-                                        <input type="name" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
+                                        <input type="text" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
                                     @else
-                                        <input type="name" id="user_full_name" name="user_full_name"
+                                        <input type="text" id="user_full_name" name="user_full_name"
                                                value="{{Auth::user()->name}}"  class="form-control"  required/>
                                     @endguest
                                 </div>
@@ -91,10 +91,17 @@
                                 <div class="col-12">
                                     <textarea class="form-control" id="comment" name="comment"  placeholder="Коментар"></textarea>
                                 </div>
+                                @auth
+                                <div class="col-12" style="margin-top: 5px">
+                                    <input type="text" id="promo" name="promo" placeholder="Промо код"
+                                           value=""  class="form-control"
+                                           onchange= "pCode(this.value)">
 
+                                </div>
+                                @endauth
                             <div class="col-12 slidecontainer">
                                 <label for="add_cost" class="form-label" >
-                                    Додати до вартости: <span id="rangeValue"> 0 </span>грн.
+                                    Змінити вартість: <span id="rangeValue"> 0 </span>грн.
                                 </label>
                                        <input type="range"
                                               @if(config('app.server') == 'Одесса')
@@ -113,7 +120,7 @@
                             </div>
 
 
-                            <h4> Вартість поїздки: <span id="rangeValueСost"> {{session('order_cost')}} </span>грн.</h4>
+                            <h4> Вартість поїздки: <span id="rangeValueСost">{{session('order_cost')}}</span>грн.</h4>
                             Рекомендована вартість на підставі цін інших служб таксі в діапазоні з
                             <a class="btn btn-success"
                             onclick="document.getElementById('add_cost').innerHTML = {{round (session('order_cost') * config('app.order_cost_min'), 0)}};
@@ -225,6 +232,30 @@
 
             </form>
     </div>
+    <script defer type="text/javascript">
 
+        function pCode(value) {
 
+            const route = "/promoSize/" + value;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+
+                    order_cost = {{session('order_cost')}} - Math.round({{session('order_cost')}}*data);
+                    rangeValue = order_cost - {{ session('order_cost')}};
+                    document.getElementById('rangeValue').innerHTML = rangeValue;
+
+                    document.getElementById('add_cost').min =  rangeValue;
+                    document.getElementById('add_cost').value =  rangeValue;
+                    document.getElementById('rangeValueСost').innerHTML =  order_cost;
+                }
+            });
+        }
+    </script>
 @endsection
+
+

@@ -49,6 +49,7 @@
                                 <li><a href="https://service.webboss.pro/text-generator" target="_blank">Generator 2</a>
                                 <li><a href="{{ route('admin-news') }}" target="_blank">News</a>
                                 <li><a href="{{ route('admin-quite') }}" target="_blank">Quite</a>
+                                <li><a href="{{ route('admin-promo') }}" target="_blank">Promo</a>
                                 <li><a href="{{ asset('/') }}">Main</a>
                             </ul>
                     </nav>
