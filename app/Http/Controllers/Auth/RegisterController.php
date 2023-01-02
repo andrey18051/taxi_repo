@@ -74,7 +74,7 @@ class RegisterController extends Controller
         //Создание промокода 5% при первой регистрации
         $promoCodeNew = substr($data['email'], 0, strripos($data['email'], '@'));
         $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
-        if ($findPromo !== null) {
+        if (empty($findPromo)) {
             $promo = new Promo();
             $promo->promoCode = $promoCodeNew;
             $promo->promoSize = 5;

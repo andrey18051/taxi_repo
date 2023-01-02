@@ -88,22 +88,25 @@ class TelegramController extends Controller
             return redirect()->intended('/home-Combo');
         } catch (Exception $e) {
             //Создание промокода 5% при первой регистрации
-            $promoCodeNew = substr($request->email , 0, strripos($request->email , '@'));
+            $promoCodeNew = substr($request->email, 0, strripos($request->email, '@'));
+            $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
 
-            $promo = new Promo();
-            $promo->promoCode = $promoCodeNew;
-            $promo->promoSize = 5;
-            $promo->promoRemark = 'Первая регистрация';
-            $promo->save();
+            if (empty($findPromo)) {
+                $promo = new Promo();
+                $promo->promoCode = $promoCodeNew;
+                $promo->promoSize = 5;
+                $promo->promoRemark = 'Первая регистрация';
+                $promo->save();
 
-            $subject = "Реєстрація успішна";
-            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+                $subject = "Реєстрація успішна";
+                $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
 
-            $paramsMail = [
-                'subject' => $subject,
-                'message' => $message,
-            ];
-            Mail::to($request->email)->send(new PromoList($paramsMail));
+                $paramsMail = [
+                    'subject' => $subject,
+                    'message' => $message,
+                ];
+                Mail::to($request->email)->send(new PromoList($paramsMail));
+            }
             $newUser['name'] = $request->name;
             $newUser['email'] = $request->email ;
             $newUser['telegram_id'] = $request->telegram_id;

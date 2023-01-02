@@ -52,21 +52,26 @@ class TwitterController extends Controller
                 } catch (Exception $e) {
                     //Создание промокода 5% при первой регистрации
                     $promoCodeNew = substr($user->email, 0, strripos($user->email, '@'));
+                    $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
 
-                    $promo = new Promo();
-                    $promo->promoCode = $promoCodeNew;
-                    $promo->promoSize = 5;
-                    $promo->promoRemark = 'Первая регистрация';
-                    $promo->save();
+                    if (empty($findPromo)) {
+                        $promoCodeNew = substr($user->email, 0, strripos($user->email, '@'));
 
-                    $subject = "Реєстрація успішна";
-                    $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+                        $promo = new Promo();
+                        $promo->promoCode = $promoCodeNew;
+                        $promo->promoSize = 5;
+                        $promo->promoRemark = 'Первая регистрация';
+                        $promo->save();
 
-                    $paramsMail = [
-                        'subject' => $subject,
-                        'message' => $message,
-                    ];
-                    Mail::to($user->email)->send(new PromoList($paramsMail));
+                        $subject = "Реєстрація успішна";
+                        $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+
+                        $paramsMail = [
+                            'subject' => $subject,
+                            'message' => $message,
+                        ];
+                        Mail::to($user->email)->send(new PromoList($paramsMail));
+                    }
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
                     $newUser['twitter_id'] = $user->id;
