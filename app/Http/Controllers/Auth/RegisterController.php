@@ -73,23 +73,22 @@ class RegisterController extends Controller
     {
         //Создание промокода 5% при первой регистрации
         $promoCodeNew = substr($data['email'], 0, strripos($data['email'], '@'));
+        $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
+        if ($findPromo !== null) {
+            $promo = new Promo();
+            $promo->promoCode = $promoCodeNew;
+            $promo->promoSize = 5;
+            $promo->promoRemark = 'Первая регистрация';
+            $promo->save();
 
-        $promo = new Promo();
-        $promo->promoCode = $promoCodeNew;
-        $promo->promoSize = 5;
-        $promo->promoRemark = 'Первая регистрация';
-        $promo->save();
-
-        $subject = "Реєстрація успішна";
-        $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
-
-
-        $paramsMail = [
-            'subject' => $subject,
-            'message' => $message,
-        ];
-        Mail::to($data['email'])->send(new PromoList($paramsMail));
-
+            $subject = "Реєстрація успішна";
+            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+            $paramsMail = [
+                'subject' => $subject,
+                'message' => $message,
+            ];
+            Mail::to($data['email'])->send(new PromoList($paramsMail));
+        }
         return User::create([
             'name' => $data['name'],
             'user_phone' => $data['user_phone'],
