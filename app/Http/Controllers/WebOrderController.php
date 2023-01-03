@@ -2250,11 +2250,7 @@ class WebOrderController extends Controller
         $req = Order::where('id', $id)->first();
 
         $json_arr = WebOrderController::tariffs();
-        if ($req->routefromnumber == 0) {
-            return view('taxi.homeReqObject', ['json_arr' => $json_arr, 'params' => $req]);
-        } else {
-            return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $req]);
-        }
+            return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $req]);
     }
 
 
@@ -2293,7 +2289,7 @@ class WebOrderController extends Controller
         $params['flexible_tariff_name'] = null;
         $params['payment_type'] = 0;
 
-        return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
+        return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params]);
 
     }
 

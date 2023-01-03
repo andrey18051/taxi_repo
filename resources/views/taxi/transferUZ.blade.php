@@ -99,7 +99,7 @@
                         </div>
                     </div>
 
-                    <<div class="col-sm-5 col-lg-4" style="margin-top: 5px">
+                    <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
                         <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
                            onclick="showHide('block_id')">Додаткові параметри</a>
 

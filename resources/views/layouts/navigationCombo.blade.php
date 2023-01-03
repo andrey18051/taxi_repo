@@ -37,6 +37,13 @@
                   style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
                 <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
             </a>
+        @else
+            <a    href="{{ route('login-taxi-info',
+                ['info' => 'Зареєструйтесь через іконку Телеграм для використання функцій Чат-Бота.'])  }}"
+                  target="_blank" title="Віртуальний помічник"
+                  style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
+                <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
+            </a>
         @endif
     @endauth
 </div>
