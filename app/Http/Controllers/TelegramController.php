@@ -74,7 +74,7 @@ class TelegramController extends Controller
 
             }
         } catch (Exception $e) {
-            dd($e->getMessage());
+            return view('auth.register',['info' => 'Помілка реєстрації']);
         }
     }
 
