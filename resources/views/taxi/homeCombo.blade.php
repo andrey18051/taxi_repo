@@ -58,14 +58,15 @@
                                                        class="form-control @error('from_number') is-invalid @enderror"
                                                        @isset($params['routefromnumber'])
                                                        value="{{ $params['routefromnumber']}}"
-                                                       style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
                                                        readonly
-                                                       @else
+                                                       @endisset
                                                        value="{{ old('from_number') }}"
                                                        placeholder="Будинок?"
                                                        autocomplete="off"
-                                                       style="text-align: center"
-                                                    @endisset>
+                                                       @isset($params)
+                                                       style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
+                                                       @endisset
+                                                       style="text-align: center">
 
                                             </div>
 

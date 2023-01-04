@@ -1,6 +1,13 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
+    @isset($info)
+        <div class="container  wrapper">
+            {{$info}}
+        </div>
+    @endisset
+
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -31,7 +38,12 @@
                             <div class="col-md-6">
                                 <input id="user_phone" type="text"
                                        class="form-control @error('user_phone') is-invalid @enderror" name="user_phone"
-                                       value="{{ old('user_phone') }}" required autocomplete="user_phone" placeholder="+380936665544">
+                                       @isset($phone)
+                                       value="{{ $phone }}"
+                                       @else
+                                       value="{{ old('user_phone') }}" required autocomplete="user_phone"
+                                       placeholder="+380936665544"
+                                       @endisset>
 
                                 @error('user_phone')
                                 <span class="invalid-feedback" role="alert">

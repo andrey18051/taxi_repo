@@ -2249,6 +2249,17 @@ class WebOrderController extends Controller
     {
         $req = Order::where('id', $id)->first();
 
+        if (Combo::where('name', $req->routefrom)->first()->street == 1) {
+            $req['routefromnumberBlockNone'] = 'block';
+        } else {
+            $req['routefromnumberBlockNone'] = 'none';
+        }
+
+        if (Combo::where('name', $req->routeto)->first()->street == 1) {
+            $req['routetonumberBlockNone'] = 'block';
+        } else {
+            $req['routetonumberBlockNone'] = 'none';
+        }
         $json_arr = WebOrderController::tariffs();
             return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $req]);
     }
@@ -2279,9 +2290,11 @@ class WebOrderController extends Controller
         $params['user_full_name'] = $response_arr ['user_first_name'];
         $params['routefrom'] = $route_address_from;
         $params['routefromnumber'] = $route_address_number_from;
+        $params['routefromnumberBlockNone'] = 'block';
         $params['route_undefined'] = 0;
         $params['routeto'] = null;
         $params['routetonumber'] = null;
+        $params['routetonumberBlockNone'] = 'block';
         $params['required_time'] = null;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
@@ -2385,9 +2398,10 @@ class WebOrderController extends Controller
 
         $finduser = User::where('user_phone', $user_phone)->first();
         if (!$finduser) {
-            return redirect()->route('register')->with('error', 'Ваш телефон не знайдено у базі.
-             Будь ласка, пройдіть реєстрацію для замовлення поїздки або перевірте номер.
-             Ваші розрахунки маршруту знайдіть натиснувши кнопку "Мої маршрути" в Особистому кабінеті.');
+            $info = 'Будь ласка, пройдіть реєстрацію для замовлення поїздки.
+            Ваш розрахунок маршруту знайдіть в Особистому кабінеті.';
+
+            return view('auth.register', ['info' => $info, 'phone' => $user_phone]);
         }
 
         $username = config('app.username');
