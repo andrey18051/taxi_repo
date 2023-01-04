@@ -135,12 +135,16 @@
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <a   href="{{route('homeCombo')}}"
-                                 style="text-decoration: none" target="_blank">
-                                {{ __('Перейти до пошуку') }}
-                            </a>
-                        </li>
+                        <div class="header gradient" >
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <a   href="{{route('homeCombo')}}"
+                                         style="text-decoration: none" target="_blank">
+                                        {{ __('Перейти до пошуку') }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
