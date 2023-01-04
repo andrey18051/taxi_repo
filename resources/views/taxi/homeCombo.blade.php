@@ -27,13 +27,9 @@
                             @csrf
                             <div class="row">
                                 <div class="col-md-7 col-lg-8">
-                                    @guest
-                                        <input type="hidden" id="user_phone" name="user_phone"  value="+380936665544">
-                                        <input type="hidden" id="user_full_name" name="user_full_name"  value="Гість">
-                                    @else
-                                        <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
-                                        <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
-                                    @endguest
+
+                                    <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
+                                    <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
 
                                     <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                                     <input type="hidden" id="comment" name="comment" placeholder="Додати побажання" />

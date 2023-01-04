@@ -268,7 +268,10 @@ Route::get('/home-Combo', function () {
                 return redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             }
             else {
-                return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+                if (Auth::check()) {
+                    return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+                }
+                else return redirect()->route('login');
             }
         }
     } else {
@@ -280,7 +283,10 @@ Route::get('/home-Combo', function () {
             if ($connectAPI == 400) {
                 return  redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             } else {
-                return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+                if (Auth::check()) {
+                    return view('taxi.homeCombo', ['json_arr' => $json_arr]);
+                }
+                else return redirect()->route('login');
             }
         }
     }
@@ -312,17 +318,49 @@ Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
     return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeMap');
 
-Route::get('/home-Map-Combo', function () {
-    IPController::getIP('/home-Map-Combo');
-    $connectAPI = WebOrderController::connectAPInoEmail();
-    if ($connectAPI == 400) {
-        return redirect()->route('home-news')
-            ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-    }
+Route::get('home-Map-Combo', function () {
+    IPController::getIP('home-Map-Combo');
     $json_arr = WebOrderController::tariffs();
-    return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
-})->name('homeMapCombo');
 
+    date_default_timezone_set("Europe/Kiev");
+    // Время интервала
+    $start_time = strtotime(config('app.start_time')); // начальное время
+    $end_time = strtotime(config('app.end_time')); // конечное время
+
+    $time = strtotime(date("h:i:sa")); // проверяемое время
+
+    // Выполняем проверку
+
+    if ($start_time  <= $end_time) {
+        if ($time >= $start_time && $time <= $end_time) {
+            return view('taxi.homeWelcomeWarCombo');
+        } else {
+            $connectAPI = WebOrderController::connectAPInoEmail();
+
+            if ($connectAPI == 400) {
+                return redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            } else {
+                if (Auth::check()) {
+                    return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
+                } else return redirect()->route('login');
+            }
+        }
+    } else {
+        if ($time >= $start_time || $time <= $end_time) {
+            return view('taxi.homeWelcomeWarCombo');
+        } else {
+            $connectAPI = WebOrderController::connectAPInoEmail();
+
+            if ($connectAPI == 400) {
+                return  redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            } else {
+                if (Auth::check()) {
+                    return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
+                } else return redirect()->route('login');
+            }
+        }
+    }
+})->name('homeMapCombo');
 
 Route::get('/taxi-gdbr', function () {
     IPController::getIP('/taxi-gdbr');

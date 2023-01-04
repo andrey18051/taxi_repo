@@ -1,7 +1,6 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-    {{-- print_r($orderId) --}}
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
             <br>
@@ -62,12 +61,8 @@
                         <div class="container text-center" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
-                                    @guest
-                                        <input type="text" id="user_full_name" name="user_full_name" value="{{ $orderId['0']['user_full_name'] }}"  class="form-control"  required/>
-                                    @else
-                                        <input type="text" id="user_full_name" name="user_full_name"
-                                               value="{{Auth::user()->name}}"  class="form-control"  required/>
-                                    @endguest
+                                   <input type="text" id="user_full_name" name="user_full_name"
+                                          value="{{Auth::user()->name}}"  class="form-control"   readonly/>
                                 </div>
                             </div>
                         </div>
@@ -75,23 +70,8 @@
                         <div class="container" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
-                                    @guest
-                                        <input id="user_phone" type="text"
-                                               class="form-control @error('user_phone') is-invalid @enderror" name="user_phone"
-
-                                               value="{{ old('user_phone') }}" required autocomplete="user_phone"
-                                               placeholder="+380936665544"
-                                            >
-
-                                        @error('user_phone')
-                                        <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                        @enderror
-                                    @else
-                                        <input type="text" class="form-control" id="user_phone" name="user_phone"
-                                               value="{{ Auth::user()->user_phone}}"  autofocus required>
-                                    @endguest
+                                  <input type="text" class="form-control" id="user_phone" name="user_phone"
+                                               value="{{ Auth::user()->user_phone}}"  readonly>
                                 </div>
                             </div>
                         </div>
