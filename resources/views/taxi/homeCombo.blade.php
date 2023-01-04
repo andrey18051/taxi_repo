@@ -1,13 +1,6 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
-
-    @isset($info)
-        <div class="container  wrapper">
-            {{$info}}
-        </div>
-    @endisset
-
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
         <div class="container" style="text-align: center">
             <h2 class="gradient"><b>Київ та область</b></h2>
@@ -22,14 +15,19 @@
                     </button>
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+
                     <div class="accordion-body">
                         <form action="{{route('search-cost')}}" id="form">
                             @csrf
                             <div class="row">
                                 <div class="col-md-7 col-lg-8">
-
-                                    <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
-                                    <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
+                                    @guest
+                                        <input type="hidden" id="user_phone" name="user_phone"  value="+380936665544">
+                                        <input type="hidden" id="user_full_name" name="user_full_name"  value="Гість">
+                                    @else
+                                        <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
+                                        <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
+                                    @endguest
 
                                     <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
                                     <input type="hidden" id="comment" name="comment" placeholder="Додати побажання" />
@@ -54,15 +52,14 @@
                                                        class="form-control @error('from_number') is-invalid @enderror"
                                                        @isset($params['routefromnumber'])
                                                        value="{{ $params['routefromnumber']}}"
+                                                       style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
                                                        readonly
-                                                       @endisset
+                                                       @else
                                                        value="{{ old('from_number') }}"
                                                        placeholder="Будинок?"
                                                        autocomplete="off"
-                                                       @isset($params)
-                                                       style="text-align: center; display: {{$params['routefromnumberBlockNone']}}"
-                                                       @endisset
-                                                       style="text-align: center">
+                                                       style="text-align: center"
+                                                    @endisset>
 
                                             </div>
 
@@ -239,10 +236,129 @@
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        <p class="text-center gradient">Замовити трансфер</p>
+                        <p class="text-center gradient">Рухайте маркерами для розрахунку вартості поїздки</p>
                     </button>
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <form action="{{route('search-cost-map')}}" id="form_object">
+                            @csrf
+                            <div class="row">
+                                <div class="col-sm-8 col-lg-8">
+                                    <input type="hidden" id="lat" name="lat"/>
+                                    <input type="hidden" id="lng" name="lng" />
+                                    <input type="hidden" id="lat2" name="lat2" />
+                                    <input type="hidden" id="lng2" name="lng2"/>
+
+                                    @guest
+                                        <input type="hidden" id="user_phone" name="user_phone"  value="+380936665544">
+                                        <input type="hidden" id="user_full_name" name="user_full_name"  value="Гість">
+                                    @else
+                                        <input type="hidden"  id="user_phone" name="user_phone" value="{{Auth::user()->user_phone}}">
+                                        <input type="hidden" id="user_full_name" name="user_full_name"   value="{{Auth::user()->name}}">
+                                    @endguest
+
+                                    <input type="hidden" class="form-control" id="search4" name="search4" autocomplete="off" placeholder="Пошук об'єкта" value="" required>
+                                    <input type="hidden" class="form-control" id="search5" name="search5" autocomplete="off" placeholder="Пошук об'єкта" >
+                                    <input type="hidden" class="form-control" id="comment" name="comment" placeholder="Додати побажання" />
+                                    <input type="hidden" id="add_cost" name="add_cost" value="0" class="form-control" />
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div id="googleMap" style="width:100%;height:150px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="container" style="text-align: left">
+                                        <input type="checkbox" class="form-check-input" id="route_undefined"  name="route_undefined" value="1">
+                                        <label class="form-check-label" for="route_undefined">По місту</label>
+                                    </div>
+
+                                    <div class="container">
+                                        <script defer src="https://www.google.com/recaptcha/api.js"></script>
+                                        <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
+                                    </div>
+                                    <br>
+                                </div>
+
+                                <div class="col-sm-5 col-lg-4" style="margin-top: 5px">
+                                    <a href="javascript:void(0)" class="w-100 btn btn-outline-success"
+                                       onclick="showHide('block_id')">Додаткові параметри</a><br>
+
+                                    <div id="block_id" style="display: none">
+                                        <ul class="list-group mb-3">
+                                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                <label class="form-label" for="required_time">Час подачі</label>
+                                                <input type="datetime-local" step="any"  id="required_time"  name="required_time" value="null">
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" id="wagon" name="wagon">
+                                                    <label class="form-check-label" for="wagon">Универсал</label>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" id="minibus" name="minibus">
+                                                    <label class="form-check-label" for="minibus">Мікроавтобус</label>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" id="premium" name="premium">
+                                                    <label class="form-check-label" for="premium">Машина преміум-класса</label>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                <div class="col-md-12">
+                                                    <label for="$flexible_tariff_name" class="form-label">Тариф</label>
+                                                    <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" >
+                                                        <option></option>
+                                                        @for ($i = 0; $i < count($json_arr); $i++)
+                                                            <option>{{$json_arr[$i]['name']}}</option>
+                                                        @endfor
+                                                    </select>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                                <div class="col-md-12">
+                                                    <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
+                                                    <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
+                                                        <option>готівка</option>
+                                                        <!--                                            <option>безготівка</option>-->
+                                                    </select>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="container text-center">
+                                <div class="row">
+                                    <a class="w-100 btn btn-danger" style="margin-top: 5px"
+                                       href="{{route('homeMapCombo')}}">
+                                        Очистити форму
+                                    </a>
+                                    <button class="w-100 btn btn-primary" style="margin-top: 5px" type="submit">
+                                        Розрахувати вартість поїздки
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <p class="text-center gradient">Замовити трансфер</p>
+                    </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div class="container-fluid" style="margin-top: 10px">
                             <div class="header gradient" >
@@ -290,12 +406,12 @@
                 </div>
             </div>
             <div class="accordion-item">
-                <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                <h2 class="accordion-header" id="headingFour">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                         <p class="text-center gradient">Замовити зустрич</p>
                     </button>
                 </h2>
-                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div class="container-fluid" style="margin-top: 10px">
                             <div class="header gradient" >
@@ -344,23 +460,7 @@
     </div>
 
     <script defer type="text/javascript">
-
-        if (sessionStorage.getItem('hidFrom') == 'none') {
-            document.getElementById('from_number').style.display='none';
-            document.getElementById('from_number').value=null;
-        }
-        if (sessionStorage.getItem('hidFrom') == 'block') {
-            document.getElementById('from_number').style.display='block';
-        }
-
-        if (sessionStorage.getItem('hidTo') == 'none') {
-            document.getElementById('to_number').style.display='none';
-            document.getElementById('to_number').value=null;
-        }
-        if (sessionStorage.getItem('hidTo') == 'block') {
-            document.getElementById('to_number').style.display='block';
-        }
-         /**
+        /**
          * Функция Скрывает/Показывает блок
          * @author ox2.ru дизайн студия
          **/
@@ -370,12 +470,7 @@
                 //Записываем ссылку на элемент в переменную obj
                 var obj = document.getElementById(element_id);
                 //Если css-свойство display не block, то:
-                if (element_id == "block_city") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
+
                 if (element_id == "block_id") {
                     if (obj.style.display != "block") {
                         obj.style.display = "block"; //Показываем элемент
@@ -387,56 +482,78 @@
             else alert("Элемент с id: " + element_id + " не найден!");
         }
 
-        function hidFrom(value) {
-            var route = "/autocomplete-search-combo-hid/" + value;
+        /**
+         * Карта Гугл
+         */
+        function myMap() {
+            var marker;
+            var myLatlng = {
+                lat: 50.568235937668135,
+                lng: 30.26999524844567
+            };
+            var marker2;
+            var myLatlng2 = {
+                lat: 50.51499815972034,
+                lng: 30.23909620059411
+            };
 
-            $.ajax({
-                url: route,         /* Куда пойдет запрос */
-                method: 'get',             /* Метод передачи (post или get) */
-                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+            var mapProp= {
+                zoom: 10,
+                center: myLatlng
+            };
+            var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
 
-                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 0) {
-                        sessionStorage.setItem('hidFrom', 'none')
-                        document.getElementById('from_number').style.display='none';
-                        document.getElementById('from_number').value=null;
-                    }
-                    if (data == 1) {
-                        sessionStorage.setItem('hidFrom', 'block')
-                        document.getElementById('from_number').style.display='block';
-                    }
-                }
+            document.getElementById('lat').value = myLatlng.lat;
+            document.getElementById('lng').value = myLatlng.lng;
+
+            document.getElementById('lat2').value = myLatlng2.lat;
+            document.getElementById('lng2').value = myLatlng2.lng;
+
+            marker = new google.maps.Marker({
+                position: myLatlng,
+                map: map,
+                draggable: true,
+                label: 'Звідки'
             });
 
+            marker.addListener('dragend', function(e) {
+                var position = marker.getPosition();
+                updateCoordinates(position.lat(), position.lng())
+            });
 
+            map.addListener('click', function(e) {
+                marker.setPosition(e.latLng);
+                updateCoordinates(e.latLng.lat(), e.latLng.lng())
+            });
+
+            marker2 = new google.maps.Marker({
+                position: myLatlng2,
+                map: map,
+                draggable: true,
+                label: 'Куди'
+            });
+
+            marker2.addListener('dragend', function(e) {
+                var position2 = marker2.getPosition();
+                updateCoordinates2(position2.lat(), position2.lng())
+            });
+
+            map.addListener('click', function(e) {
+                marker2.setPosition(e.latLng);
+                updateCoordinates2(e.latLng.lat(), e.latLng.lng())
+            });
 
         }
 
-        function hidTo(value) {
-            var route = "/autocomplete-search-combo-hid/" + value;
-
-            $.ajax({
-                url: route,         /* Куда пойдет запрос */
-                method: 'get',             /* Метод передачи (post или get) */
-                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 0) {
-                        sessionStorage.setItem('hidTo', 'none')
-                        document.getElementById('to_number').style.display='none';
-                        document.getElementById('to_number').value=null;
-                    }
-                    if (data == 1) {
-                        sessionStorage.setItem('hidTo', 'block')
-                        document.getElementById('to_number').style.display='block';
-                    }
-
-                }
-            });
-
+        function updateCoordinates(lat, lng) {
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
         }
-
+        function updateCoordinates2(lat, lng) {
+            document.getElementById('lat2').value = lat;
+            document.getElementById('lng2').value = lng;
+        }
     </script>
-
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoyJk5j4GRS41GYwZTRJduPnV5k8SDCoc&callback=myMap"></script>
 
 @endsection
