@@ -76,10 +76,20 @@
                             <div class="row">
                                 <div class="col-12">
                                     @guest
-                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                               placeholder="Телефон? Приклад: +380936665544"  autofocus required>
+                                        <input id="user_phone" type="text"
+                                               class="form-control @error('user_phone') is-invalid @enderror" name="user_phone"
+
+                                               value="{{ old('user_phone') }}" required autocomplete="user_phone"
+                                               placeholder="+380936665544"
+                                            >
+
+                                        @error('user_phone')
+                                        <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                        @enderror
                                     @else
-                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                        <input type="text" class="form-control" id="user_phone" name="user_phone"
                                                value="{{ Auth::user()->user_phone}}"  autofocus required>
                                     @endguest
                                 </div>

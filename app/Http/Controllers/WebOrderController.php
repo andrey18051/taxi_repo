@@ -1941,6 +1941,10 @@ class WebOrderController extends Controller
      */
     public function costEdit($id, Request $req)
     {
+        $req->validate([
+            'user_phone' => [new PhoneNumber()],
+        ]);
+
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
