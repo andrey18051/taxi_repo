@@ -356,7 +356,8 @@ Route::get('home-Map-Combo', function () {
             } else {
                 if (Auth::check()) {
                     return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
-                } else return redirect()->route('login');
+                }
+                else return redirect()->route('login');
             }
         }
     }
