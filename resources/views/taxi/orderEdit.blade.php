@@ -86,7 +86,13 @@
                                     @endguest
                                     @auth
                                         <input type="tel" class="form-control" id="user_phone" name="user_phone"
-                                               value="{{ Auth::user()->user_phone}}" required />
+                                               value="{{ Auth::user()->user_phone}}"
+                                               pattern="[\+]\d{12}"
+                                               placeholder="+380936665544"
+                                               title="Формат вводу: +380936665544"
+                                               minlength="13"
+                                               maxlength="13"
+                                               required />
                                     @endauth
 
                                 </div>
