@@ -266,12 +266,8 @@ Route::get('/home-Combo', function () {
 
             if ($connectAPI == 400) {
                 return redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-            }
-            else {
-                if (Auth::check()) {
+            } else {
                     return view('taxi.homeCombo', ['json_arr' => $json_arr]);
-                }
-                else return redirect()->route('login');
             }
         }
     } else {
@@ -283,10 +279,7 @@ Route::get('/home-Combo', function () {
             if ($connectAPI == 400) {
                 return  redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             } else {
-                if (Auth::check()) {
-                    return view('taxi.homeCombo', ['json_arr' => $json_arr]);
-                }
-                else return redirect()->route('login');
+                return view('taxi.homeCombo', ['json_arr' => $json_arr]);
             }
         }
     }
@@ -340,9 +333,7 @@ Route::get('home-Map-Combo', function () {
             if ($connectAPI == 400) {
                 return redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             } else {
-                if (Auth::check()) {
-                    return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
-                } else return redirect()->route('login');
+                return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
             }
         }
     } else {
@@ -354,10 +345,7 @@ Route::get('home-Map-Combo', function () {
             if ($connectAPI == 400) {
                 return  redirect()->route('home-news')->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
             } else {
-                if (Auth::check()) {
-                    return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
-                }
-                else return redirect()->route('login');
+                return view('taxi.homeMapCombo', ['json_arr' => $json_arr]);
             }
         }
     }

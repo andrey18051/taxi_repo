@@ -2313,10 +2313,6 @@ class WebOrderController extends Controller
      */
     public function transfer($routeto, $page)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
         $json_arr = WebOrderController::tariffs();
 
         $params['user_phone'] = '000';
@@ -2369,9 +2365,6 @@ class WebOrderController extends Controller
      */
     public function transferFrom($routefrom, $page)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
         $json_arr = WebOrderController::tariffs();
 
         $params['user_phone'] = '000';
