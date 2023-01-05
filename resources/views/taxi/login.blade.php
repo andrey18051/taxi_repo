@@ -30,7 +30,13 @@
 
                                     <!-- Phone input -->
                                         <div class="form-outline mb-2">
-                                             <input type="text" class="form-control" name="username" placeholder="Телефон? Приклад: +380936665544" required>
+                                             <input type="text" class="form-control" name="username"
+                                                    pattern="[\+]\d{12}"
+                                                    placeholder="+380936665544"
+                                                    title="Формат вводу: +380936665544"
+                                                    minlength="13"
+                                                    maxlength="13"
+                                                    required>
                                         </div>
 
                                         <!-- Password input -->

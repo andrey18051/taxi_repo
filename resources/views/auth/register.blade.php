@@ -38,11 +38,15 @@
                             <div class="col-md-6">
                                 <input id="user_phone" type="text"
                                        class="form-control @error('user_phone') is-invalid @enderror" name="user_phone"
+                                       pattern="[\+]\d{12}"
+                                       placeholder="+380936665544"
+                                       title="Формат вводу: +380936665544"
+                                       minlength="13"
+                                       maxlength="13"
                                        @isset($phone)
                                        value="{{ $phone }}"
                                        @else
                                        value="{{ old('user_phone') }}" required autocomplete="user_phone"
-                                       placeholder="+380936665544"
                                        @endisset>
 
                                 @error('user_phone')

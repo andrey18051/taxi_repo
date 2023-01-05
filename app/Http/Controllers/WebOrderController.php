@@ -172,7 +172,7 @@ class WebOrderController extends Controller
      */
     public function authorization($req)
     {
-        $username = substr($req->username, 3);
+        $username = $req->username;
         $password = hash('SHA512', $req->password);
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -185,7 +185,7 @@ class WebOrderController extends Controller
      */
     public function profile()
     {
-        $username = substr(Auth::user()->user_phone, 3);
+        $username = Auth::user()->user_phone;
         try {
             $password = hash('SHA512', Crypt::decryptString(Auth::user()->password_taxi));
 
@@ -2667,9 +2667,6 @@ class WebOrderController extends Controller
     */
     public function callBack(Request $req)
     {
-        $req->validate([
-            'user_phone' => [new PhoneNumber()],
-        ]);
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
 

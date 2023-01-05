@@ -61,8 +61,14 @@
                         <div class="container text-center" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
+                                    @guest
+                                        <input type="text" id="user_full_name" name="user_full_name"
+                                               value="Гість"  class="form-control"  />
+                                    @endguest
+                                    @auth
                                    <input type="text" id="user_full_name" name="user_full_name"
-                                          value="{{Auth::user()->name}}"  class="form-control"   readonly/>
+                                          value="{{Auth::user()->name}}"  class="form-control"  />
+                                    @endauth
                                 </div>
                             </div>
                         </div>
@@ -70,8 +76,19 @@
                         <div class="container" style="margin-top: 5px">
                             <div class="row">
                                 <div class="col-12">
-                                  <input type="text" class="form-control" id="user_phone" name="user_phone"
-                                               value="{{ Auth::user()->user_phone}}"  readonly>
+                                    @guest
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                               pattern="[\+]\d{12}"
+                                               placeholder="+380936665544"
+                                               title="Формат вводу: +380936665544"
+                                               minlength="13"
+                                               maxlength="13"required/>
+                                    @endguest
+                                    @auth
+                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                               value="{{ Auth::user()->user_phone}}" required />
+                                    @endauth
+
                                 </div>
                             </div>
                         </div>

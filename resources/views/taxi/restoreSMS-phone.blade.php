@@ -28,7 +28,13 @@
                                     <div class="container">
                                         <div class="row">
                                             <div class="form-outline mb-2"  >
-                                                <input type="text" class="form-control" name="username" value="{{$phone}}">
+                                                <input type="text" class="form-control" name="username"
+                                                       pattern="[\+]\d{12}"
+                                                       placeholder="+380936665544"
+                                                       title="Формат вводу: +380936665544"
+                                                       minlength="13"
+                                                       maxlength="13"
+                                                       value="{{$phone}}">
                                             </div>
 
                                             <script defer src="https://www.google.com/recaptcha/api.js"></script>

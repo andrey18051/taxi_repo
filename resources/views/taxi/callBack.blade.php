@@ -41,7 +41,11 @@
                                                    value="{{ Auth::user()->user_phone }}"
                                                    @endguest
                                                    value="{{ old('user_phone') }}"
-                                                   placeholder="Телефон? Приклад: +380936665544">
+                                                   pattern="[\+]\d{12}"
+                                                   placeholder="+380936665544"
+                                                   title="Формат вводу: +380936665544"
+                                                   minlength="13"
+                                                   maxlength="13">
                                         </div>
 
                                         <script defer src="https://www.google.com/recaptcha/api.js"></script>

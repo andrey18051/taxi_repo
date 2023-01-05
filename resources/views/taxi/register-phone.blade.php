@@ -25,7 +25,13 @@
                                         <div class="row">
                                             <!-- Phone input -->
                                             <div class="form-outline mb-4">
-                                                <input type="text" class="form-control" name="phone" autocomplete="off" value="{{$phone}}">
+                                                <input type="text" class="form-control" name="phone" autocomplete="off"
+                                                       pattern="[\+]\d{12}"
+                                                       placeholder="+380936665544"
+                                                       title="Формат вводу: +380936665544"
+                                                       minlength="13"
+                                                       maxlength="13"
+                                                       value="{{$phone}}">
                                             </div>
 
                                             <!-- Password input -->
