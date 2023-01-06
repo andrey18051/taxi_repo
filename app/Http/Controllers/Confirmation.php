@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use function Complex\subtract;
 
 class Confirmation extends Controller
 {
@@ -12,15 +13,23 @@ class Confirmation extends Controller
      * Получение кода подтверждения
      * @return string
      */
-    public function approvedPhonesSendConfirmCode($phone)
+    public function sendConfirmCode($phone)
     {
-        $url = config('app.taxi2012Url') . '/api/approvedPhones/sendConfirmCode';
-        $phone =
+        $phone = substr($phone, 1);
+
+        /* $connectAPI = WebOrderController::connectApi();
+                if ($connectAPI == 400) {
+                    return redirect()->route('home-news')
+                        ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+                }
+        $url = $connectAPI . '/api/approvedPhones/sendConfirmCode';
+
         $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'phone' => $phone, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
         ]);
-        return $response->status();
+        return $response->status();*/
+        return 200;
     }
 
     /**
@@ -28,14 +37,25 @@ class Confirmation extends Controller
      * Получение кода подтверждения
      * @return string
      */
-    public function approvedPhones()
+    public function approvedPhones($phone, $confirm_code)
     {
-        $url = config('app.taxi2012Url') . '/api/approvedPhones/';
+        $phone = substr($phone, 1);
+
+        /*$connectAPI = WebOrderController::connectApi();
+        if ($connectAPI == 400) {
+            return redirect()->route('home-news')
+                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+        }
+        $connectAPI = 'http://167.235.113.231:7306';
+        $connectAPI = 'https://m.easy-order-taxi.site/';
+        $url = $connectAPI . '/api/approvedPhones/';
         $response = Http::post($url, [
-            'phone' => '0936734488', //Обязательный. Номер мобильного телефона
-            'confirm_code' => '5945' //Обязательный. Код подтверждения.
+            'phone' => $phone, //Обязательный. Номер мобильного телефона
+            'confirm_code' =>  $confirm_code //Обязательный. Код подтверждения.
         ]);
-        return $response->status();
+        return $response->status();*/
+
+        return 200;
     }
 
 }

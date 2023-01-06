@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
@@ -39,6 +40,16 @@ use Stevebauman\Location\Facades\Location;
 */
 
 /**
+ * Проверка телефона
+ */
+
+Route::get('/sendConfirmCode/{phone}', [Confirmation::class, 'sendConfirmCode'])
+    ->name('sendConfirmCode');
+
+Route::get('/approvedPhones/{phone}/{confirm_code}', [Confirmation::class, 'approvedPhones'])
+    ->name('approvedPhones');
+
+/**
  * PromoList
  */
 
@@ -48,7 +59,7 @@ Route::get('/promoSize/{promoCode}', [PromoController::class, 'promoSize'])
 Route::get('/promoCreat', [PromoController::class, 'promoCreat'])
     ->name('promoCreat');
 
-Route::get('/promo', function() {
+Route::get('/promo', function () {
     return view('admin.promo');
 })->name('admin-promo')->middleware('role:superadministrator');
 
