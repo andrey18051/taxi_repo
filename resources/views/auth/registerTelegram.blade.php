@@ -16,7 +16,7 @@
                         <div class="card-header">{{ __('Email') }}</div>
 
                         <div class="card-body">
-                            <form method="POST" action="{{ route('registerTelegram') }}">
+                            <form action="{{ route('registerTelegram') }}">
                                 @csrf
 
                                 <input type="hidden" id="name" name="name"  value="{{$params['name']}}">

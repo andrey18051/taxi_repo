@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PromoList;
 use App\Models\Promo;
 use App\Models\PromoUse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class PromoController extends Controller
 {
@@ -59,5 +61,32 @@ class PromoController extends Controller
         $promo->save();
 
         return view('admin.promo');
+    }
+
+    /**
+     * Создание промокода 5% при первой регистрации
+     * @param $email
+     */
+    public function promoCodeNew($email)
+    {
+        $promoCodeNew = substr($email, 0, strripos($email, '@'));
+        $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
+
+        if (empty($findPromo)) {
+            $promo = new Promo();
+            $promo->promoCode = $promoCodeNew;
+            $promo->promoSize = 5;
+            $promo->promoRemark = 'Первая регистрация';
+            $promo->save();
+
+            $subject = "Ваш бонус-код";
+            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+
+            $paramsMail = [
+                'subject' => $subject,
+                'message' => $message,
+            ];
+            Mail::to($email)->send(new PromoList($paramsMail));
+        }
     }
 }

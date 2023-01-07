@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\PromoList;
 use App\Models\Promo;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
@@ -29,7 +30,6 @@ class FacebookController extends Controller
     /**
      * Create a new controller instance.
      *
-     * @return void
      */
 
 
@@ -42,35 +42,16 @@ class FacebookController extends Controller
                 Auth::login($finduser);
                 return redirect()->intended('/home-Combo');
             } else {
-                try {
-                    $finduser = User::where('email', $user->email)->first();
+                $finduser = User::where('email', $user->email)->first();
+                if ($finduser) {
                     $finduser->facebook_id = $user->id;
                     $finduser->save();
                     Auth::login($finduser);
                     return redirect()->intended('/home-Combo');
-                } catch (Exception $e) {
+                } else {
                     //Создание промокода 5% при первой регистрации
-                    $promoCodeNew = substr($user->email, 0, strripos($user->email, '@'));
-                    $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
+                    PromoController::promoCodeNew($user->email);
 
-                    if (empty($findPromo)) {
-                        $promoCodeNew = substr($user->email, 0, strripos($user->email, '@'));
-
-                        $promo = new Promo();
-                        $promo->promoCode = $promoCodeNew;
-                        $promo->promoSize = 5;
-                        $promo->promoRemark = 'Первая регистрация';
-                        $promo->save();
-
-                        $subject = "Реєстрація успішна";
-                        $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
-
-                        $paramsMail = [
-                            'subject' => $subject,
-                            'message' => $message,
-                        ];
-                        Mail::to($user->email)->send(new PromoList($paramsMail));
-                    }
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
                     $newUser['facebook_id'] = $user->id;
@@ -79,14 +60,11 @@ class FacebookController extends Controller
                     $newUser['github_id'] = null;
                     $newUser['twitter_id'] = null;
                     $newUser['telegram_id'] = null;
-                    $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
-                    $newUser['password'] = substr(str_shuffle($chars), 0, 8);
                     return view('auth.registerSocial', ['newUser' => $newUser]);
                 }
-
             }
         } catch (Exception $e) {
-            return view('auth.register',['info' => 'Помілка реєстрації']);
+            return view('auth.register', ['info' => 'Помілка реєстрації']);
         }
     }
 }

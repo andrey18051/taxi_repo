@@ -66,47 +66,26 @@ class TelegramController extends Controller
                 Auth::login($finduser);
                 return redirect()->intended('/home-Combo');
             } else {
-               // dd($user);
                 $params ['name'] = $user['first_name'] . ' ' . $user['last_name'];
                 $params ['telegram_id'] = $user['id'];
-                //dd($params);
                 return view('auth.registerTelegram', ['params' => $params, 'info' => 'Вкажіть адресу електронної пошти']);
-
             }
         } catch (Exception $e) {
-            return view('auth.register',['info' => 'Помілка реєстрації']);
+            return view('auth.register', ['info' => 'Помілка реєстрації']);
         }
     }
 
     public function registerTelegram(Request $request)
     {
-        try {
-            $finduser = User::where('email', $request->email)->first();
+        $finduser = User::where('email', $request->email)->first();
+        if ($finduser) {
             $finduser->telegram_id = $request->telegram_id;
             $finduser->save();
             Auth::login($finduser);
             return redirect()->intended('/home-Combo');
-        } catch (Exception $e) {
+        } else {
             //Создание промокода 5% при первой регистрации
-            $promoCodeNew = substr($request->email, 0, strripos($request->email, '@'));
-            $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
-
-            if (empty($findPromo)) {
-                $promo = new Promo();
-                $promo->promoCode = $promoCodeNew;
-                $promo->promoSize = 5;
-                $promo->promoRemark = 'Первая регистрация';
-                $promo->save();
-
-                $subject = "Реєстрація успішна";
-                $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
-
-                $paramsMail = [
-                    'subject' => $subject,
-                    'message' => $message,
-                ];
-                Mail::to($request->email)->send(new PromoList($paramsMail));
-            }
+            PromoController::promoCodeNew($request->email);
             $newUser['name'] = $request->name;
             $newUser['email'] = $request->email ;
             $newUser['telegram_id'] = $request->telegram_id;
@@ -115,9 +94,6 @@ class TelegramController extends Controller
             $newUser['github_id'] = null;
             $newUser['linkedin_id'] = null;
             $newUser['twitter_id'] = null;
-            $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+|";
-            $newUser['password'] = substr(str_shuffle($chars), 0, 8);
-
             return view('auth.registerSocial', ['newUser' => $newUser]);
         }
     }

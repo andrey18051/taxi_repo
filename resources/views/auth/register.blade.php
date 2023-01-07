@@ -37,7 +37,7 @@
                                        @else
                                        value="{{ old('user_phone') }}" required autocomplete="user_phone"
                                        @endisset
-                                       onchange="hidConfirm_code(this.value)" autofocus>
+                                       onchange="sendConfirmCode(this.value)" autofocus>
 
                                 @error('user_phone')
                                 <span class="invalid-feedback" role="alert">
@@ -47,14 +47,21 @@
                             </div>
                         </div>
 
-                        <div id="confirm_code_div" style="display: none">
+                        <div id="confirm_code_div">
                             <div class="row mb-3" >
                                 <label for="confirm_code" class="col-md-4 col-form-label text-md-end">{{ __('Код зі смс') }}</label>
 
                                 <div class="col-md-6">
                                     <input id="confirm_code" type="text" class="form-control"
                                            name="confirm_code" placeholder="Режим тестирования. Нажмите любые кнопки и ввод"
-                                           onchange="hidConfirm_area(document.getElementById('user_phone').value , this.value)">
+                                           onblur="approvedPhones(document.getElementById('user_phone').value , this.value)"
+                                           pattern="[0-9]*"
+                                           title="Формат вводу: 1234"
+                                           minlength="4"
+                                           maxlength="4"
+                                           autofocus
+                                           value="{{ old('confirm_code') }}"
+                                           required>
 
                                 </div>
                             </div>
@@ -62,13 +69,13 @@
                         </div>
 
 
-                        <div id="confirm_area" style="display: none">
+                        <div id="confirm_area">
 
                             <div class="row mb-3">
                                 <label for="name" class="col-md-4 col-form-label text-md-end">{{ __("Ім'я") }}</label>
 
                                 <div class="col-md-6">
-                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name">
 
                                     @error('name')
                                     <span class="invalid-feedback" role="alert">
@@ -173,18 +180,7 @@
 </div>
     <script>
 
-          if (sessionStorage.getItem('confirm_area') == 'none') {
-              document.getElementById('confirm_area').style.display='none';
-              document.getElementById('label_user_phone').style.display='block';
-              document.getElementById('user_phone').style.display='block';
-          }
-          if (sessionStorage.getItem('confirm_area') == 'block') {
-              document.getElementById('confirm_area').style.display='block';
-              document.getElementById('label_user_phone').style.display='none';
-              document.getElementById('user_phone').style.display='none';
-              document.getElementById('user_phone').value = sessionStorage.getItem('user_phone');
-          }
-        function hidConfirm_code(value) {
+        function sendConfirmCode(value) {
             var route = "/sendConfirmCode/" + value;
 
             $.ajax({
@@ -193,15 +189,12 @@
                 dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
 
                 success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 200) {
-                        /*sessionStorage.setItem('confirm_code_div', 'block');*/
-                        document.getElementById('confirm_code_div').style.display = 'block';
-                    } else alert('Помілка. Спробуйте піздніше.')
+                    if (data != 200) alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
                 }
             });
         }
 
-        function hidConfirm_area(user_phone, confirm_code) {
+        function approvedPhones(user_phone, confirm_code) {
             var route = "/approvedPhones/" + user_phone + "/" + confirm_code;
 
             $.ajax({
@@ -210,16 +203,7 @@
                 dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
 
                 success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 200) {
-                        sessionStorage.setItem('confirm_area', 'block');
-                        document.getElementById('confirm_area').style.display = 'block';
-
-                        document.getElementById('confirm_code_div').style.display = 'none';
-
-                        document.getElementById('label_user_phone').style.display = 'none';
-                        sessionStorage.setItem('user_phone', document.getElementById('user_phone').value);
-                        document.getElementById('user_phone').style.display = 'none';
-                    } else alert('Помілка кода підтвердження. Спробуйте піздніше.')
+                    if (data != 200) alert('Помілка введення кода підтвердження.');
                 }
             });
         }

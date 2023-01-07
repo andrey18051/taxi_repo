@@ -107,7 +107,7 @@ Route::get('email/telegram', [TelegramController::class, 'emailTelegram'])->name
 Route::get('auth/telegram', [TelegramController::class, 'redirectToTelegram'])->name('auth-telegram');
 Route::get('auth/telegram/callback', [TelegramController::class, 'handleTelegramCallback']);
 
-Route::post('register/telegram', [TelegramController::class, 'registerTelegram'])->name('registerTelegram');
+Route::get('register/telegram', [TelegramController::class, 'registerTelegram'])->name('registerTelegram');
 
 
 /**
