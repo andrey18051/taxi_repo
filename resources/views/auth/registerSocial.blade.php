@@ -40,7 +40,21 @@
                                        title="Формат вводу: +380936665544"
                                        minlength="13"
                                        maxlength="13"
-                                       onchange="sendConfirmCode(this.value)" autofocus>
+                                       onblur="
+                                        var route =  '/sendConfirmCode/' + this.value;
+                                            $.ajax({
+                                            url: route,         /* Куда пойдет запрос */
+                                            method: 'get',             /* Метод передачи (post или get) */
+                                            dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                                            success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                                            if (data != 200) {
+                                            alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
+                                            document.location.href = '/feedback';
+                                            }
+                                            }
+                                        });"
+                                       autofocus>
 
                                 @error('user_phone')
                                 <span class="invalid-feedback" role="alert">
@@ -56,7 +70,6 @@
                                 <div class="col-md-6">
                                     <input id="confirm_code" type="text" class="form-control"
                                            name="confirm_code" placeholder="Код зі смс"
-                                           onchange="approvedPhones(document.getElementById('user_phone').value , this.value)"
                                            pattern="[0-9]*"
                                            placeholder="1234"
                                            title="Формат вводу: 1234"
@@ -64,7 +77,27 @@
                                            maxlength="4"
                                            autofocus
                                            value="{{ old('confirm_code') }}"
-                                           required>
+                                           required
+                                           onblur="
+                                            var route = '/approvedPhones/' +
+                                                document.getElementById('user_phone').value + '/' +
+                                                this.value;
+                                            $.ajax({
+                                                  url: route,         /* Куда пойдет запрос */
+                                                  method: 'get',             /* Метод передачи (post или get) */
+                                                  dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                                                  success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                                                      if (data != 200)  {
+                                                         if (data == 400) {
+                                                                alert('Помілка введення кода підтвердження');
+                                                         } else {
+                                                                alert('Сталася помілка. Зверниться до оператора.');
+                                                                        document.location.href = '/feedback';
+                                                         }
+                                                      }
+                                                  }
+                                            });">
 
                                 </div>
                             </div>
@@ -157,67 +190,5 @@
         </div>
     </div>
 </div>
-<script defer type="text/javascript">
 
-    function pCode(value) {
-
-        const route = "/promoSize/" + value;
-
-        $.ajax({
-            url: route,         /* Куда пойдет запрос */
-            method: 'get',             /* Метод передачи (post или get) */
-            dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-            success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-
-                order_cost = {{session('order_cost')}} - Math.round({{session('order_cost')}}*data);
-                rangeValue = order_cost - {{ session('order_cost')}};
-                document.getElementById('rangeValue').innerHTML = rangeValue;
-
-                document.getElementById('add_cost').min =  rangeValue;
-                document.getElementById('add_cost').value =  rangeValue;
-                document.getElementById('rangeValueСost').innerHTML =  order_cost;
-            }
-        });
-    }
-
-    function sendConfirmCode(value) {
-        var route = "/sendConfirmCode/" + value;
-
-        $.ajax({
-            url: route,         /* Куда пойдет запрос */
-            method: 'get',             /* Метод передачи (post или get) */
-            dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-            success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                if (data != 200) {
-                    alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
-                    document.location.href = "/feedback";
-                }
-            }
-        });
-    }
-
-    function approvedPhones(user_phone, confirm_code) {
-        var route = "/approvedPhones/" + user_phone + "/" + confirm_code;
-
-        $.ajax({
-            url: route,         /* Куда пойдет запрос */
-            method: 'get',             /* Метод передачи (post или get) */
-            dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-            success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                if (data != 200)  {
-                    if (data == 400) {
-                        alert('Помілка введення кода підтвердження');
-                    } else {
-                        alert('Сталася помілка. Зверниться до оператора.');
-                        document.location.href = "/feedback";
-                    }
-                }
-            }
-        });
-    }
-
-</script>
 @endsection
