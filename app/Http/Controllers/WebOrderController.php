@@ -73,8 +73,8 @@ class WebOrderController extends Controller
                     return config('app.taxi2012Url_3');
                 } catch (Exception $e) {
                     $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу" . config('app.taxi2012Url_2') . ". " . PHP_EOL .
-                        "Ошибка подключения к серверу" . config('app.taxi2012Url_3') . ".";
+                        "Ошибка подключения к серверу " . config('app.taxi2012Url_2') . ". " . PHP_EOL .
+                        "Ошибка подключения к серверу " . config('app.taxi2012Url_3') . ".";
                     $paramsAdmin = [
                         'subject' => $subject,
                         'message' => $messageAdmin,
@@ -2395,13 +2395,13 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
 
-        $finduser = User::where('user_phone', $user_phone)->first();
+    /*    $finduser = User::where('user_phone', $user_phone)->first();
         if (!$finduser) {
             $info = 'Будь ласка, пройдіть реєстрацію для замовлення поїздки.
             Ваш розрахунок маршруту знайдіть в Особистому кабінеті.';
 
             return view('auth.register', ['info' => $info, 'phone' => $user_phone]);
-        }
+        }*/
 
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
@@ -2645,7 +2645,11 @@ class WebOrderController extends Controller
             ];
             $user = User::where('user_phone', $user_phone)->first();
 
-            Mail::to($user->email)->send(new Check($paramsCheck));
+            if ($user) {
+                Mail::to($user->email)->send(new Check($paramsCheck));
+            }
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
 
             return redirect()->route('home-id-afterorder-uid', $orderweb)->with('success', $order)
                 ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")

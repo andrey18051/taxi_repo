@@ -82,23 +82,38 @@
                                                placeholder="+380936665544"
                                                title="Формат вводу: +380936665544"
                                                minlength="13"
-                                               maxlength="13"required/>
+                                               maxlength="13"required
+                                               value="{{ old('user_phone') }}" required autocomplete="user_phone"
+                                               onchange="sendConfirmCode(this.value)" autofocus/>
                                     @endguest
                                     @auth
                                         <input type="tel" class="form-control" id="user_phone" name="user_phone"
                                                value="{{ Auth::user()->user_phone}}"
-                                               pattern="[\+]\d{12}"
-                                               placeholder="+380936665544"
-                                               title="Формат вводу: +380936665544"
-                                               minlength="13"
-                                               maxlength="13"
-                                               required />
+                                               readonly/>
                                     @endauth
 
                                 </div>
                             </div>
                         </div>
+                        @guest
+                        <div class="container" style="margin-top: 5px" id="confirm_code_div">
+                            <div class="row" >
+                                 <div class="col-12">
+                                    <input id="confirm_code" type="text" class="form-control"
+                                           name="confirm_code" placeholder="Код зі смс"
+                                           onblur="approvedPhones(document.getElementById('user_phone').value , this.value)"
+                                           pattern="[0-9]*"
+                                           title="Формат вводу: 1234"
+                                           minlength="4"
+                                           maxlength="4"
+                                           autofocus
+                                           value="{{ old('confirm_code') }}"
+                                           required>
+                                 </div>
+                            </div>
 
+                        </div>
+                        @endguest
                         <div class="container" style="margin-top: 5px">
 
                                 <div class="col-12">
@@ -268,6 +283,45 @@
                 }
             });
         }
+
+        function sendConfirmCode(value) {
+            var route = "/sendConfirmCode/" + value;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                    if (data != 200) {
+                        alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
+                        document.location.href = "/feedback";
+                    }
+                }
+            });
+        }
+
+        function approvedPhones(user_phone, confirm_code) {
+            var route = "/approvedPhones/" + user_phone + "/" + confirm_code;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                    if (data != 200)  {
+                        if (data == 400) {
+                            alert('Помілка введення кода підтвердження');
+                        } else {
+                            alert('Сталася помілка. Зверниться до оператора.');
+                            document.location.href = "/feedback";
+                        }
+                    }
+                }
+            });
+        }
+
     </script>
 @endsection
 

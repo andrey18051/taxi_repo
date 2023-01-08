@@ -250,7 +250,14 @@ return [
         'username' => 'ONLINE56',
         'password' => 'gggdsh5+',
 
-
+/* Одесса
+        'taxi2012Url_1' => 'http://31.43.107.151:7303',
+        'taxi2012Url_2' => 'http://31.43.107.151:7303',
+        'taxi2012Url_3' => 'http://31.43.107.151:7303' ,
+        'server' => 'Одесса',
+        'username' => '0936734488',
+        'password' => '22223344',
+ */
 
 
     /**
