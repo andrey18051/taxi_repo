@@ -1,7 +1,59 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
+    <script type="text/javascript">
+        /**
+         * Функция Скрывает/Показывает блок
+         * @author ox2.ru дизайн студия
+         **/
+        function showHide(element_id) {
+            //Если элемент с id-шником element_id существует
+            if (document.getElementById(element_id)) {
+                //Записываем ссылку на элемент в переменную obj
+                var obj = document.getElementById(element_id);
+                //Если css-свойство display не block, то:
 
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+
+                if (element_id == "block_id") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+            }
+            //Если элемент с id-шником element_id не найден, то выводим сообщение
+            else alert("Элемент с id: " + element_id + " не найден!");
+        }
+        function hidFrom(value) {
+            var route = "/autocomplete-search-combo-hid/" + value;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+                    if (data == 0) {
+                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('from_number').value=null;
+                    }
+                    if (data == 1) {
+                        document.getElementById('from_number').style.display='block';
+                    }
+
+                }
+            });
+
+
+
+        }
+    </script>
     @empty($params['routefromnumberBlockNone'])
         @php
             $params['routefromnumberBlockNone'] = 'display: block;'
@@ -184,59 +236,7 @@
         </div>
     </div>
 
-    <script type="text/javascript">
-        /**
-         * Функция Скрывает/Показывает блок
-         * @author ox2.ru дизайн студия
-         **/
-        function showHide(element_id) {
-            //Если элемент с id-шником element_id существует
-            if (document.getElementById(element_id)) {
-                //Записываем ссылку на элемент в переменную obj
-                var obj = document.getElementById(element_id);
-                //Если css-свойство display не block, то:
 
-                if (element_id == "block_city") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
-
-                if (element_id == "block_id") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
-            }
-            //Если элемент с id-шником element_id не найден, то выводим сообщение
-            else alert("Элемент с id: " + element_id + " не найден!");
-        }
-        function hidFrom(value) {
-            var route = "/autocomplete-search-combo-hid/" + value;
-
-            $.ajax({
-                url: route,         /* Куда пойдет запрос */
-                method: 'get',             /* Метод передачи (post или get) */
-                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 0) {
-                        document.getElementById('from_number').style.display='none';
-                        document.getElementById('from_number').value=null;
-                    }
-                    if (data == 1) {
-                        document.getElementById('from_number').style.display='block';
-                    }
-
-                }
-            });
-
-
-
-        }
-    </script>
 
 
 @endsection

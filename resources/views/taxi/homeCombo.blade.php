@@ -7,7 +7,100 @@
             {{$info}}
         </div>
     @endisset
+    <script type="text/javascript">
 
+        if (sessionStorage.getItem('hidFrom') == 'none') {
+            document.getElementById('from_number').style.display='none';
+            document.getElementById('from_number').value=null;
+        }
+        if (sessionStorage.getItem('hidFrom') == 'block') {
+            document.getElementById('from_number').style.display='block';
+        }
+
+        if (sessionStorage.getItem('hidTo') == 'none') {
+            document.getElementById('to_number').style.display='none';
+            document.getElementById('to_number').value=null;
+        }
+        if (sessionStorage.getItem('hidTo') == 'block') {
+            document.getElementById('to_number').style.display='block';
+        }
+        /**
+         * Функция Скрывает/Показывает блок
+         * @author ox2.ru дизайн студия
+         **/
+        function showHide(element_id) {
+            //Если элемент с id-шником element_id существует
+            if (document.getElementById(element_id)) {
+                //Записываем ссылку на элемент в переменную obj
+                var obj = document.getElementById(element_id);
+                //Если css-свойство display не block, то:
+                if (element_id == "block_city") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+                if (element_id == "block_id") {
+                    if (obj.style.display != "block") {
+                        obj.style.display = "block"; //Показываем элемент
+                    }
+                    else obj.style.display = "none"; //Скрываем элемент
+                }
+            }
+            //Если элемент с id-шником element_id не найден, то выводим сообщение
+            else alert("Элемент с id: " + element_id + " не найден!");
+        }
+
+        function hidFrom(value) {
+            var route = "/autocomplete-search-combo-hid/" + value;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+                    if (data == 0) {
+                        sessionStorage.setItem('hidFrom', 'none')
+                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('from_number').value=null;
+                    }
+                    if (data == 1) {
+                        sessionStorage.setItem('hidFrom', 'block')
+                        document.getElementById('from_number').style.display='block';
+                    }
+                }
+            });
+
+
+
+        }
+
+        function hidTo(value) {
+            var route = "/autocomplete-search-combo-hid/" + value;
+
+            $.ajax({
+                url: route,         /* Куда пойдет запрос */
+                method: 'get',             /* Метод передачи (post или get) */
+                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+
+                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+                    if (data == 0) {
+                        sessionStorage.setItem('hidTo', 'none')
+                        document.getElementById('to_number').style.display='none';
+                        document.getElementById('to_number').value=null;
+                    }
+                    if (data == 1) {
+                        sessionStorage.setItem('hidTo', 'block')
+                        document.getElementById('to_number').style.display='block';
+                    }
+
+                }
+            });
+
+        }
+
+    </script>
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
         <div class="container" style="text-align: center">
             <h2 class="gradient"><b>Київ та область</b></h2>
@@ -368,7 +461,7 @@
         </div>
     </div>
 
-    <script defer type="text/javascript">
+    <script type="text/javascript">
 
         if (sessionStorage.getItem('hidFrom') == 'none') {
             document.getElementById('from_number').style.display='none';
@@ -385,82 +478,6 @@
         if (sessionStorage.getItem('hidTo') == 'block') {
             document.getElementById('to_number').style.display='block';
         }
-         /**
-         * Функция Скрывает/Показывает блок
-         * @author ox2.ru дизайн студия
-         **/
-        function showHide(element_id) {
-            //Если элемент с id-шником element_id существует
-            if (document.getElementById(element_id)) {
-                //Записываем ссылку на элемент в переменную obj
-                var obj = document.getElementById(element_id);
-                //Если css-свойство display не block, то:
-                if (element_id == "block_city") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
-                if (element_id == "block_id") {
-                    if (obj.style.display != "block") {
-                        obj.style.display = "block"; //Показываем элемент
-                    }
-                    else obj.style.display = "none"; //Скрываем элемент
-                }
-            }
-            //Если элемент с id-шником element_id не найден, то выводим сообщение
-            else alert("Элемент с id: " + element_id + " не найден!");
-        }
-
-        function hidFrom(value) {
-            var route = "/autocomplete-search-combo-hid/" + value;
-
-            $.ajax({
-                url: route,         /* Куда пойдет запрос */
-                method: 'get',             /* Метод передачи (post или get) */
-                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 0) {
-                        sessionStorage.setItem('hidFrom', 'none')
-                        document.getElementById('from_number').style.display='none';
-                        document.getElementById('from_number').value=null;
-                    }
-                    if (data == 1) {
-                        sessionStorage.setItem('hidFrom', 'block')
-                        document.getElementById('from_number').style.display='block';
-                    }
-                }
-            });
-
-
-
-        }
-
-        function hidTo(value) {
-            var route = "/autocomplete-search-combo-hid/" + value;
-
-            $.ajax({
-                url: route,         /* Куда пойдет запрос */
-                method: 'get',             /* Метод передачи (post или get) */
-                dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                    if (data == 0) {
-                        sessionStorage.setItem('hidTo', 'none')
-                        document.getElementById('to_number').style.display='none';
-                        document.getElementById('to_number').value=null;
-                    }
-                    if (data == 1) {
-                        sessionStorage.setItem('hidTo', 'block')
-                        document.getElementById('to_number').style.display='block';
-                    }
-
-                }
-            });
-
-        }
-
     </script>
 
 

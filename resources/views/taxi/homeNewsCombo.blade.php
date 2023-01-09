@@ -50,7 +50,7 @@
 
                  <div class="container-fluid">
                      <a href="{{route('homeCombo')}}"
-                        style="text-decoration: none">
+                        style="text-decoration: none" onclick="sessionStorage.clear();">
                          <h4 class="text-center text-primary gradient"> <b>Пропонуємо Вам найсучасніший
                                  сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h4>
                      </a>
@@ -138,7 +138,8 @@
                  </div>
                  <div class="container-fluid" style="margin: 10px">
                      <a href="{{route('homeCombo')}}"
-                        target="_blank" style="text-decoration: none; color: black">
+                        target="_blank" style="text-decoration: none; color: black"
+                        onclick="sessionStorage.clear();">
                          <h5 style="text-align: center; " class="gradient">
                              <b>Служба Таксі Лайт Юа – це завжди надійно, комфортно та вигідно. <br>
                                  Замовьте таксі прям зараз.</b>
@@ -156,7 +157,7 @@
                          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Таксі Лайт Юа - це завжди найнижча онлайн ціна таксі
                                          Києва та області. Як викликати таксі у місті Києві? Замовити
@@ -204,7 +205,7 @@
                          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Служба Таксі Лайт Юа - це найкращий вибір завжди дешевого таксі,
                                          онлайн розрахунок вартості послуг завжди можна зробити на сайті швидше,
@@ -223,7 +224,7 @@
                          <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Є періоди, коли через знижений попит на послугу перевізники
                                          ставлять мінімальні тарифи на поїздки до таксі. Це будні дні
@@ -244,7 +245,7 @@
                          <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Служба Таксі Лайт Юа – це поїздки містом від 40 грн.
                                      </p>
@@ -279,7 +280,7 @@
                          <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
                                      <p>
                                          За допомогою служби Таксі Лайт Юа
                                          Ви комфортно та швидко дістанетеся до будь-якої точки Києва та області.
@@ -344,7 +345,7 @@
 
                  <news-component></news-component>
                  <div class="fb-comments" data-href="https://m.easy-order-taxi.site" data-width="auto" data-numposts="5"></div>
-                 <a  href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;">
+                 <a  href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;" onclick="sessionStorage.clear();">
                      <blockquote class="blockquote-3">
                          <p> <?php echo $quitesArr[$rand] ?></p>
                          <cite>Цитата дня</cite>

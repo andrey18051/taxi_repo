@@ -32,7 +32,8 @@
         </li>
     </ul>
     <div class="text-center">
-        <a href="{{route('homeCombo')}}" class="gradient-button animate-fading" target="_blank">Замовити таксі</a>
+        <a href="{{route('homeCombo')}}" class="gradient-button animate-fading" target="_blank"
+           onclick="sessionStorage.clear();">Замовити таксі</a>
     </div>
 
     <p  class="gradient text-opacity-25">
