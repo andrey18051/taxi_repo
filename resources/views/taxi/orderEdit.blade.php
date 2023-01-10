@@ -282,7 +282,7 @@
                 <div class="container text-center">
                     <div class="row">
                         <a class="w-100 btn btn-danger" style="margin-top: 5px"
-                           href="{{route('homeCombo')}}">
+                           href="{{route('homeCombo')}}" onclick="sessionStorage.clear();">
                             Очистити форму
                         </a>
                         <button class="w-100 btn btn-primary" style="margin-top: 5px" type="submit">

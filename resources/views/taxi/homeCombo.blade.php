@@ -142,7 +142,7 @@
                                                        @endisset
                                                        value="{{ old('search') }}"
                                                        placeholder="Звідки?"
-                                                       onkeyup="hidFrom(this.value);" onblur="hidFrom(this.value);"
+                                                       onblur="hidFrom(this.value);"
                                                        autocomplete="off"
                                                        required>
                                             </div>
@@ -202,7 +202,7 @@
                                                        readonly
                                                        @endisset
                                                        value="{{ old('search1') }}"
-                                                       onkeyup="hidTo(this.value);" onblur="hidTo(this.value);"
+                                                       onblur="hidTo(this.value);"
                                                        placeholder="Куди?"
                                                        autocomplete="off">
                                             </div>
