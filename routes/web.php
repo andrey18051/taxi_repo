@@ -83,6 +83,9 @@ Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
     Route::post('/webhook', [WebhookController::class, 'index']);
 });
 
+Route::get('/registerSmsFail', function () {
+    return view('auth.registerSmsFail', ['info' => 'Виникла помилка перевірки телефону.']);
+})->name('registerSmsFail');
 
 /**
  * Расшифровка IP

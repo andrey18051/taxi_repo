@@ -40,6 +40,7 @@
                                        title="Формат вводу: +380936665544"
                                        minlength="13"
                                        maxlength="13"
+                                       @if($newUser['telegram_id'] == null)
                                        onblur="
                                         var route =  '/sendConfirmCode/' + this.value;
                                             $.ajax({
@@ -49,11 +50,11 @@
 
                                             success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
                                             if (data != 200) {
-                                            alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
-                                            document.location.href = '/feedback';
+                                                document.location.href = '/registerSmsFail';
                                             }
                                             }
                                         });"
+                                       @endif
                                        autofocus>
 
                                 @error('user_phone')
@@ -63,7 +64,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div id="confirm_code_div">
+                        @if($newUser['telegram_id'] == null)
                             <div class="row mb-3" >
                                 <label for="confirm_code" class="col-md-4 col-form-label text-md-end">{{ __('Код зі смс') }}</label>
 
@@ -77,7 +78,9 @@
                                            maxlength="4"
                                            autofocus
                                            value="{{ old('confirm_code') }}"
+                                           @if($newUser['telegram_id'] == null)
                                            required
+                                           @endif
                                            onblur="
                                             var route = '/approvedPhones/' +
                                                 document.getElementById('user_phone').value + '/' +
@@ -98,11 +101,11 @@
                                                       }
                                                   }
                                             });">
-
                                 </div>
-                            </div>
+
 
                         </div>
+                        @endif
 
                         @if($newUser['google_id'])
                             <input type="hidden" id="google_id" name="google_id" value="{{ $newUser['google_id'] }}">

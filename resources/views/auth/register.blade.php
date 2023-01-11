@@ -45,10 +45,9 @@
                                             dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
 
                                             success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                                            if (data != 200) {
-                                            alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
-                                            document.location.href = '/feedback';
-                                            }
+                                                if (data != 200) {
+                                                  document.location.href = '/registerSmsFail';
+                                                }
                                             }
                                         });"
                                         autofocus>
