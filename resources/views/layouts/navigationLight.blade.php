@@ -27,24 +27,29 @@
                 ['info' => 'Зареєструйтесь через іконку Телеграм для використання функцій Чат-Бота.'])  }}"
               target="_blank" title="Віртуальний помічник"
               style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
-            <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
+            <img src="{{asset('img/icons8-telegram-app-48.png')}}" style="width:30px;">
         </a>
     @else
         @if (Auth::user()->telegram_id)
             <a    href="{{ route('telegramBot') }}"
                   target="_blank" title="Віртуальний помічник"
                   style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
-                <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
+                <img src="{{asset('img/icons8-telegram-app-48.png')}}" style="width:30px;">
             </a>
         @else
             <a    href="{{ route('login-taxi-info',
                 ['info' => 'Зареєструйтесь через іконку Телеграм для використання функцій Чат-Бота.'])  }}"
                   target="_blank" title="Віртуальний помічник"
                   style="z-index: 101; position: fixed; margin-top: 155px; right: 0px">
-                <img src="{{asset('img/icons8-chat-48.png')}}" style="width:30px;">
+                <img src="{{asset('img/icons8-telegram-app-48.png')}}" style="width:30px;">
             </a>
         @endif
-    @endauth
+    @endguest
+    <a    target="_blank" title="Віртуальний помічник Viber"
+          href="viber://pa?chatURI=taxieasyua"
+          style="z-index: 101; position: fixed; margin-top: 186px; right: 0px">
+        <img src="{{ asset('img/icons8-viber-48.png') }}" style="width:30px;">
+    </a>
 </div>
 
 

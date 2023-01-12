@@ -14,8 +14,10 @@ use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ViberController;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\WebhookViberController;
 use App\Http\Controllers\WebOrderController;
 use App\Models\NewsList;
 use App\Models\Order;
@@ -69,6 +71,23 @@ Route::get('/promo', function () {
  */
 
 Route::get('/weather', [WeatherController::class, 'temp'])->name('weather');
+
+/**
+ * Viber Bot
+ */
+Route::get('/chatViber', [ViberController::class, 'chatViber'])->name('chatViber');
+Route::get('/setWebhookViber', [ViberController::class, 'setWebhook'])->name('setWebhookViber');
+Route::get('/getAccountInfo', [ViberController::class, 'getAccountInfo'])->name('getAccountInfo');
+Route::get('/getUserDetails/{user_id}', [ViberController::class, 'getUserDetails'])->name('getUserDetails');
+Route::get('/sendMessage/{user_id}/{message}', [ViberController::class, 'sendMessage'])->name('sendMessage');
+
+
+Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
+    Route::post('/webhookViber', [WebhookViberController::class, 'index']);
+});
+
+
+
 /**
  * Telegram Bot
  */
