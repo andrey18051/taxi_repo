@@ -112,19 +112,18 @@ class TelegramController extends Controller
             'inline_keyboard' => [
                 [
                     [
-                        'text' => 'Послуги 🚕',
-                        'callback_data' => '0'
-                    ],
-
-                    [
                         'text' => 'Трансфер 🏠',
                         'callback_data' => '1'
+                    ],
+                    [
+                        'text' => 'Зустрич ✈',
+                        'callback_data' => '2'
                     ],
                 ],
                 [
                     [
-                        'text' => 'Зустрич ✈️',
-                        'callback_data' => '2'
+                        'text' => 'Послуги 🚕',
+                        'callback_data' => '0'
                     ],
 
                     [

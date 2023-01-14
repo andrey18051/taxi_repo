@@ -30,6 +30,11 @@ class ViberController extends Controller
 
     public function sendMessage(Viber $viber, $user_id, $message)
     {
-        $ch = $viber->sendMessage($user_id, $message);
+        $viber->sendMessage($user_id, $message);
+    }
+
+    public function sendKeyboard(Viber $viber, $user_id, $message, $keyboard)
+    {
+        $viber->sendKeyboard($user_id, $message, $keyboard);
     }
 }

@@ -56,4 +56,17 @@ class Viber
             'text' => $message,
         ]);
     }
+    public function sendKeyboard($user_id, $message, $keyboard)
+    {
+        return $this->http::withHeaders([
+            'X-Viber-Auth-Token' => $this->bot,
+        ])->post(self::url . '/send_message', [
+            'receiver' => $user_id,
+            'type' => 'text',
+            'sender.name' => 'ViberBot',
+            'text' => $message,
+            'keyboard' => $keyboard
+        ]);
+    }
+
 }
