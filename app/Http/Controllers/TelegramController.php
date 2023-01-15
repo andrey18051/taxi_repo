@@ -94,6 +94,7 @@ class TelegramController extends Controller
             $newUser['github_id'] = null;
             $newUser['linkedin_id'] = null;
             $newUser['twitter_id'] = null;
+            $newUser['viber_id'] = null;
             return view('auth.registerSocial', ['newUser' => $newUser]);
         }
     }

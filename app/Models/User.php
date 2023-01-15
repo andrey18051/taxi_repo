@@ -30,7 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'linkedin_id',
         'github_id',
         'twitter_id',
-        'telegram_id'
+        'telegram_id',
+        'viber_id'
     ];
 
     /**

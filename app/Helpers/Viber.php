@@ -62,6 +62,7 @@ class Viber
             'X-Viber-Auth-Token' => $this->bot,
         ])->post(self::url . '/send_message', [
             'receiver' => $user_id,
+            'min_api_version' => 7,
             'type' => 'text',
             'sender.name' => 'ViberBot',
             'text' => $message,

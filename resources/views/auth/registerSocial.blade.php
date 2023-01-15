@@ -34,13 +34,20 @@
                             <div class="col-md-6">
                                 <input id="user_phone" type="text"
                                        class="form-control @error('user_phone') is-invalid @enderror"
-                                       name="user_phone" value="{{ old('user_phone') }}" required autocomplete="user_phone"
+                                       name="user_phone"
+
+                                       @if($newUser['phone'])
+                                       value="{{ $newUser['phone'] }}"
+                                       @else
+                                       value="{{ old('user_phone') }}" required autocomplete="user_phone"
                                        pattern="[\+]\d{12}"
                                        placeholder="+380936665544"
                                        title="Формат вводу: +380936665544"
                                        minlength="13"
                                        maxlength="13"
-                                       @if($newUser['telegram_id'] == null)
+                                       @endif
+
+                                       @if($newUser['telegram_id'] == null || $newUser['viber_id'] == null)
                                        onblur="
                                         var route =  '/sendConfirmCode/' + this.value;
                                             $.ajax({
@@ -64,7 +71,7 @@
                                 @enderror
                             </div>
                         </div>
-                        @if($newUser['telegram_id'] == null)
+                        @if($newUser['telegram_id'] == null && $newUser['viber_id'] == null)
                             <div class="row mb-3" >
                                 <label for="confirm_code" class="col-md-4 col-form-label text-md-end">{{ __('Код зі смс') }}</label>
 
@@ -78,7 +85,7 @@
                                            maxlength="4"
                                            autofocus
                                            value="{{ old('confirm_code') }}"
-                                           @if($newUser['telegram_id'] == null)
+                                           @if($newUser['telegram_id'] == null && $newUser['viber_id'] == null)
                                            required
                                            @endif
                                            onblur="
@@ -136,6 +143,11 @@
                             <input type="hidden" id="telegram_id" name="telegram_id" value="{{ $newUser['telegram_id'] }}">
                         @else
                             <input type="hidden" id="telegram_id" name="telegram_id" value="">
+                        @endif
+                        @if($newUser['viber_id'])
+                            <input type="hidden" id="viber_id" name="viber_id" value="{{ $newUser['viber_id'] }}">
+                        @else
+                            <input type="hidden" id="viber_id" name="viber_id" value="">
                         @endif
 
                         <div id="confirm_area" style="display: block">

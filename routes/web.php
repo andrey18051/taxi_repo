@@ -79,14 +79,19 @@ Route::get('/chatViber', [ViberController::class, 'chatViber'])->name('chatViber
 Route::get('/setWebhookViber', [ViberController::class, 'setWebhook'])->name('setWebhookViber');
 Route::get('/getAccountInfo', [ViberController::class, 'getAccountInfo'])->name('getAccountInfo');
 Route::get('/getUserDetails/{user_id}', [ViberController::class, 'getUserDetails'])->name('getUserDetails');
-Route::get('/sendMessage/{user_id}/{message}', [ViberController::class, 'sendMessage'])->name('sendMessage');
+Route::get('/sendMessage/{user_id}/{message}/{phone}', [ViberController::class, 'sendMessage'])->name('sendMessage');
 
 
 Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
     Route::post('/webhookViber', [WebhookViberController::class, 'index']);
 });
 
+/**
+ * Viber регистрация
+ */
 
+Route::get('register/viber', [ViberController::class, 'registerViber'])->name('registerViber');
+Route::get('handleViberCallback/{user_id}/{name}/{phone}', [ViberController::class, 'handleViberCallback'])->name('handleViberCallback');
 
 /**
  * Telegram Bot

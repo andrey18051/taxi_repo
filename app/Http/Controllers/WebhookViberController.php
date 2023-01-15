@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Viber;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class WebhookViberController extends Controller
@@ -11,13 +13,16 @@ class WebhookViberController extends Controller
     public function index(Request $request, Viber $viber)
     {
 
-        // Log::debug($request->all());
+          Log::debug($request->all());
 
         /**
          * Кнопки и ответы
          */
         $user_id = $request->input('user')['id'];
-        $message = 'Привіт Andrii 18051 👋! Я віртуальний помічник служби Таксі Лайт Юа 🚕! Я розумію поки що трохи слів (наприклад - трансфер, зустрич, робота, послуги), але я дуже швидко вчуся 😺"';
+        $name = $request->input('user')['name'];
+
+        $message = "Привіт, $name! Я віртуальний помічник служби Таксі Лайт Юа 🚕! Я розумію поки що трохи слів (наприклад - трансфер, зустрич, робота, послуги), але я дуже швидко вчуся 😺";
+
         $keyboard_main = [
             "Type" => "keyboard",
             "DefaultHeight" => false,
@@ -64,10 +69,73 @@ class WebhookViberController extends Controller
                 ],
             ],
         ];
-        $viber->sendKeyboard($user_id, $message, $keyboard_main);
+        $keyboard_register = [
+            "Type" => "keyboard",
+            "DefaultHeight" => false,
+            "Buttons" => [
+                [
+                    "Columns" => 3,
+                    "Rows" => 1,
+                    "Text" => "<b>Трансфер 🏠</b>",
+                    "TextSize" => "large",
+                    "TextHAlign" => "center",
+                    "TextVAlign" => "middle",
+                    "ActionType" => "reply",
+                    "ActionBody" => "Трансфер",
+                ],
+                [
+                    "Columns" => 3,
+                    "Rows" => 1,
+                    "Text" => "<b>Зустрич ✈</b>",
+                    "TextSize" => "large",
+                    "TextHAlign" => "center",
+                    "TextVAlign" => "middle",
+                    "ActionType" => "reply",
+                    "ActionBody" => "Зустрич",
+                ],
+                [
+                    "Columns" => 3,
+                    "Rows" => 1,
+                    "Text" => "<b>Послуги 🚕</b>",
+                    "TextSize" => "large",
+                    "TextHAlign" => "center",
+                    "TextVAlign" => "middle",
+                    "ActionType" => "reply",
+                    "ActionBody" => "Послуги",
+                ],
+                [
+                    "Columns" => 3,
+                    "Rows" => 1,
+                    "Text" => "<b>Робота в 🚕</b>",
+                    "TextSize" => "large",
+                    "TextHAlign" => "center",
+                    "TextVAlign" => "middle",
+                    "ActionType" => "open-url",
+                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm",
+                ],
+                [
+                            "Columns" => 6,
+                            "Rows" => 1,
+                            "Text" => "Зареєструватись",
+                            "TextSize" => "large",
+                            "TextHAlign" => "center",
+                            "TextVAlign" => "middle",
+                            "ActionType" => "share-phone",
+                            "ActionBody" => "Зареєструватись",
+                        ],
+            ],
+        ];
 
+        $finduser = User::where('viber_id', $user_id)->first();
+        if ($finduser) {
+            Auth::login($finduser);
+            $viber->sendKeyboard($user_id, $message, $keyboard_main);
+        } else {
+            $viber->sendKeyboard($user_id, $message, $keyboard_register);
+        }
 
         $user_id = $request->input('sender')['id'];
+        $name = $request->input('sender')['name'];
         $data = mb_strtolower($request->input('message')['text']);
 
         $borispol = asset('img/borispolViber.png');
@@ -234,7 +302,7 @@ class WebhookViberController extends Controller
                             "TextSize" => "large",
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
-                            "ActionType" => "reply",
+                            "ActionType" => "share-phone",
                             "ActionBody" => "На головну",
                         ],
                     ],
@@ -242,9 +310,41 @@ class WebhookViberController extends Controller
                 $message = 'Замовити зустрич ✈ 🚂 🚌';
                 $viber->sendKeyboard($user_id, $message, $keyboard);
                 break;
+            case "зареєструватись":
+                if ($request->input('message')['contact']['phone_number']) {
+                    $phone = '+' . $request->input('message')['contact']['phone_number'];
+                    $keyboard = [
+                        "Type" => "keyboard",
+                        "DefaultHeight" => false,
+                        "Buttons" => [
+                            [
+                                "Columns" => 6,
+                                "Rows" => 1,
+                                "Text" => "<b>Перейти на реєстрацію</b>",
+                                "TextSize" => "large",
+                                "TextHAlign" => "center",
+                                "TextVAlign" => "middle",
+                                "ActionType" => "open-url",
+                                "ActionBody" => "https://m.easy-order-taxi.site/handleViberCallback/$user_id/$name/$phone",
+                            ],
+                        ],
+                    ];
+                    $viber->sendKeyboard($user_id, $message, $keyboard);
+                    break;
+                } else {
+                    $message = "Для реестрації потрібен номер телефону";
+                    $viber->sendKeyboard($user_id, $message, $keyboard_register);
+                }
+                break;
             case "на головну":
-                $message = 'Головне меню';
-                $viber->sendKeyboard($user_id, $message, $keyboard_main);
+                $message = "Головне меню";
+                $finduser = User::where('viber_id', $user_id)->first();
+                if ($finduser) {
+                    Auth::login($finduser);
+                    $viber->sendKeyboard($user_id, $message, $keyboard_main);
+                } else {
+                    $viber->sendKeyboard($user_id, $message, $keyboard_register);
+                }
                 break;
             default:
                 $needle = 'https://';
@@ -254,7 +354,13 @@ class WebhookViberController extends Controller
                 } else {
                     $message = 'Вибачьте! Я розумію поки що трохи слів (наприклад - трансфер, зустрич, робота, послуги), але я дуже швидко вчуся 😺"';
                 }
-                $viber->sendKeyboard($user_id, $message, $keyboard_main);
+                $finduser = User::where('viber_id', $user_id)->first();
+                if ($finduser) {
+                    Auth::login($finduser);
+                    $viber->sendKeyboard($user_id, $message, $keyboard_main);
+                } else {
+                    $viber->sendKeyboard($user_id, $message, $keyboard_register);
+                }
         }
     }
 }
