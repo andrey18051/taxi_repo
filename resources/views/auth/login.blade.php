@@ -100,7 +100,9 @@
                                 <a type="button"   href="{{ url('auth/telegram') }}" title="Авторизуватися через Telegram">
                                     <img src="{{ asset('img/icons8-telegram-app-48.png') }}">
                                 </a>
-
+                                <a type="button"   href="viber://pa?chatURI=taxieasyua" title="Авторизуватися через Viber">
+                                    <img src="{{ asset('img/icons8-viber-48.png') }}">
+                                </a>
                             </div>
                         </div>
                     </div>
