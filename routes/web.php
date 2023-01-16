@@ -40,7 +40,15 @@ use Stevebauman\Location\Facades\Location;
 | contains the "web" middleware group. Now create something great!
 |
 */
+/**
+ * Test
+ */
 
+Route::get('/test', function () {
+    $user_id ='tL0zpzMcNDlklD9V5dqEKg==';
+    $finduser = User::where('viber_id', $user_id)->first();
+    dd($finduser);
+})->name('test');
 /**
  * Проверка телефона
  */
@@ -257,6 +265,15 @@ Route::get('/', function () {
     return view('taxi.homeNewsCombo');
 })->name('home-news');
 
+Route::get('/home-news/{user_id}', function ($user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('home-news');
+})->name('home-newsViber');
+
+
 Route::get('/time/{phone}/{user_name}', function ($phone, $user_name) {
 
     date_default_timezone_set("Europe/Kiev");
@@ -323,7 +340,13 @@ Route::get('/home-Combo', function () {
     }
 })->name('homeCombo');
 
-
+Route::get('/home-Combo/{user_id}', function ($user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('homeCombo');
+})->name('homeComboViber');
 
 Route::get('/map', function () {
     return view('map3');
@@ -349,7 +372,7 @@ Route::get('/home-Map/{phone}/{user_name}', function ($phone, $user_name) {
     return view('taxi.homeMap', ['json_arr' => $json_arr, 'phone' => $phone, 'user_name' => $user_name]);
 })->name('homeMap');
 
-Route::get('home-Map-Combo', function () {
+Route::get('/home-Map-Combo', function () {
     IPController::getIP('home-Map-Combo');
     $json_arr = WebOrderController::tariffs();
 
@@ -388,6 +411,15 @@ Route::get('home-Map-Combo', function () {
         }
     }
 })->name('homeMapCombo');
+
+Route::get('/home-Map-Combo/{user_id}',  function ($user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('homeMapCombo');
+})->name('homeMapComboViber');
+
 
 Route::get('/taxi-gdbr', function () {
     IPController::getIP('/taxi-gdbr');
@@ -646,6 +678,14 @@ Route::get('/costhome/{route_address_from}/{route_address_number_from}/{authoriz
 Route::get('/transfer/{routeto}/{page}', [WebOrderController::class, 'transfer'])
     ->name('transfer');
 
+Route::get('/transfer/{routeto}/{page}/{user_id}', function ($routeto, $page, $user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('transfer', ['routeto' => $routeto, 'page' => $page]);
+})->name('transferViber');
+
 Route::get('/transfer/{routeto}/{page}/{user_phone}/{user_first_name}/{route_address_from}/{route_address_number_from}',
     [WebOrderController::class, 'transferProfile'])
     ->name('transfer-profile');
@@ -657,6 +697,13 @@ Route::get('/transfer/{routeto}/{page}/{user_phone}/{user_first_name}/{route_add
 Route::get('/transferfrom/{routefrom}/{page}', [WebOrderController::class, 'transferFrom'])
     ->name('transferFrom');
 
+Route::get('/transferfrom/{routefrom}/{page}/{user_id}', function ($routefrom, $page, $user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('transferFrom', ['routefrom' => $routefrom, 'page' => $page]);
+})->name('transferFromViber');
 
 /**
  * Удаление расчета
@@ -725,12 +772,30 @@ Route::get('/feedback', function () {
     return view('taxi.feedback');
 })->name('feedback');
 
+Route::get('/feedback/{user_id}', function ($user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('feedback');
+})->name('feedbackViber');
+
+
 Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
 
 Route::get('/callBackForm', function () {
     IPController::getIP('/callBackForm');
     return view('taxi.callBack');
 })->name('callBackForm');
+
+Route::get('/callBackForm/{user_id}', function ($user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('callBackForm');
+})->name('callBackFormViber');
+
 
 Route::get('/callBack', [WebOrderController::class, 'callBack'])->name('callBack');
 
@@ -741,6 +806,14 @@ Route::get('/callBack', [WebOrderController::class, 'callBack'])->name('callBack
 Route::get('/callWorkForm', function () {
     return view('driver.callWork');
 })->name('callWorkForm');
+
+Route::get('/callWorkForm/{user_id}', function ($user_id) {
+    $finduser = User::where('viber_id', $user_id)->first();
+    if ($finduser) {
+        Auth::login($finduser);
+    }
+    return redirect()->route('callWorkForm');
+})->name('callWorkFormViber');
 
 Route::get('/callWork', [WebOrderController::class, 'callWork'])->name('callWork');
 

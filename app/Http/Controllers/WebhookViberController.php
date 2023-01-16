@@ -13,7 +13,7 @@ class WebhookViberController extends Controller
     public function index(Request $request, Viber $viber)
     {
 
-          Log::debug($request->all());
+      //   Log::debug($request->all());
 
         /**
          * Кнопки и ответы
@@ -65,7 +65,7 @@ class WebhookViberController extends Controller
                     "TextHAlign" => "center",
                     "TextVAlign" => "middle",
                     "ActionType" => "open-url",
-                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm",
+                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm/$user_id",
                 ],
             ],
         ];
@@ -111,7 +111,7 @@ class WebhookViberController extends Controller
                     "TextHAlign" => "center",
                     "TextVAlign" => "middle",
                     "ActionType" => "open-url",
-                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm",
+                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm/$user_id",
                 ],
                 [
                             "Columns" => 6,
@@ -136,6 +136,7 @@ class WebhookViberController extends Controller
 
         $user_id = $request->input('sender')['id'];
         $name = $request->input('sender')['name'];
+
         $data = mb_strtolower($request->input('message')['text']);
 
         $borispol = asset('img/borispolViber.png');
@@ -157,7 +158,7 @@ class WebhookViberController extends Controller
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/home-Combo",
+                            "ActionBody" => "https://m.easy-order-taxi.site/home-Combo/$user_id",
                         ],
                         [
                             "Columns" => 6,
@@ -167,7 +168,7 @@ class WebhookViberController extends Controller
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/home-Map-Combo",
+                            "ActionBody" => "https://m.easy-order-taxi.site/home-Map-Combo/$user_id",
                         ],
                         [
                             'Columns' => 6,
@@ -177,7 +178,7 @@ class WebhookViberController extends Controller
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/feedback",
+                            "ActionBody" => "https://m.easy-order-taxi.site/feedback/$user_id",
                         ],
                         [
                             "Columns" => 6,
@@ -187,7 +188,7 @@ class WebhookViberController extends Controller
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site",
+                            "ActionBody" => "https://m.easy-order-taxi.site/home-news/$user_id",
                         ],
                         [
                             "Columns" => 6,
@@ -197,7 +198,7 @@ class WebhookViberController extends Controller
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/callBackForm",
+                            "ActionBody" => "https://m.easy-order-taxi.site/callBackForm/$user_id",
                         ],
                         [
                             "Columns" => 6,
@@ -223,28 +224,28 @@ class WebhookViberController extends Controller
                             "Columns" => 3,
                             "Rows" => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferBorispol",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferBorispol/$user_id",
                             "Image" => $borispol,
                         ],
                         [
                             "Columns" => 3,
                             "Rows" => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferJulyany",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferJulyany/$user_id",
                             "Image" => $sikorskogo,
                         ],
                         [
                             'Columns' => 3,
                             'Rows' => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/ЖД%20Южный/taxi.transferUZ",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/ЖД%20Южный/taxi.transferUZ/$user_id",
                             "Image" => $UzViber,
                         ],
                         [
                             "Columns" => 3,
                             "Rows" => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferAuto",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transfer/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferAuto/$user_id",
                             "Image" => $autoViber,
                         ],
                         [
@@ -271,28 +272,28 @@ class WebhookViberController extends Controller
                             "Columns" => 3,
                             "Rows" => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferFromBorispol",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Борисполь%20терминал%20Д/taxi.transferFromBorispol/$user_id",
                             "Image" => $borispol,
                         ],
                         [
                             "Columns" => 3,
                             "Rows" => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferFromJulyany",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/Аэропорт%20Жуляны%20новый%20%28ул.Медовая%202%29/taxi.transferFromJulyany/$user_id",
                             "Image" => $sikorskogo,
                         ],
                         [
                             'Columns' => 3,
                             'Rows' => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/ЖД%20Южный/taxi.transferFromUZ",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/ЖД%20Южный/taxi.transferFromUZ/$user_id",
                             "Image" => $UzViber,
                         ],
                         [
                             "Columns" => 3,
                             "Rows" => 2,
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferFromAuto",
+                            "ActionBody" => "https://m.easy-order-taxi.site/transferfrom/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferFromAuto/$user_id",
                             "Image" => $autoViber,
                         ],
                         [
@@ -340,7 +341,6 @@ class WebhookViberController extends Controller
                 $message = "Головне меню";
                 $finduser = User::where('viber_id', $user_id)->first();
                 if ($finduser) {
-                    Auth::login($finduser);
                     $viber->sendKeyboard($user_id, $message, $keyboard_main);
                 } else {
                     $viber->sendKeyboard($user_id, $message, $keyboard_register);
@@ -356,7 +356,6 @@ class WebhookViberController extends Controller
                 }
                 $finduser = User::where('viber_id', $user_id)->first();
                 if ($finduser) {
-                    Auth::login($finduser);
                     $viber->sendKeyboard($user_id, $message, $keyboard_main);
                 } else {
                     $viber->sendKeyboard($user_id, $message, $keyboard_register);
