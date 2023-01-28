@@ -49,9 +49,15 @@ Route::get('/test', function () {
     $finduser = User::where('viber_id', $user_id)->first();
     dd($finduser);
 })->name('test');
+
+
 /**
  * Проверка телефона
  */
+
+Route::get('/verifyPhoneInBase/{phone}', [Confirmation::class, 'verifyPhoneInBase'])
+    ->name('verifyPhoneInBase');
+
 
 Route::get('/sendConfirmCode/{phone}', [Confirmation::class, 'sendConfirmCode'])
     ->name('sendConfirmCode');
@@ -720,9 +726,27 @@ Route::get('/costhistory/orders/destroy/{id}/{authorization}', function ($id, $a
  * Отправка заказа
  */
 Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', function ($id) {
+    $req = Order::where('id', $id)->first();
+
+    $user_phone = $req->user_phone;
+
+    $finduser = User::where('user_phone', $user_phone)->first();
+
+    if (!$finduser) {
+        if (Confirmation::sendConfirmCode($user_phone) == 200) {
+            return view('auth.verifySMS', ['id' => $id, 'user_phone' => $user_phone]);
+        } else {
+            return view('taxi.feedback', ['info' => 'Помілка відправкі коду.']);
+        }
+    }
+
     $WebOrder = new WebOrderController();
     return $WebOrder->costWebOrder($id);
 })->name('costhistory-orders-neworder');
+
+Route::get('/verifySmsCode', [Confirmation::class, 'verifySmsCode'])->name('verifySmsCode');
+
+
 
 /**
  * Запрос на отмену заказа
@@ -779,6 +803,11 @@ Route::get('/feedback/{user_id}', function ($user_id) {
     }
     return redirect()->route('feedback');
 })->name('feedbackViber');
+
+Route::get('/feedbackInfo/{info}', function ($info) {
+    IPController::getIP('/feedback');
+    return view('taxi.feedback',['info' => $info]);
+})->name('feedbackInfo');
 
 
 Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');

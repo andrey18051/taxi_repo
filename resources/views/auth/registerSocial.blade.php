@@ -36,7 +36,7 @@
                                        class="form-control @error('user_phone') is-invalid @enderror"
                                        name="user_phone"
 
-                                       @if($newUser['phone'])
+                                       @isset($newUser['phone'])
                                        value="{{ $newUser['phone'] }}"
                                        @else
                                        value="{{ old('user_phone') }}" required autocomplete="user_phone"
@@ -45,9 +45,9 @@
                                        title="Формат вводу: +380936665544"
                                        minlength="13"
                                        maxlength="13"
-                                       @endif
+                                       @endisset
 
-                                       @if($newUser['telegram_id'] == null || $newUser['viber_id'] == null)
+                                       @if($newUser['telegram_id'] == null && $newUser['viber_id'] == null)
                                        onblur="
                                         var route =  '/sendConfirmCode/' + this.value;
                                             $.ajax({

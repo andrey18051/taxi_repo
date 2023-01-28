@@ -2395,14 +2395,6 @@ class WebOrderController extends Controller
         $user_full_name = $req->user_full_name;
         $user_phone = $req->user_phone;
 
-    /*    $finduser = User::where('user_phone', $user_phone)->first();
-        if (!$finduser) {
-            $info = 'Будь ласка, пройдіть реєстрацію для замовлення поїздки.
-            Ваш розрахунок маршруту знайдіть в Особистому кабінеті.';
-
-            return view('auth.register', ['info' => $info, 'phone' => $user_phone]);
-        }*/
-
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);

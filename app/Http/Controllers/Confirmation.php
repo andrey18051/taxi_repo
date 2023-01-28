@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use function Complex\subtract;
@@ -9,12 +10,27 @@ use function Complex\subtract;
 class Confirmation extends Controller
 {
     /**
+     * Проверка телефона пользователя в Базе
+     */
+    public function verifyPhoneInBase(Request $req)
+    {
+        //dd($req->phone);
+        $user_phone = User::where('user_phone', $req->phone)->first();
+        if ($user_phone) {
+            return 200;
+        } else {
+            return 400;
+        }
+    }
+
+    /**
      * Верификация телефона
      * Получение кода подтверждения
      * @return string
      */
-    public function sendConfirmCode($phone)
+    public static function sendConfirmCode($phone)
     {
+      //  return 200;
         $phone = substr($phone, 1);
 
         $connectAPI = WebOrderController::connectApi();
@@ -29,7 +45,6 @@ class Confirmation extends Controller
             'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
         ]);
         return $response->status();
-        /* return 200;*/
     }
 
     /**
@@ -37,8 +52,9 @@ class Confirmation extends Controller
      * Получение кода подтверждения
      * @return string
      */
-    public function approvedPhones($phone, $confirm_code)
+    public static function approvedPhones($phone, $confirm_code)
     {
+      //   return 200;
         $phone = substr($phone, 1);
 
         $connectAPI = WebOrderController::connectApi();
@@ -51,10 +67,16 @@ class Confirmation extends Controller
             'phone' => $phone, //Обязательный. Номер мобильного телефона
             'confirm_code' =>  $confirm_code //Обязательный. Код подтверждения.
         ]);
-
         return $response->status();
-/*
-        return 200;*/
     }
 
+    public function verifySmsCode(Request $req)
+    {
+        if (self::approvedPhones( $req->id, $req->user_phone) !== 200) {
+            return view('auth.verifySMS', ['id' => $req->id, 'user_phone' => $req->user_phone, 'info' => 'Помілка ввода кода.']);
+        } else {
+            $WebOrder = new WebOrderController();
+            return $WebOrder->costWebOrder($req->id);
+        }
+    }
 }

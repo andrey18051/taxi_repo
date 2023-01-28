@@ -82,22 +82,8 @@
                                                placeholder="+380936665544"
                                                title="Формат вводу: +380936665544"
                                                minlength="13"
-                                               maxlength="13"required
+                                               maxlength="13" required
                                                value="{{ old('user_phone') }}" required autocomplete="user_phone"
-                                               onblur="
-                                                var route =  '/sendConfirmCode/' + this.value;
-                                                    $.ajax({
-                                                    url: route,         /* Куда пойдет запрос */
-                                                    method: 'get',             /* Метод передачи (post или get) */
-                                                    dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                                                    success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                                                    if (data != 200) {
-                                                    alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
-                                                    document.location.href = '/feedback';
-                                                    }
-                                                    }
-                                                });"
                                                autofocus>
                                     @endguest
                                     @auth
@@ -109,44 +95,7 @@
                                 </div>
                             </div>
                         </div>
-                        @guest
-                        <div class="container" style="margin-top: 5px" id="confirm_code_div">
-                            <div class="row" >
-                                 <div class="col-12">
-                                    <input id="confirm_code" type="text" class="form-control"
-                                           name="confirm_code" placeholder="Код зі смс"
-                                           pattern="[0-9]*"
-                                           title="Формат вводу: 1234"
-                                           minlength="4"
-                                           maxlength="4"
-                                           autofocus
-                                           value="{{ old('confirm_code') }}"
-                                           required
-                                           onblur="
-                                            var route = '/approvedPhones/' +
-                                                document.getElementById('user_phone').value + '/' +
-                                                this.value;
-                                            $.ajax({
-                                                  url: route,         /* Куда пойдет запрос */
-                                                  method: 'get',             /* Метод передачи (post или get) */
-                                                  dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
 
-                                                  success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
-                                                      if (data != 200)  {
-                                                         if (data == 400) {
-                                                                alert('Помілка введення кода підтвердження');
-                                                         } else {
-                                                                alert('Сталася помілка. Зверниться до оператора.');
-                                                                        document.location.href = '/feedback';
-                                                         }
-                                                      }
-                                                  }
-                                            });">
-                                 </div>
-                            </div>
-
-                        </div>
-                        @endguest
                         <div class="container" style="margin-top: 5px">
 
                                 <div class="col-12">
@@ -316,8 +265,25 @@
                 }
             });
         }
-
+        function sendConfirmCode(value) {
+            //Отправка кода для подтверждения телефона
+            $.ajax({
+                url: '/sendConfirmCode/' + value,
+                method: 'get',
+                dataType: 'html',
+                success: function (data) {
+                    alert('data1' + data)
+                    if (data != 200) {
+                        alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
+                        document.location.href = '/feedback';
+                    }
+                }
+            });
+        }
     </script>
+
+
+
 @endsection
 
 
