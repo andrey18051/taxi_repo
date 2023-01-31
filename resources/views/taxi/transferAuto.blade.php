@@ -101,6 +101,7 @@
                                                @endisset
                                                value="{{ old('search') }}"
                                                onblur="hidFrom(this.value);"
+                                               onkeydown="hidFrom(this.value);"
                                                required>
                                     </div>
                                     <div class="col-lg-4 col-12" id="div_from_number">

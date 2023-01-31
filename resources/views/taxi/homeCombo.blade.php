@@ -141,6 +141,7 @@
                                                        value="{{ old('search') }}"
                                                        placeholder="Звідки?"
                                                        onblur="hideFrom (this.value)"
+                                                       onkeydown="hideFrom (this.value)"
                                                        autocomplete="off"
                                                        required>
                                             </div>
@@ -201,6 +202,7 @@
                                                        @endisset
                                                        value="{{ old('search1') }}"
                                                        onblur="hideTo(this.value)"
+                                                       onkeydown="hideTo(this.value)"
                                                        placeholder="Куди?"
                                                        autocomplete="off">
                                             </div>

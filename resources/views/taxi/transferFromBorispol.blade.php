@@ -98,6 +98,7 @@
                                            value="{{ old('search') }}"
                                            placeholder="Куди?"
                                            onblur="hidFrom(this.value);"
+                                           onkeydown="hidFrom(this.value);"
                                            autocomplete="off"
                                            required>
                                 </div>
