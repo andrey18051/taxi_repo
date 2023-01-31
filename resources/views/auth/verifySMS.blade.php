@@ -20,12 +20,17 @@
                           <input type="hidden" name="user_phone"  value="{{$user_phone}}"/>
 
 
-                        <input type="tel" class="form-control" id="confirmCode" name="confirm_code"/>
+                          <input type="text" class="form-control" id="confirm_code" name="confirm_code"/>
+
                           <div class="container text-center">
                               <div class="row">
-                                  <a class="w-100 btn btn-danger" style="margin-top: 5px"
+                                  <a class="w-100 btn btn-outline-danger" style="margin-top: 5px"
                                      href="{{route('homeCombo')}}" onclick="sessionStorage.clear();">
                                       Повернутися на головну
+                                  </a>
+                                  <a class="w-100 btn btn-outline-success" style="margin-top: 5px"
+                                     href="{{route('feedback')}}" onclick="sessionStorage.clear();">
+                                      Звернутися за допомогою
                                   </a>
                                   <button class="w-100 btn btn-primary" style="margin-top: 5px" type="submit">
                                       {{ __('Відправити') }}

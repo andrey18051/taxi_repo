@@ -736,7 +736,7 @@ Route::middleware('throttle:6,1')->get('/costhistory/orders/neworder/{id}', func
         if (Confirmation::sendConfirmCode($user_phone) == 200) {
             return view('auth.verifySMS', ['id' => $id, 'user_phone' => $user_phone]);
         } else {
-            return view('taxi.feedback', ['info' => 'Помілка відправкі коду.']);
+            return view('taxi.feedback', ['info' => 'Помилка відправкі коду.']);
         }
     }
 

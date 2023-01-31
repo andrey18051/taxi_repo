@@ -762,6 +762,13 @@ class WebOrderController extends Controller
 
                 $from = $req->search;
                 $from_number = $req->from_number;
+
+                if (Combo::where('name', $from)->first()->street == 0) {
+                    $from_number_info = '';
+                } else {
+                    $from_number_info = "(будинок №$from_number)";
+                };
+
                 $auto_type = 'Тип авто: ';
                 if ($req->wagon == 'on' || $req->wagon == '1') {
                     $wagon = true;
@@ -810,6 +817,13 @@ class WebOrderController extends Controller
                     $to = $from;
                     $to_number = $from_number;
                 };
+
+                if (Combo::where('name', $to)->first()->street == 0) {
+                    $to_number_info = '';
+                } else {
+                    $to_number_info = "(будинок №$to_number)";
+                };
+
                 $connectAPI = WebOrderController::connectApi();
                 if ($connectAPI == 400) {
                     return redirect()->route('home-news')
@@ -875,10 +889,10 @@ class WebOrderController extends Controller
 
                     if ($route_undefined === true) {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info по місту. Оплата $req->payment_type. $auto_type";
                     } else {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info до $to $to_number_info. Оплата $req->payment_type. $auto_type";
                     };
 
                     return redirect()->route('home-id', ['id' => $id])
@@ -1290,6 +1304,11 @@ class WebOrderController extends Controller
                 $from = $params['routefrom'];
                 $from_number = $params['routefromnumber'];
 
+                if (Combo::where('name', $from)->first()->street == 0) {
+                    $from_number_info = '';
+                } else {
+                    $from_number_info = "(будинок №$from_number)";
+                };
 
                 $auto_type = 'Тип авто: ';
                 if ($req->wagon == 'on' || $req->wagon == '1') {
@@ -1339,6 +1358,14 @@ class WebOrderController extends Controller
                     $to = $from;
                     $to_number = $from_number;
                 };
+
+                if (Combo::where('name', $to)->first()->street == 0) {
+                    $to_number_info = '';
+                } else {
+                    $to_number_info = "(будинок №$to_number)";
+                };
+
+
                 $connectAPI = WebOrderController::connectApi();
                 if ($connectAPI == 400) {
                     return redirect()->route('home-news')
@@ -1404,10 +1431,10 @@ class WebOrderController extends Controller
 
                     if ($route_undefined === true) {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info по місту. Оплата $req->payment_type. $auto_type";
                     } else {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from (будинок $from_number) до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info до $to $to_number_info. Оплата $req->payment_type. $auto_type";
                     };
 
 
@@ -1520,6 +1547,13 @@ class WebOrderController extends Controller
 
                 $from = $req->search;
                 $from_number = $req->from_number;
+
+                if (Combo::where('name', $from)->first()->street == 0) {
+                    $from_number_info = '';
+                } else {
+                    $from_number_info = "(будинок №$from_number)";
+                };
+
                 $auto_type = 'Тип авто: ';
                 if ($req->wagon == 'on' || $req->wagon == '1') {
                     $wagon = true;
@@ -1629,22 +1663,22 @@ class WebOrderController extends Controller
                     switch ($to) {
                         case 'Аэропорт Борисполь терминал Д':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                            $from (будинок $from_number)
+                            $from $from_number_info
                              до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
                             break;
                         case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                            $from (будинок $from_number)
+                            $from $from_number_info
                              до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
                             break;
                         case 'ЖД Южный':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                            $from (будинок $from_number)
+                            $from $from_number_info
                              до залізничного вокзалу \"Південний \". Оплата $req->payment_type. $auto_type";
                             break;
                         case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                            $from (будинок $from_number)
+                            $from $from_number_info
                              до автовокзалу. Оплата $req->payment_type. $auto_type";
                             break;
                     }
@@ -1783,6 +1817,7 @@ class WebOrderController extends Controller
 
                 $from = $req->routefrom;
                 $from_number = $req->from_number;
+
                 $auto_type = 'Тип авто: ';
                 if ($req->wagon == 'on' || $req->wagon == '1') {
                     $wagon = true;
@@ -1826,6 +1861,12 @@ class WebOrderController extends Controller
                 $to = $req->search;
 
                 $to_number = $req->routetonumber;
+
+                if (Combo::where('name', $to)->first()->street == 0) {
+                    $to_number_info = '';
+                } else {
+                    $to_number_info = "(будинок №$to_number)";
+                };
 
                 $connectAPI = WebOrderController::connectApi();
                 if ($connectAPI == 400) {
@@ -1891,7 +1932,7 @@ class WebOrderController extends Controller
                     switch ($from) {
                         case 'Аэропорт Борисполь терминал Д':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
                             break;
                         case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
@@ -1899,11 +1940,11 @@ class WebOrderController extends Controller
                             break;
                         case 'ЖД Южный':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу \"Південний \"
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
                             break;
                         case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
                             break;
                     }
 
@@ -1951,6 +1992,13 @@ class WebOrderController extends Controller
 
         $from = $req->search;
         $from_number = $req->from_number;
+
+        if (Combo::where('name', $from)->first()->street == 0) {
+            $from_number_info = '';
+        } else {
+            $from_number_info = "(будинок №$from_number)";
+        };
+
         $required_time = $req->required_time;
         $reservation = false;
 
@@ -2000,6 +2048,20 @@ class WebOrderController extends Controller
             $to = $from;
             $to_number = $from_number;
         };
+
+        if (Combo::where('name', $to)->first()->street == 0) {
+            $to_number_info = '';
+        } else {
+            $to_number_info = "(будинок №$to_number)";
+        };
+
+
+        if ($req->payment_type = 1) {
+            $payment_type_info = "Готівка";
+        } else {
+            $payment_type_info = "Безготівка";
+        }
+
         $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
@@ -2055,46 +2117,47 @@ class WebOrderController extends Controller
 
             $json_arr = json_decode($response, true);
             if ($route_undefined === true) {
-                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number) по місту. Оплата $req->payment_type. $auto_type";
+                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from $from_number_info
+                            по місту. Оплата $payment_type_info. $auto_type";
             } else {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
-                            від $from (будинок $from_number) до $to (будинок $to_number).
-                             Оплата $req->payment_type. $auto_type";
+                            від $from $from_number_info до $to_number_info.
+                             Оплата $payment_type_info. $auto_type";
                 switch ($to) {
                     case 'Аэропорт Борисполь терминал Д':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from $from_number_info
+                             до аеропорту \"Бориспіль\". Оплата $payment_type_info. $auto_type";
                         break;
                     case 'Аэропорт Жуляны новый (ул.Медовая 2)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from $from_number_info
+                             до аеропорту \"Киів\" (Жуляни). Оплата $payment_type_info. $auto_type";
                         break;
                     case 'ЖД Южный':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до залізничного вокзалу \"Південний \". Оплата $req->payment_type. $auto_type";
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from $from_number_info
+                             до залізничного вокзалу \"Південний \". Оплата $payment_type_info. $auto_type";
                         break;
                     case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
-                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from (будинок $from_number)
-                             до автовокзалу. Оплата $req->payment_type. $auto_type";
+                        $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from $from_number_info
+                             до автовокзалу. Оплата $payment_type_info. $auto_type";
                         break;
                 }
 
                 switch ($from) {
                     case 'Аэропорт Борисполь терминал Д':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $payment_type_info. $auto_type";
                         break;
                     case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $payment_type_info. $auto_type";
                         break;
                     case 'ЖД Южный':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу \"Південний \"
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $payment_type_info. $auto_type";
                         break;
                     case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $payment_type_info. $auto_type";
                         break;
                 }
             };
@@ -2102,7 +2165,7 @@ class WebOrderController extends Controller
             return redirect()->route('home-id-afterorder', ['id' => $id])->with('success', $order)->with('cost', $cost);
 
         } else {
-            return redirect()->route('home-id', ['id' => $id])->with('error', "Помилка створення маршруту.");
+            return  view('taxi.feedback', ['info' => 'Помилка створення маршруту.']);
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use http\Message\Body;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use function Complex\subtract;
@@ -54,7 +55,7 @@ class Confirmation extends Controller
      */
     public static function approvedPhones($phone, $confirm_code)
     {
-      //   return 200;
+       //   return 200;
         $phone = substr($phone, 1);
 
         $connectAPI = WebOrderController::connectApi();
@@ -67,13 +68,16 @@ class Confirmation extends Controller
             'phone' => $phone, //Обязательный. Номер мобильного телефона
             'confirm_code' =>  $confirm_code //Обязательный. Код подтверждения.
         ]);
+     //   dd($response);
         return $response->status();
     }
 
     public function verifySmsCode(Request $req)
     {
-        if (self::approvedPhones( $req->id, $req->user_phone) !== 200) {
-            return view('auth.verifySMS', ['id' => $req->id, 'user_phone' => $req->user_phone, 'info' => 'Помілка ввода кода.']);
+        $approvedPhones = self::approvedPhones($req->user_phone, $req->confirm_code);
+
+        if ($approvedPhones != 200) {
+            return view('auth.verifySMS', ['id' => $req->id, 'user_phone' => $req->user_phone, 'info' => "Помілка ввода кода."]);
         } else {
             $WebOrder = new WebOrderController();
             return $WebOrder->costWebOrder($req->id);

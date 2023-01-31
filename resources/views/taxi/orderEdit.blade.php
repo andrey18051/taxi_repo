@@ -10,53 +10,38 @@
             <form action="{{route('search-cost-edit', $orderId['0']['id']) }}">
                 @csrf
                 <div class="row" >
+                    <div>
+                        <input type="hidden" id="search" name="search" value="{{ $orderId['0']['routefrom'] }}" />
+                        <input type="hidden" id="from_number" name="from_number" value="{{ $orderId['0']['routefromnumber'] }}" />
+                        <input type="hidden" class="form-check-input" id="route_undefined" name="route_undefined"
+                                @if( $orderId['0']['route_undefined'] == 1)
+                                    checked  value="1"
+                                @endif />
+                        <input type="hidden" id="search1"  name="search1" value="{{ $orderId['0']['routeto'] }}" />
+                        <input type="hidden" id="to_number" name="to_number" value="{{ $orderId['0']['routetonumber'] }}"/>
+                        <input type="hidden" class="form-check-input" id="wagon" name="wagon"
+                               @if( $orderId['0']['wagon'] == 1)
+                               checked
+                               value="1"
+                            @endif/>
 
-                        <div class="container" style="display: none;">
-                             <div class="row">
-                                <div class="col-8">
-                                    <label for="search" class="form-label">Звідки</label>
-                                    <input readonly type="text" class="form-control" id="search" autocomplete="off" name="search" value="{{ $orderId['0']['routefrom'] }}" required>
-                                </div>
-                                <div class="col-4">
-                                    <label for="from_number" class="form-label">Будинок</label>
-                                    <input readonly type="text" id="from_number" name="from_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routefromnumber'] }}" class="form-control" />
-                                </div>
-                             </div>
-                        </div>
+                        <input type="hidden" class="form-check-input" id="minibus" name="minibus"
+                               @if( $orderId['0']['minibus'] == 1)
+                               checked
+                               value="1"
+                            @endif/>
 
-                        <div class="container" style="display: none;">
-                                <div class="row">
-                                    <div class="col-12">
-                                    <label class="form-check-label" for="route_undefined">По місту</label>
-                                    <input readonly type="checkbox" class="form-check-input" id="route_undefined" name="route_undefined" onclick="showHide('block_city')"
-                                        @if( $orderId['0']['route_undefined'] == 1)
-                                            checked
-                                           value="1"
-                                    @endif
-                                    >
-                                    </div>
-                                </div>
-                            </div>
+                        <input type="hidden" class="form-check-input" id="premium" name="premium"
+                               @if( $orderId['0']['premium'] == 1)
+                               checked
+                               value="1"
+                            @endif/>
 
-                        <div id="block_city" class="container"
-                                 @if( $orderId['0']['route_undefined'] == 1)
-                                 style="display:none"
-                                 @else  style="display:block"
-                                 @endif
-                                 style="display: none;"
-                                >
-                                <div class="row" style="display: none;">
-                                    <div class="col-8">
-                                        <label for="search1" class="form-label">Куди</label>
-                                        <input readonly type="text" class="form-control" id="search1" autocomplete="off" name="search1" value="{{ $orderId['0']['routeto'] }}" required>
-                                    </div>
+                        <input type="hidden" id="flexible_tariff_name" name="flexible_tariff_name" value="{{$orderId[0]['flexible_tariff_name']}}"/>
 
-                                    <div class="col-4">
-                                        <label for="to_number" class="form-label" >Будинок</label>
-                                        <input readonly type="text" id="to_number" name="to_number" autocomplete="off" style="text-align: center" value="{{ $orderId['0']['routetonumber'] }}" class="form-control" />
-                                    </div>
-                                </div>
-                            </div>
+                        <input type="hidden" id="flexible_tariff_name" name="payment_type" value="{{$orderId['0']['payment_type']}}"/>
+                    </div>
+
                     <div class="col-lg-12 col-sm-12 ">
                         <div class="container text-center" style="margin-top: 5px">
                             <div class="row">
@@ -97,38 +82,60 @@
                         </div>
 
                         <div class="container" style="margin-top: 5px">
-
-                                <div class="col-12">
-                                    <textarea class="form-control" id="comment" name="comment"  placeholder="Коментар"></textarea>
+                            <div class="accordion" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                            <p class="text-center gradient">Додати побажання до поїздки</p>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <div class="col-12">
+                                                <textarea class="form-control" id="comment" name="comment"  placeholder="Коментар"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                @auth
-                                <div class="col-12" style="margin-top: 5px">
-                                    <input type="text" id="promo" name="promo" placeholder="Промо код"
-                                           value=""  class="form-control"
-                                           onchange= "pCode(this.value)">
-
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            <p class="text-center gradient">Ввести промокод</p>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <div class="col-12" style="margin-top: 5px">
+                                                <input type="text" id="promo" name="promo" placeholder="Промо код"
+                                                       value=""  class="form-control"
+                                                       onchange= "pCode(this.value)"/>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                @endauth
+                            </div>
+                        </div>
+
+                        <div class="container" style="margin-top: 5px">
                             <div class="col-12 slidecontainer">
                                 <label for="add_cost" class="form-label" >
                                     Змінити вартість: <span id="rangeValue"> 0 </span>грн.
                                 </label>
-                                       <input type="range"
-                                              @if(config('app.server') == 'Одесса')
-                                              min="-30"
-                                              @else
-                                              min="0"
-                                              @endif
-                                           max="1000"
-                                            step="1"
-                                           value="0" id="add_cost" name="add_cost" style="text-align: center"
-                                           onchange="document.getElementById('rangeValue').innerHTML = this.value;
+                                <input type="range"
+                                       @if(config('app.server') == 'Одесса')
+                                       min="-30"
+                                       @else
+                                       min="0"
+                                       @endif
+                                       max="1000"
+                                       step="1"
+                                       value="0" id="add_cost" name="add_cost" style="text-align: center"
+                                       onchange="document.getElementById('rangeValue').innerHTML = this.value;
                                            let  order_cost = Number(this.value) + Number({{session('order_cost')}});
-                                                     document.getElementById('rangeValueСost').innerHTML = order_cost;"
-                                           class="slider" />
+                                           document.getElementById('rangeValueСost').innerHTML = order_cost;"
+                                       class="slider" />
 
                             </div>
-
 
                             <h4> Вартість поїздки: <span id="rangeValueСost">{{session('order_cost')}}</span>грн.</h4>
                             Рекомендована вартість на підставі цін інших служб таксі в діапазоні з
@@ -153,83 +160,9 @@
 
                             >{{round (session('order_cost') * config('app.order_cost_max'), 0)}}</a> грн.
                         </div>
-                    </div>
-                    <div class="col-md-5 col-lg-4 order-md-last" style="display: none;">
-                        <br/>
-                        <a href="javascript:void(0)" class="btn btn-outline-success col-12 order-md-last"
-                           onclick="showHide('block_id')">Додаткові параметри</a><br/><br/>
 
-                        <div id="block_id" style="display: none" >
-                            <ul class="list-group mb-3">
-                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                    <label class="form-label" for="required_time">Час подачі</label>
-                                    <input type="datetime-local" step="any"  id="required_time" value="{{ $orderId['0']['required_time']}}" name="required_time">
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="wagon" name="wagon"
-                                            @if( $orderId['0']['wagon'] == 1)
-                                               checked
-                                               value="1"
-                                            @endif>
-                                        <label class="form-check-label" for="wagon">Универсал</label>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="minibus" name="minibus"
-                                            @if( $orderId['0']['minibus'] == 1)
-                                               checked
-                                               value="1"
-                                            @endif>
-                                        <label class="form-check-label" for="minibus">Мікроавтобус</label>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="premium" name="premium"
-                                            @if( $orderId['0']['premium'] == 1)
-                                               checked
-                                               value="1"
-                                            @endif>
-                                        <label class="form-check-label" for="premium">Машина преміум-класса</label>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                    <div class="col-md-12">
-                                        <label for="$flexible_tariff_name" class="form-label">Тариф</label>
 
-                                        <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name">
-                                            <option>{{$orderId[0]['flexible_tariff_name']}}</option>
-                                            @for ($i = 0; $i < count($json_arr); $i++)
-                                                @if( $json_arr[$i]['name'] != $orderId[0]['flexible_tariff_name'])
-                                                <option>{{$json_arr[$i]['name']}}</option>
-                                                @endif
-                                            @endfor
-                                        </select>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                    <div class="col-md-12">
-                                        <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
-                                        <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
-                                            @if( $orderId['0']['payment_type'] == 1)
-                                             {{--   <option>безготівка</option>--}}
-                                                <option>готівка</option>
-                                            @else
-                                                <option>готівка</option>
-<!--                                                <option>безготівка</option>-->
-                                            @endif
-                                        </select>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="container text-center">
-                    <div class="row">
                         <a class="w-100 btn btn-danger" style="margin-top: 5px"
                            href="{{route('homeCombo')}}" onclick="sessionStorage.clear();">
                             Очистити форму
@@ -262,21 +195,6 @@
                     document.getElementById('add_cost').min =  rangeValue;
                     document.getElementById('add_cost').value =  rangeValue;
                     document.getElementById('rangeValueСost').innerHTML =  order_cost;
-                }
-            });
-        }
-        function sendConfirmCode(value) {
-            //Отправка кода для подтверждения телефона
-            $.ajax({
-                url: '/sendConfirmCode/' + value,
-                method: 'get',
-                dataType: 'html',
-                success: function (data) {
-                    alert('data1' + data)
-                    if (data != 200) {
-                        alert('Помілка відправки коду підтвердження. Спробуйте піздніше.');
-                        document.location.href = '/feedback';
-                    }
                 }
             });
         }

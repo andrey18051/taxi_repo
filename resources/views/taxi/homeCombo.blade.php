@@ -9,6 +9,51 @@
     @endisset
     <script type="text/javascript">
 
+        function hideFrom (value) {
+
+
+
+            $.ajax({
+                url: '/autocomplete-search-combo-hid/' + value,
+                method: 'get',
+                dataType: 'html',
+
+                success: function(data){
+                    if (data == 0) {
+                        sessionStorage.setItem('hidFrom', 'none');
+                        document.getElementById('from_number').style.display='none';
+                        document.getElementById('from_number').value=null;
+                    }
+                    if (data == 1) {
+                        sessionStorage.setItem('hidFrom', 'block');
+                        document.getElementById('from_number').style.display='block';
+                    }
+                }
+            });
+        }
+
+        function hideTo(value) {
+            $.ajax({
+                url: '/autocomplete-search-combo-hid/' + value,
+                method: 'get',
+                dataType: 'html',
+
+                success: function(data){
+                    if (data == 0) {
+                        sessionStorage.setItem('hidTo', 'none');
+                        document.getElementById('to_number').style.display='none';
+                        document.getElementById('to_number').value=null;
+                    }
+                    if (data == 1) {
+                        sessionStorage.setItem('hidTo', 'block');
+                        document.getElementById('to_number').style.display='block';
+                    }
+
+                }
+            })
+        }
+
+
         /**
          * Функция Скрывает/Показывает блок
          * @author ox2.ru дизайн студия
@@ -35,7 +80,21 @@
             //Если элемент с id-шником element_id не найден, то выводим сообщение
             else alert("Элемент с id: " + element_id + " не найден!");
         }
+        if (sessionStorage.getItem('hidFrom') == 'none') {
+            document.getElementById('from_number').style.display='none';
+            document.getElementById('from_number').value=null;
+        }
+        if (sessionStorage.getItem('hidFrom') == 'block') {
+            document.getElementById('from_number').style.display='block';
+        }
 
+        if (sessionStorage.getItem('hidTo') == 'none') {
+            document.getElementById('to_number').style.display='none';
+            document.getElementById('to_number').value=null;
+        }
+        if (sessionStorage.getItem('hidTo') == 'block') {
+            document.getElementById('to_number').style.display='block';
+        }
      </script>
     <div class="px-1 py-1 px-md-5 text-center text-lg-start" id="block_street">
         <div class="container" style="text-align: center">
@@ -78,28 +137,7 @@
                                                        @endisset
                                                        value="{{ old('search') }}"
                                                        placeholder="Звідки?"
-                                                       onchange="
-                                                       var route = '/autocomplete-search-combo-hid/' + this.value;
-
-                                                        $.ajax({
-                                                        url: route,         /* Куда пойдет запрос */
-                                                        method: 'get',             /* Метод передачи (post или get) */
-                                                        dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                                                        success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                                                        if (data == 0) {
-                                                        sessionStorage.setItem('hidFrom', 'none')
-                                                        document.getElementById('from_number').style.display='none';
-                                                        document.getElementById('from_number').value=null;
-                                                        }
-                                                        if (data == 1) {
-                                                        sessionStorage.setItem('hidFrom', 'block')
-                                                        document.getElementById('from_number').style.display='block';
-                                                        }
-                                                        }
-                                                        });
-
-                                                       "
+                                                       onblur="hideFrom(this.value)"
                                                        autocomplete="off"
                                                        required>
                                             </div>
@@ -159,27 +197,7 @@
                                                        readonly
                                                        @endisset
                                                        value="{{ old('search1') }}"
-                                                       onblur="
-                                                       var route =  '/autocomplete-search-combo-hid/' + this.value;
-
-                                                        $.ajax({
-                                                        url: route,         /* Куда пойдет запрос */
-                                                        method: 'get',             /* Метод передачи (post или get) */
-                                                        dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
-
-                                                        success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-                                                        if (data == 0) {
-                                                        sessionStorage.setItem('hidTo', 'none')
-                                                        document.getElementById('to_number').style.display='none';
-                                                        document.getElementById('to_number').value=null;
-                                                        }
-                                                        if (data == 1) {
-                                                        sessionStorage.setItem('hidTo', 'block')
-                                                        document.getElementById('to_number').style.display='block';
-                                                        }
-
-                                                        }
-                                                        })"
+                                                       onblur="hideTo(this.value)"
                                                        placeholder="Куди?"
                                                        autocomplete="off">
                                             </div>
@@ -201,7 +219,7 @@
                                         </div>
                                     </div>
 
-                                    <script defer src="https://www.google.com/recaptcha/api.js"></script>
+                                    <script async src="https://www.google.com/recaptcha/api.js"></script>
                                     <div class="container" style="margin-top: 5px">
                                         <div class="row">
                                             <div class="g-recaptcha" data-sitekey="{{ config('app.RECAPTCHA_SITE_KEY') }}"></div>
@@ -437,25 +455,5 @@
             </div>
         </div>
     </div>
-
-    <script type="text/javascript">
-
-        if (sessionStorage.getItem('hidFrom') == 'none') {
-            document.getElementById('from_number').style.display='none';
-            document.getElementById('from_number').value=null;
-        }
-        if (sessionStorage.getItem('hidFrom') == 'block') {
-            document.getElementById('from_number').style.display='block';
-        }
-
-        if (sessionStorage.getItem('hidTo') == 'none') {
-            document.getElementById('to_number').style.display='none';
-            document.getElementById('to_number').value=null;
-        }
-        if (sessionStorage.getItem('hidTo') == 'block') {
-            document.getElementById('to_number').style.display='block';
-        }
-    </script>
-
 
 @endsection
