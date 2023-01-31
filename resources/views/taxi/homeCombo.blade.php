@@ -9,12 +9,15 @@
     @endisset
     <script type="text/javascript">
 
+        function fixedEncodeURIComponent (str) {
+            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+                return '%' + c.charCodeAt(0).toString(16);
+            });
+        }
+
         function hideFrom (value) {
-
-
-
             $.ajax({
-                url: '/autocomplete-search-combo-hid/' + value,
+                url: '/autocomplete-search-combo-hid/' + value.split('/')[0],
                 method: 'get',
                 dataType: 'html',
 
@@ -34,7 +37,7 @@
 
         function hideTo(value) {
             $.ajax({
-                url: '/autocomplete-search-combo-hid/' + value,
+                url: '/autocomplete-search-combo-hid/' + value.split('/')[0],
                 method: 'get',
                 dataType: 'html',
 
@@ -137,7 +140,7 @@
                                                        @endisset
                                                        value="{{ old('search') }}"
                                                        placeholder="Звідки?"
-                                                       onblur="hideFrom(this.value)"
+                                                       onblur="hideFrom (this.value)"
                                                        autocomplete="off"
                                                        required>
                                             </div>

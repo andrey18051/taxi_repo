@@ -48,7 +48,7 @@
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
     <script type="text/javascript" src="{{ asset('js/jquery.cookie.js') }}"></script>
     <script type="text/javascript">
-        var route = "{{ url('autocomplete-search-combo') }}";
+        var route = "/autocomplete-search-combo";
         $.ajax({
             url: route,         /* Куда пойдет запрос */
             method: 'get',             /* Метод передачи (post или get) */

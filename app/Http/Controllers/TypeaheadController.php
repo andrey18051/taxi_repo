@@ -126,17 +126,27 @@ class TypeaheadController extends Controller
     {
         $i = 0;
 
-        $combos = Combo::get()->sortByDesc('street');
+        $combos = Combo::all()->sortByDesc('street');
         foreach ($combos as $object) {
             $data[$i] = $object->name;
             $i++;
         }
+
         return  $data;
     }
 
     public function autocompleteSearchComboHid($name)
     {
-        $combos = Combo::where('name', $name)->first();
+        $combos = Combo::select(['name', 'street'])->where('name', 'like', $name.'%')->first();
+        return  $combos->street;
+    }
+
+    public function autocompleteSearchComboHidname()
+    {
+
+        $name = "Гуртожиток Національного технічного університету України КПІ (Київ, Олекси Тихого (Виборзька) вул., 2";
+        $combos = Combo::select(['name', 'street'])->where('name', 'like', $name.'%')->first();
+
         return  $combos->street;
     }
 }

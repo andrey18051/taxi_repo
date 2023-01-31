@@ -607,6 +607,9 @@ Route::get('/search', function () {
 /**
  * Поиск по улицам
  */
+
+Route::get('/version_combo', [WebOrderController::class, 'version_combo'])->name('version_combo');
+Route::get('/autocompleteSearchComboHidname', [TypeaheadController::class, 'autocompleteSearchComboHidname'])->name('autocompleteSearchComboHid');
 Route::get('/search-home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
 Route::get('/autocomplete-search2', [TypeaheadController::class, 'autocompleteSearch2']);

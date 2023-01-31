@@ -31,7 +31,7 @@
             else alert("Элемент с id: " + element_id + " не найден!");
         }
         function hidFrom(value) {
-            var route = "/autocomplete-search-combo-hid/" + value;
+            var route = "/autocomplete-search-combo-hid/" + value.split('/')[0];
 
             $.ajax({
                 url: route,         /* Куда пойдет запрос */
