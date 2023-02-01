@@ -280,9 +280,9 @@ return [
 
     /**
      * Мастер логин и пароль Киев**/
-       'server' => 'Киев',
-       'username' => 'ONLINE56',
-       'password' => 'gggdsh5+',
+//       'server' => 'Киев',
+//       'username' => 'ONLINE56',
+//       'password' => 'gggdsh5+',
 
 
     /**

@@ -900,7 +900,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    WebOrderController::version_combo();
+                  //  WebOrderController::version_combo();
                     $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
                             відправлення/призначення або не вибрана опція поїздки по місту.
                             Правильно вводьте або зверніться до оператора.";
@@ -1688,7 +1688,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    WebOrderController::version_combo();
+                   // WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
@@ -1953,7 +1953,7 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                    WebOrderController::version_combo();
+                   // WebOrderController::version_combo();
                     ?>
                     <script type="text/javascript">
                         alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
@@ -3141,6 +3141,9 @@ class WebOrderController extends Controller
      */
     public function version_combo()
     {
+        $base = env('DB_DATABASE');
+        $marker_update = false;
+
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
@@ -3148,10 +3151,16 @@ class WebOrderController extends Controller
          * Проверка подключения к серверам
          */
         $connectAPI = WebOrderController::connectApi();
+
         if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            if ($base === 'taxi2012_test') {
+                return redirect()->route('home-admin')->with('error', "Ошибка подключения к базе $base.");
+            } else {
+                return redirect()->route('home-news')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            }
         }
+
         /**
          * Проверка даты геоданных в АПИ
          */
@@ -3164,13 +3173,10 @@ class WebOrderController extends Controller
         ]);
 
         $json_arr = json_decode($json_str, true);
-
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,
-        ])->get($url_ob, [
-            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
-        ]);
+        ])->get($url_ob);
 
         $json_arr_ob = json_decode($response_ob, true);
 
@@ -3183,38 +3189,41 @@ class WebOrderController extends Controller
          */
 
         $svd = Config::where('id', '1')->first();
+        if ($svd) {
+            if ($json_arr['version_date'] !==  $svd->streetVersionDate || $json_arr_ob['version_date'] !== $svd->objectVersionDate) {
+                $marker_update = true;
+            }
+        } else {
+            $marker_update = true;
+        }
+
         //Проверка версии геоданных и обновление или создание базы адресов
-        if (config('app.server') == 'Киев') {
-            if ($json_arr['version_date'] !== $svd->streetVersionDate ||
-                $json_arr_ob['version_date'] !== $svd->objectVersionDate || Combo::all()->count() === 0)
-            {
-                //Обновление списка тарифов
-                $url = $connectAPI . '/api/tariffs';
-                $response = Http::withHeaders([
-                    'Authorization' => $authorization,
-                ])->get($url);
 
-                $response_arr = json_decode($response, true);
-                DB::table('tarifs')->truncate();
-                for ($i = 0; $i < count($response_arr); $i++) {
-                    $new_tarif = new Tarif();
-                    $new_tarif->name = $response_arr[$i]['name'];
-                    $new_tarif->save();
-                }
+        if ($marker_update || Combo::all()->count() === 0) {
+            //Обновление списка тарифов
+            $url = $connectAPI . '/api/tariffs';
+            $response = Http::withHeaders([
+                'Authorization' => $authorization,
+            ])->get($url);
 
-                $svd->streetVersionDate = $json_arr['version_date'];
-                $svd->objectVersionDate = $json_arr_ob['version_date'];
-                $svd->save();
+            $response_arr = json_decode($response, true);
+            DB::table('tarifs')->truncate();
+            for ($i = 0; $i < count($response_arr); $i++) {
+                $new_tarif = new Tarif();
+                $new_tarif->name = $response_arr[$i]['name'];
+                $new_tarif->save();
+            }
 
-                DB::table('combos')->truncate();
-                $i = 0;
-                do {
-                    $combo = new Combo();
-                    $combo->name = $json_arr['geo_street'][$i]["name"];
-                    $combo->street = 1;
-                    $combo->save();
+            DB::table('combos')->truncate();
 
-                    $geo_street = $json_arr['geo_street'][$i]["localizations"];
+            foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
+                $combo = new Combo();
+                $combo->name = $arrStreet["name"];
+                $combo->street = 1;
+                $combo->save();
+
+                $geo_street = $arrStreet["localizations"];
+                if ($geo_street !== null) {
                     foreach ($geo_street as $val) {
                         if ($val["locale"] == "UK") {
                             $combo = new Combo();
@@ -3223,12 +3232,17 @@ class WebOrderController extends Controller
                             $combo->save();
                         }
                     }
+                }
+            }
 
-                    $combo = new Combo();
-                    $combo->name = $json_arr_ob['geo_object'][$i]["name"];
-                    $combo->street = 0;
-                    $combo->save();
-                    $geo_object = $json_arr_ob['geo_object'][$i]["localizations"];
+            foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
+                $combo = new Combo();
+                $combo->name = $arrObject["name"];
+                $combo->street = 0;
+                $combo->save();
+
+                $geo_object = $arrObject["localizations"];
+                if ($geo_object !== null) {
                     foreach ($geo_object as $val) {
                         if ($val["locale"] == "UK") {
                             $combo = new Combo();
@@ -3237,78 +3251,19 @@ class WebOrderController extends Controller
                             $combo->save();
                         }
                     }
-                    $i++;
-                } while ($i < count($json_arr['geo_street']));
+                }
             }
-        }
-     /*   if (config('app.server') == 'Одесса') {
-            if ($json_arr['version_date'] !== $svd->streetVersionDate || Combo::all()->count() === 0) {
-                $svd->streetVersionDate = $json_arr['version_date'];
-                $svd->save();
-                DB::table('combos')->truncate();
-                $i = 0;
 
-                do {
-                    $street = new Street();
-                    $street->name = $json_arr['geo_street'][$i]["name"];
-                    $street->save();
+            DB::table('configs')->truncate(); //Запись даты обновления версии
+            $svd = new Config();
+            $svd->streetVersionDate = $json_arr['version_date'];
+            $svd->objectVersionDate = $json_arr_ob['version_date'];
+            $svd->save();
 
-                    $i++;
-                } while ($i < count($json_arr['geo_street']));
-
-            }
-        }
-
-        *******************************
-
-        $svd = Config::where('id', '1')->first();
-        //Проверка версии геоданных и обновление или создание базы адресов
-        if (config('app.server') == 'Киев') {
-            if ($json_arr['version_date'] !== $svd->objectVersionDate || Combo::all()->count() === 0) {
-                $svd->objectVersionDate = $json_arr['version_date'];
-                $svd->save();
-
-                DB::table('objecttaxis')->truncate();
-                $i = 0;
-                do {
-                    $objects = new Objecttaxi();
-                    $objects->name = $json_arr['geo_object'][$i]["name"];
-                    $objects->save();
-                    $streets = $json_arr['geo_object'][$i]["localizations"];
-                    foreach ($streets as $val) {
-
-                        if ($val["locale"] == "UK") {
-                            $objects = new Objecttaxi();
-                            $objects->name = $val['name'];
-                            $objects->save();
-
-                        }
-                    }
-                    $i++;
-                } while ($i < count($json_arr['geo_object']));
-            }
-        }
-        if (config('app.server') == 'Одесса') {
-            if ($json_arr['version_date'] !== $svd->objectVersionDate || Objecttaxi::all()->count() === 0) {
-                $svd->objectVersionDate = $json_arr['version_date'];
-                $svd->save();
-                DB::table('objecttaxis')->truncate();
-                $i = 0;
-
-                do {
-                    $objects = new Objecttaxi();
-                    $objects->name = $json_arr['geo_object'][$i]["name"];
-                    $objects->save();
-
-                    $i++;
-                } while ($i < count($json_arr['geo_object']));
-
-            }
-        }
-
-
-        */
-
+            return redirect()->route('home-admin')->with('success', "База $base обновлена.");
+        } elseif ($base === 'taxi2012_test') {
+        return redirect()->route('home-admin')->with('success', "База $base актуальна.");
+    }
     }
 
     /**
@@ -3333,17 +3288,6 @@ class WebOrderController extends Controller
          */
         $comboArr = Combo::where('name', $params['routefrom'])->first();
         dd($comboArr);
-
-
-
-
-
-
-
-
-
-
-
 
         /**
          * Проверка даты геоданных в АПИ

@@ -29,7 +29,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}" target="_blank" style="width: 50px; height: 50px">
-                    {{ config('app.name', 'Sferaved') }}
+                    {{ config('app.name', 'Sferaved')  }} (<b>{{config('app.server')}}</b> база {{env('DB_DATABASE')}})
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"  data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -49,7 +49,7 @@
                                 <li><a href="https://service.webboss.pro/text-generator" target="_blank">Generator 2</a>
                                 <li><a href="{{ route('admin-news') }}" target="_blank">News</a>
                                 <li><a href="{{ route('admin-quite') }}" target="_blank">Quite</a>
-                                <li><a href="{{ route('admin-promo') }}" target="_blank">Promo</a>
+                                <li><a href="{{ route('version_combo') }}" target="_blank">Combo</a>
                                 <li><a href="{{ asset('/') }}">Main</a>
                             </ul>
                     </nav>
@@ -93,6 +93,7 @@
         </nav>
 
         <main class="py-4">
+            @include ('layouts.messages')
             @yield('content')
         </main>
     </div>
