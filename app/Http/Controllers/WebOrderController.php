@@ -1443,16 +1443,14 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-
-                    ?>
-                    <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
-                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
-                            "Правильно вводьте або зверніться до оператора.");
-                    </script>
-                    <?php
-
-                    return view('taxi.homeReqCombo', ['json_arr' => $json_arr, 'params' => $params]);
+                    $params['routefromnumberBlockNone'] = 'block';
+                    $params['routetonumberBlockNone'] = 'block';
+                    $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
+                            відправлення/призначення або не вибрана опція поїздки по місту.
+                            Правильно вводьте або зверніться до оператора.";
+                    $json_arr = WebOrderController::tariffs();
+                    return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
+                        'info' => $info]);
                 }
             }
         }
@@ -3261,7 +3259,7 @@ class WebOrderController extends Controller
             $svd->save();
 
             return redirect()->route('home-admin')->with('success', "База $base обновлена.");
-        } elseif ($base === 'taxi2012_test') {
+        } else {
         return redirect()->route('home-admin')->with('success', "База $base актуальна.");
     }
     }
