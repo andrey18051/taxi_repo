@@ -1934,7 +1934,7 @@ class WebOrderController extends Controller
                             break;
                         case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
-                            до $to (будинок $to_number). Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
                             break;
                         case 'ЖД Южный':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу \"Південний \"
@@ -2119,7 +2119,7 @@ class WebOrderController extends Controller
                             по місту. Оплата $payment_type_info. $auto_type";
             } else {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом
-                            від $from $from_number_info до $to_number_info.
+                            від $from $from_number_info до $to $to_number_info.
                              Оплата $payment_type_info. $auto_type";
                 switch ($to) {
                     case 'Аэропорт Борисполь терминал Д':
