@@ -97,22 +97,24 @@
                                         </div>
                                     </div>
                                 </div>
+                                @auth
                                 <div class="accordion-item">
                                     <h2 class="accordion-header" id="headingTwo">
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                            <p class="text-center gradient">Ввести промокод</p>
+                                            <p class="text-center gradient">Ввести бонус-код</p>
                                         </button>
                                     </h2>
                                     <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
                                         <div class="accordion-body">
                                             <div class="col-12" style="margin-top: 5px">
-                                                <input type="text" id="promo" name="promo" placeholder="Промо код"
+                                                <input type="text" id="promo" name="promo" placeholder="бонус-код"
                                                        value=""  class="form-control"
                                                        onchange= "pCode(this.value)"/>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                @endauth
                             </div>
                         </div>
 

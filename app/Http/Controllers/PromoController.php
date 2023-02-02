@@ -80,7 +80,7 @@ class PromoController extends Controller
             $promo->save();
 
             $subject = "Ваш бонус-код";
-            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. (Він стане доступний після авторизації). Приємних поїздок!";
+            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. Приємних поїздок!";
 
             $paramsMail = [
                 'subject' => $subject,

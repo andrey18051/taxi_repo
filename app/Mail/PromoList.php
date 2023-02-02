@@ -28,6 +28,6 @@ class PromoList extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.promo')->with($this->params)->subject('Реєстрація успішна');
+        return $this->markdown('emails.promo')->with($this->params)->subject('Отримайте бонус-код');
     }
 }

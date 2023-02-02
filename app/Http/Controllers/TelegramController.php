@@ -59,19 +59,15 @@ class TelegramController extends Controller
 
     public function handleTelegramCallback()
     {
-        try {
-            $user = Socialite::driver('telegram')->user();
-            $finduser = User::where('telegram_id', $user->id)->first();
-            if ($finduser) {
-                Auth::login($finduser);
-                return redirect()->intended('/home-Combo');
-            } else {
-                $params ['name'] = $user['first_name'] . ' ' . $user['last_name'];
-                $params ['telegram_id'] = $user['id'];
-                return view('auth.registerTelegram', ['params' => $params, 'info' => 'Вкажіть адресу електронної пошти']);
-            }
-        } catch (Exception $e) {
-            return view('auth.register', ['info' => 'Помілка реєстрації']);
+        $user = Socialite::driver('telegram')->user();
+        $finduser = User::where('telegram_id', $user->id)->first();
+        if ($finduser) {
+            Auth::login($finduser);
+            return redirect()->intended('/home-Combo');
+        } else {
+            $params ['name'] = $user['first_name'] . ' ' . $user['last_name'];
+            $params ['telegram_id'] = $user['id'];
+            return view('auth.registerTelegram', ['params' => $params, 'info' => 'Вкажіть адресу електронної пошти']);
         }
     }
 

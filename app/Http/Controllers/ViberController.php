@@ -43,19 +43,15 @@ class ViberController extends Controller
 
     public function handleViberCallback($user_id, $name, $phone)
     {
-        try {
-            $finduser = User::where('viber_id', $user_id)->first();
-            if ($finduser) {
-                Auth::login($finduser);
-                return redirect()->intended('/home-Combo');
-            } else {
-                $params ['name'] = $name;
-                $params ['viber_id'] = $user_id;
-                $params ['phone'] = $phone;
-                return view('auth.registerViber', ['params' => $params, 'info' => 'Вкажіть адресу електронної пошти']);
-            }
-        } catch (Exception $e) {
-            return view('auth.register', ['info' => 'Помілка реєстрації']);
+        $finduser = User::where('viber_id', $user_id)->first();
+        if ($finduser) {
+            Auth::login($finduser);
+            return redirect()->intended('/home-Combo');
+        } else {
+            $params ['name'] = $name;
+            $params ['viber_id'] = $user_id;
+            $params ['phone'] = $phone;
+            return view('auth.registerViber', ['params' => $params, 'info' => 'Вкажіть адресу електронної пошти']);
         }
     }
 
