@@ -69,7 +69,9 @@ class PromoController extends Controller
      */
     public function promoCodeNew($email)
     {
-        $promoCodeNew = substr($email, 0, strripos($email, '@'));
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+        $promoCodeNew = substr(str_shuffle($permitted_chars), 0, 6);
         $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
 
         if (empty($findPromo)) {
@@ -80,7 +82,7 @@ class PromoController extends Controller
             $promo->save();
 
             $subject = "Ваш бонус-код";
-            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. Приємних поїздок!";
+            $message = "Отримайте бонус-код за реєстрацію на нашему сайті: $promoCodeNew. Він стане доступний після авторизації. Приємних поїздок!";
 
             $paramsMail = [
                 'subject' => $subject,

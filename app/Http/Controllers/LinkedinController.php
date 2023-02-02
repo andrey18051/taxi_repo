@@ -49,9 +49,6 @@ class LinkedinController extends Controller
                     Auth::login($finduser);
                     return redirect()->intended('/home-Combo');
                 } else {
-                    //Создание промокода 5% при первой регистрации
-                    PromoController::promoCodeNew($user->email);
-
                     $newUser['name'] = $user->name;
                     $newUser['email'] = $user->email;
                     $newUser['linkedin_id'] = $user->id;

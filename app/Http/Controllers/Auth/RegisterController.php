@@ -72,7 +72,8 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         //Создание промокода 5% при первой регистрации
-        $promoCodeNew = substr($data['email'], 0, strripos($data['email'], '@'));
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $promoCodeNew = substr(str_shuffle($permitted_chars), 0, 6);
         $findPromo = Promo::where('promoCode', $promoCodeNew)->first();
         if (empty($findPromo)) {
             $promo = new Promo();

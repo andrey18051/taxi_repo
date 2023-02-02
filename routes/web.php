@@ -75,6 +75,9 @@ Route::get('/promoSize/{promoCode}', [PromoController::class, 'promoSize'])
 Route::get('/promoCreat', [PromoController::class, 'promoCreat'])
     ->name('promoCreat');
 
+Route::get('/promoCodeNew/{email}', [PromoController::class, 'promoCreat'])
+    ->name('promoCodeNew');
+
 Route::get('/promo', function () {
     return view('admin.promo');
 })->name('admin-promo')->middleware('role:superadministrator');

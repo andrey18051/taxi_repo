@@ -81,7 +81,7 @@ class TelegramController extends Controller
             return redirect()->intended('/home-Combo');
         } else {
             //Создание промокода 5% при первой регистрации
-            PromoController::promoCodeNew($request->email);
+       //     PromoController::promoCodeNew($request->email);
             $newUser['name'] = $request->name;
             $newUser['email'] = $request->email ;
             $newUser['telegram_id'] = $request->telegram_id;
