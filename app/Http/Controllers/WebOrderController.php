@@ -73,7 +73,7 @@ class WebOrderController extends Controller
                     return config('app.taxi2012Url_3');
                 } catch (Exception $e) {
                     $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . config('app.taxi2012Url_2') . ". " . PHP_EOL .
+                        "Ошибка подключения к серверу " . config('app.taxi2012Url_2') . ".   " . PHP_EOL .
                         "Ошибка подключения к серверу " . config('app.taxi2012Url_3') . ".";
                     $paramsAdmin = [
                         'subject' => $subject,
@@ -3152,7 +3152,7 @@ class WebOrderController extends Controller
 
         if ($connectAPI == 400) {
             if ($base === 'taxi2012_test') {
-                return redirect()->route('home-admin')->with('error', "Ошибка подключения к базе $base.");
+                return redirect()->route('home-admin')->with('error', "Ошибка подключения к серверу.");
             } else {
                 return redirect()->route('home-news')
                     ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
@@ -3260,15 +3260,15 @@ class WebOrderController extends Controller
 
             return redirect()->route('home-admin')->with('success', "База $base обновлена.");
         } else {
-        return redirect()->route('home-admin')->with('success', "База $base актуальна.");
-    }
+            return redirect()->route('home-admin')->with('success', "База $base актуальна.");
+        }
     }
 
     /**
      * Проверка адресов
      * $params - массив название улицы + дом (или просто объект) + по городу
      */
-    public function nameCombo ($params)
+    public function nameCombo($params)
     {
         $username = config('app.username');
         $password = hash('SHA512', config('app.password'));
@@ -3304,18 +3304,7 @@ class WebOrderController extends Controller
         ])->get($url_ob);
 
         $json_arr_ob = json_decode($response_ob, true);
-
-
-
-
-
-
-
-
-
-
-
-        /**
+ /**
          * Проверка версии геоданных и обновление или создание базы адресов
          * $json_arr['version_date'] - текущая версия улиц в базе
          * config('app.streetVersionDate') - дата версии в конфиге

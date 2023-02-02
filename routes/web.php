@@ -79,7 +79,8 @@ Route::get('/promo', function () {
     return view('admin.promo');
 })->name('admin-promo')->middleware('role:superadministrator');
 
-Route::get('/version_combo', [WebOrderController::class, 'version_combo'])->name('version_combo');
+Route::get('/version_combo', [WebOrderController::class, 'version_combo'])
+    ->name('version_combo')->middleware('role:superadministrator');
 
 /**
  * Погода
