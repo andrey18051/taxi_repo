@@ -293,7 +293,7 @@
                                                                     @endif
                                                                 @endfor
                                                             @else
-                                                                <option></option>
+{{--                                                                <option></option>--}}
                                                                 @for ($i = 0; $i < count($json_arr); $i++)
                                                                     <option>{{$json_arr[$i]['name']}}</option>
                                                                 @endfor

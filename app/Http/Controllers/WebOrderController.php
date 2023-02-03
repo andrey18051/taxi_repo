@@ -900,7 +900,6 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                  //  WebOrderController::version_combo();
                     $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
                             відправлення/призначення або не вибрана опція поїздки по місту.
                             Правильно вводьте або зверніться до оператора.";
@@ -2580,7 +2579,7 @@ class WebOrderController extends Controller
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         ]);
-
+//dd($responseWeb);
         if ($responseWeb->status()  == "200") {
             /**
              * Сохранние расчетов в базе
@@ -2635,26 +2634,26 @@ class WebOrderController extends Controller
                                     від $from (будинок $from_number) до аеропорту \"Бориспіль\".
                                     Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
                                     $json_arr['order_cost'] . "грн. Номер: " . $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                     case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     $from (будинок $from_number) до аеропорту \"Киів\" (Жуляни). Оплата $payment_type.
                                     $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] .
                                         "грн. Номер: " . $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                     case 'ЖД Южный':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     $from (будинок $from_number) до залізничного вокзалу \"Південний \".
                                     Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
                                     $json_arr['order_cost'] . "грн. Номер: " . $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                     case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     $from (будинок $from_number) до автовокзалу.  Оплата $payment_type. $auto_type.
                                     Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                    break;
-                    }
+                        break;
+                }
 
                 switch ($from) {
                     case 'Аэропорт Борисполь терминал Д':
@@ -2663,27 +2662,27 @@ class WebOrderController extends Controller
                                     Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
                                         $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                     case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     аеропорту \"Киів\" (Жуляни) до $to (будинок $to_number).
                                     Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
                                         $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                     case 'ЖД Южный':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     залізничного вокзалу \"Південний \" до $to (будинок $to_number).
                                     Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
                                         $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                     case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     автовокзалу до $to (будинок $to_number).  Оплата $payment_type. $auto_type.
                                     Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
-                    break;
+                        break;
                 }
 
             };
@@ -2712,9 +2711,7 @@ class WebOrderController extends Controller
         } else {
             $json_arr = json_decode($responseWeb, true);
             $message_error = $json_arr['Message'];
-            return redirect()->route('home-id-afterorder', $id)->with('error', "Помілка створення заказу. $message_error")
-                ->with('tel2', "Для уточнення деталей наберіть оператора та дотримуйтесь його інструкцій:")
-                ->with('back', 'Зробити нове замовлення');
+            return view('taxi.feedback', ['info' => "Помилка замовлення. $message_error"]);
         }
     }
 
