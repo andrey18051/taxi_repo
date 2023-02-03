@@ -293,7 +293,7 @@
                                                                     @endif
                                                                 @endfor
                                                             @else
-{{--                                                                <option></option>--}}
+                                                                <option></option>
                                                                 @for ($i = 0; $i < count($json_arr); $i++)
                                                                     <option>{{$json_arr[$i]['name']}}</option>
                                                                 @endfor
@@ -302,15 +302,16 @@
                                                         </select>
                                                     </div>
                                                 </li>
-                                                <li class="list-group-item d-flex justify-content-between lh-sm">
-                                                    <div class="col-md-12">
-                                                        <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>
-                                                        <select class="form-select" id="flexible_tariff_name" name="payment_type" required>
-                                                            <option>готівка</option>
-                                                            <!--                                            <option>безготівка</option>-->
-                                                        </select>
-                                                    </div>
-                                                </li>
+{{--                                                <input type="hidden" id="flexible_tariff_name" name="payment_type" value="0">--}}
+{{--                                                <li class="list-group-item d-flex justify-content-between lh-sm">--}}
+{{--                                                    <div class="col-md-12">--}}
+{{--                                                        <label for="$flexible_tariff_name" class="form-label">Тип оплати замовлення</label>--}}
+{{--                                                        <select class="form-select" id="flexible_tariff_name" name="payment_type" required>--}}
+{{--                                                            <option>готівка</option>--}}
+{{--                                                            <!--                                            <option>безготівка</option>-->--}}
+{{--                                                        </select>--}}
+{{--                                                    </div>--}}
+{{--                                                </li>--}}
                                             </ul>
                                         </div>
                                     </div>

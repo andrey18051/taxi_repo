@@ -728,13 +728,6 @@ class WebOrderController extends Controller
         $params['add_cost'] = $req->add_cost; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        if ($req->payment_type == 'готівка') {
-            $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        } else {
-            $params['payment_type'] = '1';
-        };
-
-
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
 
 
@@ -802,11 +795,7 @@ class WebOrderController extends Controller
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
 
-                if ($req->payment_type == 'готівка') {
-                    $payment_type = '0';
-                } else {
-                    $payment_type = '1';
-                };
+                $payment_type_info = "готівка";
 
                 $route_undefined = false;
                 $to = $req->search1;
@@ -852,7 +841,7 @@ class WebOrderController extends Controller
                         ['name' => $to, 'number' => $to_number],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
@@ -881,7 +870,7 @@ class WebOrderController extends Controller
                     $order->routeto = $to; //Обязательный. Улица куда.
                     $order->routetonumber = $to_number; //Обязательный. Дом куда.
                     $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     $order->save();
                     $id = $order;
                     $json_arr = json_decode($response, true);
@@ -889,10 +878,10 @@ class WebOrderController extends Controller
 
                     if ($route_undefined === true) {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from $from_number_info по місту. Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info по місту. Оплата: $payment_type_info. $auto_type";
                     } else {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from $from_number_info до $to $to_number_info. Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
                     };
 
                     return redirect()->route('home-id', ['id' => $id])
@@ -962,12 +951,6 @@ class WebOrderController extends Controller
         $params['add_cost'] = $req->add_cost; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        if ($req->payment_type == 'готівка') {
-            $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        } else {
-            $params['payment_type'] = '1';
-        };
-
         $params['routeto'] = $req->search3; //Обязательный. Улица куда.
 
         $params['route_undefined'] = false; //По городу: True, False
@@ -1033,13 +1016,7 @@ class WebOrderController extends Controller
                 $comment = $req->comment;
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
-
-                if ($req->payment_type == 'готівка') {
-                    $payment_type = '0';
-                } else {
-                    $payment_type = '1';
-                };
-
+                $payment_type_info = "готівка";
                 $route_undefined = false;
                 $to = $req->search3;
 
@@ -1075,7 +1052,7 @@ class WebOrderController extends Controller
                         ['name' => $to],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
@@ -1104,7 +1081,7 @@ class WebOrderController extends Controller
                     $order->routeto = $to; //Обязательный. Улица куда.
 
                     $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     $order->save();
                     $id = $order;
                     $json_arr = json_decode($response, true);
@@ -1112,11 +1089,11 @@ class WebOrderController extends Controller
 
                     if ($route_undefined === true) {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from по місту. Оплата $req->payment_type. $auto_type
+                        $from по місту. Оплата: $payment_type_info. $auto_type
                         Вартість поїздки становитиме: $order_cost грн.";
                     } else {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from  до $to. Оплата $req->payment_type. $auto_type
+                        $from  до $to. Оплата: $payment_type_info. $auto_type
                        ";
                     };
                     return redirect()->route('home-object-id', ['id' => $id])
@@ -1250,11 +1227,7 @@ class WebOrderController extends Controller
         $params['add_cost'] = $req->add_cost; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        if ($req->payment_type == 'готівка') {
-            $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        } else {
-            $params['payment_type'] = '1';
-        };
+        $payment_type_info = 'готівка';
 
         $params['route_undefined'] = $req->route_undefined; //По городу: True, False
 
@@ -1342,12 +1315,6 @@ class WebOrderController extends Controller
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
 
-                if ($req->payment_type == 'готівка') {
-                    $payment_type = '0';
-                } else {
-                    $payment_type = '1';
-                };
-
                 $route_undefined = false;
                 $to = $params['routeto'];
 
@@ -1392,7 +1359,7 @@ class WebOrderController extends Controller
                         ['name' => $to, 'number' => $to_number],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
@@ -1421,7 +1388,7 @@ class WebOrderController extends Controller
                     $order->routeto = $to; //Обязательный. Улица куда.
                     $order->routetonumber = $to_number; //Обязательный. Дом куда.
                     $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     $order->save();
                     $id = $order;
                     $json_arr = json_decode($response, true);
@@ -1430,10 +1397,10 @@ class WebOrderController extends Controller
 
                     if ($route_undefined === true) {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from $from_number_info по місту. Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info по місту. Оплата: $payment_type_info. $auto_type";
                     } else {
                         $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
-                        $from $from_number_info до $to $to_number_info. Оплата $req->payment_type. $auto_type";
+                        $from $from_number_info до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
                     };
 
 
@@ -1509,11 +1476,7 @@ class WebOrderController extends Controller
         $params['add_cost'] = $req->add_cost; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        if ($req->payment_type == 'готівка') {
-            $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        } else {
-            $params['payment_type'] = '1';
-        };
+
 
         $params['routeto'] = $req->search1; //Обязательный. Улица куда.
         $params['routetonumber'] = $req->to_number; //Обязательный. Дом куда.
@@ -1584,16 +1547,11 @@ class WebOrderController extends Controller
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
 
-                if ($req->payment_type == 'готівка') {
-                    $payment_type = '0';
-                } else {
-                    $payment_type = '1';
-                };
-
                 $route_undefined = false;
                 $to = $req->search1;
 
                 $to_number = '';
+                $payment_type_info = 'готівка';
 
                 $connectAPI = WebOrderController::connectApi();
                 if ($connectAPI == 400) {
@@ -1622,7 +1580,7 @@ class WebOrderController extends Controller
                         ['name' => $to],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
@@ -1651,7 +1609,7 @@ class WebOrderController extends Controller
                     $order->routeto = $to; //Обязательный. Улица куда.
                     $order->routetonumber = $to_number; //Обязательный. Дом куда.
                     $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     $order->save();
                     $id = $order;
                     $json_arr = json_decode($response, true);
@@ -1661,22 +1619,22 @@ class WebOrderController extends Controller
                         case 'Аэропорт Борисполь терминал Д':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
                             $from $from_number_info
-                             до аеропорту \"Бориспіль\". Оплата $req->payment_type. $auto_type";
+                             до аеропорту \"Бориспіль\". Оплата: $payment_type_info. $auto_type";
                             break;
                         case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
                             $from $from_number_info
-                             до аеропорту \"Киів\" (Жуляни). Оплата $req->payment_type. $auto_type";
+                             до аеропорту \"Киів\" (Жуляни). Оплата: $payment_type_info. $auto_type";
                             break;
                         case 'ЖД Южный':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
                             $from $from_number_info
-                             до залізничного вокзалу \"Південний \". Оплата $req->payment_type. $auto_type";
+                             до залізничного вокзалу \"Південний \". Оплата: $payment_type_info. $auto_type";
                             break;
                         case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від
                             $from $from_number_info
-                             до автовокзалу. Оплата $req->payment_type. $auto_type";
+                             до автовокзалу. Оплата: $payment_type_info. $auto_type";
                             break;
                     }
 
@@ -1777,14 +1735,6 @@ class WebOrderController extends Controller
         $params['comment'] = $req->comment; //Комментарий к заказу
         $params['add_cost'] = $req->add_cost; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-
-        if ($req->payment_type == 'готівка') {
-            $params['payment_type'] = '0'; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        } else {
-            $params['payment_type'] = '1';
-        };
-
-
         $params['route_undefined'] = false; //По городу: True, False
 
         $params['custom_extra_charges'] = '20'; //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
@@ -1848,11 +1798,6 @@ class WebOrderController extends Controller
                 $add_cost = $req->add_cost;
                 $taxiColumnId = config('app.taxiColumnId');
 
-                if ($req->payment_type == 'готівка') {
-                    $payment_type = '0';
-                } else {
-                    $payment_type = '1';
-                };
 
                 $route_undefined = false;
                 $to = $req->search;
@@ -1864,6 +1809,7 @@ class WebOrderController extends Controller
                 } else {
                     $to_number_info = "(будинок №$to_number)";
                 };
+                $payment_type_info = "готівка";
 
                 $connectAPI = WebOrderController::connectApi();
                 if ($connectAPI == 400) {
@@ -1892,7 +1838,7 @@ class WebOrderController extends Controller
                         ['name' => $to, 'number' => $to_number],
                     ],
                     'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                         'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
                 ]);
@@ -1920,7 +1866,7 @@ class WebOrderController extends Controller
                     $order->routeto = $to; //Обязательный. Улица куда.
                     $order->routetonumber = $to_number; //Обязательный. Дом куда.
                     $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                    $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+                    $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
                     $order->save();
                     $id = $order;
                     $json_arr = json_decode($response, true);
@@ -1929,19 +1875,19 @@ class WebOrderController extends Controller
                     switch ($from) {
                         case 'Аэропорт Борисполь терминал Д':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від аеропорту \"Бориспіль\"
-                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
                             break;
                         case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від \"Киів\" (Жуляни)
-                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
                             break;
                         case 'ЖД Южный':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від залізничного вокзалу \"Південний \"
-                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
                             break;
                         case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                             $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від автовокзалу
-                            до $to $to_number_info. Оплата $req->payment_type. $auto_type";
+                            до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
                             break;
                     }
 
@@ -2031,11 +1977,7 @@ class WebOrderController extends Controller
         $comment = $req->comment;
         $add_cost = $req->add_cost;
         $taxiColumnId = config('app.taxiColumnId');
-        if ($req->payment_type == 'готівка') {
-            $payment_type = '0';
-        } else {
-            $payment_type = '1';
-        };
+
         $route_undefined = false;
         $to = $req->search1;
         $to_number = $req->to_number;
@@ -2052,12 +1994,7 @@ class WebOrderController extends Controller
             $to_number_info = "(будинок №$to_number)";
         };
 
-
-        if ($req->payment_type = 1) {
-            $payment_type_info = "Готівка";
-        } else {
-            $payment_type_info = "Безготівка";
-        }
+        $payment_type_info = "готівка";
 
         $connectAPI = WebOrderController::connectApi();
         if ($connectAPI == 400) {
@@ -2086,7 +2023,7 @@ class WebOrderController extends Controller
                 ['name' => $to, 'number' => $to_number],
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         ]);
 
         if ($response->status() == "200") {
@@ -2109,7 +2046,7 @@ class WebOrderController extends Controller
             $order->routeto = $to; //Обязательный. Улица куда.
             $order->routetonumber = $to_number; //Обязательный. Дом куда.
             $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $order->save();
 
             $json_arr = json_decode($response, true);
@@ -2214,14 +2151,13 @@ class WebOrderController extends Controller
         if ($flexible_tariff_name) {
             $auto_type = $auto_type . "Тариф: $flexible_tariff_name";
         };
+
+        $payment_type_info = "готівка";
+
         $comment = $req->comment;
         $add_cost = $req->add_cost;
         $taxiColumnId = config('app.taxiColumnId');
-        if ($req->payment_type == 'готівка') {
-            $payment_type = '0';
-        } else {
-            $payment_type = '1';
-        };
+
         $route_undefined = false;
         $to = $req->search3;
 
@@ -2257,7 +2193,7 @@ class WebOrderController extends Controller
                 ['name' => $to],
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         ]);
 
         if ($response->status() == "200") {
@@ -2281,15 +2217,15 @@ class WebOrderController extends Controller
             $order->routeto = $to; //Обязательный. Улица куда.
 
             $order->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            $order->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $order->save();
 
             $json_arr = json_decode($response, true);
             if ($route_undefined === true) {
-                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from по місту. Оплата $req->payment_type. $auto_type";
+                $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from по місту. Оплата: $payment_type_info. $auto_type";
             } else {
                 $order = "Вітаємо $user_full_name. Ви зробили розрахунок за маршрутом від $from  до $to.
-                Оплата $req->payment_type. $auto_type";
+                Оплата: $payment_type_info. $auto_type";
             };
 
             $cost = "Вартість поїздки становитиме: " . $json_arr['order_cost'] . 'грн. Для замовлення натисніть тут.';
@@ -2498,7 +2434,8 @@ class WebOrderController extends Controller
         $comment = $req->comment .  " через смс";
         $add_cost = $req->add_cost;
         $taxiColumnId = config('app.taxiColumnId');
-        $payment_type = $req->payment_type;
+
+        $payment_type_info = "готівка";
 
         $route_undefined = false;
         $to = $req->routeto;
@@ -2541,7 +2478,7 @@ class WebOrderController extends Controller
                 ['name' => $to, 'number' => $to_number],
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                 'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
@@ -2577,9 +2514,9 @@ class WebOrderController extends Controller
                 ['name' => $to, 'number' => $to_number],
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         ]);
-//dd($responseWeb);
+
         if ($responseWeb->status()  == "200") {
             /**
              * Сохранние расчетов в базе
@@ -2603,7 +2540,7 @@ class WebOrderController extends Controller
             $orderweb->routeto = $to; //Обязательный. Улица куда.
             $orderweb->routetonumber = $to_number; //Обязательный. Дом куда.
             $orderweb->taxiColumnId = $taxiColumnId; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            $orderweb->payment_type = $payment_type; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            $orderweb->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             $json_arr = json_decode($response, true);
 
             $orderweb->web_cost = $json_arr['order_cost'];// Стоимость поездки
@@ -2611,45 +2548,39 @@ class WebOrderController extends Controller
             $orderweb->dispatching_order_uid = $json_arrWeb['dispatching_order_uid']; //Идентификатор заказа БД ТН
             $orderweb->save();
 
-            if ($req->payment_type == '0') {
-                $payment_type = 'готівка';
-            } else {
-                $payment_type = 'безготівка';
-            };
-
             if ($route_undefined !== false) {
                 $order = "Вітаємо $user_full_name
                     . Ви успішно зробили замовлення за маршрутом від $from (будинок $from_number) по місту.
-                    Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] .
+                    Оплата: $payment_type_info. $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] .
                     "грн. Номер: " .  $json_arrWeb['dispatching_order_uid'];
             } else {
                 $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом
-                    від $from (будинок $from_number) до $to (будинок $to_number). Оплата $payment_type.
-                    $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
+                    від $from (будинок $from_number) до $to (будинок $to_number). Оплата: $payment_type_info
+                     $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                     $json_arrWeb['dispatching_order_uid'];
 
                 switch ($to) {
                     case 'Аэропорт Борисполь терминал Д':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом
                                     від $from (будинок $from_number) до аеропорту \"Бориспіль\".
-                                    Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
+                                    Оплата: $payment_type_info. $auto_type. Вартість поїздки становитиме: " .
                                     $json_arr['order_cost'] . "грн. Номер: " . $json_arrWeb['dispatching_order_uid'];
                         break;
                     case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
-                                    $from (будинок $from_number) до аеропорту \"Киів\" (Жуляни). Оплата $payment_type.
+                                    $from (будинок $from_number) до аеропорту \"Киів\" (Жуляни). Оплата: $payment_type_info.
                                     $auto_type. Вартість поїздки становитиме: " . $json_arr['order_cost'] .
                                         "грн. Номер: " . $json_arrWeb['dispatching_order_uid'];
                         break;
                     case 'ЖД Южный':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     $from (будинок $from_number) до залізничного вокзалу \"Південний \".
-                                    Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
+                                    Оплата: $payment_type_info.. $auto_type. Вартість поїздки становитиме: " .
                                     $json_arr['order_cost'] . "грн. Номер: " . $json_arrWeb['dispatching_order_uid'];
                         break;
                     case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
-                                    $from (будинок $from_number) до автовокзалу.  Оплата $payment_type. $auto_type.
+                                    $from (будинок $from_number) до автовокзалу.  Оплата: $payment_type_info. $auto_type.
                                     Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                         break;
@@ -2659,27 +2590,27 @@ class WebOrderController extends Controller
                     case 'Аэропорт Борисполь терминал Д':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     аеропорту \"Бориспіль\" до $to (будинок $to_number).
-                                    Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
+                                    Оплата: $payment_type_info. $auto_type. Вартість поїздки становитиме: " .
                                         $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                         break;
                     case 'Аэропорт Жуляны новый (ул.Медовая 2)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     аеропорту \"Киів\" (Жуляни) до $to (будинок $to_number).
-                                    Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
+                                    Оплата: $payment_type_info. $auto_type. Вартість поїздки становитиме: " .
                                         $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                         break;
                     case 'ЖД Южный':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
                                     залізничного вокзалу \"Південний \" до $to (будинок $to_number).
-                                    Оплата $payment_type. $auto_type. Вартість поїздки становитиме: " .
+                                    Оплата: $payment_type_info. $auto_type. Вартість поїздки становитиме: " .
                                         $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                         break;
                     case 'Центральный автовокзал (у шлагбаума пл.Московская 3)':
                                     $order = "Вітаємо $user_full_name. Ви успішно зробили замовлення за маршрутом від
-                                    автовокзалу до $to (будинок $to_number).  Оплата $payment_type. $auto_type.
+                                    автовокзалу до $to (будинок $to_number). Оплата: $payment_type_info. $auto_type.
                                     Вартість поїздки становитиме: " . $json_arr['order_cost'] . "грн. Номер: " .
                                         $json_arrWeb['dispatching_order_uid'];
                         break;

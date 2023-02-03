@@ -44,7 +44,7 @@
 
                         <input type="hidden" id="flexible_tariff_name" name="flexible_tariff_name" value="{{$orderId[0]['flexible_tariff_name']}}"/>
 
-                        <input type="hidden" id="flexible_tariff_name" name="payment_type" value="{{$orderId['0']['payment_type']}}"/>
+{{--                        <input type="hidden" id="flexible_tariff_name" name="payment_type" value="{{$orderId['0']['payment_type']}}"/>--}}
                     </div>
 
                     <div class="col-lg-12 col-sm-12 ">
