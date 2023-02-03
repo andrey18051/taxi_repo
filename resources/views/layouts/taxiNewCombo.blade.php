@@ -101,6 +101,7 @@
         @include ('layouts.messages')
         @yield('content')
     </main>
+    @include ('layouts.footerCombo')
 </div>
 
 <script>

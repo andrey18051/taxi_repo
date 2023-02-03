@@ -5,7 +5,7 @@
 
     <div class="container-fluid">
             <div class="gradient alert-danger" style="text-align: center">
-                <h1 class="gradient">Помилка 429 (Много запитів)</h1>
+                <h1 class="gradient">Помилка 500 (Сервер зіткнувся з несподіваною помилкою, яка завадила йому виконати запит)</h1>
             </div>
     </div>
     <div class="container">
