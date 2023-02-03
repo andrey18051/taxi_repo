@@ -1,6 +1,11 @@
 @extends('layouts.taxiNewCombo')
 
 @section('content')
+    @guest
+        <div class="container  wrapper">
+            Для замовлення введить номер телефону
+        </div>
+    @endguest
 
     <div class="container" style="background-color: hsl(0, 0%, 96%)">
             <br>
@@ -62,7 +67,9 @@
                             <div class="row">
                                 <div class="col-12">
                                     @guest
-                                        <input type="tel" class="form-control" id="user_phone" name="user_phone"
+                                        <input type="tel"
+                                               class="form-control is-invalid "
+                                               id="user_phone" name="user_phone"
                                                pattern="[\+]\d{12}"
                                                placeholder="+380936665544"
                                                title="Формат вводу: +380936665544"
@@ -70,6 +77,7 @@
                                                maxlength="13" required
                                                value="{{ old('user_phone') }}" required autocomplete="user_phone"
                                                autofocus>
+
                                     @endguest
                                     @auth
                                         <input type="tel" class="form-control" id="user_phone" name="user_phone"

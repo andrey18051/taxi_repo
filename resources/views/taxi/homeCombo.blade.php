@@ -170,10 +170,10 @@
                                         <label class="form-check-label" for="route_undefined">По місту</label>
                                         <input type="checkbox" class="form-check-input" id="route_undefined"
                                                name="route_undefined"
-                                               @isset($params['route_undefined'])
-                                               @if($params['route_undefined'] == true)
-                                               checked
-                                               @endif
+                                               @isset($params)
+                                                   @if($params['route_undefined'] == true)
+                                                   checked
+                                                   @endif
                                                readonly
                                                @endisset
                                                value="1"

@@ -503,27 +503,27 @@ img {vertical-align: middle;}
 
 .wrapper {
     height: auto;
-    width: auto;
+    width: 40%;
     border-radius: 15px;
     text-align: center;
     position: absolute;
     color: white;
     background-color: #d64259;
     top:30px;
-    margin-left: 10%;
+    left: 30%;
     animation: fadeCooke 10s forwards;
 }
 @keyframes fadeCooke{
     0%{
-        transform: translateX(-2000px);
+        transform: translateY(-2000px);
     }
     20% {
-        transform: translateX(0px);
+        transform: translateY(0px);
     }
     80% {
-        transform: translateX(0px);
+        transform: translateY(0px);
     }
     100%{
-        transform: translateX(-2000px);
+        transform: translateY(-2000px);
     }
 }
