@@ -1643,17 +1643,10 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                   // WebOrderController::version_combo();
-                    ?>
-                    <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
-                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
-                            "Правильно вводьте або зверніться до оператора.");
-                    </script>
-                    <?php
-
-
-                    return view($page, ['json_arr' => $json_arr, 'params' => $params]);
+                    $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
+                           відправлення/призначення або не вибрана опція поїздки по місту.
+                           Правильно вводьте або зверніться до оператора.";
+                   return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
                 }
             }
         }
@@ -1896,17 +1889,11 @@ class WebOrderController extends Controller
                         ->with('order_cost', $order_cost);
 
                 } else {
-                   // WebOrderController::version_combo();
-                    ?>
-                    <script type="text/javascript">
-                        alert("Помилка створення маршруту: Змініть час замовлення та/або адресу " +
-                            "відправлення/призначення або не вибрана опція поїздки по місту. " +
-                            "Правильно вводьте або зверніться до оператора.");
-                    </script>
-                    <?php
+                    $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
+                           відправлення/призначення або не вибрана опція поїздки по місту.
+                           Правильно вводьте або зверніться до оператора.";
 
-
-                    return view($page, ['json_arr' => $json_arr, 'params' => $params,]);
+                    return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
                 }
             }
         }
