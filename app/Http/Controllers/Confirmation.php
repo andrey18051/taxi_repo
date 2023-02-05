@@ -31,7 +31,7 @@ class Confirmation extends Controller
      */
     public static function sendConfirmCode($phone)
     {
-      //  return 200;
+//        return 200;
         $phone = substr($phone, 1);
 
         $connectAPI = WebOrderController::connectApi();
@@ -45,6 +45,7 @@ class Confirmation extends Controller
             'phone' => $phone, //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
         ]);
+    //   dd($response->body());
         return $response->status();
     }
 
@@ -55,7 +56,7 @@ class Confirmation extends Controller
      */
     public static function approvedPhones($phone, $confirm_code)
     {
-       //   return 200;
+//        return 200;
         $phone = substr($phone, 1);
 
         $connectAPI = WebOrderController::connectApi();

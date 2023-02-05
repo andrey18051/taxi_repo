@@ -88,7 +88,7 @@
                                            @if($newUser['telegram_id'] == null && $newUser['viber_id'] == null)
                                            required
                                            @endif
-                                           onblur="
+                                           onchange="
                                             var route = '/approvedPhones/' +
                                                 document.getElementById('user_phone').value + '/' +
                                                 this.value;
@@ -105,6 +105,8 @@
                                                                 alert('Сталася помілка. Зверниться до оператора.');
                                                                         document.location.href = '/feedback';
                                                          }
+                                                      } else {
+                                                          document.getElementById('confirm_area').style.display='block';
                                                       }
                                                   }
                                             });">
@@ -150,7 +152,7 @@
                             <input type="hidden" id="viber_id" name="viber_id" value="">
                         @endif
 
-                        <div id="confirm_area" style="display: block">
+                        <div id="confirm_area" style="display: none">
                             <div class="row mb-3">
                                 <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Адреса електронної пошти') }}</label>
 

@@ -74,7 +74,7 @@
                                            autofocus
                                            value="{{ old('confirm_code') }}"
                                            required
-                                           onblur="
+                                           onchange="
                                             var route = '/approvedPhones/' +
                                                 document.getElementById('user_phone').value + '/' +
                                                 this.value;
@@ -91,6 +91,8 @@
                                                                 alert('Сталася помілка. Зверниться до оператора.');
                                                                         document.location.href = '/feedback';
                                                          }
+                                                      } else {
+                                                          document.getElementById('confirm_area').style.display='block';
                                                       }
                                                   }
                                             });">
@@ -100,7 +102,7 @@
                         </div>
 
 
-                        <div id="confirm_area">
+                        <div id="confirm_area" style="display: none">
 
                             <div class="row mb-3">
                                 <label for="name" class="col-md-4 col-form-label text-md-end">{{ __("Ім'я") }}</label>
@@ -164,6 +166,7 @@
                             <input type="hidden" id="telegram_id" name="telegram_id" value="">
                             <input type="hidden" id="viber_id" name="viber_id" value="">
 
+
                             <div class="row mb-0" id="submit_button">
                                 <div class="col-md-6 offset-md-4">
                                     <button type="submit" class="btn btn-primary">
@@ -171,6 +174,8 @@
                                     </button>
                                 </div>
                             </div>
+
+
                         </div>
                     </form>
                     <div class="col-md-8 offset-md-4 flex items-center justify-end mt-4">
