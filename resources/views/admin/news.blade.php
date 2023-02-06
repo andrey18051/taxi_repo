@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -36,20 +37,22 @@
 
                             <div class="form-outline mb-2 col-12" >
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-12">
                                         <input type="text" id="short" name="short" autocomplete="off" class="form-control"
-                                               value="📢 " />
+                                               value="{{$news[0]}}" />
                                     </div>
-
-                                    <div class="col-4">
+                                </div>
+                                <div class="row" style="margin: 5px">
+                                    <div class="col-12">
                                         <textarea class="form-control" id="full" name="full" autocomplete="off" rows="10">
-                                            🚧
+{{$news[1]}}
                                         </textarea>
                                    </div>
-
-                                    <div class="col-4">
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
                                         <input type="text" id="author" name="author" autocomplete="off" class="form-control"
-                                               value="&#128662 Служба Таксі Лайт Юа" />
+                                               value="{{$news[2]}}" />
                                     </div>
                                 </div>
                             </div>
@@ -58,6 +61,9 @@
 
                         <!-- Submit button -->
                         <div class="row">
+                            <a  class="btn btn-danger col-12" style="margin-top: 5px" href="/news">
+                                Сгенерировать
+                            </a>
                             <button type="submit" class="btn btn-primary col-12" style="margin-top: 5px">
                                 Сохранить
                             </button>

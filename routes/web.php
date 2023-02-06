@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BredoGeneratorController;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GithubController;
@@ -23,6 +24,7 @@ use App\Models\NewsList;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -40,6 +42,12 @@ use Stevebauman\Location\Facades\Location;
 | contains the "web" middleware group. Now create something great!
 |
 */
+/**
+ * Generation text for news
+ */
+
+Route::get('/textGenerate', [BredoGeneratorController::class, 'textGenerate'])->name('textGenerate');
+
 /**
  * Test
  */
@@ -227,11 +235,19 @@ Route::get('/quite-save', [TaxiController::class, 'quite'])
 * Новости
 */
 Route::get('/news', function () {
-    return view('admin.news');
-})->name('admin-news')->middleware('role:superadministrator');
+    $bredNews = new BredoGeneratorController();
+    $news = $bredNews->textGenerate();
+    return view('admin.news' , ['news' => $news]);
+})->name('admin-news')/*->middleware('role:superadministrator')*/;
 
-Route::get('/news-save', [TaxiController::class, 'news'])
-    ->name('news-save');
+Route::get('/news-save', function (Request $req) {
+    $news = new NewsList();
+    $news->short = $req->short;
+    $news->full = $req->full;
+    $news->author = $req->author;
+    $news->save();
+    return redirect()->route('admin-news');
+})->name('news-save');
 
 
 Route::get('/news-short', function () {
