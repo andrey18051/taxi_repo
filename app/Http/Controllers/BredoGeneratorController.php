@@ -151,7 +151,7 @@ class BredoGeneratorController extends Controller
         $fullNews = "🚧 ";
         $haystackServSum = 0;
 
-        for ($i = 0; $i < 10; $i++) {
+        while (strlen($fullNews) <= 1500) {
             $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']);
             //Проверка вхождения ключевых слов
 
