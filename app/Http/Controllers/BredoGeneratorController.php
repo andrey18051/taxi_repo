@@ -151,40 +151,33 @@ class BredoGeneratorController extends Controller
         $fullNews = "🚧 ";
         $haystackServSum = 0;
 
-        while (strlen($fullNews) <= 1500) {
+        while (strlen($fullNews) <= 2000) {
             $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']);
-            //Проверка вхождения ключевых слов
 
-            $haystack = $fullNewsArr[rand(0, count($fullNewsArr) - 1)];
+            $haystack = $fullNewsArr[rand(0, count($fullNewsArr) - 1)]; //Строка из старой новвсти
 
             $keyWordsIns = 0;
-            foreach ($keyWordsArr as $value) {
+            foreach ($keyWordsArr as $value) {  //Проверка вхождения ключевых слов
                 if (strpos($haystack, $value)) {
                     $keyWordsIns++;
                     break;
                 }
             }
 
-            $haystackServ = $textArrNews [rand(0, count($textArrNews) - 1)];
+            $haystackServ = $textArrNews [rand(0, count($textArrNews) - 1)]; //Строка из рекламы
             $haystackServSum++;
 
-            if (strpos($haystackServ, $fullNews) === false) {
-                if ($haystackServSum == 5) {
-                    $haystackServ = $haystackServ . ". ";
-                } else {
-                    $haystackServ = null;
-                }
-            } else {
+            if (strpos($haystackServ, $fullNews) !== false || $haystackServSum >= 5) {
                 $haystackServ = null;
+            }
+            $fullNews = $fullNews . $haystack . ". ";
+
+            if ($haystackServ !== null) {
+                $fullNews = $fullNews . $haystackServ . ". ";
             }
 
             if ($keyWordsIns === 0) {
-                $randomText = " " . $keyWordsArr[rand(0, count($keyWordsArr) - 1)];
-                $fullNews = $fullNews . $haystackServ . $haystack . $randomText . ". ";
-            } else {
-                if ($haystackServ !== null) {
-                    $fullNews = $fullNews . $haystackServ;
-                }
+                $fullNews = $fullNews . mb_convert_case($keyWordsArr[rand(0, count($keyWordsArr) - 1)], MB_CASE_TITLE, "UTF-8") . ". ";
             }
         }
 
