@@ -238,7 +238,7 @@ Route::get('/news', function () {
     $bredNews = new BredoGeneratorController();
     $news = $bredNews->textGenerate();
     return view('admin.news' , ['news' => $news]);
-})->name('admin-news')/*->middleware('role:superadministrator')*/;
+})->name('admin-news')->middleware('role:superadministrator');
 
 Route::get('/news-save', function (Request $req) {
     $news = new NewsList();
