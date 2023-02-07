@@ -50,11 +50,14 @@ class BredoGeneratorController extends Controller
         $textArrNews = explode('.', $textArr[0]);
 
         $fullNews = "🚧 ";
+        $haystackServSum = 0;
 
-        for ($i = 0; $i < 5; $i++) {
-            $fullNewsArr[$i] = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']);
+        for ($i = 0; $i < 10; $i++) {
+            $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']);
             //Проверка вхождения ключевых слов
-            $haystack = $fullNewsArr[$i][rand(0, count($fullNewsArr[$i]) - 1)];
+
+            $haystack = $fullNewsArr[rand(0, count($fullNewsArr) - 1)];
+
             $keyWordsIns = 0;
             foreach ($keyWordsArr as $value) {
                 if (strpos($haystack, $value)) {
@@ -64,18 +67,25 @@ class BredoGeneratorController extends Controller
             }
 
             $haystackServ = $textArrNews [rand(0, count($textArrNews) - 1)];
+            $haystackServSum++;
 
             if (strpos($haystackServ, $fullNews) === false) {
-                $haystackServ = $haystackServ  .  ". ";
+                if ($haystackServSum == 4) {
+                    $haystackServ = $haystackServ . ". ";
+                } else {
+                    $haystackServ = null;
+                }
             } else {
                 $haystackServ = null;
             }
 
             if ($keyWordsIns === 0) {
-                $randomText = " " . $keyWordsArr[rand(0, count($keyWordsArr) - 1)] . ". ";
-                $fullNews = $fullNews . $haystackServ . $fullNewsArr[$i][rand(0, count($fullNewsArr[$i]) - 1)] . $randomText;
+                $randomText = " " . $keyWordsArr[rand(0, count($keyWordsArr) - 1)];
+                $fullNews = $fullNews . $haystackServ . $haystack . $randomText . ". ";
             } else {
-                $fullNews = $fullNews . $haystackServ . $fullNewsArr[$i][rand(0, count($fullNewsArr[$i]) - 1)] . ". ";
+                if ($haystackServ !== null) {
+                    $fullNews = $fullNews . $haystackServ;
+                }
             }
         }
 
