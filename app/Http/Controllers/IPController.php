@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 
 class IPController extends Controller
 {
-
+    /**
+     * @param $page
+     */
 
     public function getIP($page)
     {

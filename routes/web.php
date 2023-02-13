@@ -237,7 +237,7 @@ Route::get('/quite-save', [TaxiController::class, 'quite'])
 Route::get('/news', function () {
     $bredNews = new BredoGeneratorController();
     $news = $bredNews->textGenerate();
-    return view('admin.news' , ['news' => $news]);
+    return view('admin.news', ['news' => $news]);
 })->name('admin-news')->middleware('role:superadministrator');
 
 Route::get('/news-save', function (Request $req) {
@@ -250,10 +250,8 @@ Route::get('/news-save', function (Request $req) {
 })->name('news-save');
 
 
-Route::get('/news-short', function () {
-    return response()->json(NewsList::all());
-})->name('news-short');
-
+Route::get('/news-short', [BredoGeneratorController::class, 'allNews'])->name('news-short');
+Route::get('breakingNews/{id}', [BredoGeneratorController::class, 'breakingNews'])->name('breakingNews');
 
 /**
 /***********************************************************************************************************************
@@ -934,3 +932,6 @@ Route::get('/reportIpUniqShort', [ReportController::class, 'reportIpUniqShort'])
 
 Route::get('/reportIpOrder', [ReportController::class, 'reportIpOrder'])->middleware('role:superadministrator')
     ->name('reportIpOrder');
+
+Route::get('/siteMap', [ReportController::class, 'siteMap'])->middleware('role:superadministrator')
+    ->name('siteMap');

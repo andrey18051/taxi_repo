@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\IP;
+use App\Models\NewsList;
 use App\Models\Order;
 use App\Models\Orderweb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -572,5 +574,31 @@ class ReportController extends Controller
         $reportIP = new Xlsx($spreadsheet);
         $reportIP->save($reportIP_path);
         return response()->download($reportIP_path);
+    }
+
+    public function siteMap(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+
+        Storage::delete('public/reports/sitemap.xml');
+        Storage::copy('public/reports/sitemapOld.xml', 'public/reports/sitemap.xml');
+
+        $siteMap_path = Storage::path('public/reports/sitemap.xml');
+        for ($i = NewsList::all()->count(); $i >= 1; $i--) {
+            $newIndexPage =
+    "
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/$i</loc>
+         <changefreq>monthly</changefreq>
+    </url>";
+            Storage :: append('public/reports/sitemap.xml', $newIndexPage);
+        }
+
+
+        Storage::append('public/reports/sitemap.xml', ' </urlset>');
+        $url = Storage::url('public/reports/sitemap.xml');
+//dd(url('/public/sitemap.xml'));
+//        Storage::copy('public/reports/sitemap.xml', '/public/sitemap.xml');
+        return response()->download($siteMap_path);
+
     }
 }

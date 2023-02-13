@@ -185,4 +185,16 @@ class BredoGeneratorController extends Controller
 
         return [$shortNews, $fullNews, $author];
     }
+
+    public function allNews()
+    {
+        return response()->json(NewsList::all());
+    }
+
+    public function breakingNews($id)
+    {
+        IPController::getIP("/breakingNews/$id");
+        $news = NewsList::where('id', $id)->first();
+        return view('taxi.breakingNews', ['news' => $news]);
+    }
 }

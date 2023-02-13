@@ -36,6 +36,10 @@ const  routes = [
     {
         name: 'destroyOrder',
         path: "/costhistory/orders/destroy/:id/:authorization"
+    },
+    {
+        name: 'breakingNews',
+        path: "/breakingNews/:id/"
     }
     ];
 
