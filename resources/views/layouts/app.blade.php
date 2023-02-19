@@ -47,6 +47,7 @@
                                 <li><a href="{{ route('admin-news') }}" target="_blank">News</a>
                                 <li><a href="{{ route('admin-quite') }}" target="_blank">Quite</a>
                                 <li><a href="{{ route('version_combo') }}" target="_blank">Combo</a>
+                                 <li><a href="{{ route('ViberCustoms') }}" target="_blank">ViberCustoms</a>
                                 <li><a href="{{ asset('/') }}">Main</a>
                             </ul>
                     </nav>

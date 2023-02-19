@@ -16,9 +16,11 @@ use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViberController;
+use App\Http\Controllers\ViberCustomsController;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WebhookViberController;
+use App\Http\Controllers\WebhookCustomsViberController;
 use App\Http\Controllers\WebOrderController;
 use App\Models\NewsList;
 use App\Models\Order;
@@ -100,6 +102,28 @@ Route::get('/version_combo', [WebOrderController::class, 'version_combo'])
 Route::get('/weather', [WeatherController::class, 'temp'])->name('weather');
 
 /**
+ * Viber Bot Customs
+ */
+Route::get('/viberCustoms', [ViberCustomsController::class, 'viberCustoms'])
+    ->name('ViberCustoms');
+
+Route::get('/chatViberCustoms', [ViberCustomsController::class, 'chatViber'])
+    ->name('chatViberCustoms');
+Route::get('/setWebhookViberCustoms', [ViberCustomsController::class, 'setWebhook'])
+    ->name('setWebhookViberCustoms');
+Route::get('/getAccountInfoCustoms', [ViberCustomsController::class, 'getAccountInfo'])
+    ->name('getAccountInfoCustoms');
+Route::get('/getUserDetailsCustoms/{user_id}', [ViberCustomsController::class, 'getUserDetails'])
+    ->name('getUserDetailsCustoms');
+Route::get('/sendMessageCustoms/{user_id}/{message}/{phone}', [ViberCustomsController::class, 'sendMessage'])
+    ->name('sendMessageCustoms');
+
+
+Route::post('/webhookViberCustoms', [WebhookCustomsViberController::class, 'index']);
+
+
+
+/**
  * Viber Bot
  */
 Route::get('/chatViber', [ViberController::class, 'chatViber'])->name('chatViber');
@@ -108,10 +132,7 @@ Route::get('/getAccountInfo', [ViberController::class, 'getAccountInfo'])->name(
 Route::get('/getUserDetails/{user_id}', [ViberController::class, 'getUserDetails'])->name('getUserDetails');
 Route::get('/sendMessage/{user_id}/{message}/{phone}', [ViberController::class, 'sendMessage'])->name('sendMessage');
 
-
-Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
-    Route::post('/webhookViber', [WebhookViberController::class, 'index']);
-});
+Route::post('/webhookViber', [WebhookViberController::class, 'index']);
 
 /**
  * Viber регистрация
