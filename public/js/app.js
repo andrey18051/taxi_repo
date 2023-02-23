@@ -5988,12 +5988,15 @@ __webpack_require__.r(__webpack_exports__);
 
         _this2.users.splice(i, 1);
 
-        alert(response.data);
+        document.location.reload();
+        window.alert("Данные обновлены");
       });
     },
     editUser: function editUser(id, name, email) {
       axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email).then(function (ret) {
         console.log(ret.data);
+        document.location.reload();
+        window.alert("Данные обновлены");
       });
     }
   }
@@ -32344,7 +32347,7 @@ var render = function () {
                               },
                             ],
                             staticClass: "form-control",
-                            attrs: { id: "name", required: "" },
+                            attrs: { id: "email", required: "" },
                             domProps: { value: row.email },
                             on: {
                               input: function ($event) {

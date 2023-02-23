@@ -30,7 +30,7 @@
                 <td>{{ row.id }}</td>
 
                 <td> <input id="name" class="form-control" v-model.text="row.name" required ></td>
-                <td><input id="name" class="form-control" v-model.text="row.email" required ></td>
+                <td><input id="email" class="form-control" v-model.text="row.email" required ></td>
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-success" @click="editUser(row.id, row.name, row.email)" style="margin-left: 5px">
@@ -92,13 +92,16 @@ export default {
                 .then(response => {
                     let i = this.users.map(data => data.id).indexOf(id);
                     this.users.splice(i, 1);
-                    alert(response.data)
+                    document.location.reload();
+                    window.alert("Данные обновлены");
                 });
         },
         editUser(id, name, email) {
             axios.get('/users/edit/'+ id +'/'+name+'/'+email)
                 .then(function(ret) {
-                    console.log(ret.data)
+                    console.log(ret.data);
+                    document.location.reload();
+                    window.alert("Данные обновлены");
                 })
         }
 
