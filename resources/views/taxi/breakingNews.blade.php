@@ -65,6 +65,22 @@
                                  </a>
                              </li>
                          </ul>
+                         <div class="container">
+                             <p  class="gradient text-opacity-25">
+                                 <b>Читати ще:</b>
+                             </p>
+                             <ul class="border">
+                                 @foreach($randomNewsArr as $value)
+                                     <li>
+                                         <a href="/breakingNews/{{$value['id']}}"
+                                            style="text-decoration: none;
+                                                    color: black";>{{$value["short"]}}...</a>
+                                     </li>
+                                 @endforeach
+                             </ul>
+                         </div>
+
+
                          <div class="container-fluid" style="margin-top: 10px">
                              <p  class="gradient text-opacity-25">
                                  <b>Вам також буде цікаво:</b>

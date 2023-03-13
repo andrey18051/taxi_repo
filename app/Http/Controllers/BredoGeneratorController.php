@@ -195,6 +195,27 @@ class BredoGeneratorController extends Controller
     {
         IPController::getIP("/breakingNews/$id");
         $news = NewsList::where('id', $id)->first();
-        return view('taxi.breakingNews', ['news' => $news]);
+        $randomNewsArr = self::randomNews($id);
+        return view('taxi.breakingNews', ['news' => $news, 'randomNewsArr' => $randomNewsArr]);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function randomNews($id): array
+    {
+        $news = NewsList::where('id', '<>', $id)->get();
+
+        $randomNewsArr[] = null;
+        $i = 0;
+        foreach ($news as $value) {
+            $newsArr[$i]["id"] = $value["id"];
+            $newsArr[$i++]["short"] = $value["short"];
+        }
+
+        for ($i = 0; $i <= 4; $i++) {
+            $randomNewsArr[$i] = $newsArr[random_int(0, count($newsArr) - 1)];
+        }
+        return $randomNewsArr;
     }
 }
