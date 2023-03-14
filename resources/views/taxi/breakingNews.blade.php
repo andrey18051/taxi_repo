@@ -73,6 +73,7 @@
                                  @foreach($randomNewsArr as $value)
                                      <li>
                                          <a href="/breakingNews/{{$value['id']}}"
+                                            target="_blank"
                                             style="text-decoration: none;
                                                     color: black";>{{$value["short"]}}...</a>
                                      </li>
