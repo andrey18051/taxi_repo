@@ -49,7 +49,7 @@ class BredoGeneratorController extends Controller
         $fullNews = "🚧 ";
         $haystackServSum = 0;
 
-        while (strlen($fullNews) <= 3000) {
+        while (strlen($fullNews) <= 2000) {
             $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']); //разбили старую новсть на строки
 
             $haystack = $fullNewsArr[rand(0, count($fullNewsArr) - 1)]; //Строка из старой новости
