@@ -47,36 +47,28 @@ class BredoGeneratorController extends Controller
         $newsArr = NewsList::all()->toArray(); //Старые новости
 
         $fullNews = "🚧 ";
-        $haystackServSum = 0;
 
         while (strlen($fullNews) <= 2000) {
-            $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']); //разбили старую новсть на строки
+            //разбили старую новсть на строки
+            $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']);
 
-            $haystack = $fullNewsArr[rand(0, count($fullNewsArr) - 1)]; //Строка из старой новости
+            //Строка из старой новости
+            $oldNewsString = $fullNewsArr[rand(0, count($fullNewsArr) - 1)];
 
-            $keyWordsIns = 0;
-            foreach ($keyWordsArr as $value) {  //Проверка вхождения ключевых слов
-                if (strpos($haystack, $value)) {
-                    $keyWordsIns++;
-                    break;
-                }
+            //Замена ключевых слов
+            $oldNewsStringOld = $oldNewsString;
+            foreach ($keyWordsArr as $value) {
+                $oldNewsString = str_replace($value, $keyWordsArr[rand(0, count($keyWordsArr) - 1)], $oldNewsString);
             }
 
-            $haystackServ = $textArrNews [rand(0, count($textArrNews) - 1)]; //Строка из рекламы
-            $haystackServSum++;
-
-            if (strpos($haystackServ, $fullNews) !== false || $haystackServSum >= 5) {
-                $haystackServ = null;
+            if (strcmp($oldNewsString, $oldNewsStringOld) === 0) {
+                $oldNewsString = $oldNewsString . " " . $keyWordsArr[rand(0, count($keyWordsArr) - 1)];
             }
-            $fullNews = $fullNews . $haystack . ". ";
-
-            if ($haystackServ !== null) {
-                $fullNews = $fullNews . $haystackServ . ". ";
-            }
-
-            if ($keyWordsIns === 0) {
-                $fullNews = $fullNews . mb_convert_case($keyWordsArr[rand(0, count($keyWordsArr) - 1)], MB_CASE_TITLE, "UTF-8") . ". ";
-            }
+            //Формирование новости
+ //           $fullNews = $fullNews . mb_convert_case($keyWordsArr[rand(0, count($keyWordsArr) - 1)], MB_CASE_TITLE, "UTF-8") . ". ";
+            $fullNews = ucfirst($fullNews)
+                . ucfirst($oldNewsString) . ". "
+                . ucfirst($textArrNews[rand(0, count($textArrNews) - 1)]) . ". ";
         }
 
         $author = "🚖 Служба Таксі Лайт Юа";
