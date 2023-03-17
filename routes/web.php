@@ -274,6 +274,7 @@ Route::get('/news-save', function (Request $req) {
 Route::get('/news-short', [BredoGeneratorController::class, 'allNews'])->name('news-short');
 Route::get('/breakingNews/{id}', [BredoGeneratorController::class, 'breakingNews'])->name('breakingNews');
 Route::get('/randomNews/{id}', [BredoGeneratorController::class, 'randomNews'])->name('randomNews');
+Route::get('/addTextForNews', [BredoGeneratorController::class, 'addTextForNews'])->name('addTextForNews');
 
 /**
 /***********************************************************************************************************************

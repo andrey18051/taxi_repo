@@ -41,36 +41,17 @@ class BredoGeneratorController extends Controller
 
         $quitesArr = Quite::all()->toArray(); //Заголовки
 
-        $shortNews = "📢 " . mb_convert_case($keyWordsArr[rand(0, count($keyWordsArr) - 1)], MB_CASE_TITLE, "UTF-8") . ". "
+        $shortNews = "📢 " . mb_convert_case($keyWordsArr[rand(0, count($keyWordsArr) - 1)], MB_CASE_TITLE_SIMPLE) . ". "
             . $quitesArr[rand(0, count($quitesArr) - 1)]['name'];
-
-        $newsArr = NewsList::all()->toArray(); //Старые новости
 
         $fullNews = "🚧 ";
 
         while (strlen($fullNews) <= 2000) {
-            //разбили старую новсть на строки
-            $fullNewsArr = explode('.', $newsArr[rand(0, count($newsArr) - 1)]['full']);
-
-            //Строка из старой новости
-            $oldNewsString = $fullNewsArr[rand(0, count($fullNewsArr) - 1)];
-
-            //Замена ключевых слов
-            $oldNewsStringOld = $oldNewsString;
-            foreach ($keyWordsArr as $value) {
-                $oldNewsString = str_replace($value, $keyWordsArr[rand(0, count($keyWordsArr) - 1)], $oldNewsString);
-            }
-
-            if (strcmp($oldNewsString, $oldNewsStringOld) === 0) {
-                $oldNewsString = $oldNewsString . " " . $keyWordsArr[rand(0, count($keyWordsArr) - 1)];
-            }
-            //Формирование новости
- //           $fullNews = $fullNews . mb_convert_case($keyWordsArr[rand(0, count($keyWordsArr) - 1)], MB_CASE_TITLE, "UTF-8") . ". ";
-            $fullNews = ucfirst($fullNews)
-                . ucfirst($oldNewsString) . ". "
-                . ucfirst($textArrNews[rand(0, count($textArrNews) - 1)]) . ". ";
+            $fullNews = $fullNews
+                . ucfirst($textArrNews[rand(0, count($textArrNews) - 1)]) . " "
+                . $keyWordsArr[rand(0, count($keyWordsArr) - 1)] . ". ";
         }
-
+        $fullNews = ucfirst($fullNews);
         $author = "🚖 Служба Таксі Лайт Юа";
 
         return [$shortNews, $fullNews, $author];
@@ -107,5 +88,18 @@ class BredoGeneratorController extends Controller
             $randomNewsArr[$i] = $newsArr[random_int(0, count($newsArr) - 1)];
         }
         return $randomNewsArr;
+    }
+
+    public function addTextForNews(Request $request)
+    {
+        $textNewsArr = explode('.', $request->name);
+        foreach ($textNewsArr as $value) {
+            if (strcmp($value, "") !== 0) {
+                $textAdd = new TextString();
+                $textAdd->name = $value;
+                $textAdd->save();
+            }
+        }
+        return redirect()->route("admin-news");
     }
 }
