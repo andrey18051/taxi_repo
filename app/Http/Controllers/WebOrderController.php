@@ -3597,15 +3597,16 @@ class WebOrderController extends Controller
 
         }
         else {
-            if (isset($response_arr["geo_objects"]["geo_object"])) {
+         //   dd($response_arr["geo_objects"]["geo_object"]);
+            if ($response_arr["geo_objects"]["geo_object"] != null) {
                 $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
                 $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
             } else {
                 $LatLng["lat"] = 0;
                 $LatLng["lng"] = 0;
             }
-            $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
-            $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
+//            $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
+//            $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
         }
 
         return $LatLng;
