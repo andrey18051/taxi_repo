@@ -9,6 +9,7 @@ use App\Http\Controllers\IPController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ServerController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\TwitterController;
@@ -95,6 +96,7 @@ Route::get('/promo', function () {
 Route::get('/version_combo', [WebOrderController::class, 'version_combo'])
     ->name('version_combo')->middleware('role:superadministrator');
 
+
 /**
  * Погода
  */
@@ -150,7 +152,7 @@ Route::get('/setWebhook', [TelegramController::class, 'setWebhook'])->name('setW
 Route::get('/getWebhook', [TelegramController::class, 'getWebhook'])->name('getWebhook');
 Route::get('/getWebhookInfo', [TelegramController::class, 'getWebhookInfo'])->name('getWebhookInfo');
 Route::get('/sendDocument', [TelegramController::class, 'sendDocument'])->name('sendDocument');
-//Route::get('/sendAlarm', [TelegramController::class, 'sendAlarmMessage'])->name('sendAlarm');
+Route::get('/sendAlarm/{mesage}', [TelegramController::class, 'sendAlarmMessage'])->name('sendAlarm');
 
 Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
     Route::post('/webhook', [WebhookController::class, 'index']);
@@ -276,6 +278,18 @@ Route::get('/news-short', [BredoGeneratorController::class, 'allNews'])->name('n
 Route::get('/breakingNews/{id}', [BredoGeneratorController::class, 'breakingNews'])->name('breakingNews');
 Route::get('/randomNews/{id}', [BredoGeneratorController::class, 'randomNews'])->name('randomNews');
 Route::get('/addTextForNews', [BredoGeneratorController::class, 'addTextForNews'])->name('addTextForNews');
+
+/**
+ * Servers
+ */
+
+Route::get('/servers', function () {
+    $serversInfo = ServerController::serverInfo();
+    return view('admin.servers', ['serversInfo' => $serversInfo]);
+})->name('admin-servers')/*->middleware('role:superadministrator')*/;
+
+Route::get("/connectAPIInfo/{ip}", [ServerController::class, 'connectAPIInfo'])
+    ->name('connectAPIInfo')->middleware('role:superadministrator');
 
 /**
 /***********************************************************************************************************************

@@ -46,7 +46,7 @@
                                 <li><a href="{{ route('siteMap') }}" target="_blank">SiteMap</a>
                                 <li><a href="{{ route('admin-news') }}" target="_blank">News</a>
                                 <li><a href="{{ route('version_combo') }}" target="_blank">Verify database</a>
-                                 <li><a href="{{ route('ViberCustoms') }}" target="_blank">ViberCustoms</a>
+                                <li><a href="{{ route('admin-servers') }}" target="_blank">API connection</a>
                                 <li><a href="{{ asset('/') }}">Main</a>
                             </ul>
                     </nav>
