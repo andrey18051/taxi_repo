@@ -307,7 +307,7 @@ return [
      * 23:00 05:00
      */
 
-     'start_time' => '23:00',
+     'start_time' => '00:00',
      'end_time' => '05:00',
 
     /**
@@ -315,5 +315,11 @@ return [
      */
 
      'order_cost_min' => 1.25,
-     'order_cost_max' => 1.78
+     'order_cost_max' => 1.78,
+
+    /**
+     * Id telegramm для тревоги
+     */
+
+    'chat_id_alarm' => 120352595,
 ];

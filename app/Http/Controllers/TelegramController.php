@@ -8,6 +8,7 @@ use App\Models\Config;
 use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Exception;
@@ -155,5 +156,15 @@ class TelegramController extends Controller
     {
         $ch = $telegram->sendDocument(Auth::user()->telegram_id, 'questionnaire.docx');
         dd($ch->body());
+    }
+
+    public function sendAlarmMessage($message): \Illuminate\Http\Client\Response
+    {
+        $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        return Http::post(Telegram::url . $bot . '/sendMessage', [
+            'chat_id' => config('app.chat_id_alarm'),
+            'text' => $message,
+            'parse_mode' => 'html'
+        ]);
     }
 }

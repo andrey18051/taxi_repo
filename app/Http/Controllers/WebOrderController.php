@@ -60,6 +60,10 @@ class WebOrderController extends Controller
                     'subject' => $subject,
                     'message' => $messageAdmin,
                 ];
+
+                $alarmMessage = new TelegramController();
+                $alarmMessage->sendAlarmMessage($messageAdmin);
+
                 Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                 Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
 
@@ -79,6 +83,10 @@ class WebOrderController extends Controller
                         'subject' => $subject,
                         'message' => $messageAdmin,
                     ];
+
+                    $alarmMessage = new TelegramController();
+                    $alarmMessage->sendAlarmMessage($messageAdmin);
+
                     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                     Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
 
@@ -892,6 +900,14 @@ class WebOrderController extends Controller
                     $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
                             відправлення/призначення або не вибрана опція поїздки по місту.
                             Правильно вводьте або зверніться до оператора.";
+                    $alarmMessage = new TelegramController();
+
+                    if ($route_undefined === true) {
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info по місту. Оплата: $payment_type_info. $auto_type";
+                    } else {
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
+                    };
+                    $alarmMessage->sendAlarmMessage($message);
                     $json_arr = WebOrderController::tariffs();
                     return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
                         'info' => $info]);
@@ -1646,7 +1662,15 @@ class WebOrderController extends Controller
                     $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
                            відправлення/призначення або не вибрана опція поїздки по місту.
                            Правильно вводьте або зверніться до оператора.";
-                   return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
+                    $alarmMessage = new TelegramController();
+
+                    if ($route_undefined === true) {
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info по місту. Оплата: $payment_type_info. $auto_type";
+                    } else {
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info до $to. Оплата: $payment_type_info. $auto_type";
+                    };
+                    $alarmMessage->sendAlarmMessage($message);
+                    return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
                 }
             }
         }
@@ -1892,7 +1916,14 @@ class WebOrderController extends Controller
                     $info = "Помилка створення маршруту: Змініть час замовлення та/або адресу
                            відправлення/призначення або не вибрана опція поїздки по місту.
                            Правильно вводьте або зверніться до оператора.";
+                    $alarmMessage = new TelegramController();
 
+                    if ($route_undefined === true) {
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from по місту. Оплата: $payment_type_info. $auto_type";
+                    } else {
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from  до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
+                    };
+                    $alarmMessage->sendAlarmMessage($message);
                     return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
                 }
             }
