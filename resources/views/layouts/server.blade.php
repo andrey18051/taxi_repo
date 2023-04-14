@@ -22,6 +22,9 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/left-nav-style.css') }}">
     <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
+    <script>
+        onload = function () {setTimeout ('location.reload (true)', 900000)}
+    </script>
 </head>
 <body>
     <div id="app">

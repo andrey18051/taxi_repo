@@ -286,10 +286,12 @@ Route::get('/addTextForNews', [BredoGeneratorController::class, 'addTextForNews'
 Route::get('/servers', function () {
     $serversInfo = ServerController::serverInfo();
     return view('admin.servers', ['serversInfo' => $serversInfo]);
-})->name('admin-servers')/*->middleware('role:superadministrator')*/;
+})->name('admin-servers');
 
-Route::get("/connectAPIInfo/{ip}", [ServerController::class, 'connectAPIInfo'])
-    ->name('connectAPIInfo')->middleware('role:superadministrator');
+Route::get("pingInfo/{ip}", [ServerController::class, 'pingInfo'])
+    ->name('connectAPIInfo');
+Route::get("/connectInfo/{ip}", [ServerController::class, 'connectInfo'])
+    ->name('connectInfo');
 
 /**
 /***********************************************************************************************************************
