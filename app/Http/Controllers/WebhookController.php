@@ -111,7 +111,20 @@ class WebhookController extends Controller
                 $telegram->sendButtons($telegram_id, 'Замовити зустрич ✈ 🚂 🚌', json_encode($buttons));
                 break;
             case 3:
-                $telegram->sendDocument($telegram_id, 'questionnaire.docx');
+                $buttons = [
+                    'inline_keyboard' => [
+                        [
+                            [
+                                'text' => 'Робота в 🚕',
+                                'url' => 'https://play.google.com/store/apps/details?id=com.taxieasyua.job'
+                            ],
+
+                        ],
+
+                    ]
+                ];
+                $telegram->sendButtons($telegram_id, 'Робота в 🚕', json_encode($buttons));
+//                $telegram->sendDocument($telegram_id, 'questionnaire.docx');
                 break;
         }
 
@@ -215,7 +228,19 @@ class WebhookController extends Controller
                 $telegram->sendButtons($telegram_id_chat, 'Замовити зустрич ✈ 🚂 🚌', json_encode($buttons));
                 break;
             case 'робота':
-                $telegram->sendDocument($telegram_id_chat, 'questionnaire.docx');
+                $buttons = [
+                    'inline_keyboard' => [
+                        [
+                            [
+                                'text' => 'Робота в 🚕',
+                                'url' => 'https://play.google.com/store/apps/details?id=com.taxieasyua.job'
+                            ],
+
+                        ],
+
+                    ]
+                ];
+                $telegram->sendButtons($telegram_id, 'Робота в 🚕', json_encode($buttons));
                 break;
             default:
                 $message =  "Вибачьте $first_name! Я розумію поки що трохи слів (наприклад - Привіт, трансфер, зустрич, робота), але я дуже швидко вчуся 😺";

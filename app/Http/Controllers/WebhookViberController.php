@@ -65,7 +65,7 @@ class WebhookViberController extends Controller
                     "TextHAlign" => "center",
                     "TextVAlign" => "middle",
                     "ActionType" => "open-url",
-                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm/$user_id",
+                    "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
                 ],
             ],
         ];
@@ -111,7 +111,7 @@ class WebhookViberController extends Controller
                     "TextHAlign" => "center",
                     "TextVAlign" => "middle",
                     "ActionType" => "open-url",
-                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm/$user_id",
+                    "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
                 ],
                 [
                             "Columns" => 6,
@@ -345,6 +345,26 @@ class WebhookViberController extends Controller
                 } else {
                     $viber->sendKeyboard($user_id, $message, $keyboard_register);
                 }
+                break;
+            case "робота":
+                $keyboard = [
+                    "Type" => "keyboard",
+                    "DefaultHeight" => false,
+                    "Buttons" => [
+                        [
+                            "Columns" => 6,
+                            "Rows" => 1,
+                            "Text" => "На головну",
+                            "TextSize" => "large",
+                            "TextHAlign" => "center",
+                            "TextVAlign" => "middle",
+                            "ActionType" => "share-phone",
+                            "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
+                        ],
+                    ],
+                ];
+                $message = 'Робота в 🚕';
+                $viber->sendKeyboard($user_id, $message, $keyboard);
                 break;
             default:
                 $needle = 'https://';
