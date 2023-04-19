@@ -152,7 +152,8 @@ Route::get('/setWebhook', [TelegramController::class, 'setWebhook'])->name('setW
 Route::get('/getWebhook', [TelegramController::class, 'getWebhook'])->name('getWebhook');
 Route::get('/getWebhookInfo', [TelegramController::class, 'getWebhookInfo'])->name('getWebhookInfo');
 Route::get('/sendDocument', [TelegramController::class, 'sendDocument'])->name('sendDocument');
-Route::get('/sendAlarm/{mesage}', [TelegramController::class, 'sendAlarmMessage'])->name('sendAlarm');
+Route::get('/sendAlarm/{message}', [TelegramController::class, 'sendAlarmMessage'])->name('sendAlarm');
+Route::get('/sendOffice/{message}', [TelegramController::class, 'sendOfficeMessage'])->name('sendOfficeMessage');
 
 Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
     Route::post('/webhook', [WebhookController::class, 'index']);

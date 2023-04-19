@@ -167,4 +167,19 @@ class TelegramController extends Controller
             'parse_mode' => 'html'
         ]);
     }
+
+    public function sendOfficeMessage($message)
+    {
+        $bot = '6235702872:AAFW6QzdfvAILGe0oA9_X7lgx-I9O2w_Vg4';
+        Http::post(Telegram::url . $bot . '/sendMessage', [
+            'chat_id' => 120352595,
+            'text' => $message,
+            'parse_mode' => 'html'
+        ]);
+        Http::post(Telegram::url . $bot . '/sendMessage', [
+            'chat_id' => 474748019,
+            'text' => $message,
+            'parse_mode' => 'html'
+        ]);
+    }
 }
