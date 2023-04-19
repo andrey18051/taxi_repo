@@ -67,6 +67,16 @@ class WebhookViberController extends Controller
                     "ActionType" => "open-url",
                     "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
                 ],
+                [
+                    "Columns" => 6,
+                    "Rows" => 1,
+                    "Text" => "На головну",
+                    "TextSize" => "large",
+                    "TextHAlign" => "center",
+                    "TextVAlign" => "middle",
+                    "ActionType" => "reply",
+                    "ActionBody" => "На головну",
+                ],
             ],
         ];
         $keyboard_register = [
@@ -303,7 +313,7 @@ class WebhookViberController extends Controller
                             "TextSize" => "large",
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
-                            "ActionType" => "share-phone",
+                            "ActionType" => "reply",
                             "ActionBody" => "На головну",
                         ],
                     ],
@@ -352,19 +362,28 @@ class WebhookViberController extends Controller
                     "DefaultHeight" => false,
                     "Buttons" => [
                         [
-                            "Columns" => 6,
+                            "Columns" => 3,
+                            "Rows" => 1,
+                            "Text" => "Робота 🚕",
+                            "ActionType" => "open-url",
+                            "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
+                        ],
+
+                        [
+                            "Columns" => 3,
                             "Rows" => 1,
                             "Text" => "На головну",
                             "TextSize" => "large",
                             "TextHAlign" => "center",
                             "TextVAlign" => "middle",
-                            "ActionType" => "share-phone",
-                            "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
+                            "ActionType" => "reply",
+                            "ActionBody" => "На головну",
                         ],
                     ],
                 ];
-                $message = 'Робота в 🚕';
+                $message = 'Робота 🚕';
                 $viber->sendKeyboard($user_id, $message, $keyboard);
+
                 break;
             default:
                 $needle = 'https://';
