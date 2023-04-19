@@ -50,6 +50,11 @@
           style="z-index: 101; position: fixed; margin-top: 186px; right: 0px">
         <img src="{{ asset('img/icons8-viber-48.png') }}" style="width:30px;">
     </a>
+    <a    target="_blank" title="Працевлаштування у таксі"
+          href="https://play.google.com/store/apps/details?id=com.taxieasyua.job"
+          style="z-index: 101; position: fixed; margin-top: 217px; right: 0px">
+        <img src="{{ asset('img/icons8-google-play-store-48.png') }}" style="width:30px;">
+    </a>
 </div>
 
 
