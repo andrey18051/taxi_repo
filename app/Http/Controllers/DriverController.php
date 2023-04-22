@@ -53,13 +53,12 @@ class DriverController extends Controller
 
         $keywords = preg_split("/[*]+/", $services);
 
-        $subject = "Прошу розглянути мою кандидатуру для роботи водієм.";
-
         $services = Services::all()->toArray();
 
         foreach ($keywords as $value_key) {
             foreach ($services as $value_serv) {
                 if ($value_key == $value_serv['name']) {
+                    $subject = "Прошу розглянути мою кандидатуру для роботи водієм в службі таксі " . $value_serv['name'] . ".";
                     $params = [
                         'subject' => $subject,
                         'city' => "Місто: " . $city,
@@ -74,12 +73,10 @@ class DriverController extends Controller
                         'year' => "Рік випуску: " . $year,
                         'number' => "Державий номер: " . $number
                     ];
+
                     Mail::to($value_serv['email'])->send(new JobDriver($params));
                 }
             }
         }
-//
-//
-//        return $keywords[0].$keywords[1].$keywords[2].$keywords[3].count($keywords);
     }
 }
