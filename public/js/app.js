@@ -5440,6 +5440,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "ServiceComponent",
@@ -31520,34 +31523,6 @@ var render = function () {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.filters.id.value,
-                              expression: "filters.id.value",
-                            },
-                          ],
-                          staticClass: "form-input input-sm",
-                          attrs: { placeholder: "Select by id" },
-                          domProps: { value: _vm.filters.id.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.id,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
                               value: _vm.filters.name.value,
                               expression: "filters.name.value",
                             },
@@ -31659,8 +31634,6 @@ var render = function () {
                     _vm._v(" "),
                     _vm._l(displayData, function (row) {
                       return _c("tr", { key: row.id }, [
-                        _c("td", [_vm._v(_vm._s(row.id))]),
-                        _vm._v(" "),
                         _c("td", [
                           _c("input", {
                             directives: [
@@ -31706,6 +31679,60 @@ var render = function () {
                                   return
                                 }
                                 _vm.$set(row, "email", $event.target.value)
+                              },
+                            },
+                          }),
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model.text",
+                                value: row.telegram_id,
+                                expression: "row.telegram_id",
+                                modifiers: { text: true },
+                              },
+                            ],
+                            staticClass: "form-control",
+                            attrs: { id: "telegram_id", required: "" },
+                            domProps: { value: row.telegram_id },
+                            on: {
+                              input: function ($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  row,
+                                  "telegram_id",
+                                  $event.target.value
+                                )
+                              },
+                            },
+                          }),
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model.text",
+                                value: row.viber_id,
+                                expression: "row.viber_id",
+                                modifiers: { text: true },
+                              },
+                            ],
+                            staticClass: "form-control",
+                            attrs: { id: "viber_id", required: "" },
+                            domProps: { value: row.viber_id },
+                            on: {
+                              input: function ($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(row, "viber_id", $event.target.value)
                               },
                             },
                           }),
@@ -31816,8 +31843,6 @@ var render = function () {
             "thead",
             { attrs: { slot: "head" }, slot: "head" },
             [
-              _c("v-th", { attrs: { sortKey: "id" } }, [_vm._v("#")]),
-              _vm._v(" "),
               _c("v-th", { attrs: { sortKey: "name" } }, [_vm._v("Name")]),
               _vm._v(" "),
               _c("v-th", { attrs: { sortKey: "email" } }, [_vm._v("Email")]),

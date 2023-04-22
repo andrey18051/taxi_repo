@@ -10,6 +10,7 @@ use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\TwitterController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\WebOrderController;
 use App\Models\NewsList;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Services;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -250,9 +252,13 @@ Route::get('/admin/{any}', function () {
  * Службы такси для андроида
  */
 
-Route::get('/services/all', [ServerController::class,'index']);
-Route::get('/services/destroy/{id}', [ServerController::class,'destroy']);
-Route::get('/services/edit/{id}/{name}/{email}/{telegram_id}/{viber_id}', [ServerController::class,'edit']);
+Route::get('/services/all', [ServicesController::class,'index']);
+Route::get('/services/destroy/{id}', [ServicesController::class,'destroy']);
+Route::get('/services/edit/{id}/{name}/{email}/{telegram_id}/{viber_id}', [ServicesController::class,'edit']);
+Route::get('/services/serviceNew', function () {
+    return view('admin.services');
+})->name('services-new');
+Route::get('/services/serviceCreat', [ServicesController::class,'serviceCreat'])->name('services-save');
 
 /**
  * Цитаты

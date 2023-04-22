@@ -17,20 +17,20 @@ class ServicesController extends Controller
         $service->save();
     }
 
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        return response()->json(Services::all());
+        return response()->json(Services::get());
     }
 
     public function edit($id, $name, $email, $telegram_id, $viber_id)
     {
-        $user = Services::find($id);
+        $service = Services::find($id);
 
-        $user->name = $name;
-        $user->email = $email;
-        $user->telegram_id = $telegram_id;
-        $user->viber_id = $viber_id;
-        $user->save();
+        $service->name = $name;
+        $service->email = $email;
+        $service->telegram_id = $telegram_id;
+        $service->viber_id = $viber_id;
+        $service->save();
 
         return response()->json(Services::find($id));
     }
@@ -39,4 +39,15 @@ class ServicesController extends Controller
         Services::find($id)->delete();
     }
 
+    public function serviceCreat(Request $req)
+    {
+        $service  = new Services();
+
+        $service->name = $req->name;
+        $service->email = $req->email;
+        $service->telegram_id = $req->telegram_id;
+        $service->viber_id = $req->viber_id;
+        $service->save();
+        return redirect()->route('services-new');
+    }
 }

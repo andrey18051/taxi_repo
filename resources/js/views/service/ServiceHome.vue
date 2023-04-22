@@ -2,7 +2,8 @@
 
     <div class="container">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-            <h1 class="display-5">Services</h1>
+
+                <h1 class="display-5">Services</h1>
 
         </div>
         <v-table
@@ -15,7 +16,7 @@
             @totalPagesChanged="totalPages = $event"
         >
             <thead slot="head">
-            <v-th sortKey="id">#</v-th>
+<!--            <v-th sortKey="id">#</v-th>-->
             <v-th sortKey="name" >Name</v-th>
             <v-th sortKey="email">Email</v-th>
             <v-th sortKey="telegram_id">Telegram_id</v-th>
@@ -23,7 +24,7 @@
             </thead>
             <tbody slot="body" slot-scope="{displayData}">
             <tr>
-                <td><input class="form-input input-sm" v-model="filters.id.value" placeholder="Select by id"></td>
+<!--                <td><input class="form-input input-sm" v-model="filters.id.value"></td>-->
                 <td><input class="form-input input-lg" v-model="filters.name.value" placeholder="Select by name"></td>
                 <td> <input class="form-input input-lg" v-model="filters.email.value"  placeholder="Select by email"></td>
                 <td> <input class="form-input input-lg" v-model="filters.telegram_id.value"  placeholder="Select by telegram_id"></td>
@@ -31,10 +32,12 @@
                 <td></td>
             </tr>
             <tr v-for="row in displayData" :key="row.id">
-                <td>{{ row.id }}</td>
+<!--                <td>{{ row.id }}</td>-->
 
                 <td> <input id="name" class="form-control" v-model.text="row.name" required ></td>
                 <td><input id="email" class="form-control" v-model.text="row.email" required ></td>
+                <td> <input id="telegram_id" class="form-control" v-model.text="row.telegram_id" required ></td>
+                <td><input id="viber_id" class="form-control" v-model.text="row.viber_id" required ></td>
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-success" @click="editServices(row.id, row.name, row.email)" style="margin-left: 5px">
@@ -92,6 +95,7 @@ export default {
                     }
                 )
         },
+
         deleteServices(id) {
 
             axios.get('/services/destroy/'+ id)
