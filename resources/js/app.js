@@ -23,6 +23,7 @@ window.Vue = require('vue').default;
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('user-component', require('./views/user/UserHome.vue').default);
+Vue.component('service-component', require('./views/service/ServiceHome.vue').default);
 Vue.component('user-edit', require('./views/user/UserEdit.vue').default);
 Vue.component('taxi-account', require('./views/taxi/account.vue').default);
 Vue.component('order-component', require('./views/taxi/order.vue').default);

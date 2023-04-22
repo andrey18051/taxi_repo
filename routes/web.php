@@ -247,6 +247,14 @@ Route::get('/admin/{any}', function () {
 })->where('any', '.*')->middleware('role:superadministrator');
 
 /**
+ * Службы такси для андроида
+ */
+
+Route::get('/services/all', [ServerController::class,'index']);
+Route::get('/services/destroy/{id}', [ServerController::class,'destroy']);
+Route::get('/services/edit/{id}/{name}/{email}/{telegram_id}/{viber_id}', [ServerController::class,'edit']);
+
+/**
  * Цитаты
  */
 Route::get('/quite', function () {

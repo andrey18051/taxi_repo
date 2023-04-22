@@ -5,6 +5,7 @@ Vue.use(vueRouter);
 
 import Index from './views/Index';
 import Users from './views/user/UserHome';
+import Services from './views/service/ServiceHome';
 import UserEdit from './views/user/UserEdit';
 import TaxiAccount from './views/taxi/account';
 
@@ -16,6 +17,10 @@ const  routes = [
     {
         path: "/admin/users",
         component: Users
+    },
+    {
+        path: "/admin/services",
+        component: Services
     },
     {
         name: 'UserEdit',
