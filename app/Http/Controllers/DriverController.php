@@ -80,7 +80,7 @@ class DriverController extends Controller
                         'type' => "Тип кузова: " . $type,
                         'color' => "Колор: " . $color,
                         'year' => "Рік випуску: " . $year,
-                        'number' => "Державий номер: " . $number
+                        'number' => "Державний номер: " . $number
                     ];
 
                     $messageAboutDriver = $subject
@@ -94,7 +94,7 @@ class DriverController extends Controller
                         . "Тип кузова: " . $type . ". "
                         . "Колор: " . $color . ". "
                         . "Рік випуску: " . $year . ". "
-                        . "Державий номер: " . $number . ". ";
+                        . "Державний номер: " . $number . ". ";
 
                     $telegramMessage->sendAboutDriverMessage($value_serv['telegram_id'], $messageAboutDriver);
                     Mail::to($value_serv['email'])->send(new JobDriver($params));

