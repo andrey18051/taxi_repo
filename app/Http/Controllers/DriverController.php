@@ -6,6 +6,7 @@ use App\Mail\Driver;
 use App\Mail\JobDriver;
 use App\Mail\Server;
 use App\Models\Autos;
+use App\Models\DriverHistory;
 use App\Models\Drivers;
 use App\Models\Services;
 use Illuminate\Http\Request;
@@ -51,10 +52,18 @@ class DriverController extends Controller
         $auto->save();
 
 
+        $driverHistory =  new DriverHistory();
+        $driverHistory->name = $driver->id . "*" . $auto->id . "*" . $services;
+        $driverHistory->save();
+
         $keywords = preg_split("/[*]+/", $services);
 
-        $services = Services::all()->toArray();
 
+
+        $telegramMessage = new TelegramController();
+
+
+        $services = Services::all()->toArray();
         foreach ($keywords as $value_key) {
             foreach ($services as $value_serv) {
                 if ($value_key == $value_serv['name']) {
@@ -74,6 +83,20 @@ class DriverController extends Controller
                         'number' => "Державий номер: " . $number
                     ];
 
+                    $messageAboutDriver = $subject
+                        . " Місто: " . $city . ". "
+                        . "Ім'я: " . $first_name . ". "
+                        . "Прізвище: " . $second_name . ". "
+                        . "Email: " . $email . ". "
+                        . "Телефон: " . $phone . ". "
+                        . "Марка авто: " . $brand . ". "
+                        . "Модель: " . $model . ". "
+                        . "Тип кузова: " . $type . ". "
+                        . "Колор: " . $color . ". "
+                        . "Рік випуску: " . $year . ". "
+                        . "Державий номер: " . $number . ". ";
+
+                    $telegramMessage->sendAboutDriverMessage($value_serv['telegram_id'], $messageAboutDriver);
                     Mail::to($value_serv['email'])->send(new JobDriver($params));
                 }
             }

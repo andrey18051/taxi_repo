@@ -31756,7 +31756,9 @@ var render = function () {
                                       return _vm.editServices(
                                         row.id,
                                         row.name,
-                                        row.email
+                                        row.email,
+                                        row.telegram_id,
+                                        row.viber_id
                                       )
                                     },
                                   },
