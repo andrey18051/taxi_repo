@@ -10,6 +10,7 @@ use App\Models\DriverHistory;
 use App\Models\Drivers;
 use App\Models\Services;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class DriverController extends Controller
@@ -101,5 +102,30 @@ class DriverController extends Controller
                 }
             }
         }
+    }
+
+    public function sendCode($phone): int
+    {
+        $connectAPI = WebOrderController::connectApi();
+
+        $url = $connectAPI . '/api/approvedPhones/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+        ]);
+        return $response->status();
+//        return 200;
+    }
+
+    public function approvedPhones($phone, $confirm_code): int
+    {
+        $connectAPI = WebOrderController::connectApi();
+
+        $url = $connectAPI . '/api/approvedPhones/';
+        $response = Http::post($url, [
+            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона
+            'confirm_code' => $confirm_code //Обязательный. Код подтверждения.
+        ]);
+        return $response->status();
     }
 }

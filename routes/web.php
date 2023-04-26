@@ -6,6 +6,7 @@ use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\IPController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
@@ -921,7 +922,14 @@ Route::get('/callWorkForm/{user_id}', function ($user_id) {
     return redirect()->route('callWorkForm');
 })->name('callWorkFormViber');
 
-Route::get('/callWork', [WebOrderController::class, 'callWork'])->name('callWork');
+//Route::get('/callWork', [WebOrderController::class, 'callWork'])->name('callWork');
+
+/**
+ * Работа в такси (Job)
+ */
+
+Route::get('/callWork', [JobController::class, 'index'])->name('callWork');
+Route::get('/callWork/getInfo', [JobController::class, 'getInfo'])->name('getInfo');
 
 /**
  * Машины в радиусе старта заказа
