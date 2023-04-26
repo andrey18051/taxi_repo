@@ -61,32 +61,69 @@ class JobController extends Controller
             $services = $services . "Максім*";
         }
 
+        $message_error = "Надсилання заявки неможливе. Не заповнені поля: ";
+        if (!isset($req->brand)) {
+            $message_error = $message_error . "Марка ";
+        }
+        if (!isset($req->model)) {
+            $message_error = $message_error . "Модель ";
+        }
+
+        if (!isset($req->color)) {
+            $message_error = $message_error . "Колір ";
+        }
+        if (!isset($req->year)) {
+            $message_error = $message_error . "Рік випуску ";
+        }
+
+        if (!isset($req->number)) {
+            $message_error = $message_error . "Державний номер ";
+        }
+        if (!isset($req->first_name)) {
+            $message_error = $message_error . "Ім'я ";
+        }
+        if (!isset($req->phone)) {
+            $message_error = $message_error . "Телефон";
+        }
         if ($services == null) {
-            return view('driver.callWork', ['params' => $params,
-                'info' => 'Повинна бути обрана хоча б одна служба таксі.']);
+            $message_error = $message_error . ' Повинна бути обрана хоча б одна служба таксі.';
         }
         $params["brand"] = $req->brand;
+        $brand = $req->brand;
         $params["model"] = $req->model;
+        $model = $req->model;
         $params["type"] = $req->type;
+        $type = $req->type;
         $params["color"] = $req->color;
+        $color = $req->color;
         $params["year"] = $req->year;
+        $year = $req->year;
         $params["number"] = $req->number;
+        $number = $req->number;
         $params["city"] = $req->city;
+        $city = $req->city;
         $params["first_name"] = $req->first_name;
+        $first_name = $req->first_name;
         if (isset($req->second_name)) {
             $params["second_name"] = $req->second_name;
             $second_name = $req->second_name;
         } else {
             $second_name = "не вказано";
         }
-        if (isset($req->second_name)) {
-            $params["email"] = $req->second_name;
+        if (isset($req->email)) {
+            $params["email"] = $req->email;
             $email = $req->email;
         } else {
             $email = "не вказано";
         }
         $params["phone"] = $req->phone;
+        $phone = $req->phone;
 
+
+        if ($message_error != "Надсилання заявки неможливе. Не заповнені поля: ") {
+            return view('driver.callWork', ['params' => $params,
+                'info' => $message_error]);
+        }
 
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
@@ -112,23 +149,24 @@ class JobController extends Controller
                     ];
                     Mail::to($params["email"])->send(new Driver($params));
                 }
+
                 $url = "https://m.easy-order-taxi.site/api/driverAuto/" .
-                $params["city"] . "/" .
-                $params["first_name"] . "/" .
-                $second_name . "/" .
+                    $city . "/" .
+                    $first_name . "/" .
+                    $second_name . "/" .
                     $email . "/" .
-                    $params["phone"] . "/" .
-                    $params["brand"] . "/" .
-                    $params["model"] . "/" .
-                    $params["type"] . "/" .
-                    $params["color"] . "/" .
-                    $params["year"] . "/" .
-                    $params["number"] . "/" .
+                    $phone . "/" .
+                    $brand . "/" .
+                    $model . "/" .
+                    $type . "/" .
+                    $color . "/" .
+                    $year . "/" .
+                    $number . "/" .
                     $services;
 
                 Http::get($url);
 
-                return redirect()->route('home-news')->with('success', $params['first_name'] .
+                return redirect()->route('home-news')->with('success', $first_name .
                     "!. Вашу заявку відправлено до вибраних Вами служб таксі. Чекайте на дзвінок або відповідь на вказану Вами електронну пошту. Будемо раді бачити Вас у нашій команді професіоналів.")
                      ->with('tel', "Для уточнення чекайте/або наберіть диспетчера:");
 

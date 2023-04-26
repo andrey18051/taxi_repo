@@ -28,6 +28,6 @@ class Driver extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.driver')->with($this->params)->subject('Анкета для роботи у Таксі Лайт');
+        return $this->markdown('emails.driver')->with($this->params)->subject('Анкета для роботи');
     }
 }

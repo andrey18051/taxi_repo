@@ -40,7 +40,7 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="headingOne">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        Служби таксі
+                                        Служби таксі (Має бути зазначена хоча б одна служба таксі.)
                                     </button>
                                 </h2>
                                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
@@ -178,7 +178,7 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="headingTwo">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                        Інформація про автомобіль
+                                        Інформація про автомобіль (Поля позначені * – обов'язкові до заповнення)
                                     </button>
                                 </h2>
                                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
@@ -187,32 +187,32 @@
                                             <div class="form-outline mb-2 col-12"  >
                                                 <div class="row">
                                                     <div class="row mb-3">
-                                                        <label for="brand" class="col-md-4 col-form-label text-md-end">{{ __("Марка") }}</label>
+                                                        <label for="brand" class="col-md-4 col-form-label text-md-end">{{ __("Марка*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <input id="brand" name="brand" type="text" class="form-control" autofocus required
+                                                            <input id="brand" name="brand" type="text" class="form-control" autofocus
                                                                     @isset($params["brand"])
                                                                         value="{{$params["brand"]}}"
                                                                     @endisset>
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="model" class="col-md-4 col-form-label text-md-end">{{ __("Модель") }}</label>
+                                                        <label for="model" class="col-md-4 col-form-label text-md-end">{{ __("Модель*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <input id="model" name="model" type="text" class="form-control" required
+                                                            <input id="model" name="model" type="text" class="form-control"
                                                                     @isset($params["model"])
                                                                         value="{{$params["model"]}}"
                                                                     @endisset>
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="type" class="col-md-4 col-form-label text-md-end">{{ __("Тип кузова") }}</label>
+                                                        <label for="type" class="col-md-4 col-form-label text-md-end">{{ __("Тип кузова*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <select class="form-select" id="type" name="type" required>
+                                                            <select class="form-select" id="type" name="type"  >
                                                                 @isset($params["type"])
-                                                                    <option value="{{$params["brand"]}}">{{$params["type"]}}</option>
+                                                                    <option value="{{$params["type"]}}">{{$params["type"]}}</option>
                                                                 @endisset
                                                                 <option value="седан">седан</option>
                                                                 <option value="універсал">універсал</option>
@@ -228,30 +228,30 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="color" class="col-md-4 col-form-label text-md-end">{{ __("Колір") }}</label>
+                                                        <label for="color" class="col-md-4 col-form-label text-md-end">{{ __("Колір*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <input id="color" name="color" type="text" class="form-control" required
+                                                            <input id="color" name="color" type="text" class="form-control"
                                                                     @isset($params["color"])
                                                                         value="{{$params["color"]}}"
                                                                     @endisset>
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="year" class="col-md-4 col-form-label text-md-end">{{ __("Рік випуску") }}</label>
+                                                        <label for="year" class="col-md-4 col-form-label text-md-end">{{ __("Рік випуску*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <input id="year" name="year" type="text" class="form-control" required
+                                                            <input id="year" name="year" type="text" class="form-control"
                                                                     @isset($params["year"])
                                                                         value="{{$params["year"]}}"
                                                                     @endisset>
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="number" class="col-md-4 col-form-label text-md-end">{{ __("Державний номер") }}</label>
+                                                        <label for="number" class="col-md-4 col-form-label text-md-end">{{ __("Державний номер*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <input id="number" name="number" type="text" class="form-control" required
+                                                            <input id="number" name="number" type="text" class="form-control"
                                                                     @isset($params["number"])
                                                                         value="{{$params["number"]}}"
                                                                     @endisset>
@@ -268,7 +268,7 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="headingThree">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                        Контактна інформація
+                                        Контактна інформація  (Поля позначені * – обов'язкові до заповнення)
                                     </button>
                                 </h2>
                                 <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
@@ -277,10 +277,10 @@
                                             <div class="form-outline mb-2 col-12"  >
                                                 <div class="row">
                                                     <div class="row mb-3">
-                                                        <label for="city" class="col-md-4 col-form-label text-md-end">{{ __("Місто") }}</label>
+                                                        <label for="city" class="col-md-4 col-form-label text-md-end">{{ __("Місто*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <select class="form-select" id="city" name="city" autofocus required>
+                                                            <select class="form-select" id="city" name="city" autofocus  >
                                                                 @isset($params["city"])
                                                                     <option value="{{$params["city"]}}">{{$params["city"]}}</option>
                                                                 @endisset
@@ -313,10 +313,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="first_name" class="col-md-4 col-form-label text-md-end">{{ __("Ім'я") }}</label>
+                                                        <label for="first_name" class="col-md-4 col-form-label text-md-end">{{ __("Ім'я*") }}</label>
 
                                                         <div class="col-md-6">
-                                                            <input id="first_name" name="first_name" type="text" class="form-control" required
+                                                            <input id="first_name" name="first_name" type="text" class="form-control"
                                                                     @isset($params["first_name"])
                                                                         value="{{$params["first_name"]}}"
                                                                     @endisset>
@@ -333,7 +333,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                        <label for="email" class="col-md-4 col-form-label text-md-end">{{ __("Електронна пошта") }}</label>
+                                                        <label for="email" class="col-md-4 col-form-label text-md-end">{{ __("Електронна пошта (Бажано)") }}</label>
 
                                                         <div class="col-md-6">
                                                             <input id="email" type="email"
@@ -356,7 +356,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
-                                                            <label for="phone" class="col-md-4 col-form-label text-md-end">{{ __("Телефон") }}</label>
+                                                            <label for="phone" class="col-md-4 col-form-label text-md-end">{{ __("Телефон*") }}</label>
 
                                                             <div class="col-md-6">
                                                                 <input id="phone" type="text"
@@ -366,7 +366,7 @@
                                                                         @isset($params["phone"])
                                                                         value="{{$params["phone"]}}"
                                                                         @else
-                                                                           value="{{ old('phone') }}" required autocomplete="user_phone"
+                                                                           value="{{ old('phone') }}"   autocomplete="user_phone"
                                                                         @endisset
 
                                                                         pattern="[\+]\d{12}"
@@ -405,9 +405,9 @@
                 <!-- Submit button -->
                 <div class="row">
 
-                    <button type="reset" class="btn btn-danger col-12" style="margin-top: 5px">
-                        Очистити
-                    </button>
+{{--                    <a href="{{route("getInfo")}}" class="btn btn-danger col-12" style="margin-top: 5px">--}}
+{{--                        Очистити--}}
+{{--                    </a>--}}
 
                     <button type="submit" class="btn btn-primary col-12" style="margin-top: 5px">
                         Надіслати
