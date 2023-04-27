@@ -1,6 +1,7 @@
 @component('mail::message')
 # Тема: {{ $subject}}
 
+# Сообщение с сайта https://m.easy-order-taxi.site
 
 {{$city}} <br>
 {{$first_name}} <br>
@@ -13,6 +14,8 @@
 {{$color}} <br>
 {{$year}} <br>
 {{$number}} <br>
+
+
 
 @component('mail::button', ['url' => 'mailto:'. $email])
  Ответить
