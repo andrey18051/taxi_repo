@@ -1,7 +1,7 @@
 @component('mail::message')
 # Тема: {{ $subject}}
 
-# Сообщение с сайта https://m.easy-order-taxi.site
+# Повідомлення із сайту https://m.easy-order-taxi.site
 
 {{$city}} <br>
 {{$first_name}} <br>
