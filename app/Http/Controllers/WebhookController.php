@@ -116,7 +116,7 @@ class WebhookController extends Controller
                         [
                             [
                                 'text' => 'Робота в 🚕',
-                                'url' => 'https://play.google.com/store/apps/details?id=com.taxieasyua.job'
+                                'url' => 'https://m.easy-order-taxi.site/callWorkForm'
                             ],
 
                         ],
@@ -233,7 +233,7 @@ class WebhookController extends Controller
                         [
                             [
                                 'text' => 'Робота в 🚕',
-                                'url' => 'https://play.google.com/store/apps/details?id=com.taxieasyua.job'
+                                'url' => 'https://m.easy-order-taxi.site/callWorkForm'
                             ],
 
                         ],

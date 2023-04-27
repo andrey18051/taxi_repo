@@ -65,7 +65,7 @@ class WebhookViberController extends Controller
                     "TextHAlign" => "center",
                     "TextVAlign" => "middle",
                     "ActionType" => "open-url",
-                    "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
+                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm",
                 ],
                 [
                     "Columns" => 6,
@@ -121,7 +121,7 @@ class WebhookViberController extends Controller
                     "TextHAlign" => "center",
                     "TextVAlign" => "middle",
                     "ActionType" => "open-url",
-                    "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
+                    "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm",
                 ],
                 [
                             "Columns" => 6,
@@ -366,7 +366,7 @@ class WebhookViberController extends Controller
                             "Rows" => 1,
                             "Text" => "Робота 🚕",
                             "ActionType" => "open-url",
-                            "ActionBody" => "https://play.google.com/store/apps/details?id=com.taxieasyua.job",
+                            "ActionBody" => "https://m.easy-order-taxi.site/callWorkForm",
                         ],
 
                         [
