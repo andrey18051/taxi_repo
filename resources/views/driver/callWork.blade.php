@@ -7,6 +7,7 @@
         </div>
     @endisset
 
+{{--    {{dd(count($services))}}--}}
     {{--@isset($params)
 
             {{dd($params)}}
@@ -60,14 +61,9 @@
                                                          </p>
                                                          <p class="gradient">
                                                          З нами вже працюють автомобілі наступних таксі:
-
-                                                           Термінал
-                                                             Уклон Драйвер
-                                                             Убер Драйвер
-                                                              Болт Драйвер
-                                                            838 Драйвер
-                                                             Улюблене Драйвер
-
+                                                                @foreach($services as $value)
+                                                                    {{$value['name']}}
+                                                                @endforeach
                                                          </p>
 
                                                          <p class="gradient">
@@ -114,124 +110,51 @@
                                         <div class="card-body">
                                             <div class="container">
                                                 <div class="row">
+
                                                     <div class="col-6">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="Terminal" name="Terminal"
-                                                                   @isset($params["Terminal"])
-                                                                   @if($params["Terminal"] == "on")
-                                                                   checked
-                                                                   @endif
-                                                                   @endisset
-                                                                   checked>
-                                                            <label class="form-check-label" for="Terminal">
-                                                                Терминал
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="TaxiEasyUa" name="TaxiEasyUa"
-                                                                   @isset($params["TaxiEasyUa"])
-                                                                   @if($params["TaxiEasyUa"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="TaxiEasyUa">
-                                                                Таксі Лайт Юа
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="UBER" name="UBER"
-                                                                   @isset($params["UBER"])
-                                                                   @if($params["UBER"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="UBER">
-                                                                UBER
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="UKLON" name="UKLON"
-                                                                   @isset($params["UKLON"])
-                                                                   @if($params["UKLON"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="UKLON">
-                                                                UKLON
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="BOLT" name="BOLT"
-                                                                   @isset($params["BOLT"])
-                                                                   @if($params["BOLT"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="BOLT">
-                                                                BOLT
-                                                            </label>
-                                                        </div>
+
+                                                        @for($i = 0; $i< count($services)/2; $i++)
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"   id="{{$services[$i]['name']}}" name="{{$services[$i]['name']}}"
+                                                                       @isset($params[$services[$i]['name']])
+                                                                       @if($params[$services[$i]['name']] == "on")
+                                                                       checked
+                                                                       @endif
+                                                                       @endisset
+
+                                                                       @if($services[$i]['name'] == "Термінал")
+                                                                       checked
+                                                                       @endif>
+                                                                <label class="form-check-label" for="{{$services[$i]['name']}}">
+                                                                    {{$services[$i]['name']}}
+                                                                </label>
+                                                            </div>
+                                                        @endfor
+
+
+                                                    </div>
+                                                    <div class="col-6">
+
+                                                        @for($i = count($services)/2 ; $i< count($services); $i++)
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"   id="{{$services[$i]['name']}}" name="{{$services[$i]['name']}}"
+                                                                       @isset($params[$services[$i]['name']])
+                                                                       @if($params[$services[$i]['name']] == "on")
+                                                                       checked
+                                                                       @endif
+                                                                       @endisset
+                                                                       @if($services[$i]['name'] == "Термінал")
+                                                                       checked
+                                                                       @endif>
+                                                                <label class="form-check-label" for="{{$services[$i]['name']}}">
+                                                                    {{$services[$i]['name']}}
+                                                                </label>
+                                                            </div>
+                                                        @endfor
 
 
                                                     </div>
 
-                                                    <div class="col-6">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="OnTaxi" name="OnTaxi"
-                                                                   @isset($params["OnTaxi"])
-                                                                   @if($params["OnTaxi"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="OnTaxi">
-                                                                OnTaxi
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="taxi_838" name="taxi_838"
-                                                                   @isset($params["taxi_838"])
-                                                                   @if($params["taxi_838"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="taxi_838">
-                                                                838
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="Lubimoe_Taxi" name="Lubimoe_Taxi"
-                                                                   @isset($params["Lubimoe_Taxi"])
-                                                                   @if($params["Lubimoe_Taxi"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="Lubimoe_Taxi">
-                                                                Lubimoe Taxi
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="taxi_3040" name="taxi_3040"
-                                                                   @isset($params["taxi_3040"])
-                                                                   @if($params["taxi_3040"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="taxi_3040">
-                                                                3040
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"   id="Maxim" name="Maxim"
-                                                                   @isset($params["Maxim"])
-                                                                   @if($params["Maxim"] == "on")
-                                                                   checked
-                                                                @endif
-                                                                @endisset>
-                                                            <label class="form-check-label" for="Maxim">
-                                                                Максім
-                                                            </label>
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

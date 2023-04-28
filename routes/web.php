@@ -911,7 +911,9 @@ Route::get('/callBack', [WebOrderController::class, 'callBack'])->name('callBack
  */
 
 Route::get('/callWorkForm', function () {
-    return view('driver.callWork');
+    $services =  new ServicesController();
+
+    return view('driver.callWork', ['services' => $services->servicesAll()]);
 })->name('callWorkForm');
 
 Route::get('/callWorkForm/{user_id}', function ($user_id) {

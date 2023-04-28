@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Services;
 use Illuminate\Http\Request;
+use yii\helpers\Json;
 
 class ServicesController extends Controller
 {
@@ -50,4 +51,11 @@ class ServicesController extends Controller
         $service->save();
         return redirect()->route('services-new');
     }
+
+    public function servicesAll(): array
+    {
+        return Services::all()->toArray();
+    }
+
+
 }

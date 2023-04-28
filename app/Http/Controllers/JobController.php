@@ -18,47 +18,18 @@ class JobController extends Controller
 
     public function getInfo(Request $req)
     {
-        $services = null;
+        $servicesAll =  new ServicesController();
+        $servicesArr = $servicesAll->servicesAll();
 
-        if ($req->Terminal == "on") {
-            $params["Terminal"] = $req->Terminal;
-            $services = $services . "Терминал*";
-        }
-        if ($req->TaxiEasyUa == "on") {
-            $params["TaxiEasyUa"] = $req->TaxiEasyUa;
-            $services = $services . "Таксі Лайт Юа*";
-        }
-        if ($req->UBER == "on") {
-            $params["UBER"] = $req->UBER;
-            $services = $services . "UBER*";
-        }
-        if ($req->UKLON == "on") {
-            $params["UKLON"] = $req->UKLON;
-            $services = $services . "UKLON*";
-        }
-        if ($req->BOLT == "on") {
-            $params["BOLT"] = $req->BOLT;
-            $services = $services . "BOLT*";
-        }
-        if ($req->OnTaxi == "on") {
-            $params["OnTaxi"] = $req->OnTaxi;
-            $services = $services . "OnTaxi*";
-        }
-        if ($req->taxi_838 == "on") {
-            $params["taxi_838"] = $req->taxi_838;
-            $services = $services . "838*";
-        }
-        if ($req->Lubimoe_Taxi == "on") {
-            $params["Lubimoe_Taxi"] = $req->Lubimoe_Taxi;
-            $services = $services . "Lubimoe Taxi*";
-        }
-        if ($req->taxi_3040 == "on") {
-            $params["taxi_3040"] = $req->taxi_3040;
-            $services = $services . "3040*";
-        }
-        if ($req->Maxim == "on") {
-            $params["Maxim"] = $req->Maxim;
-            $services = $services . "Максім*";
+
+        $services = null;
+        $reqArr = $req->toArray();
+dd($reqArr);
+        for ($i = 0; $i < count($servicesArr); $i++) {
+            if (isset($reqArr[$servicesArr[$i]['name']]) && $reqArr[$servicesArr[$i]['name']] == "on") {
+                $params[$servicesArr[$i]['name']] = $reqArr[$servicesArr[$i]['name']];
+                $services = $services . $servicesArr[$i]['name'] . "*";
+            }
         }
 
         $message_error = "Надсилання заявки неможливе. Не заповнені поля: ";
@@ -122,6 +93,7 @@ class JobController extends Controller
 
         if ($message_error != "Надсилання заявки неможливе. Не заповнені поля: ") {
             return view('driver.callWork', ['params' => $params,
+                'services' => $servicesArr,
                 'info' => $message_error]);
         }
 
@@ -175,6 +147,7 @@ class JobController extends Controller
         }
         if ($error) {
             return view('driver.callWork', ['params' => $params,
+                'services' => $servicesArr,
                 'info' => 'Не пройдено перевірку на робота.']);
         }
     }

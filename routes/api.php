@@ -27,3 +27,4 @@ Route::get('/driverAuto/sendCode/{phone}', [DriverController::class, 'sendCode']
 Route::get('/driverAuto/approvedPhones/{phone}/{code}', [DriverController::class, 'approvedPhones'])->name('approvedPhones');
 
 Route::get('/servicesAdd/{name}/{email}', [ServicesController::class, 'servicesAdd'])->name('servicesAdd');
+Route::get('/servicesAll', [ServicesController::class, 'servicesAll'])->name('servicesAll');
