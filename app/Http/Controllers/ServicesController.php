@@ -56,6 +56,16 @@ class ServicesController extends Controller
     {
         return Services::all()->toArray();
     }
+    public function servicesAllAndroid()
+    {
+        $services = Services::all()->toArray();
+        $i = 0;
+        foreach ($services as $value) {
+            $servicesArr[$i++] = $value['name'];
+        }
+        return  response($services, 200)
+            ->header('Content-Type', 'json');
+    }
 
 
 }
