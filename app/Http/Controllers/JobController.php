@@ -24,7 +24,7 @@ class JobController extends Controller
 
         $services = null;
         $reqArr = $req->toArray();
-dd($reqArr);
+
         for ($i = 0; $i < count($servicesArr); $i++) {
             if (isset($reqArr[$servicesArr[$i]['name']]) && $reqArr[$servicesArr[$i]['name']] == "on") {
                 $params[$servicesArr[$i]['name']] = $reqArr[$servicesArr[$i]['name']];
