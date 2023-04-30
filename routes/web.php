@@ -25,6 +25,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WebhookViberController;
 use App\Http\Controllers\WebhookCustomsViberController;
 use App\Http\Controllers\WebOrderController;
+use App\Http\Controllers\WidgetsController;
 use App\Models\NewsList;
 use App\Models\Order;
 use App\Models\Orderweb;
@@ -1000,3 +1001,12 @@ Route::get('/reportIpOrder', [ReportController::class, 'reportIpOrder'])->middle
 
 Route::get('/siteMap', [ReportController::class, 'siteMap'])->middleware('role:superadministrator')
     ->name('siteMap');
+
+
+/**
+ * Віджети для використання на сайті
+ */
+Route::get('/widgets', [WidgetsController::class, 'index'])->name('widgets-index');
+Route::get('/widgets/job', [WidgetsController::class, 'job'])->name('widgets-job');
+
+Route::get('/widgets/getInfo', [WidgetsController::class, 'getInfo'])->name('widgets-getInfo');

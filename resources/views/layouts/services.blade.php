@@ -129,6 +129,10 @@
                style="text-decoration: none;">Підтримка</a>
         </li>
         <li class="list-group-item d-flex justify-content-between lh-sm">
+            <a href="{{route('widgets-index')}}" target="_blank"
+               style="text-decoration: none;">Віджети</a>
+        </li>
+        <li class="list-group-item d-flex justify-content-between lh-sm">
             <a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank"
                style="text-decoration: none;">Ми на Фейсбук</a>
         </li>

@@ -344,6 +344,7 @@
                  </div>
 
                  <news-component></news-component>
+
                  <div class="fb-comments" data-href="https://m.easy-order-taxi.site" data-width="auto" data-numposts="5"></div>
                  <a  href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;" onclick="sessionStorage.clear();">
                      <blockquote class="blockquote-3">

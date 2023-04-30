@@ -11,9 +11,7 @@
         gtag('config', 'G-9KNVGMXW35');
     </script>
 
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v15.0" nonce="9Iil5kDp"></script>
-
+    <div id = "fb-root" ></div> <script async defer crossorigin = "anonymous" src = "https://connect.facebook.net/uk_UA/sdk.js#xfbml=1&version=v16.0&appId= 2833492766947710&autoLogAppEvents=1" nonce = "SRFVr2ee" ></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="all" />
