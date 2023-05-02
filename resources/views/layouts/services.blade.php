@@ -114,7 +114,7 @@
     <ul class="list-group mb-3">
         <li class="list-group-item d-flex justify-content-between lh-sm">
             <a href="{{route('callWorkForm')}}" target="_blank"
-               style="text-decoration: none;">Робота в таксі</a>
+               style="text-decoration: none;">Робота водієм</a>
         </li>
         <li class="list-group-item d-flex justify-content-between lh-sm">
             <a href="{{route('taxi-gdbr')}}" target="_blank"
