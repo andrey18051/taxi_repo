@@ -339,10 +339,14 @@
                                                         </p>
                                                         <p class="gradient">
                                                             З нами вже працюють автомобілі наступних таксі:
-                                                            @foreach($services as $value)
-                                                                {{$value['name']}}
-                                                            @endforeach
                                                         </p>
+                                                        <div class="header gradient" >
+                                                            @foreach($services as $value)
+                                                                <a class="borderElement" href="{{asset("/about/" . $value['link'])}}" target="_blank">{{$value['name']}}</a>
+                                                            @endforeach
+                                                        </div>
+
+
 
                                                         <p class="gradient">
                                                             Сервіси працюють у всіх містах України. Ось кілька із них: Київ, Харків, Одеса, Дніпро, Запоріжжя, Вінниця, Полтава, Суми, Черкаси, Кропивницький. Херсон, Житомир, Чернігів, Ужгород, Львів, Тернопіль, Івано-Франківськ, Рівне, Вінниця, Чернівці, Луцьк, Хмельницький

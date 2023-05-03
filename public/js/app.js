@@ -5443,6 +5443,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "ServiceComponent",
@@ -5472,6 +5474,10 @@ __webpack_require__.r(__webpack_exports__);
         viber_id: {
           value: "",
           keys: ["viber_id"]
+        },
+        link: {
+          value: "",
+          keys: ["link"]
         }
       }
     };
@@ -5502,8 +5508,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editServices: function editServices(id, name, email, telegram_id, viber_id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/services/edit/' + id + '/' + name + '/' + email + '/' + telegram_id + '/' + viber_id).then(function (ret) {
+    editServices: function editServices(id, name, email, telegram_id, viber_id, link) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/services/edit/' + id + '/' + name + '/' + email + '/' + telegram_id + '/' + viber_id + '/' + link).then(function (ret) {
         console.log(ret.data);
         document.location.reload();
         window.alert("Данные обновлены");
@@ -31739,6 +31745,31 @@ var render = function () {
                         ]),
                         _vm._v(" "),
                         _c("td", [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model.text",
+                                value: row.link,
+                                expression: "row.link",
+                                modifiers: { text: true },
+                              },
+                            ],
+                            staticClass: "form-control",
+                            attrs: { id: "link", required: "" },
+                            domProps: { value: row.link },
+                            on: {
+                              input: function ($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(row, "link", $event.target.value)
+                              },
+                            },
+                          }),
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
                           _c(
                             "div",
                             {
@@ -31758,7 +31789,8 @@ var render = function () {
                                         row.name,
                                         row.email,
                                         row.telegram_id,
-                                        row.viber_id
+                                        row.viber_id,
+                                        row.link
                                       )
                                     },
                                   },
@@ -31856,6 +31888,8 @@ var render = function () {
               _c("v-th", { attrs: { sortKey: "viber_id" } }, [
                 _vm._v("Viber_id"),
               ]),
+              _vm._v(" "),
+              _c("v-th", { attrs: { sortKey: "link" } }, [_vm._v("Link")]),
             ],
             1
           ),

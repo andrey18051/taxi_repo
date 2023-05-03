@@ -23,7 +23,7 @@ class ServicesController extends Controller
         return response()->json(Services::get());
     }
 
-    public function edit($id, $name, $email, $telegram_id, $viber_id)
+    public function edit($id, $name, $email, $telegram_id, $viber_id, $link)
     {
         $service = Services::find($id);
 
@@ -31,6 +31,8 @@ class ServicesController extends Controller
         $service->email = $email;
         $service->telegram_id = $telegram_id;
         $service->viber_id = $viber_id;
+        $service->link = $link;
+
         $service->save();
 
         return response()->json(Services::find($id));
@@ -48,6 +50,7 @@ class ServicesController extends Controller
         $service->email = $req->email;
         $service->telegram_id = $req->telegram_id;
         $service->viber_id = $req->viber_id;
+        $service->link = $req->link;
         $service->save();
         return redirect()->route('services-new');
     }

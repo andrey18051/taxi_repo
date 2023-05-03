@@ -256,7 +256,7 @@ Route::get('/admin/{any}', function () {
 
 Route::get('/services/all', [ServicesController::class,'index']);
 Route::get('/services/destroy/{id}', [ServicesController::class,'destroy']);
-Route::get('/services/edit/{id}/{name}/{email}/{telegram_id}/{viber_id}', [ServicesController::class,'edit']);
+Route::get('/services/edit/{id}/{name}/{email}/{telegram_id}/{viber_id}/{link}', [ServicesController::class,'edit']);
 Route::get('/services/serviceNew', function () {
     return view('admin.services');
 })->name('services-new');
@@ -1010,3 +1010,12 @@ Route::get('/widgets', [WidgetsController::class, 'index'])->name('widgets-index
 Route::get('/widgets/job', [WidgetsController::class, 'job'])->name('widgets-job');
 
 Route::get('/widgets/getInfo', [WidgetsController::class, 'getInfo'])->name('widgets-getInfo');
+
+/**
+ * Services about
+ */
+
+Route::get('/about/{service}', function (string $service) {
+    $page = "services." . $service;
+    return view($page);
+})->name('about-service');

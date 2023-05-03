@@ -21,6 +21,7 @@
             <v-th sortKey="email">Email</v-th>
             <v-th sortKey="telegram_id">Telegram_id</v-th>
             <v-th sortKey="viber_id">Viber_id</v-th>
+            <v-th sortKey="link">Link</v-th>
             </thead>
             <tbody slot="body" slot-scope="{displayData}">
             <tr>
@@ -38,9 +39,10 @@
                 <td><input id="email" class="form-control" v-model.text="row.email" required ></td>
                 <td> <input id="telegram_id" class="form-control" v-model.text="row.telegram_id" required ></td>
                 <td><input id="viber_id" class="form-control" v-model.text="row.viber_id" required ></td>
+                <td><input id="link" class="form-control" v-model.text="row.link" required ></td>
                 <td>
                     <div class="btn-group" role="group">
-                        <button class="btn btn-success" @click="editServices(row.id, row.name, row.email, row.telegram_id, row.viber_id)" style="margin-left: 5px">
+                        <button class="btn btn-success" @click="editServices(row.id, row.name, row.email, row.telegram_id, row.viber_id, row.link)" style="margin-left: 5px">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                             </svg>
@@ -79,7 +81,8 @@ export default {
             name: { value: "", keys: ["name"] },
             email: { value: "", keys: ["email"] },
             telegram_id: { value: "", keys: ["telegram_id"] },
-            viber_id: { value: "", keys: ["viber_id"] }
+            viber_id: { value: "", keys: ["viber_id"] },
+            link: { value: "", keys: ["link"] }
         }
     }),
     mounted() {
@@ -106,8 +109,8 @@ export default {
                     window.alert("Данные обновлены");
                 });
         },
-        editServices(id, name, email, telegram_id, viber_id) {
-            axios.get('/services/edit/'+ id +'/'+name+'/'+email+'/'+telegram_id+'/'+viber_id)
+        editServices(id, name, email, telegram_id, viber_id, link) {
+            axios.get('/services/edit/'+ id +'/'+name+'/'+email+'/'+telegram_id+'/'+viber_id+'/'+link)
                 .then(function(ret) {
                     console.log(ret.data);
                     document.location.reload();
