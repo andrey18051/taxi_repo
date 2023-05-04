@@ -1,4 +1,4 @@
-@extends('layouts.Canonical')
+@extends('layouts.uklon')
 
 @section('content')
 

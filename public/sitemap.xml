@@ -83,7 +83,94 @@
         <loc>https://m.easy-order-taxi.site/transferfrom/Центральный%20автовокзал%20%28у%20шлагбаума%20пл.Московская%203%29/taxi.transferFromAuto</loc>
         <changefreq>monthly</changefreq>
     </url>
+    <url>
+        <loc>https://m.easy-order-taxi.site/about/uber</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://m.easy-order-taxi.site/about/bolt</loc>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://m.easy-order-taxi.site/about/uklon</loc>
+        <changefreq>monthly</changefreq>
+    </url>
 
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/288</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/287</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/286</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/285</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/284</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/283</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/282</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/281</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/280</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/279</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/278</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/277</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/276</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/275</loc>
+         <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+         <loc>https://m.easy-order-taxi.site/breakingNews/274</loc>
+         <changefreq>monthly</changefreq>
+    </url>
 
     <url>
          <loc>https://m.easy-order-taxi.site/breakingNews/273</loc>
