@@ -95,6 +95,10 @@
         <loc>https://m.easy-order-taxi.site/about/uklon</loc>
         <changefreq>monthly</changefreq>
     </url>
+    <url>
+        <loc>https://m.easy-order-taxi.site/about/terminal</loc>
+        <changefreq>monthly</changefreq>
+    </url>
 
 
     <url>
