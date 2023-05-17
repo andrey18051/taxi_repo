@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AndroidController;
+use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
 use Illuminate\Http\Request;
@@ -29,3 +31,19 @@ Route::get('/driverAuto/approvedPhones/{phone}/{code}', [DriverController::class
 Route::get('/servicesAdd/{name}/{email}', [ServicesController::class, 'servicesAdd'])->name('servicesAdd');
 Route::get('/servicesAll', [ServicesController::class, 'servicesAll'])->name('servicesAll');
 Route::get('/servicesAll/Android', [ServicesController::class, 'servicesAllAndroid'])->name('servicesAllAndroid');
+
+/**
+ * Android Taxi
+ */
+
+
+Route::get('/android/comboTest', [ComboTestController::class, 'insertComboTest'])
+    ->name('insertComboTest');
+
+Route::get('/android/comboTest/index', [ComboTestController::class, 'index'])
+    ->name('insertComboTestIndex');
+
+Route::get('/android/costMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}', [AndroidController::class, 'costMap'])
+    ->name('costMap');
+Route::get('/android/orderMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}', [AndroidController::class, 'orderMap'])
+    ->name('orderMap');

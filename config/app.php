@@ -121,6 +121,8 @@ return [
 
     'key' => env('APP_KEY'),
 
+    'keyVisicom' => env('APP_KEY_VISICOM'),
+
     'cipher' => 'AES-256-CBC',
 
     /*
