@@ -1409,8 +1409,8 @@ class AndroidController extends Controller
             $from = $response_arr_from["properties"]["street_type"]
                 . $response_arr_from["properties"]["street"]
                 . ", буд." . $response_arr_from["properties"]["name"]
-                . ", " . $response_arr_from["properties"]["settlement_type"]
-                . " " . $response_arr_from["properties"]["settlement"];
+//                . ", " . $response_arr_from["properties"]["settlement_type"]
+                . " (" . $response_arr_from["properties"]["settlement"] . ")";
 
             $response_ok["order_cost"] = 100;
             $response_ok["route_address_from"] = $from;

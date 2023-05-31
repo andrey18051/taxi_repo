@@ -16,7 +16,7 @@
                 <div class="row gx-lg-5 align-items-center">
                     <div class="col-lg-6 mb-5 mb-lg-0">
                         <h4 class="my-1 display-7 fw-bold ls-tight gradient">
-                            Телефони для зв'язку з диспетчером служби таксі
+                            Телефони для зв'язку з диспетчером служби таксі (у тому числі з питань видалення облікового запису)
                         </h4>
                         <div class="container-fluid align-items-center">
                             <div class="row">
