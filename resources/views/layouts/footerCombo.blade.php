@@ -1,4 +1,19 @@
 <footer class="text-muted text-center text-small gradient">
+    <div class="center gradient">
+        <span style="color:black">Сьогодні:</span>
+        <span style="color:black;; font-size:14px;">
+              <script>
+                   document.write(date+" ");
+                   document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
+              </script>
+              (<span id="clockdat" style="color:blue;"></span>)
+                    <span>
+                        🌡️
+                        {{\App\Http\Controllers\WeatherController::temp()}}
+                        ℃
+                    </span>
+        </span>
+    </div>
     <p class="mb-1">&copy; 2022 Легке замовлення таксі </p>
     <ul class="list-inline">
         <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}" target="_blank">Конфіденційність</a></li>

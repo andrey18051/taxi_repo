@@ -59,6 +59,9 @@
 </div>
 <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
     <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"  data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div>
             <a class="navbar-brand gradient" href="{{ url('/') }}" target="_blank">
                 {{ config('app.name', 'Laravel') }}
@@ -71,27 +74,11 @@
                 target="_blank" title="Розрахунок вартості"
                 style="text-decoration: none; margin-top: 20px">Низька ціна та Швидка подача таксі Києва та області.  <br>
                 Розрахуйте вартість поїздки онлайн.</a>
-            <div class="center gradient">
-                <span style="color:black">Сьогодні:</span>
-                <span style="color:black;; font-size:14px;">
-              <script>
-                   document.write(date+" ");
-                   document.write(thismonth+ " "+thisyear+" "+"року"+" — "+ DayofWeek);
-              </script>
-              (<span id="clockdat" style="color:blue;"></span>)
-                    <span>
-                        🌡️
-                        {{\App\Http\Controllers\WeatherController::temp()}}
-                        ℃
-                    </span>
-        </span>
-            </div>
+
         </div>
 
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"  data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto">
