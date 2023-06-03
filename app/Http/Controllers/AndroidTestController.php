@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
-class AndroidController extends Controller
+class AndroidTestController extends Controller
 {
 
     public function index(): int
@@ -51,9 +51,9 @@ class AndroidController extends Controller
     public function connectAPI(): string
     {
 
-        $server1 = config('app.taxi2012Url_1');
-        $server2 = config('app.taxi2012Url_2');
-        $server3 = config('app.taxi2012Url_3');
+//        $server1 = config('app.taxi2012Url_1');
+//        $server2 = config('app.taxi2012Url_2');
+//        $server3 = config('app.taxi2012Url_3');
 
 
         $subject = 'Отсутствует доступ к серверу.';
@@ -61,10 +61,10 @@ class AndroidController extends Controller
         /**
          * тест
          */
-//        $connectAPI = 'http://31.43.107.151:7303';
-//        $server1 = $connectAPI;
-//        $server2 = $connectAPI;
-//        $server3 = $connectAPI;
+        $connectAPI = 'http://31.43.107.151:7303';
+        $server1 = $connectAPI;
+        $server2 = $connectAPI;
+        $server3 = $connectAPI;
 
         $url = "/api/time";
 
@@ -257,7 +257,7 @@ class AndroidController extends Controller
 ////                $from = $params['routefrom'];
 ////                $from_number = $params['routefromnumber'];
 //
-////                if (Combo::where('name', $from)->first()->street == 0) {
+////                if (ComboTest::where('name', $from)->first()->street == 0) {
 ////                    $from_number_info = '';
 ////                } else {
 ////                    $from_number_info = "(будинок №$from_number)";
@@ -276,7 +276,7 @@ class AndroidController extends Controller
 ////                    $to_number = $from_number;
 ////                };
 //
-////                if (Combo::where('name', $to)->first()->street == 0) {
+////                if (ComboTest::where('name', $to)->first()->street == 0) {
 ////                    $to_number_info = '';
 ////                } else {
 ////                    $to_number_info = "(будинок №$to_number)";
@@ -503,7 +503,7 @@ class AndroidController extends Controller
 //                $user_phone = "user_phone";
 //
 //
-////                if (Combo::where('name', $from)->first()->street == 0) {
+////                if (ComboTest::where('name', $from)->first()->street == 0) {
 ////                    $from_number_info = '';
 ////                } else {
 ////                    $from_number_info = "(будинок №$from_number)";
@@ -522,7 +522,7 @@ class AndroidController extends Controller
 ////                    $to_number = $from_number;
 ////                };
 //
-////                if (Combo::where('name', $to)->first()->street == 0) {
+////                if (ComboTest::where('name', $to)->first()->street == 0) {
 ////                    $to_number_info = '';
 ////                } else {
 ////                    $to_number_info = "(будинок №$to_number)";
@@ -641,12 +641,12 @@ class AndroidController extends Controller
         /**
          * Test
          */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
+                        $response_error["order_cost"] = 0;
             $response_error["Message"] = "Помилка з'єднання з сервером.";
 
             return response($response_error, 200)
@@ -657,8 +657,8 @@ class AndroidController extends Controller
          * Параметры запроса
          */
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = "Андроід-користувач";
@@ -710,10 +710,10 @@ class AndroidController extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $combos = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
         $from = $combos->name;
 
-        $combos = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
 
         $url = $connectAPI . '/api/weborders/cost';
@@ -734,8 +734,8 @@ class AndroidController extends Controller
             'flexible_tariff_name' => $tariff, //Гибкий тариф
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'number' => $from_number],
-                ['name' => $to, 'number' => $to_number],
+                        ['name' => $from, 'number' => $from_number],
+                        ['name' => $to, 'number' => $to_number],
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
@@ -763,8 +763,8 @@ class AndroidController extends Controller
         /**
          * Test
          */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -775,8 +775,8 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = "Андроід-користувач";
@@ -832,10 +832,10 @@ class AndroidController extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $combos = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
         $from = $combos->name;
 
-        $combos = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
 
 
@@ -939,8 +939,8 @@ class AndroidController extends Controller
         /**
          * Test
          */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -955,8 +955,8 @@ class AndroidController extends Controller
          * Параметры запроса
          */
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = "Андроід-користувач";
@@ -1010,7 +1010,7 @@ class AndroidController extends Controller
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
 
-        $combos = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
 
         $url = $connectAPI . '/api/weborders/cost';
@@ -1072,8 +1072,8 @@ class AndroidController extends Controller
         /**
          * Test
          */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -1084,8 +1084,8 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = "Андроід-користувач";
@@ -1195,7 +1195,7 @@ class AndroidController extends Controller
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
 
-        $combos = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
 
 
@@ -1328,11 +1328,11 @@ class AndroidController extends Controller
 
     public function geoDataSearch($to, $to_number)
     {
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $connectAPI = self::connectApi();
@@ -1401,8 +1401,8 @@ class AndroidController extends Controller
         /**
          * Test
          */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+        $username = '0936734488';
+        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -1413,8 +1413,8 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         /**
@@ -1527,7 +1527,7 @@ class AndroidController extends Controller
 
     public function autocompleteSearchComboHid($name)
     {
-        $combos = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
+        $combos = ComboTest::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
         $response["resp_result"] = 0;
         $response["message"] = $combos->street;
 //dd($combos);
