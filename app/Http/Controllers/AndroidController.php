@@ -50,6 +50,7 @@ class AndroidController extends Controller
 
     public function connectAPI(): string
     {
+        IPController::getIP('/android');
 
         $server1 = config('app.taxi2012Url_1');
         $server2 = config('app.taxi2012Url_2');
