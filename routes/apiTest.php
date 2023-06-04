@@ -51,12 +51,12 @@ Route::middleware('throttle:6,1')->get('/android/orderMap/{originLatitude}/{orig
 
 Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}', [AndroidTestController::class, 'costSearch'])
     ->name('costSearch');
-Route::middleware('throttle:6,1')->get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}', [AndroidTestController::class, 'orderSearch'])
+Route::middleware('throttle:6,1')->get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}', [AndroidTestController::class, 'orderSearch'])
     ->name('orderSearch');
 
 Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}', [AndroidTestController::class, 'costSearchGeo'])
     ->name('costSearchGeo');
-Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}', [AndroidTestController::class, 'orderSearchGeo'])
+Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}', [AndroidTestController::class, 'orderSearchGeo'])
     ->name('orderSearchGeo');
 
 Route::get('/android/fromSearchGeo/{originLatitude}/{originLongitude}', [AndroidTestController::class, 'fromSearchGeo'])

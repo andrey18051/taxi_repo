@@ -759,7 +759,7 @@ class AndroidController extends Controller
     }
 
 
-    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone)
+    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
         /**
          * Test
@@ -780,7 +780,7 @@ class AndroidController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $params['user_full_name'] = "Андроід-користувач";
+        $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
@@ -845,7 +845,7 @@ class AndroidController extends Controller
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => "taxi_easy_ua"
         ])->post($url, [
-            'user_full_name' => 'Андрей ТЕСТ!!! СРАЗУ УДАЛЯТЬ ЗАКАЗ!!!!!', //Полное имя пользователя
+            'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
@@ -1068,7 +1068,7 @@ class AndroidController extends Controller
         }
     }
 
-    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone)
+    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
         /**
          * Test
@@ -1089,7 +1089,7 @@ class AndroidController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $params['user_full_name'] = "Андроід-користувач";
+        $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
@@ -1205,7 +1205,7 @@ class AndroidController extends Controller
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => "taxi_easy_ua"
         ])->post($url, [
-            'user_full_name' => 'Андрей ТЕСТ!!! СРАЗУ УДАЛЯТЬ ЗАКАЗ!', //Полное имя пользователя
+            'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
