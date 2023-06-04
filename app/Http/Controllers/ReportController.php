@@ -21,8 +21,8 @@ class ReportController extends Controller
     public function reportIpRoute(Request $request)
     {
 
-        $dateFrom = $request->dateFrom;
-        $dateTo = $request->dateTo;
+        $dateFrom = date('Y-m-d', strtotime($request->dateFrom . '-1 day'));
+        $dateTo = date('Y-m-d', strtotime($request->dateTo . '+1 day'));
 
         $reportIP_path = Storage::path('public/reports/reportIpRoute.xlsx');
 
@@ -101,7 +101,7 @@ class ReportController extends Controller
                 $i++;
             }
         } else {
-            $sheet->setCellValue('A1', 'Нет данных в период с ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('A1', 'Нет данных в период с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
         }
 
         $reportIP = new Xlsx($spreadsheet);
@@ -112,8 +112,8 @@ class ReportController extends Controller
     public function reportIpPage(Request $request)
     {
 
-        $dateFrom = $request->dateFrom;
-        $dateTo = $request->dateTo;
+        $dateFrom = date('Y-m-d', strtotime($request->dateFrom . '-1 day'));
+        $dateTo = date('Y-m-d', strtotime($request->dateTo . '+1 day'));
 
         $reportIP_path = Storage::path('public/reports/reportIpPage.xlsx');
 
@@ -146,7 +146,7 @@ class ReportController extends Controller
         }
         if($i !== 0) {
             $sheet->setCellValue('B' . 1, 'Это список IP,которые посещали конкретные страницы'
-                . ' с ' . $dateFrom . ' по ' . $dateTo);
+                . 'с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
 
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -197,7 +197,7 @@ class ReportController extends Controller
                 $i++;
             }
         } else {
-            $sheet->setCellValue('A1', 'Нет данных в период с ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('A1', 'Нет данных в период с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
         }
 
         $reportIP = new Xlsx($spreadsheet);
@@ -208,8 +208,8 @@ class ReportController extends Controller
     public function reportIpUniq(Request $request)
     {
 
-        $dateFrom = $request->dateFrom;
-        $dateTo = $request->dateTo;
+        $dateFrom = date('Y-m-d', strtotime($request->dateFrom . '-1 day'));
+        $dateTo = date('Y-m-d', strtotime($request->dateTo . '+1 day'));
 
         $reportIP_path = Storage::path('public/reports/reportIpUniq.xlsx');
 
@@ -261,8 +261,8 @@ class ReportController extends Controller
             $sheet->getColumnDimension('O')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список уникальных IP,которые поcетили сайт');
-            $sheet->setCellValue('C1', 'c ' . $dateFrom);
-            $sheet->setCellValue('D1', 'по ' . $dateTo);
+            $sheet->setCellValue('C1', 'с ' . date('Y-m-d', strtotime($dateFrom . '+1 day'))) ;
+            $sheet->setCellValue('D1', 'по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
             $sheet->setCellValue('A2', 'IP');
             $sheet->setCellValue('B2', 'countryName');
             $sheet->setCellValue('C2', 'countryCode');
@@ -317,26 +317,29 @@ class ReportController extends Controller
             foreach ($IPs_page_unic as $value) {
                 $sheet->setCellValue('A' . $i, $value);
                 $LocationData = Location::get($value);
-                $sheet->setCellValue('B' . $i, $LocationData->countryName);
-                $sheet->setCellValue('C' . $i, $LocationData->countryCode);
-                $sheet->setCellValue('D' . $i, $LocationData->regionCode);
-                $sheet->setCellValue('E' . $i, $LocationData->regionName);
-                $sheet->setCellValue('F' . $i, $LocationData->cityName);
-                $sheet->setCellValue('G' . $i, $LocationData->zipCode);
-                $sheet->setCellValue('H' . $i, $LocationData->isoCode);
-                $sheet->setCellValue('I' . $i, $LocationData->postalCode);
-                $sheet->setCellValue('J' . $i, $LocationData->latitude);
-                $sheet->setCellValue('K' . $i, $LocationData->longitude);
-                $sheet->setCellValue('L' . $i, $LocationData->metroCode);
-                $sheet->setCellValue('M' . $i, $LocationData->areaCode);
-                $sheet->setCellValue('N' . $i, $LocationData->timezone);
-                $sheet->setCellValue('O' . $i, IP::whereBetween('created_at', [$dateFrom, $dateTo])
-                    ->where('IP_ADDR', $value)->count());
-                $i++;
+                if($LocationData != null){
+                    $sheet->setCellValue('B' . $i, $LocationData->countryName);
+                    $sheet->setCellValue('C' . $i, $LocationData->countryCode);
+                    $sheet->setCellValue('D' . $i, $LocationData->regionCode);
+                    $sheet->setCellValue('E' . $i, $LocationData->regionName);
+                    $sheet->setCellValue('F' . $i, $LocationData->cityName);
+                    $sheet->setCellValue('G' . $i, $LocationData->zipCode);
+                    $sheet->setCellValue('H' . $i, $LocationData->isoCode);
+                    $sheet->setCellValue('I' . $i, $LocationData->postalCode);
+                    $sheet->setCellValue('J' . $i, $LocationData->latitude);
+                    $sheet->setCellValue('K' . $i, $LocationData->longitude);
+                    $sheet->setCellValue('L' . $i, $LocationData->metroCode);
+                    $sheet->setCellValue('M' . $i, $LocationData->areaCode);
+                    $sheet->setCellValue('N' . $i, $LocationData->timezone);
+                    $sheet->setCellValue('O' . $i, IP::whereBetween('created_at', [$dateFrom, $dateTo])
+                        ->where('IP_ADDR', $value)->count());
+                    $i++;
+                }
+
             }
 
         } else {
-            $sheet->setCellValue('A1', 'Нет данных в период с ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('A1', 'Нет данных в период с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
         }
 
         $reportIP = new Xlsx($spreadsheet);
@@ -347,8 +350,8 @@ class ReportController extends Controller
     public function reportIpUniqShort(Request $request)
     {
 
-        $dateFrom = $request->dateFrom;
-        $dateTo = $request->dateTo;
+        $dateFrom = date('Y-m-d', strtotime($request->dateFrom . '-1 day'));
+        $dateTo = date('Y-m-d', strtotime($request->dateTo . '+1 day'));
 
         $reportIP_path = Storage::path('public/reports/reportIpUniq.xlsx');
 
@@ -385,14 +388,16 @@ class ReportController extends Controller
             $IPs_page_unic = array_unique($IPs_page);
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список уникальных IP,которые поcетили сайт');
 
             $sheet->setCellValue('A2', 'IP');
-            $sheet->setCellValue('B2', 'Всего посещений c ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('B2', 'Всего посещений с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
+            $sheet->setCellValue('C2', 'От куда ');
 
 
-            $sheet->getStyle('A2:B2')->applyFromArray([
+            $sheet->getStyle('A2:C2')->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -410,9 +415,9 @@ class ReportController extends Controller
 
             $coordN = count($IPs_page_unic) + 2;
 
-            $sheet->getStyle('A2:B2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+            $sheet->getStyle('A2:C2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
 
-            $sheet->getStyle('A3:B' . $coordN)->applyFromArray([
+            $sheet->getStyle('A3:C' . $coordN)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -426,15 +431,24 @@ class ReportController extends Controller
             ]);
 
             $i = 3;
+//            dd($IPs_page_unic);
             foreach ($IPs_page_unic as $value) {
                 $sheet->setCellValue('A' . $i, $value);
                 $sheet->setCellValue('B' . $i, IP::whereBetween('created_at', [$dateFrom, $dateTo])
                     ->where('IP_ADDR', $value)->count());
+                $android_search = IP::whereBetween('created_at', [$dateFrom, $dateTo])->where('IP_ADDR', $value)->first()->page;
+                $android = "Сайт";
+                if (strpos($android_search, "android")) {
+                    $android = "Андроид приложение";
+                } else {
+                    $android = "Сайт";
+                }
+                $sheet->setCellValue('C' . $i, $android);
                 $i++;
             }
 
         } else {
-            $sheet->setCellValue('A1', 'Нет данных в период с ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('A1', 'Нет данных в период с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
         }
 
         $reportIP = new Xlsx($spreadsheet);
@@ -445,8 +459,8 @@ class ReportController extends Controller
     public function reportIpOrder(Request $request)
     {
 
-        $dateFrom = $request->dateFrom;
-        $dateTo = $request->dateTo;
+        $dateFrom = date('Y-m-d', strtotime($request->dateFrom . '-1 day'));
+        $dateTo = date('Y-m-d', strtotime($request->dateTo . '+1 day'));
 
         $reportIP_path = Storage::path('public/reports/reportIpOrder.xlsx');
 
@@ -480,8 +494,9 @@ class ReportController extends Controller
             $sheet->getColumnDimension('P')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список заказов');
-            $sheet->setCellValue('C1', 'c ' . $dateFrom);
-            $sheet->setCellValue('D1', 'по ' . $dateTo);
+            $sheet->setCellValue('C1', 'с ' . date('Y-m-d', strtotime($dateFrom . '+1 day'))) ;
+            $sheet->setCellValue('D1', 'по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
+
             $sheet->setCellValue('A2', 'N');
             $sheet->setCellValue('B2', 'Заказчик');
             $sheet->setCellValue('C2', 'Дополнительно, грн');
@@ -566,7 +581,7 @@ class ReportController extends Controller
                 $i++;
             }
         } else {
-            $sheet->setCellValue('A1', 'Нет данных в период с ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('A1', 'Нет данных в период с ' . date('Y-m-d', strtotime($dateFrom . '+1 day')) . ' по ' . date('Y-m-d', strtotime($dateTo . '-1 day')));
         }
 
 
