@@ -68,13 +68,15 @@
                 <img src="{{ asset('img/logo.jpg') }}" style="width: 100px; height: auto">
             </a>
         </div>
-        <div class="container" style="text-align: center">
-            <a  href="{{route('homeCombo')}}"
-                class="gradient"
-                target="_blank" title="Розрахунок вартості"
-                style="text-decoration: none; margin-top: 20px">Низька ціна та Швидка подача таксі Києва та області.  <br>
-                Розрахуйте вартість поїздки онлайн.</a>
-
+        <div class="container-fluid" style="text-align: center">
+            <div class="row">
+                <div class="col-12">
+                    <a   style="width: 200px" href="https://play.google.com/store/apps/details?id=com.taxi.easy.ua">
+                        <img src="{{ asset('img/google-play-badge.png') }}" style="width: 200px; height: auto; margin-top: -15px"
+                             title="Додаток Android" />
+                    </a>
+                </div>
+            </div>
         </div>
 
 
