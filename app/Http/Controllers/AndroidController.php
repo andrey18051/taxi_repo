@@ -52,6 +52,7 @@ class AndroidController extends Controller
     {
         IPController::getIP('/android');
 
+        $server0 = config('app.taxi2012Url_0');
         $server1 = config('app.taxi2012Url_1');
         $server2 = config('app.taxi2012Url_2');
         $server3 = config('app.taxi2012Url_3');
@@ -68,32 +69,22 @@ class AndroidController extends Controller
 //        $server3 = $connectAPI;
 
         $url = "/api/time";
+        $url = $server0 . $url;
+        $alarmMessage = new TelegramController();
 
-        $url = $server1 . $url;
         if (self::checkDomain($url)) {
-            return $server1;
-        } else {
-            $url = $server2 . $url;
+            $alarmMessage->sendMeMessage($server0 . "Новый");
+            return $server0;
+        }
+            $url = $server1 . $url;
             if (self::checkDomain($url)) {
-                $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                    "Произведено подключение к серверу " . $server2 . ".";
-                $paramsAdmin = [
-                    'subject' => $subject,
-                    'message' => $messageAdmin,
-                ];
-
-                $alarmMessage = new TelegramController();
-                $alarmMessage->sendAlarmMessage($messageAdmin);
-
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                return $server2;
+                $alarmMessage->sendMeMessage($server1 . "Старый");
+                return $server1;
             } else {
-                $url = $server3 . $url;
+                $url = $server2 . $url;
                 if (self::checkDomain($url)) {
                     $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                        "Произведено подключение к серверу " . $server3 . ".";
+                        "Произведено подключение к серверу " . $server2 . ".";
                     $paramsAdmin = [
                         'subject' => $subject,
                         'message' => $messageAdmin,
@@ -104,25 +95,43 @@ class AndroidController extends Controller
 
                     Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
                     Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                    return $server3;
+                    return $server2;
                 } else {
-                    $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . $server3 . ".";
-                    $paramsAdmin = [
-                        'subject' => $subject,
-                        'message' => $messageAdmin,
-                    ];
+                    $url = $server3 . $url;
+                    if (self::checkDomain($url)) {
+                        $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
+                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
+                            "Произведено подключение к серверу " . $server3 . ".";
+                        $paramsAdmin = [
+                            'subject' => $subject,
+                            'message' => $messageAdmin,
+                        ];
 
-                    $alarmMessage = new TelegramController();
+                        $alarmMessage = new TelegramController();
+                        $alarmMessage->sendAlarmMessage($messageAdmin);
+
+                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+                        return $server3;
+                    } else {
+                        $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
+                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
+                            "Ошибка подключения к серверу " . $server3 . ".";
+                        $paramsAdmin = [
+                            'subject' => $subject,
+                            'message' => $messageAdmin,
+                        ];
+
+                        $alarmMessage = new TelegramController();
 //                    $alarmMessage->sendAlarmMessage($messageAdmin);
 
 //                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
 
-                    return '400';
+                        return '400';
+                    }
                 }
-            }
+
         }
     }
 //    public function costMap($originLatitude, $originLongitude, $destLatitude, $destLongitude, $tariff)
@@ -142,8 +151,13 @@ class AndroidController extends Controller
 //        $params['lat2'] = $destLatitude;
 //        $params['lng2'] = $destLongitude;
 //
-////        $username = config('app.username');
-////        $password = hash('SHA512', config('app.password'));
+//if($connectAPI === config('app.taxi2012Url_0')) {
+//$username = "SMS_NADO_OTPR";
+//$password = hash('SHA512', "fhHk89)_");
+//} else {
+//    $username = config('app.username');
+//    $password = hash('SHA512', config('app.password'));
+//}
 ////        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 //        /**
 //         * Откуда
@@ -352,8 +366,13 @@ class AndroidController extends Controller
 //        $params['lat2'] = $destLatitude;
 //        $params['lng2'] = $destLongitude;
 //
-////        $username = config('app.username');
-////        $password = hash('SHA512', config('app.password'));
+//if($connectAPI === config('app.taxi2012Url_0')) {
+//$username = "SMS_NADO_OTPR";
+//$password = hash('SHA512', "fhHk89)_");
+//} else {
+//    $username = config('app.username');
+//    $password = hash('SHA512', config('app.password'));
+//}
 ////        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 ////        $city = ", місто Київ";
 //        /**
@@ -639,11 +658,6 @@ class AndroidController extends Controller
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff)
     {
-        /**
-         * Test
-         */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -658,8 +672,13 @@ class AndroidController extends Controller
          * Параметры запроса
          */
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+        if($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = "Андроід-користувач";
@@ -761,11 +780,6 @@ class AndroidController extends Controller
 
     public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -776,8 +790,14 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+        if($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
+
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = $user;
@@ -937,11 +957,7 @@ class AndroidController extends Controller
 
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff)
     {
-        /**
-         * Test
-         */
-//        $username = '0936734488';
-//        $password = hash('SHA512', '22223344');
+
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -956,8 +972,13 @@ class AndroidController extends Controller
          * Параметры запроса
          */
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+        if($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = "Андроід-користувач";
@@ -1085,8 +1106,13 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+        if($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $params['user_full_name'] = $user;
@@ -1331,16 +1357,22 @@ class AndroidController extends Controller
     {
 //        $username = '0936734488';
 //        $password = hash('SHA512', '22223344');
-
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
         }
+
+        if($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
+        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+
         $url = $connectAPI . '/api/geodata/search';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -1414,8 +1446,13 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
 
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
+        if($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         /**
