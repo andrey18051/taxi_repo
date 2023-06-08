@@ -49,14 +49,14 @@ Route::middleware('throttle:6,1')->get('/android/costMap/{originLatitude}/{origi
 Route::middleware('throttle:6,1')->get('/android/orderMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}/{tarif}/{phone}', [AndroidController::class, 'orderMap'])
     ->name('orderMap');
 
-Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}', [AndroidController::class, 'costSearch'])
+Route::middleware('throttle:6,1')->get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/', [AndroidController::class, 'costSearch'])
     ->name('costSearch');
 Route::middleware('throttle:6,1')->get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}', [AndroidController::class, 'orderSearch'])
     ->name('orderSearch');
 
-Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}', [AndroidController::class, 'costSearchGeo'])
+Route::middleware('throttle:6,1')->get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/', [AndroidController::class, 'costSearchGeo'])
     ->name('costSearchGeo');
-Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}', [AndroidController::class, 'orderSearchGeo'])
+Route::middleware('throttle:6,1')->get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}', [AndroidController::class, 'orderSearchGeo'])
     ->name('orderSearchGeo');
 
 Route::get('/android/fromSearchGeo/{originLatitude}/{originLongitude}', [AndroidController::class, 'fromSearchGeo'])
@@ -71,3 +71,4 @@ Route::get('/android/approvedPhonesTest/{phone}/{code}', [AndroidController::cla
 Route::get('/android/autocompleteSearchComboHid/{name}', [AndroidController::class, 'autocompleteSearchComboHid'])->name('autocompleteSearchComboHid');
 
 Route::get('/android/sentPhone/{message}', [AndroidController::class, 'sentPhone'])->name('sentPhone');
+Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDomain'])->name('checkDomain');

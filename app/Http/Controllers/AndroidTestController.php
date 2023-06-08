@@ -637,7 +637,7 @@ class AndroidTestController extends Controller
 //
 //    }
 
-    public function costSearch($from, $from_number, $to, $to_number, $tariff)
+    public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
         /**
          * Test
@@ -662,11 +662,11 @@ class AndroidTestController extends Controller
 //        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $params['user_full_name'] = "Андроід-користувач";
-        $params['user_phone'] = "user_phone";
+        $params['user_full_name'] = $user;
+        $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
-//        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
         $reservation = $params['reservation'];
@@ -716,6 +716,15 @@ class AndroidTestController extends Controller
 
         $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
+
+        /**
+         * Сохранние расчетов в базе
+         */
+        $params['from'] = $from;
+        $params['from_number'] = $from_number;
+        $params['to'] = $to;
+        $params['to_number'] = $to_number;
+        self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
@@ -935,7 +944,7 @@ class AndroidTestController extends Controller
     }
 
 
-    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff)
+    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
         /**
          * Test
@@ -960,11 +969,11 @@ class AndroidTestController extends Controller
 //        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $params['user_full_name'] = "Андроід-користувач";
-        $params['user_phone'] = "user_phone";
+        $params['user_full_name'] = $user;
+        $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
-//        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
         $reservation = $params['reservation'];
@@ -1013,6 +1022,16 @@ class AndroidTestController extends Controller
 
         $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
+
+        /**
+         * Сохранние расчетов в базе
+         */
+        $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
+        $params['from_number'] = " ";
+        $params['to'] = $to;
+        $params['to_number'] = $to_number;
+        self::saveCoast($params);
+
 
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
@@ -1268,6 +1287,36 @@ class AndroidTestController extends Controller
     }
 
 
+    public function saveCoast($params)
+    {
+        /**
+         * Сохранние расчетов в базе
+         */
+
+        $order = new Order();
+        $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+        $order->user_full_name = $params['user_full_name'];//Полное имя пользователя
+        $order->user_phone = $params['user_phone'];//Телефон пользователя
+        $order->client_sub_card = null;
+        $order->required_time = $params['required_time']; //Время подачи предварительного заказа
+        $order->reservation = $params['reservation']; //Обязательный. Признак предварительного заказа: True, False
+        $order->route_address_entrance_from = null;
+        $order->comment = $params['comment'];  //Комментарий к заказу
+        $order->add_cost = $params['add_cost']; //Добавленная стоимость
+        $order->wagon = $params['wagon']; //Универсал: True, False
+        $order->minibus = $params['minibus']; //Микроавтобус: True, False
+        $order->premium = $params['premium']; //Машина премиум-класса: True, False
+        $order->flexible_tariff_name = $params['flexible_tariff_name']; //Гибкий тариф
+        $order->route_undefined = $params['route_undefined']; //По городу: True, False
+        $order->routefrom = $params['from']; //Обязательный. Улица откуда.
+        $order->routefromnumber = $params['from_number']; //Обязательный. Дом откуда.
+        $order->routeto = $params['to']; //Обязательный. Улица куда.
+        $order->routetonumber = $params['to_number']; //Обязательный. Дом куда.
+        $order->taxiColumnId = $params['taxiColumnId']; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->save();
+
+    }
     public function saveOrder($params)
     {
         /**

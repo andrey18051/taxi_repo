@@ -33,7 +33,7 @@ class AndroidController extends Controller
             return false;
         }
         $curlInit = curl_init($domain);
-        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 12);
+        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($curlInit, CURLOPT_HEADER, true);
         curl_setopt($curlInit, CURLOPT_NOBODY, true);
         curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
@@ -41,10 +41,16 @@ class AndroidController extends Controller
         $response = curl_exec($curlInit);
         curl_close($curlInit);
 
+//        $url = $domain;
+//        $response = Http::timeout(5)->get($url);
+
+//dd($response->status());
+//
         if ($response) {
             return true;
 //            return false;
         }
+////dd($response);
         return false;
     }
 
@@ -73,14 +79,17 @@ class AndroidController extends Controller
         $alarmMessage = new TelegramController();
 
         if (self::checkDomain($url)) {
-            $alarmMessage->sendMeMessage($server0 . "Новый");
+
             return $server0;
-        }
+        } else {
+            $alarmMessage->sendMeMessage($server0 . $server1);
+            $url = "/api/time";
             $url = $server1 . $url;
             if (self::checkDomain($url)) {
-                $alarmMessage->sendMeMessage($server1 . "Старый");
+                $alarmMessage->sendMeMessage($server0 . "Новый не работает");
                 return $server1;
             } else {
+                $url = "/api/time";
                 $url = $server2 . $url;
                 if (self::checkDomain($url)) {
                     $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
@@ -97,6 +106,8 @@ class AndroidController extends Controller
                     Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
                     return $server2;
                 } else {
+                    $url = "/api/time";
+
                     $url = $server3 . $url;
                     if (self::checkDomain($url)) {
                         $messageAdmin = "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
@@ -131,7 +142,7 @@ class AndroidController extends Controller
                         return '400';
                     }
                 }
-
+            }
         }
     }
 //    public function costMap($originLatitude, $originLongitude, $destLatitude, $destLongitude, $tariff)
@@ -656,7 +667,7 @@ class AndroidController extends Controller
 //
 //    }
 
-    public function costSearch($from, $from_number, $to, $to_number, $tariff)
+    public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
 
         $connectAPI = self::connectApi();
@@ -675,17 +686,19 @@ class AndroidController extends Controller
         if($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
+            $add_cost = 0;
         } else {
             $username = config('app.username');
             $password = hash('SHA512', config('app.password'));
+            $add_cost = 0;
         }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $params['user_full_name'] = "Андроід-користувач";
-        $params['user_phone'] = "user_phone";
+        $params['user_full_name'] = $user;
+        $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
-//        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
         $reservation = $params['reservation'];
@@ -736,6 +749,14 @@ class AndroidController extends Controller
         $combos = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
 
+        /**
+         * Сохранние расчетов в базе
+         */
+        $params['from'] = $from;
+        $params['from_number'] = $from_number;
+        $params['to'] = $to;
+        $params['to_number'] = $to_number;
+        self::saveCoast($params);
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -747,7 +768,7 @@ class AndroidController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "comment", //Комментарий к заказу
-            'add_cost' => -39,
+            'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -793,9 +814,11 @@ class AndroidController extends Controller
         if($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
+            $add_cost = 0;
         } else {
             $username = config('app.username');
             $password = hash('SHA512', config('app.password'));
+            $add_cost = 0;
         }
 
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
@@ -872,7 +895,7 @@ class AndroidController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "ТЕСТ!!!!", //Комментарий к заказу
-            'add_cost' => -39,
+            'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -955,7 +978,7 @@ class AndroidController extends Controller
     }
 
 
-    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff)
+    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
 
 
@@ -975,17 +998,19 @@ class AndroidController extends Controller
         if($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
+            $add_cost = 0;
         } else {
             $username = config('app.username');
             $password = hash('SHA512', config('app.password'));
+            $add_cost = 0;
         }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
-        $params['user_full_name'] = "Андроід-користувач";
-        $params['user_phone'] = "user_phone";
+        $params['user_full_name'] = $user;
+        $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
-//        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
+        $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
         $reservation = $params['reservation'];
@@ -1034,7 +1059,14 @@ class AndroidController extends Controller
 
         $combos = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
-
+        /**
+         * Сохранние расчетов в базе
+         */
+        $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
+        $params['from_number'] = " ";
+        $params['to'] = $to;
+        $params['to_number'] = $to_number;
+        self::saveCoast($params);
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -1047,7 +1079,7 @@ class AndroidController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "comment", //Комментарий к заказу
-            'add_cost' => -39,
+            'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -1109,9 +1141,11 @@ class AndroidController extends Controller
         if($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
+            $add_cost = 0;
         } else {
             $username = config('app.username');
             $password = hash('SHA512', config('app.password'));
+            $add_cost = 0;
         }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -1238,7 +1272,7 @@ class AndroidController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "ТЕСТ!!!!  Сразу удалить этот заказ", //Комментарий к заказу
-            'add_cost' => -39,
+            'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -1293,7 +1327,36 @@ class AndroidController extends Controller
         }
     }
 
+    public function saveCoast($params)
+    {
+        /**
+         * Сохранние расчетов в базе
+         */
 
+        $order = new Order();
+        $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+        $order->user_full_name = $params['user_full_name'];//Полное имя пользователя
+        $order->user_phone = $params['user_phone'];//Телефон пользователя
+        $order->client_sub_card = null;
+        $order->required_time = $params['required_time']; //Время подачи предварительного заказа
+        $order->reservation = $params['reservation']; //Обязательный. Признак предварительного заказа: True, False
+        $order->route_address_entrance_from = null;
+        $order->comment = $params['comment'];  //Комментарий к заказу
+        $order->add_cost = $params['add_cost']; //Добавленная стоимость
+        $order->wagon = $params['wagon']; //Универсал: True, False
+        $order->minibus = $params['minibus']; //Микроавтобус: True, False
+        $order->premium = $params['premium']; //Машина премиум-класса: True, False
+        $order->flexible_tariff_name = $params['flexible_tariff_name']; //Гибкий тариф
+        $order->route_undefined = $params['route_undefined']; //По городу: True, False
+        $order->routefrom = $params['from']; //Обязательный. Улица откуда.
+        $order->routefromnumber = $params['from_number']; //Обязательный. Дом откуда.
+        $order->routeto = $params['to']; //Обязательный. Улица куда.
+        $order->routetonumber = $params['to_number']; //Обязательный. Дом куда.
+        $order->taxiColumnId = $params['taxiColumnId']; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->save();
+
+    }
     public function saveOrder($params)
     {
         /**
@@ -1366,9 +1429,11 @@ class AndroidController extends Controller
         if($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
+            $add_cost = 0;
         } else {
             $username = config('app.username');
             $password = hash('SHA512', config('app.password'));
+            $add_cost = 0;
         }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
@@ -1449,9 +1514,11 @@ class AndroidController extends Controller
         if($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
+            $add_cost = 0;
         } else {
             $username = config('app.username');
             $password = hash('SHA512', config('app.password'));
+            $add_cost = 0;
         }
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 

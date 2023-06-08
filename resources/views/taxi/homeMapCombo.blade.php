@@ -114,7 +114,6 @@
                                                 <div class="col-md-12">
                                                     <label for="$flexible_tariff_name" class="form-label">Тариф</label>
                                                     <select class="form-select" id="flexible_tariff_name" name="flexible_tariff_name" >
-                                                        <option></option>
                                                         @for ($i = 0; $i < count($json_arr); $i++)
                                                             <option>{{$json_arr[$i]['name']}}</option>
                                                         @endfor

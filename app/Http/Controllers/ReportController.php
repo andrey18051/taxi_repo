@@ -38,26 +38,25 @@ class ReportController extends Controller
 
         $orders = Order::whereBetween('created_at', [$dateFrom, $dateTo])->get();
 
-        foreach ($orders as $value) {
-            if ($value->IP_ADDR !== null) {
-                switch ($value->IP_ADDR) {
-                    case '31.202.139.47':
-                        break;
-                    case '127.0.0.1':
-                        break;
-                    case null:
-                        break;
-                    default:
-                        $orders_unic[$i] = $value->IP_ADDR;
-                        $i++;
-                };
-            }
-        }
-        if($i !== 0) {
-            $orders_unic = array_unique($orders_unic);
+//        foreach ($orders as $value) {
+//            if ($value->IP_ADDR !== null) {
+//                switch ($value->IP_ADDR) {
+//                    case '31.202.139.47':
+//                        break;
+//                    case '127.0.0.1':
+//                        break;
+//                    case null:
+//                        break;
+//                    default:
+//                        $orders_unic[$i] = $value->IP_ADDR;
+//                        $i++;
+//                };
+//            }
+//        }
+        if($orders !== null) {
+//            $orders_unic = array_unique($orders_unic);
 
-            $sheet->setCellValue('B' . 1, 'Это список IP, с которых делали расчеты маршрутов'
-                . ' с ' . $dateFrom . ' по ' . $dateTo);
+            $sheet->setCellValue('B' . 1, 'Расчеты с ' . $dateFrom . ' по ' . $dateTo);
 
             $sheet->getStyle('A2')->applyFromArray([
                 'borders' => [
@@ -75,11 +74,12 @@ class ReportController extends Controller
                 ]
             ]);
 
-            $coordN = count($orders_unic) + 2;
+            $coordN = $orders->count() + 2;
 
-            $sheet->getStyle('A2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
 
-            $sheet->getStyle('A3:A' . $coordN)->applyFromArray([
+            $sheet->getStyle('A2:O2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+            $sheet->getStyle('A2:O' . $coordN)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -94,10 +94,70 @@ class ReportController extends Controller
 
 
             $i = 3;
+
             $sheet->getColumnDimension('A')->setAutoSize(true);
-            $sheet->setCellValue('A2', 'IP');
-            foreach ($orders_unic as $value) {
-                $sheet->setCellValue('A' . $i, $value);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setAutoSize(true);
+            $sheet->getColumnDimension('F')->setAutoSize(true);
+            $sheet->getColumnDimension('G')->setAutoSize(true);
+            $sheet->getColumnDimension('H')->setAutoSize(true);
+            $sheet->getColumnDimension('I')->setAutoSize(true);
+            $sheet->getColumnDimension('J')->setAutoSize(true);
+            $sheet->getColumnDimension('K')->setAutoSize(true);
+            $sheet->getColumnDimension('L')->setAutoSize(true);
+            $sheet->getColumnDimension('M')->setAutoSize(true);
+            $sheet->getColumnDimension('N')->setAutoSize(true);
+            $sheet->getColumnDimension('O')->setAutoSize(true);
+            $sheet->getColumnDimension('P')->setAutoSize(true);
+
+            $sheet->setCellValue('A2', 'N');
+            $sheet->setCellValue('B2', 'Заказчик');
+            $sheet->setCellValue('C2', 'Телефон');
+            $sheet->setCellValue('D2', 'Универсал');
+            $sheet->setCellValue('E2', 'Микроавтобус');
+            $sheet->setCellValue('F2', 'Премиум');
+            $sheet->setCellValue('G2', 'Тариф');
+            $sheet->setCellValue('H2', 'По городу');
+            $sheet->setCellValue('I2', 'Откуда');
+            $sheet->setCellValue('J2', '');
+            $sheet->setCellValue('K2', 'Куда');
+            $sheet->setCellValue('L2', '');
+            $sheet->setCellValue('M2', 'Способ оплаты');
+            $sheet->setCellValue('N2', 'IP_ADDR');
+            $sheet->setCellValue('O2', 'Дата и время');
+
+//dd($orders);
+            foreach ($orders  as $value) {
+                $sheet->setCellValue('A' . $i, $i - 2);
+                $sheet->setCellValue('B' . $i, $value->user_full_name );
+                $sheet->setCellValue('C' . $i, $value->user_phone );
+                if ($value->wagon !== 0) {
+                    $sheet->setCellValue('D' . $i, $value->wagon );
+                }
+                if ($value->minibus !== 0) {
+                    $sheet->setCellValue('E' . $i, $value->minibus );
+                }
+                if ($value->premium !== 0) {
+                    $sheet->setCellValue('F' . $i, $value->premium );
+                }
+                $sheet->setCellValue('G' . $i, $value->flexible_tariff_name );
+                if ($value->route_undefined  == 1) {
+                    $sheet->setCellValue('H' . $i, 'Да');
+                }
+                $sheet->setCellValue('I' . $i, $value->routefrom );
+                $sheet->setCellValue('J' . $i,$value->routefromnumber );
+                $sheet->setCellValue('K' . $i, $value->routeto );
+                $sheet->setCellValue('L' . $i, $value->routetonumber );
+                if ($value->payment_type  == 1) {
+                    $sheet->setCellValue('M' . $i, 'Наличные');
+                } {
+                    $sheet->setCellValue('M' . $i, 'Безналичные');
+                }
+                $sheet->setCellValue('N' . $i, $value->IP_ADDR );
+                $sheet->setCellValue('O' . $i, $value->created_at );
+
                 $i++;
             }
         } else {
