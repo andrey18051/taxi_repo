@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AndroidTestController;
+use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\BredoGeneratorController;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
@@ -1019,3 +1021,13 @@ Route::get('/about/{service}', function (string $service) {
     $page = "services." . $service;
     return view($page);
 })->name('about-service');
+
+
+/**
+ * BlackList
+ */
+
+Route::get('/blacklist', [BlackListController::class,'index'])->name('index-black');
+
+Route::get('/blacklist/addToBlacklist', [BlackListController::class,'addToBlacklist'])->name('addToBlacklist');
+Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'deleteFromBlacklist'])->name('deleteFromBlacklist');

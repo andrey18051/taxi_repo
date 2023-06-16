@@ -72,3 +72,13 @@ Route::get('/android/autocompleteSearchComboHid/{name}', [AndroidController::cla
 
 Route::get('/android/sentPhone/{message}', [AndroidController::class, 'sentPhone'])->name('sentPhone');
 Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDomain'])->name('checkDomain');
+
+
+
+
+Route::get('/android/addUser/{name}/{email}', [AndroidController::class, 'addUser'])->name('checkDomain');
+Route::get('/android/verifyBlackListUser/{email}', [AndroidController::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
+
+
+
+

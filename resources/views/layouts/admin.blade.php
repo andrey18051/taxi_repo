@@ -44,6 +44,7 @@
                             <li><router-link to="/admin/users">Users</router-link></li>
                             <li><router-link to="/admin/services">Services</router-link></li>
                             <li><a href="{{ asset('/services/serviceNew') }}">Services Add</a>
+                            <li><a href="{{ asset('/blacklist') }}">Black List</a>
                             <li><a href="{{ asset('/') }}">Taxi</a>
                             <li><a href="{{ asset('/home') }}">Report</a>
                         </ul>

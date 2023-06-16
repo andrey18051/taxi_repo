@@ -71,3 +71,9 @@ Route::get('/android/approvedPhonesTest/{phone}/{code}', [AndroidTestController:
 Route::get('/android/autocompleteSearchComboHid/{name}', [AndroidTestController::class, 'autocompleteSearchComboHid'])->name('autocompleteSearchComboHid');
 
 Route::get('/android/sentPhone/{message}', [AndroidTestController::class, 'sentPhone'])->name('sentPhone');
+Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDomain'])->name('checkDomain');
+
+
+
+Route::get('/android/addUser/{name}/{email}', [AndroidTestController::class, 'addUser'])->name('checkDomain');
+Route::get('/android/verifyBlackListUser/{email}', [AndroidTestController::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
