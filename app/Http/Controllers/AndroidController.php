@@ -58,7 +58,6 @@ class AndroidController extends Controller
         $server2 = config('app.taxi2012Url_2');
         $server3 = config('app.taxi2012Url_3');
 
-
         $subject = 'Отсутствует доступ к серверу.';
 
 
