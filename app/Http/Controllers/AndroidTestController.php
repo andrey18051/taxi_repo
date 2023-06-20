@@ -51,7 +51,7 @@ class AndroidTestController extends Controller
     public function connectAPI(): string
     {
 
-        IPController::getIP('/android');
+        IPController::getIP('/android/PAS2');
 
         $subject = 'Отсутствует доступ к серверу.';
 
