@@ -77,7 +77,7 @@ class DriverController extends Controller
             'brand' => "Марка авто: " . $brand,
             'model' => "Модель: " . $model,
             'type' => "Тип кузова: " . $type,
-            'color' => "Колор: " . $color,
+            'color' => "Колір: " . $color,
             'year' => "Рік випуску: " . $year,
             'number' => "Державний номер: " . $number
         ];
@@ -91,7 +91,7 @@ class DriverController extends Controller
             . "Марка авто: " . $brand . ". "
             . "Модель: " . $model . ". "
             . "Тип кузова: " . $type . ". "
-            . "Колор: " . $color . ". "
+            . "Колір: " . $color . ". "
             . "Рік випуску: " . $year . ". "
             . "Державний номер: " . $number . ". ";
 
@@ -116,7 +116,7 @@ class DriverController extends Controller
 //                        'brand' => "Марка авто: " . $brand,
 //                        'model' => "Модель: " . $model,
 //                        'type' => "Тип кузова: " . $type,
-//                        'color' => "Колор: " . $color,
+//                        'color' => "Колір: " . $color,
 //                        'year' => "Рік випуску: " . $year,
 //                        'number' => "Державний номер: " . $number
 //                    ];
@@ -130,7 +130,7 @@ class DriverController extends Controller
 //                        . "Марка авто: " . $brand . ". "
 //                        . "Модель: " . $model . ". "
 //                        . "Тип кузова: " . $type . ". "
-//                        . "Колор: " . $color . ". "
+//                        . "Колір: " . $color . ". "
 //                        . "Рік випуску: " . $year . ". "
 //                        . "Державний номер: " . $number . ". ";
 //
