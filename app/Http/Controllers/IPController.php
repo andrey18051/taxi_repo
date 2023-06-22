@@ -18,6 +18,7 @@ class IPController extends Controller
         if (getenv("REMOTE_ADDR") !== '31.202.139.47') {
             $IP =  new IP();
             $IP->IP_ADDR = getenv("REMOTE_ADDR");
+//            $IP->page = 'https://m.easy-order-taxi.site' . $page;
             $IP->page = 'https://m.easy-order-taxi.site' . $page;
             $IP->save();
         }

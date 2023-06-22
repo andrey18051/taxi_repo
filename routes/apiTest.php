@@ -77,3 +77,6 @@ Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDom
 
 Route::get('/android/addUser/{name}/{email}', [AndroidTestController::class, 'addUser'])->name('checkDomain');
 Route::get('/android/verifyBlackListUser/{email}', [AndroidTestController::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
+
+Route::get('/android/startIP', [AndroidTestController::class, 'startIP'])->name('startIP');
+

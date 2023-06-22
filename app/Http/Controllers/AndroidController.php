@@ -190,7 +190,7 @@ class AndroidController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -234,7 +234,7 @@ class AndroidController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
+            'comment' => " ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -321,7 +321,7 @@ class AndroidController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -359,7 +359,7 @@ class AndroidController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
+            'comment' => " ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -498,7 +498,7 @@ class AndroidController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -539,7 +539,7 @@ class AndroidController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
+            'comment' => " ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -638,7 +638,7 @@ class AndroidController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -731,7 +731,7 @@ class AndroidController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
+            'comment' => " ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False

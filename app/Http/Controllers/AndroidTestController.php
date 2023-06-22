@@ -48,6 +48,10 @@ class AndroidTestController extends Controller
         return false;
     }
 
+    public function startIP()
+    {
+        IPController::getIP('/android/PAS2/startPage');
+    }
     public function connectAPI(): string
     {
         IPController::getIP('/android/PAS2');
