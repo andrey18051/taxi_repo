@@ -287,7 +287,8 @@
 
                                                             <div class="col-md-6">
                                                                 <input id="phone" type="text"
-                                                                        class="form-control @error('phone') is-invalid @enderror"
+{{--                                                                        class="form-control @error('phone') is-invalid @enderror"--}}
+                                                                        class="form-control"
                                                                         name="phone"
 
                                                                         @isset($params["phone"])
@@ -296,11 +297,12 @@
                                                                            value="{{ old('phone') }}"   autocomplete="user_phone"
                                                                         @endisset
 
-                                                                        pattern="[\+]\d{12}"
+{{--                                                                        pattern="[\+]\d{12}"--}}
                                                                         placeholder="+380936665544"
-                                                                        title="Формат вводу: +380936665544"
-                                                                        minlength="13"
-                                                                        maxlength="13">
+{{--                                                                        title="Формат вводу: +380936665544"--}}
+{{--                                                                        minlength="13"--}}
+{{--                                                                        maxlength="13"--}}
+                                                                >
 
                                                                 @error('phone')
                                                                 <span class="invalid-feedback" role="alert">
