@@ -30,7 +30,7 @@
                         Анкета водія
                     </p>
 
-                    <a   style="width: 200px" href="https://play.google.com/store/apps/details?id=com.taxieasyua.job">
+                    <a   style="width: 200px" href="https://play.google.com/store/apps/details?id=com.taxieasyua.job" target="_blank">
                         <img src="{{ asset('img/google-play-badge.png') }}" style="width: 200px; height: auto; margin-top: -15px"
                              title="Додаток Android" />
                     </a>
