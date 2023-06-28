@@ -74,7 +74,7 @@
         <div class="container-fluid" style="text-align: center">
             <div class="row">
                 <div class="col-12">
-                    <a   style="width: 200px" href="https://play.google.com/store/apps/details?id=com.taxi.easy.ua">
+                    <a   style="width: 200px" href="https://play.google.com/store/apps/details?id=com.taxi.easy.ua" target="_blank">
                         <img src="{{ asset('img/google-play-badge.png') }}" style="width: 200px; height: auto; margin-top: -15px"
                              title="Додаток Android" />
                     </a>

@@ -80,3 +80,8 @@ Route::get('/android/verifyBlackListUser/{email}', [AndroidTestController::class
 
 Route::get('/android/startIP', [AndroidTestController::class, 'startIP'])->name('startIP');
 
+Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/', [AndroidTestController::class, 'costSearchMarkers'])
+    ->name('costSearchMarkers');
+
+Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/', [AndroidTestController::class, 'orderSearchMarkers'])
+    ->name('orderSearchMarkers');

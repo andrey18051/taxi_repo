@@ -738,7 +738,7 @@ class Android149Controller extends Controller
         ])->get($url, [
             'lat' => $originLatitude, //Обязательный. Широта
             'lng' => $originLongitude, //Обязательный. Долгота
-            /*'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
+            'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
         ]);
         $response_arr_from_api = json_decode($response_from_api, true);
 
@@ -994,13 +994,13 @@ class Android149Controller extends Controller
 
         if (!$params["route_undefined"]) {
             $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] . " " . $params['routefromnumber'] .
+                " за маршрутом від " . $params['from'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
                 ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
                 $params['dispatching_order_uid'];
         } else {
             $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] . " " . $params['routefromnumber'] .
+                " за маршрутом від " . $params['from'] .
                 " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
                 $params['dispatching_order_uid'];
         }
@@ -1141,7 +1141,7 @@ class Android149Controller extends Controller
 //        ])->get($url, [
 //            'lat' => $originLatitude, //Обязательный. Широта
 //            'lng' => $originLongitude, //Обязательный. Долгота
-//            /*'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
+//            'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
 //        ]);
 //        $response_arr_from_api = json_decode($response_from_api, true);
 //dd($response_arr_from_api);
