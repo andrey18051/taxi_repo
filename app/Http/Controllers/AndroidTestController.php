@@ -1824,9 +1824,12 @@ class AndroidTestController extends Controller
     public function autocompleteSearchComboHid($name)
     {
         $combos = ComboTest::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
+        if ($combos != null) {
+            $response["message"] = $combos->street;
+        } else {
+            $response["message"] = 1;
+        }
         $response["resp_result"] = 0;
-        $response["message"] = $combos->street;
-//dd($combos);
         return  response($response, 200)
             ->header('Content-Type', 'json');
     }

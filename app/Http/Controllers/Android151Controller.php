@@ -933,8 +933,22 @@ class Android151Controller extends Controller
         /**
          * Test
          */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
+        $connectAPI = self::connectApi();
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
+
+        if ($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -1065,7 +1079,7 @@ class Android151Controller extends Controller
                     ->header('Content-Type', 'json');
             }
 
-            $city = " (Одеса)";
+            $city = "(Київ та область)";
             if ($response_arr['geo_streets']['geo_street'] != null) {
                 $params['to'] = $response_arr['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
                 $params['to_number'] = $response_arr['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
@@ -1169,8 +1183,22 @@ class Android151Controller extends Controller
         /**
          * Test
          */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
+        $connectAPI = self::connectApi();
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
+
+        if ($connectAPI === config('app.taxi2012Url_0')) {
+            $username = "SMS_NADO_OTPR";
+            $password = hash('SHA512', "fhHk89)_");
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+        }
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
@@ -1848,8 +1876,12 @@ class Android151Controller extends Controller
     public function autocompleteSearchComboHid($name)
     {
         $combos = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
+        if ($combos != null) {
+            $response["message"] = $combos->street;
+        } else {
+            $response["message"] = 1;
+        }
         $response["resp_result"] = 0;
-        $response["message"] = $combos->street;
 
         return  response($response, 200)
             ->header('Content-Type', 'json');
