@@ -210,7 +210,7 @@ class AndroidTestController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -254,8 +254,8 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
-            'add_cost' => -39,
+            'comment' => " ", //Комментарий к заказу
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -284,7 +284,6 @@ class AndroidTestController extends Controller
                 ->header('Content-Type', 'json');
         }
     }
-
 
     public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
@@ -339,7 +338,7 @@ class AndroidTestController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -377,8 +376,8 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "ТЕСТ!!!!", //Комментарий к заказу
-            'add_cost' => -39,
+            'comment' => " ", //Комментарий к заказу
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -404,6 +403,14 @@ class AndroidTestController extends Controller
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
 
             self::saveOrder($params);
+
+            $LatLng = self::geoDataSearch($from, $from_number);
+            $response_ok["from_lat"] = $LatLng["lat"];
+            $response_ok["from_lng"] =  $LatLng["lng"];
+
+            $LatLng = self::geoDataSearch($to, $to_number);
+            $response_ok["lat"] = $LatLng["lat"];
+            $response_ok["lng"] =  $LatLng["lng"];
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["discount_trip"] = $response_arr["discount_trip"];
@@ -456,7 +463,6 @@ class AndroidTestController extends Controller
                 ->header('Content-Type', 'json');
         }
     }
-
 
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
@@ -512,7 +518,7 @@ class AndroidTestController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -566,8 +572,8 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
-            'add_cost' => -39,
+            'comment' => " ", //Комментарий к заказу
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -582,14 +588,11 @@ class AndroidTestController extends Controller
 //dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
-            if($route_undefined == false) {
-                $Lat_lan =  self::geoDataSearch($to, $to_number);
-                $response_ok["lat"] = $Lat_lan["lat"];
-                $response_ok["lng"] = $Lat_lan["lng"];
-            } else {
-                $response_ok["lat"] = 0;
-                $response_ok["lng"] = 0;
-            }
+
+            $response_ok["from_lat"] = 0;
+            $response_ok["from_lng"] =  0;
+            $response_ok["lat"] = 0;
+            $response_ok["lng"] = 0;
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
@@ -675,7 +678,7 @@ class AndroidTestController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "comment"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -686,9 +689,8 @@ class AndroidTestController extends Controller
         /**
          * Откуда
          */
-        $city = "(Київ та область)";
 
-        //         $destLatitude, $destLongitude
+        $from = "Місце відправлення";
         $r = 50;
         do {
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
@@ -702,85 +704,6 @@ class AndroidTestController extends Controller
             $r += 50;
         } while (empty($response_arr_from) && $r < 200);
 
-        $url = $connectAPI . '/api/geodata/nearest';
-
-        $response_from_api = Http::withHeaders([
-            'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
-        ])->get($url, [
-            'lat' => $originLatitude, //Обязательный. Широта
-            'lng' => $originLongitude, //Обязательный. Долгота
-            'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
-        ]);
-        $response_arr_from_api = json_decode($response_from_api, true);
-
-        if ($response_arr_from_api['geo_streets']['geo_street'] != null) {
-            $params['routefrom'] = $response_arr_from_api['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
-            $params['routefromnumber'] = $response_arr_from_api['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
-
-            $from_geo = $params['routefrom'] . ", буд." . $params['routefromnumber']  . $city;
-        }
-        if ($response_arr_from_api['geo_objects']['geo_object'] != null) {
-            $params['routefrom'] = $response_arr_from_api['geo_objects']['geo_object'][0]['name']; //Обязательный. Улица откуда.
-            $params['routefromnumber'] = null; //Обязательный. Дом откуда.
-            $from_geo = $params['routefrom'] . $city;
-        }
-        if ($response_arr_from_api['geo_streets']['geo_street'] == null && $response_arr_from_api['geo_objects']['geo_object'] == null) {
-
-            $response_error["order_cost"] = "0";
-            $response_error["Message"] = "Помілка розрахунку.";
-            $alarmMessageText = "Помілка розрахунку. Клиент $user, телефон $phone.";
-            $alarmMessage = new TelegramController();
-            try {
-                $alarmMessage->sendMeMessage($alarmMessageText);
-                $alarmMessage->sendAlarmMessage($alarmMessageText);
-            } catch (Exception $e) {
-                $subject = 'Ошибка в телеграмм';
-                $paramsCheck = [
-                    'subject' => $subject,
-                    'message' => $e,
-                ];
-
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
-
-
-            $paramsAdmin = [
-                'subject' => "Ошибочный расчет",
-                'message' => $alarmMessageText
-            ];
-            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-            $url = $connectAPI . '/api/weborders';
-            Http::withHeaders([
-                'Authorization' => $authorization,
-                "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
-            ])->post($url, [
-                'user_full_name' => $user,
-                'user_phone' => $phone, //Телефон пользователя
-                'comment' => "Оператору набрать клиента: Согласовать маршрут и стоимость!", //Комментарий к заказу
-                'reservation' => false, //Обязательный. Признак предварительного заказа: True,
-                'route_undefined' => true, //По городу: True, False
-                'order_cost' => 70, //Добавленная стоимость
-                'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                    ['name' => $response_arr_from["properties"]["street_type"]
-                        . $response_arr_from["properties"]["street"]
-                        . ", буд." . $response_arr_from["properties"]["name"]
-                        . ", " . $response_arr_from["properties"]["settlement_type"]
-                        . " " . $response_arr_from["properties"]["settlement"], 'lat' => '50.376733115795', 'lng' => '30.609379358341' ],
-                ],
-                'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
-            ]);
-
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-        $to_resp = $params['routefrom'];
-        $to_number_resp = $params['routefromnumber'];
-
         if ($response_arr_from != null) {
             $params['routefromnumber'] = $response_arr_from["properties"]["name"];
             $from = $response_arr_from["properties"]["street_type"]
@@ -788,13 +711,12 @@ class AndroidTestController extends Controller
                 . ", буд." . $response_arr_from["properties"]["name"]
                 . ", " . $response_arr_from["properties"]["settlement_type"]
                 . " " . $response_arr_from["properties"]["settlement"];
-        } else {
-            $from = $from_geo;
         }
 
         $params["from"] = $from;
-
+        $params['routefrom'] = $from;
         $params["to_number"] = $to_number;
+        $params["routefromnumber"] = $from;
 
         if ($originLatitude == $to) {
             $route_undefined = true;
@@ -802,7 +724,7 @@ class AndroidTestController extends Controller
             $params['to'] = 'по городу';
 
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ]
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
         } else {
@@ -814,13 +736,13 @@ class AndroidTestController extends Controller
             $to_resp = $to;
             $to_number_resp = $to_number;
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
                 ['name' => $to, 'number' => $to_number]
             ];
         }
 
 
-        $add_cost = -39;
+        $add_cost = 0;
         $url = $connectAPI . '/api/weborders';
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -832,7 +754,7 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "ТЕСТ!!!!  Сразу удалить этот заказ", //Комментарий к заказу
+            'comment' => " ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -854,8 +776,13 @@ class AndroidTestController extends Controller
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 self::saveOrder($params);
 
-                $response_ok["lat"] = 0;
-                $response_ok["lng"] = 0;
+                $LatLng = self::geoDataSearch($to, $to_number);
+
+                $response_ok["from_lat"] = $originLatitude;
+                $response_ok["from_lng"] =  $originLongitude;
+
+                $response_ok["lat"] = $LatLng["lat"];
+                $response_ok["lng"] =  $LatLng["lng"];
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
@@ -870,7 +797,7 @@ class AndroidTestController extends Controller
 
                 $response_ok["routeto"] = $to_resp;
                 $response_ok["to_number"] = $to_number_resp;
-
+//                dd($response_ok);
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
             }
@@ -879,7 +806,7 @@ class AndroidTestController extends Controller
 
                 $response_error["order_cost"] = "0";
                 $response_error["Message"] = $response_arr["Message"];
-//                dd("111");
+
                 return response($response_error, 200)
                     ->header('Content-Type', 'json');
             }
@@ -957,7 +884,7 @@ class AndroidTestController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "ТЕСТ!!!"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -967,11 +894,9 @@ class AndroidTestController extends Controller
 
 
         $taxiColumnId = config('app.taxiColumnId');
-
-        $route_undefined = false;
+        $to_geo = "Місце призначення";
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
-            $params['route_undefined'] = $route_undefined; //По городу: True, False
 
             $params['to'] = 'по городу';
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
@@ -980,87 +905,36 @@ class AndroidTestController extends Controller
 
         } else {
             $route_undefined = false;
-//
-//            $r = 50;
-//            do {
-//                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-//                    . $toLongitude
-//                    . "," . $toLatitude
-//                    . "&r=" . $r . "&l=1&key="
-//                    . config("app.keyVisicom");
-////dd($url);
-//                $response = Http::get($url);
-//                $response_arr_to = json_decode($response, true);
-//                $r += 50;
-//            } while (empty($response_arr_to) && $r < 200);
-//            dd($response_arr_to);
 
-            $url = $connectAPI . '/api/geodata/nearest';
+            $r = 50;
+            do {
+                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                    . $toLongitude
+                    . "," . $toLatitude
+                    . "&r=" . $r . "&l=1&key="
+                    . config("app.keyVisicom");
 
-            $response = Http::withHeaders([
-                'Authorization' => $authorization,
-                "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
-            ])->get($url, [
-                'lat' => $toLatitude, //Обязательный. Широта
-                'lng' => $toLongitude, //Обязательный. Долгота
-                'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
-            ]);
-            $response_arr = json_decode($response, true);
+                $response = Http::get($url);
+                $response_arr_to = json_decode($response, true);
+                $r += 50;
+            } while (empty($response_arr_to) && $r < 200);
 
-            if ($response_arr['geo_streets']['geo_street'] == null && $response_arr['geo_objects']['geo_object'] == null) {
-
-                $response_error["order_cost"] = "0";
-                $response_error["Message"] = "Помілка розрахунку.";
-                $alarmMessageText = "Помілка розрахунку. Клиент $user, телефон $phone.";
-                $alarmMessage = new TelegramController();
-                try {
-                    $alarmMessage->sendMeMessage($alarmMessageText);
-//                    $alarmMessage->sendAlarmMessage($alarmMessageText);
-                } catch (Exception $e) {
-                    $subject = 'Ошибка в телеграмм';
-                    $paramsCheck = [
-                        'subject' => $subject,
-                        'message' => $e,
-                    ];
-
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
-
-
-                $paramsAdmin = [
-                    'subject' => "Ошибочный расчет",
-                    'message' => $alarmMessageText
-                ];
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                $response_error["order_cost"] = 0;
-                $response_error["Message"] = "Помілка розрахунку. Місце призначення не знайдено. Спробуйте ще, або вібирить пошук за адресою";
-//dd($response_error);
-                return response($response_error, 200)
-                    ->header('Content-Type', 'json');
+            if ($response_arr_to != null) {
+                $params['routetonumber'] = $response_arr_to["properties"]["name"];
+                $to_geo = $response_arr_to["properties"]["street_type"]
+                    . $response_arr_to["properties"]["street"]
+                    . ", буд." . $response_arr_to["properties"]["name"]
+                    . ", " . $response_arr_to["properties"]["settlement_type"]
+                    . " " . $response_arr_to["properties"]["settlement"];
             }
 
-            $city = " (Одеса)";
-            if ($response_arr['geo_streets']['geo_street'] != null) {
-                $params['to'] = $response_arr['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
-                $params['to_number'] = $response_arr['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
-
-                $to_geo = $params['to'] . ", буд." . $params['to_number']  . $city;
-            }
-            if ($response_arr['geo_objects']['geo_object'] != null) {
-                $params['to'] = $response_arr['geo_objects']['geo_object'][0]['name']; //Обязательный. Улица откуда.
-                $params['to_number'] = null; //Обязательный. Дом откуда.
-                $to_geo = $params['to'] . $city;
-            }
-
-
-            $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to_geo;
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
                 ['name' => "name", 'lat' => $toLatitude, 'lng' => $toLongitude]
             ];
         }
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
 
 
         /**
@@ -1068,6 +942,7 @@ class AndroidTestController extends Controller
          */
         $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
         $params['from_number'] = " ";
+        $params['to_number'] = " ";
         self::saveCoast($params);
 
 
@@ -1083,8 +958,8 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
-            'add_cost' => -39,
+            'comment' => " ", //Комментарий к заказу
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -1099,8 +974,11 @@ class AndroidTestController extends Controller
 
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
-            if($route_undefined == false) {
 
+            $response_ok["from_lat"] = $originLatitude;
+            $response_ok["from_lng"] =  $originLongitude;
+
+            if ($route_undefined == false) {
                 $response_ok["lat"] = $toLatitude;
                 $response_ok["lng"] = $toLongitude;
             } else {
@@ -1124,7 +1002,6 @@ class AndroidTestController extends Controller
             }
             $response_ok["routefrom"] = $originLatitude;
             $response_ok["routefromnumber"] = " ";
-//            dd($response_ok);
 
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');
@@ -1193,7 +1070,7 @@ class AndroidTestController extends Controller
 //        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
-        $params['comment'] = "ТЕСТ!!!"; //Комментарий к заказу
+        $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
@@ -1207,9 +1084,7 @@ class AndroidTestController extends Controller
         /**
          * Откуда
          */
-        $city = "(Одесса)";
 
-        //         $destLatitude, $destLongitude
         $r = 50;
         do {
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
@@ -1223,81 +1098,7 @@ class AndroidTestController extends Controller
             $r += 50;
         } while (empty($response_arr_from) && $r < 200);
 
-        $url = $connectAPI . '/api/geodata/nearest';
-
-        $response_from_api = Http::withHeaders([
-            'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
-        ])->get($url, [
-            'lat' => $originLatitude, //Обязательный. Широта
-            'lng' => $originLongitude, //Обязательный. Долгота
-            'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
-        ]);
-        $response_arr_from_api = json_decode($response_from_api, true);
-
-        if ($response_arr_from_api['geo_streets']['geo_street'] != null) {
-            $params['routefrom'] = $response_arr_from_api['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
-            $params['routefromnumber'] = $response_arr_from_api['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
-
-            $from_geo = $params['routefrom'] . ", буд." . $params['routefromnumber']  . $city;
-        }
-        if ($response_arr_from_api['geo_objects']['geo_object'] != null) {
-            $params['routefrom'] = $response_arr_from_api['geo_objects']['geo_object'][0]['name']; //Обязательный. Улица откуда.
-            $params['routefromnumber'] = null; //Обязательный. Дом откуда.
-            $from_geo = $params['routefrom'] . $city;
-        }
-        if ($response_arr_from_api['geo_streets']['geo_street'] == null && $response_arr_from_api['geo_objects']['geo_object'] == null) {
-
-            $response_error["order_cost"] = "0";
-            $response_error["Message"] = "Помілка розрахунку.";
-            $alarmMessageText = "Помілка розрахунку. Клиент $user, телефон $phone.";
-            $alarmMessage = new TelegramController();
-            try {
-                $alarmMessage->sendMeMessage($alarmMessageText);
-                $alarmMessage->sendAlarmMessage($alarmMessageText);
-            } catch (Exception $e) {
-                $subject = 'Ошибка в телеграмм';
-                $paramsCheck = [
-                    'subject' => $subject,
-                    'message' => $e,
-                ];
-
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
-
-
-            $paramsAdmin = [
-                'subject' => "Ошибочный расчет",
-                'message' => $alarmMessageText
-            ];
-            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-            $url = $connectAPI . '/api/weborders';
-            Http::withHeaders([
-                'Authorization' => $authorization,
-            ])->post($url, [
-                'user_full_name' => $user,
-                'user_phone' => $phone, //Телефон пользователя
-                'comment' => "Оператору набрать клиента: Согласовать маршрут и стоимость!", //Комментарий к заказу
-                'reservation' => false, //Обязательный. Признак предварительного заказа: True,
-                'route_undefined' => true, //По городу: True, False
-                'order_cost' => 70, //Добавленная стоимость
-                'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                    ['name' => $response_arr_from["properties"]["street_type"]
-                        . $response_arr_from["properties"]["street"]
-                        . ", буд." . $response_arr_from["properties"]["name"]
-                        . ", " . $response_arr_from["properties"]["settlement_type"]
-                        . " " . $response_arr_from["properties"]["settlement"], 'lat' => '50.376733115795', 'lng' => '30.609379358341' ],
-                ],
-                'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
-            ]);
-
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
+        $from = "Місце відправлення";
         if ($response_arr_from != null) {
             $params['routefromnumber'] = $response_arr_from["properties"]["name"];
             $from = $response_arr_from["properties"]["street_type"]
@@ -1305,18 +1106,17 @@ class AndroidTestController extends Controller
                 . ", буд." . $response_arr_from["properties"]["name"]
                 . ", " . $response_arr_from["properties"]["settlement_type"]
                 . " " . $response_arr_from["properties"]["settlement"];
-        } else {
-            $from = $from_geo;
         }
 
         $params["from"] = $from;
+        $params["routefromnumber"]= $from;
+        $to = "Місце призначення";
 
-        $route_undefined = false;
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
             $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-            $params['to'] = 'по городу';
+            $params['to'] = 'по місту';
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
@@ -1331,90 +1131,11 @@ class AndroidTestController extends Controller
                     . "," . $toLatitude
                     . "&r=" . $r . "&l=1&key="
                     . config("app.keyVisicom");
-//dd($url);
+
                 $response = Http::get($url);
                 $response_arr_to = json_decode($response, true);
                 $r += 50;
             } while (empty($response_arr_to) && $r < 200);
-//            dd($response_arr_to);
-
-            $url = $connectAPI . '/api/geodata/nearest';
-
-            $response = Http::withHeaders([
-                'Authorization' => $authorization,
-                "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
-            ])->get($url, [
-                'lat' => $toLatitude, //Обязательный. Широта
-                'lng' => $toLongitude, //Обязательный. Долгота
-                'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
-            ]);
-            $response_arr = json_decode($response, true);
-
-            if ($response_arr['geo_streets']['geo_street'] == null && $response_arr['geo_objects']['geo_object'] == null) {
-
-                $response_error["order_cost"] = "0";
-                $response_error["Message"] = "Помілка розрахунку.";
-                $alarmMessageText = "Помілка розрахунку. Клиент $user, телефон $phone.";
-                $alarmMessage = new TelegramController();
-                try {
-                    $alarmMessage->sendMeMessage($alarmMessageText);
-                    $alarmMessage->sendAlarmMessage($alarmMessageText);
-                } catch (Exception $e) {
-                    $subject = 'Ошибка в телеграмм';
-                    $paramsCheck = [
-                        'subject' => $subject,
-                        'message' => $e,
-                    ];
-
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
-
-
-                $paramsAdmin = [
-                    'subject' => "Ошибочный расчет",
-                    'message' => $alarmMessageText
-                ];
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-            $url = $connectAPI . '/api/weborders';
-            Http::withHeaders([
-                'Authorization' => $authorization,
-            ])->post($url, [
-                'user_full_name' => $user,
-                'user_phone' => $phone, //Телефон пользователя
-                'comment' => "Оператору набрать клиента: Согласовать маршрут и стоимость!", //Комментарий к заказу
-                'reservation' => false, //Обязательный. Признак предварительного заказа: True,
-                'route_undefined' => true, //По городу: True, False
-                'order_cost' => 70, //Добавленная стоимость
-                'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                    ['name' => $response_arr_from["properties"]["street_type"]
-                        . $response_arr_from["properties"]["street"]
-                        . ", буд." . $response_arr_from["properties"]["name"]
-                        . ", " . $response_arr_from["properties"]["settlement_type"]
-                        . " " . $response_arr_from["properties"]["settlement"], 'lat' => '50.376733115795', 'lng' => '30.609379358341' ],
-                ],
-                'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы.
-            ]);
-                $response_error["order_cost"] = 0;
-                $response_error["Message"] = "Помілка розрахунку. Місце призначення не знайдено. Спробуйте ще, або вібирить пошук за адресою";
-//dd($response_error);
-                return response($response_error, 200)
-                    ->header('Content-Type', 'json');
-            }
-
-            $city = " (Одеса)";
-            if ($response_arr['geo_streets']['geo_street'] != null) {
-                $params['to'] = $response_arr['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
-                $params['to_number'] = $response_arr['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
-
-                $to_geo = $params['to'] . ", буд." . $params['to_number']  . $city;
-            }
-            if ($response_arr['geo_objects']['geo_object'] != null) {
-                $params['to'] = $response_arr['geo_objects']['geo_object'][0]['name']; //Обязательный. Улица откуда.
-                $params['to_number'] = " "; //Обязательный. Дом откуда.
-                $to_geo = $params['to'] . $city;
-            }
 
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
@@ -1426,8 +1147,6 @@ class AndroidTestController extends Controller
                     . ", буд." . $response_arr_to["properties"]["name"]
                     . ", " . $response_arr_to["properties"]["settlement_type"]
                     . " " . $response_arr_to["properties"]["settlement"];
-            } else {
-                $to = $to_geo;
             }
 
 
@@ -1443,22 +1162,25 @@ class AndroidTestController extends Controller
          */
         $params['from'] = $from;
         $params['from_number'] = " ";
+        $params['to_number'] = " ";
+        $params['to'] = $to;
+
         self::saveCoast($params);
+        $params['routefrom'] = $from;
 
-
-        $url = $connectAPI . '/api/weborders/cost';
-        $add_cost= -39;
+        $url = $connectAPI . '/api/weborders';
+        $add_cost= 0;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
         ])->post($url, [
-            'user_full_name' => null, //Полное имя пользователя
-            'user_phone' => null, //Телефон пользователя
+            'user_full_name' => $user, //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "comment", //Комментарий к заказу
+            'comment' => " ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -1471,7 +1193,7 @@ class AndroidTestController extends Controller
             /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                 'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
             if ($response_arr["order_cost"] != 0) {
@@ -1480,8 +1202,11 @@ class AndroidTestController extends Controller
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 self::saveOrder($params);
 
-                $response_ok["lat"] = 0;
-                $response_ok["lng"] = 0;
+                $response_ok["from_lat"] = $originLatitude;
+                $response_ok["from_lng"] =  $originLongitude;
+
+                $response_ok["lat"] = $toLatitude;
+                $response_ok["lng"] =  $toLongitude;
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
@@ -1495,6 +1220,8 @@ class AndroidTestController extends Controller
 
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
+//                $response_ok["route_address_from"] = $from;
+//                $response_ok["route_address_to"] = " ";
 //                dd($response_ok);
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
@@ -1632,8 +1359,6 @@ class AndroidTestController extends Controller
         $username = '0936734488';
         $password = hash('SHA512', '22223344');
 
-//        $username = config('app.username');
-//        $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $connectAPI = self::connectApi();
