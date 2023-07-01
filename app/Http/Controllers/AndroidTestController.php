@@ -254,7 +254,7 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => " ", //Комментарий к заказу
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
             'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -363,7 +363,7 @@ class AndroidTestController extends Controller
 
         $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         $to = $combos->name;
-
+        $add_cost = 0;
 
         $url = $connectAPI . '/api/weborders';
         $response = Http::withHeaders([
@@ -376,8 +376,8 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => " ", //Комментарий к заказу
-            'add_cost' => 0,
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -413,18 +413,23 @@ class AndroidTestController extends Controller
             $response_ok["lng"] =  $LatLng["lng"];
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
-            $response_ok["find_car_timeout"] = $response_arr["find_car_timeout"];
-            $response_ok["find_car_delay"] = $response_arr["find_car_delay"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
+            $response_ok["add_cost"] = $add_cost;
+//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
+            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["find_car_timeout"] = $response_arr["find_car_timeout"];
+//            $response_ok["find_car_delay"] = $response_arr["find_car_delay"];
 
-            $response_ok["route_address_from"] = $response_arr["route_address_from"];
+//            $response_ok["route_address_from"] = $response_arr["route_address_from"];
 
             $response_ok["routefrom"] =  $from;
             $response_ok["routefromnumber"] =   $from_number;
 
-            $response_ok["route_address_to"] = $response_arr["route_address_to"];
+            $response_ok["routeto"] =  $to;
+            $response_ok["to_number"] =   $to_number;
+
+//            $response_ok["route_address_to"] = $response_arr["route_address_to"];
 
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');
@@ -572,7 +577,7 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => " ", //Комментарий к заказу
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
             'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -754,7 +759,7 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => " ", //Комментарий к заказу
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -775,14 +780,20 @@ class AndroidTestController extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 self::saveOrder($params);
+                if ($route_undefined == false) {
+                    $LatLng = self::geoDataSearch($to, $to_number);
+                    $response_ok["lat"] = $LatLng["lat"];
+                    $response_ok["lng"] =  $LatLng["lng"];
+                } else {
+                    $response_ok["lat"] = $originLatitude;
+                    $response_ok["lng"] =  $originLongitude;
+                }
 
-                $LatLng = self::geoDataSearch($to, $to_number);
 
                 $response_ok["from_lat"] = $originLatitude;
                 $response_ok["from_lng"] =  $originLongitude;
 
-                $response_ok["lat"] = $LatLng["lat"];
-                $response_ok["lng"] =  $LatLng["lng"];
+
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
@@ -795,8 +806,8 @@ class AndroidTestController extends Controller
                 $response_ok["routefromnumber"] = $params['routefromnumber'];
 
 
-                $response_ok["routeto"] = $to_resp;
-                $response_ok["to_number"] = $to_number_resp;
+                $response_ok["routeto"] = $params['to'];
+                $response_ok["to_number"] = $to_number;
 //                dd($response_ok);
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
@@ -958,7 +969,7 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => " ", //Комментарий к заказу
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
             'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -971,7 +982,7 @@ class AndroidTestController extends Controller
             /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                 'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
 
@@ -1180,7 +1191,7 @@ class AndroidTestController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => " ", //Комментарий к заказу
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
