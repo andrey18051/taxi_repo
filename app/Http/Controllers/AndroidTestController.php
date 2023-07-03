@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\BlackList;
+use App\Models\Combo;
 use App\Models\ComboTest;
 use App\Models\Order;
 use App\Models\Orderweb;
@@ -48,25 +49,40 @@ class AndroidTestController extends Controller
 
     public function startIP()
     {
-        IPController::getIP('/android/PAS2/startPage');
+        if (self::connectAPI() == 'http://31.43.107.151:7303') {
+            IPController::getIP('/android/PAS2/startPage');
+        } else {
+            IPController::getIP('/android/PAS1/startPage');
+        }
     }
+
     public function connectAPI(): string
     {
-        IPController::getIP('/android/PAS2');
-
         $subject = 'Отсутствует доступ к серверу.';
 
         /**
          * тест
          */
+
+        IPController::getIP('/android/PAS2');
         $connectAPI = 'http://31.43.107.151:7303';
+        $server0 = $connectAPI;
         $server1 = $connectAPI;
         $server2 = $connectAPI;
         $server3 = $connectAPI;
 
+        /**
+         * ПАС1
+         */
+//            IPController::getIP('/android/PAS1');
+//            $server0 = config('app.taxi2012Url_0');
+//            $server1 = config('app.taxi2012Url_1');
+//            $server2 = config('app.taxi2012Url_2');
+//            $server3 = config('app.taxi2012Url_3');
+
         $url = "/api/time";
 
-        $url = $server1 . $url;
+        $url = $server0 . $url;
         if (self::checkDomain($url)) {
             return $server1;
         } else {
@@ -158,26 +174,12 @@ class AndroidTestController extends Controller
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
-
-        $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-                        $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Помилка з'єднання з сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
 
         /**
          * Параметры запроса
          */
 
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $authorization = self::autorization();
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -220,20 +222,30 @@ class AndroidTestController extends Controller
 
 
         $taxiColumnId = config('app.taxiColumnId');
+        $connectAPI = self::connectAPI();
 
         if ($from == $to) {
             $route_undefined = true;
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+            } else {
+                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+            }
+            $combos_to = $combos_from;
         } else {
             $route_undefined = false;
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            } else {
+                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+            }
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $combos = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-        $from = $combos->name;
-
-        $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-        $to = $combos->name;
-
+        $from = $combos_from->name;
+        $to = $combos_to->name;
         /**
          * Сохранние расчетов в базе
          */
@@ -242,11 +254,16 @@ class AndroidTestController extends Controller
         $params['to'] = $to;
         $params['to_number'] = $to_number;
         self::saveCoast($params);
-
+        $connectAPI = self::connectApi();
         $url = $connectAPI . '/api/weborders/cost';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -287,23 +304,7 @@ class AndroidTestController extends Controller
 
     public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
-
-        $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $authorization = self::autorization();
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -357,18 +358,40 @@ class AndroidTestController extends Controller
             $route_undefined = false;
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
+        $connectAPI = self::connectApi();
+        if ($from == $to) {
+            $route_undefined = true;
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+            } else {
+                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+            }
+            $combos_to = $combos_from;
+        } else {
+            $route_undefined = false;
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            } else {
+                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+            }
+        }
 
-        $combos = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-        $from = $combos->name;
+        $from = $combos_from->name;
+        $to = $combos_to->name;
 
-        $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-        $to = $combos->name;
         $add_cost = 0;
-
+        $connectAPI = self::connectApi();
         $url = $connectAPI . '/api/weborders';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -396,9 +419,7 @@ class AndroidTestController extends Controller
         ]);
 
         if ($response->status() == 200) {
-
             $response_arr = json_decode($response, true);
-
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
 
@@ -446,8 +467,7 @@ class AndroidTestController extends Controller
     public function sendCode($phone)
     {
 
-        $connectAPI = 'http://31.43.107.151:7303';
-        $url = $connectAPI . '/api/approvedPhones/sendConfirmCode';
+        $url = self::connectApi() . '/api/approvedPhones/sendConfirmCode';
         $response = Http::post($url, [
             'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -471,26 +491,8 @@ class AndroidTestController extends Controller
 
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
-
         $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Помилка з'єднання з сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-        /**
-         * Параметры запроса
-         */
-
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $authorization = self::autorization();
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -546,8 +548,13 @@ class AndroidTestController extends Controller
 
         } else {
             $route_undefined = false;
-            $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-            $to = $combos->name;
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            } else {
+                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+            }
+            $to = $combos_to->name;
+
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
@@ -556,20 +563,26 @@ class AndroidTestController extends Controller
                 ];
         }
 
+        $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
+        $params['from_number'] = " ";
+        $params['to_number'] = $to_number;
 
         /**
          * Сохранние расчетов в базе
          */
-        $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
-        $params['from_number'] = " ";
-        $params['to_number'] = $to_number;
+
         self::saveCoast($params);
 
-
         $url = $connectAPI . '/api/weborders/cost';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -590,7 +603,7 @@ class AndroidTestController extends Controller
             /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
                 'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-//dd($response->body());
+
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
 
@@ -632,23 +645,8 @@ class AndroidTestController extends Controller
 
     public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
 
-        $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $authorization = self::autorization();
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -734,8 +732,13 @@ class AndroidTestController extends Controller
 
         } else {
             $route_undefined = false;
-            $combos = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-            $to = $combos->name;
+            if (self::connectAPI() == 'http://31.43.107.151:7303') {
+                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            } else {
+                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+            }
+            $to = $combos_to->name;
+
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
             $to_resp = $to;
@@ -748,10 +751,16 @@ class AndroidTestController extends Controller
 
 
         $add_cost = 0;
+        $connectAPI = self::connectApi();
         $url = $connectAPI . '/api/weborders';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -843,26 +852,8 @@ class AndroidTestController extends Controller
 
     public function costSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
 
-        $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Помилка з'єднання з сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-        /**
-         * Параметры запроса
-         */
-
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $authorization = self::autorization();
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -956,12 +947,17 @@ class AndroidTestController extends Controller
         $params['to_number'] = " ";
         self::saveCoast($params);
 
-
+        $connectAPI = self::connectApi();
         $url = $connectAPI . '/api/weborders/cost';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -1029,26 +1025,8 @@ class AndroidTestController extends Controller
 
     public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
 
-        $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Помилка з'єднання з сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-        /**
-         * Параметры запроса
-         */
-
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $authorization = self::autorization();
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -1178,12 +1156,17 @@ class AndroidTestController extends Controller
 
         self::saveCoast($params);
         $params['routefrom'] = $from;
-
+        $connectAPI = self::connectApi();
         $url = $connectAPI . '/api/weborders';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
         $add_cost= 0;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -1367,20 +1350,18 @@ class AndroidTestController extends Controller
 
     public function geoDataSearch($to, $to_number)
     {
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
 
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-
+        $authorization = self::autorization();
         $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
         $url = $connectAPI . '/api/geodata/search';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
         ])->get($url, [
             'q' => $to, //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -1433,30 +1414,11 @@ class AndroidTestController extends Controller
     }
     public function fromSearchGeo($originLatitude, $originLongitude)
     {
-        /**
-         * Test
-         */
-        $username = '0936734488';
-        $password = hash('SHA512', '22223344');
-
-        $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-
-//        $username = config('app.username');
-//        $password = hash('SHA512', config('app.password'));
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         /**
          * Откуда
          */
 
-        //         $destLatitude, $destLongitude
         $r = 50;
         do {
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
@@ -1464,53 +1426,25 @@ class AndroidTestController extends Controller
                 . "," . $originLatitude
                 . "&r=" . $r . "&l=1&key="
                 . config("app.keyVisicom");
-//dd($url);
+
             $response = Http::get($url);
             $response_arr_from = json_decode($response, true);
             $r += 50;
         } while (empty($response_arr_from) && $r < 200);
-//dd($response_arr_from);
-
-//        $url = $connectAPI . '/api/geodata/nearest';
-//
-//        $response_from_api = Http::withHeaders([
-//            'Authorization' => $authorization,
-//            "X-WO-API-APP-ID" => "taxi_easy_ua_pas2"
-//        ])->get($url, [
-//            'lat' => $originLatitude, //Обязательный. Широта
-//            'lng' => $originLongitude, //Обязательный. Долгота
-//            'r' => '50' //необязательный. Радиус поиска. Значение от 0 до 1000 м. Если не указано — 500м.*/
-//        ]);
-//        $response_arr_from_api = json_decode($response_from_api, true);
-//dd($response_arr_from_api);
-//        if ($response_arr_from_api['geo_streets']['geo_street'] != null) {
-//            $from_geo = $response_arr_from_api['geo_streets']['geo_street'][0]['name']; //Обязательный. Улица откуда.
-//            $from_geo_number = $response_arr_from_api['geo_streets']['geo_street'][0]['houses'][0]['house']; //Обязательный. Дом откуда.
-//
-//            $from_geo = $from_geo . ", буд." . $from_geo_number;
-//        } else {
-//            $from_geo = $response_arr_from_api['geo_objects']['geo_object'][0]['name']; //Обязательный. Улица откуда.
-//        }
-
-
 
         if ($response_arr_from != null) {
             $from = $response_arr_from["properties"]["street_type"]
                 . $response_arr_from["properties"]["street"]
                 . ", буд." . $response_arr_from["properties"]["name"]
-//                . ", " . $response_arr_from["properties"]["settlement_type"]
                 . " (" . $response_arr_from["properties"]["settlement"] . ")";
 
             $response_ok["order_cost"] = 100;
             $response_ok["route_address_from"] = $from;
 
-//dd($response_ok);
 
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');
         } else {
-//            $response_arr = json_decode($response, true);
-
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Помилка гоепошуку. Спробуйте вказати місце з бази адрес.";
             return  response($response_error, 200)
@@ -1521,8 +1455,8 @@ class AndroidTestController extends Controller
     public function approvedPhones($phone, $confirm_code)
     {
 
-        $connectAPI = 'http://31.43.107.151:7303';
-        $url = $connectAPI . '/api/approvedPhones/';
+
+        $url = self::connectApi() . '/api/approvedPhones/';
         $response = Http::post($url, [
             'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона
             'confirm_code' => $confirm_code //Обязательный. Код подтверждения.
@@ -1559,15 +1493,24 @@ class AndroidTestController extends Controller
 
     public function autocompleteSearchComboHid($name)
     {
-        $combos = ComboTest::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
-        if ($combos != null) {
-            $response["message"] = $combos->street;
+
+        if (self::connectAPI() == 'http://31.43.107.151:7303') {
+             $combos = ComboTest::where('name', 'like', $name . '%')->first();
         } else {
-            $response["message"] = 1;
+             $combos = Combo::where('name', 'like', $name . '%')->first();
         }
-        $response["resp_result"] = 0;
-        return  response($response, 200)
-            ->header('Content-Type', 'json');
+        if ($combos != null) {
+            $response["resp_result"] = 0;
+            $response["message"] = $combos->street;
+            return  response($response, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $response["resp_result"] = "0";
+            $response["Message"] = "Помілка пошуку";
+
+            return response($response, 200)
+                ->header('Content-Type', 'json');
+        }
     }
 
     public function sentPhone(string $message)
@@ -1637,5 +1580,34 @@ class AndroidTestController extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
+    }
+
+    private function autorization()
+    {
+
+        $connectAPI = self::connectApi();
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $username = config('app.username');
+            $password = hash('SHA512', config('app.password'));
+
+            switch ($connectAPI) {
+                case 'http://31.43.107.151:7303':
+                    $username = '0936734488';
+                    $password = hash('SHA512', '22223344');
+                    break;
+                case config('app.taxi2012Url_0'):
+                    $username = "SMS_NADO_OTPR";
+                    $password = hash('SHA512', "fhHk89)_");
+                    break;
+            }
+        }
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
     }
 }

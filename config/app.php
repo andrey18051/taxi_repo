@@ -14,6 +14,8 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'X-WO-API-APP-ID-PAS1' => 'taxi_easy_ua_pas1',
+    'X-WO-API-APP-ID-PAS2' => 'taxi_easy_ua_pas2',
 
     /*
     |--------------------------------------------------------------------------
