@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidTestController extends Controller
+class Android154Controller extends Controller
 {
 
     public function index(): int
@@ -64,21 +64,21 @@ class AndroidTestController extends Controller
          * тест
          */
 
-        IPController::getIP('/android/PAS2');
-        $connectAPI = 'http://31.43.107.151:7303';
-        $server0 = $connectAPI;
-        $server1 = $connectAPI;
-        $server2 = $connectAPI;
-        $server3 = $connectAPI;
+//        IPController::getIP('/android/PAS2');
+//        $connectAPI = 'http://31.43.107.151:7303';
+//        $server0 = $connectAPI;
+//        $server1 = $connectAPI;
+//        $server2 = $connectAPI;
+//        $server3 = $connectAPI;
 
         /**
          * ПАС1
          */
-//            IPController::getIP('/android/PAS1');
-//            $server0 = config('app.taxi2012Url_0');
-//            $server1 = config('app.taxi2012Url_1');
-//            $server2 = config('app.taxi2012Url_2');
-//            $server3 = config('app.taxi2012Url_3');
+            IPController::getIP('/android/PAS1');
+            $server0 = config('app.taxi2012Url_0');
+            $server1 = config('app.taxi2012Url_1');
+            $server2 = config('app.taxi2012Url_2');
+            $server3 = config('app.taxi2012Url_3');
 
         $url = "/api/time";
 
@@ -499,7 +499,7 @@ class AndroidTestController extends Controller
 
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
-        $connectAPI = self::connectApi();
+
         $authorization = self::autorization();
         if ($authorization["order_cost"] == 0) {
             return response($authorization, 200)
@@ -547,7 +547,7 @@ class AndroidTestController extends Controller
 
 
         $taxiColumnId = config('app.taxiColumnId');
-
+        $connectAPI = self::connectApi();
         $route_undefined = false;
         if ($originLatitude == $to) {
             $route_undefined = true;
@@ -1623,7 +1623,6 @@ class AndroidTestController extends Controller
     {
 
         $connectAPI = self::connectApi();
-
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -1643,7 +1642,8 @@ class AndroidTestController extends Controller
                     $password = hash('SHA512', "fhHk89)_");
                     break;
             }
-            return 'Basic ' . base64_encode($username . ':' . $password);
         }
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
     }
 }
