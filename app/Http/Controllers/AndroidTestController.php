@@ -172,7 +172,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
+    public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
 
         /**
@@ -269,6 +269,7 @@ class AndroidTestController extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
+        $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -292,8 +293,8 @@ class AndroidTestController extends Controller
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 
         if ($response->status() == 200) {
@@ -310,7 +311,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
+    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
         $connectAPI = self::connectApi();
 
@@ -404,6 +405,7 @@ class AndroidTestController extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
+        $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -429,8 +431,8 @@ class AndroidTestController extends Controller
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 
         if ($response->status() == 200) {
@@ -595,7 +597,7 @@ class AndroidTestController extends Controller
          */
 
         self::saveCoast($params);
-
+        $extra_charge_codes = preg_split("/[*]+/", $services);
         $url = $connectAPI . '/api/weborders/cost';
         if ($connectAPI == 'http://31.43.107.151:7303') {
                 $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
@@ -792,7 +794,7 @@ class AndroidTestController extends Controller
         }
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
-//        dd($extra_charge_codes);
+
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -885,7 +887,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function costSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user)
+    public function costSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $services)
     {
         $connectAPI = self::connectApi();
 
@@ -996,7 +998,7 @@ class AndroidTestController extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-
+        $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -1017,10 +1019,10 @@ class AndroidTestController extends Controller
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-//dd($response->body());
+//dd($response);
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
 
@@ -1065,7 +1067,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user)
+    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -1214,6 +1216,7 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $add_cost= 0;
+        $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -1234,8 +1237,8 @@ class AndroidTestController extends Controller
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 //dd($response->body());
         if ($response->status() == 200) {
