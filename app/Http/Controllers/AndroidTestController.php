@@ -252,8 +252,8 @@ class AndroidTestController extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $from = $combos_from;
-        $to = $combos_to;
+        $from = $combos_from->name;
+        $to = $combos_to->name;
         /**
          * Сохранние расчетов в базе
          */
@@ -394,8 +394,8 @@ class AndroidTestController extends Controller
             }
         }
 
-        $from = $combos_from;
-        $to = $combos_to;
+        $from = $combos_from->name;
+        $to = $combos_to->name;
 
         $add_cost = 0;
         $url = $connectAPI . '/api/weborders';
@@ -504,8 +504,9 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
+    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
     {
+
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
@@ -575,7 +576,7 @@ class AndroidTestController extends Controller
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
             }
-            $to = $combos_to;
+            $to = $combos_to->name;
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
@@ -601,10 +602,10 @@ class AndroidTestController extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-
+        $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -622,8 +623,9 @@ class AndroidTestController extends Controller
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'extra_charge_codes' =>$extra_charge_codes,
+            //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 
         if ($response->status() == 200) {
@@ -665,7 +667,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
+    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -767,7 +769,7 @@ class AndroidTestController extends Controller
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
             }
-            $to = $combos_to;
+            $to = $combos_to->name;
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
@@ -788,6 +790,9 @@ class AndroidTestController extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+//        dd($extra_charge_codes);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -808,8 +813,8 @@ class AndroidTestController extends Controller
             'route' =>$rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 //dd($response->body());
         if ($response->status() == 200) {

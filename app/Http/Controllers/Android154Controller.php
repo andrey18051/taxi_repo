@@ -252,8 +252,8 @@ class Android154Controller extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $from = $combos_from;
-        $to = $combos_to;
+        $from = $combos_from->name;
+        $to = $combos_to->name;
         /**
          * Сохранние расчетов в базе
          */
@@ -394,8 +394,8 @@ class Android154Controller extends Controller
             }
         }
 
-        $from = $combos_from;
-        $to = $combos_to;
+        $from = $combos_from->name;
+        $to = $combos_to->name;
 
         $add_cost = 0;
         $url = $connectAPI . '/api/weborders';
@@ -575,7 +575,7 @@ class Android154Controller extends Controller
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
             }
-            $to = $combos_to;
+            $to = $combos_to->name;
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
@@ -767,7 +767,7 @@ class Android154Controller extends Controller
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
             }
-            $to = $combos_to;
+            $to = $combos_to->name;
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
