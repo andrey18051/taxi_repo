@@ -433,7 +433,7 @@ class AndroidController extends Controller
 
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
-
+            $params['server'] = $connectAPI;
             self::saveOrder($params);
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
@@ -805,6 +805,7 @@ class AndroidController extends Controller
 
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+            $params['server'] = $connectAPI;
             self::saveOrder($params);
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
@@ -864,7 +865,6 @@ class AndroidController extends Controller
         $order->taxiColumnId = $params['taxiColumnId']; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
         $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->save();
-
     }
     public function saveOrder($params)
     {
@@ -891,9 +891,10 @@ class AndroidController extends Controller
         $order->routeto = $params["to"]; //Обязательный. Улица куда.
         $order->routetonumber = $params["to_number"]; //Обязательный. Дом куда.
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
+        $order->server = $params['server'];
 
         $order->save();
 
@@ -903,13 +904,13 @@ class AndroidController extends Controller
 
         if (!$params["route_undefined"]) {
             $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] . " " . $params['routefromnumber'] .
+                " за маршрутом від " . $params['from'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
                 ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
                 $params['dispatching_order_uid'];
         } else {
             $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] . " " . $params['routefromnumber'] .
+                " за маршрутом від " . $params['from'] .
                 " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
                 $params['dispatching_order_uid'];
         }
@@ -922,7 +923,17 @@ class AndroidController extends Controller
 
         Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
         $message = new TelegramController();
-        $message->sendMeMessage($order);
+        try {
+            $message->sendMeMessage($order);
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
     }
 
     public function geoDataSearch($to, $to_number)

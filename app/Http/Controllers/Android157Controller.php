@@ -454,6 +454,7 @@ class Android157Controller extends Controller
             $response_arr = json_decode($response, true);
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+            $params['server'] = $connectAPI;
 
             self::saveOrder($params);
 
@@ -840,6 +841,7 @@ class Android157Controller extends Controller
 //                dd($response_arr);
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
                 self::saveOrder($params);
                 if ($route_undefined == false) {
                     $LatLng = self::geoDataSearch($to, $to_number);
@@ -1262,6 +1264,7 @@ class Android157Controller extends Controller
 
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
                 self::saveOrder($params);
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -1347,6 +1350,7 @@ class Android157Controller extends Controller
         $order->save();
 
     }
+
     public function saveOrder($params)
     {
         /**
@@ -1372,9 +1376,10 @@ class Android157Controller extends Controller
         $order->routeto = $params["to"]; //Обязательный. Улица куда.
         $order->routetonumber = $params["to_number"]; //Обязательный. Дом куда.
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
+        $order->server = $params['server'];
 
         $order->save();
 
