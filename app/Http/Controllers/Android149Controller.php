@@ -53,7 +53,7 @@ class Android149Controller extends Controller
         IPController::getIP('/android/PAS2/startPage');
     }
     public function connectAPI(): string
-    {
+    { return 400;
         $subject = 'Отсутствует доступ к серверу.';
 
         /**
@@ -194,9 +194,10 @@ class Android149Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -313,9 +314,10 @@ class Android149Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -469,9 +471,10 @@ class Android149Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -617,9 +620,10 @@ class Android149Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -819,9 +823,10 @@ class Android149Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -986,9 +991,10 @@ class Android149Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -1330,8 +1336,11 @@ class Android149Controller extends Controller
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Обновите приложение";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
 
         if ($connectAPI === config('app.taxi2012Url_0')) {
@@ -1397,9 +1406,9 @@ class Android149Controller extends Controller
     public function fromSearchGeo($originLatitude, $originLongitude)
     {
         $connectAPI = self::connectApi();
-        if ($connectAPI == 400) {
+       if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
@@ -1520,12 +1529,32 @@ class Android149Controller extends Controller
 
     public function autocompleteSearchComboHid($name)
     {
-        $combos = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
-        $response["resp_result"] = 0;
-        $response["message"] = $combos->street;
+        $connectAPI = self::connectApi();
+        if ($connectAPI == 400) {
+            $response_error["resp_result"] = 200;
+            $response_error["message"] = 200;
 
-        return  response($response, 200)
-            ->header('Content-Type', 'json');
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos = ComboTest::where('name', 'like', $name . '%')->first();
+            } else {
+                $combos = Combo::where('name', 'like', $name . '%')->first();
+            }
+            if ($combos != null) {
+                $response["resp_result"] = 0;
+                $response["message"] = $combos->street;
+                return  response($response, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $response["resp_result"] = 400;
+                $response["message"] = 400;
+
+                return response($response, 200)
+                    ->header('Content-Type', 'json');
+            }
+        }
     }
 
     public function sentPhone(string $message)

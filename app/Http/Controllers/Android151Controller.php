@@ -6,6 +6,7 @@ use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\Combo;
+use App\Models\ComboTest;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
@@ -52,7 +53,7 @@ class Android151Controller extends Controller
         IPController::getIP('/android/PAS2/startPage');
     }
     public function connectAPI(): string
-    {
+    { return 400;
         $subject = 'Отсутствует доступ к серверу.';
 
         /**
@@ -193,9 +194,10 @@ class Android151Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -312,9 +314,10 @@ class Android151Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -468,9 +471,10 @@ class Android151Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -616,9 +620,10 @@ class Android151Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -818,9 +823,10 @@ class Android151Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -985,9 +991,10 @@ class Android151Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -1330,10 +1337,12 @@ class Android151Controller extends Controller
 
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
-            return redirect()->route('home-news')
-                ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
-        }
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Обновите приложение";
 
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
         if ($connectAPI === config('app.taxi2012Url_0')) {
             $username = "SMS_NADO_OTPR";
             $password = hash('SHA512', "fhHk89)_");
@@ -1399,7 +1408,7 @@ class Android151Controller extends Controller
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
@@ -1520,16 +1529,32 @@ class Android151Controller extends Controller
 
     public function autocompleteSearchComboHid($name)
     {
-        $combos = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
-        if ($combos != null) {
-            $response["message"] = $combos->street;
-        } else {
-            $response["message"] = 1;
-        }
-        $response["resp_result"] = 0;
+        $connectAPI = self::connectApi();
+        if ($connectAPI == 400) {
+            $response_error["resp_result"] = 200;
+            $response_error["message"] = 200;
 
-        return  response($response, 200)
-            ->header('Content-Type', 'json');
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            if ($connectAPI == 'http://31.43.107.151:7303') {
+                $combos = ComboTest::where('name', 'like', $name . '%')->first();
+            } else {
+                $combos = Combo::where('name', 'like', $name . '%')->first();
+            }
+            if ($combos != null) {
+                $response["resp_result"] = 0;
+                $response["message"] = $combos->street;
+                return  response($response, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $response["resp_result"] = 400;
+                $response["message"] = 400;
+
+                return response($response, 200)
+                    ->header('Content-Type', 'json');
+            }
+        }
     }
 
     public function sentPhone(string $message)

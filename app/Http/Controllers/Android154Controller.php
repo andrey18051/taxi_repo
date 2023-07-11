@@ -58,7 +58,7 @@ class Android154Controller extends Controller
     }
 
     public function connectAPI(): string
-    {
+    { return 400;
         $subject = 'Отсутствует доступ к серверу.';
 
         /**
@@ -199,9 +199,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -318,9 +319,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -474,9 +476,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -622,9 +625,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -824,9 +828,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -991,9 +996,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
@@ -1338,9 +1344,10 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
+            $response_error["Message"] = "Обновите приложение";
 
-            return $response_error;
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
         }
         $authorization = self::autorization();
 
