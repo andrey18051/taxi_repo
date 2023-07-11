@@ -26,6 +26,14 @@ class AndroidTestController extends Controller
             return 200;
         }
     }
+    public function version()
+    {
+        $response_error["resp_result"] = 200;
+        $response_error["message"] = "2.43";
+
+        return  response($response_error, 200)
+            ->header('Content-Type', 'json');
+    }
 
     private function checkDomain($domain): bool
     {
@@ -309,10 +317,9 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
+    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $services)
     {
         $connectAPI = self::connectApi();
-
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -381,7 +388,6 @@ class AndroidTestController extends Controller
         $from = $combos_from->name;
         $to = $combos_to->name;
 
-        $add_cost = 0;
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");

@@ -10,7 +10,6 @@ use App\Models\ComboTest;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
@@ -58,7 +57,7 @@ class Android154Controller extends Controller
     }
 
     public function connectAPI(): string
-    { return 400;
+    {
         $subject = 'Отсутствует доступ к серверу.';
 
         /**
@@ -188,7 +187,7 @@ class Android154Controller extends Controller
         }
     }
 
-    public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
+    public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
 
         /**
@@ -199,10 +198,9 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
@@ -270,7 +268,7 @@ class Android154Controller extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-        $extra_charge_codes = preg_split("/[*]+/", $services);
+
         $add_cost = 0;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -295,7 +293,7 @@ class Android154Controller extends Controller
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 
@@ -313,16 +311,15 @@ class Android154Controller extends Controller
         }
     }
 
-    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
+    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user)
     {
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
@@ -393,7 +390,7 @@ class Android154Controller extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-        $extra_charge_codes = preg_split("/[*]+/", $services);
+
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -419,7 +416,7 @@ class Android154Controller extends Controller
             ],
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 
@@ -469,17 +466,41 @@ class Android154Controller extends Controller
         }
     }
 
-    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
+    public function sendCode($phone)
+    {
+
+        $url = self::connectApi() . '/api/approvedPhones/sendConfirmCode';
+        $response = Http::post($url, [
+            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
+            'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+        ]);
+//dd($response->body());
+        if ($response->status() == 200) {
+            $response_status["resp_result"] = 200;
+            return  response($response_status, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $response_arr = json_decode($response, true);
+
+            $response_error["resp_result"] = 400;
+            $response_error["message"] = $response_arr["Message"];
+//            $response_error["message"] = "Message";
+
+            return  response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
+    }
+
+    public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
 
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
@@ -545,14 +566,14 @@ class Android154Controller extends Controller
          */
 
         self::saveCoast($params);
-        $extra_charge_codes = preg_split("/[*]+/", $services);
+
         $url = $connectAPI . '/api/weborders/cost';
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-        $extra_charge_codes = preg_split("/[*]+/", $services);
+
         $add_cost = 0;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -574,7 +595,7 @@ class Android154Controller extends Controller
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' =>$extra_charge_codes,
+//            'extra_charge_codes' =>$extra_charge_codes,
             //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
@@ -618,17 +639,16 @@ class Android154Controller extends Controller
         }
     }
 
-    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
+    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user)
     {
 
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
@@ -727,7 +747,7 @@ class Android154Controller extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
 
-        $extra_charge_codes = preg_split("/[*]+/", $services);
+
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -749,7 +769,7 @@ class Android154Controller extends Controller
             'route' =>$rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 //dd($response->body());
@@ -822,16 +842,15 @@ class Android154Controller extends Controller
         }
     }
 
-    public function costSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $services)
+    public function costSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user)
     {
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
@@ -850,6 +869,22 @@ class Android154Controller extends Controller
         $params['premium'] = 0;
         $params['route_address_entrance_from'] = null;
 
+//        if ($req->wagon == 'on' || $req->wagon == 1) {
+//            $params['wagon'] = 1; //Универсал: True, False
+//        } else {
+//            $params['wagon'] = 0;
+//        };
+//        if ($req->minibus == 'on' || $req->minibus == 1) {
+//            $params['minibus'] = 1; //Микроавтобус: True, False
+//        } else {
+//            $params['minibus'] = 0;
+//        };
+//        if ($req->premium == 'on' || $req->premium == 1) {
+//            $params['premium'] = 1; //Машина премиум-класса: True, False
+//        } else {
+//            $params['premium'] = 0;
+//        };
+
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
@@ -865,9 +900,8 @@ class Android154Controller extends Controller
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
 
-            $params['to'] = 'по місту';
+            $params['to'] = 'по городу';
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
                 ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
@@ -919,8 +953,7 @@ class Android154Controller extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-        $extra_charge_codes = preg_split("/[*]+/", $services);
-        $add_cost = 0;
+
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -932,7 +965,7 @@ class Android154Controller extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
-            'add_cost' => $add_cost,
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -941,10 +974,10 @@ class Android154Controller extends Controller
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-//dd($response);
+//dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
 
@@ -989,17 +1022,16 @@ class Android154Controller extends Controller
         }
     }
 
-    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $services)
+    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user)
     {
 
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
@@ -1016,6 +1048,22 @@ class Android154Controller extends Controller
         $params['minibus'] = 0;
         $params['premium'] = 0;
         $params['route_address_entrance_from'] = null;
+
+//        if ($req->wagon == 'on' || $req->wagon == 1) {
+//            $params['wagon'] = 1; //Универсал: True, False
+//        } else {
+//            $params['wagon'] = 0;
+//        };
+//        if ($req->minibus == 'on' || $req->minibus == 1) {
+//            $params['minibus'] = 1; //Микроавтобус: True, False
+//        } else {
+//            $params['minibus'] = 0;
+//        };
+//        if ($req->premium == 'on' || $req->premium == 1) {
+//            $params['premium'] = 1; //Машина премиум-класса: True, False
+//        } else {
+//            $params['premium'] = 0;
+//        };
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
@@ -1057,7 +1105,7 @@ class Android154Controller extends Controller
         }
 
         $params["from"] = $from;
-
+        $params["routefromnumber"]= $from;
         $to = "Місце призначення";
 
         if ($originLatitude == $toLatitude) {
@@ -1066,8 +1114,7 @@ class Android154Controller extends Controller
 
             $params['to'] = 'по місту';
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
         } else {
@@ -1124,7 +1171,6 @@ class Android154Controller extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $add_cost= 0;
-        $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID
@@ -1145,8 +1191,8 @@ class Android154Controller extends Controller
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            /*  'extra_charge_codes' => 'ENGLISH', //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
 //dd($response->body());
         if ($response->status() == 200) {
@@ -1155,7 +1201,6 @@ class Android154Controller extends Controller
 
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
-                $params['server'] = $connectAPI;
                 self::saveOrder($params);
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -1237,11 +1282,10 @@ class Android154Controller extends Controller
         $order->routeto = $params['to']; //Обязательный. Улица куда.
         $order->routetonumber = $params['to_number']; //Обязательный. Дом куда.
         $order->taxiColumnId = $params['taxiColumnId']; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->save();
 
     }
-
     public function saveOrder($params)
     {
         /**
@@ -1267,10 +1311,9 @@ class Android154Controller extends Controller
         $order->routeto = $params["to"]; //Обязательный. Улица куда.
         $order->routetonumber = $params["to_number"]; //Обязательный. Дом куда.
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->payment_type = 0; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
-        $order->server = $params['server'];
 
         $order->save();
 
@@ -1312,31 +1355,6 @@ class Android154Controller extends Controller
         };
     }
 
-    public function sendCode($phone)
-    {
-
-        $url = self::connectApi() . '/api/approvedPhones/sendConfirmCode';
-        $response = Http::post($url, [
-            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-        ]);
-//dd($response->body());
-        if ($response->status() == 200) {
-            $response_status["resp_result"] = 200;
-            return  response($response_status, 200)
-                ->header('Content-Type', 'json');
-        } else {
-            $response_arr = json_decode($response, true);
-
-            $response_error["resp_result"] = 400;
-            $response_error["message"] = $response_arr["Message"];
-//            $response_error["message"] = "Message";
-
-            return  response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-    }
-
     public function geoDataSearch($to, $to_number)
     {
 
@@ -1344,10 +1362,9 @@ class Android154Controller extends Controller
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Обновите приложение";
+            $response_error["Message"] = "Ошибка соединения с сервером.";
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
+            return $response_error;
         }
         $authorization = self::autorization();
 
