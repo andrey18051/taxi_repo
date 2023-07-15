@@ -29,7 +29,7 @@ class AndroidTestController extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = "2.43";
+        $response_error["message"] = "2.46";
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
@@ -275,10 +275,13 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
+//        $extra_charge_codes = ["BAGGAGE", "CONDIT"];
         $add_cost = 0;
+//        $response = Http::dd()->withHeaders([
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => "1.52.1"
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -293,6 +296,7 @@ class AndroidTestController extends Controller
             'premium' => 0, //Машина премиум-класса: True, False
             'flexible_tariff_name' => $tariff, //Гибкий тариф
             'route_undefined' => $route_undefined, //По городу: True, False
+//            'BAGGAGE' => true,
             'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                         ['name' => $from, 'number' => $from_number],
                         ['name' => $to, 'number' => $to_number],
@@ -545,7 +549,7 @@ class AndroidTestController extends Controller
          */
 
         self::saveCoast($params);
-        $extra_charge_codes = preg_split("/[*]+/", $services);
+
         $url = $connectAPI . '/api/weborders/cost';
         if ($connectAPI == 'http://31.43.107.151:7303') {
                 $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
@@ -553,10 +557,12 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
+//      dd($extra_charge_codes);
         $add_cost = 0;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => "1.52.1"
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -578,7 +584,7 @@ class AndroidTestController extends Controller
             //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
 
@@ -618,7 +624,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
+    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $add_cost, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -694,7 +700,7 @@ class AndroidTestController extends Controller
 
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $to, 'lat' => $originLatitude, 'lng' => $originLongitude ]
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
         } else {
@@ -717,8 +723,6 @@ class AndroidTestController extends Controller
         }
 
 
-        $add_cost = 0;
-
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
@@ -730,7 +734,8 @@ class AndroidTestController extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => "1.52.1"
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -987,7 +992,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $services)
+    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $add_cost, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -1120,7 +1125,7 @@ class AndroidTestController extends Controller
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
-        $add_cost= 0;
+
         $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -1602,5 +1607,49 @@ class AndroidTestController extends Controller
                 break;
         }
         return 'Basic ' . base64_encode($username . ':' . $password);
+    }
+
+    public function myHistory()
+    {
+
+        $connectAPI = self::connectApi();
+
+
+        $url = $connectAPI . '/api/clients/ordershistory';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+        $authorization = self::autorization();
+        $response = Http::withHeaders([
+             'Authorization' => $authorization,
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => "1.52.1"
+        ])->get($url);
+        return $response;
+//dd($response->body());
+    }
+    public function historyUID($uid)
+    {
+
+        $connectAPI = self::connectApi();
+
+
+        $url = $connectAPI . '/api/weborders/';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+        $url = $url . $uid;
+        $authorization = self::autorization();
+        $response = Http::withHeaders([
+             'Authorization' => $authorization,
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => "1.52.1"
+        ])->get($url);
+        return $response;
+//dd($response->body());
     }
 }

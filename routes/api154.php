@@ -85,3 +85,5 @@ Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLat
 
 Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/', [Android154Controller::class, 'orderSearchMarkers'])
     ->name('orderSearchMarkers');
+Route::get('/android/historyUID/{uid}', [Android154Controller::class, 'historyUID'])
+    ->name('myHistory');

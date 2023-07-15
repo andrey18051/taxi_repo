@@ -690,7 +690,7 @@ class Android157Controller extends Controller
 
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $to, 'lat' => $originLatitude, 'lng' => $originLongitude ]
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
         } else {
@@ -1598,5 +1598,29 @@ class Android157Controller extends Controller
                 break;
         }
         return 'Basic ' . base64_encode($username . ':' . $password);
+    }
+
+    public function historyUID($uid)
+    {
+
+        $connectAPI = "http://167.235.113.231:7307";
+//        'taxi2012Url_0' => 'http://167.235.113.231:7307',
+//    'taxi2012Url_1' => 'http://167.235.113.231:7306',
+//    'taxi2012Url_2' => 'http://134.249.181.173:7208',
+//    'taxi2012Url_3' => 'http://91.205.17.153:7208' ,
+
+        $url = $connectAPI . '/api/weborders/';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+        $url = $url . $uid;
+        $authorization = self::autorization();
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+        ])->get($url);
+        return $response;
     }
 }
