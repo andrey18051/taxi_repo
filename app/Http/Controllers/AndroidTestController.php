@@ -259,6 +259,7 @@ class AndroidTestController extends Controller
 
         $from = $combos_from->name;
         $to = $combos_to->name;
+
         /**
          * Сохранние расчетов в базе
          */
@@ -276,7 +277,7 @@ class AndroidTestController extends Controller
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
 //        $extra_charge_codes = ["BAGGAGE", "CONDIT"];
-        $add_cost = 0;
+
 //        $response = Http::dd()->withHeaders([
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -290,13 +291,13 @@ class AndroidTestController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
-            'add_cost' => $add_cost,
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
             'flexible_tariff_name' => $tariff, //Гибкий тариф
             'route_undefined' => $route_undefined, //По городу: True, False
-//            'BAGGAGE' => true,
+
             'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                         ['name' => $from, 'number' => $from_number],
                         ['name' => $to, 'number' => $to_number],
@@ -306,7 +307,7 @@ class AndroidTestController extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response);
         if ($response->status() == 200) {
             return  response($response, 200)
                 ->header('Content-Type', 'json');
@@ -323,6 +324,7 @@ class AndroidTestController extends Controller
 
     public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $services)
     {
+
         $connectAPI = self::connectApi();
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
@@ -359,6 +361,7 @@ class AndroidTestController extends Controller
         $taxiColumnId = config('app.taxiColumnId');
 
         $params["from"] = $from;
+        $params["from_number"] = $from_number;
         $params["routefromnumber"] =  $from_number;
         $params["to"] = $to;
         $params["to_number"] = $to_number;
@@ -401,7 +404,8 @@ class AndroidTestController extends Controller
         $extra_charge_codes = preg_split("/[*]+/", $services);
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => "1.52.1"
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -1246,6 +1250,7 @@ class AndroidTestController extends Controller
 
     public function saveOrder($params)
     {
+
         /**
          * Сохранние расчетов в базе
          */
@@ -1279,25 +1284,39 @@ class AndroidTestController extends Controller
         /**
          * Сообщение о заказе
          */
-
-        if (!$params["route_undefined"]) {
-            $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] .
-                " до "  . $params['to'] . " " . $params['to_number'] .
-                ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                $params['dispatching_order_uid'];
+        if ($params['from_number']) {
+            if (!$params["route_undefined"]) {
+                $order = "Нове замовлення від " . $params['user_full_name'] .
+                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                    " до "  . $params['to'] . " " . $params['to_number'] .
+                    ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    $params['dispatching_order_uid'];
+            } else {
+                $order = "Нове замовлення від " . $params['user_full_name'] .
+                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                    " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    $params['dispatching_order_uid'];
+            }
         } else {
-            $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] .
-                " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                $params['dispatching_order_uid'];
+            if (!$params["route_undefined"]) {
+                $order = "Нове замовлення від " . $params['user_full_name'] .
+                    " за маршрутом від " . $params['from'] .
+                    " до "  . $params['to'] . " " . $params['to_number'] .
+                    ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    $params['dispatching_order_uid'];
+            } else {
+                $order = "Нове замовлення від " . $params['user_full_name'] .
+                    " за маршрутом від " . $params['from'] .
+                    " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    $params['dispatching_order_uid'];
+            }
         }
+            $subject = 'Інформація про нову поїздку:';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $order,
+            ];
 
-        $subject = 'Інформація про нову поїздку:';
-        $paramsCheck = [
-            'subject' => $subject,
-            'message' => $order,
-        ];
 
         Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
         $message = new TelegramController();
