@@ -94,3 +94,9 @@ Route::get('/android/myHistory/', [AndroidTestController::class, 'myHistory'])
 
 Route::get('/android/historyUID/{uid}', [AndroidTestController::class, 'historyUID'])
     ->name('myHistory');
+
+Route::get('/android/apiVersion/', [AndroidTestController::class, 'apiVersion'])
+    ->name('apiVersion');
+
+Route::get('/android/geoDataSearch/{to}/{to_number}', [AndroidTestController::class, 'geoDataSearch'])
+    ->name('geoDataSearch');

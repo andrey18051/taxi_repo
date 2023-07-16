@@ -276,13 +276,14 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
-//        $extra_charge_codes = ["BAGGAGE", "CONDIT"];
-
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
 //        $response = Http::dd()->withHeaders([
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
-            "X-API-VERSION" => "1.52.1"
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -402,10 +403,13 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
         $response = Http::withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
-            "X-API-VERSION" => "1.52.1"
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -561,12 +565,15 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
-//      dd($extra_charge_codes);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+
         $add_cost = 0;
         $response = Http::withHeaders([
              'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
-            "X-API-VERSION" => "1.52.1"
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -686,12 +693,16 @@ class AndroidTestController extends Controller
 
         if ($response_arr_from != null) {
             $params['routefromnumber'] = $response_arr_from["properties"]["name"];
+
             $from = $response_arr_from["properties"]["street_type"]
                 . $response_arr_from["properties"]["street"]
                 . ", буд." . $response_arr_from["properties"]["name"]
                 . ", " . $response_arr_from["properties"]["settlement_type"]
                 . " " . $response_arr_from["properties"]["settlement"];
+        } else {
+            $from = "Місце відправлення";
         }
+        $params['from_number'] = $from;
 
         $params["from"] = $from;
         $params['routefrom'] = $from;
@@ -735,11 +746,14 @@ class AndroidTestController extends Controller
         }
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
-
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
         $response = Http::withHeaders([
+//            $response = Http::dd()->withHeaders([
             'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
-            "X-API-VERSION" => "1.52.1"
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -757,10 +771,10 @@ class AndroidTestController extends Controller
             'route' =>$rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+            'extra_charge_codes' =>   $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-//dd($response->body());
+
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
             if ($response_arr["order_cost"] != 0) {
@@ -824,7 +838,7 @@ class AndroidTestController extends Controller
 //            dd($response_arr);
             $response_error["order_cost"] = "0";
             $response_error["Message"] = $response_arr["Message"];
-//            dd("333");
+//            dd($response_error);
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
@@ -927,10 +941,14 @@ class AndroidTestController extends Controller
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
         $add_cost = 0;
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -1061,6 +1079,7 @@ class AndroidTestController extends Controller
                 . ", " . $response_arr_from["properties"]["settlement_type"]
                 . " " . $response_arr_from["properties"]["settlement"];
         }
+        $params['routefrom'] = $from;
 
         $params["from"] = $from;
 
@@ -1121,7 +1140,7 @@ class AndroidTestController extends Controller
         $params['to'] = $to;
 
         self::saveCoast($params);
-        $params['routefrom'] = $from;
+
 
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
@@ -1131,9 +1150,13 @@ class AndroidTestController extends Controller
         }
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -1284,7 +1307,8 @@ class AndroidTestController extends Controller
         /**
          * Сообщение о заказе
          */
-        if ($params['from_number']) {
+//        dd($params);
+        if ($params['from_number'] != null) {
             if (!$params["route_undefined"]) {
                 $order = "Нове замовлення від " . $params['user_full_name'] .
                     " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
@@ -1361,6 +1385,30 @@ class AndroidTestController extends Controller
     public function geoDataSearch($to, $to_number)
     {
 
+//        https://api.visicom.ua/data-api/5.0/uk/geocode.json?text=м. Київ, вул. Хрещатик, 26&key=694ae33ba1338e1a5c59f416046dc5c1
+        https://api.visicom.ua/data-api/5.0/uk/geocode.json?text=м. Одесса,вул. 11-Я ЛИНИЯ (КИЕВСКИЙ Р-Н, ДЕРИБАСОВКА), 1, 26&key=694ae33ba1338e1a5c59f416046dc5c1
+//            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?text="
+//                ."м. Одесса,"
+//                . $to
+//                . "," . $to_number
+//                . "&key="
+//                . config("app.keyVisicom");
+//dd($url);
+//            $response = Http::get($url);
+//            $response_arr_from = json_decode($response, true);
+//
+//dd($response_arr_from);
+//        if ($response_arr_from != null) {
+//
+////            $params['routefromnumber'] = $response_arr_from["properties"]["name"];
+////            $from = $response_arr_from["properties"]["street_type"]
+////                . $response_arr_from["properties"]["street"]
+////                . ", буд." . $response_arr_from["properties"]["name"]
+////                . ", " . $response_arr_from["properties"]["settlement_type"]
+////                . " " . $response_arr_from["properties"]["settlement"];
+//        }
+
+
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
@@ -1380,7 +1428,8 @@ class AndroidTestController extends Controller
         }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
-            "X-WO-API-APP-ID" => $X_WO_API_APP_ID
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'q' => $to, //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -1644,7 +1693,7 @@ class AndroidTestController extends Controller
         $response = Http::withHeaders([
              'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
-            "X-API-VERSION" => "1.52.1"
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
         return $response;
 //dd($response->body());
@@ -1666,9 +1715,19 @@ class AndroidTestController extends Controller
         $response = Http::withHeaders([
              'Authorization' => $authorization,
             "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
-            "X-API-VERSION" => "1.52.1"
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
         return $response;
 //dd($response->body());
+    }
+    public function apiVersion()
+    {
+        $connectAPI = self::connectApi();
+
+        $url = $connectAPI . '/api/version';
+        $response = Http::get($url);
+        $response_arr = json_decode($response, true);
+
+        return $response_arr["version"];
     }
 }
