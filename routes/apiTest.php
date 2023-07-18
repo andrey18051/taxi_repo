@@ -4,6 +4,7 @@ use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\VisicomController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -100,3 +101,15 @@ Route::get('/android/apiVersion/', [AndroidTestController::class, 'apiVersion'])
 
 Route::get('/android/geoDataSearch/{to}/{to_number}', [AndroidTestController::class, 'geoDataSearch'])
     ->name('geoDataSearch');
+
+Route::get('/android/geoDataSearchStreet/{to}/{to_number}', [AndroidTestController::class, 'geoDataSearchStreet'])
+    ->name('geoDataSearchStreet');
+
+Route::get('/android/geoDataSearchObject/{to}', [AndroidTestController::class, 'geoDataSearchObject'])
+    ->name('geoDataSearchObject');
+
+Route::get('/android/geoLatLanSearch/{originLatitude}/{originLongitude}', [AndroidTestController::class, 'geoLatLanSearch'])
+    ->name('geoLatLanSearch');
+
+Route::get('/android/visicom/show/{settlement}', [VisicomController::class, 'show'])
+    ->name('visicom_show');

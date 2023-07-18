@@ -195,7 +195,7 @@ class AndroidTestController extends Controller
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
-
+//dd($to . "-" . $to_number . "-");
         /**
          * Параметры запроса
          */
@@ -260,6 +260,32 @@ class AndroidTestController extends Controller
         $from = $combos_from->name;
         $to = $combos_to->name;
 
+        $LatLngFrom = self::geoDataSearch($from, $from_number);
+        $from_lat = $LatLngFrom["lat"];
+        $from_lng =  $LatLngFrom["lng"];
+        if ($from_lat != 0 && $from_lng != 0) {
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
+                ['name' => $to, 'number' => $to_number],
+            ];
+        } else {
+            $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'number' => $from_number],
+                ['name' => $to, 'number' => $to_number],
+            ];
+        }
+
+        $LatLngTo = self::geoDataSearch($to, $to_number);
+        $to_lat = $LatLngTo["lat"];
+        $to_lng = $LatLngTo["lng"];
+
+        if ($to_lat != 0 && $to_lng != 0) {
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
+                ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng ],
+            ];
+        }
+//dd($rout);
         /**
          * Сохранние расчетов в базе
          */
@@ -298,11 +324,7 @@ class AndroidTestController extends Controller
             'premium' => 0, //Машина премиум-класса: True, False
             'flexible_tariff_name' => $tariff, //Гибкий тариф
             'route_undefined' => $route_undefined, //По городу: True, False
-
-            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                        ['name' => $from, 'number' => $from_number],
-                        ['name' => $to, 'number' => $to_number],
-            ],
+            'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
@@ -364,6 +386,7 @@ class AndroidTestController extends Controller
         $params["from"] = $from;
         $params["from_number"] = $from_number;
         $params["routefromnumber"] =  $from_number;
+
         $params["to"] = $to;
         $params["to_number"] = $to_number;
 
@@ -396,6 +419,35 @@ class AndroidTestController extends Controller
         $from = $combos_from->name;
         $to = $combos_to->name;
 
+        $LatLngFrom = self::geoDataSearch($from, $from_number);
+        $from_lat = $LatLngFrom["lat"];
+        $from_lng =  $LatLngFrom["lng"];
+        if ($from_lat != 0 && $from_lng != 0) {
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
+                ['name' => $to, 'number' => $to_number],
+            ];
+        } else {
+            $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'number' => $from_number],
+                ['name' => $to, 'number' => $to_number],
+            ];
+        }
+//dd($to. " " . $to_number);
+        $LatLngTo = self::geoDataSearch($to, $to_number);
+        $to_lat = $LatLngTo["lat"];
+        $to_lng = $LatLngTo["lng"];
+//dd($LatLngTo);
+        if ($to_lat != 0 && $to_lng != 0) {
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
+                ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng ],
+            ];
+        }
+
+//        dd($rout);
+//dd($rout);
+
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
@@ -424,18 +476,13 @@ class AndroidTestController extends Controller
             'premium' => 0, //Машина премиум-класса: True, False
             'flexible_tariff_name' => $tariff, //Гибкий тариф
             'route_undefined' => $route_undefined, //По городу: True, False
-            'route' => [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-
-                ['name' => $from, 'number' => $from_number],
-                ['name' => $to, 'number' => $to_number],
-
-            ],
+            'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
             $params["order_cost"] = $response_arr["order_cost"];
@@ -676,32 +723,53 @@ class AndroidTestController extends Controller
         /**
          * Откуда
          */
+        $visicom = VisicomController::showLatLng($originLatitude, $originLongitude);
 
-        $from = "Місце відправлення";
-        $r = 50;
-        do {
-            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-                . $originLongitude
-                . "," . $originLatitude
-                . "&r=" . $r . "&l=1&key="
-                . config("app.keyVisicom");
+        if ($visicom == 404) {
+            $r = 50;
+            do {
+                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                    . $originLongitude
+                    . "," . $originLatitude
+                    . "&r=" . $r . "&l=1&key="
+                    . config("app.keyVisicom");
 
-            $response = Http::get($url);
-            $response_arr_from = json_decode($response, true);
-            $r += 50;
-        } while (empty($response_arr_from) && $r < 200);
+                $response = Http::get($url);
+                $response_arr_from = json_decode($response, true);
+                $r += 50;
+            } while (empty($response_arr_from) && $r < 200);
 
-        if ($response_arr_from != null) {
-            $params['routefromnumber'] = $response_arr_from["properties"]["name"];
+            if ($response_arr_from != null) {
+                $params['routefromnumber'] = $response_arr_from["properties"]["name"];
 
-            $from = $response_arr_from["properties"]["street_type"]
-                . $response_arr_from["properties"]["street"]
-                . ", буд." . $response_arr_from["properties"]["name"]
-                . ", " . $response_arr_from["properties"]["settlement_type"]
-                . " " . $response_arr_from["properties"]["settlement"];
+                $from = $response_arr_from["properties"]["street_type"]
+                    . $response_arr_from["properties"]["street"]
+                    . ", буд." . $response_arr_from["properties"]["name"]
+                    . ", " . $response_arr_from["properties"]["settlement_type"]
+                    . " " . $response_arr_from["properties"]["settlement"];
+
+                $request["street_type"] = $response_arr_from["properties"]["street_type"];
+                $request["street"] = $response_arr_from["properties"]["street"];
+                $request["name"] = $response_arr_from["properties"]["name"];
+                $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
+                $request["settlement"] = $response_arr_from["properties"]["settlement"];
+                $request["lat"] = $originLatitude;
+                $request["lng"] = $originLongitude;
+
+                VisicomController::store($request);
+            } else {
+                $from = "Місце відправлення";
+            }
         } else {
-            $from = "Місце відправлення";
+            $params['routefromnumber'] = $visicom["name"];
+
+            $from = $visicom["street_type"]
+                . $visicom["street"]
+                . ", буд." . $visicom["name"]
+                . ", " . $visicom["settlement_type"]
+                . " " . $visicom["settlement"];
         }
+
         $params['from_number'] = $from;
 
         $params["from"] = $from;
@@ -1057,38 +1125,55 @@ class AndroidTestController extends Controller
          * Откуда
          */
 
-        $r = 50;
-        do {
-            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-                . $originLongitude
-                . "," . $originLatitude
-                . "&r=" . $r . "&l=1&key="
-                . config("app.keyVisicom");
+        $visicom = VisicomController::showLatLng($originLatitude, $originLongitude);
+        if ($visicom == 404) {
+            $r = 50;
+            do {
+                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                    . $originLongitude
+                    . "," . $originLatitude
+                    . "&r=" . $r . "&l=1&key="
+                    . config("app.keyVisicom");
 
-            $response = Http::get($url);
-            $response_arr_from = json_decode($response, true);
-            $r += 50;
-        } while (empty($response_arr_from) && $r < 200);
+                $response = Http::get($url);
+                $response_arr_from = json_decode($response, true);
+                $r += 50;
+            } while (empty($response_arr_from) && $r < 200);
 
-        $from = "Місце відправлення";
-        if ($response_arr_from != null) {
-            $params['routefromnumber'] = $response_arr_from["properties"]["name"];
-            $from = $response_arr_from["properties"]["street_type"]
-                . $response_arr_from["properties"]["street"]
-                . ", буд." . $response_arr_from["properties"]["name"]
-                . ", " . $response_arr_from["properties"]["settlement_type"]
-                . " " . $response_arr_from["properties"]["settlement"];
+            if ($response_arr_from != null) {
+                $params['routefromnumber'] = $response_arr_from["properties"]["name"];
+
+                $from = $response_arr_from["properties"]["street_type"]
+                    . $response_arr_from["properties"]["street"]
+                    . ", буд." . $response_arr_from["properties"]["name"]
+                    . ", " . $response_arr_from["properties"]["settlement_type"]
+                    . " " . $response_arr_from["properties"]["settlement"];
+
+                $request["street_type"] = $response_arr_from["properties"]["street_type"];
+                $request["street"] = $response_arr_from["properties"]["street"];
+                $request["name"] = $response_arr_from["properties"]["name"];
+                $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
+                $request["settlement"] = $response_arr_from["properties"]["settlement"];
+                $request["lat"] = $originLatitude;
+                $request["lng"] = $originLongitude;
+
+                VisicomController::store($request);
+            } else {
+                $from = "Місце відправлення";
+            }
+        } else {
+            $params['routefromnumber'] = $visicom["name"];
+
+            $from = $visicom["street_type"]
+                . $visicom["street"]
+                . ", буд." . $visicom["name"]
+                . ", " . $visicom["settlement_type"]
+                . " " . $visicom["settlement"];
         }
         $params['routefrom'] = $from;
 
-        $params["from"] = $from;
-
-        $to = "Місце призначення";
-
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
-            $params['route_undefined'] = $route_undefined; //По городу: True, False
-
             $params['to'] = 'по місту';
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
@@ -1097,47 +1182,82 @@ class AndroidTestController extends Controller
 
         } else {
             $route_undefined = false;
+            $visicom = VisicomController::showLatLng($toLongitude, $toLatitude);
 
-            $r = 50;
-            do {
-                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-                    . $toLongitude
-                    . "," . $toLatitude
-                    . "&r=" . $r . "&l=1&key="
-                    . config("app.keyVisicom");
+            if ($visicom == 404) {
+                $r = 50;
+                do {
+                    $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                        . $toLongitude
+                        . "," . $toLatitude
+                        . "&r=" . $r . "&l=1&key="
+                        . config("app.keyVisicom");
 
-                $response = Http::get($url);
-                $response_arr_to = json_decode($response, true);
-                $r += 50;
-            } while (empty($response_arr_to) && $r < 200);
+                    $response = Http::get($url);
+                    $response_arr_to = json_decode($response, true);
+                    $r += 50;
+                } while (empty($response_arr_to) && $r < 200);
 
 
-            $params['route_undefined'] = $route_undefined; //По городу: True, False
+                if ($response_arr_to != null) {
+                    $params['routetonumber'] = $response_arr_to["properties"]["name"];
+                    $to = $response_arr_to["properties"]["street_type"]
+                        . $response_arr_to["properties"]["street"]
+                        . ", буд." . $response_arr_to["properties"]["name"]
+                        . ", " . $response_arr_to["properties"]["settlement_type"]
+                        . " " . $response_arr_to["properties"]["settlement"];
+                    $request["street_type"] = $response_arr_to["properties"]["street_type"];
+                    $request["street"] = $response_arr_to["properties"]["street"];
+                    $request["name"] = $response_arr_to["properties"]["name"];
+                    $request["settlement_type"] = $response_arr_to["properties"]["settlement_type"];
+                    $request["settlement"] = $response_arr_to["properties"]["settlement"];
+                    $request["lat"] = $originLatitude;
+                    $request["lng"] = $originLongitude;
 
-            if ($response_arr_to != null) {
-                $params['routetonumber'] = $response_arr_to["properties"]["name"];
-                $to = $response_arr_to["properties"]["street_type"]
-                    . $response_arr_to["properties"]["street"]
-                    . ", буд." . $response_arr_to["properties"]["name"]
-                    . ", " . $response_arr_to["properties"]["settlement_type"]
-                    . " " . $response_arr_to["properties"]["settlement"];
+                    VisicomController::store($request);
+
+                } else {
+                    $to = "Місце призначення";
+                }
+            } else {
+                $params['routefromnumber'] = $visicom["name"];
+
+                $to = $visicom["street_type"]
+                    . $visicom["street"]
+                    . ", буд." . $visicom["name"]
+                    . ", " . $visicom["settlement_type"]
+                    . " " . $visicom["settlement"];
             }
-
-
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
                 ['name' => $to, 'lat' => $toLatitude, 'lng' => $toLongitude]
             ];
         }
 
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
 
         /**
          * Сохранние расчетов в базе
          */
-        $params['from'] = $from;
-        $params['from_number'] = " ";
-        $params['to_number'] = " ";
-        $params['to'] = $to;
+        $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
+        if ($addressFrom['name'] != "name") {
+            $params['from'] = $addressFrom['name'];
+            $params['from_number'] = $addressFrom['house'];
+        } else {
+            $params['from'] = $from;
+            $params['from_number'] = ' ';
+        }
+//dd($addressFrom);
+        $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
+        if ($addressTo['name'] != "name") {
+            $params['to'] = $addressTo['name'];
+            $params['to_number'] = $addressTo['house'];
+        } else {
+            $params['to'] = $to;
+            $params['to_number'] = " ";
+        }
+
+
 
         self::saveCoast($params);
 
@@ -1200,8 +1320,8 @@ class AndroidTestController extends Controller
                 $response_ok["currency"] = $response_arr["currency"];
                 $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
-                $response_ok["routefrom"] = $params['routefrom'];
-                $response_ok["routefromnumber"] = $params['routefromnumber'];
+                $response_ok["routefrom"] = $params['from'];
+                $response_ok["routefromnumber"] = $params['from_number'];
 
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
@@ -1293,7 +1413,7 @@ class AndroidTestController extends Controller
         $order->flexible_tariff_name = $params["flexible_tariff_name"]; //Гибкий тариф
         $order->route_undefined = $params["route_undefined"]; //По городу: True, False
         $order->routefrom = $params["from"]; //Обязательный. Улица откуда.
-        $order->routefromnumber = $params["routefromnumber"]; //Обязательный. Дом откуда.
+        $order->routefromnumber = $params["from_number"]; //Обязательный. Дом откуда.
         $order->routeto = $params["to"]; //Обязательный. Улица куда.
         $order->routetonumber = $params["to_number"]; //Обязательный. Дом куда.
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
@@ -1308,38 +1428,25 @@ class AndroidTestController extends Controller
          * Сообщение о заказе
          */
 //        dd($params);
-        if ($params['from_number'] != null) {
-            if (!$params["route_undefined"]) {
-                $order = "Нове замовлення від " . $params['user_full_name'] .
-                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                    " до "  . $params['to'] . " " . $params['to_number'] .
-                    ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                    $params['dispatching_order_uid'];
-            } else {
-                $order = "Нове замовлення від " . $params['user_full_name'] .
-                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                    " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                    $params['dispatching_order_uid'];
-            }
+
+        if (!$params["route_undefined"]) {
+            $order = "Нове замовлення від " . $params['user_full_name'] .
+                " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                " до "  . $params['to'] . " " . $params['to_number'] .
+                ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                $params['dispatching_order_uid'];
         } else {
-            if (!$params["route_undefined"]) {
-                $order = "Нове замовлення від " . $params['user_full_name'] .
-                    " за маршрутом від " . $params['from'] .
-                    " до "  . $params['to'] . " " . $params['to_number'] .
-                    ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                    $params['dispatching_order_uid'];
-            } else {
-                $order = "Нове замовлення від " . $params['user_full_name'] .
-                    " за маршрутом від " . $params['from'] .
-                    " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                    $params['dispatching_order_uid'];
-            }
+            $order = "Нове замовлення від " . $params['user_full_name'] .
+                " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                $params['dispatching_order_uid'];
         }
-            $subject = 'Інформація про нову поїздку:';
-            $paramsCheck = [
-                'subject' => $subject,
-                'message' => $order,
-            ];
+
+        $subject = 'Інформація про нову поїздку:';
+        $paramsCheck = [
+            'subject' => $subject,
+            'message' => $order,
+        ];
 
 
         Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
@@ -1382,32 +1489,18 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function geoDataSearch($to, $to_number)
+    public function geoDataSearch($to, $to_number): array
     {
+        if ($to_number != " ") {
+            $LatLng = self::geoDataSearchStreet($to, $to_number);
+        } else {
+            $LatLng = self::geoDataSearchObject($to);
+        }
 
-//        https://api.visicom.ua/data-api/5.0/uk/geocode.json?text=м. Київ, вул. Хрещатик, 26&key=694ae33ba1338e1a5c59f416046dc5c1
-        https://api.visicom.ua/data-api/5.0/uk/geocode.json?text=м. Одесса,вул. 11-Я ЛИНИЯ (КИЕВСКИЙ Р-Н, ДЕРИБАСОВКА), 1, 26&key=694ae33ba1338e1a5c59f416046dc5c1
-//            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?text="
-//                ."м. Одесса,"
-//                . $to
-//                . "," . $to_number
-//                . "&key="
-//                . config("app.keyVisicom");
-//dd($url);
-//            $response = Http::get($url);
-//            $response_arr_from = json_decode($response, true);
-//
-//dd($response_arr_from);
-//        if ($response_arr_from != null) {
-//
-////            $params['routefromnumber'] = $response_arr_from["properties"]["name"];
-////            $from = $response_arr_from["properties"]["street_type"]
-////                . $response_arr_from["properties"]["street"]
-////                . ", буд." . $response_arr_from["properties"]["name"]
-////                . ", " . $response_arr_from["properties"]["settlement_type"]
-////                . " " . $response_arr_from["properties"]["settlement"];
-//        }
-
+        return $LatLng;
+    }
+    public function geoDataSearchStreet($to, $to_number): array
+    {
 
         $connectAPI = self::connectApi();
 
@@ -1447,77 +1540,188 @@ class AndroidTestController extends Controller
                 locale*/
         ]);
         $response_arr = json_decode($response, true);
-//        dd($response_arr);
-//        dd($response_arr["geo_streets"]["geo_street"][0]["houses"][0]['house']);
+//dd($response_arr);
         $LatLng["lat"] = 0;
         $LatLng["lng"] = 0;
         if ((strncmp($to_number, " ", 1) != 0)) {
             if (isset($response_arr["geo_streets"]["geo_street"][0]["houses"])) {
                 foreach ($response_arr["geo_streets"]["geo_street"][0]["houses"] as $value) {
-//                    dd(strncmp($value['house'], $to_number, strlen($to_number)));
-                    if (strncmp($value['house'], $to_number, strlen($to_number)-1) != 0) {
+                    if ($value['house'] ==  trim($to_number)) {
                         $LatLng["lat"] = $value["lat"];
                         $LatLng["lng"] = $value["lng"];
                         break;
                     }
                 }
-            }
-        } else {
-//               dd($response_arr["geo_objects"]["geo_object"]);
-            if ($response_arr["geo_objects"]["geo_object"] != null) {
-                foreach ($response_arr["geo_objects"]["geo_object"] as $value) {
-//                    dd(strncmp($value['house'], $to_number, strlen($to_number)));
-                    if (strncmp($value['name'], $to, strlen($to)) != 0) {
-                        $LatLng["lat"] = $value["lat"];
-                        $LatLng["lng"] = $value["lng"];
-                        break;
-                    }
-                }
-                $LatLng["lat"] = $response_arr["geo_objects"]["geo_object"][0]["lat"];
-                $LatLng["lng"] = $response_arr["geo_objects"]["geo_object"][0]["lng"];
             }
         }
-//dd($LatLng);
+
+        return $LatLng;
+    }
+    public function geoDataSearchObject($to): array
+    {
+        $connectAPI = self::connectApi();
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return $response_error;
+        }
+        $authorization = self::autorization();
+
+
+        $url = $connectAPI . '/api/geodata/objects/search';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => self::apiVersion()
+        ])->get($url, [
+            'q' => $to, //Обязательный. Несколько букв для поиска объекта.
+            'offset' => 0, //Смещение при выборке (сколько пропустить).
+            'limit' => 1, //Кол-во возвращаемых записей (предел).
+            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
+            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
+            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
+                Возможные значения:
+                * (возвращает все поля)
+                name
+                old_name
+                houses
+                lat
+                lng
+                locale*/
+        ]);
+        $response_arr = json_decode($response, true);
+        $LatLng["lat"] = 0;
+        $LatLng["lng"] = 0;
+
+        if (isset($response_arr["geo_object"][0]["name"])) {
+            $LatLng["lat"] = $response_arr["geo_object"][0]["lat"];
+            $LatLng["lng"] = $response_arr["geo_object"][0]["lng"];
+        }
+
+//        dd($LatLng);
         return $LatLng;
     }
     public function fromSearchGeo($originLatitude, $originLongitude)
     {
 
-        /**
-         * Откуда
-         */
+        $visicom = VisicomController::showLatLng($originLatitude, $originLongitude);
+        $addressArr = self::geoLatLanSearch($originLatitude, $originLongitude);
 
-        $r = 50;
-        do {
-            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-                . $originLongitude
-                . "," . $originLatitude
-                . "&r=" . $r . "&l=1&key="
-                . config("app.keyVisicom");
+        $response_ok["name"] = $addressArr['name'];
+        $response_ok["house"] = $addressArr['house'];
 
-            $response = Http::get($url);
-            $response_arr_from = json_decode($response, true);
-            $r += 50;
-        } while (empty($response_arr_from) && $r < 200);
+        if ($visicom == 404) {
+            $r = 50;
+            do {
+                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                    . $originLongitude
+                    . "," . $originLatitude
+                    . "&r=" . $r . "&l=1&key="
+                    . config("app.keyVisicom");
 
-        if ($response_arr_from != null) {
-            $from = $response_arr_from["properties"]["street_type"]
-                . $response_arr_from["properties"]["street"]
-                . ", буд." . $response_arr_from["properties"]["name"]
-                . " (" . $response_arr_from["properties"]["settlement"] . ")";
+                $response = Http::get($url);
+                $response_arr_from = json_decode($response, true);
+                $r += 50;
+            } while (empty($response_arr_from) && $r < 200);
+
+            if ($response_arr_from != null) {
+                $from = $response_arr_from["properties"]["street_type"]
+                    . $response_arr_from["properties"]["street"]
+                    . ", буд." . $response_arr_from["properties"]["name"]
+                    . " (" . $response_arr_from["properties"]["settlement"] . ")";
+
+                $response_ok["order_cost"] = 100;
+                $response_ok["route_address_from"] = $from;
+
+
+
+                $request["street_type"] = $response_arr_from["properties"]["street_type"];
+                $request["street"] = $response_arr_from["properties"]["street"];
+                $request["name"] = $response_arr_from["properties"]["name"];
+                $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
+                $request["settlement"] = $response_arr_from["properties"]["settlement"];
+                $request["lat"] = $originLatitude;
+                $request["lng"] = $originLongitude;
+
+                VisicomController::store($request);
+
+                return  response($response_ok, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "Помилка гоепошуку. Спробуйте вказати місце з бази адрес.";
+                return  response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        } else {
+            $from =  $visicom["street_type"]
+                . $visicom["street"]
+                . ", буд." . $visicom["name"]
+                . ", " . $visicom["settlement_type"]
+                . " " . $visicom["settlement"];
 
             $response_ok["order_cost"] = 100;
             $response_ok["route_address_from"] = $from;
-
-
+//            dd($response_ok);
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');
-        } else {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Помилка гоепошуку. Спробуйте вказати місце з бази адрес.";
-            return  response($response_error, 200)
-                ->header('Content-Type', 'json');
         }
+    }
+
+    public function geoLatLanSearch($originLatitude, $originLongitude): array
+    {
+        $connectAPI = self::connectApi();
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return $response_error;
+        }
+        $authorization = self::autorization();
+
+
+        $url = $connectAPI . '/api/geodata/nearest';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+        $r = 50;
+        do {
+            $response = Http::withHeaders([
+                'Authorization' => $authorization,
+                "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+                "X-API-VERSION" => self::apiVersion()
+            ])->get($url, [
+                'lat' => $originLatitude,
+                'lng' => $originLongitude,
+                'r' => $r,
+            ]);
+            $r += 50;
+            $response_arr = json_decode($response, true);
+        } while (empty($response_arr) && $r < 200);
+
+        $addressArr['name'] = "name";
+        $addressArr['house'] =  "house";
+
+        if ($response_arr["geo_streets"]["geo_street"] != null) {
+            $addressArr['name'] =  $response_arr["geo_streets"]["geo_street"][0]["name"];
+            $addressArr['house'] =  $response_arr["geo_streets"]["geo_street"][0]["houses"][0]["house"];
+        }
+        if ($response_arr["geo_objects"]["geo_object"] != null) {
+            $addressArr['name'] =  $response_arr["geo_objects"]["geo_object"][0]["name"];
+            $addressArr['house'] =  " ";
+        }
+//dd($addressArr);
+        return  $addressArr;
     }
 
     public function approvedPhones($phone, $confirm_code)
