@@ -52,12 +52,12 @@ Route::middleware('throttle:6,1')->get('/android/orderMap/{originLatitude}/{orig
 
 Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}/', [AndroidTestController::class, 'costSearch'])
     ->name('costSearch');
-Route::middleware('throttle:6,1')->get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{services}', [AndroidTestController::class, 'orderSearch'])
+Route::middleware('throttle:6,1')->get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{services}', [AndroidTestController::class, 'orderSearch'])
     ->name('orderSearch');
 
 Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}', [AndroidTestController::class, 'costSearchGeo'])
     ->name('costSearchGeo');
-Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{services}', [AndroidTestController::class, 'orderSearchGeo'])
+Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{services}', [AndroidTestController::class, 'orderSearchGeo'])
     ->name('orderSearchGeo');
 
 Route::get('/android/fromSearchGeo/{originLatitude}/{originLongitude}', [AndroidTestController::class, 'fromSearchGeo'])
@@ -84,7 +84,7 @@ Route::get('/android/startIP', [AndroidTestController::class, 'startIP'])->name(
 Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/', [AndroidTestController::class, 'costSearchMarkers'])
     ->name('costSearchMarkers');
 
-Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{services}/', [AndroidTestController::class, 'orderSearchMarkers'])
+Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{services}', [AndroidTestController::class, 'orderSearchMarkers'])
     ->name('orderSearchMarkers');
 
 Route::get('/android/versionAPI/', [AndroidTestController::class, 'version'])

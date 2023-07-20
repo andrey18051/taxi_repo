@@ -12,6 +12,7 @@ use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
 class AndroidTestController extends Controller
@@ -260,31 +261,28 @@ class AndroidTestController extends Controller
         $from = $combos_from->name;
         $to = $combos_to->name;
 
+        $routFrom = ['name' => $from, 'number' => $from_number];
+        $routTo =   ['name' => $to, 'number' => $to_number];
+
         $LatLngFrom = self::geoDataSearch($from, $from_number);
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
-        if ($from_lat != 0 && $from_lng != 0) {
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
-                ['name' => $to, 'number' => $to_number],
-            ];
-        } else {
-            $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'number' => $from_number],
-                ['name' => $to, 'number' => $to_number],
-            ];
-        }
 
         $LatLngTo = self::geoDataSearch($to, $to_number);
         $to_lat = $LatLngTo["lat"];
         $to_lng = $LatLngTo["lng"];
 
-        if ($to_lat != 0 && $to_lng != 0) {
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
-                ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng ],
-            ];
+        if ($from_lat != 0 && $from_lng != 0) {
+            $routFrom = ['name' => $from, 'lat' => $from_lat, 'lng' => $from_lng];
         }
+
+        if ($to_lat != 0 && $to_lng != 0) {
+            $routTo = ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng];
+        }
+        $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            $routFrom,
+            $routTo,
+        ];
 //dd($rout);
         /**
          * Сохранние расчетов в базе
@@ -345,7 +343,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $services)
+    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -359,20 +357,11 @@ class AndroidTestController extends Controller
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
-
         $params['client_sub_card'] = null;
-//        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
-        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
-
-        $reservation = $params['reservation'];
-        $required_time = null;
-
-        $params["required_time"] = $required_time;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
         $params['premium'] = 0;
         $params['route_address_entrance_from'] = null;
-
 
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
@@ -419,34 +408,46 @@ class AndroidTestController extends Controller
         $from = $combos_from->name;
         $to = $combos_to->name;
 
+        $routFrom = ['name' => $from, 'number' => $from_number];
+        $routTo =   ['name' => $to, 'number' => $to_number];
+
         $LatLngFrom = self::geoDataSearch($from, $from_number);
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
-        if ($from_lat != 0 && $from_lng != 0) {
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
-                ['name' => $to, 'number' => $to_number],
-            ];
-        } else {
-            $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'number' => $from_number],
-                ['name' => $to, 'number' => $to_number],
-            ];
-        }
-//dd($to. " " . $to_number);
+
         $LatLngTo = self::geoDataSearch($to, $to_number);
         $to_lat = $LatLngTo["lat"];
         $to_lng = $LatLngTo["lng"];
-//dd($LatLngTo);
-        if ($to_lat != 0 && $to_lng != 0) {
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from , 'lat' => $from_lat, 'lng' => $from_lng ],
-                ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng ],
-            ];
+
+        if ($from_lat != 0 && $from_lng != 0) {
+            $routFrom = ['name' => $from, 'lat' => $from_lat, 'lng' => $from_lng];
         }
 
-//        dd($rout);
-//dd($rout);
+        if ($to_lat != 0 && $to_lng != 0) {
+            $routTo = ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng];
+        }
+        $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            $routFrom,
+            $routTo,
+        ];
+
+        $required_time =  null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = date("Y-m-d");
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $params['reservation'] = $reservation;
+
+        $params["required_time"] = $required_time;
+
+
+        if ($comment == "no_comment") {
+            $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+        }
 
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
@@ -466,10 +467,10 @@ class AndroidTestController extends Controller
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => $comment, //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -682,7 +683,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $add_cost, $services)
+    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -697,15 +698,7 @@ class AndroidTestController extends Controller
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
-
         $params['client_sub_card'] = null;
-//        $params['required_time'] = $req->required_time; //Время подачи предварительного заказа
-        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
-
-        $reservation = $params['reservation'];
-        $required_time = null;
-
-        $params["required_time"] = $required_time;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
         $params['premium'] = 0;
@@ -798,14 +791,30 @@ class AndroidTestController extends Controller
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
-            $to_resp = $to;
-            $to_number_resp = $to_number;
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
                 ['name' => $to, 'number' => $to_number]
             ];
         }
 
+
+        $required_time =  null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = date("Y-m-d");
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $params['reservation'] = $reservation;
+
+        $params["required_time"] = $required_time;
+
+
+        if ($comment == "no_comment") {
+            $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+        }
 
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
@@ -827,10 +836,10 @@ class AndroidTestController extends Controller
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => $comment, //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -1119,7 +1128,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $add_cost, $services)
+    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $add_cost, $time, $comment, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -1134,13 +1143,7 @@ class AndroidTestController extends Controller
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
-
         $params['client_sub_card'] = null;
-        $params['required_time'] = null; //Время подачи предварительного заказа
-        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
-
-        $reservation = $params['reservation'];
-        $required_time = null;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
         $params['premium'] = 0;
@@ -1275,9 +1278,7 @@ class AndroidTestController extends Controller
 
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        /**
-         * Сохранние расчетов в базе
-         */
+
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
         if ($addressFrom['name'] != "name") {
             $params['from'] = $addressFrom['name'];
@@ -1296,10 +1297,23 @@ class AndroidTestController extends Controller
             $params['to_number'] = " ";
         }
 
+        $required_time =  null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = date("Y-m-d");
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $params['reservation'] = $reservation;
+
+        $params["required_time"] = $required_time;
 
 
-        self::saveCoast($params);
-
+        if ($comment == "no_comment") {
+            $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+        }
 
         $url = $connectAPI . '/api/weborders';
         if ($connectAPI == 'http://31.43.107.151:7303') {
@@ -1320,10 +1334,10 @@ class AndroidTestController extends Controller
             'user_full_name' => $user, //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
-            'required_time' => null, //Время подачи предварительного заказа
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => $comment, //Комментарий к заказу
             'add_cost' => $add_cost,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
