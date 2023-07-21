@@ -343,7 +343,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $services)
+    public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $date, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -434,7 +434,8 @@ class AndroidTestController extends Controller
         $required_time =  null; //Время подачи предварительного заказа
         $reservation = false; //Обязательный. Признак предварительного заказа: True, False
         if ($time != "no_time") {
-            $todayDate = date("Y-m-d");
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
             list($hours, $minutes) = explode(":", $time);
             $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
             $reservation = true; //Обязательный. Признак предварительного заказа: True, False
@@ -683,7 +684,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $services)
+    public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $date, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -801,7 +802,9 @@ class AndroidTestController extends Controller
         $required_time =  null; //Время подачи предварительного заказа
         $reservation = false; //Обязательный. Признак предварительного заказа: True, False
         if ($time != "no_time") {
-            $todayDate = date("Y-m-d");
+
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
             list($hours, $minutes) = explode(":", $time);
             $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
             $reservation = true; //Обязательный. Признак предварительного заказа: True, False
@@ -1128,7 +1131,7 @@ class AndroidTestController extends Controller
         }
     }
 
-    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $add_cost, $time, $comment, $services)
+    public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $add_cost, $time, $comment, $date, $services)
     {
 
         $connectAPI = self::connectApi();
@@ -1300,7 +1303,8 @@ class AndroidTestController extends Controller
         $required_time =  null; //Время подачи предварительного заказа
         $reservation = false; //Обязательный. Признак предварительного заказа: True, False
         if ($time != "no_time") {
-            $todayDate = date("Y-m-d");
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
             list($hours, $minutes) = explode(":", $time);
             $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
             $reservation = true; //Обязательный. Признак предварительного заказа: True, False
