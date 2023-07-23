@@ -30,7 +30,7 @@ class Android160Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = "1.603";
+        $response_error["message"] = "1.605";
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
@@ -1024,12 +1024,11 @@ class Android160Controller extends Controller
          */
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
         if ($addressFrom['name'] != "name") {
-            $params['from'] = $addressFrom['name'];
             $params['from_number'] = $addressFrom['house'];
         } else {
-            $params['from'] = $addressFrom;
             $params['from_number'] = ' ';
         }
+        $params['from'] = $addressFrom['name'];
 
         $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
         if ($addressTo['name'] != "name") {
@@ -1039,8 +1038,8 @@ class Android160Controller extends Controller
             $params['to'] = $to;
             $params['to_number'] = " ";
         }
-
-        self::saveCoast($params);
+//dd($params);
+//        self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
         if ($connectAPI == 'http://31.43.107.151:7303') {

@@ -30,7 +30,7 @@ class AndroidTestController extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = "2.703";
+        $response_error["message"] = "2.705";
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
@@ -1033,12 +1033,11 @@ class AndroidTestController extends Controller
          */
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
         if ($addressFrom['name'] != "name") {
-            $params['from'] = $addressFrom['name'];
             $params['from_number'] = $addressFrom['house'];
         } else {
-            $params['from'] = $addressFrom;
             $params['from_number'] = ' ';
         }
+        $params['from'] = $addressFrom['name'];
 //dd($addressFrom);
         $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
         if ($addressTo['name'] != "name") {
