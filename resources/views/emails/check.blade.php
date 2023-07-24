@@ -12,6 +12,7 @@
               0674061856
          </a>
     </span>
+    <br>
     <span>
          <a class="btn btn-outline-success" href="tel:+380674061856">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-inbound" viewBox="0 0 16 16">
@@ -20,6 +21,7 @@
               0933242525
          </a>
     </span>
+    <br>
     <span>
          <a class="btn btn-outline-success" href="tel:+380674061856">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-inbound" viewBox="0 0 16 16">
@@ -28,7 +30,7 @@
               0504115575
          </a>
     </span>
-
+    <br>
 </div>
 Приємної поїздки.
 @endcomponent
