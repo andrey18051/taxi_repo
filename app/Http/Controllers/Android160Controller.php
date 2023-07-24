@@ -1032,14 +1032,12 @@ class Android160Controller extends Controller
 
         $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
         if ($addressTo['name'] != "name") {
-            $params['to'] = $addressTo['name'];
             $params['to_number'] = $addressTo['house'];
         } else {
-            $params['to'] = $to;
             $params['to_number'] = " ";
         }
-//dd($params);
-//        self::saveCoast($params);
+        $params['to'] = $addressTo['name'];
+        self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
         if ($connectAPI == 'http://31.43.107.151:7303') {
@@ -1274,21 +1272,19 @@ class Android160Controller extends Controller
 
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
         if ($addressFrom['name'] != "name") {
-            $params['from'] = $addressFrom['name'];
             $params['from_number'] = $addressFrom['house'];
         } else {
-            $params['from'] = $from;
             $params['from_number'] = ' ';
         }
+        $params['from'] = $addressFrom['name'];
 
         $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
         if ($addressTo['name'] != "name") {
-            $params['to'] = $addressTo['name'];
             $params['to_number'] = $addressTo['house'];
         } else {
-            $params['to'] = $to;
             $params['to_number'] = " ";
         }
+        $params['to'] = $addressTo['name'];
 
         $required_time =  null; //Время подачи предварительного заказа
         $reservation = false; //Обязательный. Признак предварительного заказа: True, False
