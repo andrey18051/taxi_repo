@@ -1022,21 +1022,24 @@ class Android160Controller extends Controller
         /**
          * Сохранние расчетов в базе
          */
+
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
         if ($addressFrom['name'] != "name") {
+            $params['from'] = $addressFrom['name'];
             $params['from_number'] = $addressFrom['house'];
         } else {
+            $params['from'] = 'Місце відправлення';
             $params['from_number'] = ' ';
         }
-        $params['from'] = $addressFrom['name'];
 
         $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
         if ($addressTo['name'] != "name") {
+            $params['to'] = $addressTo['name'];
             $params['to_number'] = $addressTo['house'];
         } else {
+            $params['to'] = 'Місце призначення';
             $params['to_number'] = " ";
         }
-        $params['to'] = $addressTo['name'];
         self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
@@ -1270,21 +1273,24 @@ class Android160Controller extends Controller
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
 
+
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
         if ($addressFrom['name'] != "name") {
+            $params['from'] = $addressFrom['name'];
             $params['from_number'] = $addressFrom['house'];
         } else {
+            $params['from'] = 'Місце відправлення';
             $params['from_number'] = ' ';
         }
-        $params['from'] = $addressFrom['name'];
 
         $addressTo = self::geoLatLanSearch($toLatitude, $toLongitude);
         if ($addressTo['name'] != "name") {
+            $params['to'] = $addressTo['name'];
             $params['to_number'] = $addressTo['house'];
         } else {
+            $params['to'] = 'Місце призначення';
             $params['to_number'] = " ";
         }
-        $params['to'] = $addressTo['name'];
 
         $required_time =  null; //Время подачи предварительного заказа
         $reservation = false; //Обязательный. Признак предварительного заказа: True, False
