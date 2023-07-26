@@ -113,3 +113,9 @@ Route::get('/android/geoLatLanSearch/{originLatitude}/{originLongitude}', [Andro
 
 Route::get('/android/visicom/show/{settlement}', [VisicomController::class, 'show'])
     ->name('visicom_show');
+
+Route::get('/android/webordersCancel/{uid}', [AndroidTestController::class, 'webordersCancel'])
+    ->name('webordersCancel');
+
+Route::get('/android/historyUIDStatus/{uid}', [AndroidTestController::class, 'historyUIDStatus'])
+    ->name('myHistoryStatus');

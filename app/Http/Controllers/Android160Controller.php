@@ -30,7 +30,7 @@ class Android160Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = "1.608";
+        $response_error["message"] = "1.609";
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
@@ -250,9 +250,24 @@ class Android160Controller extends Controller
             }
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
+        if ($combos_from == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Не вірна адреса";
 
-        $from = $combos_from->name;
-        $to = $combos_to->name;
+            return  response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $from = $combos_from->name;
+        }
+        if ($combos_to == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Не вірна адреса";
+
+            return  response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $to = $combos_to->name;
+        }
 
         $routFrom = ['name' => $from, 'number' => $from_number];
         $routTo =   ['name' => $to, 'number' => $to_number];
@@ -398,8 +413,24 @@ class Android160Controller extends Controller
             }
         }
 
-        $from = $combos_from->name;
-        $to = $combos_to->name;
+        if ($combos_from == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Не вірна адреса";
+
+            return  response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $from = $combos_from->name;
+        }
+        if ($combos_to == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Не вірна адреса";
+
+            return  response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $to = $combos_to->name;
+        }
 
         $routFrom = ['name' => $from, 'number' => $from_number];
         $routTo =   ['name' => $to, 'number' => $to_number];
@@ -580,7 +611,16 @@ class Android160Controller extends Controller
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
             }
-            $to = $combos_to->name;
+
+            if ($combos_to == null) {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "Не вірна адреса";
+
+                return  response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $to = $combos_to->name;
+            }
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
@@ -780,7 +820,16 @@ class Android160Controller extends Controller
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
             }
-            $to = $combos_to->name;
+
+            if ($combos_to == null) {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "Не вірна адреса";
+
+                return  response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $to = $combos_to->name;
+            }
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
