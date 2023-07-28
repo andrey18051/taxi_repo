@@ -1031,3 +1031,8 @@ Route::get('/blacklist', [BlackListController::class,'index'])->name('index-blac
 
 Route::get('/blacklist/addToBlacklist', [BlackListController::class,'addToBlacklist'])->name('addToBlacklist');
 Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'deleteFromBlacklist'])->name('deleteFromBlacklist');
+
+/**
+  * Ip address
+  */
+Route::get('/ip/city', [IPController::class,'ipCity'])->name('ipCity');

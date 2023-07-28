@@ -2047,8 +2047,6 @@ class AndroidPas2Controller extends Controller
     {
         $connectAPI = self::connectApi();
 
-
-        $url = $connectAPI . '/api/weborders/';
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
