@@ -30,7 +30,7 @@ class Android160Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = "1.609";
+        $response_error["message"] = config('app.version-PAS1');
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');

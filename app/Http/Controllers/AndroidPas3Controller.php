@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidTestController extends Controller
+class AndroidPas3Controller extends Controller
 {
 
     public function index(): int
@@ -30,7 +30,7 @@ class AndroidTestController extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = config('app.version-PAS2');
+        $response_error["message"] = config('app.version-PAS3');
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
@@ -311,7 +311,7 @@ class AndroidTestController extends Controller
 
         $url = $connectAPI . '/api/weborders/cost';
         if ($connectAPI == 'http://31.43.107.151:7303') {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS3");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
         }
