@@ -33,4 +33,10 @@ class IPController extends Controller
         return response()->json(['response' => $LocationData->regionName]);
     }
 
+    public function address(): \Illuminate\Http\JsonResponse
+    {
+        $LocationData = Location::get(getenv("REMOTE_ADDR"));
+
+        return response()->json(['response' => $LocationData]);
+    }
 }

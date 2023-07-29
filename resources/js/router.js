@@ -8,6 +8,7 @@ import Users from './views/user/UserHome';
 import Services from './views/service/ServiceHome';
 import UserEdit from './views/user/UserEdit';
 import TaxiAccount from './views/taxi/account';
+import CityHome from "./views/city/CityHome";
 
 const  routes = [
     {
@@ -21,6 +22,10 @@ const  routes = [
     {
         path: "/admin/services",
         component: Services
+    },
+    {
+        path: "/admin/city",
+        component: CityHome
     },
     {
         name: 'UserEdit',

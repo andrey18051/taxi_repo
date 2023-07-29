@@ -3,6 +3,7 @@
 use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\BredoGeneratorController;
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\GithubController;
@@ -1036,3 +1037,14 @@ Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'delete
   * Ip address
   */
 Route::get('/ip/city', [IPController::class,'ipCity'])->name('ipCity');
+Route::get('/ip/address', [IPController::class,'address'])->name('address');
+ /**
+  * City
+  */
+Route::get('/city/all', [CityController::class,'index']);
+Route::get('/city/destroy/{id}', [CityController::class,'destroy']);
+Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}', [CityController::class,'edit']);
+Route::get('/city/cityNew', function () {
+    return view('admin.cities');
+})->name('city-new');
+Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-save');

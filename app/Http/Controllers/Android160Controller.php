@@ -2014,4 +2014,68 @@ class Android160Controller extends Controller
 
         return $response_arr["version"];
     }
+    /**
+     * Запрос отмены заказа клиентом
+     * @return string
+     */
+    public function webordersCancel($uid)
+    {
+        $connectAPI = self::connectApi();
+
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+
+        $authorization = self::autorization();
+        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => self::apiVersion()
+        ])->put($url);
+
+
+
+        $json_arrWeb = json_decode($response, true);
+
+        $resp_answer = "Запит на скасування замовлення надіслано. ";
+
+        switch ($json_arrWeb['order_client_cancel_result']) {
+            case '0':
+                $resp_answer = $resp_answer . "Замовлення не вдалося скасувати. ";
+                break;
+            case '1':
+                $resp_answer = $resp_answer . "Замовлення скасоване. ";
+                break;
+            case '2':
+                $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської. ";
+                break;
+        }
+        return response()->json(['response' => $resp_answer]);
+    }
+    public function historyUIDStatus($uid)
+    {
+
+        $connectAPI = self::connectApi();
+
+
+        $url = $connectAPI . '/api/weborders/';
+        if ($connectAPI == 'http://31.43.107.151:7303') {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
+        } else {
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+        }
+        $url = $url . $uid;
+        $authorization = self::autorization();
+        $response = Http::withHeaders([
+            'Authorization' => $authorization,
+            "X-WO-API-APP-ID" => $X_WO_API_APP_ID,
+            "X-API-VERSION" => self::apiVersion()
+        ])->get($url);
+        return $response;
+
+    }
 }
+

@@ -59,7 +59,7 @@ class AndroidPas4Controller extends Controller
     public function startIP()
     {
         if (self::connectAPI() == 'http://31.43.107.151:7303') {
-            IPController::getIP('/android/PAS2/startPage');
+            IPController::getIP('/android/PAS4/startPage');
         } else {
             IPController::getIP('/android/PAS1/startPage');
         }
@@ -73,7 +73,7 @@ class AndroidPas4Controller extends Controller
          * тест
          */
 
-        IPController::getIP('/android/PAS2');
+        IPController::getIP('/android/PAS4');
         $connectAPI = 'http://31.43.107.151:7303';
         $server0 = $connectAPI;
 
