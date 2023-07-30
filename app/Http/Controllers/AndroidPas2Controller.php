@@ -234,7 +234,7 @@ class AndroidPas2Controller extends Controller
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
-//dd($to . "-" . $to_number . "-");
+
         /**
          * Параметры запроса
          */
@@ -256,8 +256,6 @@ class AndroidPas2Controller extends Controller
         $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        $reservation = $params['reservation'];
-        $required_time = null;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
         $params['premium'] = 0;
@@ -286,12 +284,19 @@ class AndroidPas2Controller extends Controller
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-            } else {
-                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+
+            switch ($connectAPI) {
+                case 'http://31.43.107.151:7303':
+                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case 'http://167.235.113.231:7307':
+                case 'http://167.235.113.231:7306':
+                case 'http://134.249.181.173:7208':
+                case 'http://91.205.17.153:7208':
+                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
             }
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
@@ -337,7 +342,7 @@ class AndroidPas2Controller extends Controller
             $routFrom,
             $routTo,
         ];
-//dd($rout);
+
         /**
          * Сохранние расчетов в базе
          */
@@ -353,7 +358,7 @@ class AndroidPas2Controller extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-//        $response = Http::dd()->withHeaders([
+
         $response = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
@@ -378,7 +383,7 @@ class AndroidPas2Controller extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-//dd($response);
+
         if ($response->status() == 200) {
             return  response($response, 200)
                 ->header('Content-Type', 'json');
@@ -438,20 +443,35 @@ class AndroidPas2Controller extends Controller
 
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-            } else {
-                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+
+            switch ($connectAPI) {
+                case 'http://31.43.107.151:7303':
+                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+                    break;
+                case 'http://167.235.113.231:7307':
+                case 'http://167.235.113.231:7306':
+                case 'http://134.249.181.173:7208':
+                case 'http://91.205.17.153:7208':
+                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+                    break;
             }
+
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-            } else {
-                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+
+            switch ($connectAPI) {
+                case 'http://31.43.107.151:7303':
+                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case 'http://167.235.113.231:7307':
+                case 'http://167.235.113.231:7306':
+                case 'http://134.249.181.173:7208':
+                case 'http://91.205.17.153:7208':
+                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
             }
         }
 
@@ -644,11 +664,19 @@ class AndroidPas2Controller extends Controller
 
         } else {
             $route_undefined = false;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-            } else {
-                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+
+            switch ($connectAPI) {
+                case 'http://31.43.107.151:7303':
+                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case 'http://167.235.113.231:7307':
+                case 'http://167.235.113.231:7306':
+                case 'http://134.249.181.173:7208':
+                case 'http://91.205.17.153:7208':
+                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
             }
+
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "Не вірна адреса";
@@ -853,11 +881,18 @@ class AndroidPas2Controller extends Controller
 
         } else {
             $route_undefined = false;
-            if (self::connectAPI() == 'http://31.43.107.151:7303') {
-                $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-            } else {
-                $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+            switch ($connectAPI) {
+                case 'http://31.43.107.151:7303':
+                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case 'http://167.235.113.231:7307':
+                case 'http://167.235.113.231:7306':
+                case 'http://134.249.181.173:7208':
+                case 'http://91.205.17.153:7208':
+                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
             }
+
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "Не вірна адреса";
