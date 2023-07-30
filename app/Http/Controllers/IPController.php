@@ -28,8 +28,8 @@ class IPController extends Controller
     public function ipCity(): \Illuminate\Http\JsonResponse
     {
         $LocationData = Location::get(getenv("REMOTE_ADDR"));
-//        $LocationData = Location::get("94.158.152.248");
-//        $LocationData = Location::get("185.237.74.247");
+//        $LocationData = Location::get("94.158.152.248"); //Одесса тест
+//        $LocationData = Location::get("185.237.74.247"); //Киев
         return response()->json(['response' => $LocationData->regionName]);
     }
 

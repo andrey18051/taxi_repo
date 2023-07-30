@@ -221,14 +221,14 @@ class Android160Controller extends Controller
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
-        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['taxiColumnId'] = config('app.taxiColumnIdKyiv'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
         $payment_type_info = 'готівка';
 
         $params['route_undefined'] = false; //По городу: True, False
 
 
-        $taxiColumnId = config('app.taxiColumnId');
+        $taxiColumnId = config('app.taxiColumnIdKyiv');
 
 
         if ($from == $to) {
@@ -305,7 +305,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
@@ -374,11 +374,11 @@ class Android160Controller extends Controller
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
-        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['taxiColumnId'] = config('app.taxiColumnIdKyiv'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
         $payment_type_info = 'готівка';
 
-        $taxiColumnId = config('app.taxiColumnId');
+        $taxiColumnId = config('app.taxiColumnIdKyiv');
 
         $params["from"] = $from;
         $params["from_number"] = $from_number;
@@ -478,7 +478,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
@@ -585,14 +585,14 @@ class Android160Controller extends Controller
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
-        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['taxiColumnId'] = config('app.taxiColumnIdKyiv'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
         $payment_type_info = 'готівка';
 
         $params['route_undefined'] = false; //По городу: True, False
 
 
-        $taxiColumnId = config('app.taxiColumnId');
+        $taxiColumnId = config('app.taxiColumnIdKyiv');
 
         if ($originLatitude == $to) {
             $route_undefined = true;
@@ -644,7 +644,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
                 $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
@@ -740,11 +740,11 @@ class Android160Controller extends Controller
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
-        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['taxiColumnId'] = config('app.taxiColumnIdKyiv'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
         $payment_type_info = 'готівка';
 
-        $taxiColumnId = config('app.taxiColumnId');
+        $taxiColumnId = config('app.taxiColumnIdKyiv');
 
         /**
          * Откуда
@@ -864,7 +864,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
@@ -995,14 +995,14 @@ class Android160Controller extends Controller
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
-        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['taxiColumnId'] = config('app.taxiColumnIdKyiv'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
         $payment_type_info = 'готівка';
 
         $params['route_undefined'] = false; //По городу: True, False
 
 
-        $taxiColumnId = config('app.taxiColumnId');
+        $taxiColumnId = config('app.taxiColumnIdKyiv');
         $to_geo = "Місце призначення";
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
@@ -1095,7 +1095,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
@@ -1195,14 +1195,14 @@ class Android160Controller extends Controller
         $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
-        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['taxiColumnId'] = config('app.taxiColumnIdKyiv'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
         $payment_type_info = 'готівка';
 
         $params['route_undefined'] = false; //По городу: True, False
 
 
-        $taxiColumnId = config('app.taxiColumnId');
+        $taxiColumnId = config('app.taxiColumnIdKyiv');
 
         /**
          * Откуда
@@ -1364,7 +1364,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
@@ -1563,7 +1563,7 @@ class Android160Controller extends Controller
         $url = self::connectApi() . '/api/approvedPhones/sendConfirmCode';
         $response = Http::post($url, [
             'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
+            'taxiColumnId' => config('app.taxiColumnIdKyiv') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
         ]);
 
         if ($response->status() == 200) {
@@ -1608,7 +1608,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -1664,7 +1664,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $response = Http::withHeaders([
             'Authorization' => $authorization,
@@ -1778,7 +1778,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $r = 50;
         do {
@@ -1973,7 +1973,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $authorization = self::autorization();
         $response = Http::withHeaders([
@@ -1992,7 +1992,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $url = $url . $uid;
         $authorization = self::autorization();
@@ -2025,7 +2025,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
 
         $authorization = self::autorization();
@@ -2065,7 +2065,7 @@ class Android160Controller extends Controller
         if ($connectAPI == 'http://31.43.107.151:7303') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         $url = $url . $uid;
         $authorization = self::autorization();
