@@ -77,9 +77,9 @@ class CityController extends Controller
     public function cityOnline($city)
     {
 
-        $serverArrOffline = City::where('online', "false")->where('name', $city)->get()->toArray();
+        $serverArr = self::cityAll($city);
 
-        foreach ($serverArrOffline as $value) {
+        foreach ($serverArr as $value) {
             if (self::hasPassedFiveMinutes($value['updated_at'])) {
                 self::checkDomain($value["address"]);
             }
