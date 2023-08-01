@@ -41,7 +41,7 @@ class AndroidPas4001Controller extends Controller
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS1');
+                $response_error["message"] = config('app.version-PAS4');
                 break;
         }
         return  response($response_error, 200)
@@ -61,7 +61,7 @@ class AndroidPas4001Controller extends Controller
                 $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
                 break;
             default:
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
         }
         return $X_WO_API_APP_ID;
     }
@@ -582,11 +582,7 @@ class AndroidPas4001Controller extends Controller
         self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-        if ($connectAPI == 'http://31.43.107.151:7303') {
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-        } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
-        }
+
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
