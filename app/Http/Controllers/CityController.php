@@ -55,7 +55,7 @@ class CityController extends Controller
 
     public function cityCreat(Request $req)
     {
-        $city  = new City();
+        $city = new City();
 
         $city->name = $req->name;
         $city->address = $req->address;
@@ -80,25 +80,24 @@ class CityController extends Controller
         $serverArr = self::cityAll($city);
 
         foreach ($serverArr as $value) {
-            if (self::hasPassedFiveMinutes($value['updated_at'])) {
-                self::checkDomain($value["address"]);
+            if ($value["online"] == "true") {
+                if (self::checkDomain($value["address"])) {
+                    return "http://" . $value["address"];
+                };
+            } else {
+                if (self::hasPassedFiveMinutes($value['updated_at']) && self::checkDomain($value["address"])) {
+                    return "http://" . $value["address"];
+                }
             }
         }
-
-        $server = City::where('online', "true")-> where('name', $city)->first();
-
-        if ($server != null) {
-            return "http://" .  $server->address;
-        } else {
-            return 400;
-        }
+        return 400;
     }
 
 
     /**
      * @throws \Exception
      */
-    private function checkDomain($domain)
+    private function checkDomain($domain): bool
     {
         $city = City::where('address', $domain)->first();
 
@@ -114,6 +113,7 @@ class CityController extends Controller
         if ($response) {
             $city->online = "true";
             $city->save();
+            return true;
         } else {
             $city->online = "false";
             $city->save();
@@ -134,6 +134,7 @@ class CityController extends Controller
                 ];
                 Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
             };
+            return false;
         }
     }
 
