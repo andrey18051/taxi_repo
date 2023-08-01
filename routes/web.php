@@ -1042,8 +1042,9 @@ Route::get('/ip/address', [IPController::class,'address'])->name('address');
   * City
   */
 Route::get('/city/all', [CityController::class,'index']);
+Route::get('/city/online', [CityController::class,'cityOnline']);
 Route::get('/city/destroy/{id}', [CityController::class,'destroy']);
-Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}', [CityController::class,'edit']);
+Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}/{online}', [CityController::class,'edit']);
 Route::get('/city/cityNew', function () {
     return view('admin.cities');
 })->name('city-new');

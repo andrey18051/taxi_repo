@@ -11,6 +11,7 @@ use App\Models\ComboTest;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
+use DateTimeImmutable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
@@ -104,132 +105,7 @@ class AndroidPas4001Controller extends Controller
 
     public function connectAPI(): string
     {
-
-        /**
-         * тест
-         */
-
-//        IPController::getIP('/android/PAS2');
-//        $connectAPI = 'http://31.43.107.151:7303';
-//        $server0 = $connectAPI;
-//        $server1 = $connectAPI;
-//        $server2 = $connectAPI;
-//        $server3 = $connectAPI;
-
-        /**
-         * ПАС1
-         */
-        IPController::getIP('/android/PAS4');
-        $server0 = config('app.taxi2012Url_0');
-        $server1 = config('app.taxi2012Url_1');
-        $server2 = config('app.taxi2012Url_2');
-        $server3 = config('app.taxi2012Url_3');
-
-        $url = "/api/time";
-        $alarmMessage = new TelegramController();
-
-        if (self::checkDomain($server0 . $url)) {
-            return $server0;
-        } else {
-            try {
-                $alarmMessage->sendAlarmMessage("Отключен " . $server0);
-            } catch (Exception $e) {
-                $subject = 'Ошибка в телеграмм';
-                $paramsCheck = [
-                    'subject' => $subject,
-                    'message' => $e,
-                ];
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
-
-            if (self::checkDomain($server1 . $url)) {
-                $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                    "Произведено подключение к серверу " . $server1 . ".";
-                $paramsAdmin = [
-                    'subject' => $subject,
-                    'message' => $messageAdmin,
-                ];
-
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $subject = 'Ошибка в телеграмм';
-                    $paramsCheck = [
-                        'subject' => $subject,
-                        'message' => $e,
-                    ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
-
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                return $server1;
-            } else {
-                if (self::checkDomain($server2 . $url)) {
-                    $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                        "Произведено подключение к серверу " . $server2 . ".";
-                    $paramsAdmin = [
-                        'subject' => $subject,
-                        'message' => $messageAdmin,
-                    ];
-                    try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        $subject = 'Ошибка в телеграмм';
-                        $paramsCheck = [
-                            'subject' => $subject,
-                            'message' => $e,
-                        ];
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
-                    };
-                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                    return $server2;
-                } else {
-                    if (self::checkDomain($server3 . $url)) {
-                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                            "Произведено подключение к серверу " . $server3 . ".";
-                        $paramsAdmin = [
-                            'subject' => $subject,
-                            'message' => $messageAdmin,
-                        ];
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                        } catch (Exception $e) {
-                            $subject = 'Ошибка в телеграмм';
-                            $paramsCheck = [
-                                'subject' => $subject,
-                                'message' => $e,
-                            ];
-                            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
-                        };
-                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                        return $server3;
-                    } else {
-                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server3 . ".";
-                        $paramsAdmin = [
-                            'subject' => $subject,
-                            'message' => $messageAdmin,
-                        ];
-
-                        $alarmMessage = new TelegramController();
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-
-                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-                        return '400';
-                    }
-                }
-            }
-        }
+        return self::onlineAPI();
     }
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
@@ -2104,5 +1980,23 @@ class AndroidPas4001Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->get($url);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPI(): string
+    {
+
+        /**
+         * тест
+         */
+//        $city = "Odessa";
+        /**
+         * Kyiv City;
+         */
+        $city = "Kyiv City";
+
+        return CityController::cityOnline($city);
     }
 }

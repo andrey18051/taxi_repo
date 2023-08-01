@@ -119,3 +119,6 @@ Route::get('/android/webordersCancel/{uid}', [AndroidPas4001Controller::class, '
 
 Route::get('/android/historyUIDStatus/{uid}', [AndroidPas4001Controller::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
+
+Route::get('/android/onlineAPI', [AndroidPas4001Controller::class, 'onlineAPI'])
+    ->name('onlineAPI');

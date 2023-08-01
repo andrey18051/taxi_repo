@@ -21,6 +21,7 @@
             <v-th sortKey="address">address</v-th>
             <v-th sortKey="login">login</v-th>
             <v-th sortKey="password">password</v-th>
+            <v-th sortKey="password">online</v-th>
             </thead>
             <tbody slot="body" slot-scope="{displayData}">
             <tr>
@@ -29,6 +30,7 @@
                 <td> <input class="form-input input-lg" v-model="filters.address.value"  placeholder="Select by address"></td>
                 <td> <input class="form-input input-lg" v-model="filters.login.value"  placeholder="Select by login"></td>
                 <td> <input class="form-input input-lg" v-model="filters.password.value"  placeholder="Select by password"></td>
+                <td> <input class="form-input input-lg" v-model="filters.online.value"  placeholder="Select by online"></td>
                 <td></td>
             </tr>
             <tr v-for="row in displayData" :key="row.id">
@@ -39,8 +41,16 @@
                 <td> <input id="login" class="form-control" v-model.text="row.login" required ></td>
                 <td><input id="password" class="form-control" v-model.text="row.password" required ></td>
                 <td>
+                    <select id="online" class="form-control" v-model="row.online" required>
+                        <option value="true">online</option>
+                        <option value="false">no_online</option>
+                    </select>
+                </td>
+
+
+                <td>
                     <div class="btn-group" role="group">
-                        <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password)" style="margin-left: 5px">
+                        <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password, row.online)" style="margin-left: 5px">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                             </svg>
@@ -80,6 +90,7 @@ export default {
             address: { value: "", keys: ["address"] },
             login: { value: "", keys: ["login"] },
             password: { value: "", keys: ["password"] },
+            online: { value: "", keys: ["online"] },
         }
     }),
     mounted() {
@@ -106,11 +117,11 @@ export default {
                     window.alert("Данные обновлены");
                 });
         },
-        editCities(id, name, address, login, password) {
-            axios.get('/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password)
+        editCities(id, name, address, login, password, online) {
+            axios.get('/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online)
                 .then(function(ret) {
                     console.log(ret.data);
-                    document.location.reload();
+                    // document.location.reload();
                     window.alert("Данные обновлены");
                 })
         }

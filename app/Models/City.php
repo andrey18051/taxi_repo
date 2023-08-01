@@ -25,4 +25,8 @@ class City extends Model
      * @var mixed
      */
     private $password;
+    /**
+     * @var bool|mixed
+     */
+    private $online;
 }

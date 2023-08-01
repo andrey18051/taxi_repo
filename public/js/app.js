@@ -5443,6 +5443,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityComponent",
@@ -5472,6 +5482,10 @@ __webpack_require__.r(__webpack_exports__);
         password: {
           value: "",
           keys: ["password"]
+        },
+        online: {
+          value: "",
+          keys: ["online"]
         }
       }
     };
@@ -5502,10 +5516,10 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editCities: function editCities(id, name, address, login, password) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password).then(function (ret) {
-        console.log(ret.data);
-        document.location.reload();
+    editCities: function editCities(id, name, address, login, password, online) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online).then(function (ret) {
+        console.log(ret.data); // document.location.reload();
+
         window.alert("Данные обновлены");
       });
     }
@@ -31891,6 +31905,34 @@ var render = function () {
                         }),
                       ]),
                       _vm._v(" "),
+                      _c("td", [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.filters.online.value,
+                              expression: "filters.online.value",
+                            },
+                          ],
+                          staticClass: "form-input input-lg",
+                          attrs: { placeholder: "Select by online" },
+                          domProps: { value: _vm.filters.online.value },
+                          on: {
+                            input: function ($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.filters.online,
+                                "value",
+                                $event.target.value
+                              )
+                            },
+                          },
+                        }),
+                      ]),
+                      _vm._v(" "),
                       _c("td"),
                     ]),
                     _vm._v(" "),
@@ -32000,6 +32042,53 @@ var render = function () {
                         _vm._v(" "),
                         _c("td", [
                           _c(
+                            "select",
+                            {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: row.online,
+                                  expression: "row.online",
+                                },
+                              ],
+                              staticClass: "form-control",
+                              attrs: { id: "online", required: "" },
+                              on: {
+                                change: function ($event) {
+                                  var $$selectedVal = Array.prototype.filter
+                                    .call($event.target.options, function (o) {
+                                      return o.selected
+                                    })
+                                    .map(function (o) {
+                                      var val =
+                                        "_value" in o ? o._value : o.value
+                                      return val
+                                    })
+                                  _vm.$set(
+                                    row,
+                                    "online",
+                                    $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  )
+                                },
+                              },
+                            },
+                            [
+                              _c("option", { attrs: { value: "true" } }, [
+                                _vm._v("online"),
+                              ]),
+                              _vm._v(" "),
+                              _c("option", { attrs: { value: "false" } }, [
+                                _vm._v("no_online"),
+                              ]),
+                            ]
+                          ),
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
+                          _c(
                             "div",
                             {
                               staticClass: "btn-group",
@@ -32018,7 +32107,8 @@ var render = function () {
                                         row.name,
                                         row.address,
                                         row.login,
-                                        row.password
+                                        row.password,
+                                        row.online
                                       )
                                     },
                                   },
@@ -32117,6 +32207,10 @@ var render = function () {
               _vm._v(" "),
               _c("v-th", { attrs: { sortKey: "password" } }, [
                 _vm._v("password"),
+              ]),
+              _vm._v(" "),
+              _c("v-th", { attrs: { sortKey: "password" } }, [
+                _vm._v("online"),
               ]),
             ],
             1

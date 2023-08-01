@@ -52,7 +52,7 @@ class ServicesController extends Controller
         $service->viber_id = $req->viber_id;
         $service->link = $req->link;
         $service->save();
-        return redirect()->route('services-new');
+        return redirect()->route('admin');
     }
 
     public function servicesAll(): array
