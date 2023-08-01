@@ -1638,9 +1638,14 @@ class AndroidPas4001Controller extends Controller
 
         $visicom = VisicomController::showLatLng($originLatitude, $originLongitude);
         $addressArr = self::geoLatLanSearch($originLatitude, $originLongitude);
+        if (isset($addressArr["order_cost"]) && $addressArr["order_cost"] != 0) {
+            $response_ok["name"] = $addressArr['name'];
+            $response_ok["house"] = $addressArr['house'];
+        } else {
+            $response_ok["name"] = 'name';
+            $response_ok["house"] = 'house';
+        }
 
-        $response_ok["name"] = $addressArr['name'];
-        $response_ok["house"] = $addressArr['house'];
 
         if ($visicom == 404) {
             $r = 50;

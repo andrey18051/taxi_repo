@@ -71,34 +71,20 @@ class CityController extends Controller
         return City::where('name', $city)->get()->toArray();
     }
 
-    public function cityOffline($city)
+    /**
+     * @throws \Exception
+     */
+    public function cityOnline($city)
     {
-        $serverArrAll = self::cityAll($city);
 
-        foreach ($serverArrAll as $value) {
+        $serverArrOffline = City::where('online', "false")->where('name', $city)->get()->toArray();
+
+        foreach ($serverArrOffline as $value) {
             if (self::hasPassedFiveMinutes($value['updated_at'])) {
                 self::checkDomain($value["address"]);
             }
         }
 
-
-        return City::where('online', "false")->
-        where('name', $city)->get()->toArray();
-    }
-
-    public function cityOnline($city)
-    {
-
-        $serverArrOffline = self::cityOffline($city);
-        if (!empty($serverArrOffline)) {
-            foreach ($serverArrOffline as $value) {
-                if (self::hasPassedFiveMinutes($value["updated_at"])) {
-                    $city = City::where('address', $value["address"])->first();
-                    $city->online = "true";
-                    $city->save();
-                }
-            }
-        }
         $server = City::where('online', "true")-> where('name', $city)->first();
 
         if ($server != null) {
@@ -115,42 +101,39 @@ class CityController extends Controller
     private function checkDomain($domain)
     {
         $city = City::where('address', $domain)->first();
-        if (self::hasPassedFiveMinutes($city->updated_at)) {
-            $domainFull = "http://" . $domain . "/api/time";
-            $curlInit = curl_init($domainFull);
-            curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
-            curl_setopt($curlInit, CURLOPT_HEADER, true);
-            curl_setopt($curlInit, CURLOPT_NOBODY, true);
-            curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
 
-            $response = curl_exec($curlInit);
-            curl_close($curlInit);
-            if ($response) {
-                $city->online = "true";
-                $city->save();
+        $domainFull = "http://" . $domain . "/api/time";
+        $curlInit = curl_init($domainFull);
+        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($curlInit, CURLOPT_HEADER, true);
+        curl_setopt($curlInit, CURLOPT_NOBODY, true);
+        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
 
-            } else {
-                $city->online = "false";
-                $city->save();
-                $alarmMessage = new TelegramController();
-                $messageAdmin = "Ошибка подключения к серверу " . "http://" . $domain . ".";
-                $paramsAdmin = [
-                    'subject' => "Ошибка подключения к серверу",
-                    'message' => "Ошибка подключения к серверу " . "http://" . $domain . "."
+        $response = curl_exec($curlInit);
+        curl_close($curlInit);
+        if ($response) {
+            $city->online = "true";
+            $city->save();
+        } else {
+            $city->online = "false";
+            $city->save();
+            $alarmMessage = new TelegramController();
+            $messageAdmin = "Ошибка подключения к серверу " . "http://" . $domain . ".";
+            $paramsAdmin = [
+                'subject' => "Ошибка подключения к серверу",
+                'message' => "Ошибка подключения к серверу " . "http://" . $domain . "."
+            ];
+
+            try {
+                $alarmMessage->sendAlarmMessage($messageAdmin);
+                $alarmMessage->sendMeMessage($messageAdmin);
+            } catch (Exception $e) {
+                $paramsCheck = [
+                    'subject' => 'Ошибка в телеграмм',
+                    'message' => $e,
                 ];
-
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                    $alarmMessage->sendMeMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $paramsCheck = [
-                        'subject' => 'Ошибка в телеграмм',
-                        'message' => $e,
-                    ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
-
-            }
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            };
         }
     }
 
