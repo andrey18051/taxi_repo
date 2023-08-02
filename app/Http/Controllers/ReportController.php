@@ -497,12 +497,22 @@ class ReportController extends Controller
                 $sheet->setCellValue('B' . $i, IP::whereBetween('created_at', [$dateFrom, $dateTo])
                     ->where('IP_ADDR', $value)->count());
                 $android_search = IP::whereBetween('created_at', [$dateFrom, $dateTo])->where('IP_ADDR', $value)->first()->page;
+//                dd($android_search);
                 $android = "Сайт";
-                if (strpos($android_search, "android")) {
-                    $android = "Андроид приложение";
-                } else {
-                    $android = "Сайт";
+
+                if (strpos($android_search, "PAS1")) {
+                    $android = "Андроид приложение PAS1";
                 }
+                if (strpos($android_search, "PAS2")) {
+                    $android = "Андроид приложение PAS2";
+                }
+                if (strpos($android_search, "PAS3")) {
+                    $android = "Андроид приложение PAS3";
+                }
+                if (strpos($android_search, "PAS4")) {
+                    $android = "Андроид приложение PAS4";
+                }
+
                 $sheet->setCellValue('C' . $i, $android);
                 $i++;
             }
