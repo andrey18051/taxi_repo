@@ -11,6 +11,8 @@ use App\Models\ComboTest;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
+use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
@@ -40,7 +42,7 @@ class AndroidPas2Controller extends Controller
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS1');
+                $response_error["message"] = config('app.version-PAS2');
                 break;
         }
         return  response($response_error, 200)
@@ -57,10 +59,10 @@ class AndroidPas2Controller extends Controller
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
                 break;
             default:
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
+                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         }
         return $X_WO_API_APP_ID;
     }
@@ -95,141 +97,16 @@ class AndroidPas2Controller extends Controller
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
-                IPController::getIP('/android/PAS1/startPage');
+                IPController::getIP('/android/PAS2/startPage');
                 break;
             default:
-                IPController::getIP('/android/PAS1/startPage');
+                IPController::getIP('/android/PAS2/startPage');
         }
     }
 
     public function connectAPI(): string
     {
-
-        /**
-         * тест
-         */
-
-        IPController::getIP('/android/PAS2');
-        $connectAPI = 'http://31.43.107.151:7303';
-        $server0 = $connectAPI;
-        $server1 = $connectAPI;
-        $server2 = $connectAPI;
-        $server3 = $connectAPI;
-
-        /**
-         * ПАС1
-         */
-//        IPController::getIP('/android/PAS1');
-//        $server0 = config('app.taxi2012Url_0');
-//        $server1 = config('app.taxi2012Url_1');
-//        $server2 = config('app.taxi2012Url_2');
-//        $server3 = config('app.taxi2012Url_3');
-
-        $url = "/api/time";
-        $alarmMessage = new TelegramController();
-
-        if (self::checkDomain($server0 . $url)) {
-            return $server0;
-        } else {
-            try {
-                $alarmMessage->sendAlarmMessage("Отключен " . $server0);
-            } catch (Exception $e) {
-                $subject = 'Ошибка в телеграмм';
-                $paramsCheck = [
-                    'subject' => $subject,
-                    'message' => $e,
-                ];
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
-
-            if (self::checkDomain($server1 . $url)) {
-                $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                    "Произведено подключение к серверу " . $server1 . ".";
-                $paramsAdmin = [
-                    'subject' => $subject,
-                    'message' => $messageAdmin,
-                ];
-
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $subject = 'Ошибка в телеграмм';
-                    $paramsCheck = [
-                        'subject' => $subject,
-                        'message' => $e,
-                    ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
-
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                return $server1;
-            } else {
-                if (self::checkDomain($server2 . $url)) {
-                    $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                        "Произведено подключение к серверу " . $server2 . ".";
-                    $paramsAdmin = [
-                        'subject' => $subject,
-                        'message' => $messageAdmin,
-                    ];
-                    try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        $subject = 'Ошибка в телеграмм';
-                        $paramsCheck = [
-                            'subject' => $subject,
-                            'message' => $e,
-                        ];
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
-                    };
-                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                    return $server2;
-                } else {
-                    if (self::checkDomain($server3 . $url)) {
-                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                            "Произведено подключение к серверу " . $server3 . ".";
-                        $paramsAdmin = [
-                            'subject' => $subject,
-                            'message' => $messageAdmin,
-                        ];
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                        } catch (Exception $e) {
-                            $subject = 'Ошибка в телеграмм';
-                            $paramsCheck = [
-                                'subject' => $subject,
-                                'message' => $e,
-                            ];
-                            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
-                        };
-                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                        return $server3;
-                    } else {
-                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server3 . ".";
-                        $paramsAdmin = [
-                            'subject' => $subject,
-                            'message' => $messageAdmin,
-                        ];
-
-                        $alarmMessage = new TelegramController();
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-
-                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-                        return '400';
-                    }
-                }
-            }
-        }
+        return self::onlineAPI();
     }
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
@@ -692,7 +569,7 @@ class AndroidPas2Controller extends Controller
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
                 ['name' => $to, 'number' => $to_number]
-                ];
+            ];
         }
 
         $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
@@ -706,11 +583,7 @@ class AndroidPas2Controller extends Controller
         self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-        if ($connectAPI == 'http://31.43.107.151:7303') {
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-        } else {
-            $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
-        }
+
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
@@ -1762,9 +1635,14 @@ class AndroidPas2Controller extends Controller
 
         $visicom = VisicomController::showLatLng($originLatitude, $originLongitude);
         $addressArr = self::geoLatLanSearch($originLatitude, $originLongitude);
+        if (isset($addressArr["order_cost"]) && $addressArr["order_cost"] != 0) {
+            $response_ok["name"] = $addressArr['name'];
+            $response_ok["house"] = $addressArr['house'];
+        } else {
+            $response_ok["name"] = 'name';
+            $response_ok["house"] = 'house';
+        }
 
-        $response_ok["name"] = $addressArr['name'];
-        $response_ok["house"] = $addressArr['house'];
 
         if ($visicom == 404) {
             $r = 50;
@@ -1919,9 +1797,9 @@ class AndroidPas2Controller extends Controller
                 ->header('Content-Type', 'json');
         } else {
             if ($connectAPI == 'http://31.43.107.151:7303') {
-                 $combos = ComboTest::where('name', 'like', $name . '%')->first();
+                $combos = ComboTest::where('name', 'like', $name . '%')->first();
             } else {
-                 $combos = Combo::where('name', 'like', $name . '%')->first();
+                $combos = Combo::where('name', 'like', $name . '%')->first();
             }
             if ($combos != null) {
                 $response["resp_result"] = 0;
@@ -2009,8 +1887,10 @@ class AndroidPas2Controller extends Controller
 
     private function autorization()
     {
+
         $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
 
+//        dd($city);
         $username = $city->login;
         $password = hash('SHA512', $city->password);
 
@@ -2102,5 +1982,23 @@ class AndroidPas2Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->get($url);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPI(): string
+    {
+
+        /**
+         * тест
+         */
+//        $city = "Odessa";
+        /**
+         * Kyiv City;
+         */
+        $city = "Kyiv City";
+
+        return CityController::cityOnline($city);
     }
 }
