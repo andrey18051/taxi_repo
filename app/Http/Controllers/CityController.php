@@ -85,8 +85,10 @@ class CityController extends Controller
                     return "http://" . $value["address"];
                 };
             } else {
-                if (self::hasPassedFiveMinutes($value['updated_at']) && self::checkDomain($value["address"])) {
-                    return "http://" . $value["address"];
+                if (self::hasPassedFiveMinutes($value['updated_at'])) {
+                    if (self::checkDomain($value["address"])) {
+                        return "http://" . $value["address"];
+                    }
                 }
             }
         }
