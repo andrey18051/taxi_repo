@@ -28,15 +28,18 @@ class IPController extends Controller
     public function ipCity(): \Illuminate\Http\JsonResponse
     {
         $LocationData = Location::get(getenv("REMOTE_ADDR"));
-//        $LocationData = Location::get("94.158.152.248"); //Одесса тест
-//        $LocationData = Location::get("185.237.74.247"); //Киев
+//        $LocationData = Location::get("94.158.152.248"); //Odessa
+//        $LocationData = Location::get("185.237.74.247"); //Kyiv City
+//        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
         return response()->json(['response' => $LocationData->regionName]);
     }
 
     public function address(): \Illuminate\Http\JsonResponse
     {
         $LocationData = Location::get(getenv("REMOTE_ADDR"));
-
+//                $LocationData = Location::get("94.158.152.248"); //Odessa
+//        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
+//                $LocationData = Location::get("185.237.74.247"); //Kyiv City
         return response()->json(['response' => $LocationData]);
     }
 }

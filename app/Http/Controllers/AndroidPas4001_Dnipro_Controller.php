@@ -7,17 +7,23 @@ use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\City;
 use App\Models\Combo;
+use App\Models\ComboDnipro;
 use App\Models\ComboTest;
+use App\Models\Config;
+use App\Models\DniproCombo;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Tarif;
 use App\Models\User;
 use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas4001Controller extends Controller
+class AndroidPas4001_Dnipro_Controller extends Controller
 {
 
     public function index(): int
@@ -129,31 +135,14 @@ class AndroidPas4001Controller extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
+        $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
 
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-            } else {
-                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-            }
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -297,38 +286,12 @@ class AndroidPas4001Controller extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
+        $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    break;
-            }
-
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
         }
 
         if ($combos_from == null) {
@@ -520,18 +483,7 @@ class AndroidPas4001Controller extends Controller
 
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -733,17 +685,8 @@ class AndroidPas4001Controller extends Controller
 
         } else {
             $route_undefined = false;
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+
+            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -1414,7 +1357,7 @@ class AndroidPas4001Controller extends Controller
         $order->required_time = $params["required_time"]; //Время подачи предварительного заказа
         $order->reservation = $params["reservation"]; //Обязательный. Признак предварительного заказа: True, False
         $order->route_address_entrance_from = null;
-        $order->comment = $params["comment"];  //Комментарий к заказу
+        $order->comment = self::identificationId();  //Комментарий к заказу
         $order->add_cost = $params["add_cost"]; //Добавленная стоимость
         $order->wagon = $params["wagon"]; //Универсал: True, False
         $order->minibus = $params["minibus"]; //Микроавтобус: True, False
@@ -1775,11 +1718,8 @@ class AndroidPas4001Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                 $combos = ComboTest::where('name', 'like', $name . '%')->first();
-            } else {
-                 $combos = Combo::where('name', 'like', $name . '%')->first();
-            }
+            $combos = DniproCombo::where('name', 'like', $name . '%')->first();
+
             if ($combos != null) {
                 $response["resp_result"] = 0;
                 $response["message"] = $combos->street;
@@ -1976,8 +1916,93 @@ class AndroidPas4001Controller extends Controller
         /**
          * Kyiv City;
          */
-        $city = "Kyiv City";
+//        $city = "Kyiv City";
+        /**
+         * Dnipropetrovsk Oblast;
+         */
+        $city = "Dnipropetrovsk Oblast";
 
         return CityController::cityOnline($city);
+    }
+
+    /**
+     * Контроль версии улиц и объектов
+     */
+    public function versionComboDnipro(): \Illuminate\Http\RedirectResponse
+    {
+        $base = env('DB_DATABASE');
+        $marker_update = false;
+
+        $authorization = self::autorization();
+        /**
+         * Проверка подключения к серверам
+         */
+        $connectAPI = self::connectApi();
+
+        if ($connectAPI == 400) {
+                return redirect()->route('home-news')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+
+        }
+
+        /**
+         * Проверка даты геоданных в АПИ
+         */
+
+        $url = $connectAPI . '/api/geodata/streets';
+        $json_str = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
+        ]);
+        $json_arr = json_decode($json_str, true);
+
+        $url_ob = $connectAPI . '/api/geodata/objects';
+        $response_ob = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url_ob);
+
+        $json_arr_ob = json_decode($response_ob, true);
+
+        /**
+         * Проверка версии геоданных и обновление или создание базы адресов
+         */
+//
+        $svd = Config::where('id', '1')->first();
+
+        if ($json_arr['version_date'] !==  $svd->dnipro_versionDate) {
+            $marker_update = true;
+        }
+
+
+        //Проверка версии геоданных и обновление или создание базы адресов
+
+        if ($marker_update || DniproCombo::all()->count() === 0) {
+            DB::table('dnipro_combos')->truncate();
+
+            foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
+                $combo = new DniproCombo();
+                $combo->name = $arrStreet["name"];
+                $combo->street = 1;
+                $combo->save();
+
+            }
+
+            foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
+                $combo = new DniproCombo();
+                $combo->name = $arrObject["name"];
+                $combo->street = 0;
+                $combo->save();
+
+            }
+
+            $svd = Config::where('id', '1')->first();
+            $svd->dnipro_versionDate = $json_arr['version_date'];
+            $svd->save();
+
+            return redirect()->route('home-admin')->with('success', "База $base обновлена.");
+        } else {
+            return redirect()->route('home-admin')->with('success', "База $base актуальна.");
+        }
     }
 }
