@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
+use App\Http\Controllers\AndroidPas2_Dnipro_Controller;
 use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\BredoGeneratorController;
@@ -511,6 +511,11 @@ Route::get('/taxi-gdbr', function () {
     IPController::getIP('/taxi-gdbr');
     return view('taxi.gdpr');
 })->name('taxi-gdbr');
+
+Route::get('/taxi-privacy_policy', function () {
+    IPController::getIP('/taxi-privacy_policy');
+    return view('taxi.privacy_policy');
+})->name('taxi-privacy_policy');
 
 Route::get('/taxi-umovy', function () {
     IPController::getIP('/taxi-umovy');
@@ -1054,5 +1059,5 @@ Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-s
 /**
  *
  */
-Route::get('/city/versionComboDnipro', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
+Route::get('/city/versionComboDnipro', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
 

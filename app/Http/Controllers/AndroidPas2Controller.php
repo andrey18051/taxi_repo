@@ -1404,7 +1404,7 @@ class AndroidPas2Controller extends Controller
         $order->required_time = $params['required_time']; //Время подачи предварительного заказа
         $order->reservation = $params['reservation']; //Обязательный. Признак предварительного заказа: True, False
         $order->route_address_entrance_from = null;
-        $order->comment = $params['comment'];  //Комментарий к заказу
+        $order->comment = self::identificationId();  //Комментарий к заказу
         $order->add_cost = $params['add_cost']; //Добавленная стоимость
         $order->wagon = $params['wagon']; //Универсал: True, False
         $order->minibus = $params['minibus']; //Микроавтобус: True, False
@@ -1435,7 +1435,7 @@ class AndroidPas2Controller extends Controller
         $order->required_time = $params["required_time"]; //Время подачи предварительного заказа
         $order->reservation = $params["reservation"]; //Обязательный. Признак предварительного заказа: True, False
         $order->route_address_entrance_from = null;
-        $order->comment = $params["comment"];  //Комментарий к заказу
+        $order->comment = self::identificationId();  //Комментарий к заказу
         $order->add_cost = $params["add_cost"]; //Добавленная стоимость
         $order->wagon = $params["wagon"]; //Универсал: True, False
         $order->minibus = $params["minibus"]; //Микроавтобус: True, False

@@ -94,11 +94,74 @@
                     </div>
 
                 </div>
-
                 <div class="container" style="background-color: hsl(0, 0%, 96%)">
                     <br>
                     <div class="container" style="text-align: center">
-                        <h1 class="gradient"><b>Політика конфіденційності</b></h1>
+                        <a href="https://m.easy-order-taxi.site/taxi-privacy_policy">
+                            <h1 class="gradient"><b>Privacy Policy</b></h1>
+                        </a>
+                    </div>
+                    <div class="container">
+                        <div class="row gx-lg-5 align-items-center">
+                            <div class="text-center">
+
+                                <h3>1. Collection and use of personal data</h3>
+                                <p class="lead" style="text-align: justify">
+                                    We value your trust and are committed to ensuring that your personal data is securely protected. This privacy policy explains how we collect, use and protect your personal data as part of your use of our app.
+                                </p>
+                                <h3>2. Aggregate data</h3>
+                                <p class="lead" style="text-align: justify">
+                                    To ensure the functionality of ordering a taxi in our application, we collect and store users' mobile phone numbers. These data are necessary to contact you and provide the taxi ordering service.
+                                </p>
+                                <h3>3. Data transmission</h3>
+                                <p class="lead" style="text-align: justify">
+                                    Your mobile phone numbers are shared with our dispatcher to find available cars to fulfill your taxi order. We guarantee that your personal data will be used exclusively within the framework of the taxi ordering service.
+                                </p>
+                                <h3>4. Consent to data processing</h3>
+                                <p class="lead" style="text-align: justify">
+                                    By using our application and providing us with your personal data, you consent to the collection, use and transfer of that data in accordance with this privacy policy.
+                                </p>
+                                <h3>5. Data protection</h3>
+                                <p class="lead" style="text-align: justify">
+                                    We take all necessary measures to ensure the security of your personal data and prevent unauthorized access to them.
+                                </p>
+                                <h3>6. Applicability of legislation</h3>
+                                <p class="lead" style="text-align: justify">
+                                    Our application complies with the General Data Protection Regulation <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679">(GDPR)</a> of the European of the Union regarding the collection, use and processing of personal data.
+
+                                </p>
+                                <h3>7. Your rights</h3>
+                                <p class="lead" style="text-align: justify">
+                                    You have the right at any time to request access to your personal data, to make changes or to remove it from our database. To do this, contact us at taxi.easy.ua@gmail.com.
+                                </p>
+                                <h3>8. Consent and changes</h3>
+                                <p class="lead" style="text-align: justify">
+                                    By using our app, you agree to the terms of our privacy policy. We reserve the right to make changes to this policy and you will be notified.
+                                </p>
+                                <p class="lead" style="text-align: justify">
+                                    You have the right at any time to request access to your personal data, to make changes or to remove it from our database. To do this, contact us at taxi.easy.ua@gmail.com.
+                                </p>
+                                <p class="lead" style="text-align: justify">
+                                    If you have any further questions or inquiries regarding your privacy and data, please contact us at the contact address below.
+                                </p>
+
+                                <p class="lead" style="text-align: justify">
+                                    Effective date: 01/01/2023
+                                </p>
+                                <p class="lead" style="text-align: justify">
+                                    Contact information: taxi.easy.ua@gmail.com
+                                <p class="lead"> Please familiarize yourself with
+                                    <a href="{{ route('taxi-umovy') }}">Terms of service.</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <div class="container" style="background-color: hsl(0, 0%, 96%)">
+                    <br>
+                    <div class="container" style="text-align: center">
+                        <a href="https://m.easy-order-taxi.site/taxi-privacy_policy">
+                            <h1 class="gradient"><b>Політика конфіденційності</b></h1>
+                        </a>
                     </div>
                     <div class="container">
                         <div class="row gx-lg-5 align-items-center">

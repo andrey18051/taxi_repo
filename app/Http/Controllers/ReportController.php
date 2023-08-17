@@ -561,8 +561,7 @@ class ReportController extends Controller
             $sheet->getColumnDimension('M')->setAutoSize(true);
             $sheet->getColumnDimension('N')->setAutoSize(true);
             $sheet->getColumnDimension('O')->setAutoSize(true);
-            $sheet->getColumnDimension('P')->setAutoSize(true);
-            $sheet->getColumnDimension('Q')->setAutoSize(true);
+
 
             $sheet->setCellValue('B1', 'Это список заказов');
             $sheet->setCellValue('C1', 'с ' . date('Y-m-d', strtotime($dateFrom . '+1 day'))) ;
@@ -571,23 +570,22 @@ class ReportController extends Controller
             $sheet->setCellValue('A2', 'N');
             $sheet->setCellValue('B2', 'Заказчик');
             $sheet->setCellValue('C2', 'Дополнительно, грн');
-            $sheet->setCellValue('D2', 'Универсал');
-            $sheet->setCellValue('E2', 'Микроавтобус');
-            $sheet->setCellValue('F2', 'Премиум');
-            $sheet->setCellValue('G2', 'Тариф');
-            $sheet->setCellValue('H2', 'По городу');
-            $sheet->setCellValue('I2', 'Откуда');
+            $sheet->setCellValue('D2', 'Андроид');
+
+            $sheet->setCellValue('E2', 'Тариф');
+            $sheet->setCellValue('F2', 'По городу');
+            $sheet->setCellValue('G2', 'Откуда');
+            $sheet->setCellValue('H2', '');
+            $sheet->setCellValue('I2', 'Куда');
             $sheet->setCellValue('J2', '');
-            $sheet->setCellValue('K2', 'Куда');
-            $sheet->setCellValue('L2', '');
-            $sheet->setCellValue('M2', 'Способ оплаты');
-            $sheet->setCellValue('N2', 'Итого стоимость поездки, грн');
-            $sheet->setCellValue('O2', 'Идентификатор');
-            $sheet->setCellValue('P2', 'Сервер');
-            $sheet->setCellValue('Q2', 'Дата и время');
+            $sheet->setCellValue('K2', 'Способ оплаты');
+            $sheet->setCellValue('L2', 'Итого стоимость поездки, грн');
+            $sheet->setCellValue('M2', 'Идентификатор');
+            $sheet->setCellValue('N2', 'Сервер');
+            $sheet->setCellValue('O2', 'Дата и время');
 
 
-            $sheet->getStyle('A2:Q2')->applyFromArray([
+            $sheet->getStyle('A2:O2')->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -605,9 +603,9 @@ class ReportController extends Controller
 
             $coordN = count($orderWebs) + 2;
 
-            $sheet->getStyle('A2:Q2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+            $sheet->getStyle('A2:O2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
 
-            $sheet->getStyle('A3:Q' . $coordN)->applyFromArray([
+            $sheet->getStyle('A3:O' . $coordN)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -625,32 +623,26 @@ class ReportController extends Controller
                 $sheet->setCellValue('A' . $i, $i - 2);
                 $sheet->setCellValue('B' . $i, $value->user_full_name);
                 $sheet->setCellValue('C' . $i, $value->add_cost);
-                if ($value->wagon !== 0) {
-                    $sheet->setCellValue('D' . $i, $value->wagon);
-                }
-                if ($value->minibus !== 0) {
-                    $sheet->setCellValue('E' . $i, $value->minibus);
-                }
-                if ($value->premium !== 0) {
-                    $sheet->setCellValue('F' . $i, $value->premium);
-                }
-                $sheet->setCellValue('G' . $i, $value->flexible_tariff_name);
+
+                $sheet->setCellValue('D' . $i, $value->comment);
+
+                $sheet->setCellValue('E' . $i, $value->flexible_tariff_name);
                 if ($value->route_undefined == 1) {
-                    $sheet->setCellValue('H' . $i, 'Да');
+                    $sheet->setCellValue('G' . $i, 'Да');
                 }
-                $sheet->setCellValue('I' . $i, $value->routefrom);
-                $sheet->setCellValue('J' . $i, $value->routefromnumber);
-                $sheet->setCellValue('K' . $i, $value->routeto);
-                $sheet->setCellValue('L' . $i, $value->routetonumber);
+                $sheet->setCellValue('F' . $i, $value->routefrom);
+                $sheet->setCellValue('H' . $i, $value->routefromnumber);
+                $sheet->setCellValue('I' . $i, $value->routeto);
+                $sheet->setCellValue('J' . $i, $value->routetonumber);
                 if ($value->payment_type  == 0 || $value->payment_type  == "") {
-                    $sheet->setCellValue('M' . $i, 'Наличные');
+                    $sheet->setCellValue('K' . $i, 'Наличные');
                 } else {
-                    $sheet->setCellValue('M' . $i, 'Безналичные');
+                    $sheet->setCellValue('K' . $i, 'Безналичные');
                 }
-                $sheet->setCellValue('N' . $i, $value->web_cost);
-                $sheet->setCellValue('O' . $i, $value->dispatching_order_uid);
-                $sheet->setCellValue('P' . $i, $value->server);
-                $sheet->setCellValue('Q' . $i, $value->created_at);
+                $sheet->setCellValue('L' . $i, $value->web_cost);
+                $sheet->setCellValue('M' . $i, $value->dispatching_order_uid);
+                $sheet->setCellValue('N' . $i, $value->server);
+                $sheet->setCellValue('O' . $i, $value->created_at);
                 $i++;
             }
         } else {

@@ -38,55 +38,20 @@ class AndroidPas2_Dnipro_Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
+        $response_error["message"] = config('app.version-PAS2');
 
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $response_error["message"] = config('app.version-PAS2');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS4');
-                break;
-        }
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
     }
 
     public function identificationId()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
-                break;
-            default:
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
-        }
-        return $X_WO_API_APP_ID;
+        return config("app.X-WO-API-APP-ID-PAS2");
     }
 
     public function startIP()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                IPController::getIP('/android/PAS2/startPage');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                IPController::getIP('/android/PAS4/startPage');
-                break;
-            default:
-                IPController::getIP('/android/PAS4/startPage');
-        }
+        IPController::getIP('/android/PAS2/startPage');
     }
 
     public function connectAPI(): string
@@ -1327,7 +1292,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
         $order->required_time = $params['required_time']; //Время подачи предварительного заказа
         $order->reservation = $params['reservation']; //Обязательный. Признак предварительного заказа: True, False
         $order->route_address_entrance_from = null;
-        $order->comment = $params['comment'];  //Комментарий к заказу
+        $order->comment = self::identificationId();  //Комментарий к заказу
         $order->add_cost = $params['add_cost']; //Добавленная стоимость
         $order->wagon = $params['wagon']; //Универсал: True, False
         $order->minibus = $params['minibus']; //Микроавтобус: True, False
@@ -1909,15 +1874,6 @@ class AndroidPas2_Dnipro_Controller extends Controller
      */
     public function onlineAPI(): string
     {
-
-        /**
-         * тест
-         */
-//        $city = "Odessa";
-        /**
-         * Kyiv City;
-         */
-//        $city = "Kyiv City";
         /**
          * Dnipropetrovsk Oblast;
          */
