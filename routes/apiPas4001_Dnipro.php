@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AndroidPas2_Dnipro_Controller;
+use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
@@ -37,7 +37,7 @@ Route::get('/servicesAll/Android', [ServicesController::class, 'servicesAllAndro
 /**
  * Android Taxi
  */
-Route::get('/android', [AndroidPas2_Dnipro_Controller::class, 'index'])->name('driver');
+Route::get('/android', [AndroidPas4001_Dnipro_Controller::class, 'index'])->name('driver');
 
 Route::get('/android/comboPas2', [ComboTestController::class, 'insertComboTest'])
     ->name('insertComboTest');
@@ -45,80 +45,80 @@ Route::get('/android/comboPas2', [ComboTestController::class, 'insertComboTest']
 Route::get('/android/comboTest/index', [ComboTestController::class, 'index'])
     ->name('insertComboTestIndex');
 
-Route::middleware('throttle:6,1')->get('/android/costMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}/{tarif}', [AndroidPas2_Dnipro_Controller::class, 'costMap'])
+Route::middleware('throttle:6,1')->get('/android/costMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}/{tarif}', [AndroidPas4001_Dnipro_Controller::class, 'costMap'])
     ->name('costMap');
-Route::middleware('throttle:6,1')->get('/android/orderMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}/{tarif}/{phone}', [AndroidPas2_Dnipro_Controller::class, 'orderMap'])
+Route::middleware('throttle:6,1')->get('/android/orderMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}/{tarif}/{phone}', [AndroidPas4001_Dnipro_Controller::class, 'orderMap'])
     ->name('orderMap');
 
-Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}/', [AndroidPas2_Dnipro_Controller::class, 'costSearch'])
+Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}/', [AndroidPas4001_Dnipro_Controller::class, 'costSearch'])
     ->name('costSearch');
-Route::get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidPas2_Dnipro_Controller::class, 'orderSearch'])
+Route::get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidPas4001_Dnipro_Controller::class, 'orderSearch'])
     ->name('orderSearch');
 
-Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}', [AndroidPas2_Dnipro_Controller::class, 'costSearchGeo'])
+Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}', [AndroidPas4001_Dnipro_Controller::class, 'costSearchGeo'])
     ->name('costSearchGeo');
-Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidPas2_Dnipro_Controller::class, 'orderSearchGeo'])
+Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidPas4001_Dnipro_Controller::class, 'orderSearchGeo'])
     ->name('orderSearchGeo');
 
-Route::get('/android/fromSearchGeo/{originLatitude}/{originLongitude}', [AndroidPas2_Dnipro_Controller::class, 'fromSearchGeo'])
+Route::get('/android/fromSearchGeo/{originLatitude}/{originLongitude}', [AndroidPas4001_Dnipro_Controller::class, 'fromSearchGeo'])
     ->name('fromSearchGeo');
 
 
-Route::get('/android/sendCode/{phone}', [AndroidPas2_Dnipro_Controller::class, 'sendCode'])->name('sendCode');
-Route::get('/android/approvedPhones/{phone}/{code}', [AndroidPas2_Dnipro_Controller::class, 'approvedPhones'])->name('approvedPhones');
+Route::get('/android/sendCode/{phone}', [AndroidPas4001_Dnipro_Controller::class, 'sendCode'])->name('sendCode');
+Route::get('/android/approvedPhones/{phone}/{code}', [AndroidPas4001_Dnipro_Controller::class, 'approvedPhones'])->name('approvedPhones');
 
-Route::get('/android/sendCodeTest/{phone}', [AndroidPas2_Dnipro_Controller::class, 'sendCodeTest'])->name('sendCode');
-Route::get('/android/approvedPhonesTest/{phone}/{code}', [AndroidPas2_Dnipro_Controller::class, 'approvedPhonesTest'])->name('approvedPhones');
-Route::get('/android/autocompleteSearchComboHid/{name}', [AndroidPas2_Dnipro_Controller::class, 'autocompleteSearchComboHid'])->name('autocompleteSearchComboHid');
+Route::get('/android/sendCodeTest/{phone}', [AndroidPas4001_Dnipro_Controller::class, 'sendCodeTest'])->name('sendCode');
+Route::get('/android/approvedPhonesTest/{phone}/{code}', [AndroidPas4001_Dnipro_Controller::class, 'approvedPhonesTest'])->name('approvedPhones');
+Route::get('/android/autocompleteSearchComboHid/{name}', [AndroidPas4001_Dnipro_Controller::class, 'autocompleteSearchComboHid'])->name('autocompleteSearchComboHid');
 
-Route::get('/android/sentPhone/{message}', [AndroidPas2_Dnipro_Controller::class, 'sentPhone'])->name('sentPhone');
+Route::get('/android/sentPhone/{message}', [AndroidPas4001_Dnipro_Controller::class, 'sentPhone'])->name('sentPhone');
 Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDomain'])->name('checkDomain');
 
 
 
-Route::get('/android/addUser/{name}/{email}', [AndroidPas2_Dnipro_Controller::class, 'addUser'])->name('checkDomain');
-Route::get('/android/verifyBlackListUser/{email}', [AndroidPas2_Dnipro_Controller::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
+Route::get('/android/addUser/{name}/{email}', [AndroidPas4001_Dnipro_Controller::class, 'addUser'])->name('checkDomain');
+Route::get('/android/verifyBlackListUser/{email}', [AndroidPas4001_Dnipro_Controller::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
 
-Route::get('/android/startIP', [AndroidPas2_Dnipro_Controller::class, 'startIP'])->name('startIP');
+Route::get('/android/startIP', [AndroidPas4001_Dnipro_Controller::class, 'startIP'])->name('startIP');
 
-Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/', [AndroidPas2_Dnipro_Controller::class, 'costSearchMarkers'])
+Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/', [AndroidPas4001_Dnipro_Controller::class, 'costSearchMarkers'])
     ->name('costSearchMarkers');
 
-Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidPas2_Dnipro_Controller::class, 'orderSearchMarkers'])
+Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidPas4001_Dnipro_Controller::class, 'orderSearchMarkers'])
     ->name('orderSearchMarkers');
 
-Route::get('/android/versionAPI/', [AndroidPas2_Dnipro_Controller::class, 'version'])
+Route::get('/android/versionAPI/', [AndroidPas4001_Dnipro_Controller::class, 'version'])
     ->name('version');
 
-Route::get('/android/myHistory/', [AndroidPas2_Dnipro_Controller::class, 'myHistory'])
+Route::get('/android/myHistory/', [AndroidPas4001_Dnipro_Controller::class, 'myHistory'])
     ->name('myHistory');
 
-Route::get('/android/historyUID/{uid}', [AndroidPas2_Dnipro_Controller::class, 'historyUID'])
+Route::get('/android/historyUID/{uid}', [AndroidPas4001_Dnipro_Controller::class, 'historyUID'])
     ->name('myHistory');
 
-Route::get('/android/apiVersion/', [AndroidPas2_Dnipro_Controller::class, 'apiVersion'])
+Route::get('/android/apiVersion/', [AndroidPas4001_Dnipro_Controller::class, 'apiVersion'])
     ->name('apiVersion');
 
-Route::get('/android/geoDataSearch/{to}/{to_number}', [AndroidPas2_Dnipro_Controller::class, 'geoDataSearch'])
+Route::get('/android/geoDataSearch/{to}/{to_number}', [AndroidPas4001_Dnipro_Controller::class, 'geoDataSearch'])
     ->name('geoDataSearch');
 
-Route::get('/android/geoDataSearchStreet/{to}/{to_number}', [AndroidPas2_Dnipro_Controller::class, 'geoDataSearchStreet'])
+Route::get('/android/geoDataSearchStreet/{to}/{to_number}', [AndroidPas4001_Dnipro_Controller::class, 'geoDataSearchStreet'])
     ->name('geoDataSearchStreet');
 
-Route::get('/android/geoDataSearchObject/{to}', [AndroidPas2_Dnipro_Controller::class, 'geoDataSearchObject'])
+Route::get('/android/geoDataSearchObject/{to}', [AndroidPas4001_Dnipro_Controller::class, 'geoDataSearchObject'])
     ->name('geoDataSearchObject');
 
-Route::get('/android/geoLatLanSearch/{originLatitude}/{originLongitude}', [AndroidPas2_Dnipro_Controller::class, 'geoLatLanSearch'])
+Route::get('/android/geoLatLanSearch/{originLatitude}/{originLongitude}', [AndroidPas4001_Dnipro_Controller::class, 'geoLatLanSearch'])
     ->name('geoLatLanSearch');
 
 Route::get('/android/visicom/show/{settlement}', [VisicomController::class, 'show'])
     ->name('visicom_show');
 
-Route::get('/android/webordersCancel/{uid}', [AndroidPas2_Dnipro_Controller::class, 'webordersCancel'])
+Route::get('/android/webordersCancel/{uid}', [AndroidPas4001_Dnipro_Controller::class, 'webordersCancel'])
     ->name('webordersCancel');
 
-Route::get('/android/historyUIDStatus/{uid}', [AndroidPas2_Dnipro_Controller::class, 'historyUIDStatus'])
+Route::get('/android/historyUIDStatus/{uid}', [AndroidPas4001_Dnipro_Controller::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
 
-Route::get('/android/onlineAPI', [AndroidPas2_Dnipro_Controller::class, 'onlineAPI'])
+Route::get('/android/onlineAPI', [AndroidPas4001_Dnipro_Controller::class, 'onlineAPI'])
     ->name('onlineAPI');

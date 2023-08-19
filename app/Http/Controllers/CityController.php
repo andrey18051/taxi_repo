@@ -99,18 +99,46 @@ class CityController extends Controller
     /**
      * @throws \Exception
      */
-    private function checkDomain($domain): bool
+    public function checkDomain($domain): bool
     {
         $city = City::where('address', $domain)->first();
 
         $domainFull = "http://" . $domain . "/api/time";
-        $curlInit = curl_init($domainFull);
-        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($curlInit, CURLOPT_HEADER, true);
-        curl_setopt($curlInit, CURLOPT_NOBODY, true);
-        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
+//        $curlInit = curl_init($domainFull);
+//        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
+//        curl_setopt($curlInit, CURLOPT_HEADER, true);
+//        curl_setopt($curlInit, CURLOPT_NOBODY, true);
+//        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
+//
+//        $response = curl_exec($curlInit);
 
+        $curlInit = curl_init($domainFull);
+        curl_setopt_array($curlInit, array(
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false
+        ));
         $response = curl_exec($curlInit);
+
+        if (curl_errno($curlInit)) {
+            $city->online = "false";
+            $city->save();
+            $alarmMessage = new TelegramController();
+            $messageAdmin = "Ошибка подключения к серверу " . "http://" . $domain . ".";
+            try {
+                $alarmMessage->sendAlarmMessage($messageAdmin);
+                $alarmMessage->sendMeMessage($messageAdmin);
+            } catch (Exception $e) {
+                $paramsCheck = [
+                    'subject' => 'Ошибка в телеграмм',
+                    'message' => $e,
+                ];
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            };
+            return false;
+        }
+
         curl_close($curlInit);
         if ($response) {
             $city->online = "true";
@@ -121,11 +149,6 @@ class CityController extends Controller
             $city->save();
             $alarmMessage = new TelegramController();
             $messageAdmin = "Ошибка подключения к серверу " . "http://" . $domain . ".";
-            $paramsAdmin = [
-                'subject' => "Ошибка подключения к серверу",
-                'message' => "Ошибка подключения к серверу " . "http://" . $domain . "."
-            ];
-
             try {
                 $alarmMessage->sendAlarmMessage($messageAdmin);
                 $alarmMessage->sendMeMessage($messageAdmin);

@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas2_Dnipro_Controller extends Controller
+class AndroidPas4001_Dnipro_Controller extends Controller
 {
 
     public function index(): int
@@ -38,55 +38,20 @@ class AndroidPas2_Dnipro_Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
+        $response_error["message"] = config('app.version-PAS4');
 
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $response_error["message"] = config('app.version-PAS2');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS4');
-                break;
-        }
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
     }
 
     public function identificationId()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
-                break;
-            default:
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
-        }
-        return $X_WO_API_APP_ID;
+        return config("app.X-WO-API-APP-ID-PAS4");
     }
 
     public function startIP()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                IPController::getIP('/android/PAS2/startPage');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                IPController::getIP('/android/PAS4/startPage');
-                break;
-            default:
-                IPController::getIP('/android/PAS4/startPage');
-        }
+        IPController::getIP('/android/PAS4/startPage');
     }
 
     public function connectAPI(): string
@@ -102,7 +67,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
          */
 
         $connectAPI = self::connectApi();
-
+//dd($connectAPI);
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -228,7 +193,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response->body());
         if ($response->status() == 200) {
             return  response($response, 200)
                 ->header('Content-Type', 'json');
@@ -407,7 +372,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             $response_ok["add_cost"] = $add_cost;
 //            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
 //            $response_ok["find_car_timeout"] = $response_arr["find_car_timeout"];
 //            $response_ok["find_car_delay"] = $response_arr["find_car_delay"];
 
@@ -558,10 +523,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
-            $response_ok["add_cost"] = $response_arr["add_cost"];
-            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
+//            $response_ok["add_cost"] = $response_arr["add_cost"];
+//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
             if ($originLatitude != $to) {
                 $response_ok["routeto"] =  $to;
@@ -786,10 +751,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
-                $response_ok["add_cost"] = $add_cost;
-                $response_ok["recommended_add_cost"] = $add_cost;
+//                $response_ok["add_cost"] = $add_cost;
+//                $response_ok["recommended_add_cost"] = $add_cost;
                 $response_ok["currency"] = $response_arr["currency"];
-                $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//                $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
                 $response_ok["routefrom"] = $params['routefrom'];
                 $response_ok["routefromnumber"] = $params['routefromnumber'];
@@ -1003,10 +968,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
-            $response_ok["add_cost"] = $response_arr["add_cost"];
-            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
+//            $response_ok["add_cost"] = $response_arr["add_cost"];
+//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
             if ($originLatitude != $toLatitude) {
                 $response_ok["routeto"] =  $params["to"];
@@ -1268,10 +1233,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
-                $response_ok["add_cost"] = $add_cost;
-                $response_ok["recommended_add_cost"] = $add_cost;
+//                $response_ok["add_cost"] = $add_cost;
+//                $response_ok["recommended_add_cost"] = $add_cost;
                 $response_ok["currency"] = $response_arr["currency"];
-                $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//                $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
                 $response_ok["routefrom"] = $params['from'];
                 $response_ok["routefromnumber"] = $params['from_number'];
@@ -1957,7 +1922,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
         $json_arr = json_decode($json_str, true);
-
+dd($json_arr);
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,

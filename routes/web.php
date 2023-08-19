@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AndroidPas2_Dnipro_Controller;
+use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
 use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\BredoGeneratorController;
@@ -1060,4 +1061,5 @@ Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-s
  *
  */
 Route::get('/city/versionComboDnipro', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
+Route::get('/city/versionComboDnipro', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro4001');
 
