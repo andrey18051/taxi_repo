@@ -130,9 +130,17 @@ class AndroidPas4001_Dnipro_Controller extends Controller
             $to = $combos_to->name;
         }
 
-        $routFrom = ['name' => $from, 'number' => $from_number];
-        $routTo =   ['name' => $to, 'number' => $to_number];
+        if ($from_number !== " ") {
+            $routFrom = ['name' => $from, 'number' => $from_number];
+        } else {
+            $routFrom = ['name' => $from];
+        }
 
+        if ($to_number !== " ") {
+            $routTo =   ['name' => $to, 'number' => $to_number];
+        } else {
+            $routTo =   ['name' => $to];
+        }
         $LatLngFrom = self::geoDataSearch($from, $from_number);
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
@@ -279,9 +287,18 @@ class AndroidPas4001_Dnipro_Controller extends Controller
             $to = $combos_to->name;
         }
 
-        $routFrom = ['name' => $from, 'number' => $from_number];
-        $routTo =   ['name' => $to, 'number' => $to_number];
 
+        if ($from_number !== " ") {
+            $routFrom = ['name' => $from, 'number' => $from_number];
+        } else {
+            $routFrom = ['name' => $from];
+        }
+
+        if ($to_number !== " ") {
+            $routTo =   ['name' => $to, 'number' => $to_number];
+        } else {
+            $routTo =   ['name' => $to];
+        }
         $LatLngFrom = self::geoDataSearch($from, $from_number);
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
@@ -398,6 +415,7 @@ class AndroidPas4001_Dnipro_Controller extends Controller
         }
     }
 
+
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
     {
 
@@ -463,10 +481,18 @@ class AndroidPas4001_Dnipro_Controller extends Controller
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $to, 'number' => $to_number]
+
+            if ($to_number !== " ") {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to, 'number' => $to_number]
                 ];
+            } else {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to]
+                ];
+            }
         }
 
         $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
@@ -649,6 +675,8 @@ class AndroidPas4001_Dnipro_Controller extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
+
+
         } else {
             $route_undefined = false;
 
@@ -666,10 +694,18 @@ class AndroidPas4001_Dnipro_Controller extends Controller
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $to, 'number' => $to_number]
-            ];
+
+            if ($to_number !== " ") {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to, 'number' => $to_number]
+                ];
+            } else {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to]
+                ];
+            }
         }
 
 
@@ -1922,7 +1958,7 @@ class AndroidPas4001_Dnipro_Controller extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
         $json_arr = json_decode($json_str, true);
-dd($json_arr);
+
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,

@@ -518,6 +518,11 @@ Route::get('/taxi-privacy_policy', function () {
     return view('taxi.privacy_policy');
 })->name('taxi-privacy_policy');
 
+Route::get('/privacy_policy', function () {
+    IPController::getIP('/taxi-privacy_policy');
+    return view('taxi.privacy_policy');
+})->name('privacy_policy');
+
 Route::get('/taxi-umovy', function () {
     IPController::getIP('/taxi-umovy');
     return view('taxi.umovy');
@@ -1060,6 +1065,6 @@ Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-s
 /**
  *
  */
-Route::get('/city/versionComboDnipro', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
-Route::get('/city/versionComboDnipro', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro4001');
+Route::get('/city/versionComboDniproPas2', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
+Route::get('/city/versionComboDniproPas4', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro4001');
 
