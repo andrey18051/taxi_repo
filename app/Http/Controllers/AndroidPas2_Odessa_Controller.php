@@ -6,17 +6,23 @@ use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\City;
+use App\Models\Combo;
+use App\Models\OdessaCombo;
 use App\Models\ComboTest;
 use App\Models\Config;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Tarif;
 use App\Models\User;
+use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidTestController extends Controller
+class AndroidPAS2_Odessa_Controller extends Controller
 {
 
     public function index(): int
@@ -39,7 +45,7 @@ class AndroidTestController extends Controller
 
     public function identificationId()
     {
-        return config("app.X-WO-API-APP-ID-TEST");
+        return config("app.X-WO-API-APP-ID-PAS2");
     }
 
     public function startIP()
@@ -93,14 +99,14 @@ class AndroidTestController extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
-        $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_from = OdessaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
 
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -253,8 +259,8 @@ class AndroidTestController extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-        $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos_from = OdessaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
@@ -460,7 +466,7 @@ class AndroidTestController extends Controller
 
         } else {
             $route_undefined = false;
-            $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -673,7 +679,7 @@ class AndroidTestController extends Controller
         } else {
             $route_undefined = false;
 
-            $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -1713,7 +1719,7 @@ class AndroidTestController extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            $combos = ComboTest::where('name', 'like', $name . '%')->first();
+            $combos = OdessaCombo::where('name', 'like', $name . '%')->first();
 
             if ($combos != null) {
                 $response["resp_result"] = 0;
@@ -1907,7 +1913,7 @@ class AndroidTestController extends Controller
         /**
          * Odessa;
          */
-        $city = "OdessaTest";
+        $city = "Odessa";
 
         return CityController::cityOnline($city);
     }
@@ -1964,11 +1970,11 @@ class AndroidTestController extends Controller
 
         //Проверка версии геоданных и обновление или создание базы адресов
 
-        if ($marker_update || ComboTest::all()->count() === 0) {
-            DB::table('combo_tests')->truncate();
+        if ($marker_update || OdessaCombo::all()->count() === 0) {
+            DB::table('odessa_combos')->truncate();
 
             foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
-                $combo = new ComboTest();
+                $combo = new OdessaCombo();
                 $combo->name = $arrStreet["name"];
                 $combo->street = 1;
                 $combo->save();
@@ -1976,7 +1982,7 @@ class AndroidTestController extends Controller
             }
 
             foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
-                $combo = new ComboTest();
+                $combo = new OdessaCombo();
                 $combo->name = $arrObject["name"];
                 $combo->street = 0;
                 $combo->save();
