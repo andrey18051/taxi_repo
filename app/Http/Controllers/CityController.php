@@ -125,7 +125,7 @@ class CityController extends Controller
             $city->online = "false";
             $city->save();
             $alarmMessage = new TelegramController();
-            $messageAdmin = "Ошибка подключения к серверу " . "http://" . $domain . ".";
+            $messageAdmin = "Ошибка подключения к серверу города $city->name http://" . $domain . ".";
             try {
                 $alarmMessage->sendAlarmMessage($messageAdmin);
                 $alarmMessage->sendMeMessage($messageAdmin);
