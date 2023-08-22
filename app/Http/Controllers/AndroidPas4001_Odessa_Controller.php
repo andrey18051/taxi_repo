@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas2_Odessa_Controller extends Controller
+class AndroidPas4001_Odessa_Controller extends Controller
 {
 
     public function index(): int
@@ -37,7 +37,7 @@ class AndroidPas2_Odessa_Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
-        $response_error["message"] = config('app.version-PAS2');
+        $response_error["message"] = config('app.version-PAS4');
 
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
@@ -45,12 +45,12 @@ class AndroidPas2_Odessa_Controller extends Controller
 
     public function identificationId()
     {
-        return config("app.X-WO-API-APP-ID-PAS2");
+        return config("app.X-WO-API-APP-ID-PAS4");
     }
 
     public function startIP()
     {
-        IPController::getIP('/android/PAS2/startPage');
+        IPController::getIP('/android/PAS4/startPage');
     }
 
     public function connectAPI(): string
