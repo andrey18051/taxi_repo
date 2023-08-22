@@ -63,6 +63,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/apiPas2_Odessa.php'));
 
+            Route::prefix('apiPas2_Zaporizhzhia')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/apiPas2_Zaporizhzhia.php'));
+
             Route::prefix('apiPas3')
                 ->middleware('api')
                 ->namespace($this->namespace)

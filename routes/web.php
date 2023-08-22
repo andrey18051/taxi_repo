@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AndroidPas2_Dnipro_Controller;
 use App\Http\Controllers\AndroidPAS2_Odessa_Controller;
+use App\Http\Controllers\AndroidPAS2_Zaporizhzhia_Controller;
 use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
 use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\BlackListController;
@@ -1069,4 +1070,5 @@ Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-s
 Route::get('/city/versionComboDniproPas2', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
 Route::get('/city/versionComboDniproPas4', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro4001');
 Route::get('/city/versionComboOdessaPas2', [AndroidPAS2_Odessa_Controller::class,'versionComboOdessa'])->name('versionComboOdessa2');
+Route::get('/city/versionComboZaporizhzhiaPas2', [AndroidPAS2_Zaporizhzhia_Controller::class,'versionComboZaporizhzhia'])->name('versionComboZaporizhzhia2');
 
