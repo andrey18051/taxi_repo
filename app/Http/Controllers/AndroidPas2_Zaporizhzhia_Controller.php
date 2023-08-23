@@ -73,7 +73,9 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -226,7 +228,9 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -426,7 +430,9 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -588,7 +594,9 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -841,8 +849,9 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
             return $response_error;
         }
 
-
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -1043,7 +1052,9 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
@@ -1963,7 +1974,7 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
 //
         $svd = Config::where('id', '1')->first();
 
-        if ($json_arr['version_date'] !==  $svd->odessa_versionDate) {
+        if ($json_arr['version_date'] !==  $svd->zaporizhzhia_versionDate) {
             $marker_update = true;
         }
 
@@ -1990,7 +2001,7 @@ class AndroidPAS2_Zaporizhzhia_Controller extends Controller
             }
 
             $svd = Config::where('id', '1')->first();
-            $svd->odessa_versionDate = $json_arr['version_date'];
+            $svd->zaporizhzhia_versionDate = $json_arr['version_date'];
             $svd->save();
 
             return redirect()->route('home-admin')->with('success', "База $base обновлена.");

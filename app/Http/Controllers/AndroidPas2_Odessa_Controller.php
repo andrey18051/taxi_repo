@@ -74,7 +74,9 @@ class AndroidPas2_Odessa_Controller extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -226,7 +228,9 @@ class AndroidPas2_Odessa_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -427,7 +431,9 @@ class AndroidPas2_Odessa_Controller extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -588,7 +594,9 @@ class AndroidPas2_Odessa_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -841,7 +849,9 @@ class AndroidPas2_Odessa_Controller extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -1042,7 +1052,9 @@ class AndroidPas2_Odessa_Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;

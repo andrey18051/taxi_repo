@@ -163,6 +163,41 @@ class CityController extends Controller
         }
     }
 
+    public function checkDomains()
+    {
+        $city = City::all()->toArray();
+//dd($city);
+        foreach ($city as $value) {
+            $domainFull = "http://" . $value['address'] . "/api/time";
+
+            $curlInit = curl_init($domainFull);
+            curl_setopt_array($curlInit, array(
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false
+            ));
+            $response = curl_exec($curlInit);
+            if (curl_errno($curlInit) || !$response) {
+                $alarmMessage = new TelegramController();
+                $name = $value['name'];
+                $messageAdmin = "Ошибка подключения к серверу города $name http://" . $value['address'] . ".";
+                try {
+                    $alarmMessage->sendAlarmMessage($messageAdmin);
+                    $alarmMessage->sendMeMessage($messageAdmin);
+                } catch (Exception $e) {
+                    $paramsCheck = [
+                        'subject' => 'Ошибка в телеграмм',
+                        'message' => $e,
+                    ];
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                };
+                return false;
+            }
+            curl_close($curlInit);
+        }
+
+    }
 
     /**
      * @throws \Exception

@@ -7,10 +7,9 @@ use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\City;
 use App\Models\Combo;
-use App\Models\ComboDnipro;
+use App\Models\CherkasyCombo;
 use App\Models\ComboTest;
 use App\Models\Config;
-use App\Models\DniproCombo;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\Tarif;
@@ -23,7 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas2_Dnipro_Controller extends Controller
+class AndroidPAS2_Cherkasy_Controller extends Controller
 {
 
     public function index(): int
@@ -102,14 +101,14 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
-        $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_from = CherkasyCombo::select(['name'])->where('name', 'like', $from . '%')->first();
 
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = CherkasyCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -229,10 +228,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
             return $response_error;
         }
+
         if ($tariff == " ") {
             $tariff = null;
         }
-
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
@@ -264,8 +263,8 @@ class AndroidPas2_Dnipro_Controller extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
-        $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos_from = CherkasyCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_to = CherkasyCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
@@ -431,10 +430,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
             return $response_error;
         }
+
         if ($tariff == " ") {
             $tariff = null;
         }
-
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -473,7 +472,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
         } else {
             $route_undefined = false;
-            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = CherkasyCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -688,7 +687,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
         } else {
             $route_undefined = false;
 
-            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = CherkasyCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -849,10 +848,10 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
             return $response_error;
         }
+
         if ($tariff == " ") {
             $tariff = null;
         }
-
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -1732,7 +1731,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            $combos = DniproCombo::where('name', 'like', $name . '%')->first();
+            $combos = CherkasyCombo::where('name', 'like', $name . '%')->first();
 
             if ($combos != null) {
                 $response["resp_result"] = 0;
@@ -1924,17 +1923,9 @@ class AndroidPas2_Dnipro_Controller extends Controller
     {
 
         /**
-         * тест
+         * Odessa;
          */
-//        $city = "Odessa";
-        /**
-         * Kyiv City;
-         */
-//        $city = "Kyiv City";
-        /**
-         * Dnipropetrovsk Oblast;
-         */
-        $city = "Dnipropetrovsk Oblast";
+        $city = "Cherkasy Oblast";
 
         return CityController::cityOnline($city);
     }
@@ -1942,7 +1933,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
     /**
      * Контроль версии улиц и объектов
      */
-    public function versionComboDnipro(): \Illuminate\Http\RedirectResponse
+    public function versionComboCherkasy(): \Illuminate\Http\RedirectResponse
     {
         $base = env('DB_DATABASE');
         $marker_update = false;
@@ -1970,7 +1961,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
         $json_arr = json_decode($json_str, true);
-        dd($json_arr);
+//        dd($json_arr);
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,
@@ -1984,18 +1975,18 @@ class AndroidPas2_Dnipro_Controller extends Controller
 //
         $svd = Config::where('id', '1')->first();
 
-        if ($json_arr['version_date'] !==  $svd->dnipro_versionDate) {
+        if ($json_arr['version_date'] !==  $svd->cherkasy_versionDate) {
             $marker_update = true;
         }
 
 
         //Проверка версии геоданных и обновление или создание базы адресов
 
-        if ($marker_update || DniproCombo::all()->count() === 0) {
-            DB::table('dnipro_combos')->truncate();
+        if ($marker_update || CherkasyCombo::all()->count() === 0) {
+            DB::table('cherkasy_combos')->truncate();
 
             foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
-                $combo = new DniproCombo();
+                $combo = new CherkasyCombo();
                 $combo->name = $arrStreet["name"];
                 $combo->street = 1;
                 $combo->save();
@@ -2003,7 +1994,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             }
 
             foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
-                $combo = new DniproCombo();
+                $combo = new CherkasyCombo();
                 $combo->name = $arrObject["name"];
                 $combo->street = 0;
                 $combo->save();
@@ -2011,7 +2002,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             }
 
             $svd = Config::where('id', '1')->first();
-            $svd->dnipro_versionDate = $json_arr['version_date'];
+            $svd->cherkasy_versionDate = $json_arr['version_date'];
             $svd->save();
 
             return redirect()->route('home-admin')->with('success', "База $base обновлена.");

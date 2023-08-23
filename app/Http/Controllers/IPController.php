@@ -31,6 +31,7 @@ class IPController extends Controller
 //        $LocationData = Location::get("94.158.152.248"); //Odessa
 //        $LocationData = Location::get("185.237.74.247"); //Kyiv City
 //        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
+//        $LocationData = Location::get("91.244.56.202"); //Cherkasy Oblast
         return response()->json(['response' => $LocationData->regionName]);
     }
 

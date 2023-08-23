@@ -51,20 +51,7 @@ class AndroidPas2Controller extends Controller
 
     public function identificationId()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-                break;
-            default:
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-        }
-        return $X_WO_API_APP_ID;
+        return config("app.X-WO-API-APP-ID-PAS2");
     }
 
     private function checkDomain($domain): bool
@@ -89,19 +76,7 @@ class AndroidPas2Controller extends Controller
 
     public function startIP()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                IPController::getIP('/android/PAS2/startPage');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                IPController::getIP('/android/PAS2/startPage');
-                break;
-            default:
-                IPController::getIP('/android/PAS2/startPage');
-        }
+        IPController::getIP('/android/PAS2/startPage');
     }
 
     public function connectAPI(): string
@@ -125,6 +100,9 @@ class AndroidPas2Controller extends Controller
             return $response_error;
         }
 
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -147,34 +125,15 @@ class AndroidPas2Controller extends Controller
 
         $params['route_undefined'] = false; //По городу: True, False
 
-
         $taxiColumnId = config('app.taxiColumnId');
 
-
+        $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-            } else {
-                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-            }
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+            $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -285,7 +244,9 @@ class AndroidPas2Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -318,38 +279,13 @@ class AndroidPas2Controller extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
+        $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    break;
-            }
-
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+            $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
 
         if ($combos_from == null) {
@@ -493,6 +429,7 @@ class AndroidPas2Controller extends Controller
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
     {
 
+
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
@@ -501,7 +438,9 @@ class AndroidPas2Controller extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -667,7 +606,9 @@ class AndroidPas2Controller extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
@@ -918,7 +859,9 @@ class AndroidPas2Controller extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;

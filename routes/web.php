@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AndroidPAS2_Cherkasy_Controller;
 use App\Http\Controllers\AndroidPas2_Dnipro_Controller;
 use App\Http\Controllers\AndroidPAS2_Odessa_Controller;
 use App\Http\Controllers\AndroidPAS2_Zaporizhzhia_Controller;
@@ -1063,12 +1064,14 @@ Route::get('/city/cityNew', function () {
     return view('admin.cities');
 })->name('city-new');
 Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-save');
+Route::get('/city/verification', [CityController::class,'checkDomains'])->name('checkDomains');
 
 /**
  * City versionCombo
  */
 Route::get('/city/versionComboDniproPas2', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
 Route::get('/city/versionComboDniproPas4', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro4001');
-Route::get('/city/versionComboOdessaPas2', [AndroidPAS2_Odessa_Controller::class,'versionComboOdessa'])->name('versionComboOdessa2');
-Route::get('/city/versionComboZaporizhzhiaPas2', [AndroidPAS2_Zaporizhzhia_Controller::class,'versionComboZaporizhzhia'])->name('versionComboZaporizhzhia2');
+Route::get('/city/versionComboOdessaPas2', [AndroidPas2_Odessa_Controller::class,'versionComboOdessa'])->name('versionComboOdessa2');
+Route::get('/city/versionComboZaporizhzhiaPas2', [AndroidPas2_Zaporizhzhia_Controller::class,'versionComboZaporizhzhia'])->name('versionComboZaporizhzhia2');
+Route::get('/city/versionComboCherkasyPas2', [AndroidPas2_Cherkasy_Controller::class,'versionComboCherkasy'])->name('versionComboCherkasy2');
 
