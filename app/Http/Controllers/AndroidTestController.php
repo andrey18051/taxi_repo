@@ -67,7 +67,9 @@ class AndroidTestController extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -220,7 +222,9 @@ class AndroidTestController extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -421,7 +425,9 @@ class AndroidTestController extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -582,7 +588,9 @@ class AndroidTestController extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -835,7 +843,9 @@ class AndroidTestController extends Controller
             return $response_error;
         }
 
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -1036,7 +1046,9 @@ class AndroidTestController extends Controller
 
             return $response_error;
         }
-
+        if ($tariff == " ") {
+            $tariff = null;
+        }
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;

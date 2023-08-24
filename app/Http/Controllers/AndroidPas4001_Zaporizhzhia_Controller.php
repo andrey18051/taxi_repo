@@ -7,7 +7,7 @@ use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\City;
 use App\Models\Combo;
-use App\Models\OdessaCombo;
+use App\Models\ZaporizhzhiaCombo;
 use App\Models\ComboTest;
 use App\Models\Config;
 use App\Models\Order;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas4001_Odessa_Controller extends Controller
+class AndroidPas4001_Zaporizhzhia_Controller extends Controller
 {
 
     public function index(): int
@@ -73,10 +73,10 @@ class AndroidPas4001_Odessa_Controller extends Controller
 
             return $response_error;
         }
-
         if ($tariff == " ") {
             $tariff = null;
         }
+
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -101,14 +101,14 @@ class AndroidPas4001_Odessa_Controller extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
-        $combos_from = OdessaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_from = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
 
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -228,10 +228,10 @@ class AndroidPas4001_Odessa_Controller extends Controller
 
             return $response_error;
         }
-
         if ($tariff == " ") {
             $tariff = null;
         }
+
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
@@ -263,8 +263,8 @@ class AndroidPas4001_Odessa_Controller extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-        $combos_from = OdessaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
-        $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+        $combos_from = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_to = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
@@ -472,7 +472,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
 
         } else {
             $route_undefined = false;
-            $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -594,10 +594,10 @@ class AndroidPas4001_Odessa_Controller extends Controller
 
             return $response_error;
         }
-
         if ($tariff == " ") {
             $tariff = null;
         }
+
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
@@ -687,7 +687,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
         } else {
             $route_undefined = false;
 
-            $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -852,7 +852,6 @@ class AndroidPas4001_Odessa_Controller extends Controller
         if ($tariff == " ") {
             $tariff = null;
         }
-
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
 
@@ -1052,10 +1051,10 @@ class AndroidPas4001_Odessa_Controller extends Controller
 
             return $response_error;
         }
+
         if ($tariff == " ") {
             $tariff = null;
         }
-
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
@@ -1731,7 +1730,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            $combos = OdessaCombo::where('name', 'like', $name . '%')->first();
+            $combos = ZaporizhzhiaCombo::where('name', 'like', $name . '%')->first();
 
             if ($combos != null) {
                 $response["resp_result"] = 0;
@@ -1925,7 +1924,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
         /**
          * Odessa;
          */
-        $city = "Odessa";
+        $city = "Zaporizhzhia";
 
         return CityController::cityOnline($city);
     }
@@ -1933,7 +1932,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
     /**
      * Контроль версии улиц и объектов
      */
-    public function versionComboOdessa(): \Illuminate\Http\RedirectResponse
+    public function versionComboZaporizhzhia(): \Illuminate\Http\RedirectResponse
     {
         $base = env('DB_DATABASE');
         $marker_update = false;
@@ -1975,18 +1974,18 @@ class AndroidPas4001_Odessa_Controller extends Controller
 //
         $svd = Config::where('id', '1')->first();
 
-        if ($json_arr['version_date'] !==  $svd->odessa_versionDate) {
+        if ($json_arr['version_date'] !==  $svd->zaporizhzhia_versionDate) {
             $marker_update = true;
         }
 
 
         //Проверка версии геоданных и обновление или создание базы адресов
 
-        if ($marker_update || OdessaCombo::all()->count() === 0) {
-            DB::table('odessa_combos')->truncate();
+        if ($marker_update || ZaporizhzhiaCombo::all()->count() === 0) {
+            DB::table('zaporizhzhia_combos')->truncate();
 
             foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
-                $combo = new OdessaCombo();
+                $combo = new ZaporizhzhiaCombo();
                 $combo->name = $arrStreet["name"];
                 $combo->street = 1;
                 $combo->save();
@@ -1994,7 +1993,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
             }
 
             foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
-                $combo = new OdessaCombo();
+                $combo = new ZaporizhzhiaCombo();
                 $combo->name = $arrObject["name"];
                 $combo->street = 0;
                 $combo->save();
@@ -2002,7 +2001,7 @@ class AndroidPas4001_Odessa_Controller extends Controller
             }
 
             $svd = Config::where('id', '1')->first();
-            $svd->odessa_versionDate = $json_arr['version_date'];
+            $svd->zaporizhzhia_versionDate = $json_arr['version_date'];
             $svd->save();
 
             return redirect()->route('home-admin')->with('success', "База $base обновлена.");

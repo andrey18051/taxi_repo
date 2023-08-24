@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPAS2_Zaporizhzhia_Controller extends Controller
+class AndroidPas2_Zaporizhzhia_Controller extends Controller
 {
 
     public function index(): int
