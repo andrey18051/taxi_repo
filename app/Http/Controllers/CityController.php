@@ -114,7 +114,7 @@ class CityController extends Controller
 
         $curlInit = curl_init($domainFull);
         curl_setopt_array($curlInit, array(
-            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_CONNECTTIMEOUT => 7,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false
@@ -172,7 +172,7 @@ class CityController extends Controller
 
             $curlInit = curl_init($domainFull);
             curl_setopt_array($curlInit, array(
-                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_CONNECTTIMEOUT => 7,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_SSL_VERIFYHOST => false

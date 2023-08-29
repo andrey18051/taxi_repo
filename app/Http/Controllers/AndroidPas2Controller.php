@@ -34,17 +34,7 @@ class AndroidPas2Controller extends Controller
     {
         $response_error["resp_result"] = 200;
 
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $response_error["message"] = config('app.version-PAS2');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS2');
-                break;
-        }
+       $response_error["message"] = config('app.version-PAS2');
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
     }
@@ -1811,17 +1801,18 @@ class AndroidPas2Controller extends Controller
 
     public function verifyBlackListUser($email)
     {
+        self::startIP();
         $user =  BlackList::where('email', $email)->first();
 
         if ($user == null) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Не черном списке";
+            $response_error["Message"] = config('app.version-PAS2');
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "В черном списке";
+            $response_error["Message"] = config('app.version-PAS2');
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');

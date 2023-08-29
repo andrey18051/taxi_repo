@@ -1801,17 +1801,18 @@ class AndroidPas4001_Dnipro_Controller extends Controller
 
     public function verifyBlackListUser($email)
     {
-        $user =  BlackList::where('email', $email)->first();
+        self::startIP();
+        $user = BlackList::where('email', $email)->first();
 
         if ($user == null) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Не черном списке";
+            $response_error["Message"] = config('app.version-PAS4');
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = "В черном списке";
+            $response_error["Message"] = config('app.version-PAS4');
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');

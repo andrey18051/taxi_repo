@@ -1608,6 +1608,7 @@ class Android149Controller extends Controller
 
     public function verifyBlackListUser($email)
     {
+        self::startIP();
         $user =  BlackList::where('email', $email)->first();
 
         if ($user == null) {
