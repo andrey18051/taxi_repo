@@ -6,6 +6,7 @@ use App\Mail\Admin;
 use App\Mail\Check;
 use App\Mail\Driver;
 use App\Mail\Feedback;
+use App\Models\City;
 use App\Models\Combo;
 use App\Models\Config;
 use App\Models\Objecttaxi;
@@ -32,69 +33,69 @@ class WebOrderController extends Controller
     /**
      * Проверка подключения к АПИ
      */
-    public function connectAPI()
-    {
-        $username = config('app.username');
-        $password = hash('SHA512', config('app.password'));
-        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-        $subject = 'Отсутствует доступ к серверу.';
-
-        try {
-            $url = config('app.taxi2012Url_1') . '/api/clients/profile';
-
-
-            Http::timeout(2)->withHeaders([
-                'Authorization' => $authorization,
-            ])->get($url);
-            return config('app.taxi2012Url_1');
-        } catch (Exception $e) {
-            try {
-                $url = config('app.taxi2012Url_2') . '/api/clients/profile';
-                Http::timeout(2)->withHeaders([
-                    'Authorization' => $authorization,
-                ])->get($url);
-
-                $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
-                    "Произведено подключение к серверу " . config('app.taxi2012Url_2') . ".";
-                $paramsAdmin = [
-                    'subject' => $subject,
-                    'message' => $messageAdmin,
-                ];
-
-                $alarmMessage = new TelegramController();
-                $alarmMessage->sendAlarmMessage($messageAdmin);
-
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-                return config('app.taxi2012Url_2');
-            } catch (Exception $e) {
-                try {
-                    $url = config('app.taxi2012Url_3') . '/api/clients/profile';
-                    Http::timeout(2)->withHeaders([
-                        'Authorization' => $authorization,
-                    ])->get($url);
-                    return config('app.taxi2012Url_3');
-                } catch (Exception $e) {
-                    $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . config('app.taxi2012Url_2') . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . config('app.taxi2012Url_3') . ".";
-                    $paramsAdmin = [
-                        'subject' => $subject,
-                        'message' => $messageAdmin,
-                    ];
-
-                    $alarmMessage = new TelegramController();
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-
-                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-                    return '400';
-                }
-            }
-        }
-    }
+//    public function connectAPI()
+//    {
+//        $username = config('app.username');
+//        $password = hash('SHA512', config('app.password'));
+//        $authorization = 'Basic ' . base64_encode($username . ':' . $password);
+//        $subject = 'Отсутствует доступ к серверу.';
+//
+//        try {
+//            $url = config('app.taxi2012Url_1') . '/api/clients/profile';
+//
+//
+//            Http::timeout(2)->withHeaders([
+//                'Authorization' => $authorization,
+//            ])->get($url);
+//            return config('app.taxi2012Url_1');
+//        } catch (Exception $e) {
+//            try {
+//                $url = config('app.taxi2012Url_2') . '/api/clients/profile';
+//                Http::timeout(2)->withHeaders([
+//                    'Authorization' => $authorization,
+//                ])->get($url);
+//
+//                $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
+//                    "Произведено подключение к серверу " . config('app.taxi2012Url_2') . ".";
+//                $paramsAdmin = [
+//                    'subject' => $subject,
+//                    'message' => $messageAdmin,
+//                ];
+//
+//                $alarmMessage = new TelegramController();
+//                $alarmMessage->sendAlarmMessage($messageAdmin);
+//
+//                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+//                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//
+//                return config('app.taxi2012Url_2');
+//            } catch (Exception $e) {
+//                try {
+//                    $url = config('app.taxi2012Url_3') . '/api/clients/profile';
+//                    Http::timeout(2)->withHeaders([
+//                        'Authorization' => $authorization,
+//                    ])->get($url);
+//                    return config('app.taxi2012Url_3');
+//                } catch (Exception $e) {
+//                    $messageAdmin = "Ошибка подключения к серверу " . config('app.taxi2012Url_1') . ".   " . PHP_EOL .
+//                        "Ошибка подключения к серверу " . config('app.taxi2012Url_2') . ".   " . PHP_EOL .
+//                        "Ошибка подключения к серверу " . config('app.taxi2012Url_3') . ".";
+//                    $paramsAdmin = [
+//                        'subject' => $subject,
+//                        'message' => $messageAdmin,
+//                    ];
+//
+//                    $alarmMessage = new TelegramController();
+//                    $alarmMessage->sendAlarmMessage($messageAdmin);
+//
+//                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+//                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//
+//                    return '400';
+//                }
+//            }
+//        }
+//    }
 
     public function connectAPInoEmail()
     {
@@ -105,21 +106,27 @@ class WebOrderController extends Controller
         try {
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
             Http::timeout(2)->withHeaders([
-                'Authorization' => $authorization,
+    "Authorization" => self::autorization(),
+                "X-WO-API-APP-ID" => self::identificationId(),
+                "X-API-VERSION" => self::apiVersion()
             ])->get($url);
             return config('app.taxi2012Url_1');
         } catch (Exception $e) {
             try {
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
                 Http::timeout(2)->withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+                    "X-WO-API-APP-ID" => self::identificationId(),
+                    "X-API-VERSION" => self::apiVersion()
                 ])->get($url);
                 return config('app.taxi2012Url_2');
             } catch (Exception $e) {
                 try {
                     $url = config('app.taxi2012Url_3') . '/api/clients/profile';
                     Http::timeout(2)->withHeaders([
-                        'Authorization' => $authorization,
+                        "Authorization" => self::autorization(),
+                        "X-WO-API-APP-ID" => self::identificationId(),
+                        "X-API-VERSION" => self::apiVersion()
                     ])->get($url);
                     return config('app.taxi2012Url_3');
                 } catch (Exception $e) {
@@ -168,7 +175,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         return $response->collect();
@@ -209,7 +218,9 @@ class WebOrderController extends Controller
 
             $url = $connectAPI . '/api/clients/profile';
             $response = Http::withHeaders([
-                'Authorization' => $authorization,
+                "Authorization" => self::autorization(),
+                "X-WO-API-APP-ID" => self::identificationId(),
+                "X-API-VERSION" => self::apiVersion()
             ])->get($url);
             $response_arr = json_decode($response, true);
 
@@ -249,7 +260,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
         $response_arr = json_decode($response, true);
 
@@ -282,11 +295,14 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+"Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
-        $response_arr = json_decode($response, true);
+//        $response_arr = json_decode($response, true);
 
-        return view('taxi.profileEdit', ['authorization' => $authorization, 'response' => $response]);
+        return view('taxi.profileEdit',
+            ["Authorization" => self::autorization(), 'response' => $response]);
     }
 
     /**
@@ -830,7 +846,9 @@ class WebOrderController extends Controller
                 $url = $connectAPI . '/api/weborders/cost';
 
                 $response = Http::withHeaders([
-                    'Authorization' => $authorization,
+        "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => null, //Полное имя пользователя
                     'user_phone' => null, //Телефон пользователя
@@ -1049,7 +1067,9 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
-                    'Authorization' => $authorization,
+        "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => null, //Полное имя пользователя
                     'user_phone' => null, //Телефон пользователя
@@ -1173,7 +1193,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/nearest';
         $response_from = Http::withHeaders([
-            'Authorization' => $authorization,
+"Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'lat' => $params['lat'], //Обязательный. Широта
             'lng' => $params['lng'], //Обязательный. Долгота
@@ -1196,7 +1218,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/nearest';
         $response_to = Http::withHeaders([
-            'Authorization' => $authorization,
+"Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'lat' => $params['lat2'], //Обязательный. Широта
             'lng' => $params['lng2'], //Обязательный. Долгота
@@ -1356,7 +1380,9 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+                    "X-WO-API-APP-ID" => self::identificationId(),
+                    "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => null, //Полное имя пользователя
                     'user_phone' => null, //Телефон пользователя
@@ -1577,7 +1603,9 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => null, //Полное имя пользователя
                     'user_phone' => null, //Телефон пользователя
@@ -1836,7 +1864,9 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/weborders/cost';
                 $response = Http::withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => null, //Полное имя пользователя
                     'user_phone' => null, //Телефон пользователя
@@ -2022,7 +2052,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user_full_name, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -2192,7 +2224,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user_full_name, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -2296,7 +2330,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/profile';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         $response_arr = json_decode($response, true);
@@ -2477,7 +2513,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/cost';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user_full_name, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -2513,7 +2551,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders';
         $responseWeb = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'user_full_name' => $user_full_name, //Полное имя пользователя
             'user_phone' => $user_phone, //Телефон пользователя
@@ -2693,7 +2733,9 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => 'Новий замовник',
                     'user_phone' => $user_phone, //Телефон пользователя
@@ -2800,7 +2842,9 @@ class WebOrderController extends Controller
                 }
                 $url = $connectAPI . '/api/weborders';
                 $responseWeb = Http::withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->post($url, [
                     'user_full_name' => $user_full_name,
                     'user_phone' => $user_phone, //Телефон пользователя
@@ -2913,7 +2957,9 @@ class WebOrderController extends Controller
         //Обновление списка тарифов
         $url = $connectAPI . '/api/tariffs';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         $response_arr = json_decode($response, true);
@@ -2926,7 +2972,9 @@ class WebOrderController extends Controller
 
         $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
@@ -3001,7 +3049,9 @@ class WebOrderController extends Controller
         //Обновление списка тарифов
         $url = $connectAPI . '/api/tariffs';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         $response_arr = json_decode($response, true);
@@ -3013,7 +3063,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/objects';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
@@ -3106,7 +3158,9 @@ class WebOrderController extends Controller
 
         $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
@@ -3114,7 +3168,9 @@ class WebOrderController extends Controller
         $json_arr = json_decode($json_str, true);
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url_ob);
 
         $json_arr_ob = json_decode($response_ob, true);
@@ -3142,7 +3198,9 @@ class WebOrderController extends Controller
             //Обновление списка тарифов
             $url = $connectAPI . '/api/tariffs';
             $response = Http::withHeaders([
-                'Authorization' => $authorization,
+                "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
             ])->get($url);
 
             $response_arr = json_decode($response, true);
@@ -3234,14 +3292,18 @@ class WebOrderController extends Controller
 
         $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         $json_arr = json_decode($json_str, true);
 
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url_ob);
 
         $json_arr_ob = json_decode($response_ob, true);
@@ -3262,7 +3324,9 @@ class WebOrderController extends Controller
                 //Обновление списка тарифов
                 $url = $connectAPI . '/api/tariffs';
                 $response = Http::withHeaders([
-                    'Authorization' => $authorization,
+                    "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
                 ])->get($url);
 
                 $response_arr = json_decode($response, true);
@@ -3401,7 +3465,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/objects';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'versionDateGratherThan' => '', //Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
@@ -3430,7 +3496,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/cancel/' . $uid;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->put($url);
 
 
@@ -3477,7 +3545,9 @@ class WebOrderController extends Controller
         try {
             $url = $connectAPI . '/api/weborders/' . $uid;
             $response = Http::withHeaders([
-                'Authorization' => $authorization,
+                "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
             ])->put($url);
             $json_arrWeb = json_decode($response, true);
 
@@ -3518,7 +3588,9 @@ class WebOrderController extends Controller
 
             $url = $connectAPI . '/api/weborders/' . $uid;
             $response = Http::withHeaders([
-                'Authorization' => $authorization,
+                "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
             ])->put($url);
             $json_arrWeb = json_decode($response, true);
 
@@ -3545,7 +3617,9 @@ class WebOrderController extends Controller
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
 
             'lat' => '50.418843668133', //Обязательный. Широта
@@ -3592,7 +3666,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/search';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'q' => $q, //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -3661,7 +3737,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/account/changepassword';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->put($url, [
             //Все поля обязательные
             'oldPassword' => '11223344', //Старый пароль
@@ -3722,7 +3800,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/' . $uid . '/driver';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         return $response->body() ;
@@ -3747,7 +3827,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         return $response->body() ;
@@ -3771,7 +3853,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'amount' => 100
         ]);
@@ -3797,7 +3881,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->put($url, [
             'amount' => 50
         ]);
@@ -3824,7 +3910,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/' . $uid . '/cost/additional';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->delete($url);
 
         return $response->body() ;
@@ -3847,7 +3935,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/drivercarposition/' . $uid;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
 
         return $response->body() ;
@@ -3872,7 +3962,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/rate/' . $uid;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'rating' => 5, // Обязательный.	1, 2, 3, 4, 5	Оценка поездки
             'rating_comment' => 'Ok' //Комментарий к оценке. Максимальная длина 120 символов.
@@ -3899,7 +3991,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/weborders/hide/' . $uid;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->put($url);
 
         return $response->status() ;
@@ -3922,7 +4016,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/ordersreport';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'dateFrom' => '2022-01-01', //Обязательный. Начальный интервал для отчета
             'dateTo' => '2022-12-31', //Обязательный. Конечный интервал для отчета
@@ -3947,7 +4043,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/ordershistory';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
           //  'limit' => '10', //Необязательный. Вернуть количество записей
             'offset' => '0', //Необязательный. Пропустить количество записей
@@ -3977,7 +4075,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/bonusreport';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             //  'limit' => '10', //Необязательный. Вернуть количество записей
             'offset' => '0', //Необязательный. Пропустить количество записей
@@ -4003,7 +4103,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/lastaddresses';
         $response = Http::withHeaders([
-            'Authorization' => $authorization, ])->get($url);
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion() ])->get($url);
         return $response->body();
     }
 
@@ -4025,7 +4127,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/credential';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
             //X-WO-API-APP-ID: App_name
         ])->put($url, [
             'app_registration_token' => 'string' //токен (*) Если значения X-WO-API-APP-ID нет в БД сервера или он пустой, он записан в профиль клиента не будет.
@@ -4051,7 +4155,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/changePhone/sendConfirmCode';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'phone' => '380936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'taxiColumnId' => 0 //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
@@ -4076,7 +4182,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/changePhone/';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->put($url, [
             'phone' => '380936734488', //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
             'confirm_code' => '1130' //Обязательный. Код подтверждения.
@@ -4117,7 +4225,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/balance/transactions/';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
             'amount' => '100.21', //Обязательный. Сумма платежа
         ]);
@@ -4142,7 +4252,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/balance/transaction/' . $id;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
         return $response->body();
     }
@@ -4164,7 +4276,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/clients/balance/transactions/';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             /*Необязательные
              * 'limit' => '10', //Вернуть количество записей
@@ -4190,7 +4304,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/client/addresses';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url);
         return $response->body();
     }
@@ -4212,7 +4328,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/client/addresses';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
            'alias' => 'Мой дом', //Название. Максимальный размер 100.
             'comment' => 'Домофон не работает', //Комментарий для создания заказа. Максимальный размер 1024.
@@ -4245,7 +4363,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/client/addresses';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->put($url, [
             'favorite_address_uid' => '092f5cce-715c-4a6a-8aa7-bf54f434c3cf',//Идентификатор избранного адреса, который необходимо обновить.
             'alias' => 'Мой дом', //Название. Максимальный размер 100.
@@ -4280,7 +4400,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/client/addresses/' . $favorite_address_uid;
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->delete($url);
         return $response->status();
     }
@@ -4304,7 +4426,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/objects/search';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'q' => 'Оде', //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -4341,7 +4465,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/streets';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
@@ -4367,7 +4493,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/streets/search';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'q' => 'Оде', //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -4408,7 +4536,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/search';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'lat' => '46.4834363079238', //Обязательный. Широта
             'lng' => '30.6886028410144', //Обязательный. Долгота
@@ -4436,7 +4566,9 @@ class WebOrderController extends Controller
         }
         $url = $connectAPI . '/api/geodata/nearest';
         $response = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'lat' => '46.4834363079238', //Обязательный. Широта
             'lng' => '30.6886028410144', //Обязательный. Долгота
@@ -4514,5 +4646,54 @@ class WebOrderController extends Controller
         return $response->body() ;
     }
 
+    public function apiVersion()
+    {
+        $connectAPI = self::connectApi();
 
+        $url = $connectAPI . '/api/version';
+        $response = Http::get($url);
+        $response_arr = json_decode($response, true);
+
+        return $response_arr["version"];
+    }
+
+    private function autorization()
+    {
+
+        $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
+
+//        dd($city);
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPI(): string
+    {
+
+        /**
+         * тест
+         */
+//        $city = "OdessaTest";
+        /**
+         * Kyiv City;
+         */
+        $city = "Kyiv City";
+
+        return CityController::cityOnline($city);
+    }
+
+    public function identificationId()
+    {
+        return config("app.X-WO-API-APP-ID-SITE");
+    }
+
+    public function connectAPI(): string
+    {
+        return self::onlineAPI();
+    }
 }

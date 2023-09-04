@@ -1207,4 +1207,24 @@ class AndroidController extends Controller
                 ->header('Content-Type', 'json');
         }
     }
+
+    public function verifyBlackListUserOrder($email)
+    {
+        self::startIP();
+        $user =  BlackList::where('email', $email)->first();
+
+        if ($user == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = config('app.version-PAS2');
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "В черном списке";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
+    }
 }

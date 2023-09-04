@@ -1810,7 +1810,7 @@ class AndroidPas4001_Zaporizhzhia_Controller extends Controller
                 ->header('Content-Type', 'json');
         } else {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = config('app.version-PAS4');
+            $response_error["Message"] = "В черном списке";
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');

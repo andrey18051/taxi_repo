@@ -1812,7 +1812,7 @@ class AndroidPas2Controller extends Controller
                 ->header('Content-Type', 'json');
         } else {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = config('app.version-PAS2');
+            $response_error["Message"] = "В черном списке";
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');

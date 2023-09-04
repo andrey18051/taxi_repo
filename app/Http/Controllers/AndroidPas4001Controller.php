@@ -50,37 +50,12 @@ class AndroidPas4001Controller extends Controller
 
     public function identificationId()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
-                break;
-            default:
-                $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS4");
-        }
-        return $X_WO_API_APP_ID;
+        return config("app.X-WO-API-APP-ID-PAS4");
     }
 
     public function startIP()
     {
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                IPController::getIP('/android/PAS2/startPage');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                IPController::getIP('/android/PAS4/startPage');
-                break;
-            default:
-                IPController::getIP('/android/PAS4/startPage');
-        }
+        IPController::getIP('/android/PAS4/startPage');
     }
 
     public function connectAPI(): string
@@ -1870,23 +1845,11 @@ class AndroidPas4001Controller extends Controller
                 ->header('Content-Type', 'json');
         } else {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = config('app.version-PAS4');
+            $response_error["Message"] = "В черном списке";
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
-    }
-
-    private function autorization()
-    {
-
-        $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
-
-//        dd($city);
-        $username = $city->login;
-        $password = hash('SHA512', $city->password);
-
-        return 'Basic ' . base64_encode($username . ':' . $password);
     }
 
     public function myHistory()
@@ -1903,6 +1866,7 @@ class AndroidPas4001Controller extends Controller
         ])->get($url);
         return $response;
     }
+
     public function historyUID($uid)
     {
 
@@ -1921,6 +1885,7 @@ class AndroidPas4001Controller extends Controller
         return $response;
 //dd($response->body());
     }
+
     public function apiVersion()
     {
         $connectAPI = self::connectApi();
@@ -1930,6 +1895,36 @@ class AndroidPas4001Controller extends Controller
         $response_arr = json_decode($response, true);
 
         return $response_arr["version"];
+    }
+
+    private function autorization()
+    {
+
+        $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
+
+//        dd($city);
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPI(): string
+    {
+
+        /**
+         * тест
+         */
+//        $city = "Odessa";
+        /**
+         * Kyiv City;
+         */
+        $city = "Kyiv City";
+
+        return CityController::cityOnline($city);
     }
 
     /**
@@ -1974,23 +1969,5 @@ class AndroidPas4001Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->get($url);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function onlineAPI(): string
-    {
-
-        /**
-         * тест
-         */
-//        $city = "Odessa";
-        /**
-         * Kyiv City;
-         */
-        $city = "Kyiv City";
-
-        return CityController::cityOnline($city);
     }
 }
