@@ -152,11 +152,11 @@ class AndroidPas4001_Dnipro_Controller extends Controller
         $to_lng = $LatLngTo["lng"];
 
         if ($from_lat != 0 && $from_lng != 0) {
-            $routFrom = ['name' => $from, 'lat' => $from_lat, 'lng' => $from_lng];
+            $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
         }
 
         if ($to_lat != 0 && $to_lng != 0) {
-            $routTo = ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng];
+            $routTo = ['name' => $to, 'number' => $to_number,  'lat' => $to_lat, 'lng' => $to_lng];
         }
         $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
             $routFrom,
@@ -312,11 +312,11 @@ class AndroidPas4001_Dnipro_Controller extends Controller
         $to_lng = $LatLngTo["lng"];
 
         if ($from_lat != 0 && $from_lng != 0) {
-            $routFrom = ['name' => $from, 'lat' => $from_lat, 'lng' => $from_lng];
+            $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
         }
 
         if ($to_lat != 0 && $to_lng != 0) {
-            $routTo = ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng];
+            $routTo = ['name' => $to, 'number' => $to_number,  'lat' => $to_lat, 'lng' => $to_lng];
         }
         $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
             $routFrom,

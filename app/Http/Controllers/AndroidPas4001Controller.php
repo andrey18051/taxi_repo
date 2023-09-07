@@ -109,28 +109,14 @@ class AndroidPas4001Controller extends Controller
 
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-            } else {
-                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-            }
+
+            $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+            $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+            $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -165,11 +151,11 @@ class AndroidPas4001Controller extends Controller
         $to_lng = $LatLngTo["lng"];
 
         if ($from_lat != 0 && $from_lng != 0) {
-            $routFrom = ['name' => $from, 'lat' => $from_lat, 'lng' => $from_lng];
+            $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
         }
 
         if ($to_lat != 0 && $to_lng != 0) {
-            $routTo = ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng];
+            $routTo = ['name' => $to, 'number' => $to_number,  'lat' => $to_lat, 'lng' => $to_lng];
         }
         $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
             $routFrom,
@@ -341,11 +327,11 @@ class AndroidPas4001Controller extends Controller
         $to_lng = $LatLngTo["lng"];
 
         if ($from_lat != 0 && $from_lng != 0) {
-            $routFrom = ['name' => $from, 'lat' => $from_lat, 'lng' => $from_lng];
+            $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
         }
 
         if ($to_lat != 0 && $to_lng != 0) {
-            $routTo = ['name' => $to,  'lat' => $to_lat, 'lng' => $to_lng];
+            $routTo = ['name' => $to, 'number' => $to_number,  'lat' => $to_lat, 'lng' => $to_lng];
         }
         $rout  = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
             $routFrom,
