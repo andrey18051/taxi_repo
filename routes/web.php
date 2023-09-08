@@ -1057,7 +1057,7 @@ Route::get('/ip/address', [IPController::class,'address'])->name('address');
   * City
   */
 Route::get('/city/all', [CityController::class,'index']);
-Route::get('/city/online', [CityController::class,'cityOnline']);
+Route::get('/city/online/{city}', [CityController::class,'cityOnline']);
 Route::get('/city/destroy/{id}', [CityController::class,'destroy']);
 Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}/{online}', [CityController::class,'edit']);
 Route::get('/city/cityNew', function () {
@@ -1065,6 +1065,8 @@ Route::get('/city/cityNew', function () {
 })->name('city-new');
 Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-save');
 Route::get('/city/verification', [CityController::class,'checkDomains'])->name('checkDomains');
+
+
 
 /**
  * City versionCombo
@@ -1074,4 +1076,5 @@ Route::get('/city/versionComboDniproPas4', [AndroidPas4001_Dnipro_Controller::cl
 Route::get('/city/versionComboOdessaPas2', [AndroidPas2_Odessa_Controller::class,'versionComboOdessa'])->name('versionComboOdessa2');
 Route::get('/city/versionComboZaporizhzhiaPas2', [AndroidPas2_Zaporizhzhia_Controller::class,'versionComboZaporizhzhia'])->name('versionComboZaporizhzhia2');
 Route::get('/city/versionComboCherkasyPas2', [AndroidPas2_Cherkasy_Controller::class,'versionComboCherkasy'])->name('versionComboCherkasy2');
+Route::get('/showLatLng/{Lat}/{lng}', [\App\Http\Controllers\VisicomController::class,'showLatLng'])->name('showLatLng');
 

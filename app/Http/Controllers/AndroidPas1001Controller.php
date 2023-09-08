@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas4001Controller extends Controller
+class AndroidPas1001Controller extends Controller
 {
 
     public function index(): int
@@ -32,30 +32,20 @@ class AndroidPas4001Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
+        $response_error["message"] = config('app.version-PAS1');
 
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $response_error["message"] = config('app.version-PAS2');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS4');
-                break;
-        }
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
     }
 
     public function identificationId()
     {
-        return config("app.X-WO-API-APP-ID-PAS4");
+        return config("app.X-WO-API-APP-ID-PAS1");
     }
 
     public function startIP()
     {
-        IPController::getIP('/android/PAS4/startPage');
+        IPController::getIP('/android/PAS1/startPage');
     }
 
     public function connectAPI(): string
@@ -1825,7 +1815,7 @@ class AndroidPas4001Controller extends Controller
 
         if ($user == null) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = config('app.version-PAS4');
+            $response_error["Message"] = config('app.version-PAS1');
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');

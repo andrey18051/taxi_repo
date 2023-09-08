@@ -624,12 +624,12 @@ class AndroidTestController extends Controller
                     . "," . $originLatitude
                     . "&r=" . $r . "&l=1&key="
                     . config("app.keyVisicom");
-
+//dd($url);
                 $response = Http::get($url);
                 $response_arr_from = json_decode($response, true);
                 $r += 50;
             } while (empty($response_arr_from) && $r < 200);
-
+//dd($response_arr_from);
             if ($response_arr_from != null) {
                 $params['routefromnumber'] = $response_arr_from["properties"]["name"];
 
@@ -644,9 +644,13 @@ class AndroidTestController extends Controller
                 $request["name"] = $response_arr_from["properties"]["name"];
                 $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
-                $request["lat"] = $originLatitude;
-                $request["lng"] = $originLongitude;
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
+//
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
                 $params['from_number'] = $response_arr_from["properties"]["name"];
+//                dd($request);
                 VisicomController::store($request);
             }
         } else {
@@ -1106,8 +1110,8 @@ class AndroidTestController extends Controller
                 $request["name"] = $response_arr_from["properties"]["name"];
                 $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
-                $request["lat"] = $originLatitude;
-                $request["lng"] = $originLongitude;
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
 
                 VisicomController::store($request);
             }
@@ -1603,8 +1607,8 @@ class AndroidTestController extends Controller
                 $request["name"] = $response_arr_from["properties"]["name"];
                 $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
-                $request["lat"] = $originLatitude;
-                $request["lng"] = $originLongitude;
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
 
                 VisicomController::store($request);
 

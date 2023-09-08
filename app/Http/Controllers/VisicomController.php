@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Visicom;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class VisicomController extends Controller
@@ -10,17 +11,20 @@ class VisicomController extends Controller
     public function store($request)
     {
 
-        // Создание новой записи в базе данных
-        $visicom = new Visicom();
-        $visicom->street_type = $request["street_type"];
-        $visicom->street = $request["street"];
-        $visicom->name = $request["name"];
-        $visicom->settlement_type = $request["settlement_type"];
-        $visicom->settlement = $request["settlement"];
-        $visicom->lat = $request["lat"];
-        $visicom->lng = $request["lng"];
-        // Заполните остальные поля вашей модели Visicom
-        $visicom->save();
+        if(self::showLatLng($request["lat"], $request["lng"] ) == 404) {
+            // Создание новой записи в базе данных
+            $visicom = new Visicom();
+            $visicom->street_type = $request["street_type"];
+            $visicom->street = $request["street"];
+            $visicom->name = $request["name"];
+            $visicom->settlement_type = $request["settlement_type"];
+            $visicom->settlement = $request["settlement"];
+            $visicom->lat = $request["lat"];
+            $visicom->lng = $request["lng"];
+            // Заполните остальные поля вашей модели Visicom
+            $visicom->save();
+        }
+
         // Ответ с созданной записью
         return 200;
     }
@@ -48,6 +52,8 @@ class VisicomController extends Controller
         }
         // Ответ с найденной записью
         return $visicom->toArray();
+
+//        return 404;
     }
 
 

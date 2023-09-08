@@ -7,17 +7,23 @@ use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\City;
 use App\Models\Combo;
+use App\Models\ComboDnipro;
 use App\Models\ComboTest;
+use App\Models\Config;
+use App\Models\DniproCombo;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Tarif;
 use App\Models\User;
 use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
 use SebastianBergmann\Diff\Exception;
 
-class AndroidPas4001Controller extends Controller
+class AndroidPas1001_Dnipro_Controller extends Controller
 {
 
     public function index(): int
@@ -32,30 +38,20 @@ class AndroidPas4001Controller extends Controller
     public function version()
     {
         $response_error["resp_result"] = 200;
+        $response_error["message"] = config('app.version-PAS1');
 
-        switch (self::connectAPI()) {
-            case 'http://31.43.107.151:7303':
-                $response_error["message"] = config('app.version-PAS2');
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $response_error["message"] = config('app.version-PAS4');
-                break;
-        }
         return  response($response_error, 200)
             ->header('Content-Type', 'json');
     }
 
     public function identificationId()
     {
-        return config("app.X-WO-API-APP-ID-PAS4");
+        return config("app.X-WO-API-APP-ID-PAS1");
     }
 
     public function startIP()
     {
-        IPController::getIP('/android/PAS4/startPage');
+        IPController::getIP('/android/PAS1/startPage');
     }
 
     public function connectAPI(): string
@@ -71,7 +67,7 @@ class AndroidPas4001Controller extends Controller
          */
 
         $connectAPI = self::connectApi();
-
+//dd($connectAPI);
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -106,17 +102,14 @@ class AndroidPas4001Controller extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
+        $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
 
         if ($from == $to) {
             $route_undefined = true;
-
-            $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-            $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -139,9 +132,17 @@ class AndroidPas4001Controller extends Controller
             $to = $combos_to->name;
         }
 
-        $routFrom = ['name' => $from, 'number' => $from_number];
-        $routTo =   ['name' => $to, 'number' => $to_number];
+        if ($from_number !== " ") {
+            $routFrom = ['name' => $from, 'number' => $from_number];
+        } else {
+            $routFrom = ['name' => $from];
+        }
 
+        if ($to_number !== " ") {
+            $routTo =   ['name' => $to, 'number' => $to_number];
+        } else {
+            $routTo =   ['name' => $to];
+        }
         $LatLngFrom = self::geoDataSearch($from, $from_number);
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
@@ -202,7 +203,7 @@ class AndroidPas4001Controller extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
-
+//dd($response->body());
         if ($response->status() == 200) {
             return  response($response, 200)
                 ->header('Content-Type', 'json');
@@ -262,38 +263,13 @@ class AndroidPas4001Controller extends Controller
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
+        $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+        $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
         if ($from == $to) {
             $route_undefined = true;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    break;
-            }
-
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
         }
 
         if ($combos_from == null) {
@@ -315,9 +291,18 @@ class AndroidPas4001Controller extends Controller
             $to = $combos_to->name;
         }
 
-        $routFrom = ['name' => $from, 'number' => $from_number];
-        $routTo =   ['name' => $to, 'number' => $to_number];
 
+        if ($from_number !== " ") {
+            $routFrom = ['name' => $from, 'number' => $from_number];
+        } else {
+            $routFrom = ['name' => $from];
+        }
+
+        if ($to_number !== " ") {
+            $routTo =   ['name' => $to, 'number' => $to_number];
+        } else {
+            $routTo =   ['name' => $to];
+        }
         $LatLngFrom = self::geoDataSearch($from, $from_number);
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
@@ -408,7 +393,7 @@ class AndroidPas4001Controller extends Controller
             $response_ok["add_cost"] = $add_cost;
 //            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
 //            $response_ok["find_car_timeout"] = $response_arr["find_car_timeout"];
 //            $response_ok["find_car_delay"] = $response_arr["find_car_delay"];
 
@@ -433,6 +418,7 @@ class AndroidPas4001Controller extends Controller
                 ->header('Content-Type', 'json');
         }
     }
+
 
     public function costSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $services)
     {
@@ -487,18 +473,7 @@ class AndroidPas4001Controller extends Controller
 
         } else {
             $route_undefined = false;
-
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -512,10 +487,18 @@ class AndroidPas4001Controller extends Controller
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $to, 'number' => $to_number]
+
+            if ($to_number !== " ") {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to, 'number' => $to_number]
                 ];
+            } else {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to]
+                ];
+            }
         }
 
         $params['from'] = "lat: " . $originLatitude . " lon: " . $originLongitude;
@@ -572,10 +555,10 @@ class AndroidPas4001Controller extends Controller
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
-            $response_ok["add_cost"] = $response_arr["add_cost"];
-            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
+//            $response_ok["add_cost"] = $response_arr["add_cost"];
+//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
             if ($originLatitude != $to) {
                 $response_ok["routeto"] =  $to;
@@ -700,19 +683,12 @@ class AndroidPas4001Controller extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ]
             ];
 
+
+
         } else {
             $route_undefined = false;
-            switch ($connectAPI) {
-                case 'http://31.43.107.151:7303':
-                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-                case 'http://167.235.113.231:7307':
-                case 'http://167.235.113.231:7306':
-                case 'http://134.249.181.173:7208':
-                case 'http://91.205.17.153:7208':
-                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
-                    break;
-            }
+
+            $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
 
             if ($combos_to == null) {
                 $response_error["order_cost"] = 0;
@@ -726,10 +702,18 @@ class AndroidPas4001Controller extends Controller
 
             $params['route_undefined'] = $route_undefined; //По городу: True, False
             $params['to'] = $to;
-            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
-                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
-                ['name' => $to, 'number' => $to_number]
-            ];
+
+            if ($to_number !== " ") {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to, 'number' => $to_number]
+                ];
+            } else {
+                $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                    ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                    ['name' => $to]
+                ];
+            }
         }
 
 
@@ -811,10 +795,10 @@ class AndroidPas4001Controller extends Controller
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
-                $response_ok["add_cost"] = $add_cost;
-                $response_ok["recommended_add_cost"] = $add_cost;
+//                $response_ok["add_cost"] = $add_cost;
+//                $response_ok["recommended_add_cost"] = $add_cost;
                 $response_ok["currency"] = $response_arr["currency"];
-                $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//                $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
                 $response_ok["routefrom"] = $params['routefrom'];
                 $response_ok["routefromnumber"] = $params['routefromnumber'];
@@ -865,10 +849,10 @@ class AndroidPas4001Controller extends Controller
 
             return $response_error;
         }
+
         if ($tariff == " ") {
             $tariff = null;
         }
-
 
         $params['user_full_name'] = $user;
         $params['user_phone'] = $phone;
@@ -1030,10 +1014,10 @@ class AndroidPas4001Controller extends Controller
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
-            $response_ok["add_cost"] = $response_arr["add_cost"];
-            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
+//            $response_ok["add_cost"] = $response_arr["add_cost"];
+//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-            $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
             if ($originLatitude != $toLatitude) {
                 $response_ok["routeto"] =  $params["to"];
@@ -1297,10 +1281,10 @@ class AndroidPas4001Controller extends Controller
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
-                $response_ok["add_cost"] = $add_cost;
-                $response_ok["recommended_add_cost"] = $add_cost;
+//                $response_ok["add_cost"] = $add_cost;
+//                $response_ok["recommended_add_cost"] = $add_cost;
                 $response_ok["currency"] = $response_arr["currency"];
-                $response_ok["discount_trip"] = $response_arr["discount_trip"];
+//                $response_ok["discount_trip"] = $response_arr["discount_trip"];
 
                 $response_ok["routefrom"] = $params['from'];
                 $response_ok["routefromnumber"] = $params['from_number'];
@@ -1356,7 +1340,7 @@ class AndroidPas4001Controller extends Controller
         $order->required_time = $params['required_time']; //Время подачи предварительного заказа
         $order->reservation = $params['reservation']; //Обязательный. Признак предварительного заказа: True, False
         $order->route_address_entrance_from = null;
-        $order->comment = self::identificationId();  //Комментарий к заказу
+        $order->comment = $params['comment'];  //Комментарий к заказу
         $order->add_cost = $params['add_cost']; //Добавленная стоимость
         $order->wagon = $params['wagon']; //Универсал: True, False
         $order->minibus = $params['minibus']; //Микроавтобус: True, False
@@ -1628,7 +1612,6 @@ class AndroidPas4001Controller extends Controller
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
                 $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
                 $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
-
                 VisicomController::store($request);
 
                 return  response($response_ok, 200)
@@ -1748,11 +1731,8 @@ class AndroidPas4001Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            if ($connectAPI == 'http://31.43.107.151:7303') {
-                 $combos = ComboTest::where('name', 'like', $name . '%')->first();
-            } else {
-                 $combos = Combo::where('name', 'like', $name . '%')->first();
-            }
+            $combos = DniproCombo::where('name', 'like', $name . '%')->first();
+
             if ($combos != null) {
                 $response["resp_result"] = 0;
                 $response["message"] = $combos->street;
@@ -1825,7 +1805,7 @@ class AndroidPas4001Controller extends Controller
 
         if ($user == null) {
             $response_error["order_cost"] = 0;
-            $response_error["Message"] = config('app.version-PAS4');
+            $response_error["Message"] = config('app.version-PAS1');
 
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
@@ -1836,6 +1816,18 @@ class AndroidPas4001Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
+    }
+
+    private function autorization()
+    {
+
+        $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
+
+//        dd($city);
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
     }
 
     public function myHistory()
@@ -1852,7 +1844,6 @@ class AndroidPas4001Controller extends Controller
         ])->get($url);
         return $response;
     }
-
     public function historyUID($uid)
     {
 
@@ -1871,7 +1862,6 @@ class AndroidPas4001Controller extends Controller
         return $response;
 //dd($response->body());
     }
-
     public function apiVersion()
     {
         $connectAPI = self::connectApi();
@@ -1881,36 +1871,6 @@ class AndroidPas4001Controller extends Controller
         $response_arr = json_decode($response, true);
 
         return $response_arr["version"];
-    }
-
-    private function autorization()
-    {
-
-        $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
-
-//        dd($city);
-        $username = $city->login;
-        $password = hash('SHA512', $city->password);
-
-        return 'Basic ' . base64_encode($username . ':' . $password);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function onlineAPI(): string
-    {
-
-        /**
-         * тест
-         */
-//        $city = "Odessa";
-        /**
-         * Kyiv City;
-         */
-        $city = "Kyiv City";
-
-        return CityController::cityOnline($city);
     }
 
     /**
@@ -1955,5 +1915,108 @@ class AndroidPas4001Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->get($url);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPI(): string
+    {
+
+        /**
+         * тест
+         */
+//        $city = "Odessa";
+        /**
+         * Kyiv City;
+         */
+//        $city = "Kyiv City";
+        /**
+         * Dnipropetrovsk Oblast;
+         */
+        $city = "Dnipropetrovsk Oblast";
+
+        return CityController::cityOnline($city);
+    }
+
+    /**
+     * Контроль версии улиц и объектов
+     */
+    public function versionComboDnipro(): \Illuminate\Http\RedirectResponse
+    {
+        $base = env('DB_DATABASE');
+        $marker_update = false;
+
+        $authorization = self::autorization();
+        /**
+         * Проверка подключения к серверам
+         */
+        $connectAPI = self::connectApi();
+
+        if ($connectAPI == 400) {
+                return redirect()->route('home-news')
+                    ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
+
+        }
+
+        /**
+         * Проверка даты геоданных в АПИ
+         */
+
+        $url = $connectAPI . '/api/geodata/streets';
+        $json_str = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url, [
+            'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
+        ]);
+        $json_arr = json_decode($json_str, true);
+
+        $url_ob = $connectAPI . '/api/geodata/objects';
+        $response_ob = Http::withHeaders([
+            'Authorization' => $authorization,
+        ])->get($url_ob);
+
+        $json_arr_ob = json_decode($response_ob, true);
+
+        /**
+         * Проверка версии геоданных и обновление или создание базы адресов
+         */
+//
+        $svd = Config::where('id', '1')->first();
+
+        if ($json_arr['version_date'] !==  $svd->dnipro_versionDate) {
+            $marker_update = true;
+        }
+
+
+        //Проверка версии геоданных и обновление или создание базы адресов
+
+        if ($marker_update || DniproCombo::all()->count() === 0) {
+            DB::table('dnipro_combos')->truncate();
+
+            foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
+                $combo = new DniproCombo();
+                $combo->name = $arrStreet["name"];
+                $combo->street = 1;
+                $combo->save();
+
+            }
+
+            foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
+                $combo = new DniproCombo();
+                $combo->name = $arrObject["name"];
+                $combo->street = 0;
+                $combo->save();
+
+            }
+
+            $svd = Config::where('id', '1')->first();
+            $svd->dnipro_versionDate = $json_arr['version_date'];
+            $svd->save();
+
+            return redirect()->route('home-admin')->with('success', "База $base обновлена.");
+        } else {
+            return redirect()->route('home-admin')->with('success', "База $base актуальна.");
+        }
     }
 }

@@ -78,19 +78,63 @@ class CityController extends Controller
     {
 
         $serverArr = self::cityAll($city);
-
+//dd($serverArr);
         foreach ($serverArr as $value) {
-            if ($value["online"] == "true") {
-                if (self::checkDomain($value["address"])) {
-                    return "http://" . $value["address"];
-                };
-            } else {
-                if (self::hasPassedFiveMinutes($value['updated_at'])) {
-                    if (self::checkDomain($value["address"])) {
+            $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
+            $checking = self::checkDomain($value["address"]);
+            $online = $value["online"];
+
+            $city = City::where('address', $value["address"])->first();
+//            dd($value["address"]);
+//            dd( $timeFive);
+            if ($online == "false") {
+                if ($timeFive == true) {
+                    if ($checking == true) {
+                        $city->online = "true";
+                        $city->save();
                         return "http://" . $value["address"];
+                    } else {
+                        $city->online = "true";
+                        $city->save();
+                        $city->online = "false";
+                        $city->save();
+                        $alarmMessage = new TelegramController();
+                        $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ".";
+                        try {
+                            $alarmMessage->sendAlarmMessage($messageAdmin);
+                            $alarmMessage->sendMeMessage($messageAdmin);
+                        } catch (Exception $e) {
+                            $paramsCheck = [
+                                'subject' => 'Ошибка в телеграмм',
+                                'message' => $e,
+                            ];
+                            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                        };
                     }
                 }
             }
+            if ($online == "true") {
+                if ($checking == true) {
+                    return "http://" . $value["address"];
+                } else {
+                    $city->online = "false";
+                    $city->save();
+                    $alarmMessage = new TelegramController();
+                    $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ".";
+                    try {
+                        $alarmMessage->sendAlarmMessage($messageAdmin);
+                        $alarmMessage->sendMeMessage($messageAdmin);
+                    } catch (Exception $e) {
+                        $paramsCheck = [
+                            'subject' => 'Ошибка в телеграмм',
+                            'message' => $e,
+                        ];
+                        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                    };
+                }
+            }
+
+
         }
         return 400;
     }
@@ -101,9 +145,8 @@ class CityController extends Controller
      */
     public function checkDomain($domain): bool
     {
-        $city = City::where('address', $domain)->first();
 
-        $domainFull = "http://" . $domain . "/api/time";
+        $domainFull = "http://" . $domain . "/api/version";
 //        $curlInit = curl_init($domainFull);
 //        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
 //        curl_setopt($curlInit, CURLOPT_HEADER, true);
@@ -114,53 +157,34 @@ class CityController extends Controller
 
         $curlInit = curl_init($domainFull);
         curl_setopt_array($curlInit, array(
-            CURLOPT_CONNECTTIMEOUT => 7,
+            CURLOPT_CONNECTTIMEOUT => 2,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false
         ));
         $response = curl_exec($curlInit);
-
+//dd($domainFull);
+        $city = City::where('address', $domain)->first();
         if (curl_errno($curlInit)) {
-            $city->online = "false";
-            $city->save();
-            $alarmMessage = new TelegramController();
-            $messageAdmin = "Ошибка подключения к серверу города $city->name http://" . $domain . ".";
-            try {
-                $alarmMessage->sendAlarmMessage($messageAdmin);
-                $alarmMessage->sendMeMessage($messageAdmin);
-            } catch (Exception $e) {
-                $paramsCheck = [
-                    'subject' => 'Ошибка в телеграмм',
-                    'message' => $e,
-                ];
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
+
             return false;
+        } else {
+
+            return true;
         }
 
         curl_close($curlInit);
-        if ($response) {
-            $city->online = "true";
-            $city->save();
-            return true;
-        } else {
-            $city->online = "false";
-            $city->save();
-            $alarmMessage = new TelegramController();
-            $messageAdmin = "Ошибка подключения к серверу " . "http://" . $domain . ".";
-            try {
-                $alarmMessage->sendAlarmMessage($messageAdmin);
-                $alarmMessage->sendMeMessage($messageAdmin);
-            } catch (Exception $e) {
-                $paramsCheck = [
-                    'subject' => 'Ошибка в телеграмм',
-                    'message' => $e,
-                ];
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
-            return false;
-        }
+//        if ($response) {
+//            $city = City::where('address', $domain)->first();
+//            $city->online = "true";
+//            $city->save();
+//            return true;
+//        } else {
+//            $city = City::where('address', $domain)->first();
+//            $city->online = "false";
+//            $city->save();
+//            return false;
+//        }
     }
 
     public function checkDomains()
@@ -184,7 +208,7 @@ class CityController extends Controller
                 $messageAdmin = "Ошибка подключения к серверу города $name http://" . $value['address'] . ".";
                 try {
                     $alarmMessage->sendAlarmMessage($messageAdmin);
-                    $alarmMessage->sendMeMessage($messageAdmin);
+//                    $alarmMessage->sendMeMessage($messageAdmin);
                 } catch (Exception $e) {
                     $paramsCheck = [
                         'subject' => 'Ошибка в телеграмм',
@@ -203,6 +227,49 @@ class CityController extends Controller
      * @throws \Exception
      */
     protected function hasPassedFiveMinutes($updated_at): bool
+    {
+        $updated_at_datetime = new DateTimeImmutable($updated_at);
+        $current_datetime = new DateTimeImmutable();
+
+        $interval = $current_datetime->diff($updated_at_datetime);
+
+        return ($interval->i >= 5);
+    }
+
+//    protected function hasPassedThirtyMinutesOrFiveMinutes($updated_at): bool
+//    {
+//        // Создаем объект DateTimeImmutable для $updated_at
+//        $updated_at_datetime = new DateTimeImmutable($updated_at);
+//
+//        // Получаем текущую дату и время в киевском времени
+//        $current_datetime = new DateTimeImmutable(null, new DateTimeZone('Europe/Kiev'));
+//
+//        // Получаем текущее время в минутах с начала суток
+//        $current_minutes = $current_datetime->format('H') * 60 + $current_datetime->format('i');
+//
+//        // Устанавливаем начальное и конечное время интервала
+//        $start_time = $current_datetime->setTime(0, 0);
+//        $end_time = $current_datetime->setTime(5, 0);
+//
+//        // Проверяем, находится ли $updated_at внутри интервала с 00:00 до 05:00
+//        if ($updated_at_datetime >= $start_time && $updated_at_datetime <= $end_time) {
+//            return true;
+//        }
+//
+//        // Если текущее время находится в интервале с 00:00 до 05:00, то возвращаем false (5 минут)
+//        if ($current_minutes >= 0 && $current_minutes < 300) {
+//            return false;
+//        }
+//
+//        // В остальных случаях возвращаем true (30 минут)
+//        return true;
+//    }
+
+
+    /**
+     * @throws \Exception
+     */
+    protected function hasPassedFive($updated_at): bool
     {
         $updated_at_datetime = new DateTimeImmutable($updated_at);
         $current_datetime = new DateTimeImmutable();

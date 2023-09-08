@@ -719,8 +719,8 @@ class AndroidPas1700Controller extends Controller
                 $request["name"] = $response_arr_from["properties"]["name"];
                 $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
-                $request["lat"] = $originLatitude;
-                $request["lng"] = $originLongitude;
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
                 $params['from_number'] = $response_arr_from["properties"]["name"];
                 VisicomController::store($request);
             }
@@ -1176,8 +1176,8 @@ class AndroidPas1700Controller extends Controller
                 $request["name"] = $response_arr_from["properties"]["name"];
                 $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
-                $request["lat"] = $originLatitude;
-                $request["lng"] = $originLongitude;
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
 
                 VisicomController::store($request);
             }
@@ -1673,8 +1673,8 @@ class AndroidPas1700Controller extends Controller
                 $request["name"] = $response_arr_from["properties"]["name"];
                 $request["settlement_type"] = $response_arr_from["properties"]["settlement_type"];
                 $request["settlement"] = $response_arr_from["properties"]["settlement"];
-                $request["lat"] = $originLatitude;
-                $request["lng"] = $originLongitude;
+                $request["lat"] = $response_arr_from["geo_centroid"]["coordinates"][1];
+                $request["lng"] = $response_arr_from["geo_centroid"]["coordinates"][0];
 
                 VisicomController::store($request);
 
