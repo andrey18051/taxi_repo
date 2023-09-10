@@ -44,16 +44,16 @@ class VisicomController extends Controller
 
     public function showLatLng($lat, $lng)
     {
-        // Поиск записи по полям 'lat' и 'lng'
-        $visicom = Visicom::where('lat', $lat)->where('lng', $lng)->first();
+//        $visicom = Visicom::where('lat', $lat)->where('lng', $lng)->first();
+//        // Поиск записи по полям 'lat' и 'lng'
+//
+//        if (!$visicom) {
+//            return 404;
+//        }
+//        // Ответ с найденной записью
+//        return $visicom->toArray();
 
-        if (!$visicom) {
-            return 404;
-        }
-        // Ответ с найденной записью
-        return $visicom->toArray();
-
-//        return 404;
+        return 404;
     }
 
 

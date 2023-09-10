@@ -52,137 +52,159 @@ class Android151Controller extends Controller
     {
         IPController::getIP('/android/PAS2/startPage');
     }
+//    public function connectAPI(): string
+//    { return 400;
+//        $subject = 'Отсутствует доступ к серверу.';
+//
+//        /**
+//         * тест
+//         */
+//
+////        IPController::getIP('/android/PAS2');
+////        $connectAPI = 'http://31.43.107.151:7303';
+////        $server0 = $connectAPI;
+////        $server1 = $connectAPI;
+////        $server2 = $connectAPI;
+////        $server3 = $connectAPI;
+//
+//        /**
+//         * ПАС1
+//         */
+//        IPController::getIP('/android/PAS1');
+//        $server0 = config('app.taxi2012Url_0');
+//        $server1 = config('app.taxi2012Url_1');
+//        $server2 = config('app.taxi2012Url_2');
+//        $server3 = config('app.taxi2012Url_3');
+//
+//        $url = "/api/time";
+//        $alarmMessage = new TelegramController();
+//
+//        if (self::checkDomain($server0 . $url)) {
+//            return $server0;
+//        } else {
+//            try {
+//                $alarmMessage->sendAlarmMessage("Отключен " . $server0);
+//            } catch (Exception $e) {
+//                $subject = 'Ошибка в телеграмм';
+//                $paramsCheck = [
+//                    'subject' => $subject,
+//                    'message' => $e,
+//                ];
+//                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+//            };
+//
+//            if (self::checkDomain($server1 . $url)) {
+//                $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
+//                    "Произведено подключение к серверу " . $server1 . ".";
+//                $paramsAdmin = [
+//                    'subject' => $subject,
+//                    'message' => $messageAdmin,
+//                ];
+//
+//                try {
+//                    $alarmMessage->sendAlarmMessage($messageAdmin);
+//                } catch (Exception $e) {
+//                    $subject = 'Ошибка в телеграмм';
+//                    $paramsCheck = [
+//                        'subject' => $subject,
+//                        'message' => $e,
+//                    ];
+//                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+//                };
+//
+//                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+//                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                return $server1;
+//            } else {
+//                if (self::checkDomain($server2 . $url)) {
+//                    $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
+//                        "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
+//                        "Произведено подключение к серверу " . $server2 . ".";
+//                    $paramsAdmin = [
+//                        'subject' => $subject,
+//                        'message' => $messageAdmin,
+//                    ];
+//                    try {
+//                        $alarmMessage->sendAlarmMessage($messageAdmin);
+//                    } catch (Exception $e) {
+//                        $subject = 'Ошибка в телеграмм';
+//                        $paramsCheck = [
+//                            'subject' => $subject,
+//                            'message' => $e,
+//                        ];
+//                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
+//                    };
+//                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+//                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                    return $server2;
+//                } else {
+//                    if (self::checkDomain($server3 . $url)) {
+//                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
+//                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
+//                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
+//                            "Произведено подключение к серверу " . $server3 . ".";
+//                        $paramsAdmin = [
+//                            'subject' => $subject,
+//                            'message' => $messageAdmin,
+//                        ];
+//                        try {
+//                            $alarmMessage->sendAlarmMessage($messageAdmin);
+//                        } catch (Exception $e) {
+//                            $subject = 'Ошибка в телеграмм';
+//                            $paramsCheck = [
+//                                'subject' => $subject,
+//                                'message' => $e,
+//                            ];
+//                            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
+//                        };
+//                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+//                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                        return $server3;
+//                    } else {
+//                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
+//                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
+//                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
+//                            "Ошибка подключения к серверу " . $server3 . ".";
+//                        $paramsAdmin = [
+//                            'subject' => $subject,
+//                            'message' => $messageAdmin,
+//                        ];
+//
+//                        $alarmMessage = new TelegramController();
+//                        $alarmMessage->sendAlarmMessage($messageAdmin);
+//
+//                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+//                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//
+//                        return '400';
+//                    }
+//                }
+//            }
+//        }
+//    }
     public function connectAPI(): string
-    { return 400;
-        $subject = 'Отсутствует доступ к серверу.';
+    {
+        return self::onlineAPI();
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPI(): string
+    {
 
         /**
          * тест
          */
-
-//        IPController::getIP('/android/PAS2');
-//        $connectAPI = 'http://31.43.107.151:7303';
-//        $server0 = $connectAPI;
-//        $server1 = $connectAPI;
-//        $server2 = $connectAPI;
-//        $server3 = $connectAPI;
-
+//        $city = "Odessa";
         /**
-         * ПАС1
+         * Kyiv City;
          */
-        IPController::getIP('/android/PAS1');
-        $server0 = config('app.taxi2012Url_0');
-        $server1 = config('app.taxi2012Url_1');
-        $server2 = config('app.taxi2012Url_2');
-        $server3 = config('app.taxi2012Url_3');
+        $city = "Kyiv City";
 
-        $url = "/api/time";
-        $alarmMessage = new TelegramController();
-
-        if (self::checkDomain($server0 . $url)) {
-            return $server0;
-        } else {
-            try {
-                $alarmMessage->sendAlarmMessage("Отключен " . $server0);
-            } catch (Exception $e) {
-                $subject = 'Ошибка в телеграмм';
-                $paramsCheck = [
-                    'subject' => $subject,
-                    'message' => $e,
-                ];
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            };
-
-            if (self::checkDomain($server1 . $url)) {
-                $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                    "Произведено подключение к серверу " . $server1 . ".";
-                $paramsAdmin = [
-                    'subject' => $subject,
-                    'message' => $messageAdmin,
-                ];
-
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $subject = 'Ошибка в телеграмм';
-                    $paramsCheck = [
-                        'subject' => $subject,
-                        'message' => $e,
-                    ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
-
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                return $server1;
-            } else {
-                if (self::checkDomain($server2 . $url)) {
-                    $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                        "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                        "Произведено подключение к серверу " . $server2 . ".";
-                    $paramsAdmin = [
-                        'subject' => $subject,
-                        'message' => $messageAdmin,
-                    ];
-                    try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        $subject = 'Ошибка в телеграмм';
-                        $paramsCheck = [
-                            'subject' => $subject,
-                            'message' => $e,
-                        ];
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
-                    };
-                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                    return $server2;
-                } else {
-                    if (self::checkDomain($server3 . $url)) {
-                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                            "Произведено подключение к серверу " . $server3 . ".";
-                        $paramsAdmin = [
-                            'subject' => $subject,
-                            'message' => $messageAdmin,
-                        ];
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                        } catch (Exception $e) {
-                            $subject = 'Ошибка в телеграмм';
-                            $paramsCheck = [
-                                'subject' => $subject,
-                                'message' => $e,
-                            ];
-                            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
-                        };
-                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-                        return $server3;
-                    } else {
-                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server1 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server2 . ".   " . PHP_EOL .
-                            "Ошибка подключения к серверу " . $server3 . ".";
-                        $paramsAdmin = [
-                            'subject' => $subject,
-                            'message' => $messageAdmin,
-                        ];
-
-                        $alarmMessage = new TelegramController();
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-
-                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
-                        return '400';
-                    }
-                }
-            }
-        }
+        return CityController::cityOnline($city);
     }
-
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
 
