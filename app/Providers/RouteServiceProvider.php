@@ -46,7 +46,7 @@ class RouteServiceProvider extends ServiceProvider
             Route::prefix('apiTest')
                 ->middleware('api')
                 ->namespace($this->namespace)
-                ->group(base_path('routes/apiTest.php'));
+                ->group(base_path('routes/apiTestOSM.php'));
 
             Route::prefix('apiPas2')
                 ->middleware('api')

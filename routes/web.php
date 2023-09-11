@@ -16,6 +16,7 @@ use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
+use App\Http\Controllers\OpenStreetMapController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServerController;
@@ -1078,3 +1079,8 @@ Route::get('/city/versionComboZaporizhzhiaPas2', [AndroidPas2_Zaporizhzhia_Contr
 Route::get('/city/versionComboCherkasyPas2', [AndroidPas2_Cherkasy_Controller::class,'versionComboCherkasy'])->name('versionComboCherkasy2');
 Route::get('/showLatLng/{Lat}/{lng}', [\App\Http\Controllers\VisicomController::class,'showLatLng'])->name('showLatLng');
 
+/**
+ *
+ */
+
+Route::get('/reverse/{Lat}/{lng}', [OpenStreetMapController::class,'reverse'])->name('reverse');
