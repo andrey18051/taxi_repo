@@ -26,6 +26,7 @@ use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
+use App\Http\Controllers\UIDController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
@@ -1084,3 +1085,9 @@ Route::get('/showLatLng/{Lat}/{lng}', [\App\Http\Controllers\VisicomController::
  */
 
 Route::get('/reverse/{Lat}/{lng}', [OpenStreetMapController::class,'reverse'])->name('reverse');
+ /**
+  * UID
+  */
+
+Route::get('/android/UIDStatusShow/{user_full_name}', [UIDController::class, 'UIDStatusShow'])
+    ->name('UIDStatusShow');

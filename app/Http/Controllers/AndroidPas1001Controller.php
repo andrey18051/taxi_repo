@@ -383,6 +383,8 @@ class AndroidPas1001Controller extends Controller
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
+            $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+
             self::saveOrder($params);
 
             $LatLng = self::geoDataSearch($from, $from_number);
@@ -783,6 +785,8 @@ class AndroidPas1001Controller extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
+                $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+
                 self::saveOrder($params);
                 if ($route_undefined == false) {
                     $LatLng = self::geoDataSearch($to, $to_number);
@@ -1277,6 +1281,8 @@ class AndroidPas1001Controller extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
+                $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+
                 self::saveOrder($params);
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -1393,7 +1399,8 @@ class AndroidPas1001Controller extends Controller
         $order->web_cost = $params['order_cost'];
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
         $order->server = $params['server'];
-
+        $order->closeReason = $params['closeReason'];
+        $order->closeReasonI = 1;
         $order->save();
 
         /**

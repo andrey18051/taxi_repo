@@ -119,3 +119,13 @@ Route::get('/android/webordersCancel/{uid}', [AndroidTestOSMController::class, '
 
 Route::get('/android/historyUIDStatus/{uid}', [AndroidTestOSMController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
+
+
+/**
+ * UID
+ */
+
+Route::get('/android/UIDStatus/{uid}', [AndroidTestOSMController::class, 'UIDStatus'])
+    ->name('UIDStatus');
+
+
