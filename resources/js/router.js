@@ -9,6 +9,7 @@ import Services from './views/service/ServiceHome';
 import UserEdit from './views/user/UserEdit';
 import TaxiAccount from './views/taxi/account';
 import CityHome from "./views/city/CityHome";
+import CloseReasonHome from "./views/close_reason/CloseReasonHome";
 
 const  routes = [
     {
@@ -42,6 +43,11 @@ const  routes = [
     {
         name: 'editOrder',
         path: "/costhistory/orders/edit/:id"
+    },
+    {
+        name: 'closeReason',
+        path: "/admin/closeReason",
+        component: CloseReasonHome
     },
     {
         name: 'destroyOrder',

@@ -1091,3 +1091,10 @@ Route::get('/reverse/{Lat}/{lng}', [OpenStreetMapController::class,'reverse'])->
 
 Route::get('/android/UIDStatusShow/{user_full_name}', [UIDController::class, 'UIDStatusShow'])
     ->name('UIDStatusShow');
+
+Route::get('/closeReasonData/all', [UIDController::class, 'UIDStatusShowAdmin'])
+    ->name('UIDStatusShowAdmin');
+
+Route::get('/UIDStatusReviewAdmin/{dispatching_order_uid}', [UIDController::class, 'UIDStatusReviewAdmin'])
+    ->name('UIDStatusShowAdmin');
+

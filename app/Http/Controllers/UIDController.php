@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\City;
 use App\Models\Orderweb;
+use DateInterval;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -75,6 +77,95 @@ class UIDController extends Controller
             }
         }
         return $response;
+    }
+
+    public function UIDStatusShowAdmin(): array
+    {
+        $order = Orderweb::where("closeReason", "!=", null)
+            -> where("server", "!=", null)
+            -> where("comment", "!=", null)->get();
+        $response = null;
+//        dd($order->toArray());
+        if (!$order->isEmpty()) {
+            $i=0;
+
+            foreach ($order->toArray() as $value) {
+                switch ($value["closeReason"]) {
+                    case "-1":
+                        $closeReasonText = "(-1) В обработке";
+                        break;
+                    case "0":
+                        $closeReasonText = "(0) Выполнен";
+                        break;
+                    case "1":
+                        $closeReasonText = "(1) Снят клиентом";
+                        break;
+                    case "2":
+                        $closeReasonText = "(2) Не выполнено";
+                        break;
+                    case "3":
+                        $closeReasonText = "(3) Не выполнено";
+                        break;
+                    case "4":
+                        $closeReasonText = "(4) Не выполнено";
+                        break;
+                    case "5":
+                        $closeReasonText = "(5) Не выполнено";
+                        break;
+                    case "6":
+                        $closeReasonText = "(6) Снят клиентом";
+                        break;
+                    case "7":
+                        $closeReasonText = "(7) Снят клиентом";
+                        break;
+                    case "8":
+                        $closeReasonText = "(8) Снят клиентом";
+                        break;
+                    case "9":
+                        $closeReasonText = "(9) Снят клиентом";
+                        break;
+                    default:
+                        $closeReasonText = "не известное значение";
+                        break;
+
+                }
+
+
+                date_default_timezone_set('Europe/Kiev');
+
+
+                $date = new DateTime($value["created_at"]);
+                $date->add(new DateInterval('PT3H'));
+
+                $formatted_date = $date->format('d.m.Y H:i:s');
+
+
+                $response[$i] = [
+                    'id' => $value["id"],
+                    'first' =>$formatted_date,
+                    'name' => $value["user_full_name"],
+                    'from' => "От " . $value["routefrom"] . " " . $value["routefromnumber"] . " до " . $value["routeto"] . " " . $value["routetonumber"],
+                    'cost' => $value["web_cost"],
+                    'uid' => $value["dispatching_order_uid"],
+                    'reason' => $closeReasonText,
+                ];
+                $i++;
+            }
+        }
+//        dd($response);
+        return $response;
+    }
+
+    public function UIDStatusReviewAdmin($uid)
+    {
+         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+         $connectAPI =  $order->server;
+         $autorization = self::autorization($connectAPI);
+         $identificationId = $order->comment;
+
+         $order->closeReason = self::closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId);
+         $order->save();
     }
 
     public function UIDStatusReview($order)

@@ -29,6 +29,7 @@ Vue.component('taxi-account', require('./views/taxi/account.vue').default);
 Vue.component('order-component', require('./views/taxi/order.vue').default);
 Vue.component('news-component', require('./views/taxi/news.vue').default);
 Vue.component('city-component', require('./views/city/CityHome.vue').default);
+Vue.component('city-component', require('./views/close_reason/CloseReasonHome.vue').default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
