@@ -56,9 +56,12 @@ class UIDController extends Controller
         $response = null;
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
-
+            $orderUpdate = Orderweb::where("user_full_name", $user_full_name)
+                -> where("closeReason", "!=", null)
+                -> where("server", "!=", null)
+                -> where("comment", "!=", null)->get()->toArray();
             $i=0;
-            foreach ($order->toArray() as $value) {
+            foreach ($orderUpdate as $value) {
                 $response[$i] = [
                     'routefrom' => $value["routefrom"],
                     'routefromnumber' => $value["routefromnumber"],
