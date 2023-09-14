@@ -385,7 +385,14 @@ class Android160Controller extends Controller
         }
         $authorization = self::autorization();
 
-        $params['user_full_name'] = $user;
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) == 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
         $params['wagon'] = 0;
@@ -753,7 +760,14 @@ class Android160Controller extends Controller
         }
         $authorization = self::autorization();
 
-        $params['user_full_name'] = $user;
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) == 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
         $params['wagon'] = 0;
@@ -1210,7 +1224,14 @@ class Android160Controller extends Controller
         }
         $authorization = self::autorization();
 
-        $params['user_full_name'] = $user;
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) == 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
         $params['user_phone'] = $phone;
         $params['client_sub_card'] = null;
         $params['wagon'] = 0;
@@ -1522,6 +1543,7 @@ class Android160Controller extends Controller
 
         $order->user_full_name = $params["user_full_name"];//Полное имя пользователя
         $order->user_phone = $params["user_phone"];//Телефон пользователя
+        $order->email = $params['email'];//Телефон пользователя
         $order->client_sub_card = null;
         $order->required_time = $params["required_time"]; //Время подачи предварительного заказа
         $order->reservation = $params["reservation"]; //Обязательный. Признак предварительного заказа: True, False

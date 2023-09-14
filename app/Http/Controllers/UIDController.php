@@ -79,6 +79,37 @@ class UIDController extends Controller
         return $response;
     }
 
+    public function UIDStatusShowEmail($email)
+    {
+        $order = Orderweb:: where("email", $email)
+            -> where("closeReason", "!=", null)
+            -> where("server", "!=", null)
+            -> where("comment", "!=", null)->get();
+
+        $response = null;
+        if (!$order->isEmpty()) {
+            self::UIDStatusReview($order);
+            $orderUpdate = Orderweb::where("email", $email)
+                -> where("closeReason", "!=", null)
+                -> where("server", "!=", null)
+                -> where("comment", "!=", null)->get()->toArray();
+            $i=0;
+            foreach ($orderUpdate as $value) {
+                $response[$i] = [
+                    'routefrom' => $value["routefrom"],
+                    'routefromnumber' => $value["routefromnumber"],
+                    'routeto' => $value["routeto"],
+                    'routetonumber' => $value["routetonumber"],
+                    'web_cost' => $value["web_cost"],
+                    'closeReason' => $value["closeReason"],
+                    'created_at' => $value["created_at"],
+                ];
+                $i++;
+            }
+        }
+        return $response;
+    }
+
     public function UIDStatusShowAdmin(): array
     {
         $order = Orderweb::where("closeReason", "!=", null)

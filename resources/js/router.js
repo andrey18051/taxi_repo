@@ -10,6 +10,7 @@ import UserEdit from './views/user/UserEdit';
 import TaxiAccount from './views/taxi/account';
 import CityHome from "./views/city/CityHome";
 import CloseReasonHome from "./views/close_reason/CloseReasonHome";
+import BonusHome from "./views/bonuses/BonusHome";
 
 const  routes = [
     {
@@ -27,6 +28,10 @@ const  routes = [
     {
         path: "/admin/city",
         component: CityHome
+    },
+    {
+        path: "/admin/bonus",
+        component: BonusHome
     },
     {
         name: 'UserEdit',

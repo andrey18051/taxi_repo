@@ -7,6 +7,7 @@ use App\Http\Controllers\AndroidPAS2_Zaporizhzhia_Controller;
 use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
 use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\BlackListController;
+use App\Http\Controllers\BonusController;
 use App\Http\Controllers\BredoGeneratorController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\Confirmation;
@@ -1092,9 +1093,19 @@ Route::get('/reverse/{Lat}/{lng}', [OpenStreetMapController::class,'reverse'])->
 Route::get('/android/UIDStatusShow/{user_full_name}', [UIDController::class, 'UIDStatusShow'])
     ->name('UIDStatusShow');
 
+Route::get('/android/UIDStatusShowEmail/{email}', [UIDController::class, 'UIDStatusShowEmail'])
+    ->name('UIDStatusShowEmail');
+
 Route::get('/closeReasonData/all', [UIDController::class, 'UIDStatusShowAdmin'])
     ->name('UIDStatusShowAdmin');
 
 Route::get('/UIDStatusReviewAdmin/{dispatching_order_uid}', [UIDController::class, 'UIDStatusReviewAdmin'])
     ->name('UIDStatusShowAdmin');
 
+/**
+ * Bonuses
+ */
+Route::get('/bonus/all', [BonusController::class, 'index']);
+Route::get('/bonus/destroy/{id}', [BonusController::class, 'destroy']);
+Route::get('/bonus/edit/', [BonusController::class, 'edit']);
+Route::get('/bonus/store/', [BonusController::class, 'store'])->name('bonus-store');
