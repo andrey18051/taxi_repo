@@ -1107,5 +1107,6 @@ Route::get('/UIDStatusReviewAdmin/{dispatching_order_uid}', [UIDController::clas
  */
 Route::get('/bonus/all', [BonusController::class, 'index']);
 Route::get('/bonus/destroy/{id}', [BonusController::class, 'destroy']);
-Route::get('/bonus/edit/', [BonusController::class, 'edit']);
+Route::get('/bonus/edit/{id}/{name}/{size}', [BonusController::class, 'edit']);
 Route::get('/bonus/store/', [BonusController::class, 'store'])->name('bonus-store');
+Route::get('/bonus/newPage/', [BonusController::class, 'new'])->name('bonus-new');

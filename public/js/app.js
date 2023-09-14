@@ -5442,46 +5442,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "BonusHome",
@@ -5508,7 +5468,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    this.getbonuses();
+    this.getBonuses();
   },
   methods: {
     getBonuses: function getBonuses() {
@@ -5535,8 +5495,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     editBonuses: function editBonuses(id, name, size) {
       axios__WEBPACK_IMPORTED_MODULE_0___default().get('/bonus/edit/' + id + '/' + name + '/' + size).then(function (ret) {
-        console.log(ret.data); // document.location.reload();
-
+        console.log(ret.data);
+        document.location.reload();
         window.alert("Данные обновлены");
       });
     }
@@ -32539,7 +32499,17 @@ var staticRenderFns = [
         staticClass:
           "pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center",
       },
-      [_c("h1", { staticClass: "display-5" }, [_vm._v("Bonus")])]
+      [
+        _c(
+          "a",
+          {
+            staticClass: "btn btn-success",
+            staticStyle: { "margin-left": "5px" },
+            attrs: { href: "/bonus/newPage", target: "_blank" },
+          },
+          [_c("h1", { staticClass: "display-5" }, [_vm._v("Bonus")])]
+        ),
+      ]
     )
   },
 ]

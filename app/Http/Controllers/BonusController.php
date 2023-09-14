@@ -13,30 +13,40 @@ class BonusController extends Controller
         return $BonusTypes->toArray();
     }
 
-    public function store($name, $size)
+    public function store(Request $request)
     {
-        $data = [
-            'name' => $name,
-            'size' => $size,
-        ];
+        $data = $request->validate([
+            'name' => 'required|string',
+            'size' => 'required|integer',
+        ]);
 
-        BonusTypes::create($data);
+        $bonusType =  new BonusTypes();
+        $bonusType->name = $request->name;
+        $bonusType->size = $request->size;
+        $bonusType->save();
+
+
+        return redirect('/admin/bonus')->with('success', 'Запись успешно создана');
     }
 
-    public function edit(Request $id, $name, $size)
+    public function edit($id, $name, $size)
     {
-        $data = [
-            'name' => $name,
-            'size' => $size,
-        ];
+
 
         $BonusTypes = BonusTypes::find($id);
-        $BonusTypes->update($data);
+        $BonusTypes->name = $name;
+        $BonusTypes->size = $size;
+        $BonusTypes->save();
     }
 
     public function destroy($id)
     {
         $BonusTypes = BonusTypes::find($id);
         $BonusTypes->delete();
+    }
+
+    public function new()
+    {
+        return view('admin.bonus');
     }
 }

@@ -1,54 +1,14 @@
 <template>
-<!--    <div class="row justify-content-center">-->
-<!--        <div class="col-md-12">-->
-<!--            <p>Cities</p>-->
-<!--            <div class="card">-->
-<!--                <div class="card-body">-->
-<!--                    <form action="{{ route('bonus-store') }}">-->
-<!--                        @csrf-->
-<!--                        <div class="container">-->
-<!--                            <div class="row">-->
 
-<!--                                <div class="form-outline mb-2 col-12" >-->
-<!--                                    <div class="row">-->
-<!--                                        <div class="col-3">-->
-<!--                                            <input type="text" id="name_add" name="name" autocomplete="off" class="form-control" placeholder="name"-->
-<!--                                                   value="Kyiv City"-->
-<!--                                            />-->
-<!--                                        </div>-->
-<!--                                        <div class="col-3">-->
-<!--                                            <input type="number" id="size_add" name="address" autocomplete="off" class="form-control" placeholder="size"/>-->
-<!--                                        </div>-->
-
-<!--                                    </div>-->
-
-<!--                                </div>-->
-
-<!--                            </div>-->
-
-<!--                            &lt;!&ndash; Submit button &ndash;&gt;-->
-<!--                            <div class="row">-->
-
-<!--                                <button type="submit" class="btn btn-primary col-12" style="margin-top: 5px">-->
-<!--                                    Сохранить-->
-<!--                                </button>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </form>-->
-
-
-<!--                </div>-->
-
-<!--            </div>-->
-
-<!--        </div>-->
-<!--    </div>-->
     <div class="container">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 
+            <a href="/bonus/newPage" target="_blank" class="btn btn-success" style="margin-left: 5px">
                 <h1 class="display-5">Bonus</h1>
+            </a>
 
         </div>
+
         <v-table
             :data="bonuses"
             :filters="filters"
@@ -120,7 +80,7 @@ export default {
         }
     }),
     mounted() {
-        this.getbonuses()
+        this.getBonuses()
     },
     methods: {
         getBonuses() {
@@ -147,10 +107,11 @@ export default {
             axios.get('/bonus/edit/'+ id +'/'+name+'/'+ size)
                 .then(function(ret) {
                     console.log(ret.data);
-                    // document.location.reload();
+                    document.location.reload();
                     window.alert("Данные обновлены");
                 })
-        }
+        },
+
 
     }
 }
