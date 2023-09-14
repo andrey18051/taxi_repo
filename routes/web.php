@@ -1110,3 +1110,6 @@ Route::get('/bonus/destroy/{id}', [BonusController::class, 'destroy']);
 Route::get('/bonus/edit/{id}/{name}/{size}', [BonusController::class, 'edit']);
 Route::get('/bonus/store/', [BonusController::class, 'store'])->name('bonus-store');
 Route::get('/bonus/newPage/', [BonusController::class, 'new'])->name('bonus-new');
+Route::get('/bonus/bonusUserShow/{email}', [BonusController::class, 'bonusUserShow'])->name('bonusUserShow');
+Route::get('/bonus/bonusAdd/{email}/{bonusTypeId}/{bonus}', [BonusController::class, 'bonusAdd'])->name('bonusUserAdd');
+Route::get('/bonus/bonusDel/{email}/{bonusTypeId}/{bonus}', [BonusController::class, 'bonusDel'])->name('bonusUserDel');
