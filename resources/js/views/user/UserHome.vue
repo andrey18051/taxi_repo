@@ -18,12 +18,14 @@
             <v-th sortKey="id">#</v-th>
             <v-th sortKey="name" >Name</v-th>
             <v-th sortKey="email">Email</v-th>
+            <v-th sortKey="bonus">Bonus</v-th>
             </thead>
             <tbody slot="body" slot-scope="{displayData}">
             <tr>
                 <td><input class="form-input input-sm" v-model="filters.id.value" placeholder="Select by id"></td>
                 <td><input class="form-input input-lg" v-model="filters.name.value" placeholder="Select by name"></td>
                 <td> <input class="form-input input-lg" v-model="filters.email.value"  placeholder="Select by email"></td>
+                <td> <input class="form-input input-lg" v-model="filters.bonus.value"  placeholder="Select by bonus"></td>
                 <td></td>
             </tr>
             <tr v-for="row in displayData" :key="row.id">
@@ -31,9 +33,10 @@
 
                 <td> <input id="name" class="form-control" v-model.text="row.name" required ></td>
                 <td><input id="email" class="form-control" v-model.text="row.email" required ></td>
+                <td><input id="bonus" class="form-control" v-model.text="row.bonus" required ></td>
                 <td>
                     <div class="btn-group" role="group">
-                        <button class="btn btn-success" @click="editUser(row.id, row.name, row.email)" style="margin-left: 5px">
+                        <button class="btn btn-success" @click="editUser(row.id, row.name, row.email, row.bonus)" style="margin-left: 5px">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                             </svg>
@@ -70,7 +73,8 @@ export default {
         filters: {
             id: { value: "", keys: ["id"] },
             name: { value: "", keys: ["name"] },
-            email: { value: "", keys: ["email"] }
+            email: { value: "", keys: ["email"] },
+            bonus: { value: "", keys: ["bonus"] }
         }
     }),
     mounted() {
@@ -96,8 +100,8 @@ export default {
                     window.alert("Данные обновлены");
                 });
         },
-        editUser(id, name, email) {
-            axios.get('/users/edit/'+ id +'/'+name+'/'+email)
+        editUser(id, name, email, bonus) {
+            axios.get('/users/edit/'+ id +'/'+name+'/'+email+'/'+ bonus)
                 .then(function(ret) {
                     console.log(ret.data);
                     document.location.reload();

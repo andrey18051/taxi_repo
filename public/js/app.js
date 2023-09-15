@@ -6557,6 +6557,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserComponent",
@@ -6578,6 +6581,10 @@ __webpack_require__.r(__webpack_exports__);
         email: {
           value: "",
           keys: ["email"]
+        },
+        bonus: {
+          value: "",
+          keys: ["bonus"]
         }
       }
     };
@@ -6608,8 +6615,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editUser: function editUser(id, name, email) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email).then(function (ret) {
+    editUser: function editUser(id, name, email, bonus) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email + '/' + bonus).then(function (ret) {
         console.log(ret.data);
         document.location.reload();
         window.alert("Данные обновлены");
@@ -35180,6 +35187,34 @@ var render = function () {
                         }),
                       ]),
                       _vm._v(" "),
+                      _c("td", [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.filters.bonus.value,
+                              expression: "filters.bonus.value",
+                            },
+                          ],
+                          staticClass: "form-input input-lg",
+                          attrs: { placeholder: "Select by bonus" },
+                          domProps: { value: _vm.filters.bonus.value },
+                          on: {
+                            input: function ($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.filters.bonus,
+                                "value",
+                                $event.target.value
+                              )
+                            },
+                          },
+                        }),
+                      ]),
+                      _vm._v(" "),
                       _c("td"),
                     ]),
                     _vm._v(" "),
@@ -35238,6 +35273,31 @@ var render = function () {
                         ]),
                         _vm._v(" "),
                         _c("td", [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model.text",
+                                value: row.bonus,
+                                expression: "row.bonus",
+                                modifiers: { text: true },
+                              },
+                            ],
+                            staticClass: "form-control",
+                            attrs: { id: "bonus", required: "" },
+                            domProps: { value: row.bonus },
+                            on: {
+                              input: function ($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(row, "bonus", $event.target.value)
+                              },
+                            },
+                          }),
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
                           _c(
                             "div",
                             {
@@ -35255,7 +35315,8 @@ var render = function () {
                                       return _vm.editUser(
                                         row.id,
                                         row.name,
-                                        row.email
+                                        row.email,
+                                        row.bonus
                                       )
                                     },
                                   },
@@ -35347,6 +35408,8 @@ var render = function () {
               _c("v-th", { attrs: { sortKey: "name" } }, [_vm._v("Name")]),
               _vm._v(" "),
               _c("v-th", { attrs: { sortKey: "email" } }, [_vm._v("Email")]),
+              _vm._v(" "),
+              _c("v-th", { attrs: { sortKey: "bonus" } }, [_vm._v("Bonus")]),
             ],
             1
           ),

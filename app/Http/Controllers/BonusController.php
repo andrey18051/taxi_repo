@@ -73,6 +73,10 @@ class BonusController extends Controller
         $bonus *= $bonusTypes->size;
         $user->bonus += $bonus;
         $user->save();
+
+        return [
+            'bonus' => $bonus,
+        ];
     }
 
     public function bonusDel($email, $bonusTypeId, $bonus)

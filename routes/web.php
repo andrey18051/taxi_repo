@@ -249,7 +249,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::get('/users/all', [UserController::class,'index']);
 Route::get('/users/destroy/{id}', [UserController::class,'destroy'])->middleware('verified');
-Route::get('/users/edit/{id}/{name}/{email}', [UserController::class,'edit']);
+Route::get('/users/edit/{id}/{name}/{email}/{bonus}', [UserController::class,'edit']);
 
 Route::get('/users/show/{id}', [UserController::class,'show']);
 

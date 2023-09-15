@@ -55,12 +55,13 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit($id, $name, $email)
+    public function edit($id, $name, $email, $bonus)
     {
         $user = User::find($id);
 
         $user->name = $name;
         $user->email = $email;
+        $user->bonus = $bonus;
         $user->save();
 
       return response()->json(User::find($id));

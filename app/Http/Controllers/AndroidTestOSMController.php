@@ -229,7 +229,7 @@ class AndroidTestOSMController extends Controller
         $userArr = preg_split("/[*]+/", $user);
 
         $params['user_full_name'] = $userArr[0];
-        if (count($userArr) == 2) {
+        if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
         } else {
             $params['email'] = "no email";
@@ -246,7 +246,16 @@ class AndroidTestOSMController extends Controller
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        $payment_type_info = 'готівка';
+//        $payment_type_info = 'готівка';
+        $payment_type = 0;
+
+        $autorization = self::autorization();
+        if ($userArr[2] == 'bonus_payment') {
+            $username = "SMS_NADOB";
+            $password = hash('SHA512', "dgh5-$");
+            $autorization =   'Basic ' . base64_encode($username . ':' . $password);
+            $payment_type = 1;
+        }
 
         $taxiColumnId = config('app.taxiColumnId');
 
@@ -262,6 +271,7 @@ class AndroidTestOSMController extends Controller
         } else {
             $route_undefined = false;
         }
+
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
         $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
@@ -338,9 +348,17 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-
         if ($comment == "no_comment") {
             $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment') {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+        } else {
+            if ($userArr[2] == 'bonus_payment') {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
         }
 
         $url = $connectAPI . '/api/weborders';
@@ -350,11 +368,12 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
+
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
-            'user_full_name' => $user, //Полное имя пользователя
+            'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -369,7 +388,7 @@ class AndroidTestOSMController extends Controller
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
@@ -621,7 +640,15 @@ class AndroidTestOSMController extends Controller
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        $payment_type_info = 'готівка';
+        $payment_type = 0;
+
+        $autorization = self::autorization();
+        if ($userArr[2] == 'bonus_payment') {
+            $username = "SMS_NADOB";
+            $password = hash('SHA512', "dgh5-$");
+            $autorization =   'Basic ' . base64_encode($username . ':' . $password);
+            $payment_type = 1;
+        }
 
         $taxiColumnId = config('app.taxiColumnId');
 
@@ -704,6 +731,15 @@ class AndroidTestOSMController extends Controller
 
         if ($comment == "no_comment") {
             $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment') {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+        } else {
+            if ($userArr[2] == 'bonus_payment') {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
         }
 
         $url = $connectAPI . '/api/weborders';
@@ -715,11 +751,11 @@ class AndroidTestOSMController extends Controller
         };
         $response = Http::withHeaders([
 //            $response = Http::dd()->withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
-            'user_full_name' => $user, //Полное имя пользователя
+            'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -734,7 +770,7 @@ class AndroidTestOSMController extends Controller
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' =>$rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' =>   $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
@@ -1011,7 +1047,15 @@ class AndroidTestOSMController extends Controller
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        $payment_type_info = 'готівка';
+        $payment_type = 0;
+
+        $autorization = self::autorization();
+        if ($userArr[2] == 'bonus_payment') {
+            $username = "SMS_NADOB";
+            $password = hash('SHA512', "dgh5-$");
+            $autorization =   'Basic ' . base64_encode($username . ':' . $password);
+            $payment_type = 1;
+        }
 
         $params['route_undefined'] = false; //По городу: True, False
 
@@ -1104,6 +1148,15 @@ class AndroidTestOSMController extends Controller
 
         if ($comment == "no_comment") {
             $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment') {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+        } else {
+            if ($userArr[2] == 'bonus_payment') {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
         }
 
         $url = $connectAPI . '/api/weborders';
@@ -1114,11 +1167,11 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
-            'user_full_name' => $user, //Полное имя пользователя
+            'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -1133,7 +1186,7 @@ class AndroidTestOSMController extends Controller
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ]);
