@@ -259,7 +259,9 @@ class BonusBalanceController extends Controller
         if ($response["close_reason"] == 0) {
             self::blockBonusToDelete($id);
         };
-        if ($response["close_reason"] != -1) {
+        if ($response["close_reason"] == 8) {
+            self::blockBonusToDelete($id);
+        } elseif ($response["close_reason"] != -1) {
             self::blockBonusReturn($id);
         };
     }

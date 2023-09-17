@@ -150,7 +150,7 @@ class UIDController extends Controller
                         $closeReasonText = "(7) Снят клиентом";
                         break;
                     case "8":
-                        $closeReasonText = "(8) Снят клиентом";
+                        $closeReasonText = "(8) Выполнен";
                         break;
                     case "9":
                         $closeReasonText = "(9) Снят клиентом";
