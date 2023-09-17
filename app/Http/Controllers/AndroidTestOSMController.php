@@ -623,7 +623,7 @@ class AndroidTestOSMController extends Controller
         $userArr = preg_split("/[*]+/", $user);
 
         $params['user_full_name'] = $userArr[0];
-        if (count($userArr) == 2) {
+        if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
         } else {
             $params['email'] = "no email";
@@ -1030,7 +1030,7 @@ class AndroidTestOSMController extends Controller
         $userArr = preg_split("/[*]+/", $user);
 
         $params['user_full_name'] = $userArr[0];
-        if (count($userArr) == 2) {
+        if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
         } else {
             $params['email'] = "no email";

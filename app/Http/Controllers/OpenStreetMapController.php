@@ -14,15 +14,51 @@ class OpenStreetMapController extends Controller
         $response = Http::get($url);
         $response_arr = json_decode($response, true);
         if (empty($response_arr)) {
-            return 404;
+            $r = 50;
+            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                . $originLongitude
+                . "," . $originLatitude
+                . "&r=" . $r . "&l=1&key="
+                . config("app.keyVisicom");
+
+            $response = Http::get($url);
+            $response_arr_from = json_decode($response, true);
+
+            if ($response_arr_from != null) {
+                return $response_arr_from["properties"]["street_type"]
+                    . $response_arr_from["properties"]["street"]
+                    . ", буд." . $response_arr_from["properties"]["name"]
+                    . ", " . $response_arr_from["properties"]["settlement_type"]
+                    . " " . $response_arr_from["properties"]["settlement"];
+            } else {
+                return "Точка на карте";
+            }
         } else {
-//            dd($response_arr);
-            if($response_arr["category"] == "building") {
+            if ($response_arr["category"] == "building") {
                 return $response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"] .", місто " . $response_arr["address"]["city"];
-            } elseif ($response_arr["category"] == "amenity") {
+            }
+            if ($response_arr["category"] == "amenity") {
                 return $response_arr["address"]["amenity"] . " " . $response_arr["address"]["road"] .", місто " . $response_arr["address"]["city"];
             } else {
-                return $response_arr["display_name"];
+                $r = 50;
+                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+                    . $originLongitude
+                    . "," . $originLatitude
+                    . "&r=" . $r . "&l=1&key="
+                    . config("app.keyVisicom");
+
+                $response = Http::get($url);
+                $response_arr_from = json_decode($response, true);
+
+                if ($response_arr_from != null) {
+                    return $response_arr_from["properties"]["street_type"]
+                        . $response_arr_from["properties"]["street"]
+                        . ", буд." . $response_arr_from["properties"]["name"]
+                        . ", " . $response_arr_from["properties"]["settlement_type"]
+                        . " " . $response_arr_from["properties"]["settlement"];
+                } else {
+                    return "Точка на карте";
+                }
             }
         }
     }

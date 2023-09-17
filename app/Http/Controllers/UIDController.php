@@ -84,7 +84,9 @@ class UIDController extends Controller
         $order = Orderweb:: where("email", $email)
             -> where("closeReason", "!=", null)
             -> where("server", "!=", null)
-            -> where("comment", "!=", null)->get();
+            -> where("comment", "!=", null)
+            ->orderBy("updated_at", "desc")
+            ->get();
 
         $response = null;
         if (!$order->isEmpty()) {
@@ -92,7 +94,10 @@ class UIDController extends Controller
             $orderUpdate = Orderweb::where("email", $email)
                 -> where("closeReason", "!=", null)
                 -> where("server", "!=", null)
-                -> where("comment", "!=", null)->get()->toArray();
+                -> where("comment", "!=", null)
+                -> orderBy("updated_at", "desc")
+                -> get()
+                -> toArray();
             $i=0;
             foreach ($orderUpdate as $value) {
                 $response[$i] = [
