@@ -350,12 +350,12 @@ class AndroidTestOSMController extends Controller
 
         if ($comment == "no_comment") {
             $comment =  "Оператору набрать заказчика и согласовать весь заказ";
-            if ($userArr[2] == 'bonus_payment') {
+            if ($userArr[2] == 'bonus_payment' && $from == $to) {
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
         } else {
-            if ($userArr[2] == 'bonus_payment') {
+            if ($userArr[2] == 'bonus_payment'  && $from == $to) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }

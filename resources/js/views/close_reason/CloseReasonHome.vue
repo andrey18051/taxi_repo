@@ -6,7 +6,7 @@
                 <h1 class="display-5">CloseReason</h1>
 
         </div>
-        <div style="width: 1600px; overflow-x: auto;">
+        <div style="width: 1200px; overflow-x: auto;">
             <v-table
             :data="close_reason_data"
             :filters="filters"

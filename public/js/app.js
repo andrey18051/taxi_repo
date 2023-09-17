@@ -33094,7 +33094,7 @@ var render = function () {
       _vm._v(" "),
       _c(
         "div",
-        { staticStyle: { width: "1600px", "overflow-x": "auto" } },
+        { staticStyle: { width: "1200px", "overflow-x": "auto" } },
         [
           _c(
             "v-table",
