@@ -7,6 +7,7 @@ use App\Http\Controllers\AndroidPAS2_Zaporizhzhia_Controller;
 use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
 use App\Http\Controllers\AndroidTestController;
 use App\Http\Controllers\BlackListController;
+use App\Http\Controllers\BonusBalanceController;
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\BredoGeneratorController;
 use App\Http\Controllers\CityController;
@@ -1055,6 +1056,7 @@ Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'delete
   * Ip address
   */
 Route::get('/ip/city', [IPController::class,'ipCity'])->name('ipCity');
+Route::get('/ip/ipCityOne/{ip}', [IPController::class,'ipCityOne'])->name('ipCity');
 Route::get('/ip/address', [IPController::class,'address'])->name('address');
  /**
   * City
@@ -1113,3 +1115,37 @@ Route::get('/bonus/newPage/', [BonusController::class, 'new'])->name('bonus-new'
 Route::get('/bonus/bonusUserShow/{email}', [BonusController::class, 'bonusUserShow'])->name('bonusUserShow');
 Route::get('/bonus/bonusAdd/{email}/{bonusTypeId}/{bonus}', [BonusController::class, 'bonusAdd'])->name('bonusUserAdd');
 Route::get('/bonus/bonusDel/{email}/{bonusTypeId}/{bonus}', [BonusController::class, 'bonusDel'])->name('bonusUserDel');
+
+/**
+ * Balance Bonus
+ */
+Route::get('/bonusBalance/recordsAdd/{orderwebs_id}/{users_id}/{bonus_types_id}/{bonus}', [BonusBalanceController::class, 'recordsAdd'])
+    ->name('recordsAdd');
+Route::get('/bonusBalance/recordsDel/{orderwebs_id}/{users_id}/{bonus_types_id}/{bonus}', [BonusBalanceController::class, 'recordsDel'])
+    ->name('recordsDel');
+Route::get('/bonusBalance/recordsBloke/{uid}', [BonusBalanceController::class, 'recordsBloke'])
+    ->name('recordsBloke');
+Route::get('/bonusBalance/userBalance/{users_id}', [BonusBalanceController::class, 'userBalance'])
+    ->name('userBalance');
+Route::get('/bonusBalance/userBalanceBloke/{users_id}', [BonusBalanceController::class, 'userBalanceBloke'])
+    ->name('userBalanceBloke');
+Route::get('/bonusBalance/userBalanceHistory/{users_id}', [BonusBalanceController::class, 'userBalanceHistory'])
+    ->name('userBalanceHistory');
+
+Route::get('/bonusBalance/blockBonusToDelete/{orderwebs_id}', [BonusBalanceController::class, 'blockBonusToDelete'])
+    ->name('blockBonusToDelete');
+Route::get('/bonusBalance/blockBonusReturn/{orderwebs_id}', [BonusBalanceController::class, 'blockBonusReturn'])
+    ->name('blockBonusReturn');
+
+Route::get('/bonusBalance/historyUID/{users_id}', [BonusBalanceController::class, 'historyUID'])
+    ->name('historyUID');
+
+Route::get('/bonusBalance/historyUIDunBlocked/{uid}', [BonusBalanceController::class, 'historyUIDunBlocked'])
+    ->name('historyUIDunBlocked');
+
+/**
+ * User add
+ */
+Route::get('/android/addUser/{name}/{email}', [WebOrderController::class, 'addUser'])->name('addUser');
+Route::get('/android/bonusType1ForAll', [WebOrderController::class, 'bonusType1ForAll'])->name('bonusType1ForAll');
+Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNameEmail'])->name('fixIncorrectNameEmail');

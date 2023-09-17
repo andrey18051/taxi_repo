@@ -6560,6 +6560,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserComponent",
@@ -6569,6 +6570,7 @@ __webpack_require__.r(__webpack_exports__);
       users: [],
       currentPage: 1,
       totalPages: 0,
+      maxPageLinks: 25,
       filters: {
         id: {
           value: "",
@@ -35284,7 +35286,7 @@ var render = function () {
                               },
                             ],
                             staticClass: "form-control",
-                            attrs: { id: "bonus", required: "" },
+                            attrs: { id: "bonus", readonly: "", required: "" },
                             domProps: { value: row.bonus },
                             on: {
                               input: function ($event) {
@@ -35417,7 +35419,11 @@ var render = function () {
       ),
       _vm._v(" "),
       _c("smart-pagination", {
-        attrs: { currentPage: _vm.currentPage, totalPages: _vm.totalPages },
+        attrs: {
+          currentPage: _vm.currentPage,
+          totalPages: _vm.totalPages,
+          maxPageLinks: _vm.maxPageLinks,
+        },
         on: {
           "update:currentPage": function ($event) {
             _vm.currentPage = $event

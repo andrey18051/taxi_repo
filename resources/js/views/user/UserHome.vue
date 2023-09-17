@@ -33,7 +33,7 @@
 
                 <td> <input id="name" class="form-control" v-model.text="row.name" required ></td>
                 <td><input id="email" class="form-control" v-model.text="row.email" required ></td>
-                <td><input id="bonus" class="form-control" v-model.text="row.bonus" required ></td>
+                <td><input id="bonus" class="form-control" v-model.text="row.bonus" readonly required></td>
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-success" @click="editUser(row.id, row.name, row.email, row.bonus)" style="margin-left: 5px">
@@ -56,6 +56,7 @@
         <smart-pagination
             :currentPage.sync="currentPage"
             :totalPages="totalPages"
+            :maxPageLinks="maxPageLinks"
         />
     </div>
 
@@ -70,6 +71,7 @@ export default {
         users: [],
         currentPage: 1,
         totalPages: 0,
+        maxPageLinks: 25,
         filters: {
             id: { value: "", keys: ["id"] },
             name: { value: "", keys: ["name"] },

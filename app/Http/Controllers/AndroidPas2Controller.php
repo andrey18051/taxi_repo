@@ -1826,6 +1826,8 @@ class AndroidPas2Controller extends Controller
             $newUser->viber_id = null;
             $newUser->save();
         }
+        $user =  User::where('email', $email)->first();
+        (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
     }
 
     public function verifyBlackListUser($email)

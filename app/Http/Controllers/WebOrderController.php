@@ -6,6 +6,7 @@ use App\Mail\Admin;
 use App\Mail\Check;
 use App\Mail\Driver;
 use App\Mail\Feedback;
+use App\Models\BonusBalance;
 use App\Models\City;
 use App\Models\Combo;
 use App\Models\Config;
@@ -4696,4 +4697,72 @@ class WebOrderController extends Controller
     {
         return self::onlineAPI();
     }
+
+    public function addUser($name, $email)
+    {
+
+        $newUser = User::whereRaw('BINARY email = ?', [$email])->first();
+
+
+        if ($newUser == null) {
+            $newUser = new User();
+            $newUser->name = $name;
+            $newUser->email = $email;
+            $newUser->password = "123245687";
+
+            $newUser->facebook_id = null;
+            $newUser->google_id = null;
+            $newUser->linkedin_id = null;
+            $newUser->github_id = null;
+            $newUser->twitter_id = null;
+            $newUser->telegram_id = null;
+            $newUser->viber_id = null;
+            $newUser->save();
+        }
+        $user =  User::where('email', $email)->first();
+        (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
+    }
+
+    public function bonusType1ForAll()
+    {
+        $user =  User::all();
+        foreach ($user->toArray() as $value) {
+
+                (new BonusBalanceController)->recordsAdd(0, $value['id'], 1, 1);
+
+        }
+    }
+
+     public function fixIncorrectNameEmail()
+     {
+        DB::beginTransaction();
+
+        try {
+            // Найти записи, в которых поле "name" содержит символ "@"
+            $incorrectRecords = DB::table('users')
+                ->where('name', 'LIKE', '%@%')
+                ->get();
+
+            // Исправить неправильные записи
+            foreach ($incorrectRecords as $record) {
+                DB::table('users')
+                    ->where('id', $record->id)
+                    ->update([
+                        'name' => $record->email,
+                        'email' => $record->name,
+                    ]);
+            }
+
+            DB::commit();
+
+            // Вернуть сообщение об успешном исправлении
+            return count($incorrectRecords) . ' неправильных записей было исправлено.';
+        } catch (Exception $e) {
+            DB::rollback();
+
+            // Вернуть сообщение об ошибке, если что-то пошло не так
+            return 'Произошла ошибка при исправлении записей: ' . $e->getMessage();
+        }
+    }
+
 }
