@@ -1137,11 +1137,14 @@ Route::get('/bonusBalance/blockBonusToDelete/{orderwebs_id}', [BonusBalanceContr
 Route::get('/bonusBalance/blockBonusReturn/{orderwebs_id}', [BonusBalanceController::class, 'blockBonusReturn'])
     ->name('blockBonusReturn');
 
-Route::get('/bonusBalance/historyUID/{users_id}', [BonusBalanceController::class, 'historyUID'])
+Route::get('/bonusBalance/historyUID/{id}', [BonusBalanceController::class, 'historyUID'])
     ->name('historyUID');
 
 Route::get('/bonusBalance/historyUIDunBlocked/{uid}', [BonusBalanceController::class, 'historyUIDunBlocked'])
     ->name('historyUIDunBlocked');
+
+Route::get('/bonusBalance/bonusReport/', [ReportController::class, 'bonusReport'])
+    ->name('bonusReport');
 
 /**
  * User add
@@ -1149,3 +1152,4 @@ Route::get('/bonusBalance/historyUIDunBlocked/{uid}', [BonusBalanceController::c
 Route::get('/android/addUser/{name}/{email}', [WebOrderController::class, 'addUser'])->name('addUser');
 Route::get('/android/bonusType1ForAll', [WebOrderController::class, 'bonusType1ForAll'])->name('bonusType1ForAll');
 Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNameEmail'])->name('fixIncorrectNameEmail');
+

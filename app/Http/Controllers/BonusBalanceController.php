@@ -184,16 +184,73 @@ class BonusBalanceController extends Controller
         /**
          * Начисление бонусов за первую поездку
          */
-        $orderBalanceRecord = BonusBalance::where("users_id", $users_id)
+        $orderBalanceRecord2 = BonusBalance::where("users_id", $users_id)
             ->where("bonus_types_id", 2)
             ->first();
 
-        if ($orderBalanceRecord == null) {
-            $bonus = self::historyUID($users_id);
-            if ($bonus != null) {
-                self::recordsAdd(0, $users_id, 2, $bonus);
+        $orderBalanceRecord7 = BonusBalance::where("users_id", $users_id)
+            ->where("bonus_types_id", 7)
+            ->first();
+
+        if ($orderBalanceRecord2 != null && $orderBalanceRecord7 == null) {
+             self::recordsAdd(0, $users_id, 7, 1);
+        }
+        /**
+         * Начисление бонусов за выполненную поездку
+         */
+
+        $user = User::find($users_id);
+
+        $orderNotComplete = Orderweb::where("email", $user->email)
+            ->where(function ($query) {
+                $query->where("closeReason", "!=", 0)
+                    ->orWhere("closeReason", "!=", 8);
+            })->get();
+
+        if ($orderNotComplete != null) {
+            $orderNotCompleteArray = $orderNotComplete->toArray();
+            foreach ($orderNotCompleteArray as $value) {
+                UIDController::UIDStatusReviewAdmin($value['dispatching_order_uid']);
             }
         }
+
+        $orderComplete = Orderweb::where("email", $user->email)
+            ->where(function ($query) {
+                $query->where("closeReason", 0)
+                ->orWhere("closeReason", 8);
+            })->get();
+
+        if ($orderComplete != null) {
+            $orderCompleteArray = $orderComplete->toArray();
+
+            $orderBalanceRecord = BonusBalance::where("users_id", $users_id)
+                ->where("bonus_types_id", 2)
+                ->get();
+            if ($orderBalanceRecord != null) {
+                $orderBalanceRecordArray = $orderBalanceRecord->toArray();
+
+                foreach ($orderCompleteArray as $value) {
+                    $verify = false;
+                    foreach ($orderBalanceRecordArray as $item) {
+                        if ($value["id"] == $item['orderwebs_id']) {
+                            $verify = true;
+                            break;
+                        };
+                    }
+                    if (false == $verify) {
+                        $bonus = self::historyUID($value["id"]);
+                        self::recordsAdd($value["id"], $users_id, 2, $bonus);
+                    };
+                }
+            } else {
+                foreach ($orderCompleteArray as $value) {
+                    $bonus = self::historyUID($value["id"]);
+                    self::recordsAdd($value["id"], $users_id, 2, $bonus);
+                }
+            }
+        }
+
+
         /**
          * Разблокировка бонусов
          */
@@ -207,32 +264,28 @@ class BonusBalanceController extends Controller
         }
     }
 
-    public function historyUID($users_id)
+    public function historyUID($id)
     {
-        $result = 0;
-        $user = User::find($users_id);
-        $order = Orderweb::where("closeReason", 0)
-            ->where("email", $user->email)
-            ->first();
-        if ($order) {
-            $connectApi =str_replace('http://', '', $order->server);
 
-            $city = City::where('address', $connectApi)->first();
+        $order = Orderweb::find($id);
 
-            $username = $city->login;
-            $password = hash('SHA512', $city->password);
+        $connectApi =str_replace('http://', '', $order->server);
 
-            $autorization = 'Basic ' . base64_encode($username . ':' . $password);
+        $city = City::where('address', $connectApi)->first();
 
-            $url = 'http://' . $connectApi . '/api/weborders/'  . $order->dispatching_order_uid;
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
 
-            $response = Http::withHeaders([
-                "Authorization" => $autorization,
-                "X-WO-API-APP-ID" => $order->comment,
-            ])->get($url);
-            $result = $response['order_cost'];
-        }
-        return $result;
+        $autorization = 'Basic ' . base64_encode($username . ':' . $password);
+
+        $url = 'http://' . $connectApi . '/api/weborders/'  . $order->dispatching_order_uid;
+
+        $response = Http::withHeaders([
+            "Authorization" => $autorization,
+            "X-WO-API-APP-ID" => $order->comment,
+        ])->get($url);
+//dd($response);
+        return $response['order_cost'];
     }
 
     public function historyUIDunBlocked($id)

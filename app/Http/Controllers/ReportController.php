@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BonusBalance;
+use App\Models\BonusTypes;
 use App\Models\IP;
 use App\Models\NewsList;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -680,5 +683,98 @@ class ReportController extends Controller
 //        Storage::copy('public/reports/sitemap.xml', '/public/sitemap.xml');
         return response()->download($siteMap_path);
 
+    }
+
+    public function bonusReport(Request $request)
+    {
+        $user = User::where('email', $request->email)->get();
+        $bonusRecords = BonusBalance::where('users_id', $user->toArray()[0]['id'])->get();
+
+//        dd($bonusRecords->toArray());
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getActiveSheet()->setTitle('Бонусы');
+        $sheet = $spreadsheet->getActiveSheet();
+
+        if ($bonusRecords != null) {
+            $sheet->getColumnDimension('A')->setAutoSize(true);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setAutoSize(true);
+            $sheet->getColumnDimension('F')->setAutoSize(true);
+            $sheet->getColumnDimension('G')->setAutoSize(true);
+            $sheet->getColumnDimension('H')->setAutoSize(true);
+
+            $sheet->setCellValue('B1', 'Это список движения бонусов');
+            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
+            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+
+            $sheet->setCellValue('A2', 'N п/п');
+            $sheet->setCellValue('B2', 'UID');
+            $sheet->setCellValue('C2', 'Операция');
+            $sheet->setCellValue('D2', 'Зачисление');
+            $sheet->setCellValue('E2', 'Списание');
+            $sheet->setCellValue('F2', 'Блокировка');
+            $sheet->setCellValue('G2', 'Создано');
+            $sheet->setCellValue('H2', 'Обновлено');
+
+
+            $sheet->getStyle('A2:O2')->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => [
+                            'rgb' => '808080'
+                        ]
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $coordN = count($bonusRecords) + 2;
+
+            $sheet->getStyle('A2:H2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+            $sheet->getStyle('A3:H' . $coordN)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $i = 3;
+            foreach ($bonusRecords as $value) {
+                $sheet->setCellValue('A' . $i, $i - 2);
+                if ($value->orderwebs_id != 0) {
+                    $sheet->setCellValue('B' . $i, Orderweb::find($value->orderwebs_id)->dispatching_order_uid);
+                }
+                $sheet->setCellValue('C' . $i, BonusTypes::find($value->bonus_types_id)->name);
+                $sheet->setCellValue('D' . $i, $value->bonusAdd);
+                $sheet->setCellValue('E' . $i, $value->bonusDel);
+                $sheet->setCellValue('F' . $i, $value->bonusBloke);
+                $sheet->setCellValue('G' . $i, date('d-m-Y H:m:s', strtotime( $value->created_at)));
+                $sheet->setCellValue('H' . $i, date('d-m-Y H:m:s', strtotime( $value->updated_at)));
+                $i++;
+            }
+        } else {
+            $sheet->setCellValue('A1', 'Нет данных в период');
+        }
+
+
+        $reportIP_path = Storage::path('public/reports/reportBonus.xlsx');
+        $reportIP = new Xlsx($spreadsheet);
+        $reportIP->save($reportIP_path);
+        return response()->download($reportIP_path);
     }
 }
