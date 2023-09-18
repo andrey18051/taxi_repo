@@ -85,7 +85,7 @@ class UIDController extends Controller
             -> where("closeReason", "!=", null)
             -> where("server", "!=", null)
             -> where("comment", "!=", null)
-            ->orderBy("updated_at", "desc")
+            ->orderBy("created_at", "desc")
             ->get();
 
         $response = null;
@@ -95,7 +95,7 @@ class UIDController extends Controller
                 -> where("closeReason", "!=", null)
                 -> where("server", "!=", null)
                 -> where("comment", "!=", null)
-                -> orderBy("updated_at", "desc")
+                -> orderBy("created_at", "desc")
                 -> get()
                 -> toArray();
             $i=0;

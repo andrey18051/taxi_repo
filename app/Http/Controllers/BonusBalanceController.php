@@ -169,16 +169,29 @@ class BonusBalanceController extends Controller
             ->latest("updated_at")
             ->first();
 
+//        if ($latestBalanceRecord) {
+//            // В $latestBalanceRecord содержится запись с самой поздней датой в поле "updated_at"
+//            // Вы можете использовать эту запись по вашим нуждам
+//            $currentTime = time();
+//            $timeElapsed = $currentTime - strtotime($latestBalanceRecord->updated_at);
+//            if ($timeElapsed >= 24 * 60 * 60) {
+//                self::recordsAdd(0, $users_id, 3, 1);
+//            }
+//        } else {
+//            // Если записей не найдено, вы можете выполнить соответствующие действия
+//            self::recordsAdd(0, $users_id, 3, 1);
+//        }
+
+
         if ($latestBalanceRecord) {
-            // В $latestBalanceRecord содержится запись с самой поздней датой в поле "updated_at"
-            // Вы можете использовать эту запись по вашим нуждам
-            $currentTime = time();
-            $timeElapsed = $currentTime - strtotime($latestBalanceRecord->updated_at);
-            if ($timeElapsed >= 24 * 60 * 60) {
+            $daysAgo = now()->subDay(); // Получить текущую дату и вычесть один день.
+
+            if ($latestBalanceRecord->updated_at <= $daysAgo) {
+                // Если дата обновления меньше или равна дате, предшествующей текущей дате на один день, выполните код.
                 self::recordsAdd(0, $users_id, 3, 1);
             }
         } else {
-            // Если записей не найдено, вы можете выполнить соответствующие действия
+            // Если записей не найдено, вы можете выполнить соответствующие действия.
             self::recordsAdd(0, $users_id, 3, 1);
         }
         /**
@@ -201,11 +214,13 @@ class BonusBalanceController extends Controller
 
         $user = User::find($users_id);
 
+//        $orderNotComplete = Orderweb::where("email", $user->email)
+//            ->where(function ($query) {
+//                $query->where("closeReason", "!=", 0)
+//                    ->orWhere("closeReason", "!=", 8);
+//            })->get();
         $orderNotComplete = Orderweb::where("email", $user->email)
-            ->where(function ($query) {
-                $query->where("closeReason", "!=", 0)
-                    ->orWhere("closeReason", "!=", 8);
-            })->get();
+            ->where("closeReason", "-1")->get();
 
         if ($orderNotComplete != null) {
             $orderNotCompleteArray = $orderNotComplete->toArray();
