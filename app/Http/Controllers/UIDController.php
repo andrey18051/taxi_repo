@@ -99,6 +99,9 @@ class UIDController extends Controller
                 -> get()
                 -> toArray();
             $i=0;
+
+            date_default_timezone_set('Europe/Kiev');
+
             foreach ($orderUpdate as $value) {
                 $response[$i] = [
                     'routefrom' => $value["routefrom"],
@@ -107,7 +110,7 @@ class UIDController extends Controller
                     'routetonumber' => $value["routetonumber"],
                     'web_cost' => $value["web_cost"],
                     'closeReason' => $value["closeReason"],
-                    'created_at' => $value["created_at"],
+                    'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                 ];
                 $i++;
             }
