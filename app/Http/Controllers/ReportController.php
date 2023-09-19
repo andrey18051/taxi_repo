@@ -754,6 +754,10 @@ class ReportController extends Controller
             ]);
 
             $i = 3;
+            $bonusAdd = 0;
+            $bonusDel = 0;
+            $bonusBloke = 0;
+
             foreach ($bonusRecords as $value) {
                 $sheet->setCellValue('A' . $i, $i - 2);
                 if ($value->orderwebs_id != 0) {
@@ -761,15 +765,26 @@ class ReportController extends Controller
                 }
                 $sheet->setCellValue('C' . $i, BonusTypes::find($value->bonus_types_id)->name);
                 $sheet->setCellValue('D' . $i, $value->bonusAdd);
+                $bonusAdd += $value->bonusAdd;
                 $sheet->setCellValue('E' . $i, $value->bonusDel);
+                $bonusDel += $value->bonusDel;
                 $sheet->setCellValue('F' . $i, $value->bonusBloke);
+                $bonusBloke += $value->bonusBloke;
                 $sheet->setCellValue('G' . $i, date('d-m-Y H:m:s', strtotime( $value->created_at)));
                 $sheet->setCellValue('H' . $i, date('d-m-Y H:m:s', strtotime( $value->updated_at)));
                 $i++;
             }
+            $sheet->setCellValue('C' . $i, "ИТОГО");
+            $sheet->setCellValue('D' . $i, $bonusAdd);
+            $sheet->setCellValue('E' . $i, $bonusDel);
+            $sheet->setCellValue('F' . $i, $bonusBloke);
+            $i++;
+            $sheet->setCellValue('C' . $i, "Баланс");
+            $sheet->setCellValue('D' . $i, $bonusAdd - $bonusDel - $bonusBloke);
         } else {
             $sheet->setCellValue('A1', 'Нет данных в период');
         }
+
 
 
         $reportIP_path = Storage::path('public/reports/reportBonus.xlsx');
