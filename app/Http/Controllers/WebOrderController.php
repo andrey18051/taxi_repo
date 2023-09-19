@@ -4718,18 +4718,17 @@ class WebOrderController extends Controller
             $newUser->telegram_id = null;
             $newUser->viber_id = null;
             $newUser->save();
+
+            $user = User::where('email', $email)->first();
+            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
         }
-        $user =  User::where('email', $email)->first();
-        (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
     }
 
     public function bonusType1ForAll()
     {
         $user =  User::all();
         foreach ($user->toArray() as $value) {
-
                 (new BonusBalanceController)->recordsAdd(0, $value['id'], 1, 1);
-
         }
     }
 

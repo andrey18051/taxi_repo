@@ -184,10 +184,10 @@ class BonusBalanceController extends Controller
 
 
         if ($latestBalanceRecord) {
-            $daysAgo = now()->subDay(); // Получить текущую дату и вычесть один день.
+            $daysAgo = now()->subDay()->startOfDay(); // Получить текущую дату и вычесть один день, затем обнулить время.
 
-            if ($latestBalanceRecord->updated_at <= $daysAgo) {
-                // Если дата обновления меньше или равна дате, предшествующей текущей дате на один день, выполните код.
+            if ($latestBalanceRecord->updated_at->startOfDay() <= $daysAgo) {
+                // Если дата обновления, обнуленная по времени, меньше или равна предыдущей дате, обнуленной по времени, на один день назад, выполните код.
                 self::recordsAdd(0, $users_id, 3, 1);
             }
         } else {

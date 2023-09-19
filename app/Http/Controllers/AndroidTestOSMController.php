@@ -42,10 +42,10 @@ class AndroidTestOSMController extends Controller
         return config("app.X-WO-API-APP-ID-TEST");
     }
 
-    public function startIP()
-    {
-        IPController::getIP('/android/PAS2/startPage');
-    }
+//    public function startIP()
+//    {
+//        IPController::getIP('/android/PAS2/startPage');
+//    }
 
     public function connectAPI(): string
     {
@@ -54,7 +54,6 @@ class AndroidTestOSMController extends Controller
 
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
-
         /**
          * Параметры запроса
          */
@@ -137,11 +136,26 @@ class AndroidTestOSMController extends Controller
         } else {
             $routTo =   ['name' => $to];
         }
-        $LatLngFrom = self::geoDataSearch($from, $from_number);
+        $LatLngFrom = UniversalAndroidFunctionController:: geoDataSearch(
+            $to,
+            $to_number,
+            self::autorization(),
+            self::identificationId(),
+            self::apiVersion(),
+            $connectAPI
+        );
+
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
 
-        $LatLngTo = self::geoDataSearch($to, $to_number);
+        $LatLngTo = UniversalAndroidFunctionController:: geoDataSearch(
+            $to,
+            $to_number,
+            self::autorization(),
+            self::identificationId(),
+            self::apiVersion(),
+            $connectAPI
+        );
         $to_lat = $LatLngTo["lat"];
         $to_lng = $LatLngTo["lng"];
 
@@ -164,7 +178,8 @@ class AndroidTestOSMController extends Controller
         $params['from_number'] = $from_number;
         $params['to'] = $to;
         $params['to_number'] = $to_number;
-        self::saveCoast($params);
+
+        (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -172,12 +187,7 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-
-        $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->post($url, [
+        $parameter = [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
             'client_sub_card' => null,
@@ -196,8 +206,16 @@ class AndroidTestOSMController extends Controller
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
-//dd($response->body());
+        ];
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            self::autorization(),
+            self::identificationId(),
+            self::apiVersion()
+        );
+
         if ($response->status() == 200) {
             return  response($response, 200)
                 ->header('Content-Type', 'json');
@@ -314,11 +332,25 @@ class AndroidTestOSMController extends Controller
         } else {
             $routTo =   ['name' => $to];
         }
-        $LatLngFrom = self::geoDataSearch($from, $from_number);
+        $LatLngFrom = (new UniversalAndroidFunctionController)->geoDataSearch(
+            $from,
+            $from_number,
+            $autorization,
+            self::identificationId(),
+            self::apiVersion(),
+            $connectAPI
+        );
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
 
-        $LatLngTo = self::geoDataSearch($to, $to_number);
+        $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
+            $to,
+            $to_number,
+            $autorization,
+            self::identificationId(),
+            self::apiVersion(),
+            $connectAPI
+        );
         $to_lat = $LatLngTo["lat"];
         $to_lng = $LatLngTo["lng"];
 
@@ -367,12 +399,8 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-        $response = Http::withHeaders([
 
-            "Authorization" => $autorization,
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->post($url, [
+        $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
@@ -391,7 +419,42 @@ class AndroidTestOSMController extends Controller
             'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
+        ];
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $autorization,
+            self::identificationId(),
+            self::apiVersion()
+        );
+
+
+//        $response = Http::withHeaders([
+//
+//            "Authorization" => $autorization,
+//            "X-WO-API-APP-ID" => self::identificationId(),
+//            "X-API-VERSION" => self::apiVersion()
+//        ])->post($url, [
+//            'user_full_name' => $userArr[0], //Полное имя пользователя
+//            'user_phone' => $phone, //Телефон пользователя
+//            'client_sub_card' => null,
+//            'required_time' => $required_time, //Время подачи предварительного заказа
+//            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+//            'route_address_entrance_from' => null,
+//            'comment' => $comment, //Комментарий к заказу
+//            'add_cost' => $add_cost,
+//            'wagon' => 0, //Универсал: True, False
+//            'minibus' => 0, //Микроавтобус: True, False
+//            'premium' => 0, //Машина премиум-класса: True, False
+//            'flexible_tariff_name' => $tariff, //Гибкий тариф
+//            'route_undefined' => $route_undefined, //По городу: True, False
+//            'route' => $rout,
+//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+//            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+//            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+////                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+//        ]);
 //dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
@@ -400,13 +463,27 @@ class AndroidTestOSMController extends Controller
             $params['server'] = $connectAPI;
             $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
 
-            self::saveOrder($params);
+            (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
 
-            $LatLng = self::geoDataSearch($from, $from_number);
+            $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
+                $from,
+                $from_number,
+                $autorization,
+                self::identificationId(),
+                self::apiVersion(),
+                $connectAPI
+            );
             $response_ok["from_lat"] = $LatLng["lat"];
             $response_ok["from_lng"] =  $LatLng["lng"];
 
-            $LatLng = self::geoDataSearch($to, $to_number);
+            $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
+                $to,
+                $to_number,
+                $autorization,
+                self::identificationId(),
+                self::apiVersion(),
+                $connectAPI
+            );
             $response_ok["lat"] = $LatLng["lat"];
             $response_ok["lng"] =  $LatLng["lng"];
 
@@ -530,7 +607,7 @@ class AndroidTestOSMController extends Controller
          * Сохранние расчетов в базе
          */
 
-        self::saveCoast($params);
+        (new UniversalAndroidFunctionController)->saveCost($params, self::identificationId());
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -540,11 +617,7 @@ class AndroidTestOSMController extends Controller
         };
 
         $add_cost = 0;
-        $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->post($url, [
+        $parameter = [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
             'client_sub_card' => null,
@@ -564,7 +637,42 @@ class AndroidTestOSMController extends Controller
             'extra_charge_codes' =>$extra_charge_codes,
             //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
+        ];
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            self::autorization(),
+            self::identificationId(),
+            self::apiVersion()
+        );
+
+
+//        $response = Http::withHeaders([
+//            "Authorization" => self::autorization(),
+//            "X-WO-API-APP-ID" => self::identificationId(),
+//            "X-API-VERSION" => self::apiVersion()
+//        ])->post($url, [
+//            'user_full_name' => null, //Полное имя пользователя
+//            'user_phone' => null, //Телефон пользователя
+//            'client_sub_card' => null,
+//            'required_time' => null, //Время подачи предварительного заказа
+//            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+//            'route_address_entrance_from' => null,
+//            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+//            'add_cost' => $add_cost,
+//            'wagon' => 0, //Универсал: True, False
+//            'minibus' => 0, //Микроавтобус: True, False
+//            'premium' => 0, //Машина премиум-класса: True, False
+//            'flexible_tariff_name' => $tariff, //Гибкий тариф
+//            'route_undefined' => $route_undefined, //По городу: True, False
+//            'route' => $rout,
+//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+//            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+//            'extra_charge_codes' =>$extra_charge_codes,
+//            //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+////                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+//        ]);
 //dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
@@ -749,12 +857,8 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-        $response = Http::withHeaders([
-//            $response = Http::dd()->withHeaders([
-            "Authorization" => $autorization,
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->post($url, [
+
+        $parameter =  [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
@@ -773,7 +877,43 @@ class AndroidTestOSMController extends Controller
             'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' =>   $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
+        ];
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $autorization,
+            self::identificationId(),
+            self::apiVersion()
+        );
+
+
+
+//        $response = Http::withHeaders([
+////            $response = Http::dd()->withHeaders([
+//            "Authorization" => $autorization,
+//            "X-WO-API-APP-ID" => self::identificationId(),
+//            "X-API-VERSION" => self::apiVersion()
+//        ])->post($url, [
+//            'user_full_name' => $userArr[0], //Полное имя пользователя
+//            'user_phone' => $phone, //Телефон пользователя
+//            'client_sub_card' => null,
+//            'required_time' => $required_time, //Время подачи предварительного заказа
+//            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+//            'route_address_entrance_from' => null,
+//            'comment' => $comment, //Комментарий к заказу
+//            'add_cost' => $add_cost,
+//            'wagon' => 0, //Универсал: True, False
+//            'minibus' => 0, //Микроавтобус: True, False
+//            'premium' => 0, //Машина премиум-класса: True, False
+//            'flexible_tariff_name' => $tariff, //Гибкий тариф
+//            'route_undefined' => $route_undefined, //По городу: True, False
+//            'route' =>$rout,
+//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+//            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+//            'extra_charge_codes' =>   $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+////                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+//        ]);
 
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
@@ -784,9 +924,16 @@ class AndroidTestOSMController extends Controller
                 $params['server'] = $connectAPI;
 
                 $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
-                self::saveOrder($params);
+                (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
                 if ($route_undefined == false) {
-                    $LatLng = self::geoDataSearch($to, $to_number);
+                    $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
+                        $to,
+                        $to_number,
+                        $autorization,
+                        self::identificationId(),
+                        self::apiVersion(),
+                        $connectAPI
+                    );
                     $response_ok["lat"] = $LatLng["lat"];
                     $response_ok["lng"] =  $LatLng["lng"];
                 } else {
@@ -934,7 +1081,7 @@ class AndroidTestOSMController extends Controller
 //            $params['to'] = 'Місце призначення';
 //            $params['to_number'] = " ";
 //        }
-        self::saveCoast($params);
+        (new UniversalAndroidFunctionController)->saveCost($params, self::identificationId());
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -1166,11 +1313,8 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-        $response = Http::withHeaders([
-            "Authorization" => $autorization,
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->post($url, [
+
+        $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
@@ -1189,7 +1333,40 @@ class AndroidTestOSMController extends Controller
             'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
+        ];
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $autorization,
+            self::identificationId(),
+            self::apiVersion()
+        );
+
+//
+//        $response = Http::withHeaders([
+//            "Authorization" => $autorization,
+//            "X-WO-API-APP-ID" => self::identificationId(),
+//            "X-API-VERSION" => self::apiVersion()
+//        ])->post($url, [
+//            'user_full_name' => $userArr[0], //Полное имя пользователя
+//            'user_phone' => $phone, //Телефон пользователя
+//            'client_sub_card' => null,
+//            'required_time' => $required_time, //Время подачи предварительного заказа
+//            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+//            'route_address_entrance_from' => null,
+//            'comment' => $comment, //Комментарий к заказу
+//            'add_cost' => $add_cost,
+//            'wagon' => 0, //Универсал: True, False
+//            'minibus' => 0, //Микроавтобус: True, False
+//            'premium' => 0, //Машина премиум-класса: True, False
+//            'flexible_tariff_name' => $tariff, //Гибкий тариф
+//            'route_undefined' => $route_undefined, //По городу: True, False
+//            'route' => $rout,
+//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+//            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+//            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+////            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+//        ]);
 //dd($response->body());
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
@@ -1200,7 +1377,7 @@ class AndroidTestOSMController extends Controller
                 $params['server'] = $connectAPI;
                 $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
 
-                self::saveOrder($params);
+                (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
 
                 $response_ok["from_lat"] = $originLatitude;
                 $response_ok["from_lng"] =  $originLongitude;
@@ -1254,249 +1431,116 @@ class AndroidTestOSMController extends Controller
                 ->header('Content-Type', 'json');
         }
     }
-
-    public function saveCoast($params)
-    {
-        /**
-         * Сохранние расчетов в базе
-         */
-
-        $order = new Order();
-        $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
-        $order->user_full_name = $params['user_full_name'];//Полное имя пользователя
-        $order->user_phone = $params['user_phone'];//Телефон пользователя
-        $order->client_sub_card = null;
-        $order->required_time = $params['required_time']; //Время подачи предварительного заказа
-        $order->reservation = $params['reservation']; //Обязательный. Признак предварительного заказа: True, False
-        $order->route_address_entrance_from = null;
-        $order->comment = $params['comment'];  //Комментарий к заказу
-        $order->add_cost = $params['add_cost']; //Добавленная стоимость
-        $order->wagon = $params['wagon']; //Универсал: True, False
-        $order->minibus = $params['minibus']; //Микроавтобус: True, False
-        $order->premium = $params['premium']; //Машина премиум-класса: True, False
-        $order->flexible_tariff_name = $params['flexible_tariff_name']; //Гибкий тариф
-        $order->route_undefined = $params['route_undefined']; //По городу: True, False
-        $order->routefrom = $params['from']; //Обязательный. Улица откуда.
-        $order->routefromnumber = $params['from_number']; //Обязательный. Дом откуда.
-        $order->routeto = $params['to']; //Обязательный. Улица куда.
-        $order->routetonumber = " "; //Обязательный. Дом куда.
-        $order->taxiColumnId = $params['taxiColumnId']; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        $order->save();
-    }
-
-    public function saveOrder($params)
-    {
-
-        /**
-         * Сохранние расчетов в базе
-         */
-        $order = new Orderweb();
-
-        $order->user_full_name = $params["user_full_name"];//Полное имя пользователя
-        $order->user_phone = $params["user_phone"];//Телефон пользователя
-        $order->email = $params['email'];//Телефон пользователя
-        $order->client_sub_card = null;
-        $order->required_time = $params["required_time"]; //Время подачи предварительного заказа
-        $order->reservation = $params["reservation"]; //Обязательный. Признак предварительного заказа: True, False
-        $order->route_address_entrance_from = null;
-        $order->comment = self::identificationId();  //Комментарий к заказу
-        $order->add_cost = $params["add_cost"]; //Добавленная стоимость
-        $order->wagon = $params["wagon"]; //Универсал: True, False
-        $order->minibus = $params["minibus"]; //Микроавтобус: True, False
-        $order->premium = $params["premium"]; //Машина премиум-класса: True, False
-        $order->flexible_tariff_name = $params["flexible_tariff_name"]; //Гибкий тариф
-        $order->route_undefined = $params["route_undefined"]; //По городу: True, False
-        $order->routefrom = $params["from"]; //Обязательный. Улица откуда.
-        $order->routefromnumber = $params["from_number"]; //Обязательный. Дом откуда.
-        $order->routeto = $params["to"]; //Обязательный. Улица куда.
-        $order->routetonumber = $params["to_number"]; //Обязательный. Дом куда.
-        $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        $order->web_cost = $params['order_cost'];
-        $order->dispatching_order_uid = $params['dispatching_order_uid'];
-        $order->closeReason = $params['closeReason'];
-        $order->closeReasonI = 1;
-        $order->server = $params['server'];
-
-        $order->save();
-
-        /**
-         * Сообщение о заказе
-         */
-//        dd($params);
-
-        if (!$params["route_undefined"]) {
-            $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                " до "  . $params['to'] . " " . $params['to_number'] .
-                ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                $params['dispatching_order_uid'];
-        } else {
-            $order = "Нове замовлення від " . $params['user_full_name'] .
-                " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                $params['dispatching_order_uid'];
-        }
-
-        $subject = 'Інформація про нову поїздку:';
-        $paramsCheck = [
-            'subject' => $subject,
-            'message' => $order,
-        ];
-
-
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-        $message = new TelegramController();
-        try {
-            $message->sendMeMessage($order);
-        } catch (Exception $e) {
-            $subject = 'Ошибка в телеграмм';
-            $paramsCheck = [
-                'subject' => $subject,
-                'message' => $e,
-            ];
-
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-        };
-    }
-
-    public function sendCode($phone)
-    {
-
-        $url = self::connectApi() . '/api/approvedPhones/sendConfirmCode';
-        $response = Http::post($url, [
-            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
-            'taxiColumnId' => config('app.taxiColumnId') //Номер колоны, из которой отправляется SMS (0, 1 или 2, по умолчанию 0).
-        ]);
-//dd($response->body());
-        if ($response->status() == 200) {
-            $response_status["resp_result"] = 200;
-            return  response($response_status, 200)
-                ->header('Content-Type', 'json');
-        } else {
-            $response_arr = json_decode($response, true);
-
-            $response_error["resp_result"] = 400;
-            $response_error["message"] = $response_arr["Message"];
-//            $response_error["message"] = "Message";
-
-            return  response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-    }
-
-    public function geoDataSearch($to, $to_number): array
-    {
-        if ($to_number != " ") {
-            $LatLng = self::geoDataSearchStreet($to, $to_number);
-        } else {
-            $LatLng = self::geoDataSearchObject($to);
-        }
-
-        return $LatLng;
-    }
-    public function geoDataSearchStreet($to, $to_number): array
-    {
-
-        $connectAPI = self::connectApi();
-
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
-
-            return $response_error;
-        }
-
-
-
-        $url = $connectAPI . '/api/geodata/search';
-
-        $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->get($url, [
-            'q' => $to, //Обязательный. Несколько букв для поиска объекта.
-            'offset' => 0, //Смещение при выборке (сколько пропустить).
-            'limit' => 1, //Кол-во возвращаемых записей (предел).
-            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
-            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
-            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
-                Возможные значения:
-                * (возвращает все поля)
-                name
-                old_name
-                houses
-                lat
-                lng
-                locale*/
-        ]);
-        $response_arr = json_decode($response, true);
-//dd($response_arr);
-        $LatLng["lat"] = 0;
-        $LatLng["lng"] = 0;
-        if ((strncmp($to_number, " ", 1) != 0)) {
-            if (isset($response_arr["geo_streets"]["geo_street"][0]["houses"])) {
-                foreach ($response_arr["geo_streets"]["geo_street"][0]["houses"] as $value) {
-                    if ($value['house'] ==  trim($to_number)) {
-                        $LatLng["lat"] = $value["lat"];
-                        $LatLng["lng"] = $value["lng"];
-                        break;
-                    }
-                }
-            }
-        }
-
-        return $LatLng;
-    }
-    public function geoDataSearchObject($to): array
-    {
-        $connectAPI = self::connectApi();
-
-        if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Ошибка соединения с сервером.";
-
-            return $response_error;
-        }
-
-
-
-        $url = $connectAPI . '/api/geodata/objects/search';
-
-        $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->get($url, [
-            'q' => $to, //Обязательный. Несколько букв для поиска объекта.
-            'offset' => 0, //Смещение при выборке (сколько пропустить).
-            'limit' => 1, //Кол-во возвращаемых записей (предел).
-            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
-            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
-            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
-                Возможные значения:
-                * (возвращает все поля)
-                name
-                old_name
-                houses
-                lat
-                lng
-                locale*/
-        ]);
-        $response_arr = json_decode($response, true);
-        $LatLng["lat"] = 0;
-        $LatLng["lng"] = 0;
-
-        if (isset($response_arr["geo_object"][0]["name"])) {
-            $LatLng["lat"] = $response_arr["geo_object"][0]["lat"];
-            $LatLng["lng"] = $response_arr["geo_object"][0]["lng"];
-        }
-
-//        dd($LatLng);
-        return $LatLng;
-    }
+//
+//    public function geoDataSearch($to, $to_number): array
+//    {
+//        if ($to_number != " ") {
+//            $LatLng = self::geoDataSearchStreet($to, $to_number);
+//        } else {
+//            $LatLng = self::geoDataSearchObject($to);
+//        }
+//
+//        return $LatLng;
+//    }
+//    public function geoDataSearchStreet($to, $to_number): array
+//    {
+//
+//        $connectAPI = self::connectApi();
+//
+//        if ($connectAPI == 400) {
+//            $response_error["order_cost"] = 0;
+//            $response_error["Message"] = "Ошибка соединения с сервером.";
+//
+//            return $response_error;
+//        }
+//
+//        $url = $connectAPI . '/api/geodata/search';
+//
+//        $response = Http::withHeaders([
+//            "Authorization" => self::autorization(),
+//            "X-WO-API-APP-ID" => self::identificationId(),
+//            "X-API-VERSION" => self::apiVersion()
+//        ])->get($url, [
+//            'q' => $to, //Обязательный. Несколько букв для поиска объекта.
+//            'offset' => 0, //Смещение при выборке (сколько пропустить).
+//            'limit' => 1, //Кол-во возвращаемых записей (предел).
+//            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
+//            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
+//            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
+//                Возможные значения:
+//                * (возвращает все поля)
+//                name
+//                old_name
+//                houses
+//                lat
+//                lng
+//                locale*/
+//        ]);
+//        $response_arr = json_decode($response, true);
+////dd($response_arr);
+//        $LatLng["lat"] = 0;
+//        $LatLng["lng"] = 0;
+//        if ((strncmp($to_number, " ", 1) != 0)) {
+//            if (isset($response_arr["geo_streets"]["geo_street"][0]["houses"])) {
+//                foreach ($response_arr["geo_streets"]["geo_street"][0]["houses"] as $value) {
+//                    if ($value['house'] ==  trim($to_number)) {
+//                        $LatLng["lat"] = $value["lat"];
+//                        $LatLng["lng"] = $value["lng"];
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//
+//        return $LatLng;
+//    }
+//    public function geoDataSearchObject($to): array
+//    {
+//        $connectAPI = self::connectApi();
+//
+//        if ($connectAPI == 400) {
+//            $response_error["order_cost"] = 0;
+//            $response_error["Message"] = "Ошибка соединения с сервером.";
+//
+//            return $response_error;
+//        }
+//
+//
+//
+//        $url = $connectAPI . '/api/geodata/objects/search';
+//
+//        $response = Http::withHeaders([
+//            "Authorization" => self::autorization(),
+//            "X-WO-API-APP-ID" => self::identificationId(),
+//            "X-API-VERSION" => self::apiVersion()
+//        ])->get($url, [
+//            'q' => $to, //Обязательный. Несколько букв для поиска объекта.
+//            'offset' => 0, //Смещение при выборке (сколько пропустить).
+//            'limit' => 1, //Кол-во возвращаемых записей (предел).
+//            'transliteration' => true, //Разрешить транслитерацию запроса при поиске.
+//            'qwertySwitcher' => true, //Разрешить преобразование строки запроса в случае ошибочного набора с неверной раскладкой клавиатуры (qwerty). Например, «ghbdtn» - это «привет».
+//            'fields' => '*', /*Данным параметром можно указать перечень требуемых параметров, которые будут возвращаться в ответе. Разделяются запятой.
+//                Возможные значения:
+//                * (возвращает все поля)
+//                name
+//                old_name
+//                houses
+//                lat
+//                lng
+//                locale*/
+//        ]);
+//        $response_arr = json_decode($response, true);
+//        $LatLng["lat"] = 0;
+//        $LatLng["lng"] = 0;
+//
+//        if (isset($response_arr["geo_object"][0]["name"])) {
+//            $LatLng["lat"] = $response_arr["geo_object"][0]["lat"];
+//            $LatLng["lng"] = $response_arr["geo_object"][0]["lng"];
+//        }
+//
+////        dd($LatLng);
+//        return $LatLng;
+//    }
 //    public function fromSearchGeo($originLatitude, $originLongitude)
 //    {
 //
@@ -1608,8 +1652,6 @@ class AndroidTestOSMController extends Controller
             return $response_error;
         }
 
-
-
         $url = $connectAPI . '/api/geodata/nearest';
 
         $r = 50;
@@ -1642,44 +1684,44 @@ class AndroidTestOSMController extends Controller
         return  $addressArr;
     }
 
-    public function approvedPhones($phone, $confirm_code)
-    {
-
-
-        $url = self::connectApi() . '/api/approvedPhones/';
-        $response = Http::post($url, [
-            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона
-            'confirm_code' => $confirm_code //Обязательный. Код подтверждения.
-        ]);
-
-        if ($response->status() == 200) {
-            $response_status["resp_result"] = 200;
-            return  response($response_status, 200)
-                ->header('Content-Type', 'json');
-        } else {
-            $response_arr = json_decode($response, true);
-
-            $response_error["resp_result"] = 0;
-            $response_error["message"] = $response_arr["Message"];
-
-            return  response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-    }
-
-    public function sendCodeTest($phone)
-    {
-        $response_status["resp_result"] = 200;
-        return  response($response_status, 200)
-            ->header('Content-Type', 'json');
-    }
-
-    public function approvedPhonesTest($phone, $confirm_code)
-    {
-        $response_status["resp_result"] = 200;
-        return  response($response_status, 200)
-            ->header('Content-Type', 'json');
-    }
+//    public function approvedPhones($phone, $confirm_code)
+//    {
+//
+//
+//        $url = self::connectApi() . '/api/approvedPhones/';
+//        $response = Http::post($url, [
+//            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона
+//            'confirm_code' => $confirm_code //Обязательный. Код подтверждения.
+//        ]);
+//
+//        if ($response->status() == 200) {
+//            $response_status["resp_result"] = 200;
+//            return  response($response_status, 200)
+//                ->header('Content-Type', 'json');
+//        } else {
+//            $response_arr = json_decode($response, true);
+//
+//            $response_error["resp_result"] = 0;
+//            $response_error["message"] = $response_arr["Message"];
+//
+//            return  response($response_error, 200)
+//                ->header('Content-Type', 'json');
+//        }
+//    }
+//
+//    public function sendCodeTest($phone)
+//    {
+//        $response_status["resp_result"] = 200;
+//        return  response($response_status, 200)
+//            ->header('Content-Type', 'json');
+//    }
+//
+//    public function approvedPhonesTest($phone, $confirm_code)
+//    {
+//        $response_status["resp_result"] = 200;
+//        return  response($response_status, 200)
+//            ->header('Content-Type', 'json');
+//    }
 
     public function autocompleteSearchComboHid($name)
     {
@@ -1737,46 +1779,9 @@ class AndroidTestOSMController extends Controller
         Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
     }
 
-    public function addUser($name, $email)
-    {
-        $newUser =  User::where('email', $email)->first();
 
-        if ($newUser == null) {
-            $newUser = new User();
-            $newUser->name = $name;
-            $newUser->email = $email;
-            $newUser->password = "123245687";
 
-            $newUser->facebook_id = null;
-            $newUser->google_id = null;
-            $newUser->linkedin_id = null;
-            $newUser->github_id = null;
-            $newUser->twitter_id = null;
-            $newUser->telegram_id = null;
-            $newUser->viber_id = null;
-            $newUser->save();
-        }
-    }
 
-    public function verifyBlackListUser($email)
-    {
-        self::startIP();
-        $user =  BlackList::where('email', $email)->first();
-
-        if ($user == null) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Не черном списке";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        } else {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "В черном списке";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
-        }
-    }
 
     private function autorization()
     {
@@ -1918,7 +1923,9 @@ class AndroidTestOSMController extends Controller
 
         $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
-            'Authorization' => $authorization,
+            "Authorization" => self::autorization(),
+            "X-WO-API-APP-ID" => self::identificationId(),
+            "X-API-VERSION" => self::apiVersion()
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
@@ -1934,43 +1941,32 @@ class AndroidTestOSMController extends Controller
         /**
          * Проверка версии геоданных и обновление или создание базы адресов
          */
-//
-        $svd = Config::where('id', '1')->first();
-
-        if ($json_arr['version_date'] !==  $svd->odessa_versionDate) {
-            $marker_update = true;
-        }
 
 
         //Проверка версии геоданных и обновление или создание базы адресов
 
-        if ($marker_update || ComboTest::all()->count() === 0) {
-            DB::table('combo_tests')->truncate();
+        DB::table('combo_tests')->truncate();
 
-            foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
-                $combo = new ComboTest();
-                $combo->name = $arrStreet["name"];
-                $combo->street = 1;
-                $combo->save();
+        foreach ($json_arr['geo_street'] as $arrStreet) { //Улицы
+            $combo = new ComboTest();
+            $combo->name = $arrStreet["name"];
+            $combo->street = 1;
+            $combo->save();
 
-            }
-
-            foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
-                $combo = new ComboTest();
-                $combo->name = $arrObject["name"];
-                $combo->street = 0;
-                $combo->save();
-
-            }
-
-            $svd = Config::where('id', '1')->first();
-            $svd->odessa_versionDate = $json_arr['version_date'];
-            $svd->save();
-
-            return redirect()->route('home-admin')->with('success', "База $base обновлена.");
-        } else {
-            return redirect()->route('home-admin')->with('success', "База $base актуальна.");
         }
-    }
 
+        foreach ($json_arr_ob['geo_object'] as $arrObject) { // Объекты
+            $combo = new ComboTest();
+            $combo->name = $arrObject["name"];
+            $combo->street = 0;
+            $combo->save();
+
+        }
+
+        $svd = Config::where('id', '1')->first();
+        $svd->odessa_versionDate = $json_arr['version_date'];
+        $svd->save();
+
+        return redirect()->route('home-admin')->with('success', "База $base обновлена.");
+    }
 }

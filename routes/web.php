@@ -29,6 +29,7 @@ use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UIDController;
+use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
@@ -1079,6 +1080,7 @@ Route::get('/city/verification', [CityController::class,'checkDomains'])->name('
 Route::get('/city/versionComboDniproPas2', [AndroidPas2_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro');
 Route::get('/city/versionComboDniproPas4', [AndroidPas4001_Dnipro_Controller::class,'versionComboDnipro'])->name('versionComboDnipro4001');
 Route::get('/city/versionComboOdessaPas2', [AndroidPas2_Odessa_Controller::class,'versionComboOdessa'])->name('versionComboOdessa2');
+Route::get('/city/versionComboOdessaPas2', [AndroidPas2_Odessa_Controller::class,'versionComboOdessa'])->name('versionComboOdessa2');
 Route::get('/city/versionComboZaporizhzhiaPas2', [AndroidPas2_Zaporizhzhia_Controller::class,'versionComboZaporizhzhia'])->name('versionComboZaporizhzhia2');
 Route::get('/city/versionComboCherkasyPas2', [AndroidPas2_Cherkasy_Controller::class,'versionComboCherkasy'])->name('versionComboCherkasy2');
 Route::get('/showLatLng/{Lat}/{lng}', [\App\Http\Controllers\VisicomController::class,'showLatLng'])->name('showLatLng');
@@ -1149,7 +1151,13 @@ Route::get('/bonusBalance/bonusReport/', [ReportController::class, 'bonusReport'
 /**
  * User add
  */
-Route::get('/android/addUser/{name}/{email}', [WebOrderController::class, 'addUser'])->name('addUser');
+Route::get('/android/addUser/{name}/{email}', [UniversalAndroidFunctionController::class, 'addUser'])->name('addUser');
 Route::get('/android/bonusType1ForAll', [WebOrderController::class, 'bonusType1ForAll'])->name('bonusType1ForAll');
 Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNameEmail'])->name('fixIncorrectNameEmail');
 
+
+/**
+ * BlackList
+ */
+Route::get('/android/verifyBlackListUser/{email}/{androidDom}', [UniversalAndroidFunctionController::class, 'verifyBlackListUser'])
+    ->name('verifyBlackListUser');

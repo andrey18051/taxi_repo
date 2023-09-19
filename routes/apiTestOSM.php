@@ -129,3 +129,9 @@ Route::get('/android/UIDStatus/{uid}', [AndroidTestOSMController::class, 'UIDSta
     ->name('UIDStatus');
 
 
+/**
+ * Base Comdo_Test
+ */
+
+Route::get('/versionComboOdessa', [AndroidTestOSMController::class, 'versionComboOdessa'])
+    ->name('versionComboOdessa');
