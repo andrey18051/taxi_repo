@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Mail\Check;
 use App\Models\BlackList;
 use App\Models\City;
+use App\Models\DoubleOrder;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
+use function Symfony\Component\Translation\t;
 
 class UniversalAndroidFunctionController extends Controller
 {
@@ -24,92 +27,75 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     ) {
         return Http::withHeaders([
-//            $response = Http::dd()->withHeaders([
+//            return  Http::dd()->withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
             "X-API-VERSION" => $apiVersion
         ])->post($url, $parameter);
     }
 
-    public function postRequestHTTPDouble(
-        $url,
-        $parameter,
-        $authorizationBonus,
-        $authorizationDouble,
-        $identificationId,
-        $apiVersion,
-        $connectAPI
-    ) {
-        $responseBonus = Http::withHeaders([
-            "Authorization" => $authorizationBonus,
-            "X-WO-API-APP-ID" => $identificationId,
-            "X-API-VERSION" => $apiVersion
-        ])->post($url, $parameter);
-        $responseBonus["url"] = $url;
-        $responseBonus["parameter"] = $parameter;
-
-
-        $originalString = $parameter['phone'];
-        $parameter['phone'] = substr($originalString, 0, -1);
-        $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
-
-
-        $responseDouble = Http::withHeaders([
-            "Authorization" => $authorizationDouble,
-            "X-WO-API-APP-ID" => $identificationId,
-            "X-API-VERSION" => $apiVersion
-        ])->post($url, $parameter);
-        $responseDouble["url"] = $url;
-        $responseDouble["parameter"] = $parameter;
-
-
-        $this->startNewProcessExecutionStatus(
-            $responseBonus,
-            $responseDouble,
-            $authorizationBonus,
-            $authorizationDouble,
-            $connectAPI,
-            $identificationId,
-            $apiVersion
-        );
-
-        return $responseBonus;
-    }
     public function startNewProcessExecutionStatus(
-        $responseBonus,
-        $responseDouble,
-        $authorizationBonus,
-        $authorizationDouble,
-        $connectAPI,
-        $identificationId,
-        $apiVersion
+        $doubleOrderId
     ) {
+        $doubleOrder = DoubleOrder::find($doubleOrderId);
+
+//        dd($doubleOrder);
+        $responseBonusStr = $doubleOrder->responseBonusStr;
+        $responseDoubleStr = $doubleOrder->responseDoubleStr;
+        $authorizationBonus = $doubleOrder->authorizationBonus;
+        $authorizationDouble = $doubleOrder->authorizationDouble;
+        $connectAPI = $doubleOrder->connectAPI;
+        $identificationId = $doubleOrder->identificationId;
+        $apiVersion = $doubleOrder->apiVersion;
+
+        $doubleOrder->delete();
+
+        $responseBonus = json_decode($responseBonusStr, true);
+        $responseDouble = json_decode($responseDoubleStr, true);
+
         $startTime = time();
+
         $upDateTimeBonus = $startTime;
         $upDateTimeDouble = $startTime;
 
-        $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
+//        $maxExecutionTime = 1*60; // Максимальное время выполнения - 4 часа
+          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
         $cancelUID = null;
+        $bonusOrder = $responseBonus['dispatching_order_uid'];
+        $doubleOrder = $responseDouble['dispatching_order_uid'];
+        $newStatusBonus = self::getExecutionStatus(
+            $authorizationBonus,
+            $identificationId,
+            $apiVersion,
+            $responseBonus["url"],
+            $bonusOrder
+        );
+        $newStatusDouble = self::getExecutionStatus(
+            $authorizationDouble,
+            $identificationId,
+            $apiVersion,
+            $responseDouble["url"],
+            $doubleOrder
+        );
 
-        $newStatusBonus['execution_status'] = $responseBonus['execution_status'];
-        $newStatusDouble['execution_status'] = $responseDouble['execution_status'];
-
-        $newStatusBonus['dispatching_order_uid'] = $responseBonus['dispatching_order_uid'];
-        $newStatusDouble['dispatching_order_uid'] = $responseDouble['dispatching_order_uid'];
 
 
+        $i = 0;
+        $respString = null;
+        $respStringDouble = null;
         while (time() - $startTime < $maxExecutionTime) {
-            if ($newStatusBonus['execution_status'] == "CarFound" || $newStatusBonus['execution_status'] == "Running") {
-                if ($newStatusDouble['execution_status'] == "CarFound" || $newStatusDouble['execution_status'] == "Running") {
+
+            if ($newStatusBonus == "Canceled" || $newStatusBonus == "Executed" || $newStatusBonus == "CostCalculation") {
+                if ($newStatusDouble == "Canceled" || $newStatusDouble == "Executed" || $newStatusDouble == "CostCalculation") {
                     break;
                 }
             }
 
-            switch ($newStatusBonus['execution_status']) {
+            switch ($newStatusBonus) {
                 case "CarFound":
                 case "Running":
-                    $this->webordersCancel(
-                        $newStatusDouble['dispatching_order_uid'],
+                    self::webordersCancel(
+                        $doubleOrder,
                         $connectAPI,
                         $authorizationDouble,
                         $identificationId,
@@ -117,41 +103,49 @@ class UniversalAndroidFunctionController extends Controller
                     );
                     $cancelUID = $responseDouble;
                     if ((time() - $upDateTimeBonus) >= 30) {
-                        $newStatusBonus = $this->getExecutionStatus(
+                        $newStatusBonus = self::getExecutionStatus(
                             $authorizationBonus,
                             $identificationId,
                             $apiVersion,
                             $responseBonus["url"],
-                            $responseBonus["parameter"]
+                            $bonusOrder
                         );
+                        $respString = $respString . " * " . $i . $newStatusBonus;
+                        $i++;
                         $upDateTimeBonus = time();
                     }
+                    $i++;
                     break;
                 case "WaitingCarSearch":
                 case "SearchesForCar":
                     if ($cancelUID == $responseDouble) {
-                        Http::withHeaders([
+                        $response =  Http::withHeaders([
                             "Authorization" => $authorizationDouble,
                             "X-WO-API-APP-ID" => $identificationId,
                             "X-API-VERSION" => $apiVersion
                         ])->post($responseDouble['url'], $responseDouble['parameter']);
+
+                        $responseArr = json_decode($response, true);
+                        $doubleOrder = $responseArr["dispatching_order_uid"];
                     }
                     if ((time() - $upDateTimeBonus) >= 5) {
-                        $newStatusBonus = $this->getExecutionStatus(
+                        $newStatusBonus = self::getExecutionStatus(
                             $authorizationBonus,
                             $identificationId,
                             $apiVersion,
                             $responseBonus["url"],
-                            $responseBonus["parameter"]
+                            $bonusOrder
                         );
+                        $respString = $respString . " * " . $i . $newStatusBonus;
+                        $i++;
                         $upDateTimeBonus = time();
                     }
                     break;
             }
-            switch ($newStatusDouble['execution_status']) {
+            switch ($newStatusDouble) {
                 case "CarFound":
                 case "Running":
-                    $this->webordersCancel(
+                    self::webordersCancel(
                         $newStatusBonus['dispatching_order_uid'],
                         $connectAPI,
                         $authorizationBonus,
@@ -160,54 +154,216 @@ class UniversalAndroidFunctionController extends Controller
                     );
                     $cancelUID = $responseBonus;
                     if ((time() - $upDateTimeDouble) >= 30) {
-                        $newStatusDouble = $this->getExecutionStatus(
+                        $newStatusDouble = self::getExecutionStatus(
                             $authorizationDouble,
                             $identificationId,
                             $apiVersion,
                             $responseDouble["url"],
-                            $responseDouble["parameter"]
+                            $doubleOrder
                         );
+                        $respStringDouble = $respStringDouble . " * " . $i . $newStatusDouble;
+                        $i++;
                         $upDateTimeDouble = time();
                     }
                     break;
                 case "WaitingCarSearch":
                 case "SearchesForCar":
                     if ($cancelUID == $responseBonus) {
-                        Http::withHeaders([
+                        $response = Http::withHeaders([
                             "Authorization" => $authorizationBonus,
                             "X-WO-API-APP-ID" => $identificationId,
                             "X-API-VERSION" => $apiVersion
                         ])->post($responseBonus['url'], $responseBonus['parameter']);
+
+                        $responseArr = json_decode($response, true);
+                        $bonusOrder = $responseArr["dispatching_order_uid"];
                     }
                     if ((time() - $upDateTimeDouble) >= 5) {
-                        $newStatusDouble = $this->getExecutionStatus(
+                        $newStatusDouble = self::getExecutionStatus(
                             $authorizationDouble,
                             $identificationId,
                             $apiVersion,
                             $responseDouble["url"],
-                            $responseDouble["parameter"]
+                            $doubleOrder
                         );
+                        $respStringDouble = $respStringDouble . " * " . $i . $newStatusDouble;
+                        $i++;
                         $upDateTimeDouble = time();
                     }
                     break;
             }
         }
+        return "respString:" . $respString . " - respStringDouble:" . $respStringDouble;
     }
 
+    public function startNewProcessExecutionStatusPost(Request $request): int
+    {
+        Log::debug($request->all());
+//dd($request);
+        $responseBonusStr = $request->responseBonusStr;
+        $responseDoubleStr = $request->responseDoubleStr;
+        $authorizationBonus = $request->authorizationBonus;
+        $authorizationDouble = $request->authorizationDouble;
+        $connectAPI = $request->connectAPI;
+        $identificationId = $request->identificationId;
+        $apiVersion = $request->apiVersion;
+
+        $responseBonus = json_decode($responseBonusStr, true);
+        $responseDouble = json_decode($responseDoubleStr, true);
+
+        $startTime = time();
+
+        $upDateTimeBonus = $startTime;
+        $upDateTimeDouble = $startTime;
+
+        $maxExecutionTime = 2*60; // Максимальное время выполнения - 4 часа
+        //  $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
+        $cancelUID = null;
+        $bonusOrder = $responseBonus['dispatching_order_uid'];
+        $doubleOrder = $responseDouble['dispatching_order_uid'];
+        $newStatusBonus = self::getExecutionStatus(
+            $authorizationBonus,
+            $identificationId,
+            $apiVersion,
+            $responseBonus["url"],
+            $bonusOrder
+        );
+        $newStatusDouble = self::getExecutionStatus(
+            $authorizationDouble,
+            $identificationId,
+            $apiVersion,
+            $responseDouble["url"],
+            $doubleOrder
+        );
+
+        return "$newStatusBonus";
+
+//        $i = 0;
+//        while (time() - $startTime < $maxExecutionTime) {
+//            $i++;
+//            if ($newStatusBonus == "Canceled" || $newStatusBonus == "Executed" || $newStatusBonus == "CostCalculation") {
+//                if ($newStatusDouble == "Canceled" || $newStatusDouble == "Executed" || $newStatusDouble == "CostCalculation") {
+//                    break;
+//                }
+//            }
+//
+//            switch ($newStatusBonus) {
+//                case "CarFound":
+//                case "Running":
+//                    self::webordersCancel(
+//                        $doubleOrder,
+//                        $connectAPI,
+//                        $authorizationDouble,
+//                        $identificationId,
+//                        $apiVersion
+//                    );
+//                    $cancelUID = $responseDouble;
+//                    if ((time() - $upDateTimeBonus) >= 30) {
+//                        $newStatusBonus = self::getExecutionStatus(
+//                            $authorizationBonus,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $responseBonus["url"],
+//                            $bonusOrder
+//                        );
+//                        $upDateTimeBonus = time();
+//                    }
+//                    $i++;
+//                    break;
+//                case "WaitingCarSearch":
+//                case "SearchesForCar":
+//                    if ($cancelUID == $responseDouble) {
+//                        $response =  Http::withHeaders([
+//                            "Authorization" => $authorizationDouble,
+//                            "X-WO-API-APP-ID" => $identificationId,
+//                            "X-API-VERSION" => $apiVersion
+//                        ])->post($responseDouble['url'], $responseDouble['parameter']);
+//
+//                        $responseArr = json_decode($response, true);
+//                        $doubleOrder = $responseArr["dispatching_order_uid"];
+//                    }
+//                    if ((time() - $upDateTimeBonus) >= 5) {
+//                        $newStatusBonus = self::getExecutionStatus(
+//                            $authorizationBonus,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $responseBonus["url"],
+//                            $bonusOrder
+//                        );
+//                        $upDateTimeBonus = time();
+//                    }
+//                    break;
+//            }
+//            switch ($newStatusDouble) {
+//                case "CarFound":
+//                case "Running":
+//                    self::webordersCancel(
+//                        $newStatusBonus['dispatching_order_uid'],
+//                        $connectAPI,
+//                        $authorizationBonus,
+//                        $identificationId,
+//                        $apiVersion
+//                    );
+//                    $cancelUID = $responseBonus;
+//                    if ((time() - $upDateTimeDouble) >= 30) {
+//                        $newStatusDouble = self::getExecutionStatus(
+//                            $authorizationDouble,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $responseDouble["url"],
+//                            $doubleOrder
+//                        );
+//                        $upDateTimeDouble = time();
+//                    }
+//                    break;
+//                case "WaitingCarSearch":
+//                case "SearchesForCar":
+//                    if ($cancelUID == $responseBonus) {
+//                        $response = Http::withHeaders([
+//                            "Authorization" => $authorizationBonus,
+//                            "X-WO-API-APP-ID" => $identificationId,
+//                            "X-API-VERSION" => $apiVersion
+//                        ])->post($responseBonus['url'], $responseBonus['parameter']);
+//
+//                        $responseArr = json_decode($response, true);
+//                        $bonusOrder = $responseArr["dispatching_order_uid"];
+//                    }
+//                    if ((time() - $upDateTimeDouble) >= 5) {
+//                        $newStatusDouble = self::getExecutionStatus(
+//                            $authorizationDouble,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $responseDouble["url"],
+//                            $doubleOrder
+//                        );
+//                        $upDateTimeDouble = time();
+//                    }
+//                    break;
+//            }
+//        }
+//        return $i;
+    }
     public function getExecutionStatus(
         $authorization,
         $identificationId,
         $apiVersion,
         $url,
-        $parameter
+        $dispatching_order_uid
     ) {
         // Здесь реализуйте код для получения статуса execution_status по UID
         // Верните фактический статус для последующей проверки
-        return  Http::withHeaders([
+
+        $url = $url . "/" . $dispatching_order_uid;
+
+        $response = Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
             "X-API-VERSION" => $apiVersion
-        ])->post($url, $parameter);
+        ])->get($url);
+
+        $responseArr = json_decode($response, true);
+
+        return $responseArr["execution_status"] ;
     }
 
     /**
@@ -527,6 +683,7 @@ class UniversalAndroidFunctionController extends Controller
         $city = City::where('name', $cityString)->first();
         $username = $city->login;
         $password = hash('SHA512', $city->password);
+//        dd($username . " " . $city->password);
         return 'Basic ' . base64_encode($username . ':' . $password);
     }
 

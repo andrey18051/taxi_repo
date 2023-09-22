@@ -8,6 +8,7 @@ use App\Models\BlackList;
 use App\Models\City;
 use App\Models\ComboTest;
 use App\Models\Config;
+use App\Models\DoubleOrder;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
@@ -41,11 +42,6 @@ class AndroidTestOSMController extends Controller
     {
         return config("app.X-WO-API-APP-ID-TEST");
     }
-
-//    public function startIP()
-//    {
-//        IPController::getIP('/android/PAS2/startPage');
-//    }
 
     public function connectAPI(): string
     {
@@ -268,10 +264,18 @@ class AndroidTestOSMController extends Controller
         $payment_type = 0;
 
         $autorization = self::autorization();
+
         if ($userArr[2] == 'bonus_payment') {
-            $autorization =  UniversalAndroidFunctionController::authorization("BonusTestOne");
+            $authorizationBonus =  UniversalAndroidFunctionController::authorization("BonusTestOne");
+            $authorizationDouble =  UniversalAndroidFunctionController::authorization("BonusTestTwo");
             $payment_type = 1;
+        } else {
+            $authorizationBonus =  null;
+            $authorizationDouble =  null;
         }
+        $identificationId = self::identificationId();
+        $apiVersion =  self::apiVersion();
+
 
         $taxiColumnId = config('app.taxiColumnId');
 
@@ -334,8 +338,8 @@ class AndroidTestOSMController extends Controller
             $from,
             $from_number,
             $autorization,
-            self::identificationId(),
-            self::apiVersion(),
+            $identificationId,
+            $apiVersion,
             $connectAPI
         );
         $from_lat = $LatLngFrom["lat"];
@@ -345,8 +349,8 @@ class AndroidTestOSMController extends Controller
             $to,
             $to_number,
             $autorization,
-            self::identificationId(),
-            self::apiVersion(),
+            $identificationId,
+            $apiVersion,
             $connectAPI
         );
         $to_lat = $LatLngTo["lat"];
@@ -419,43 +423,50 @@ class AndroidTestOSMController extends Controller
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 
-        $response = UniversalAndroidFunctionController::postRequestHTTP(
-            $url,
-            $parameter,
-            $autorization,
-            self::identificationId(),
-            self::apiVersion()
-        );
+        if ($authorizationDouble != null) {
+            $response = UniversalAndroidFunctionController::postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
+            $responseBonus = json_decode($response, true);
+            $responseBonus["url"] = $url;
+            $responseBonus["parameter"] = $parameter;
+
+            $originalString = $parameter['user_phone'];
+            $parameter['phone'] = substr($originalString, 0, -1);
+            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
+            $parameter['payment_type'] = 0;
+
+            $responseDouble = UniversalAndroidFunctionController::postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion
+            );
+
+            $responseDouble = json_decode($responseDouble, true);
+            $responseDouble["url"] = $url;
+            $responseDouble["parameter"] = $parameter;
 
 
-//        $response = Http::withHeaders([
-//
-//            "Authorization" => $autorization,
-//            "X-WO-API-APP-ID" => self::identificationId(),
-//            "X-API-VERSION" => self::apiVersion()
-//        ])->post($url, [
-//            'user_full_name' => $userArr[0], //Полное имя пользователя
-//            'user_phone' => $phone, //Телефон пользователя
-//            'client_sub_card' => null,
-//            'required_time' => $required_time, //Время подачи предварительного заказа
-//            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
-//            'route_address_entrance_from' => null,
-//            'comment' => $comment, //Комментарий к заказу
-//            'add_cost' => $add_cost,
-//            'wagon' => 0, //Универсал: True, False
-//            'minibus' => 0, //Микроавтобус: True, False
-//            'premium' => 0, //Машина премиум-класса: True, False
-//            'flexible_tariff_name' => $tariff, //Гибкий тариф
-//            'route_undefined' => $route_undefined, //По городу: True, False
-//            'route' => $rout,
-//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-//            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-//            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-////                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-//        ]);
-//dd($response->body());
+
+        } else {
+            $response = UniversalAndroidFunctionController::postRequestHTTP(
+                $url,
+                $parameter,
+                $autorization,
+                $identificationId,
+                $apiVersion
+            );
+        }
+
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
+            $params["order_cost"] = $response_arr["order_cost"];
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
@@ -468,7 +479,7 @@ class AndroidTestOSMController extends Controller
                 $from_number,
                 $autorization,
                 self::identificationId(),
-                self::apiVersion(),
+                $apiVersion,
                 $connectAPI
             );
             $response_ok["from_lat"] = $LatLng["lat"];
@@ -478,8 +489,8 @@ class AndroidTestOSMController extends Controller
                 $to,
                 $to_number,
                 $autorization,
-                self::identificationId(),
-                self::apiVersion(),
+                $identificationId,
+                $apiVersion,
                 $connectAPI
             );
             $response_ok["lat"] = $LatLng["lat"];
@@ -488,21 +499,24 @@ class AndroidTestOSMController extends Controller
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
             $response_ok["add_cost"] = $add_cost;
-//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
             $response_ok["currency"] = $response_arr["currency"];
-//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
-//            $response_ok["find_car_timeout"] = $response_arr["find_car_timeout"];
-//            $response_ok["find_car_delay"] = $response_arr["find_car_delay"];
-
-//            $response_ok["route_address_from"] = $response_arr["route_address_from"];
-
             $response_ok["routefrom"] =  $from;
             $response_ok["routefromnumber"] =   $from_number;
 
             $response_ok["routeto"] =  $to;
             $response_ok["to_number"] =   $to_number;
 
-//            $response_ok["route_address_to"] = $response_arr["route_address_to"];
+            $doubleOrder = new DoubleOrder();
+            $doubleOrder ->responseBonusStr = json_encode($responseBonus);
+            $doubleOrder ->responseDoubleStr = json_encode($responseDouble);
+            $doubleOrder ->authorizationBonus = $authorizationBonus;
+            $doubleOrder ->authorizationDouble =$authorizationDouble;
+            $doubleOrder ->connectAPI = $connectAPI;
+            $doubleOrder ->identificationId =  $identificationId;
+            $doubleOrder ->apiVersion = $apiVersion;
+            $doubleOrder->save();
+
+            $response_ok["doubleOrder"] = $doubleOrder->id;
 
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');

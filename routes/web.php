@@ -1161,3 +1161,13 @@ Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNa
  */
 Route::get('/android/verifyBlackListUser/{email}/{androidDom}', [UniversalAndroidFunctionController::class, 'verifyBlackListUser'])
     ->name('verifyBlackListUser');
+
+/**
+ * Universal
+ */
+Route::get('/android/Universal/startNewProcessExecutionStatus/{doubleOrder}', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatus'])
+    ->name('startNewProcessExecutionStatus');
+
+
+Route::post('/android/Universal/startNewProcessExecutionStatusPost/', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusPost'])
+    ->name('startNewProcessExecutionStatusPost');
