@@ -7,6 +7,7 @@ use App\Mail\Server;
 use App\Models\City;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
@@ -278,4 +279,27 @@ class CityController extends Controller
 
         return ($interval->i >= 5);
     }
+
+    public function versionAPICitiesUpdate()
+    {
+        $cities = City::all()->toArray();
+        foreach ($cities as $value) {
+            $city = City::where('name', $value["name"])->first();
+            $url = "http://" . $city->address . '/api/version';
+            $response = Http::get($url);
+            $response_arr = json_decode($response, true);
+
+            $city->versionApi = $response_arr["version"];
+            $city->save();
+        }
+    }
+
+    public function apiVersion($connectAPI)
+    {
+        $url = $connectAPI . '/api/version';
+        $response = Http::get($url);
+        $response_arr = json_decode($response, true);
+
+    }
+
 }

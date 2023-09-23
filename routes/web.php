@@ -1072,6 +1072,12 @@ Route::get('/city/cityNew', function () {
 Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-save');
 Route::get('/city/verification', [CityController::class,'checkDomains'])->name('checkDomains');
 
+Route::get('/city/versionAPICitiesUpdate', [CityController::class,'versionAPICitiesUpdate'])
+    ->name('versionAPICitiesUpdate');
+
+Route::get('/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionController::class,'apiVersion'])
+    ->name('apiVersion');
+
 
 
 /**
@@ -1171,3 +1177,4 @@ Route::get('/android/Universal/startNewProcessExecutionStatus/{doubleOrder}', [U
 
 Route::post('/android/Universal/startNewProcessExecutionStatusPost/', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusPost'])
     ->name('startNewProcessExecutionStatusPost');
+

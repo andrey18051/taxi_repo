@@ -26,6 +26,13 @@ class UniversalAndroidFunctionController extends Controller
         $identificationId,
         $apiVersion
     ) {
+//     dd(  Http::withHeaders([
+////            return  Http::dd()->withHeaders([
+//            "Authorization" => $authorization,
+//            "X-WO-API-APP-ID" => $identificationId,
+//            "X-API-VERSION" => $apiVersion
+//        ])->post($url, $parameter)->body());
+
         return Http::withHeaders([
 //            return  Http::dd()->withHeaders([
             "Authorization" => $authorization,
@@ -683,8 +690,20 @@ class UniversalAndroidFunctionController extends Controller
         $city = City::where('name', $cityString)->first();
         $username = $city->login;
         $password = hash('SHA512', $city->password);
-//        dd($username . " " . $city->password);
         return 'Basic ' . base64_encode($username . ':' . $password);
     }
+    public function apiVersion($name, $address)
+    {
 
+        $url = $address;
+        if (strpos($url, "http://") !== false) {
+            $cleanedUrl = str_replace("http://", "", $url);
+        } else {
+            // Если "http://" не найдено, сохраняем исходный URL
+            $cleanedUrl = $url;
+        }
+        $city = City::where('name', $name)->where('address', $cleanedUrl)->first();
+//dd($city);
+        return $city->toArray()['versionApi'];
+    }
 }

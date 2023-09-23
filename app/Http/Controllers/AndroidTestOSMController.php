@@ -12,6 +12,7 @@ use App\Models\DoubleOrder;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -20,6 +21,9 @@ use SebastianBergmann\Diff\Exception;
 class AndroidTestOSMController extends Controller
 {
 
+    /**
+     * @throws \Exception
+     */
     public function index(): int
     {
         $connectAPI = self::connectApi();
@@ -43,17 +47,19 @@ class AndroidTestOSMController extends Controller
         return config("app.X-WO-API-APP-ID-TEST");
     }
 
+    /**
+     * @throws \Exception
+     */
     public function connectAPI(): string
     {
         return self::onlineAPI();
     }
 
+    /**
+     * @throws \Exception
+     */
     public function costSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $services)
     {
-        /**
-         * Параметры запроса
-         */
-
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
@@ -82,12 +88,7 @@ class AndroidTestOSMController extends Controller
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-
-        $payment_type_info = 'готівка';
-
         $params['route_undefined'] = false; //По городу: True, False
-
-
         $taxiColumnId = config('app.taxiColumnId');
 
         $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
@@ -132,24 +133,24 @@ class AndroidTestOSMController extends Controller
         } else {
             $routTo =   ['name' => $to];
         }
-        $LatLngFrom = UniversalAndroidFunctionController:: geoDataSearch(
+        $LatLngFrom = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
             self::autorization(),
             self::identificationId(),
-            self::apiVersion(),
+            (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI),
             $connectAPI
         );
 
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
 
-        $LatLngTo = UniversalAndroidFunctionController:: geoDataSearch(
+        $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
             self::autorization(),
             self::identificationId(),
-            self::apiVersion(),
+            (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI),
             $connectAPI
         );
         $to_lat = $LatLngTo["lat"];
@@ -175,7 +176,7 @@ class AndroidTestOSMController extends Controller
         $params['to'] = $to;
         $params['to_number'] = $to_number;
 
-        UniversalAndroidFunctionController::saveCost($params);
+        (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -204,12 +205,12 @@ class AndroidTestOSMController extends Controller
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 
-        $response = UniversalAndroidFunctionController::postRequestHTTP(
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
             self::autorization(),
             self::identificationId(),
-            self::apiVersion()
+            (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         );
 
         if ($response->status() == 200) {
@@ -226,10 +227,13 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function orderSearch($from, $from_number, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $date, $services)
     {
-
         $connectAPI = self::connectApi();
+
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -260,25 +264,26 @@ class AndroidTestOSMController extends Controller
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-//        $payment_type_info = 'готівка';
         $payment_type = 0;
 
         $autorization = self::autorization();
 
         if ($userArr[2] == 'bonus_payment') {
-            $authorizationBonus =  UniversalAndroidFunctionController::authorization("BonusTestOne");
-            $authorizationDouble =  UniversalAndroidFunctionController::authorization("BonusTestTwo");
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
         } else {
             $authorizationBonus =  null;
             $authorizationDouble =  null;
         }
         $identificationId = self::identificationId();
-        $apiVersion =  self::apiVersion();
-
+        $apiVersion =  (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI);
 
         $taxiColumnId = config('app.taxiColumnId');
 
+        /**
+         * Откуда
+         */
         $params["from"] = $from;
         $params["from_number"] = $from_number;
         $params["routefromnumber"] =  $from_number;
@@ -334,7 +339,7 @@ class AndroidTestOSMController extends Controller
         } else {
             $routTo =   ['name' => $to];
         }
-        $LatLngFrom = UniversalAndroidFunctionController::geoDataSearch(
+        $LatLngFrom = (new UniversalAndroidFunctionController)->geoDataSearch(
             $from,
             $from_number,
             $autorization,
@@ -345,7 +350,7 @@ class AndroidTestOSMController extends Controller
         $from_lat = $LatLngFrom["lat"];
         $from_lng =  $LatLngFrom["lng"];
 
-        $LatLngTo = UniversalAndroidFunctionController::geoDataSearch(
+        $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
             $autorization,
@@ -424,7 +429,7 @@ class AndroidTestOSMController extends Controller
         ];
 
         if ($authorizationDouble != null) {
-            $response = UniversalAndroidFunctionController::postRequestHTTP(
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
                 $authorizationBonus,
@@ -440,7 +445,7 @@ class AndroidTestOSMController extends Controller
             $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
             $parameter['payment_type'] = 0;
 
-            $responseDouble = UniversalAndroidFunctionController::postRequestHTTP(
+            $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
                 $authorizationDouble,
@@ -455,26 +460,26 @@ class AndroidTestOSMController extends Controller
 
 
         } else {
-            $response = UniversalAndroidFunctionController::postRequestHTTP(
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
                 $autorization,
                 $identificationId,
                 $apiVersion
             );
+            $responseDouble = null;
         }
 
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
             $params["order_cost"] = $response_arr["order_cost"];
-            $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
-            $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+            $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
 
-            UniversalAndroidFunctionController::saveOrder($params, self::identificationId());
+            (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
 
-            $LatLng = UniversalAndroidFunctionController::geoDataSearch(
+            $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
                 $from,
                 $from_number,
                 $autorization,
@@ -485,7 +490,7 @@ class AndroidTestOSMController extends Controller
             $response_ok["from_lat"] = $LatLng["lat"];
             $response_ok["from_lng"] =  $LatLng["lng"];
 
-            $LatLng = UniversalAndroidFunctionController::geoDataSearch(
+            $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
                 $to,
                 $to_number,
                 $autorization,
@@ -502,22 +507,23 @@ class AndroidTestOSMController extends Controller
             $response_ok["currency"] = $response_arr["currency"];
             $response_ok["routefrom"] =  $from;
             $response_ok["routefromnumber"] =   $from_number;
-
             $response_ok["routeto"] =  $to;
             $response_ok["to_number"] =   $to_number;
 
-            $doubleOrder = new DoubleOrder();
-            $doubleOrder ->responseBonusStr = json_encode($responseBonus);
-            $doubleOrder ->responseDoubleStr = json_encode($responseDouble);
-            $doubleOrder ->authorizationBonus = $authorizationBonus;
-            $doubleOrder ->authorizationDouble =$authorizationDouble;
-            $doubleOrder ->connectAPI = $connectAPI;
-            $doubleOrder ->identificationId =  $identificationId;
-            $doubleOrder ->apiVersion = $apiVersion;
-            $doubleOrder->save();
+            if ($responseDouble != null) {
+                $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
+                $doubleOrder = new DoubleOrder();
+                $doubleOrder->responseBonusStr = json_encode($responseBonus);
+                $doubleOrder->responseDoubleStr = json_encode($responseDouble);
+                $doubleOrder->authorizationBonus = $authorizationBonus;
+                $doubleOrder->authorizationDouble = $authorizationDouble;
+                $doubleOrder->connectAPI = $connectAPI;
+                $doubleOrder->identificationId = $identificationId;
+                $doubleOrder->apiVersion = $apiVersion;
+                $doubleOrder->save();
 
-            $response_ok["doubleOrder"] = $doubleOrder->id;
-
+                $response_ok["doubleOrder"] = $doubleOrder->id;
+            }
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');
         } else {
@@ -552,8 +558,6 @@ class AndroidTestOSMController extends Controller
         $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        $reservation = $params['reservation'];
-        $required_time = null;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
         $params['premium'] = 0;
@@ -563,12 +567,7 @@ class AndroidTestOSMController extends Controller
         $params['comment'] = " "; //Комментарий к заказу
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-
-        $payment_type_info = 'готівка';
-
         $params['route_undefined'] = false; //По городу: True, False
-
-
         $taxiColumnId = config('app.taxiColumnId');
 
         if ($originLatitude == $to) {
@@ -619,7 +618,7 @@ class AndroidTestOSMController extends Controller
          * Сохранние расчетов в базе
          */
 
-        UniversalAndroidFunctionController::saveCost($params, self::identificationId());
+        (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -627,8 +626,6 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-
-        $add_cost = 0;
         $parameter = [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -637,7 +634,7 @@ class AndroidTestOSMController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
-            'add_cost' => $add_cost,
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -651,68 +648,16 @@ class AndroidTestOSMController extends Controller
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 
-        $response = UniversalAndroidFunctionController::postRequestHTTP(
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
             self::autorization(),
             self::identificationId(),
-            self::apiVersion()
+            (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         );
 
-
-//        $response = Http::withHeaders([
-//            "Authorization" => self::autorization(),
-//            "X-WO-API-APP-ID" => self::identificationId(),
-//            "X-API-VERSION" => self::apiVersion()
-//        ])->post($url, [
-//            'user_full_name' => null, //Полное имя пользователя
-//            'user_phone' => null, //Телефон пользователя
-//            'client_sub_card' => null,
-//            'required_time' => null, //Время подачи предварительного заказа
-//            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
-//            'route_address_entrance_from' => null,
-//            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
-//            'add_cost' => $add_cost,
-//            'wagon' => 0, //Универсал: True, False
-//            'minibus' => 0, //Микроавтобус: True, False
-//            'premium' => 0, //Машина премиум-класса: True, False
-//            'flexible_tariff_name' => $tariff, //Гибкий тариф
-//            'route_undefined' => $route_undefined, //По городу: True, False
-//            'route' => $rout,
-//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-//            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-//            'extra_charge_codes' =>$extra_charge_codes,
-//            //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-////                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-//        ]);
-//dd($response->body());
         if ($response->status() == 200) {
-            $response_arr = json_decode($response, true);
-
-            $response_ok["from_lat"] = 0;
-            $response_ok["from_lng"] =  0;
-            $response_ok["lat"] = 0;
-            $response_ok["lng"] = 0;
-
-            $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
-            $response_ok["order_cost"] = $response_arr["order_cost"];
-//            $response_ok["add_cost"] = $response_arr["add_cost"];
-//            $response_ok["recommended_add_cost"] = $response_arr["recommended_add_cost"];
-            $response_ok["currency"] = $response_arr["currency"];
-//            $response_ok["discount_trip"] = $response_arr["discount_trip"];
-
-            if ($originLatitude != $to) {
-                $response_ok["routeto"] =  $to;
-                $response_ok["to_number"] =   $to_number;
-            } else {
-                $response_ok["routeto"] = $originLatitude;
-                $response_ok["to_number"] = " ";
-            }
-            $response_ok["routefrom"] = $originLatitude;
-            $response_ok["routefromnumber"] = " ";
-//            dd($response_ok);
-
-            return  response($response_ok, 200)
+            return  response($response, 200)
                 ->header('Content-Type', 'json');
         } else {
             $response_arr = json_decode($response, true);
@@ -725,9 +670,11 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function orderSearchGeo($originLatitude, $originLongitude, $to, $to_number, $tariff, $phone, $user, $add_cost, $time, $comment, $date, $services)
     {
-
         $connectAPI = self::connectApi();
 
         if ($connectAPI == 400) {
@@ -763,10 +710,17 @@ class AndroidTestOSMController extends Controller
         $payment_type = 0;
 
         $autorization = self::autorization();
+
         if ($userArr[2] == 'bonus_payment') {
-            $autorization =  UniversalAndroidFunctionController::authorization("BonusTestOne");
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
+        } else {
+            $authorizationBonus =  null;
+            $authorizationDouble =  null;
         }
+        $identificationId = self::identificationId();
+        $apiVersion =  (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI);
 
         $taxiColumnId = config('app.taxiColumnId');
 
@@ -849,19 +803,18 @@ class AndroidTestOSMController extends Controller
 
         if ($comment == "no_comment") {
             $comment =  "Оператору набрать заказчика и согласовать весь заказ";
-            if ($userArr[2] == 'bonus_payment') {
+            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
         } else {
-            if ($userArr[2] == 'bonus_payment') {
+            if ($userArr[2] == 'bonus_payment'  && $route_undefined) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
         }
 
         $url = $connectAPI . '/api/weborders';
-
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
@@ -889,59 +842,66 @@ class AndroidTestOSMController extends Controller
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 
-        $response = UniversalAndroidFunctionController::postRequestHTTP(
-            $url,
-            $parameter,
-            $autorization,
-            self::identificationId(),
-            self::apiVersion()
-        );
+        if ($authorizationDouble != null) {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
+            $responseBonus = json_decode($response, true);
+            $responseBonus["url"] = $url;
+            $responseBonus["parameter"] = $parameter;
+
+            $originalString = $parameter['user_phone'];
+            $parameter['phone'] = substr($originalString, 0, -1);
+            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
+            $parameter['payment_type'] = 0;
+
+            $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion
+            );
+
+            $responseDouble = json_decode($responseDouble, true);
+            $responseDouble["url"] = $url;
+            $responseDouble["parameter"] = $parameter;
 
 
 
-//        $response = Http::withHeaders([
-////            $response = Http::dd()->withHeaders([
-//            "Authorization" => $autorization,
-//            "X-WO-API-APP-ID" => self::identificationId(),
-//            "X-API-VERSION" => self::apiVersion()
-//        ])->post($url, [
-//            'user_full_name' => $userArr[0], //Полное имя пользователя
-//            'user_phone' => $phone, //Телефон пользователя
-//            'client_sub_card' => null,
-//            'required_time' => $required_time, //Время подачи предварительного заказа
-//            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
-//            'route_address_entrance_from' => null,
-//            'comment' => $comment, //Комментарий к заказу
-//            'add_cost' => $add_cost,
-//            'wagon' => 0, //Универсал: True, False
-//            'minibus' => 0, //Микроавтобус: True, False
-//            'premium' => 0, //Машина премиум-класса: True, False
-//            'flexible_tariff_name' => $tariff, //Гибкий тариф
-//            'route_undefined' => $route_undefined, //По городу: True, False
-//            'route' =>$rout,
-//            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-//            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-//            'extra_charge_codes' =>   $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
-////                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-//        ]);
+        } else {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $autorization,
+                $identificationId,
+                $apiVersion
+            );
+            $responseDouble = null;
+        }
+
 
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
-//            dd($response_arr);
+
             if ($response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
 
-                $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
-                UniversalAndroidFunctionController::saveOrder($params, self::identificationId());
+                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+                (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
                 if ($route_undefined == false) {
-                    $LatLng = UniversalAndroidFunctionController::geoDataSearch(
+                    $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
                         $to,
                         $to_number,
                         $autorization,
                         self::identificationId(),
-                        self::apiVersion(),
+                        (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI),
                         $connectAPI
                     );
                     $response_ok["lat"] = $LatLng["lat"];
@@ -955,22 +915,30 @@ class AndroidTestOSMController extends Controller
                 $response_ok["from_lat"] = $originLatitude;
                 $response_ok["from_lng"] =  $originLongitude;
 
-
-
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
-//                $response_ok["add_cost"] = $add_cost;
-//                $response_ok["recommended_add_cost"] = $add_cost;
+                $response_ok["add_cost"] = $add_cost;
                 $response_ok["currency"] = $response_arr["currency"];
-//                $response_ok["discount_trip"] = $response_arr["discount_trip"];
-
                 $response_ok["routefrom"] = $params['routefrom'];
                 $response_ok["routefromnumber"] = $params['routefromnumber'];
 
-
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $to_number;
-//                dd($response_ok);
+
+                if ($responseDouble != null) {
+                    $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
+                    $doubleOrder = new DoubleOrder();
+                    $doubleOrder->responseBonusStr = json_encode($responseBonus);
+                    $doubleOrder->responseDoubleStr = json_encode($responseDouble);
+                    $doubleOrder->authorizationBonus = $authorizationBonus;
+                    $doubleOrder->authorizationDouble = $authorizationDouble;
+                    $doubleOrder->connectAPI = $connectAPI;
+                    $doubleOrder->identificationId = $identificationId;
+                    $doubleOrder->apiVersion = $apiVersion;
+                    $doubleOrder->save();
+
+                    $response_ok["doubleOrder"] = $doubleOrder->id;
+                }
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
             }
@@ -988,21 +956,24 @@ class AndroidTestOSMController extends Controller
 
                 $response_error["order_cost"] = "0";
                 $response_error["Message"] = $response_arr["Message"];
-//                dd("222");
+
                 return response($response_error, 200)
                     ->header('Content-Type', 'json');
             }
         } else {
             $response_arr = json_decode($response, true);
-//            dd($response_arr);
+
             $response_error["order_cost"] = "0";
             $response_error["Message"] = $response_arr["Message"];
-//            dd($response_error);
+
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function costSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $services)
     {
         $connectAPI = self::connectApi();
@@ -1025,8 +996,6 @@ class AndroidTestOSMController extends Controller
         $params['required_time'] = null; //Время подачи предварительного заказа
         $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
 
-        $reservation = $params['reservation'];
-        $required_time = null;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
         $params['premium'] = 0;
@@ -1037,20 +1006,17 @@ class AndroidTestOSMController extends Controller
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        $payment_type_info = 'готівка';
-
         $params['route_undefined'] = false; //По городу: True, False
 
-
         $taxiColumnId = config('app.taxiColumnId');
-        $to_geo = "Місце призначення";
+
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
             $params['to'] = 'по місту';
         } else {
             $route_undefined = false;
 
-            $osmAddress = OpenStreetMapController::reverse($toLatitude, $toLongitude);
+            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
 
             $params['to_number'] = " ";
             if ($osmAddress == "404") {
@@ -1080,7 +1046,7 @@ class AndroidTestOSMController extends Controller
         }
         $route_undefined = false;
 
-        UniversalAndroidFunctionController::saveCost($params, self::identificationId());
+        (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -1088,12 +1054,7 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-        $add_cost = 0;
-        $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
-        ])->post($url, [
+        $parameter = [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
             'client_sub_card' => null,
@@ -1101,7 +1062,7 @@ class AndroidTestOSMController extends Controller
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
             'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
-            'add_cost' => $add_cost,
+            'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
             'premium' => 0, //Машина премиум-класса: True, False
@@ -1112,8 +1073,15 @@ class AndroidTestOSMController extends Controller
             'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
-        ]);
-//dd($response);
+        ];
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            self::autorization(),
+            self::identificationId(),
+            (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
+        );
+
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
 
@@ -1158,6 +1126,9 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function orderSearchMarkers($originLatitude, $originLongitude, $toLatitude, $toLongitude, $tariff, $phone, $user, $add_cost, $time, $comment, $date, $services)
     {
 
@@ -1197,9 +1168,16 @@ class AndroidTestOSMController extends Controller
 
         $autorization = self::autorization();
         if ($userArr[2] == 'bonus_payment') {
-            $autorization =  UniversalAndroidFunctionController::authorization("BonusTestOne");
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
+        } else {
+            $authorizationBonus =  null;
+            $authorizationDouble =  null;
         }
+        $identificationId = self::identificationId();
+        $apiVersion =  (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI);
+
 
         $params['route_undefined'] = false; //По городу: True, False
 
@@ -1225,6 +1203,7 @@ class AndroidTestOSMController extends Controller
         if ($originLatitude == $toLatitude) {
             $route_undefined = true;
             $params['to'] = 'по місту';
+            $params['to_number'] = " ";
             $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
@@ -1233,7 +1212,7 @@ class AndroidTestOSMController extends Controller
         } else {
             $route_undefined = false;
 
-            $osmAddress = OpenStreetMapController::reverse($toLatitude, $toLongitude);
+            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
 
             $params['to_number'] = " ";
             if ($osmAddress == "404") {
@@ -1279,24 +1258,20 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        $doubleOrder = false;
         if ($comment == "no_comment") {
             $comment =  "Оператору набрать заказчика и согласовать весь заказ";
-            if ($userArr[2] == 'bonus_payment') {
+            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
-                $doubleOrder = true;
             }
         } else {
-            if ($userArr[2] == 'bonus_payment') {
-                $doubleOrder = true;
+            if ($userArr[2] == 'bonus_payment'  && $route_undefined) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
         }
 
         $url = $connectAPI . '/api/weborders';
-
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
@@ -1322,23 +1297,46 @@ class AndroidTestOSMController extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
-        if ($doubleOrder) {
-            UniversalAndroidFunctionController::postRequestHTTPDouble(
+        if ($authorizationDouble != null) {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
-                self::autorization(),
-                UniversalAndroidFunctionController::authorization("BonusTestTwo"),
-                self::identificationId(),
-                self::apiVersion()
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
             );
+            $responseBonus = json_decode($response, true);
+            $responseBonus["url"] = $url;
+            $responseBonus["parameter"] = $parameter;
+
+            $originalString = $parameter['user_phone'];
+            $parameter['phone'] = substr($originalString, 0, -1);
+            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
+            $parameter['payment_type'] = 0;
+
+            $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion
+            );
+
+            $responseDouble = json_decode($responseDouble, true);
+            $responseDouble["url"] = $url;
+            $responseDouble["parameter"] = $parameter;
+
+
+
         } else {
-            $response = UniversalAndroidFunctionController::postRequestHTTP(
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
                 $autorization,
-                self::identificationId(),
-                self::apiVersion()
+                $identificationId,
+                $apiVersion
             );
+            $responseDouble = null;
         }
 
 
@@ -1348,9 +1346,9 @@ class AndroidTestOSMController extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
-                $params['closeReason'] = UIDController::closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
 
-                UniversalAndroidFunctionController::saveOrder($params, self::identificationId());
+                (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
 
                 $response_ok["from_lat"] = $originLatitude;
                 $response_ok["from_lng"] =  $originLongitude;
@@ -1360,12 +1358,27 @@ class AndroidTestOSMController extends Controller
 
                 $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
                 $response_ok["order_cost"] = $response_arr["order_cost"];
+                $response_ok["add_cost"] = $add_cost;
                 $response_ok["currency"] = $response_arr["currency"];
                 $response_ok["routefrom"] = $params['from'];
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
 
+                if ($responseDouble != null) {
+                    $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
+                    $doubleOrder = new DoubleOrder();
+                    $doubleOrder->responseBonusStr = json_encode($responseBonus);
+                    $doubleOrder->responseDoubleStr = json_encode($responseDouble);
+                    $doubleOrder->authorizationBonus = $authorizationBonus;
+                    $doubleOrder->authorizationDouble = $authorizationDouble;
+                    $doubleOrder->connectAPI = $connectAPI;
+                    $doubleOrder->identificationId = $identificationId;
+                    $doubleOrder->apiVersion = $apiVersion;
+                    $doubleOrder->save();
+
+                    $response_ok["doubleOrder"] = $doubleOrder->id;
+                }
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
             }
@@ -1396,6 +1409,9 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function fromSearchGeo($originLatitude, $originLongitude)
     {
 
@@ -1418,11 +1434,14 @@ class AndroidTestOSMController extends Controller
             $response["route_address_from"] = $from;
 
         }
-//        dd($response);
+
         return  response($response, 200)
             ->header('Content-Type', 'json');
     }
 
+    /**
+     * @throws \Exception
+     */
     public function geoLatLanSearch($originLatitude, $originLongitude): array
     {
         $connectAPI = self::connectApi();
@@ -1441,7 +1460,7 @@ class AndroidTestOSMController extends Controller
             $response = Http::withHeaders([
                 "Authorization" => self::autorization(),
                 "X-WO-API-APP-ID" => self::identificationId(),
-                "X-API-VERSION" => self::apiVersion()
+                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
             ])->get($url, [
                 'lat' => $originLatitude,
                 'lng' => $originLongitude,
@@ -1467,7 +1486,9 @@ class AndroidTestOSMController extends Controller
     }
 
 
-
+    /**
+     * @throws \Exception
+     */
     public function autocompleteSearchComboHid($name)
     {
         $connectAPI = self::connectApi();
@@ -1524,7 +1545,7 @@ class AndroidTestOSMController extends Controller
         Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
     }
 
-    private function autorization()
+    private function autorization(): string
     {
 
         $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
@@ -1542,12 +1563,11 @@ class AndroidTestOSMController extends Controller
 
         $url = $connectAPI . '/api/clients/ordershistory';
 
-        $response = Http::withHeaders([
+        return Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url);
-        return $response;
     }
     public function historyUID($uid)
     {
@@ -1559,28 +1579,18 @@ class AndroidTestOSMController extends Controller
 
         $url = $url . $uid;
 
-        $response = Http::withHeaders([
+        return Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url);
-        return $response;
     }
 
-    public function apiVersion()
-    {
-        $connectAPI = self::connectApi();
-
-        $url = $connectAPI . '/api/version';
-        $response = Http::get($url);
-        $response_arr = json_decode($response, true);
-
-        return $response_arr["version"];
-    }
 
     /**
      * Запрос отмены заказа клиентом
-     * @return string
+     * @return string|string[]
+     * @throws \Exception
      */
     public function webordersCancel($uid)
     {
@@ -1590,7 +1600,7 @@ class AndroidTestOSMController extends Controller
         $response = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->put($url);
 
         $json_arrWeb = json_decode($response, true);
@@ -1608,8 +1618,15 @@ class AndroidTestOSMController extends Controller
                 $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
                 break;
         }
-        return response()->json(['response' => $resp_answer]);
+//        dd($resp_answer);
+        return [
+            'response' => $resp_answer,
+        ];
     }
+
+    /**
+     * @throws \Exception
+     */
     public function historyUIDStatus($uid)
     {
         $connectAPI = self::connectApi();
@@ -1618,7 +1635,7 @@ class AndroidTestOSMController extends Controller
         return Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url);
     }
 
@@ -1634,11 +1651,12 @@ class AndroidTestOSMController extends Controller
          */
         $city = "OdessaTest";
 
-        return CityController::cityOnline($city);
+        return (new CityController)->cityOnline($city);
     }
 
     /**
      * Контроль версии улиц и объектов
+     * @throws \Exception
      */
     public function versionComboOdessa(): \Illuminate\Http\RedirectResponse
     {
@@ -1665,7 +1683,7 @@ class AndroidTestOSMController extends Controller
         $json_str = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url, [
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
