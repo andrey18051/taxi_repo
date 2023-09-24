@@ -440,9 +440,9 @@ class AndroidTestOSMController extends Controller
             $responseBonus["url"] = $url;
             $responseBonus["parameter"] = $parameter;
 
-            $originalString = $parameter['user_phone'];
-            $parameter['phone'] = substr($originalString, 0, -1);
-            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
+//            $originalString = $parameter['user_phone'];
+//            $parameter['phone'] = substr($originalString, 0, -1);
+//            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
             $parameter['payment_type'] = 0;
 
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -854,9 +854,9 @@ class AndroidTestOSMController extends Controller
             $responseBonus["url"] = $url;
             $responseBonus["parameter"] = $parameter;
 
-            $originalString = $parameter['user_phone'];
-            $parameter['phone'] = substr($originalString, 0, -1);
-            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
+//            $originalString = $parameter['user_phone'];
+//            $parameter['phone'] = substr($originalString, 0, -1);
+//            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
             $parameter['payment_type'] = 0;
 
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -1309,9 +1309,9 @@ class AndroidTestOSMController extends Controller
             $responseBonus["url"] = $url;
             $responseBonus["parameter"] = $parameter;
 
-            $originalString = $parameter['user_phone'];
-            $parameter['phone'] = substr($originalString, 0, -1);
-            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
+//            $originalString = $parameter['user_phone'];
+//            $parameter['phone'] = substr($originalString, 0, -1);
+//            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
             $parameter['payment_type'] = 0;
 
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(

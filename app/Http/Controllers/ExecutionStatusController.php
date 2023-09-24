@@ -25,8 +25,8 @@ class ExecutionStatusController extends Controller
         DB::table('execution_statuses')->truncate();
         DB::statement('ALTER TABLE execution_statuses AUTO_INCREMENT = 1');
 
-        DB::table('exec_status_histories')->truncate();
-        DB::statement('ALTER TABLE exec_status_histories AUTO_INCREMENT = 1');
+//        DB::table('exec_status_histories')->truncate();
+//        DB::statement('ALTER TABLE exec_status_histories AUTO_INCREMENT = 1');
 
         $exec = new ExecutionStatus();
         $exec->bonus = "WaitingCarSearch";

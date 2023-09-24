@@ -1173,6 +1173,8 @@ Route::get('/android/verifyBlackListUser/{email}/{androidDom}', [UniversalAndroi
  */
 Route::get('/android/Universal/startNewProcessExecutionStatus/{doubleOrder}', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatus'])
     ->name('startNewProcessExecutionStatus');
+Route::get('/android/Universal/startNewProcessExecutionStatusEmu/{doubleOrder}', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusEmu'])
+    ->name('startNewProcessExecutionStatus');
 
 
 Route::post('/android/Universal/startNewProcessExecutionStatusPost/', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusPost'])
