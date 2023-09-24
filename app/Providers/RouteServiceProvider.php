@@ -38,6 +38,11 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
+            Route::prefix('emu')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/emu.php'));
+
             Route::prefix('api')
                 ->middleware('api')
                 ->namespace($this->namespace)
