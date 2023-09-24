@@ -551,8 +551,34 @@ class UniversalAndroidFunctionController extends Controller
                 break;
             }
 
-
         }
+        self::ordersExecStatusHistory(
+            $bonusOrder,
+            "bonus",
+            "Canceled",
+            "снят окончательно"
+        );
+        self::ordersExecStatusHistory(
+            $doubleOrder,
+            "double",
+            "Canceled",
+            "снят окончательно"
+        );
+
+        self::webordersCancel(
+            $bonusOrder,
+            $connectAPI,
+            $authorizationBonus,
+            $identificationId,
+            $apiVersion
+        );
+        self::webordersCancel(
+            $doubleOrder,
+            $connectAPI,
+            $authorizationDouble,
+            $identificationId,
+            $apiVersion
+        );
         return "respString:" . $respString . " - respStringDouble:" . $respStringDouble;
 }
     public function startNewProcessExecutionStatusEmu(
