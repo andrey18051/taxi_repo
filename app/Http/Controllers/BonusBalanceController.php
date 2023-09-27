@@ -9,6 +9,7 @@ use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class BonusBalanceController extends Controller
 {
@@ -43,32 +44,35 @@ class BonusBalanceController extends Controller
         $balance_records->bonusDel = $bonusDel * $bonus_types_size;
         $balance_records->save();
     }
-    public function recordsBloke(
-        $uid
-    ) {
+    public function recordsBloke($uid)
+    {
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 //dd( $order);
-        $email = $order->email;
 
-        $bonusBloke = $order->web_cost;
-        $orderwebs_id = $order->id;
+        $bonusBlockedBalanceRecord = BonusBalance::where("orderwebs_id", $order->id)->first();
+        if (!$bonusBlockedBalanceRecord) {
+            $email = $order->email;
 
-        $user = User::where('email', $email)->get()->toArray();
+            $bonusBloke = $order->web_cost;
+            $orderwebs_id = $order->id;
+
+            $user = User::where('email', $email)->get()->toArray();
 //dd($user);
-        $users_id =  $user[0]['id'];
-        $bonus_types_size = BonusTypes::find(6)->size;
+            $users_id = $user[0]['id'];
+            $bonus_types_size = BonusTypes::find(6)->size;
 
-        $balance_records = new BonusBalance();
-        $balance_records->orderwebs_id = $orderwebs_id;
-        $balance_records->users_id = $users_id;
-        $balance_records->bonus_types_id = 6;
-        $balance_records->bonusBloke = $bonusBloke * $bonus_types_size;
-        $balance_records->save();
+            $balance_records = new BonusBalance();
+            $balance_records->orderwebs_id = $orderwebs_id;
+            $balance_records->users_id = $users_id;
+            $balance_records->bonus_types_id = 6;
+            $balance_records->bonusBloke = $bonusBloke * $bonus_types_size;
+            $balance_records->save();
 
-        $response["bonus"] = $bonusBloke * $bonus_types_size;
+            $response["bonus"] = $bonusBloke * $bonus_types_size;
 
-        return response($response, 200)
-            ->header('Content-Type', 'json');
+            return response($response, 200)
+                ->header('Content-Type', 'json');
+        }
     }
 
     public function userBalance($users_id)
@@ -169,19 +173,6 @@ class BonusBalanceController extends Controller
             ->latest("updated_at")
             ->first();
 
-//        if ($latestBalanceRecord) {
-//            // В $latestBalanceRecord содержится запись с самой поздней датой в поле "updated_at"
-//            // Вы можете использовать эту запись по вашим нуждам
-//            $currentTime = time();
-//            $timeElapsed = $currentTime - strtotime($latestBalanceRecord->updated_at);
-//            if ($timeElapsed >= 24 * 60 * 60) {
-//                self::recordsAdd(0, $users_id, 3, 1);
-//            }
-//        } else {
-//            // Если записей не найдено, вы можете выполнить соответствующие действия
-//            self::recordsAdd(0, $users_id, 3, 1);
-//        }
-
 
         if ($latestBalanceRecord) {
             $daysAgo = now()->subDay()->startOfDay(); // Получить текущую дату и вычесть один день, затем обнулить время.
@@ -214,11 +205,6 @@ class BonusBalanceController extends Controller
 
         $user = User::find($users_id);
 
-//        $orderNotComplete = Orderweb::where("email", $user->email)
-//            ->where(function ($query) {
-//                $query->where("closeReason", "!=", 0)
-//                    ->orWhere("closeReason", "!=", 8);
-//            })->get();
         $orderNotComplete = Orderweb::where("email", $user->email)
             ->where("closeReason", "-1")->get();
 
@@ -270,14 +256,49 @@ class BonusBalanceController extends Controller
          * Разблокировка бонусов
          */
 
-        $bonusBlockedBalanceRecord = BonusBalance::where("bonus_types_id", 6)->get();
+        $totalBonus = BonusBalance::where('users_id', $users_id)->sum('bonusBloke');
 
-        if (!$bonusBlockedBalanceRecord->isEmpty()) {
-            foreach ($bonusBlockedBalanceRecord->toArray() as $value) {
+        if ($totalBonus != 0) {
+            $bonusBlockedBalanceRecord = BonusBalance::where("users_id", $users_id)
+                ->where(function ($query) {
+                    $query->where("bonus_types_id", 4)
+                        ->orWhere("bonus_types_id", 6);
+                })
+//                ->where('orderwebs_id', '!=', 0)
+//                ->select('orderwebs_id', 'bonusBloke')
+                ->get()->toArray();
+
+            $bonusSumByOrderwebsId = [];
+
+            $uniqueArray = [];
+
+            foreach ($bonusBlockedBalanceRecord as $item) {
+                $orderwebsId = $item["orderwebs_id"];
+                $bonusBloke = $item["bonusBloke"];
+
+                // Если запись с таким orderwebs_id уже есть в результате
+                if (isset($bonusSumByOrderwebsId[$orderwebsId])) {
+                    // Обновляем сумму bonusBloke для данного orderwebs_id
+                    $bonusSumByOrderwebsId[$orderwebsId] += $bonusBloke;
+                } else {
+                    // Если записи с таким orderwebs_id нет, добавляем ее в результат
+                    $bonusSumByOrderwebsId[$orderwebsId] = $bonusBloke;
+                }
+            }
+
+// Проходим по уникальным записям и добавляем их в результат
+            foreach ($bonusBlockedBalanceRecord as $item) {
+                $orderwebsId = $item["orderwebs_id"];
+                if ($bonusSumByOrderwebsId[$orderwebsId] !== 0) {
+                    $uniqueArray[] = $item;
+                }
+            }
+//            dd($uniqueArray);
+            foreach ($uniqueArray as $value) {
                 self::historyUIDunBlocked($value['orderwebs_id']);
             }
         }
-    }
+     }
 
     public function historyUID($id)
     {
@@ -299,7 +320,10 @@ class BonusBalanceController extends Controller
             "Authorization" => $autorization,
             "X-WO-API-APP-ID" => $order->comment,
         ])->get($url);
-//dd($response);
+
+        Log::debug("historyUID " . $url);
+
+//        dd($response);
         return $response['order_cost'];
     }
 
@@ -323,7 +347,9 @@ class BonusBalanceController extends Controller
             "Authorization" => $autorization,
             "X-WO-API-APP-ID" => $order['comment'],
         ])->get($url);
-//dd($response["close_reason"]);
+
+        Log::debug("historyUIDunBlocked " . $url);
+
         if ($response["close_reason"] == 0) {
             self::blockBonusToDelete($id);
         };

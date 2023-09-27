@@ -137,9 +137,16 @@ class TypeaheadController extends Controller
 
     public function autocompleteSearchComboHid($name)
     {
-        $combos = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
-        return  $combos->street;
+        $combo = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();
+
+        if ($combo) {
+            return $combo->street;
+        } else {
+            // Обработка случая, когда объект не найден
+            return 1;
+        }
     }
+
 
     public function autocompleteSearchComboHidname()
     {
