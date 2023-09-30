@@ -1905,11 +1905,12 @@ class AndroidPas4001Controller extends Controller
     {
         $connectAPI = self::connectApi();
 
-        $url = $connectAPI . '/api/version';
-        $response = Http::get($url);
-        $response_arr = json_decode($response, true);
-
-        return $response_arr["version"];
+//        $url = $connectAPI . '/api/version';
+//        $response = Http::get($url);
+//        $response_arr = json_decode($response, true);
+//
+//        return $response_arr["version"];
+        return (new UniversalAndroidFunctionController)->apiVersion("Kyiv City", $connectAPI);
     }
 
     private function autorization()

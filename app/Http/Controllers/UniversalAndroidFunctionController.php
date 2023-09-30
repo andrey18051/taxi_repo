@@ -32,1208 +32,34 @@ class UniversalAndroidFunctionController extends Controller
 //            return  Http::dd()->withHeaders([
 //            "Authorization" => $authorization,
 //            "X-WO-API-APP-ID" => $identificationId,
-////            "X-API-VERSION" => $apiVersion
+//            "X-API-VERSION" => $apiVersion
 //        ])->post($url, $parameter)->body();
 
         return Http::withHeaders([
 //            return  Http::dd()->withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
-//            "X-API-VERSION" => $apiVersion
+            "X-API-VERSION" => $apiVersion
         ])->post($url, $parameter);
     }
 
-//    public function startNewProcessExecutionStatus(
-//        $doubleOrderId
-//    ) {
-//        $doubleOrder = DoubleOrder::find($doubleOrderId);
-//
-//        $responseBonusStr = $doubleOrder->responseBonusStr;
-//        $responseDoubleStr = $doubleOrder->responseDoubleStr;
-//        $authorizationBonus = $doubleOrder->authorizationBonus;
-//        $authorizationDouble = $doubleOrder->authorizationDouble;
-//        $connectAPI = $doubleOrder->connectAPI;
-//        $identificationId = $doubleOrder->identificationId;
-//        $apiVersion = $doubleOrder->apiVersion;
-//
-////        $doubleOrder->delete();
-//
-//        $responseBonus = json_decode($responseBonusStr, true);
-//        $responseDouble = json_decode($responseDoubleStr, true);
-//
-//        $startTime = time();
-//
-//        $upDateTimeBonus = $startTime;
-//        $upDateTimeDouble = $startTime;
-//
-//        $maxExecutionTime = 10*60; // Максимальное время выполнения - 4 часа
-////          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
-//        $cancelUID = null;
-//        $bonusOrder = $responseBonus['dispatching_order_uid'];
-//        $doubleOrder = $responseDouble['dispatching_order_uid'];
-//        $newStatusBonus = self::getExecutionStatus(
-//            $authorizationBonus,
-//            $identificationId,
-//            $apiVersion,
-//            $responseBonus["url"],
-//            $bonusOrder
-//        )["execution_status"];
-//        $newStatusDouble = self::getExecutionStatus(
-//            $authorizationDouble,
-//            $identificationId,
-//            $apiVersion,
-//            $responseDouble["url"],
-//            $doubleOrder
-//        )["execution_status"];
-//        $upDateTimeBonusInterval = 5;
-//        $upDateTimeDoubleInterval = 5;
-//
-//        $respString = null;
-//        $respStringDouble = null;
-//
-//        $bonusCancel = false;
-//        $bonusCarFound = false;
-//        $bonusWaitingCarSearch = true;
-//
-//        $doubleCancel = false;
-//        $doubleCarFound = false;
-//        $doubleWaitingCarSearch = true;
-//
-//        self::ordersExecStatusHistory(
-//            $bonusOrder,
-//            "bonus",
-//            $newStatusBonus,
-//            "в работе"
-//        );
-//
-//        self::ordersExecStatusHistory(
-//            $doubleOrder,
-//            "double",
-//            $newStatusDouble,
-//            "в работе"
-//        );
-//        $lastStatusBonus = $newStatusBonus;
-//        $lastStatusBonusTime = time();
-//
-//        $lastStatusDouble = $newStatusDouble;
-//        $lastStatusDoubleTime = time();
-//
-//
-//        while (time() - $startTime < $maxExecutionTime) {
-//
-//            if ($bonusCancel && $doubleCancel) {
-//                self::ordersExecStatusHistory(
-//                    $bonusOrder,
-//                    "bonus",
-//                    "Canceled",
-//                    "снят окончательно"
-//                );
-//                self::ordersExecStatusHistory(
-//                    $doubleOrder,
-//                    "double",
-//                    "Canceled",
-//                    "снят окончательно"
-//                );
-//                break;
-//            }
-//
-//
-//            if (time() - $lastStatusBonusTime >= $upDateTimeBonusInterval) {
-//                $newStatusBonusResp = self::getExecutionStatus(
-//                    $authorizationBonus,
-//                    $identificationId,
-//                    $apiVersion,
-//                    $responseBonus["url"],
-//                    $bonusOrder
-//                );
-//
-//                $newStatusBonus = $newStatusBonusResp["execution_status"];
-//
-//                if ($newStatusBonusResp["close_reason"] == "1") {
-//                    self::ordersExecStatusHistory(
-//                        $bonusOrder,
-//                        "bonus",
-//                        "Canceled",
-//                        "снят окончательно"
-//                    );
-//                    break;
-//                }
-//
-//                $lastStatusBonusTime = time();
-//                switch ($newStatusBonus) {
-//                    case "CarFound":
-//                    case "Running":
-//                        $bonusCancel = false;
-//                        $bonusCarFound = true;
-//                        $bonusWaitingCarSearch = false;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            self::webordersCancel(
-//                                $doubleOrder,
-//                                $connectAPI,
-//                                $authorizationDouble,
-//                                $identificationId,
-//                                $apiVersion
-//                            );
-//                            self::ordersExecStatusHistory(
-//                                $doubleOrder,
-//                                "double",
-//                                "Canceled",
-//                                "снят"
-//                            );
-//                            $doubleCancel = true;
-//                            $upDateTimeBonusInterval = 30;
-//                            $lastStatusBonus = $newStatusBonus;
-//
-//                            $bonusCarFound = true;
-//
-//                            if ($bonusCancel) {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationBonus,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    self::updateExecutionStatusEmu("bonus"),
-//                                    "восстановлен"
-//                                );
-//                                $bonusCancel = false;
-//                                $lastStatusBonus = $newStatusBonus;
-//
-//                                $upDateTimeBonusInterval = 5;
-//                            }
-//                        }
-//                        break;
-//                    case "WaitingCarSearch":
-//                    case "SearchesForCar":
-//                        $bonusCancel = false;
-//                        $bonusCarFound = false;
-//                        $bonusWaitingCarSearch = true;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            if ($doubleCancel) {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationDouble,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//
-//
-//                                $doubleCancel = false;
-//                                $lastStatusDouble = self::getExecutionStatus(
-//                                    $authorizationDouble,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseDouble["url"],
-//                                    $doubleOrder
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                                $lastStatusDoubleTime = time();
-//                            }
-//                            $upDateTimeBonusInterval = 5;
-//                        }
-//                        break;
-//                    case "Canceled":
-//                    case "CostCalculation":
-//                        $bonusCancel = true;
-//                        $bonusCarFound = false;
-//                        $bonusWaitingCarSearch = false;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            if ($doubleWaitingCarSearch) {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationBonus,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//
-//                                $bonusCancel = false;
-//                                $lastStatusBonus = self::getExecutionStatus(
-//                                    $authorizationBonus,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseBonus["url"],
-//                                    $bonusOrder
-//                                );
-//
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    $lastStatusBonus,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            $upDateTimeBonusInterval = 5;
-//                        }
-//
-//                        break;
-//                    case "Executed":
-//                        $bonusCancel = true;
-//                        $bonusCarFound = false;
-//                        $bonusWaitingCarSearch = false;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            if ($doubleWaitingCarSearch) {
-//                                self::webordersCancel(
-//                                    $bonusOrder,
-//                                    $connectAPI,
-//                                    $authorizationBonus,
-//                                    $identificationId,
-//                                    $apiVersion
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    "Canceled",
-//                                    "снят"
-//                                );
-//                                $bonusCancel = true;
-//                                $lastStatusBonus = "Executed";
-//
-//                            } else {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationBonus,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//
-//                                $lastStatusBonus = self::getExecutionStatus(
-//                                    $authorizationBonus,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseBonus["url"],
-//                                    $bonusOrder
-//                                );
-//
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    $lastStatusBonus,
-//                                    "восстановлен"
-//                                );
-//                                $bonusCancel = false;
-//                            }
-//                            self::webordersCancel(
-//                                $doubleOrder,
-//                                $connectAPI,
-//                                $authorizationDouble,
-//                                $identificationId,
-//                                $apiVersion
-//                            );
-//                            self::ordersExecStatusHistory(
-//                                $doubleOrder,
-//                                "double",
-//                                "Canceled",
-//                                "снят"
-//                            );
-//                            $doubleCancel = true;
-//                            $lastStatusDouble = $newStatusBonus;
-//                            $lastStatusDoubleTime = time();
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//
-//                        break;
-//                    default:
-//                        $upDateTimeBonusInterval = 5;
-//                }
-//            }
-//            if (time() - $lastStatusDoubleTime >= $upDateTimeDoubleInterval) {
-//                $newStatusDoubleResp = self::getExecutionStatus(
-//                    $authorizationDouble,
-//                    $identificationId,
-//                    $apiVersion,
-//                    $responseDouble["url"],
-//                    $doubleOrder
-//                );
-//
-//                $newStatusDouble = $newStatusDoubleResp["execution_status"];
-//
-//                if ($newStatusDoubleResp["close_reason"] == "1") {
-//                    self::ordersExecStatusHistory(
-//                        $doubleOrder,
-//                        "double",
-//                        "Canceled",
-//                        "снят окончательно"
-//                    );
-//                    return;
-//                }
-//
-//
-//                $lastStatusDoubleTime = time();
-//                switch ($newStatusDouble) {
-//                    case "CarFound":
-//                    case "Running":
-//                        $doubleWaitingCarSearch = false;
-//
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusCarFound) {
-//                                self::webordersCancel(
-//                                    $doubleOrder,
-//                                    $connectAPI,
-//                                    $authorizationDouble,
-//                                    $identificationId,
-//                                    $apiVersion
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    "bonus status = " . $newStatusBonus,
-//                                    "снят"
-//                                );
-//                                $doubleCancel = true;
-//                            } else {
-//                                self::webordersCancel(
-//                                    $bonusOrder,
-//                                    $connectAPI,
-//                                    $authorizationBonus,
-//                                    $identificationId,
-//                                    $apiVersion
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    "double status = " . $newStatusDouble,
-//                                    "снят"
-//                                );
-//                                $bonusCancel = true;
-//                                $lastStatusBonus = "Canceled";
-//
-//                            }
-//
-//                            $upDateTimeDoubleInterval = 30;
-//                            $lastStatusDouble = $newStatusDouble;
-//
-//
-//                            if ($doubleCancel && $bonusWaitingCarSearch) {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationDouble,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//                                $doubleCancel = false;
-//
-//                                $lastStatusDouble = self::getExecutionStatus(
-//                                    $authorizationDouble,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseDouble["url"],
-//                                    $doubleOrder
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                                $upDateTimeDoubleInterval = 5;
-//                            }
-//                        }
-//                        break;
-//                    case "WaitingCarSearch":
-//                    case "SearchesForCar":
-//                        $doubleCancel = false;
-//                        $doubleCarFound = false;
-//                        $doubleWaitingCarSearch = true;
-//
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusCancel) {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationBonus,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//                                $bonusCancel = false;
-//                                $lastStatusBonus = self::getExecutionStatus(
-//                                    $authorizationBonus,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseBonus["url"],
-//                                    $bonusOrder
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    $lastStatusBonus,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//                        break;
-//                    case "Canceled":
-//                    case "CostCalculation":
-//                        $doubleCancel = true;
-//                        $doubleCarFound = false;
-//                        $doubleWaitingCarSearch = false;
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusWaitingCarSearch) {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationDouble,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//
-//
-//                                $doubleCancel = false;
-//                                $lastStatusDouble = self::getExecutionStatus(
-//                                    $authorizationDouble,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseDouble["url"],
-//                                    $doubleOrder
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//
-//                        break;
-//                    case "Executed":
-//                        $doubleCancel = true;
-//                        $doubleCarFound = false;
-//                        $doubleWaitingCarSearch = false;
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusWaitingCarSearch) {
-//                                self::webordersCancel(
-//                                    $doubleOrder,
-//                                    $connectAPI,
-//                                    $authorizationDouble,
-//                                    $identificationId,
-//                                    $apiVersion
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    "Executed",
-//                                    "снят"
-//                                );
-//                                $doubleCancel = true;
-//                                $lastStatusDouble = "Executed";
-//
-//                            } else {
-//                                $response =  Http::withHeaders([
-//                                    "Authorization" => $authorizationDouble,
-//                                    "X-WO-API-APP-ID" => $identificationId,
-//                                    //            "X-API-VERSION" => $apiVersion
-//                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-//
-//                                $responseArr = json_decode($response, true);
-//                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//
-//
-//                                $doubleCancel = false;
-//                                $lastStatusDouble = self::getExecutionStatus(
-//                                    $authorizationDouble,
-//                                    $identificationId,
-//                                    $apiVersion,
-//                                    $responseDouble["url"],
-//                                    $doubleOrder
-//                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            self::ordersExecStatusHistory(
-//                                $bonusOrder,
-//                                "bonus",
-//                                "Executed",
-//                                "снят"
-//                            );
-//                            $bonusCancel = true;
-//                            $lastStatusBonus = "Executed";
-//
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//
-//                        break;
-//                    default:
-//                        $upDateTimeDoubleInterval = 5;
-//                }
-//            }
-//
-//
-//        }
-//        self::ordersExecStatusHistory(
-//            $bonusOrder,
-//            "bonus",
-//            "Canceled",
-//            "снят окончательно"
-//        );
-//        self::ordersExecStatusHistory(
-//            $doubleOrder,
-//            "double",
-//            "Canceled",
-//            "снят окончательно"
-//        );
-//
-//        self::webordersCancel(
-//            $bonusOrder,
-//            $connectAPI,
-//            $authorizationBonus,
-//            $identificationId,
-//            $apiVersion
-//        );
-//        self::webordersCancel(
-//            $doubleOrder,
-//            $connectAPI,
-//            $authorizationDouble,
-//            $identificationId,
-//            $apiVersion
-//        );
-//        return "respString:" . $respString . " - respStringDouble:" . $respStringDouble;
-//}
-//    public function startNewProcessExecutionStatusEmuOld(
-//        $doubleOrderId
-//    ) {
-//        $doubleOrder = DoubleOrder::find($doubleOrderId);
-//
-//        $responseBonusStr = $doubleOrder->responseBonusStr;
-//        $responseDoubleStr = $doubleOrder->responseDoubleStr;
-//        $authorizationBonus = $doubleOrder->authorizationBonus;
-//        $authorizationDouble = $doubleOrder->authorizationDouble;
-//        $connectAPI = $doubleOrder->connectAPI;
-//        $identificationId = $doubleOrder->identificationId;
-//        $apiVersion = $doubleOrder->apiVersion;
-//
-////        $doubleOrder->delete();
-//
-//        $responseBonus = json_decode($responseBonusStr, true);
-//        $responseDouble = json_decode($responseDoubleStr, true);
-//
-//        $startTime = time();
-//
-//        $upDateTimeBonus = $startTime;
-//        $upDateTimeDouble = $startTime;
-//
-//        $maxExecutionTime = 10*60; // Максимальное время выполнения - 4 часа
-////          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
-//        $cancelUID = null;
-//        $bonusOrder = $responseBonus['dispatching_order_uid'];
-//        $doubleOrder = $responseDouble['dispatching_order_uid'];
-//        $newStatusBonus = self::getExecutionStatusEmu("bonus");
-////        $newStatusBonus = self::getExecutionStatus(
-////            $authorizationBonus,
-////            $identificationId,
-////            $apiVersion,
-////            $responseBonus["url"],
-////            $bonusOrder
-////        )["execution_status"];
-//        $newStatusDouble = self::getExecutionStatusEmu("double");
-////        $newStatusDouble = self::getExecutionStatus(
-////            $authorizationDouble,
-////            $identificationId,
-////            $apiVersion,
-////            $responseDouble["url"],
-////            $doubleOrder
-////        )["execution_status"];
-//        $upDateTimeBonusInterval = 5;
-//        $upDateTimeDoubleInterval = 5;
-//
-//        $respString = null;
-//        $respStringDouble = null;
-//
-//        $bonusCancel = false;
-//        $bonusCarFound = false;
-//        $bonusWaitingCarSearch = true;
-//
-//        $doubleCancel = false;
-//        $doubleCarFound = false;
-//        $doubleWaitingCarSearch = true;
-//
-//        self::ordersExecStatusHistory(
-//            $bonusOrder,
-//            "bonus",
-//            $newStatusBonus,
-//            "в работе"
-//        );
-//
-//        self::ordersExecStatusHistory(
-//            $doubleOrder,
-//            "double",
-//            $newStatusDouble,
-//            "в работе"
-//        );
-//        $lastStatusBonus = $newStatusBonus;
-//        $lastStatusBonusTime = time();
-//
-//        $lastStatusDouble = $newStatusDouble;
-//        $lastStatusDoubleTime = time();
-//
-//
-//        while (time() - $startTime < $maxExecutionTime) {
-//            if ($bonusCancel && $doubleCancel) {
-//                self::ordersExecStatusHistory(
-//                    $bonusOrder,
-//                    "bonus",
-//                    "Canceled",
-//                    "снят окончательно"
-//                );
-//                self::ordersExecStatusHistory(
-//                    $doubleOrder,
-//                    "double",
-//                    "Canceled",
-//                    "снят окончательно"
-//                );
-//                break;
-//            }
-//
-//
-//            if (time() - $lastStatusBonusTime >= $upDateTimeBonusInterval) {
-//                $newStatusBonus = self::getExecutionStatusEmu("bonus");
-////                $newStatusBonusResp = self::getExecutionStatus(
-////                    $authorizationBonus,
-////                    $identificationId,
-////                    $apiVersion,
-////                    $responseBonus["url"],
-////                    $bonusOrder
-////                );
-//
-////                $newStatusBonus = $newStatusBonusResp["execution_status"];
-//
-////                if ($newStatusBonusResp["close_reason"] == "1") {
-////                    self::ordersExecStatusHistory(
-////                        $bonusOrder,
-////                        "bonus",
-////                        "Canceled",
-////                        "снят окончательно"
-////                    );
-////                    break;
-////                }
-//
-//                $lastStatusBonusTime = time();
-//                switch ($newStatusBonus) {
-//                    case "CarFound":
-//                    case "Running":
-//                        $bonusCancel = false;
-//                        $bonusCarFound = true;
-//                        $bonusWaitingCarSearch = false;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-////                            self::webordersCancel(
-////                                $doubleOrder,
-////                                $connectAPI,
-////                                $authorizationDouble,
-////                                $identificationId,
-////                                $apiVersion
-////                            );
-//                            self::ordersExecStatusHistory(
-//                                $doubleOrder,
-//                                "double",
-//                                "Canceled",
-//                                "снят"
-//                            );
-//                            $doubleCancel = true;
-//                            $upDateTimeBonusInterval = 30;
-//                            $lastStatusBonus = $newStatusBonus;
-//
-//                            $bonusCarFound = true;
-//
-//                            if ($bonusCancel) {
-//                                $bonusOrder = "New bonusOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationBonus,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    self::updateExecutionStatusEmu("bonus"),
-//                                    "восстановлен"
-//                                );
-//                                $bonusCancel = false;
-//                                $lastStatusBonus = $newStatusBonus;
-//
-//                                $upDateTimeBonusInterval = 5;
-//                            }
-//                        }
-//                        break;
-//                    case "WaitingCarSearch":
-//                    case "SearchesForCar":
-//                        $bonusCancel = false;
-//                        $bonusCarFound = false;
-//                        $bonusWaitingCarSearch = true;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            if ($doubleCancel) {
-//                                $doubleOrder = "New doubleOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationDouble,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//
-//
-//                                $doubleCancel = false;
-//                                $lastStatusDouble = self::updateExecutionStatusEmu("double");
-////                                $lastStatusDouble = self::getExecutionStatus(
-////                                    $authorizationDouble,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseDouble["url"],
-////                                    $doubleOrder
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                                $lastStatusDoubleTime = time();
-//                            }
-//                            $upDateTimeBonusInterval = 5;
-//                        }
-//                        break;
-//                    case "Canceled":
-//                    case "CostCalculation":
-//                        $bonusCancel = true;
-//                        $bonusCarFound = false;
-//                        $bonusWaitingCarSearch = false;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            if ($doubleWaitingCarSearch) {
-//                                $bonusOrder = "New bonusOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationBonus,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//
-//                                $bonusCancel = false;
-//                                $lastStatusBonus = self::updateExecutionStatusEmu("bonus");
-////                                $lastStatusBonus = self::getExecutionStatus(
-////                                    $authorizationBonus,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseBonus["url"],
-////                                    $bonusOrder
-////                                );
-//
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    $lastStatusBonus,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            $upDateTimeBonusInterval = 5;
-//                        }
-//
-//                        break;
-//                    case "Executed":
-//                        $bonusCancel = true;
-//                        $bonusCarFound = false;
-//                        $bonusWaitingCarSearch = false;
-//                        if ($lastStatusBonus != $newStatusBonus) {
-//                            if ($doubleWaitingCarSearch) {
-////                                self::webordersCancel(
-////                                    $bonusOrder,
-////                                    $connectAPI,
-////                                    $authorizationBonus,
-////                                    $identificationId,
-////                                    $apiVersion
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    "Canceled",
-//                                    "снят"
-//                                );
-//                                $bonusCancel = true;
-//                                $lastStatusBonus = "Executed";
-//
-//                            } else {
-//                                $bonusOrder = "New bonusOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationBonus,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//                                  $lastStatusBonus = self::updateExecutionStatusEmu("bonus");
-////                                $lastStatusBonus = self::getExecutionStatus(
-////                                    $authorizationBonus,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseBonus["url"],
-////                                    $bonusOrder
-////                                );
-//
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    $lastStatusBonus,
-//                                    "восстановлен"
-//                                );
-//                                $bonusCancel = false;
-//                            }
-////                            self::webordersCancel(
-////                                $doubleOrder,
-////                                $connectAPI,
-////                                $authorizationDouble,
-////                                $identificationId,
-////                                $apiVersion
-////                            );
-//                            self::ordersExecStatusHistory(
-//                                $doubleOrder,
-//                                "double",
-//                                "Canceled",
-//                                "снят"
-//                            );
-//                            $doubleCancel = true;
-//                            $lastStatusDouble = $newStatusBonus;
-//                            $lastStatusDoubleTime = time();
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//
-//                        break;
-//                    default:
-//                        $upDateTimeBonusInterval = 5;
-//                }
-//            }
-//            if (time() - $lastStatusDoubleTime >= $upDateTimeDoubleInterval) {
-//                $newStatusDouble = self::getExecutionStatusEmu("double");
-////                $newStatusDoubleResp = self::getExecutionStatus(
-////                    $authorizationDouble,
-////                    $identificationId,
-////                    $apiVersion,
-////                    $responseDouble["url"],
-////                    $doubleOrder
-////                );
-////
-////                $newStatusDouble = $newStatusDoubleResp["execution_status"];
-////
-////                if ($newStatusDoubleResp["close_reason"] == "1") {
-////                    self::ordersExecStatusHistory(
-////                        $doubleOrder,
-////                        "double",
-////                        "Canceled",
-////                        "снят окончательно"
-////                    );
-////                    return;
-////                }
-//
-//
-//                $lastStatusDoubleTime = time();
-//                switch ($newStatusDouble) {
-//                    case "CarFound":
-//                    case "Running":
-//                        $doubleWaitingCarSearch = false;
-//
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusCarFound) {
-////                                self::webordersCancel(
-////                                    $doubleOrder,
-////                                    $connectAPI,
-////                                    $authorizationDouble,
-////                                    $identificationId,
-////                                    $apiVersion
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    "bonus status = " . $newStatusBonus,
-//                                    "снят"
-//                                );
-//                                $doubleCancel = true;
-//                            } else {
-////                                self::webordersCancel(
-////                                    $bonusOrder,
-////                                    $connectAPI,
-////                                    $authorizationBonus,
-////                                    $identificationId,
-////                                    $apiVersion
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    "double status = " . $newStatusDouble,
-//                                    "снят"
-//                                );
-//                                $bonusCancel = true;
-//                                $lastStatusBonus = "Canceled";
-//
-//                            }
-//
-//                            $upDateTimeDoubleInterval = 30;
-//                            $lastStatusDouble = $newStatusDouble;
-//
-//
-//                            if ($doubleCancel && $bonusWaitingCarSearch) {
-//                                $doubleOrder = "New doubleOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationDouble,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//                                $doubleCancel = false;
-//                                $lastStatusDouble = self::updateExecutionStatusEmu("double");
-////                                $lastStatusDouble = self::getExecutionStatus(
-////                                    $authorizationDouble,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseDouble["url"],
-////                                    $doubleOrder
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                                $upDateTimeDoubleInterval = 5;
-//                            }
-//                        }
-//                        break;
-//                    case "WaitingCarSearch":
-//                    case "SearchesForCar":
-//                        $doubleCancel = false;
-//                        $doubleCarFound = false;
-//                        $doubleWaitingCarSearch = true;
-//
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusCancel) {
-//                                $bonusOrder = "New bonusOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationBonus,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseBonus['url'], $responseBonus['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $bonusOrder = $responseArr["dispatching_order_uid"];
-//
-//                                $bonusCancel = false;
-//                                $lastStatusBonus = self::updateExecutionStatusEmu("bonus");
-////                                $lastStatusBonus = self::getExecutionStatus(
-////                                    $authorizationBonus,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseBonus["url"],
-////                                    $bonusOrder
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $bonusOrder,
-//                                    "bonus",
-//                                    $lastStatusBonus,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//                        break;
-//                    case "Canceled":
-//                    case "CostCalculation":
-//                        $doubleCancel = true;
-//                        $doubleCarFound = false;
-//                        $doubleWaitingCarSearch = false;
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusWaitingCarSearch) {
-//                                $doubleOrder = "New doubleOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationDouble,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//
-//
-//                                $doubleCancel = false;
-//
-//                                $lastStatusDouble = self::updateExecutionStatusEmu("double");
-////                                $lastStatusDouble = self::getExecutionStatus(
-////                                    $authorizationDouble,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseDouble["url"],
-////                                    $doubleOrder
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//
-//                        break;
-//                    case "Executed":
-//                        $doubleCancel = true;
-//                        $doubleCarFound = false;
-//                        $doubleWaitingCarSearch = false;
-//                        if ($lastStatusDouble != $newStatusDouble) {
-//                            if ($bonusWaitingCarSearch) {
-////                                self::webordersCancel(
-////                                    $doubleOrder,
-////                                    $connectAPI,
-////                                    $authorizationDouble,
-////                                    $identificationId,
-////                                    $apiVersion
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    "Executed",
-//                                    "снят"
-//                                );
-//                                $doubleCancel = true;
-//                                $lastStatusDouble = "Executed";
-//
-//                            } else {
-//                                $doubleOrder = "New doubleOrder UID";
-////                                $response =  Http::withHeaders([
-////                                    "Authorization" => $authorizationDouble,
-////                                    "X-WO-API-APP-ID" => $identificationId,
-////                                    //            "X-API-VERSION" => $apiVersion
-////                                ])->post($responseDouble['url'], $responseDouble['parameter']);
-////
-////                                $responseArr = json_decode($response, true);
-////                                $doubleOrder = $responseArr["dispatching_order_uid"];
-//
-//
-//                                $doubleCancel = false;
-//                                $lastStatusDouble = self::updateExecutionStatusEmu("double");
-////                                $lastStatusDouble = self::getExecutionStatus(
-////                                    $authorizationDouble,
-////                                    $identificationId,
-////                                    $apiVersion,
-////                                    $responseDouble["url"],
-////                                    $doubleOrder
-////                                );
-//                                self::ordersExecStatusHistory(
-//                                    $doubleOrder,
-//                                    "double",
-//                                    $lastStatusDouble,
-//                                    "восстановлен"
-//                                );
-//
-//                            }
-//                            self::ordersExecStatusHistory(
-//                                $bonusOrder,
-//                                "bonus",
-//                                "Executed",
-//                                "снят"
-//                            );
-//                            $bonusCancel = true;
-//                            $lastStatusBonus = "Executed";
-//
-//                            $upDateTimeDoubleInterval = 5;
-//                        }
-//
-//                        break;
-//                    default:
-//                        $upDateTimeDoubleInterval = 5;
-//                }
-//            }
-//
-//
-//        }
-//        self::ordersExecStatusHistory(
-//            $bonusOrder,
-//            "bonus",
-//            "Canceled",
-//            "снят окончательно"
-//        );
-//        self::ordersExecStatusHistory(
-//            $doubleOrder,
-//            "double",
-//            "Canceled",
-//            "снят окончательно"
-//        );
-//
-//        self::webordersCancel(
-//            $bonusOrder,
-//            $connectAPI,
-//            $authorizationBonus,
-//            $identificationId,
-//            $apiVersion
-//        );
-//        self::webordersCancel(
-//            $doubleOrder,
-//            $connectAPI,
-//            $authorizationDouble,
-//            $identificationId,
-//            $apiVersion
-//        );
-//        return "respString:" . $respString . " - respStringDouble:" . $respStringDouble;
-//}
     public function startNewProcessExecutionStatusEmu($doubleOrderId)
     {
-        $doubleOrder = DoubleOrder::find($doubleOrderId);
+        $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
 
-        $responseBonusStr = $doubleOrder->responseBonusStr;
-        $responseDoubleStr = $doubleOrder->responseDoubleStr;
-        $authorizationBonus = $doubleOrder->authorizationBonus;
-        $authorizationDouble = $doubleOrder->authorizationDouble;
-        $connectAPI = $doubleOrder->connectAPI;
-        $identificationId = $doubleOrder->identificationId;
-        $apiVersion = $doubleOrder->apiVersion;
+        $responseBonusStr = $doubleOrderRecord->responseBonusStr;
+        $responseDoubleStr = $doubleOrderRecord->responseDoubleStr;
+        $authorizationBonus = $doubleOrderRecord->authorizationBonus;
+        $authorizationDouble = $doubleOrderRecord->authorizationDouble;
+        $connectAPI = $doubleOrderRecord->connectAPI;
+        $identificationId = $doubleOrderRecord->identificationId;
+        $apiVersion = $doubleOrderRecord->apiVersion;
 
 //        $doubleOrder->delete();
 
 
 
-        $maxExecutionTime = 10*60; // Максимальное время выполнения - 4 часа
+        $maxExecutionTime = 5*60; // Максимальное время выполнения - 4 часа
 //          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
         $startTime = time();
 
@@ -1262,7 +88,6 @@ class UniversalAndroidFunctionController extends Controller
             default:
                 $upDateTimeBonusInterval = 30;
         }
-
         $newStatusDouble = self::newStatus(
             $authorizationDouble,
             $identificationId,
@@ -1282,26 +107,27 @@ class UniversalAndroidFunctionController extends Controller
                 $upDateTimeDoubleInterval = 30;
         }
 
+        $canceledAll = self::canceledFinish(
+            $lastStatusBonus,
+            $lastStatusDouble
+        );
+        Log::debug("canceledFinish" . $canceledAll);
+        if ($canceledAll) {
+            $doubleOrderRecord->delete();
+            return "finish Canceled by User";
+        };
 
-        $respString = null;
-        $respStringDouble = null;
 
-        $bonusCancel = false;
-        $bonusCarFound = false;
-        $bonusWaitingCarSearch = true;
+        while (time() - $startTime < $maxExecutionTime && $canceledAll == false) {
+            $canceledAll = self::canceledFinish(
+                $lastStatusBonus,
+                $lastStatusDouble
+            );
 
-        $doubleCancel = false;
-        $doubleCarFound = false;
-        $doubleWaitingCarSearch = true;
-
-        while (time() - $startTime < $maxExecutionTime) {
-            if (self::canceledFinish(
-                $bonusCancel,
-                $bonusOrder,
-                $doubleCancel,
-                $doubleOrder
-            )) {
-                return "finish Canceled by User";
+            if ($canceledAll) {
+                Log::debug("canceledFinish" . $canceledAll);
+                $doubleOrderRecord->delete();
+                break;
             }
 
             if (time() - $lastStatusBonusTime >= $upDateTimeBonusInterval) {
@@ -1322,7 +148,7 @@ class UniversalAndroidFunctionController extends Controller
                     default:
                         $upDateTimeBonusInterval = 30;
                 }
-
+                Log::debug(" Bonus " . " newStatusBonus: " . $newStatusBonus . "newStatusDouble" . $newStatusDouble);
                 switch ($newStatusBonus) {
                     case "SearchesForCar":
                         switch ($newStatusDouble) {
@@ -1385,7 +211,7 @@ class UniversalAndroidFunctionController extends Controller
                                     }
                                 }
                                 //Восстановление Double
-                                if ($doubleCancel) {
+//                                if ($doubleCancel) {
                                     $doubleOrder = self::orderNewCreat(
                                         $authorizationDouble,
                                         $identificationId,
@@ -1409,7 +235,7 @@ class UniversalAndroidFunctionController extends Controller
                                             break;
                                         default:
                                             $upDateTimeDoubleInterval = 30;
-                                    }
+//                                    }
                                     $doubleCancel = false;
                                 }
                                 break;
@@ -1477,7 +303,7 @@ class UniversalAndroidFunctionController extends Controller
                                     }
                                 }
                                 //Восстановление Double
-                                if ($doubleCancel) {
+                                //                                if ($doubleCancel) {
                                     $doubleOrder = self::orderNewCreat(
                                         $authorizationDouble,
                                         $identificationId,
@@ -1501,7 +327,7 @@ class UniversalAndroidFunctionController extends Controller
                                             break;
                                         default:
                                             $upDateTimeDoubleInterval = 30;
-                                    }
+//                                    }
                                     $doubleCancel = false;
                                 }
                                 break;
@@ -1671,7 +497,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Executed":
                                     case "CostCalculation":
                                         //Восстановление Bonus
-                                        if ($bonusCancel) {
+//                                        if ($bonusCancel) {
                                             $bonusOrder = self::orderNewCreat(
                                                 $authorizationBonus,
                                                 $identificationId,
@@ -1695,7 +521,7 @@ class UniversalAndroidFunctionController extends Controller
                                                     break;
                                                 default:
                                                     $upDateTimeBonusInterval = 30;
-                                            }
+//                                            }
                                             $bonusCancel = false;
                                         }
                                         //Опрос Double
@@ -1754,7 +580,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Executed":
                                     case "CostCalculation":
                                         //Восстановление Bonus
-                                        if ($bonusCancel) {
+//                                        if ($bonusCancel) {
                                             $bonusOrder = self::orderNewCreat(
                                                 $authorizationBonus,
                                                 $identificationId,
@@ -1778,7 +604,7 @@ class UniversalAndroidFunctionController extends Controller
                                                     break;
                                                 default:
                                                     $upDateTimeBonusInterval = 30;
-                                            }
+//                                            }
                                             $bonusCancel = false;
                                         }
                                         //Опрос Double
@@ -1901,7 +727,7 @@ class UniversalAndroidFunctionController extends Controller
                             case "SearchesForCar":
                             case "WaitingCarSearch":
                                 //Восстановление Bonus
-                                if ($bonusCancel) {
+//                                if ($bonusCancel) {
                                     $bonusOrder = self::orderNewCreat(
                                         $authorizationBonus,
                                         $identificationId,
@@ -1925,7 +751,7 @@ class UniversalAndroidFunctionController extends Controller
                                             break;
                                         default:
                                             $upDateTimeBonusInterval = 30;
-                                    }
+//                                    }
                                     $bonusCancel = false;
                                 }
                                 //Опрос Double
@@ -2003,7 +829,7 @@ class UniversalAndroidFunctionController extends Controller
                     default:
                         $upDateTimeDoubleInterval = 30;
                 }
-
+                Log::debug(" Double " . " newStatusBonus: " . $newStatusBonus . "newStatusDouble" . $newStatusDouble);
                 switch ($newStatusDouble) {
                     case "SearchesForCar":
                         switch ($newStatusBonus) {
@@ -2067,7 +893,7 @@ class UniversalAndroidFunctionController extends Controller
                                     }
                                 }
                                 //Восстановление Bonus
-                                if ($bonusCancel) {
+//                                if ($bonusCancel) {
                                     $bonusOrder = self::orderNewCreat(
                                         $authorizationBonus,
                                         $identificationId,
@@ -2091,7 +917,7 @@ class UniversalAndroidFunctionController extends Controller
                                             break;
                                         default:
                                             $upDateTimeBonusInterval = 30;
-                                    }
+//                                    }
                                     $bonusCancel = false;
                                 }
                                 break;
@@ -2159,7 +985,7 @@ class UniversalAndroidFunctionController extends Controller
                                     }
                                 }
                                 //Восстановление Bonus
-                                if ($bonusCancel) {
+//                                if ($bonusCancel) {
                                     $bonusOrder = self::orderNewCreat(
                                         $authorizationBonus,
                                         $identificationId,
@@ -2183,7 +1009,7 @@ class UniversalAndroidFunctionController extends Controller
                                             break;
                                         default:
                                             $upDateTimeBonusInterval = 30;
-                                    }
+//                                    }
                                     $bonusCancel = false;
                                 }
                                 break;
@@ -2403,7 +1229,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Executed":
                                     case "CostCalculation":
                                         //Восстановление Double
-                                        if ($doubleCancel) {
+//                                        if ($doubleCancel) {
                                             $doubleOrder = self::orderNewCreat(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -2427,7 +1253,7 @@ class UniversalAndroidFunctionController extends Controller
                                                     break;
                                                 default:
                                                     $upDateTimeDoubleInterval = 30;
-                                            }
+//                                            }
                                             $doubleCancel = false;
                                         }
                                         //Опрос Bonus
@@ -2475,7 +1301,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Executed":
                                     case "CostCalculation":
                                         //Восстановление Double
-                                        if ($doubleCancel) {
+//                                        if ($doubleCancel) {
                                             $doubleOrder = self::orderNewCreat(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -2499,7 +1325,7 @@ class UniversalAndroidFunctionController extends Controller
                                                     break;
                                                 default:
                                                     $upDateTimeDoubleInterval = 30;
-                                            }
+//                                            }
                                             $doubleCancel = false;
                                         }
                                         //Опрос Bonus
@@ -2621,7 +1447,7 @@ class UniversalAndroidFunctionController extends Controller
                             case "SearchesForCar":
                             case "WaitingCarSearch":
                                 //Восстановление Double
-                                if ($doubleCancel) {
+//                                if ($doubleCancel) {
                                     $doubleOrder = self::orderNewCreat(
                                         $authorizationDouble,
                                         $identificationId,
@@ -2645,7 +1471,7 @@ class UniversalAndroidFunctionController extends Controller
                                             break;
                                         default:
                                             $upDateTimeDoubleInterval = 30;
-                                    }
+//                                    }
                                     $doubleCancel = false;
                                 }
                                 //Опрос Bonus
@@ -2720,6 +1546,7 @@ class UniversalAndroidFunctionController extends Controller
             $identificationId,
             $apiVersion
         );
+        $doubleOrderRecord->delete();
         return "finish by time is out";
     }
 
@@ -2732,47 +1559,41 @@ class UniversalAndroidFunctionController extends Controller
         $orderType
     ) {
         $newStatus = self::getExecutionStatusEmu("bonus");
-//        $newStatus = self::getExecutionStatus(
-//            $authorization,
-//            $identificationId,
-//            $apiVersion,
-//            $url,
-//            $order
-//        )["execution_status"];
+        $newStatus = self::getExecutionStatus(
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $url,
+            $order
+        )["execution_status"];
+
+        $message = "в работе";
+        if ($newStatus == "Canceled") {
+            $message = "закрыт";
+        }
 
         self::ordersExecStatusHistory(
             $order,
             $orderType,
             $newStatus,
-            "в работе"
+            $message
         );
+        Log::debug("function newStatus: " . $newStatus);
         return $newStatus;
     }
 
     public function canceledFinish(
-        $bonusCancel,
-        $bonusOrder,
-        $doubleCancel,
-        $doubleOrder
+        $lastStatusBonus,
+        $lastStatusDouble
     ): bool {
-        if ($bonusCancel && $doubleCancel) {
-            self::ordersExecStatusHistory(
-                $bonusOrder,
-                "bonus",
-                "Canceled",
-                "снят окончательно"
-            );
-            self::ordersExecStatusHistory(
-                $doubleOrder,
-                "double",
-                "Canceled",
-                "снят окончательно"
-            );
-            return true;
-        } else {
-            return false;
+        $canceledAll = false;
+        if ($lastStatusBonus == "Canceled" && $lastStatusDouble == "Canceled") {
+            $canceledAll = true;
+            Log::debug("function canceledFinish: " . $canceledAll);
         }
+        return $canceledAll;
     }
+
     public function orderCanceled(
         $order,
         $orderType,
@@ -2795,6 +1616,7 @@ class UniversalAndroidFunctionController extends Controller
             "Canceled",
             "снят"
         );
+        Log::debug("function orderCanceled: ". $order);
     }
 
     public function orderNewCreat(
@@ -2805,14 +1627,14 @@ class UniversalAndroidFunctionController extends Controller
         $parameter
     ): string {
         $order = "New UID ";
-//        $response = Http::withHeaders([
-//            "Authorization" => $authorization,
-//            "X-WO-API-APP-ID" => $identificationId,
-//            //            "X-API-VERSION" => $apiVersion
-//        ])->post($url, $parameter);
-//
-//        $responseArr = json_decode($response, true);
-//        $order = $responseArr["dispatching_order_uid"];
+        $response = Http::withHeaders([
+            "Authorization" => $authorization,
+            "X-WO-API-APP-ID" => $identificationId,
+            "X-API-VERSION" => $apiVersion
+        ])->post($url, $parameter);
+
+        $responseArr = json_decode($response, true);
+        $order = $responseArr["dispatching_order_uid"];
         Log::debug(" orderNewCreat: " . $url . $order);
         return $order;
     }
@@ -2832,7 +1654,7 @@ class UniversalAndroidFunctionController extends Controller
         $response = Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
-            //            "X-API-VERSION" => $apiVersion
+            "X-API-VERSION" => $apiVersion
         ])->get($url);
         $responseArr = json_decode($response, true);
         Log::debug("$url" . "execution_status: " . $responseArr["execution_status"] . " close_reason: " . $responseArr["close_reason"]);
@@ -2878,8 +1700,9 @@ class UniversalAndroidFunctionController extends Controller
         Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
-            //            "X-API-VERSION" => $apiVersion
+            "X-API-VERSION" => $apiVersion
         ])->put($url);
+        Log::debug("function webordersCancel: " . $url);
     }
 
     public function ordersExecStatusHistory(
@@ -3090,7 +1913,7 @@ class UniversalAndroidFunctionController extends Controller
         $response = Http::withHeaders([
             "Authorization" => $autorization,
             "X-WO-API-APP-ID" => $identificationId,
-            //            "X-API-VERSION" => $apiVersion
+            "X-API-VERSION" => $apiVersion
         ])->get($url, [
             'q' => $to, //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -3145,7 +1968,7 @@ class UniversalAndroidFunctionController extends Controller
         $response = Http::withHeaders([
             "Authorization" => $autorization,
             "X-WO-API-APP-ID" => $identificationId,
-            //            "X-API-VERSION" => $apiVersion
+            "X-API-VERSION" => $apiVersion
         ])->get($url, [
             'q' => $to, //Обязательный. Несколько букв для поиска объекта.
             'offset' => 0, //Смещение при выборке (сколько пропустить).
@@ -3185,7 +2008,7 @@ class UniversalAndroidFunctionController extends Controller
         return Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
-            //            "X-API-VERSION" => $apiVersion
+            "X-API-VERSION" => $apiVersion
         ])->get($url);
     }
 

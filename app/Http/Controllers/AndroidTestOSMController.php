@@ -72,7 +72,23 @@ class AndroidTestOSMController extends Controller
             $tariff = null;
         }
 
-        $params['user_full_name'] = $user;
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+
+        if ($userArr[2] == 'bonus_payment') {
+            $authorization =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $payment_type = 1;
+        } else {
+            $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
+            $payment_type = 0;
+        }
+
         $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
@@ -136,7 +152,7 @@ class AndroidTestOSMController extends Controller
         $LatLngFrom = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
-            self::autorization(),
+            $authorization,
             self::identificationId(),
             (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI),
             $connectAPI
@@ -148,7 +164,7 @@ class AndroidTestOSMController extends Controller
         $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
-            self::autorization(),
+            $authorization,
             self::identificationId(),
             (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI),
             $connectAPI
@@ -200,15 +216,15 @@ class AndroidTestOSMController extends Controller
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
-
+//dd($parameter);
         $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
-            self::autorization(),
+            $authorization,
             self::identificationId(),
             (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         );
@@ -264,9 +280,9 @@ class AndroidTestOSMController extends Controller
         $params['add_cost'] = 0; //Добавленная стоимость
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
-        $payment_type = 0;
 
-        $autorization = self::autorization();
+
+        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
 
         if ($userArr[2] == 'bonus_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
@@ -275,6 +291,7 @@ class AndroidTestOSMController extends Controller
         } else {
             $authorizationBonus =  null;
             $authorizationDouble =  null;
+            $payment_type = 0;
         }
         $identificationId = self::identificationId();
         $apiVersion =  (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI);
@@ -342,7 +359,7 @@ class AndroidTestOSMController extends Controller
         $LatLngFrom = (new UniversalAndroidFunctionController)->geoDataSearch(
             $from,
             $from_number,
-            $autorization,
+            $authorization,
             $identificationId,
             $apiVersion,
             $connectAPI
@@ -353,7 +370,7 @@ class AndroidTestOSMController extends Controller
         $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
-            $autorization,
+            $authorization,
             $identificationId,
             $apiVersion,
             $connectAPI
@@ -463,7 +480,7 @@ class AndroidTestOSMController extends Controller
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
-                $autorization,
+                $authorization,
                 $identificationId,
                 $apiVersion
             );
@@ -475,14 +492,15 @@ class AndroidTestOSMController extends Controller
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
-            $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+
+            $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), $authorization, self::identificationId());
 
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
 
             $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
                 $from,
                 $from_number,
-                $autorization,
+                $authorization,
                 self::identificationId(),
                 $apiVersion,
                 $connectAPI
@@ -493,7 +511,7 @@ class AndroidTestOSMController extends Controller
             $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
                 $to,
                 $to_number,
-                $autorization,
+                $authorization,
                 $identificationId,
                 $apiVersion,
                 $connectAPI
@@ -531,6 +549,7 @@ class AndroidTestOSMController extends Controller
 
             $response_error["order_cost"] = 0;
             $response_error["Message"] = $response_arr["Message"];
+//            dd($response_error);
             return  response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
@@ -626,6 +645,8 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
+        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
+
         $parameter = [
             'user_full_name' => null, //Полное имя пользователя
             'user_phone' => null, //Телефон пользователя
@@ -651,7 +672,7 @@ class AndroidTestOSMController extends Controller
         $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
-            self::autorization(),
+            $authorization,
             self::identificationId(),
             (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         );
@@ -709,7 +730,7 @@ class AndroidTestOSMController extends Controller
 
         $payment_type = 0;
 
-        $autorization = self::autorization();
+        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
 
         if ($userArr[2] == 'bonus_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
@@ -877,7 +898,7 @@ class AndroidTestOSMController extends Controller
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
-                $autorization,
+                $authorization,
                 $identificationId,
                 $apiVersion
             );
@@ -893,13 +914,13 @@ class AndroidTestOSMController extends Controller
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
 
-                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), $authorization, self::identificationId());
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
                 if ($route_undefined == false) {
                     $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
                         $to,
                         $to_number,
-                        $autorization,
+                        $authorization,
                         self::identificationId(),
                         (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI),
                         $connectAPI
@@ -1049,7 +1070,7 @@ class AndroidTestOSMController extends Controller
         (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-
+        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
@@ -1077,7 +1098,7 @@ class AndroidTestOSMController extends Controller
         $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
-            self::autorization(),
+            $authorization,
             self::identificationId(),
             (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         );
@@ -1166,7 +1187,7 @@ class AndroidTestOSMController extends Controller
 
         $payment_type = 0;
 
-        $autorization = self::autorization();
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         if ($userArr[2] == 'bonus_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
@@ -1346,7 +1367,8 @@ class AndroidTestOSMController extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
-                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), self::autorization(), self::identificationId());
+
+                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), $autorization, self::identificationId());
 
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
 
@@ -1454,11 +1476,11 @@ class AndroidTestOSMController extends Controller
         }
 
         $url = $connectAPI . '/api/geodata/nearest';
-
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         $r = 50;
         do {
             $response = Http::withHeaders([
-                "Authorization" => self::autorization(),
+                "Authorization" => $autorization,
                 "X-WO-API-APP-ID" => self::identificationId(),
                 "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
             ])->get($url, [
@@ -1545,26 +1567,15 @@ class AndroidTestOSMController extends Controller
         Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
     }
 
-    private function autorization(): string
-    {
-
-        $city = City::where('address', str_replace('http://', '', self::connectApi()))->first();
-
-        $username = $city->login;
-        $password = hash('SHA512', $city->password);
-
-        return 'Basic ' . base64_encode($username . ':' . $password);
-    }
-
     public function myHistory()
     {
 
         $connectAPI = self::connectApi();
 
         $url = $connectAPI . '/api/clients/ordershistory';
-
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         return Http::withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url);
@@ -1578,9 +1589,9 @@ class AndroidTestOSMController extends Controller
         $url = $connectAPI . '/api/weborders/';
 
         $url = $url . $uid;
-
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         return Http::withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url);
@@ -1595,10 +1606,10 @@ class AndroidTestOSMController extends Controller
     public function webordersCancel($uid)
     {
         $connectAPI = self::connectApi();
-
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         $url = $connectAPI . '/api/weborders/cancel/' . $uid;
         $response = Http::withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->put($url);
@@ -1630,10 +1641,11 @@ class AndroidTestOSMController extends Controller
     public function historyUIDStatus($uid)
     {
         $connectAPI = self::connectApi();
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         $url = $connectAPI . '/api/weborders/' . $uid;
 
         return Http::withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url);
@@ -1663,7 +1675,7 @@ class AndroidTestOSMController extends Controller
         $base = env('DB_DATABASE');
         $marker_update = false;
 
-        $authorization = self::autorization();
+        $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         /**
          * Проверка подключения к серверам
          */
@@ -1681,7 +1693,7 @@ class AndroidTestOSMController extends Controller
 
         $url = $connectAPI . '/api/geodata/streets';
         $json_str = Http::withHeaders([
-            "Authorization" => self::autorization(),
+            "Authorization" => $autorization,
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI)
         ])->get($url, [
@@ -1690,6 +1702,7 @@ class AndroidTestOSMController extends Controller
         $json_arr = json_decode($json_str, true);
 //        dd($json_arr);
         $url_ob = $connectAPI . '/api/geodata/objects';
+        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url_ob);

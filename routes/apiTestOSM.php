@@ -79,7 +79,7 @@ Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDom
 Route::get('/android/addUser/{name}/{email}', [AndroidTestOSMController::class, 'addUser'])->name('checkDomain');
 Route::get('/android/verifyBlackListUser/{email}', [AndroidTestOSMController::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
 
-Route::get('/android/startIP', [AndroidTestOSMController::class, 'startIP'])->name('startIP');
+
 
 Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/', [AndroidTestOSMController::class, 'costSearchMarkers'])
     ->name('costSearchMarkers');

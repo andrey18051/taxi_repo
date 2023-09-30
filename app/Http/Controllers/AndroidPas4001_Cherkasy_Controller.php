@@ -1894,12 +1894,12 @@ class AndroidPas4001_Cherkasy_Controller extends Controller
     public function apiVersion()
     {
         $connectAPI = self::connectApi();
-
-        $url = $connectAPI . '/api/version';
-        $response = Http::get($url);
-        $response_arr = json_decode($response, true);
-
-        return $response_arr["version"];
+        return (new UniversalAndroidFunctionController)->apiVersion("Cherkasy Oblast", $connectAPI);
+//        $url = $connectAPI . '/api/version';
+//        $response = Http::get($url);
+//        $response_arr = json_decode($response, true);
+//
+//        return $response_arr["version"];
     }
 
     /**
