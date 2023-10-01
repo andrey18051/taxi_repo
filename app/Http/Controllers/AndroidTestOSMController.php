@@ -570,7 +570,23 @@ class AndroidTestOSMController extends Controller
         if ($tariff == " ") {
             $tariff = null;
         }
-        $params['user_full_name'] = $user;
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+
+        if ($userArr[2] == 'bonus_payment') {
+            $authorization =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $payment_type = 1;
+        } else {
+            $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
+            $payment_type = 0;
+        }
+
         $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
@@ -645,7 +661,6 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
 
         $parameter = [
             'user_full_name' => null, //Полное имя пользователя
@@ -663,7 +678,7 @@ class AndroidTestOSMController extends Controller
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' =>$extra_charge_codes,
             //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
@@ -1010,7 +1025,23 @@ class AndroidTestOSMController extends Controller
             $tariff = null;
         }
 
-        $params['user_full_name'] = $user;
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+
+        if ($userArr[2] == 'bonus_payment') {
+            $authorization =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $payment_type = 1;
+        } else {
+            $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
+            $payment_type = 0;
+        }
+
         $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
@@ -1070,7 +1101,7 @@ class AndroidTestOSMController extends Controller
         (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
+
         $extra_charge_codes = preg_split("/[*]+/", $services);
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
@@ -1091,7 +1122,7 @@ class AndroidTestOSMController extends Controller
             'route_undefined' => $route_undefined, //По городу: True, False
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-            'payment_type' => 0, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
