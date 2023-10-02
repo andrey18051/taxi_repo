@@ -375,7 +375,7 @@ class AndroidPas4001Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
-            'user_full_name' => $user, //Полное имя пользователя
+            'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -782,7 +782,7 @@ class AndroidPas4001Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
-            'user_full_name' => $user, //Полное имя пользователя
+            'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -1285,7 +1285,7 @@ class AndroidPas4001Controller extends Controller
             "X-WO-API-APP-ID" => self::identificationId(),
             "X-API-VERSION" => self::apiVersion()
         ])->post($url, [
-            'user_full_name' => $user, //Полное имя пользователя
+            'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
