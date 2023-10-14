@@ -11,13 +11,10 @@ use App\Models\ExecutionStatus;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
-use function Symfony\Component\Translation\t;
 
 class UniversalAndroidFunctionController extends Controller
 {
@@ -45,6 +42,7 @@ class UniversalAndroidFunctionController extends Controller
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId)
     {
+        ExecStatusHistory::truncate();
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
 
         $responseBonusStr = $doubleOrderRecord->responseBonusStr;
@@ -55,7 +53,7 @@ class UniversalAndroidFunctionController extends Controller
         $identificationId = $doubleOrderRecord->identificationId;
         $apiVersion = $doubleOrderRecord->apiVersion;
 
-//        $doubleOrder->delete();
+        $doubleOrderRecord->delete();
 
 
 

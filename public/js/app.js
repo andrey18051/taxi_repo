@@ -5757,6 +5757,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CloseReasonHome",
@@ -5766,6 +5767,7 @@ __webpack_require__.r(__webpack_exports__);
       close_reason_data: [],
       currentPage: 1,
       totalPages: 0,
+      maxPageLinks: 25,
       filters: {
         id: {
           value: "",
@@ -33622,7 +33624,11 @@ var render = function () {
       ),
       _vm._v(" "),
       _c("smart-pagination", {
-        attrs: { currentPage: _vm.currentPage, totalPages: _vm.totalPages },
+        attrs: {
+          currentPage: _vm.currentPage,
+          totalPages: _vm.totalPages,
+          maxPageLinks: _vm.maxPageLinks,
+        },
         on: {
           "update:currentPage": function ($event) {
             _vm.currentPage = $event

@@ -67,6 +67,7 @@
         <smart-pagination
             :currentPage.sync="currentPage"
             :totalPages="totalPages"
+            :maxPageLinks="maxPageLinks"
         />
     </div>
 
@@ -81,6 +82,7 @@ export default {
         close_reason_data: [],
         currentPage: 1,
         totalPages: 0,
+        maxPageLinks: 25,
         filters: {
             id: { value: "", keys: ["id"] },
             first: { value: "", keys: ["first"] },

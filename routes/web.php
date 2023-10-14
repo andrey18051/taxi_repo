@@ -19,6 +19,7 @@ use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\OpenStreetMapController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServerController;
@@ -1180,3 +1181,15 @@ Route::get('/android/Universal/startNewProcessExecutionStatusEmu/{doubleOrder}',
 Route::post('/android/Universal/startNewProcessExecutionStatusPost/', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusPost'])
     ->name('startNewProcessExecutionStatusPost');
 
+
+/**
+ * Payments
+ */
+Route::get('/android/payment/addRecords/{email}/{value}/', [PaymentController::class, 'addRecord'])
+    ->name('addRecord');
+Route::get('/android/payment/blockedRecord/{uid}', [PaymentController::class, 'blockedRecord'])
+    ->name('blockedRecord');
+Route::get('/android/payment/updateStatus/{email}', [PaymentController::class, 'updateStatus'])
+    ->name('updateStatus');
+Route::get('/android/payment/userBalance/{email}', [PaymentController::class, 'userBalance'])
+    ->name('userBalance');

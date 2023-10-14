@@ -81,7 +81,7 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        if ($userArr[2] == 'bonus_payment') {
+        if ($userArr[2] == 'bonus_payment' || $userArr[2] == 'google_payment') {
             $authorization =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $payment_type = 1;
         } else {
@@ -284,7 +284,7 @@ class AndroidTestOSMController extends Controller
 
         $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
 
-        if ($userArr[2] == 'bonus_payment') {
+        if ($userArr[2] == 'bonus_payment' || $userArr[2] == 'google_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
@@ -410,8 +410,16 @@ class AndroidTestOSMController extends Controller
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
+            if ($userArr[2] == 'google_payment' && $from == $to) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
         } else {
             if ($userArr[2] == 'bonus_payment'  && $from == $to) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'google_payment'  && $from == $to) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -579,7 +587,7 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        if ($userArr[2] == 'bonus_payment') {
+        if ($userArr[2] == 'bonus_payment' || $userArr[2] == 'google_payment') {
             $authorization =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $payment_type = 1;
         } else {
@@ -747,7 +755,7 @@ class AndroidTestOSMController extends Controller
 
         $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
 
-        if ($userArr[2] == 'bonus_payment') {
+        if ($userArr[2] == 'bonus_payment' || $userArr[2] == 'google_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
@@ -843,8 +851,16 @@ class AndroidTestOSMController extends Controller
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
+            if ($userArr[2] == 'google_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
         } else {
             if ($userArr[2] == 'bonus_payment'  && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'google_payment'  && $route_undefined) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -1034,7 +1050,7 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        if ($userArr[2] == 'bonus_payment') {
+        if ($userArr[2] == 'bonus_payment' || $userArr[2] == 'google_payment') {
             $authorization =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $payment_type = 1;
         } else {
@@ -1219,7 +1235,7 @@ class AndroidTestOSMController extends Controller
         $payment_type = 0;
 
         $autorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-        if ($userArr[2] == 'bonus_payment') {
+        if ($userArr[2] == 'bonus_payment' || $userArr[2] == 'google_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
@@ -1316,8 +1332,16 @@ class AndroidTestOSMController extends Controller
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
+            if ($userArr[2] == 'google_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
         } else {
             if ($userArr[2] == 'bonus_payment'  && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'google_payment' && $route_undefined) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -1661,6 +1685,9 @@ class AndroidTestOSMController extends Controller
                 break;
         }
 //        dd($resp_answer);
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb->closeReason = "1";
+        $orderweb->save();
         return [
             'response' => $resp_answer,
         ];
