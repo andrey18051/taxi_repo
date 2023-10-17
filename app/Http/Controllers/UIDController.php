@@ -122,7 +122,9 @@ class UIDController extends Controller
     {
         $order = Orderweb::where("closeReason", "!=", null)
             -> where("server", "!=", null)
-            -> where("comment", "!=", null)->get();
+            -> where("comment", "!=", null)
+            ->orderByDesc('created_at')
+            ->get();
         $response = null;
 //        dd($order->toArray());
         if (!$order->isEmpty()) {
