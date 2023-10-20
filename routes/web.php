@@ -13,6 +13,7 @@ use App\Http\Controllers\BredoGeneratorController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
+use App\Http\Controllers\FondyController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\IPController;
@@ -1193,3 +1194,18 @@ Route::get('/android/payment/updateStatus/{email}', [PaymentController::class, '
     ->name('updateStatus');
 Route::get('/android/payment/userBalance/{email}', [PaymentController::class, 'userBalance'])
     ->name('userBalance');
+
+/**
+ * Fondy
+ */
+Route::get('/fondyData/all', [FondyController::class, 'fondyStatusShowAdmin'])
+    ->name('fondyStatusShowAdmin');
+
+Route::get('/fondyStatusReviewAdmin/{fondy_order_uid}', [FondyController::class, 'fondyStatusReviewAdmin'])
+    ->name('fondyStatusReviewAdmin');
+
+Route::get('/fondyOrderIdStatus/{order_uid}', [FondyController::class, 'fondyOrderIdStatus'])
+    ->name('fondyOrderIdStatus');
+
+Route::get('/fondyOrderIdReverse/{order_uid}', [FondyController::class, 'fondyOrderIdReverse'])
+    ->name('fondyOrderIdReverse');
