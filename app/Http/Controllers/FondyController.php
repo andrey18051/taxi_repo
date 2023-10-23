@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\City;
 use App\Models\Orderweb;
+use App\Models\User;
 use DateInterval;
 use DateTime;
 use Exception;
@@ -300,6 +301,37 @@ class FondyController extends Controller
             $order->save();
         }
     }
+
+    public function handleCallback(Request $request)
+    {
+        Log::debug('handleCallback request->getContent(): ' . $request->getContent());
+        $data = json_decode($request->getContent(), true);
+        Log::debug('handleCallback: ' . $data);
+
+        $callback = file_get_contents('php://input');
+        $callaback_object = json_decode($callback);
+
+        Log::debug('handleCallback: callaback_object ' . $callaback_object);
+
+        // Проверьте IP-адрес запроса, чтобы убедиться, что это запрос от FONDY
+        $allowedIP = '54.154.216.60';
+        $clientIP = $request->ip();
+
+        if ($clientIP !== $allowedIP) {
+            return response('Access Denied', 403);
+        }
+        // Ответ на callback
+        return response('OK', 200);
+    }
+
+    public function getCardToken($email)
+    {
+        $user = User::where('email', $email)->first();
+
+        return ['card_token' => $user->card_token];
+    }
+
+
     public function generateSignature($params)
     {
         // Сортируем параметры по ключам (алфавитный порядок)

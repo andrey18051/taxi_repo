@@ -1718,8 +1718,11 @@ class AndroidTestOSMController extends Controller
         }
 //        dd($resp_answer);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $orderweb->closeReason = "1";
-        $orderweb->save();
+        if ($orderweb) {
+            $orderweb->closeReason = "1";
+            $orderweb->save();
+        }
+
         return [
             'response' => $resp_answer,
         ];

@@ -1209,3 +1209,6 @@ Route::get('/fondyOrderIdStatus/{order_uid}', [FondyController::class, 'fondyOrd
 
 Route::get('/fondyOrderIdReverse/{order_uid}', [FondyController::class, 'fondyOrderIdReverse'])
     ->name('fondyOrderIdReverse');
+
+Route::post('/server-callback', [FondyController::class, 'handleCallback']);
+Route::get('/get-card-token/{email}', [FondyController::class, 'getCardToken']);
