@@ -22,10 +22,12 @@
     </div>
 </div>
 
+<br>
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <p>BlackList</p>
+            <p><b>BlackList</b></p>
             <div class="row">
                 <div class="card col-5">
                     <div class="card-body">
@@ -77,6 +79,44 @@
                         </form>
                     </div>
                 </div>
+            </div>
+        </div>
+</div>
+
+    <br>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <p><b>Payment System</b></p>
+            <div class="row">
+                <div class="card col-5">
+                    <div class="card-body">
+                        <form action="{{ route('setPaySystem') }}">
+                            @csrf
+                            <div class="row">
+                                <label for="pay_system" class="form-label">Change</label>
+                                <select class="form-select" id="pay_system" name="pay_system">
+
+                                        <option>{{$pay_system}}</option>
+                                    @if($pay_system == 'fondy')
+                                        <option>mono</option>
+                                    @else
+                                        <option>fondy</option>
+                                    @endif
+                                </select>
+                            </div>
+                                <!-- Submit button -->
+                            <div class="row">
+                                <button type="submit" class="btn btn-success" style="margin-top: 5px">
+                                    Сохранить
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </div>
 </div>

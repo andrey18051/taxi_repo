@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\Check;
 use App\Models\BlackList;
+use App\Models\Card;
 use App\Models\City;
 use App\Models\DoubleOrder;
 use App\Models\ExecStatusHistory;
@@ -11,6 +12,7 @@ use App\Models\ExecutionStatus;
 use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
+use DateTime;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -2030,5 +2032,150 @@ class UniversalAndroidFunctionController extends Controller
         $city = City::where('name', $name)->where('address', $cleanedUrl)->first();
 //dd($city);
         return $city->toArray()['versionApi'];
+    }
+
+    public function orderIdMemory($order_id, $uid, $pay_system)
+    {
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        switch ($pay_system) {
+            case "fondy_payment":
+                $orderweb->fondy_order_id = $order_id;
+                break;
+            case "mono_payment":
+                $orderweb->mono_order_id = $order_id;
+                break;
+        }
+        $orderweb->pay_system = $pay_system;
+        $orderweb->save();
+    }
+
+    public function getCardToken($email, $pay_system)
+    {
+        $user = User::where('email', $email)->first();
+        $cards = Card::where('pay_system', $pay_system)
+            ->where('user_id', $user->id)
+            ->get();
+
+        $response = [];
+
+        foreach ($cards as $card) {
+            $rectokenLifetimeString = $card->rectoken_lifetime;
+            $rectokenLifetimeDateTime = DateTime::createFromFormat('d.m.Y H:i:s', $rectokenLifetimeString);
+
+            $cardData = [
+                'masked_card' => $card->masked_card,
+                'card_type' => $card->card_type,
+                'bank_name' => $card->bank_name,
+                'rectoken' => $card->rectoken
+            ];
+
+            if ($rectokenLifetimeDateTime instanceof DateTime) {
+                $currentTime = new DateTime();
+
+                if ($rectokenLifetimeDateTime > $currentTime) {
+                    $response[] = $cardData;
+                } else {
+                    $card->delete();
+                    $response[] = $cardData;
+                }
+            } else {
+                $response[] = $cardData;
+            }
+        }
+
+        return response()->json(['cards' => $response]);
+    }
+
+    public function deleteCardToken($rectoken)
+    {
+
+        $card = Card::where('pay_system', 'fondy')
+            ->where('rectoken', $rectoken)
+            ->first();
+
+        $card->delete();
+    }
+
+    public function UIDStatusReview($order)
+    {
+        foreach ($order as $value) {
+            $currentTime = time();
+            $uid = $value["dispatching_order_uid"];
+            $timeElapsed = $currentTime - strtotime($value["updated_at"]);
+            $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5*60;
+
+            $closeReason = $value["closeReason"];
+            $closeReasonI = $value["closeReasonI"];
+
+            $connectAPI =  $value["server"];
+            $identificationId = $value["comment"];
+
+            switch ($closeReason) {
+                case "-1":
+                    if ($timeElapsed >= 60) {
+                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                    }
+                    break;
+                case "0":
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                    switch ($closeReasonI) {
+                        case 1:
+                            if ($timeElapsed5 >= 5 * 60) {
+                                if ($timeElapsed >= 60) {
+                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                };
+                            }
+
+                            break;
+                        case 2:
+                            if ($timeElapsed >= 60 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                        case 3:
+                            if ($timeElapsed >= 24 * 60 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                        case 4:
+                            if ($timeElapsed >= 3 * 24 * 60 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                    }
+                    break;
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                    switch ($closeReasonI) {
+                        case "1":
+                            if ($timeElapsed >= 5 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                        case "2":
+                            if ($timeElapsed >= 60 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                        case "3":
+                            if ($timeElapsed >= 24 * 60 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                        case "4":
+                            if ($timeElapsed >= 3 * 24 * 60 * 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            };
+                            break;
+                    }
+                    break;
+            }
+        }
     }
 }

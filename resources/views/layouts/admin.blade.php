@@ -44,7 +44,7 @@
                             <li><router-link to="/admin/users">Users</router-link></li>
                             <li><router-link to="/admin/services">Services</router-link></li>
                             <li><a href="{{ asset('/services/serviceNew') }}">Services Add</a>
-                            <li><a href="{{ asset('/blacklist') }}">Black List</a>
+                            <li><a href="{{ asset('/blacklist') }}">Android settings</a>
                             <li><router-link to="/admin/closeReason">Close Reason</router-link></li>
                             <li><router-link to="/admin/fondy">Fondy</router-link></li>
                             <li><router-link to="/admin/bonus">Bonuses types</router-link></li>

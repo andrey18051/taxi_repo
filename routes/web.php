@@ -1181,6 +1181,7 @@ Route::get('/android/Universal/startNewProcessExecutionStatusEmu/{doubleOrder}',
 
 Route::post('/android/Universal/startNewProcessExecutionStatusPost/', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusPost'])
     ->name('startNewProcessExecutionStatusPost');
+Route::get('/android/orderIdMemory/{order_id}/{uid}/{pay_system}', [UniversalAndroidFunctionController::class, 'orderIdMemory'])->name('orderIdMemory');
 
 
 /**
@@ -1211,4 +1212,10 @@ Route::get('/fondyOrderIdReverse/{order_uid}', [FondyController::class, 'fondyOr
     ->name('fondyOrderIdReverse');
 
 Route::post('/server-callback', [FondyController::class, 'handleCallback']);
-Route::get('/get-card-token/{email}', [FondyController::class, 'getCardToken']);
+
+
+/**
+ * Token
+ */
+Route::get('/get-card-token/{email}/{pay_system}', [UniversalAndroidFunctionController::class, 'getCardToken']);
+Route::get('/delete-card-token/{rectoken}', [UniversalAndroidFunctionController::class, 'deleteCardToken']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Card;
 use App\Models\City;
 use App\Models\Orderweb;
 use App\Models\User;
@@ -35,12 +36,7 @@ class FondyController extends Controller
         Log::debug($request->all);
     }
 
-    public function orderIdMemory($fondy_order_id, $uid)
-    {
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $orderweb->fondy_order_id = $fondy_order_id;
-        $orderweb->save();
-    }
+
 
     public function fondyStatusShowAdmin(): array
     {
@@ -304,15 +300,6 @@ class FondyController extends Controller
 
     public function handleCallback(Request $request)
     {
-        Log::debug('handleCallback request->getContent(): ' . $request->getContent());
-        $data = json_decode($request->getContent(), true);
-        Log::debug('handleCallback: ' . $data);
-
-        $callback = file_get_contents('php://input');
-        $callaback_object = json_decode($callback);
-
-        Log::debug('handleCallback: callaback_object ' . $callaback_object);
-
         // Проверьте IP-адрес запроса, чтобы убедиться, что это запрос от FONDY
         $allowedIP = '54.154.216.60';
         $clientIP = $request->ip();
@@ -320,16 +307,46 @@ class FondyController extends Controller
         if ($clientIP !== $allowedIP) {
             return response('Access Denied', 403);
         }
+        Log::debug('handleCallback request->getContent(): ' . $request->getContent());
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['sender_email']);
+        Log::debug($data['rectoken']);
+
+        $user = User::where('email', $data['sender_email'])->first();
+
+        if ($user) {
+            $additionalInfo = json_decode($data['additional_info'], true);
+
+            if (isset($additionalInfo['card_type'], $additionalInfo['bank_name'])) {
+                $cardType = $additionalInfo['card_type'];
+                $bankName = $additionalInfo['bank_name'];
+
+                $card = Card::where('pay_system', 'fondy')
+                    ->where('user_id', $user->id)
+                    ->where('rectoken', $data['rectoken'])
+                    ->first();
+
+                if (!$card) {
+                    $card = new Card();
+                    $card->user_id = $user->id;
+                }
+
+                $card->pay_system = 'fondy';
+                $card->masked_card = $data['masked_card'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken = $data['rectoken'];
+                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+
+                $card->save();
+            }
+        }
+
         // Ответ на callback
         return response('OK', 200);
     }
 
-    public function getCardToken($email)
-    {
-        $user = User::where('email', $email)->first();
-
-        return ['card_token' => $user->card_token];
-    }
 
 
     public function generateSignature($params)
@@ -366,4 +383,6 @@ class FondyController extends Controller
 
         return 'Basic ' . base64_encode($username . ':' . $password);
     }
+
+
 }

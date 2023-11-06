@@ -55,7 +55,7 @@ class BonusController extends Controller
     {
         $user = User::where('email', $email)->first();
         if ($user != null) {
-            BonusBalanceController::userBalance($user->id);
+            (new BonusBalanceController)->userBalance($user->id);
             $user = User::where('email', $email)->first();
             $response = [
                 'bonus' => $user->toArray()['bonus'],

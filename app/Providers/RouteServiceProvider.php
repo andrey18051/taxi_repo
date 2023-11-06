@@ -38,7 +38,16 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::prefix('fondy')
+            Route::prefix('android_set')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/android_set.php'));
+            Route::prefix('mono')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/mono.php'));
+
+             Route::prefix('fondy')
                 ->middleware('api')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/fondy.php'));

@@ -81,7 +81,11 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        if ($userArr[2] == 'google_payment') {
+        if ($userArr[2] == 'fondy_payment') {
+            $authorization =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'mono_payment') {
             $authorization =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
             $payment_type = 1;
         }
@@ -290,7 +294,12 @@ class AndroidTestOSMController extends Controller
         $authorizationBonus =  null;
         $authorizationDouble =  null;
         $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-        if ($userArr[2] == 'google_payment') {
+
+        if ($userArr[2] == 'fondy_payment') {
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+            $payment_type = 1;        }
+        if ($userArr[2] == 'mono_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
@@ -419,7 +428,11 @@ class AndroidTestOSMController extends Controller
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'google_payment' && $from == $to) {
+            if ($userArr[2] == 'fondy_payment' && $from == $to) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment' && $from == $to) {
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -428,7 +441,11 @@ class AndroidTestOSMController extends Controller
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'google_payment'  && $from == $to) {
+            if ($userArr[2] == 'fondy_payment'  && $from == $to) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment'  && $from == $to) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -488,6 +505,7 @@ class AndroidTestOSMController extends Controller
             );
 
             $responseDouble = json_decode($responseDouble, true);
+//            dd($responseDouble);
             $responseDouble["url"] = $url;
             $responseDouble["parameter"] = $parameter;
 
@@ -596,7 +614,11 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        if ($userArr[2] == 'google_payment') {
+        if ($userArr[2] == 'fondy_payment') {
+            $authorization =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'mono_payment') {
             $authorization =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
             $payment_type = 1;
         }
@@ -769,7 +791,12 @@ class AndroidTestOSMController extends Controller
         $authorizationBonus =  null;
         $authorizationDouble =  null;
         $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-        if ($userArr[2] == 'google_payment') {
+        if ($userArr[2] == 'fondy_payment') {
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'mono_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
@@ -869,7 +896,11 @@ class AndroidTestOSMController extends Controller
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'google_payment' && $route_undefined) {
+            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment' && $route_undefined) {
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -878,7 +909,11 @@ class AndroidTestOSMController extends Controller
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'google_payment'  && $route_undefined) {
+            if ($userArr[2] == 'fondy_payment'  && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment'  && $route_undefined) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -1068,7 +1103,11 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        if ($userArr[2] == 'google_payment') {
+        if ($userArr[2] == 'fondy_payment') {
+            $authorization =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'mono_payment') {
             $authorization =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
             $payment_type = 1;
         }
@@ -1259,7 +1298,13 @@ class AndroidTestOSMController extends Controller
         $authorizationBonus =  null;
         $authorizationDouble =  null;
         $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-        if ($userArr[2] == 'google_payment') {
+//        dd($userArr[2]);
+        if ($userArr[2] == 'fondy_payment') {
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'mono_payment') {
             $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
             $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
             $payment_type = 1;
@@ -1362,7 +1407,11 @@ class AndroidTestOSMController extends Controller
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'google_payment' && $route_undefined) {
+            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment' && $route_undefined) {
                 $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -1371,7 +1420,11 @@ class AndroidTestOSMController extends Controller
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'google_payment' && $route_undefined) {
+            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment' && $route_undefined) {
                 $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
             }
@@ -1403,8 +1456,8 @@ class AndroidTestOSMController extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
+//        dd($authorizationDouble);
         if ($authorizationDouble != null) {
-
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AndroidSettings;
 use App\Models\BlackList;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -29,8 +30,9 @@ class BlackListController extends Controller
             }
         }
 
+        $pay_settings = AndroidSettings::find("1");
 
-        return view('admin.blacklist', ['emailArray' => $emailArray, 'blackArray' => $blackArray]);
+        return view('admin.blacklist', ['emailArray' => $emailArray, 'blackArray' => $blackArray, 'pay_system' => $pay_settings->pay_system]);
     }
 
     public function addToBlacklist(Request $req)
