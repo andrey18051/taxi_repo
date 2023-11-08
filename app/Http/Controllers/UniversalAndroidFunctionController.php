@@ -59,7 +59,7 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
-        $maxExecutionTime = 5*60; // Максимальное время выполнения - 4 часа
+        $maxExecutionTime = 1*60; // Максимальное время выполнения - 4 часа
 //          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
         $startTime = time();
 
@@ -1558,7 +1558,7 @@ class UniversalAndroidFunctionController extends Controller
         $order,
         $orderType
     ) {
-        $newStatus = self::getExecutionStatusEmu("bonus");
+//        $newStatus = self::getExecutionStatusEmu("bonus");
         $newStatus = self::getExecutionStatus(
             $authorization,
             $identificationId,
@@ -1604,6 +1604,7 @@ class UniversalAndroidFunctionController extends Controller
     ) {
         self::webordersCancel(
             $order,
+            $orderType,
             $connectAPI,
             $authorization,
             $identificationId,
@@ -1691,6 +1692,7 @@ class UniversalAndroidFunctionController extends Controller
      */
     public function webordersCancel(
         $uid,
+        $orderType,
         $connectAPI,
         $authorization,
         $identificationId,
@@ -1703,6 +1705,24 @@ class UniversalAndroidFunctionController extends Controller
             "X-API-VERSION" => $apiVersion
         ])->put($url);
         Log::debug("function webordersCancel: " . $url);
+        Log::debug("function webordersCancel orderType: " . $orderType);
+
+
+        if ($orderType == 'bonus') {
+            $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+            Log::debug("function webordersCancel: order->fondy_order_id " . $order->fondy_order_id);
+            if ($order->fondy_order_id != null) {
+                //Возврат денег по Фонди
+                (new FondyController)->fondyOrderIdReverse($order->fondy_order_id);
+            } else {
+                if ($order->mono_order_id == null) {
+                    //Возврат бонусов
+                    (new BonusBalanceController)->bonusUnBlockedUser($order->email);
+                } else {
+                    //Возврат денег по Моно
+                }
+            }
+        }
     }
 
     public function ordersExecStatusHistory(

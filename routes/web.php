@@ -1156,6 +1156,9 @@ Route::get('/bonusBalance/historyUIDunBlocked/{uid}', [BonusBalanceController::c
 Route::get('/bonusBalance/bonusReport/', [ReportController::class, 'bonusReport'])
     ->name('bonusReport');
 
+Route::get('/bonusBalance/balanceReviewDaily/', [BonusBalanceController::class, 'balanceReviewDaily'])
+    ->name('balanceReviewDaily');
+
 /**
  * User add
  */
