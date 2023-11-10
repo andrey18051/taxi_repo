@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class BonusBalanceController extends Controller
 {
+
     public function recordsAdd(
         $orderwebs_id,
         $users_id,
@@ -461,6 +462,107 @@ class BonusBalanceController extends Controller
             }
         }
     }
+
+    public function bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold)
+    {
+       /**
+        * Разблокировка бонусов
+        */
+
+        $result = 0;
+
+        $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
+
+        $connectAPI =  $order->server;
+        $autorization = self::autorization($connectAPI);
+        $identificationId = $order->comment;
+
+        $order->closeReason = self::closeReasonUIDStatusFirst(
+            $bonusOrder,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        );
+
+
+        $bonusOrderCloseReason = $order->closeReason;
+        $doubleOrderCloseReason = self::closeReasonUIDStatusFirst(
+            $doubleOrder,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        );
+
+        Log::debug("bonusUnBlockedUid order->closeReason:" . strval($order->closeReason));
+
+        switch ($bonusOrderCloseReason) {
+            case "-1":
+                break;
+            case "0":
+            case "8":
+                self::blockBonusToDelete($order->id);
+                $result = 1;
+                break;
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "9":
+                switch ($doubleOrderCloseReason) {
+                    case "-1":
+                        break;
+                    case "0":
+                    case "8":
+                        self::blockBonusToDelete($order->id);
+                        $result = 1;
+                        break;
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "9":
+                        self::blockBonusReturn($order->id);
+                        $result = 1;
+                        break;
+                }
+                break;
+        }
+
+        $order->save();
+        return $result;
+    }
+
+    public function closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId)
+    {
+        $url = $connectAPI . '/api/weborders/' . $uid;
+        $response = Http::withHeaders([
+            "Authorization" => $autorization,
+            "X-WO-API-APP-ID" => $identificationId,
+        ])->get($url);
+        if ($response->status() == 200) {
+            $response_arr = json_decode($response, true);
+            return $response_arr["close_reason"];
+        }
+        return "-1";
+    }
+
+    private function autorization($connectApi)
+    {
+
+        $city = City::where('address', str_replace('http://', '', $connectApi))->first();
+
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
+    }
+
     public function historyUID($id)
     {
 

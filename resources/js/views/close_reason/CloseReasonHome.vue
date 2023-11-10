@@ -19,36 +19,29 @@
             <thead slot="head">
             <v-th sortKey="id"  style="width: 60px">id</v-th>
             <v-th sortKey="first"  style="width: 200px">дата</v-th>
+            <v-th sortKey="reason"  style="width: 200px">close_reason</v-th>
+            <v-th></v-th>
             <v-th sortKey="name"  style="width: 200px">клиент</v-th>
             <v-th sortKey="from"  style="width: 400px">маршрут</v-th>
             <v-th sortKey="cost"  style="width: 60px">грн</v-th>
             <v-th sortKey="uid"  style="width: 250px">uid</v-th>
-            <v-th sortKey="reason"  style="width: 200px">close_reason</v-th>
             </thead>
             <tbody slot="body" slot-scope="{displayData}">
             <tr>
 
                 <td ><input class="form-input input-sm"  style="width: 60px" v-model="filters.id.value"></td>
-
-
                 <td><input class="form-input input-sm" style="width: 200px" v-model="filters.first.value"></td>
+                <td> <input class="form-input input-lg"  style="width: 200px" v-model="filters.reason.value"></td>
+                <td></td>
                 <td><input class="form-input input-lg" style="width: 200px" v-model="filters.name.value"></td>
                 <td> <input class="form-input input-lg"  style="width: 400px" v-model="filters.from.value"></td>
                 <td> <input class="form-input input-lg" style="width: 60px" v-model="filters.cost.value"></td>
                 <td> <input class="form-input input-lg" style="width: 250px" v-model="filters.uid.value"></td>
-                <td> <input class="form-input input-lg"  style="width: 200px" v-model="filters.reason.value"></td>
-                <td></td>
             </tr>
             <tr v-for="row in displayData" :key="row.id">
                  <td style="width: 60px">{{ row.id }}</td>
                 <td> <input id="first" class="form-control" style="width: 200px" v-model.text="row.first" required ></td>
-                <td><input id="name" class="form-control" style="width: 200px" v-model.text="row.name" required ></td>
-                <td> <input id="from" class="form-control" style="width: 400px" v-model.text="row.from" required ></td>
-                <td><input id="cost" class="form-control" style="width: 60px" v-model.text="row.cost" required ></td>
-                <td><input id="uid" class="form-control" style="width: 250px" v-model.text="row.uid" required ></td>
                 <td><input id="reason" class="form-control" style="width: 200px" v-model.text="row.reason" required ></td>
-
-
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-success" @click="saveClose_reason_data(row.uid)" style="margin-left: 5px">
@@ -59,6 +52,12 @@
 
                     </div>
                 </td>
+                <td><input id="name" class="form-control" style="width: 200px" v-model.text="row.name" required ></td>
+                <td> <input id="from" class="form-control" style="width: 400px" v-model.text="row.from" required ></td>
+                <td><input id="cost" class="form-control" style="width: 60px" v-model.text="row.cost" required ></td>
+                <td><input id="uid" class="form-control" style="width: 250px" v-model.text="row.uid" required ></td>
+
+
             </tr>
             </tbody>
         </v-table>

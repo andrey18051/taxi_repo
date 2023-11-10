@@ -5757,7 +5757,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CloseReasonHome",
@@ -33427,6 +33426,36 @@ var render = function () {
                                 {
                                   name: "model",
                                   rawName: "v-model",
+                                  value: _vm.filters.reason.value,
+                                  expression: "filters.reason.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "200px" },
+                              domProps: { value: _vm.filters.reason.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.reason,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td"),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
                                   value: _vm.filters.name.value,
                                   expression: "filters.name.value",
                                 },
@@ -33532,36 +33561,6 @@ var render = function () {
                               },
                             }),
                           ]),
-                          _vm._v(" "),
-                          _c("td", [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.filters.reason.value,
-                                  expression: "filters.reason.value",
-                                },
-                              ],
-                              staticClass: "form-input input-lg",
-                              staticStyle: { width: "200px" },
-                              domProps: { value: _vm.filters.reason.value },
-                              on: {
-                                input: function ($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.filters.reason,
-                                    "value",
-                                    $event.target.value
-                                  )
-                                },
-                              },
-                            }),
-                          ]),
-                          _vm._v(" "),
-                          _c("td"),
                         ]),
                         _vm._v(" "),
                         _vm._l(displayData, function (row) {
@@ -33594,6 +33593,80 @@ var render = function () {
                                   },
                                 },
                               }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.reason,
+                                    expression: "row.reason",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "200px" },
+                                attrs: { id: "reason", required: "" },
+                                domProps: { value: row.reason },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(row, "reason", $event.target.value)
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c(
+                                "div",
+                                {
+                                  staticClass: "btn-group",
+                                  attrs: { role: "group" },
+                                },
+                                [
+                                  _c(
+                                    "button",
+                                    {
+                                      staticClass: "btn btn-success",
+                                      staticStyle: { "margin-left": "5px" },
+                                      on: {
+                                        click: function ($event) {
+                                          return _vm.saveClose_reason_data(
+                                            row.uid
+                                          )
+                                        },
+                                      },
+                                    },
+                                    [
+                                      _c(
+                                        "svg",
+                                        {
+                                          staticClass: "bi bi-save2",
+                                          attrs: {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "16",
+                                            height: "16",
+                                            fill: "currentColor",
+                                            viewBox: "0 0 16 16",
+                                          },
+                                        },
+                                        [
+                                          _c("path", {
+                                            attrs: {
+                                              d: "M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z",
+                                            },
+                                          }),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                ]
+                              ),
                             ]),
                             _vm._v(" "),
                             _c("td", [
@@ -33699,80 +33772,6 @@ var render = function () {
                                 },
                               }),
                             ]),
-                            _vm._v(" "),
-                            _c("td", [
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model.text",
-                                    value: row.reason,
-                                    expression: "row.reason",
-                                    modifiers: { text: true },
-                                  },
-                                ],
-                                staticClass: "form-control",
-                                staticStyle: { width: "200px" },
-                                attrs: { id: "reason", required: "" },
-                                domProps: { value: row.reason },
-                                on: {
-                                  input: function ($event) {
-                                    if ($event.target.composing) {
-                                      return
-                                    }
-                                    _vm.$set(row, "reason", $event.target.value)
-                                  },
-                                },
-                              }),
-                            ]),
-                            _vm._v(" "),
-                            _c("td", [
-                              _c(
-                                "div",
-                                {
-                                  staticClass: "btn-group",
-                                  attrs: { role: "group" },
-                                },
-                                [
-                                  _c(
-                                    "button",
-                                    {
-                                      staticClass: "btn btn-success",
-                                      staticStyle: { "margin-left": "5px" },
-                                      on: {
-                                        click: function ($event) {
-                                          return _vm.saveClose_reason_data(
-                                            row.uid
-                                          )
-                                        },
-                                      },
-                                    },
-                                    [
-                                      _c(
-                                        "svg",
-                                        {
-                                          staticClass: "bi bi-save2",
-                                          attrs: {
-                                            xmlns: "http://www.w3.org/2000/svg",
-                                            width: "16",
-                                            height: "16",
-                                            fill: "currentColor",
-                                            viewBox: "0 0 16 16",
-                                          },
-                                        },
-                                        [
-                                          _c("path", {
-                                            attrs: {
-                                              d: "M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z",
-                                            },
-                                          }),
-                                        ]
-                                      ),
-                                    ]
-                                  ),
-                                ]
-                              ),
-                            ]),
                           ])
                         }),
                       ],
@@ -33809,6 +33808,17 @@ var render = function () {
                     "v-th",
                     {
                       staticStyle: { width: "200px" },
+                      attrs: { sortKey: "reason" },
+                    },
+                    [_vm._v("close_reason")]
+                  ),
+                  _vm._v(" "),
+                  _c("v-th"),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "200px" },
                       attrs: { sortKey: "name" },
                     },
                     [_vm._v("клиент")]
@@ -33839,15 +33849,6 @@ var render = function () {
                       attrs: { sortKey: "uid" },
                     },
                     [_vm._v("uid")]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-th",
-                    {
-                      staticStyle: { width: "200px" },
-                      attrs: { sortKey: "reason" },
-                    },
-                    [_vm._v("close_reason")]
                   ),
                 ],
                 1
