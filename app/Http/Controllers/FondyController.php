@@ -223,6 +223,39 @@ class FondyController extends Controller
         Log::debug("fondyOrderIdCupture responseData:" . json_encode($responseData));
         return $responseData['response']['capture_status'];
     }
+
+    private function fondyOrderIdCuptureCost($fondy_order_id, $cost)
+    {
+        $url = "https://pay.fondy.eu/api/capture/order_id";
+        $params =  array(
+            "order_id" => $fondy_order_id,
+            "currency" => "UAH",
+            "amount" => $cost . "00",
+            "merchant_id" => config('app.merchantId'),
+        );
+
+        $signature = self::generateSignature($params);
+        $requestData = array(
+            "request" => array(
+                "order_id" => $fondy_order_id,
+                "currency" => "UAH",
+                "amount" => $cost ."00",
+                "merchant_id" => config('app.merchantId'),
+                "signature" => $signature
+            )
+        );
+//dd($requestData);
+        Log::debug("fondyOrderIdCupture requestData:" . json_encode($requestData));
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($url, $requestData);
+
+// Получаем JSON-ответ
+        $responseData = $response->json();
+
+        Log::debug("fondyOrderIdCupture responseData:" . json_encode($responseData));
+        return $responseData['response']['capture_status'];
+    }
     public function fondyStatusReviewAdmin($fondy_order_id)
     {
         $order = Orderweb::where("fondy_order_id", $fondy_order_id)->first();
@@ -236,7 +269,7 @@ class FondyController extends Controller
             $connectAPI,
             $autorization,
             $identificationId
-        );
+        )["close_reason"];
 
         Log::debug("fondyStatusReviewAdmin order->closeReason:" . strval($order->closeReason));
 
@@ -272,21 +305,28 @@ class FondyController extends Controller
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
 
-        $order->closeReason = self::closeReasonUIDStatusFirst(
+        $holdOrderCost = $order->web_cost;
+
+        $uidBonus = self::closeReasonUIDStatusFirst(
             $bonusOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
 
+        $bonusOrderCloseReason = $uidBonus["close_reason"];
+        $bonusOrderCost = $uidBonus["order_cost"];
 
-        $bonusOrderCloseReason = $order->closeReason;
-        $doubleOrderCloseReason = self::closeReasonUIDStatusFirst(
+        $uidDouble = self::closeReasonUIDStatusFirst(
             $doubleOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
+
+        $doubleOrderCloseReason = $uidDouble["close_reason"];
+        $doubleOrderCost =  $uidDouble["order_cost"];
+
 
         Log::debug("fondyStatusReview order->closeReason:" . strval($order->closeReason));
 
@@ -295,8 +335,41 @@ class FondyController extends Controller
                 break;
             case "0":
             case "8":
-                self::fondyOrderIdCupture($order->fondy_order_id);
-                $result = 1;
+                switch ($doubleOrderCloseReason) {
+                    case "-1":
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "9":
+                        if ($holdOrderCost >= $bonusOrderCost) {
+                            self::fondyOrderIdCuptureCost($order->fondy_order_id, $bonusOrderCost);
+                        } else {
+                            self::fondyOrderIdCuptureCost($order->fondy_order_id, $holdOrderCost);
+                        }
+                        $result = 1;
+                        break;
+                    case "0":
+                    case "8":
+                        if ($bonusOrderCost >= $doubleOrderCost) {
+                            if ($holdOrderCost >= $bonusOrderCost) {
+                                self::fondyOrderIdCuptureCost($order->fondy_order_id, $bonusOrderCost);
+                            } else {
+                                self::fondyOrderIdCuptureCost($order->fondy_order_id, $holdOrderCost);
+                            }
+                        } else {
+                            if ($holdOrderCost >= $doubleOrderCost) {
+                                self::fondyOrderIdCuptureCost($order->fondy_order_id, $doubleOrderCost);
+                            } else {
+                                self::fondyOrderIdCuptureCost($order->fondy_order_id, $holdOrderCost);
+                            }
+                        }
+                        $result = 1;
+                        break;
+                }
                 break;
             case "1":
             case "2":
@@ -311,7 +384,11 @@ class FondyController extends Controller
                         break;
                     case "0":
                     case "8":
-                        self::fondyOrderIdCupture($order->fondy_order_id);
+                        if ($holdOrderCost >= $doubleOrderCost) {
+                            self::fondyOrderIdCuptureCost($order->fondy_order_id, $doubleOrderCost);
+                        } else {
+                            self::fondyOrderIdCuptureCost($order->fondy_order_id, $holdOrderCost);
+                        }
                         $result = 1;
                         break;
                     case "1":
@@ -328,12 +405,14 @@ class FondyController extends Controller
                 }
                 break;
         }
+
+        $order->closeReason = $bonusOrderCloseReason;
         $order->fondy_status_pay = self::fondyOrderIdStatus($order->fondy_order_id);
         $order->save();
         return $result;
     }
 
-    public function closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId)
+    private function closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId)
     {
         $url = $connectAPI . '/api/weborders/' . $uid;
         $response = Http::withHeaders([
@@ -342,7 +421,9 @@ class FondyController extends Controller
         ])->get($url);
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
-            return $response_arr["close_reason"];
+            Log::debug('closeReasonUIDStatusFirst ' . json_encode($response_arr));
+
+            return $response_arr;
         }
         return "-1";
     }

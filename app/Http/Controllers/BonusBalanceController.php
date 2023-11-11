@@ -140,6 +140,33 @@ class BonusBalanceController extends Controller
         }
     }
 
+    private function blockBonusToDeleteCost($orderwebs_id, $cost)
+    {
+        $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)
+            ->where("bonus_types_id", 6)
+            ->where("bonusBloke", "!=", 0)
+            ->first();
+        $balance_records_2 = BonusBalance::where("orderwebs_id", $orderwebs_id)
+            ->where(function ($query) {
+                $query->where("bonus_types_id", 4)
+                    ->orWhere("bonus_types_id", 5);
+            })
+            ->first();
+
+        $bonusType = BonusTypes::where("id", 5)->first();
+
+        if (!$balance_records_2) {
+            $balance_records_new = new BonusBalance();
+
+            $balance_records_new->bonusDel = $cost * $bonusType->size;
+            $balance_records_new->orderwebs_id = $orderwebs_id;
+            $balance_records_new->users_id = $balance_records->users_id;
+            $balance_records_new->bonusBloke = (-1) *  $balance_records->bonusBloke;
+            $balance_records_new->bonus_types_id = 5;
+            $balance_records_new->save();
+        }
+    }
+
     public function blockBonusReturn($orderwebs_id)
     {
         $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)
@@ -477,31 +504,76 @@ class BonusBalanceController extends Controller
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
 
-        $order->closeReason = self::closeReasonUIDStatusFirst(
+        $holdOrderCost = $order->web_cost;
+        Log::debug("bonusUnBlockedUid holdOrderCost" . $holdOrderCost);
+
+        $uidBonus = self::closeReasonUIDStatusFirst(
             $bonusOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
 
+        $bonusOrderCloseReason = $uidBonus["close_reason"];
+        Log::debug("bonusUnBlockedUid bonusOrderCloseReason" . $bonusOrderCloseReason);
 
-        $bonusOrderCloseReason = $order->closeReason;
-        $doubleOrderCloseReason = self::closeReasonUIDStatusFirst(
+        $bonusOrderCost = $uidBonus["order_cost"];
+        Log::debug("bonusUnBlockedUid bonusOrderCost" . $bonusOrderCost);
+
+        $uidDouble = self::closeReasonUIDStatusFirst(
             $doubleOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
 
-        Log::debug("bonusUnBlockedUid order->closeReason:" . strval($order->closeReason));
+        $doubleOrderCloseReason = $uidDouble["close_reason"];
+        $doubleOrderCost =  $uidDouble["order_cost"];
+
+        Log::debug("bonusUnBlockedUid doubleOrderCost" . $doubleOrderCost);
+
+        Log::debug("bonusUnBlockedUid order->closeReason:" . $doubleOrderCloseReason);
 
         switch ($bonusOrderCloseReason) {
             case "-1":
                 break;
             case "0":
             case "8":
-                self::blockBonusToDelete($order->id);
-                $result = 1;
+                switch ($doubleOrderCloseReason) {
+                    case "-1":
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "9":
+                        if ($holdOrderCost >= $bonusOrderCost) {
+                            self::blockBonusToDeleteCost($order->id, $bonusOrderCost);
+                        } else {
+                            self::blockBonusToDeleteCost($order->id, $holdOrderCost);
+                        }
+                        $result = 1;
+                        break;
+                    case "0":
+                    case "8":
+                        if ($bonusOrderCost >= $doubleOrderCost) {
+                            if ($holdOrderCost >= $bonusOrderCost) {
+                                self::blockBonusToDeleteCost($order->id, $bonusOrderCost);
+                            } else {
+                                self::blockBonusToDeleteCost($order->id, $holdOrderCost);
+                            }
+                        } else {
+                            if ($holdOrderCost >= $doubleOrderCost) {
+                                self::blockBonusToDeleteCost($order->id, $doubleOrderCost);
+                            } else {
+                                self::blockBonusToDeleteCost($order->id, $holdOrderCost);
+                            }
+                        }
+                        $result = 1;
+                        break;
+                }
                 break;
             case "1":
             case "2":
@@ -516,7 +588,11 @@ class BonusBalanceController extends Controller
                         break;
                     case "0":
                     case "8":
-                        self::blockBonusToDelete($order->id);
+                        if ($holdOrderCost >= $doubleOrderCost) {
+                            self::blockBonusToDeleteCost($order->id, $doubleOrderCost);
+                        } else {
+                            self::blockBonusToDeleteCost($order->id, $holdOrderCost);
+                        }
                         $result = 1;
                         break;
                     case "1":
@@ -534,11 +610,12 @@ class BonusBalanceController extends Controller
                 break;
         }
 
+        $order->closeReason = $bonusOrderCloseReason;
         $order->save();
         return $result;
     }
 
-    public function closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId)
+    private function closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId)
     {
         $url = $connectAPI . '/api/weborders/' . $uid;
         $response = Http::withHeaders([
@@ -547,7 +624,8 @@ class BonusBalanceController extends Controller
         ])->get($url);
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
-            return $response_arr["close_reason"];
+            Log::debug('closeReasonUIDStatusFirst ' . json_encode($response_arr));
+            return $response_arr;
         }
         return "-1";
     }
