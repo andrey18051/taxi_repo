@@ -30,8 +30,16 @@ class CityController extends Controller
     }
 
 
-    public function edit($id, $name, $address, $login, $password, $online)
-    {
+    public function edit(
+        $id,
+        $name,
+        $address,
+        $login,
+        $password,
+        $online,
+        $card_max_pay,
+        $bonus_max_pay
+    ) {
         $city = City::find($id);
 
         if (!$city) {
@@ -44,6 +52,8 @@ class CityController extends Controller
         $city->login = $login;
         $city->password = $password;
         $city->online = $online;
+        $city->card_max_pay = $card_max_pay;
+        $city->bonus_max_pay = $bonus_max_pay;
         $city->save();
 
         return response()->json($city);
@@ -237,49 +247,6 @@ class CityController extends Controller
         return ($interval->i >= 5);
     }
 
-//    protected function hasPassedThirtyMinutesOrFiveMinutes($updated_at): bool
-//    {
-//        // Создаем объект DateTimeImmutable для $updated_at
-//        $updated_at_datetime = new DateTimeImmutable($updated_at);
-//
-//        // Получаем текущую дату и время в киевском времени
-//        $current_datetime = new DateTimeImmutable(null, new DateTimeZone('Europe/Kiev'));
-//
-//        // Получаем текущее время в минутах с начала суток
-//        $current_minutes = $current_datetime->format('H') * 60 + $current_datetime->format('i');
-//
-//        // Устанавливаем начальное и конечное время интервала
-//        $start_time = $current_datetime->setTime(0, 0);
-//        $end_time = $current_datetime->setTime(5, 0);
-//
-//        // Проверяем, находится ли $updated_at внутри интервала с 00:00 до 05:00
-//        if ($updated_at_datetime >= $start_time && $updated_at_datetime <= $end_time) {
-//            return true;
-//        }
-//
-//        // Если текущее время находится в интервале с 00:00 до 05:00, то возвращаем false (5 минут)
-//        if ($current_minutes >= 0 && $current_minutes < 300) {
-//            return false;
-//        }
-//
-//        // В остальных случаях возвращаем true (30 минут)
-//        return true;
-//    }
-
-
-    /**
-     * @throws \Exception
-     */
-    protected function hasPassedFive($updated_at): bool
-    {
-        $updated_at_datetime = new DateTimeImmutable($updated_at);
-        $current_datetime = new DateTimeImmutable();
-
-        $interval = $current_datetime->diff($updated_at_datetime);
-
-        return ($interval->i >= 5);
-    }
-
     public function versionAPICitiesUpdate()
     {
         $cities = City::all()->toArray();
@@ -299,7 +266,24 @@ class CityController extends Controller
         $url = $connectAPI . '/api/version';
         $response = Http::get($url);
         $response_arr = json_decode($response, true);
-
     }
 
+    public function maxPayValue($city): array
+    {
+        $city = City::where('name', $city)->first();
+
+        return [
+            'card_max_pay' => $city->card_max_pay,
+            'bonus_max_pay' => $city->bonus_max_pay
+            ];
+    }
+    public function merchantFondy($city): array
+    {
+        $city = City::where('name', $city)->first();
+
+        return [
+            'merchant_fondy' => $city->merchant_fondy,
+            'fondy_key_storage' => $city->fondy_key_storage
+        ];
+    }
 }

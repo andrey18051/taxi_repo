@@ -1146,14 +1146,14 @@ class AndroidTestOSMController extends Controller
         } else {
             $route_undefined = false;
 
-            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
-
+//            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
+            $params['to'] = 'Місце призначення';
             $params['to_number'] = " ";
-            if ($osmAddress == "404") {
-                $params['to'] = 'Місце призначення';
-            } else {
-                $params['to'] = $osmAddress;
-            }
+//            if ($osmAddress == "404") {
+//
+//            } else {
+//                $params['to'] = $osmAddress;
+//            }
 
         }
         $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
@@ -1484,6 +1484,313 @@ class AndroidTestOSMController extends Controller
 
             $responseDouble = json_decode($responseDouble, true);
 //            dd($responseDouble);
+            $responseDouble["url"] = $url;
+            $responseDouble["parameter"] = $parameter;
+
+
+
+        } else {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorization,
+                $identificationId,
+                $apiVersion
+            );
+            $responseDouble = null;
+        }
+
+
+        if ($response->status() == 200) {
+            $response_arr = json_decode($response, true);
+            if ($response_arr["order_cost"] != 0) {
+                $params["order_cost"] = $response_arr["order_cost"];
+                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
+
+                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI(), $authorization, self::identificationId());
+
+                (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId());
+
+                $response_ok["from_lat"] = $originLatitude;
+                $response_ok["from_lng"] =  $originLongitude;
+
+                $response_ok["lat"] = $toLatitude;
+                $response_ok["lng"] =  $toLongitude;
+
+                $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                $response_ok["order_cost"] = $response_arr["order_cost"];
+                $response_ok["add_cost"] = $add_cost;
+                $response_ok["currency"] = $response_arr["currency"];
+                $response_ok["routefrom"] = $params['from'];
+                $response_ok["routefromnumber"] = $params['from_number'];
+                $response_ok["routeto"] = $params['to'];
+                $response_ok["to_number"] = $params['to_number'];
+
+                if ($responseDouble != null) {
+                    $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
+                    $doubleOrder = new DoubleOrder();
+                    $doubleOrder->responseBonusStr = json_encode($responseBonus);
+                    $doubleOrder->responseDoubleStr = json_encode($responseDouble);
+                    $doubleOrder->authorizationBonus = $authorizationBonus;
+                    $doubleOrder->authorizationDouble = $authorizationDouble;
+                    $doubleOrder->connectAPI = $connectAPI;
+                    $doubleOrder->identificationId = $identificationId;
+                    $doubleOrder->apiVersion = $apiVersion;
+                    $doubleOrder->save();
+
+                    $response_ok["doubleOrder"] = $doubleOrder->id;
+                }
+                return response($response_ok, 200)
+                    ->header('Content-Type', 'json');
+            }
+            if ($response_arr["order_cost"] == 0) {
+                $response_arr = json_decode($response, true);
+
+                $response_error["order_cost"] = "0";
+                $response_error["Message"] = $response_arr["Message"];
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+            if ($response_arr["order_cost"] == null) {
+                $response_arr = json_decode($response, true);
+
+                $response_error["order_cost"] = "0";
+                $response_error["Message"] = $response_arr["Message"];
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        } else {
+            $response_arr = json_decode($response, true);
+            $response_error["order_cost"] = "0";
+            $response_error["Message"] = $response_arr["Message"];
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
+    }
+/**
+     * @throws \Exception
+     */
+    public function orderSearchMarkersVisicom(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $user,
+        $add_cost,
+        $time,
+        $comment,
+        $date,
+        $start,
+        $finish,
+        $services
+    ) {
+
+        $connectAPI = self::connectApi();
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return $response_error;
+        }
+        if ($tariff == " ") {
+            $tariff = null;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+        $params['user_phone'] = $phone;
+        $params['client_sub_card'] = null;
+        $params['wagon'] = 0;
+        $params['minibus'] = 0;
+        $params['premium'] = 0;
+        $params['route_address_entrance_from'] = null;
+
+        $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
+        $params['comment'] = " "; //Комментарий к заказу
+        $params['add_cost'] = 0; //Добавленная стоимость
+        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+
+        $payment_type = 0;
+        $authorizationBonus =  null;
+        $authorizationDouble =  null;
+        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
+
+        if ($userArr[2] == 'fondy_payment') {
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'mono_payment') {
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+            $payment_type = 1;
+        }
+        if ($userArr[2] == 'bonus_payment') {
+            $authorizationBonus =  (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
+            $authorizationDouble =  (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+            $payment_type = 1;
+        }
+
+        $identificationId = self::identificationId();
+        $apiVersion =  (new UniversalAndroidFunctionController)->apiVersion("OdessaTest", $connectAPI);
+
+
+        $params['route_undefined'] = false; //По городу: True, False
+
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        /**
+         * Откуда
+         */
+
+        $params['from_number'] = " ";
+
+        $from = $start;
+        $params['routefrom'] = $start;
+
+        if ($originLatitude == $toLatitude) {
+            $route_undefined = true;
+            $params['to'] = 'по місту';
+            $params['to_number'] = " ";
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude ],
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
+            ];
+
+        } else {
+            $route_undefined = false;
+
+            $params['to'] = $finish;
+            $params['to_number'] = " ";
+
+            $to = $finish;
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
+                ['name' => $to, 'lat' => $toLatitude, 'lng' => $toLongitude]
+            ];
+        }
+
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
+
+//
+//        $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
+//        if ($addressFrom['name'] != "name") {
+//            $params['from'] = $addressFrom['name'];
+//            $params['from_number'] = $addressFrom['house'];
+//        } else {
+//            $params['from'] = 'Місце відправлення';
+//            $params['from_number'] = ' ';
+//        }
+        $params['from'] = $start;
+        $params['from_number'] = "";
+
+        $required_time =  null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $params['reservation'] = $reservation;
+
+        $params["required_time"] = $required_time;
+
+        if ($comment == "no_comment") {
+            $comment =  "Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment' && $route_undefined) {
+                $comment =  "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+        } else {
+            if ($userArr[2] == 'bonus_payment'  && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+            if ($userArr[2] == 'mono_payment' && $route_undefined) {
+                $comment =  $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+                $route_undefined = false;
+            }
+        }
+
+        $url = $connectAPI . '/api/weborders';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+        $parameter= [
+            'user_full_name' => $userArr[0], //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => $comment, //Комментарий к заказу
+            'add_cost' => $add_cost,
+            'wagon' => 0, //Универсал: True, False
+            'minibus' => 0, //Микроавтобус: True, False
+            'premium' => 0, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $tariff, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ];
+//dd($parameter);
+        if ($authorizationDouble != null) {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
+            $responseBonus = json_decode($response, true);
+            $responseBonus["url"] = $url;
+            $responseBonus["parameter"] = $parameter;
+
+            $parameter['payment_type'] = 0;
+
+            $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion
+            );
+
+            $responseDouble = json_decode($responseDouble, true);
+
             $responseDouble["url"] = $url;
             $responseDouble["parameter"] = $parameter;
 

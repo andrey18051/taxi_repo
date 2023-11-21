@@ -1067,7 +1067,7 @@ Route::get('/ip/address', [IPController::class,'address'])->name('address');
 Route::get('/city/all', [CityController::class,'index']);
 Route::get('/city/online/{city}', [CityController::class,'cityOnline']);
 Route::get('/city/destroy/{id}', [CityController::class,'destroy']);
-Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}/{online}', [CityController::class,'edit']);
+Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}', [CityController::class,'edit']);
 Route::get('/city/cityNew', function () {
     return view('admin.cities');
 })->name('city-new');
@@ -1079,6 +1079,12 @@ Route::get('/city/versionAPICitiesUpdate', [CityController::class,'versionAPICit
 
 Route::get('/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionController::class,'apiVersion'])
     ->name('apiVersion');
+
+Route::get('/city/maxPayValue/{city}', [CityController::class,'maxPayValue'])
+    ->name('maxPayValue');
+
+Route::get('/city/merchantFondy/{city}', [CityController::class,'merchantFondy'])
+    ->name('mercantFondy');
 
 
 

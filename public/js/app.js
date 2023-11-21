@@ -5595,6 +5595,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityComponent",
@@ -5604,6 +5613,7 @@ __webpack_require__.r(__webpack_exports__);
       cities: [],
       currentPage: 1,
       totalPages: 0,
+      maxPageLinks: 25,
       filters: {
         id: {
           value: "",
@@ -5628,6 +5638,14 @@ __webpack_require__.r(__webpack_exports__);
         online: {
           value: "",
           keys: ["online"]
+        },
+        card_max_pay: {
+          value: "",
+          keys: ["card_max_pay"]
+        },
+        bonus_max_pay: {
+          value: "",
+          keys: ["bonus_max_pay"]
         }
       }
     };
@@ -5658,8 +5676,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editCities: function editCities(id, name, address, login, password, online) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online).then(function (ret) {
+    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -32787,491 +32805,660 @@ var render = function () {
       _vm._m(0),
       _vm._v(" "),
       _c(
-        "v-table",
-        {
-          staticClass: "my-2 table table-striped",
-          attrs: {
-            data: _vm.cities,
-            filters: _vm.filters,
-            hideSortIcons: true,
-            currentPage: _vm.currentPage,
-            pageSize: 5,
-          },
-          on: {
-            "update:currentPage": function ($event) {
-              _vm.currentPage = $event
-            },
-            "update:current-page": function ($event) {
-              _vm.currentPage = $event
-            },
-            totalPagesChanged: function ($event) {
-              _vm.totalPages = $event
-            },
-          },
-          scopedSlots: _vm._u([
+        "div",
+        { staticStyle: { width: "1200px", "overflow-x": "auto" } },
+        [
+          _c(
+            "v-table",
             {
-              key: "body",
-              fn: function (ref) {
-                var displayData = ref.displayData
-                return _c(
-                  "tbody",
-                  {},
-                  [
-                    _c("tr", [
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.filters.id.value,
-                              expression: "filters.id.value",
-                            },
-                          ],
-                          staticClass: "form-input input-sm",
-                          domProps: { value: _vm.filters.id.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.id,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.filters.name.value,
-                              expression: "filters.name.value",
-                            },
-                          ],
-                          staticClass: "form-input input-lg",
-                          attrs: { placeholder: "Select by name" },
-                          domProps: { value: _vm.filters.name.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.name,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.filters.address.value,
-                              expression: "filters.address.value",
-                            },
-                          ],
-                          staticClass: "form-input input-lg",
-                          attrs: { placeholder: "Select by address" },
-                          domProps: { value: _vm.filters.address.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.address,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.filters.login.value,
-                              expression: "filters.login.value",
-                            },
-                          ],
-                          staticClass: "form-input input-lg",
-                          attrs: { placeholder: "Select by login" },
-                          domProps: { value: _vm.filters.login.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.login,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.filters.password.value,
-                              expression: "filters.password.value",
-                            },
-                          ],
-                          staticClass: "form-input input-lg",
-                          attrs: { placeholder: "Select by password" },
-                          domProps: { value: _vm.filters.password.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.password,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.filters.online.value,
-                              expression: "filters.online.value",
-                            },
-                          ],
-                          staticClass: "form-input input-lg",
-                          attrs: { placeholder: "Select by online" },
-                          domProps: { value: _vm.filters.online.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filters.online,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td"),
-                    ]),
-                    _vm._v(" "),
-                    _vm._l(displayData, function (row) {
-                      return _c("tr", { key: row.id }, [
-                        _c("td", [_vm._v(_vm._s(row.id))]),
-                        _vm._v(" "),
-                        _c("td", [
-                          _c("input", {
-                            directives: [
-                              {
-                                name: "model",
-                                rawName: "v-model.text",
-                                value: row.name,
-                                expression: "row.name",
-                                modifiers: { text: true },
-                              },
-                            ],
-                            staticClass: "form-control",
-                            attrs: { id: "name", required: "" },
-                            domProps: { value: row.name },
-                            on: {
-                              input: function ($event) {
-                                if ($event.target.composing) {
-                                  return
-                                }
-                                _vm.$set(row, "name", $event.target.value)
-                              },
-                            },
-                          }),
-                        ]),
-                        _vm._v(" "),
-                        _c("td", [
-                          _c("input", {
-                            directives: [
-                              {
-                                name: "model",
-                                rawName: "v-model.text",
-                                value: row.address,
-                                expression: "row.address",
-                                modifiers: { text: true },
-                              },
-                            ],
-                            staticClass: "form-control",
-                            attrs: { id: "address", required: "" },
-                            domProps: { value: row.address },
-                            on: {
-                              input: function ($event) {
-                                if ($event.target.composing) {
-                                  return
-                                }
-                                _vm.$set(row, "address", $event.target.value)
-                              },
-                            },
-                          }),
-                        ]),
-                        _vm._v(" "),
-                        _c("td", [
-                          _c("input", {
-                            directives: [
-                              {
-                                name: "model",
-                                rawName: "v-model.text",
-                                value: row.login,
-                                expression: "row.login",
-                                modifiers: { text: true },
-                              },
-                            ],
-                            staticClass: "form-control",
-                            attrs: { id: "login", required: "" },
-                            domProps: { value: row.login },
-                            on: {
-                              input: function ($event) {
-                                if ($event.target.composing) {
-                                  return
-                                }
-                                _vm.$set(row, "login", $event.target.value)
-                              },
-                            },
-                          }),
-                        ]),
-                        _vm._v(" "),
-                        _c("td", [
-                          _c("input", {
-                            directives: [
-                              {
-                                name: "model",
-                                rawName: "v-model.text",
-                                value: row.password,
-                                expression: "row.password",
-                                modifiers: { text: true },
-                              },
-                            ],
-                            staticClass: "form-control",
-                            attrs: { id: "password", required: "" },
-                            domProps: { value: row.password },
-                            on: {
-                              input: function ($event) {
-                                if ($event.target.composing) {
-                                  return
-                                }
-                                _vm.$set(row, "password", $event.target.value)
-                              },
-                            },
-                          }),
-                        ]),
-                        _vm._v(" "),
-                        _c("td", [
-                          _c(
-                            "select",
-                            {
+              staticClass: "my-2 table table-striped",
+              attrs: {
+                data: _vm.cities,
+                filters: _vm.filters,
+                hideSortIcons: true,
+                currentPage: _vm.currentPage,
+                pageSize: 5,
+              },
+              on: {
+                "update:currentPage": function ($event) {
+                  _vm.currentPage = $event
+                },
+                "update:current-page": function ($event) {
+                  _vm.currentPage = $event
+                },
+                totalPagesChanged: function ($event) {
+                  _vm.totalPages = $event
+                },
+              },
+              scopedSlots: _vm._u([
+                {
+                  key: "body",
+                  fn: function (ref) {
+                    var displayData = ref.displayData
+                    return _c(
+                      "tbody",
+                      {},
+                      [
+                        _c("tr", [
+                          _c("td", [
+                            _c("input", {
                               directives: [
                                 {
                                   name: "model",
                                   rawName: "v-model",
-                                  value: row.online,
-                                  expression: "row.online",
+                                  value: _vm.filters.id.value,
+                                  expression: "filters.id.value",
                                 },
                               ],
-                              staticClass: "form-control",
-                              attrs: { id: "online", required: "" },
+                              staticClass: "form-input input-sm",
+                              staticStyle: { width: "30px" },
+                              domProps: { value: _vm.filters.id.value },
                               on: {
-                                change: function ($event) {
-                                  var $$selectedVal = Array.prototype.filter
-                                    .call($event.target.options, function (o) {
-                                      return o.selected
-                                    })
-                                    .map(function (o) {
-                                      var val =
-                                        "_value" in o ? o._value : o.value
-                                      return val
-                                    })
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
                                   _vm.$set(
-                                    row,
-                                    "online",
-                                    $event.target.multiple
-                                      ? $$selectedVal
-                                      : $$selectedVal[0]
+                                    _vm.filters.id,
+                                    "value",
+                                    $event.target.value
                                   )
                                 },
                               },
-                            },
-                            [
-                              _c("option", { attrs: { value: "true" } }, [
-                                _vm._v("online"),
-                              ]),
-                              _vm._v(" "),
-                              _c("option", { attrs: { value: "false" } }, [
-                                _vm._v("no_online"),
-                              ]),
-                            ]
-                          ),
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.name.value,
+                                  expression: "filters.name.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "120px" },
+                              attrs: { placeholder: "Select by name" },
+                              domProps: { value: _vm.filters.name.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.name,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.card_max_pay.value,
+                                  expression: "filters.card_max_pay.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "80px" },
+                              attrs: { placeholder: "Select by card_max_pay" },
+                              domProps: {
+                                value: _vm.filters.card_max_pay.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.card_max_pay,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.bonus_max_pay.value,
+                                  expression: "filters.bonus_max_pay.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "80px" },
+                              attrs: { placeholder: "Select by bonus_max_pay" },
+                              domProps: {
+                                value: _vm.filters.bonus_max_pay.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.bonus_max_pay,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.address.value,
+                                  expression: "filters.address.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "180px" },
+                              attrs: { placeholder: "Select by address" },
+                              domProps: { value: _vm.filters.address.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.address,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.login.value,
+                                  expression: "filters.login.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "120px" },
+                              attrs: { placeholder: "Select by login" },
+                              domProps: { value: _vm.filters.login.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.login,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.password.value,
+                                  expression: "filters.password.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "80px" },
+                              attrs: { placeholder: "Select by password" },
+                              domProps: { value: _vm.filters.password.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.password,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.online.value,
+                                  expression: "filters.online.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "80px" },
+                              attrs: { placeholder: "Select by online" },
+                              domProps: { value: _vm.filters.online.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.online,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td"),
                         ]),
                         _vm._v(" "),
-                        _c("td", [
-                          _c(
-                            "div",
-                            {
-                              staticClass: "btn-group",
-                              attrs: { role: "group" },
-                            },
-                            [
+                        _vm._l(displayData, function (row) {
+                          return _c("tr", { key: row.id }, [
+                            _c("td", { staticStyle: { width: "30px" } }, [
+                              _vm._v(_vm._s(row.id)),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.name,
+                                    expression: "row.name",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "120px" },
+                                attrs: { id: "name", required: "" },
+                                domProps: { value: row.name },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(row, "name", $event.target.value)
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.card_max_pay,
+                                    expression: "row.card_max_pay",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "80px" },
+                                attrs: { id: "card_max_pay", required: "" },
+                                domProps: { value: row.card_max_pay },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "card_max_pay",
+                                      $event.target.value
+                                    )
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.bonus_max_pay,
+                                    expression: "row.bonus_max_pay",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "80px" },
+                                attrs: { id: "bonus_max_pay", required: "" },
+                                domProps: { value: row.bonus_max_pay },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "bonus_max_pay",
+                                      $event.target.value
+                                    )
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.address,
+                                    expression: "row.address",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "180px" },
+                                attrs: { id: "address", required: "" },
+                                domProps: { value: row.address },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "address",
+                                      $event.target.value
+                                    )
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.login,
+                                    expression: "row.login",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "120px" },
+                                attrs: { id: "login", required: "" },
+                                domProps: { value: row.login },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(row, "login", $event.target.value)
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.text",
+                                    value: row.password,
+                                    expression: "row.password",
+                                    modifiers: { text: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "80px" },
+                                attrs: { id: "password", required: "" },
+                                domProps: { value: row.password },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "password",
+                                      $event.target.value
+                                    )
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
                               _c(
-                                "button",
+                                "select",
                                 {
-                                  staticClass: "btn btn-success",
-                                  staticStyle: { "margin-left": "5px" },
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.online,
+                                      expression: "row.online",
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "80px" },
+                                  attrs: { id: "online", required: "" },
                                   on: {
-                                    click: function ($event) {
-                                      return _vm.editCities(
-                                        row.id,
-                                        row.name,
-                                        row.address,
-                                        row.login,
-                                        row.password,
-                                        row.online
+                                    change: function ($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call(
+                                          $event.target.options,
+                                          function (o) {
+                                            return o.selected
+                                          }
+                                        )
+                                        .map(function (o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        row,
+                                        "online",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
                                       )
                                     },
                                   },
                                 },
                                 [
-                                  _c(
-                                    "svg",
-                                    {
-                                      staticClass: "bi bi-save2",
-                                      attrs: {
-                                        xmlns: "http://www.w3.org/2000/svg",
-                                        width: "16",
-                                        height: "16",
-                                        fill: "currentColor",
-                                        viewBox: "0 0 16 16",
-                                      },
-                                    },
-                                    [
-                                      _c("path", {
-                                        attrs: {
-                                          d: "M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z",
-                                        },
-                                      }),
-                                    ]
-                                  ),
+                                  _c("option", { attrs: { value: "true" } }, [
+                                    _vm._v("online"),
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("option", { attrs: { value: "false" } }, [
+                                    _vm._v("no_online"),
+                                  ]),
                                 ]
                               ),
-                              _vm._v(" "),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
                               _c(
-                                "button",
+                                "div",
                                 {
-                                  staticClass: "btn btn-danger",
-                                  staticStyle: { "margin-left": "5px" },
-                                  on: {
-                                    click: function ($event) {
-                                      return _vm.deleteCities(row.id)
-                                    },
-                                  },
+                                  staticClass: "btn-group",
+                                  attrs: { role: "group" },
                                 },
                                 [
                                   _c(
-                                    "svg",
+                                    "button",
                                     {
-                                      staticClass: "bi bi-trash",
-                                      attrs: {
-                                        xmlns: "http://www.w3.org/2000/svg",
-                                        width: "16",
-                                        height: "16",
-                                        fill: "currentColor",
-                                        viewBox: "0 0 16 16",
+                                      staticClass: "btn btn-success",
+                                      staticStyle: { "margin-left": "5px" },
+                                      on: {
+                                        click: function ($event) {
+                                          return _vm.editCities(
+                                            row.id,
+                                            row.name,
+                                            row.address,
+                                            row.login,
+                                            row.password,
+                                            row.online,
+                                            row.card_max_pay,
+                                            row.bonus_max_pay
+                                          )
+                                        },
                                       },
                                     },
                                     [
-                                      _c("path", {
-                                        attrs: {
-                                          d: "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z",
+                                      _c(
+                                        "svg",
+                                        {
+                                          staticClass: "bi bi-save2",
+                                          attrs: {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "16",
+                                            height: "16",
+                                            fill: "currentColor",
+                                            viewBox: "0 0 16 16",
+                                          },
                                         },
-                                      }),
-                                      _vm._v(" "),
-                                      _c("path", {
-                                        attrs: {
-                                          "fill-rule": "evenodd",
-                                          d: "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                                        [
+                                          _c("path", {
+                                            attrs: {
+                                              d: "M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z",
+                                            },
+                                          }),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "button",
+                                    {
+                                      staticClass: "btn btn-danger",
+                                      staticStyle: { "margin-left": "5px" },
+                                      on: {
+                                        click: function ($event) {
+                                          return _vm.deleteCities(row.id)
                                         },
-                                      }),
+                                      },
+                                    },
+                                    [
+                                      _c(
+                                        "svg",
+                                        {
+                                          staticClass: "bi bi-trash",
+                                          attrs: {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "16",
+                                            height: "16",
+                                            fill: "currentColor",
+                                            viewBox: "0 0 16 16",
+                                          },
+                                        },
+                                        [
+                                          _c("path", {
+                                            attrs: {
+                                              d: "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z",
+                                            },
+                                          }),
+                                          _vm._v(" "),
+                                          _c("path", {
+                                            attrs: {
+                                              "fill-rule": "evenodd",
+                                              d: "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                                            },
+                                          }),
+                                        ]
+                                      ),
                                     ]
                                   ),
                                 ]
                               ),
-                            ]
-                          ),
-                        ]),
-                      ])
-                    }),
-                  ],
-                  2
-                )
-              },
+                            ]),
+                          ])
+                        }),
+                      ],
+                      2
+                    )
+                  },
+                },
+              ]),
             },
-          ]),
-        },
-        [
-          _c(
-            "thead",
-            { attrs: { slot: "head" }, slot: "head" },
             [
-              _c("v-th", { attrs: { sortKey: "id" } }, [_vm._v("#")]),
-              _vm._v(" "),
-              _c("v-th", { attrs: { sortKey: "name" } }, [_vm._v("Name")]),
-              _vm._v(" "),
-              _c("v-th", { attrs: { sortKey: "address" } }, [
-                _vm._v("address"),
-              ]),
-              _vm._v(" "),
-              _c("v-th", { attrs: { sortKey: "login" } }, [_vm._v("login")]),
-              _vm._v(" "),
-              _c("v-th", { attrs: { sortKey: "password" } }, [
-                _vm._v("password"),
-              ]),
-              _vm._v(" "),
-              _c("v-th", { attrs: { sortKey: "password" } }, [
-                _vm._v("online"),
-              ]),
-            ],
-            1
+              _c(
+                "thead",
+                { attrs: { slot: "head" }, slot: "head" },
+                [
+                  _c("v-th", { attrs: { sortKey: "id" } }, [_vm._v("#")]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "name" } }, [_vm._v("Name")]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "card_max_pay" } }, [
+                    _vm._v("card_max_pay"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "login" } }, [
+                    _vm._v("bonus_max_pay"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "address" } }, [
+                    _vm._v("address"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "login" } }, [
+                    _vm._v("login"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "password" } }, [
+                    _vm._v("password"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "password" } }, [
+                    _vm._v("online"),
+                  ]),
+                ],
+                1
+              ),
+            ]
           ),
-        ]
+        ],
+        1
       ),
       _vm._v(" "),
       _c("smart-pagination", {
-        attrs: { currentPage: _vm.currentPage, totalPages: _vm.totalPages },
+        attrs: {
+          currentPage: _vm.currentPage,
+          totalPages: _vm.totalPages,
+          maxPageLinks: _vm.maxPageLinks,
+        },
         on: {
           "update:currentPage": function ($event) {
             _vm.currentPage = $event

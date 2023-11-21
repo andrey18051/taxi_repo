@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddFondyKeyStorageLoumnToCitiesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('cities', function (Blueprint $table) {
+            $table->after('merchant_fondy', function ($table) {
+                $table->string('fondy_key_storage')->nullable();
+            });
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('cities', function (Blueprint $table) {
+            $table->dropColumn('fondy_key_storage');
+        });
+    }
+}
