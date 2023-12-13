@@ -50,9 +50,9 @@ Route::middleware('throttle:6,1')->get('/android/costMap/{originLatitude}/{origi
 Route::middleware('throttle:6,1')->get('/android/orderMap/{originLatitude}/{originLongitude}/{destLatitude}/{destLongitude}/{tarif}/{phone}', [AndroidTestOSMController::class, 'orderMap'])
     ->name('orderMap');
 
-Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}/', [AndroidTestOSMController::class, 'costSearch'])
+Route::get('/android/costSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'costSearch'])
     ->name('costSearch');
-Route::get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidTestOSMController::class, 'orderSearch'])
+Route::get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearch'])
     ->name('orderSearch');
 
 Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}', [AndroidTestOSMController::class, 'costSearchGeo'])
@@ -69,7 +69,7 @@ Route::get('/android/approvedPhones/{phone}/{code}', [AndroidTestOSMController::
 
 Route::get('/android/sendCodeTest/{phone}', [AndroidTestOSMController::class, 'sendCodeTest'])->name('sendCode');
 Route::get('/android/approvedPhonesTest/{phone}/{code}', [AndroidTestOSMController::class, 'approvedPhonesTest'])->name('approvedPhones');
-Route::get('/android/autocompleteSearchComboHid/{name}', [AndroidTestOSMController::class, 'autocompleteSearchComboHid'])->name('autocompleteSearchComboHid');
+Route::get('/android/autocompleteSearchComboHid/{name}/{city}', [AndroidTestOSMController::class, 'autocompleteSearchComboHid'])->name('autocompleteSearchComboHid');
 
 Route::get('/android/sentPhone/{message}', [AndroidTestOSMController::class, 'sentPhone'])->name('sentPhone');
 Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDomain'])->name('checkDomain');
@@ -81,13 +81,13 @@ Route::get('/android/verifyBlackListUser/{email}', [AndroidTestOSMController::cl
 
 
 
-Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/', [AndroidTestOSMController::class, 'costSearchMarkers'])
+Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'costSearchMarkers'])
     ->name('costSearchMarkers');
 
-Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}', [AndroidTestOSMController::class, 'orderSearchMarkers'])
+Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearchMarkers'])
     ->name('orderSearchMarkers');
 
-Route::get('/android/orderSearchMarkersVisicom/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{services}', [AndroidTestOSMController::class, 'orderSearchMarkersVisicom'])
+Route::get('/android/orderSearchMarkersVisicom/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearchMarkersVisicom'])
     ->name('orderSearchMarkers');
 
 Route::get('/android/versionAPI/', [AndroidTestOSMController::class, 'version'])

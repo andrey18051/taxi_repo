@@ -2227,4 +2227,14 @@ class UniversalAndroidFunctionController extends Controller
             }
         }
     }
+
+    function encryptData($data, $key) {
+        $method = 'AES-256-CBC';
+        $key = hash('sha256', $key, true);
+        $iv = openssl_random_pseudo_bytes(16);
+
+        $encrypted = openssl_encrypt($data, $method, $key, 0, $iv);
+
+        return base64_encode($iv . $encrypted);
+    }
 }

@@ -35,6 +35,7 @@ use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
+use App\Http\Controllers\VisicomController;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WebhookViberController;
@@ -1104,6 +1105,7 @@ Route::get('/showLatLng/{Lat}/{lng}', [\App\Http\Controllers\VisicomController::
  */
 
 Route::get('/reverse/{Lat}/{lng}', [OpenStreetMapController::class,'reverse'])->name('reverse');
+Route::get('/reverseAddress/{Lat}/{lng}', [OpenStreetMapController::class,'reverseAddress'])->name('reverse');
  /**
   * UID
   */
@@ -1228,3 +1230,5 @@ Route::post('/server-callback', [FondyController::class, 'handleCallback']);
  */
 Route::get('/get-card-token/{email}/{pay_system}', [UniversalAndroidFunctionController::class, 'getCardToken']);
 Route::get('/delete-card-token/{rectoken}', [UniversalAndroidFunctionController::class, 'deleteCardToken']);
+Route::get('/visicomKeyInfo/{appName}', [VisicomController::class, 'visicomKeyInfo'])
+    ->middleware('ip.limit');

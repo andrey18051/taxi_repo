@@ -73,4 +73,19 @@ class VisicomController extends Controller
         // Ответ с сообщением об успешном удалении
         return response()->json(['message' => 'Запись успешно удалена'], 200);
     }
+
+    public function visicomKeyInfo(string $appName)
+    {
+        $result = ["keyVisicom" => ""];
+        switch ($appName) {
+            case "PAS2":
+                $result = ["keyVisicom" => config("app.keyVisicom")];
+                break;
+            case "PAS1":
+            case "PAS4":
+                $result = ["keyVisicom" => config("app.keyVisicomMy")];
+                break;
+        }
+        return $result;
+    }
 }
