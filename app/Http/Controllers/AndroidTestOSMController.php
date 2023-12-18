@@ -2500,8 +2500,8 @@ class AndroidTestOSMController extends Controller
 
                 switch ($city) {
                     case "OdessaTest":
-                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay", $connectAPI);
+                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo", $connectAPI);
                         break;
                     case "Kyiv City":
                     case "Dnipropetrovsk Oblast":
@@ -2519,8 +2519,8 @@ class AndroidTestOSMController extends Controller
 
                 switch ($city) {
                     case "OdessaTest":
-                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
-                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
+                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorization("BonusTestOne", $connectAPI);
+                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo", $connectAPI);
                         break;
                     case "Kyiv City":
                     case "Dnipropetrovsk Oblast":
