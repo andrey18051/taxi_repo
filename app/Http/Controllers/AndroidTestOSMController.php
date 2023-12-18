@@ -2171,7 +2171,7 @@ class AndroidTestOSMController extends Controller
         $url = $connectAPI . '/api/geodata/nearest';
 
 
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $r = 50;
         do {
             $response = Http::withHeaders([
@@ -2297,7 +2297,7 @@ class AndroidTestOSMController extends Controller
         $connectAPI = self::connectApi($city);
 
         $url = $connectAPI . '/api/clients/ordershistory';
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         return Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => self::identificationId($application),
@@ -2319,7 +2319,7 @@ class AndroidTestOSMController extends Controller
         $url = $connectAPI . '/api/weborders/';
 
         $url = $url . $uid;
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         return Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => self::identificationId($application),
@@ -2338,7 +2338,7 @@ class AndroidTestOSMController extends Controller
         $city = "OdessaTest";
         $application = "PAS2";
         $connectAPI = self::connectApi($city);
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $url = $connectAPI . '/api/weborders/cancel/' . $uid;
         $response = Http::withHeaders([
             "Authorization" => $authorization,
@@ -2381,7 +2381,7 @@ class AndroidTestOSMController extends Controller
         $city = "OdessaTest";
         $application = "PAS2";
         $connectAPI = self::connectApi($city);
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $url = $connectAPI . '/api/weborders/' . $uid;
 
         return Http::withHeaders([
@@ -2416,7 +2416,7 @@ class AndroidTestOSMController extends Controller
 
         $base = env('DB_DATABASE');
 
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         /**
          * Проверка подключения к серверам
          */
@@ -2444,7 +2444,7 @@ class AndroidTestOSMController extends Controller
         $json_arr = json_decode($json_str, true);
 //        dd($json_arr);
         $url_ob = $connectAPI . '/api/geodata/objects';
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,
         ])->get($url_ob);
