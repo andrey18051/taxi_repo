@@ -1231,4 +1231,4 @@ Route::post('/server-callback', [FondyController::class, 'handleCallback']);
 Route::get('/get-card-token/{email}/{pay_system}', [UniversalAndroidFunctionController::class, 'getCardToken']);
 Route::get('/delete-card-token/{rectoken}', [UniversalAndroidFunctionController::class, 'deleteCardToken']);
 Route::get('/visicomKeyInfo/{appName}', [VisicomController::class, 'visicomKeyInfo'])
-    ->middleware('ip.limit');
+    ->middleware('throttle:20,60');

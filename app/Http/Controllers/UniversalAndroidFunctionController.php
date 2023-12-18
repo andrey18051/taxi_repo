@@ -2061,9 +2061,11 @@ class UniversalAndroidFunctionController extends Controller
         ])->get($url);
     }
 
-    public function authorization($cityString): string
+    public function authorization($cityString, $connectAPI): string
     {
-        $city = City::where('name', $cityString)->first();
+        $city = City::where('name', $cityString)
+            ->where("address", str_replace("http://", "", $connectAPI))
+            ->first();
         $username = $city->login;
         $password = hash('SHA512', $city->password);
         return 'Basic ' . base64_encode($username . ':' . $password);

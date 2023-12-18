@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Visicom;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use yii\debug\models\search\Log;
 
 class VisicomController extends Controller
 {
@@ -86,6 +87,7 @@ class VisicomController extends Controller
                 $result = ["keyVisicom" => config("app.keyVisicomMy")];
                 break;
         }
+        \Illuminate\Support\Facades\Log::debug($result);
         return $result;
     }
 }

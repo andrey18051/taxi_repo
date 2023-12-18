@@ -32909,7 +32909,10 @@ var render = function () {
                               ],
                               staticClass: "form-input input-lg",
                               staticStyle: { width: "80px" },
-                              attrs: { placeholder: "Select by card_max_pay" },
+                              attrs: {
+                                placeholder: "Select by card_max_pay",
+                                value: "0",
+                              },
                               domProps: {
                                 value: _vm.filters.card_max_pay.value,
                               },
@@ -32940,7 +32943,10 @@ var render = function () {
                               ],
                               staticClass: "form-input input-lg",
                               staticStyle: { width: "80px" },
-                              attrs: { placeholder: "Select by bonus_max_pay" },
+                              attrs: {
+                                placeholder: "Select by bonus_max_pay",
+                                value: "0",
+                              },
                               domProps: {
                                 value: _vm.filters.bonus_max_pay.value,
                               },
@@ -33123,7 +33129,7 @@ var render = function () {
                                 ],
                                 staticClass: "form-control",
                                 staticStyle: { width: "80px" },
-                                attrs: { id: "card_max_pay", required: "" },
+                                attrs: { id: "card_max_pay" },
                                 domProps: { value: row.card_max_pay },
                                 on: {
                                   input: function ($event) {
@@ -33153,7 +33159,7 @@ var render = function () {
                                 ],
                                 staticClass: "form-control",
                                 staticStyle: { width: "80px" },
-                                attrs: { id: "bonus_max_pay", required: "" },
+                                attrs: { id: "bonus_max_pay" },
                                 domProps: { value: row.bonus_max_pay },
                                 on: {
                                   input: function ($event) {

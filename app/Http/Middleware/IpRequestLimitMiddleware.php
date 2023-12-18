@@ -14,14 +14,23 @@ class IpRequestLimitMiddleware
     {
         $ip = $request->ip();
         $key = 'ip_request_limit_' . $ip;
-        $maxRequests = 20; // Максимальное количество запросов за час
+        $maxRequests = 5; // Максимальное количество запросов за час
+//
+//        // Используем RateLimiter для установки ограничения
+//        RateLimiter::for($key, function () use ($maxRequests, $ip) {
+//            return Limit::perHour($maxRequests)->response(function () {
+//                return response('Too many requests.', 429);
+//            });
+//        });
+        $decayMinutes = 3; // Время блокировки в минутах
 
-        // Используем RateLimiter для установки ограничения
-        RateLimiter::for($key, function () use ($maxRequests, $ip) {
-            return Limit::perHour($maxRequests)->response(function () {
+// Используем RateLimiter для установки ограничения
+        RateLimiter::for($key, function () use ($key, $maxRequests, $decayMinutes, $ip) {
+            return Limit::perMinute($maxRequests)->by($key)->response(function () {
                 return response('Too many requests.', 429);
-            });
+            })->decayMinutes($decayMinutes);
         });
+
 
         // Проверяем, не превышено ли максимальное количество попыток
         if (RateLimiter::tooManyAttempts($key, $maxRequests)) {

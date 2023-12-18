@@ -30,8 +30,8 @@
                 <tr>
                     <td><input class="form-input input-sm"  style="width: 30px" v-model="filters.id.value"></td>
                     <td><input class="form-input input-lg"  style="width: 120px" v-model="filters.name.value" placeholder="Select by name"></td>
-                    <td><input class="form-input input-lg"  style="width: 80px" v-model="filters.card_max_pay.value" placeholder="Select by card_max_pay"></td>
-                    <td> <input class="form-input input-lg" style="width: 80px" v-model="filters.bonus_max_pay.value"  placeholder="Select by bonus_max_pay"></td>
+                    <td><input class="form-input input-lg"  style="width: 80px" v-model="filters.card_max_pay.value" placeholder="Select by card_max_pay" value="0"></td>
+                    <td> <input class="form-input input-lg" style="width: 80px" v-model="filters.bonus_max_pay.value"  placeholder="Select by bonus_max_pay" value="0" ></td>
                     <td> <input class="form-input input-lg" style="width: 180px" v-model="filters.address.value"  placeholder="Select by address"></td>
                     <td> <input class="form-input input-lg" style="width: 120px" v-model="filters.login.value"  placeholder="Select by login"></td>
                     <td> <input class="form-input input-lg" style="width: 80px" v-model="filters.password.value"  placeholder="Select by password"></td>
@@ -42,8 +42,8 @@
                     <td style="width: 30px">{{ row.id }}</td>
 
                     <td> <input id="name" class="form-control" style="width: 120px" v-model.text="row.name" required ></td>
-                    <td><input id="card_max_pay" class="form-control" style="width: 80px" v-model.text="row.card_max_pay" required ></td>
-                    <td> <input id="bonus_max_pay" class="form-control" style="width: 80px" v-model.text="row.bonus_max_pay" required ></td>
+                    <td><input id="card_max_pay" class="form-control" style="width: 80px" v-model.text="row.card_max_pay"  ></td>
+                    <td> <input id="bonus_max_pay" class="form-control" style="width: 80px" v-model.text="row.bonus_max_pay"  ></td>
                     <td><input id="address" class="form-control" style="width: 180px" v-model.text="row.address" required ></td>
                     <td> <input id="login" class="form-control" style="width: 120px" v-model.text="row.login" required ></td>
                     <td><input id="password" class="form-control" style="width: 80px" v-model.text="row.password" required ></td>

@@ -95,7 +95,7 @@ class AndroidTestOSMController extends Controller
 
 
         $connectAPI = self::connectApi($city);
-
+//dd($connectAPI);
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -116,7 +116,7 @@ class AndroidTestOSMController extends Controller
         }
 
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
@@ -391,7 +391,7 @@ class AndroidTestOSMController extends Controller
 //        $authorizationDouble = null;
 
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
         $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
@@ -755,7 +755,7 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
@@ -967,7 +967,7 @@ class AndroidTestOSMController extends Controller
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
         $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
@@ -1319,7 +1319,7 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
@@ -1528,7 +1528,7 @@ class AndroidTestOSMController extends Controller
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
         $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
@@ -1857,7 +1857,7 @@ class AndroidTestOSMController extends Controller
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city);
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
 
         $authorization = $authorizationChoiceArr["authorization"];
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
@@ -2485,11 +2485,12 @@ class AndroidTestOSMController extends Controller
 
     private function authorizationChoice(
         $payment,
-        $city
+        $city,
+        $connectAPI
     ): array {
         $authorizationChoiceArr = array();
 
-        $authorizationChoiceArr["authorization"] = (new UniversalAndroidFunctionController)->authorization($city);
+        $authorizationChoiceArr["authorization"] = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $authorizationChoiceArr["payment_type"] = 0;
 
         switch ($payment) {
