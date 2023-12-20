@@ -1834,6 +1834,10 @@ class UniversalAndroidFunctionController extends Controller
 
         $order->save();
 
+        $user = User::where("email", $params["email"])->first();
+        $user->user_phone = $params["user_phone"];
+        $user->save();
+
         /**
          * Сообщение о заказе
          */
@@ -2238,5 +2242,37 @@ class UniversalAndroidFunctionController extends Controller
         $encrypted = openssl_encrypt($data, $method, $key, 0, $iv);
 
         return base64_encode($iv . $encrypted);
+    }
+
+    function userPhone()
+    {
+        $users = User::all()->toArray();
+
+        foreach ($users as $value) {
+            // Check if order exists for the user's email
+            $order = Orderweb::where("email", $value["email"])->first();
+
+            if ($order) {
+                $user = User::where("email", $value["email"])->first();
+
+                // Check if user exists before trying to update user_phone
+                if ($user) {
+                    $user->user_phone = $order->user_phone;
+                    $user->save();
+                } else {
+                    // Handle the case where the user doesn't exist
+                    // You may want to log an error or take appropriate action
+                }
+            } else {
+                // Handle the case where the order doesn't exist
+                // You may want to log an error or take appropriate action
+            }
+        }
+    }
+
+    public function userPhoneReturn(string $email): array
+    {
+        $user = User::where("email", $email)->first();
+        return ["phone"=>$user->user_phone];
     }
 }

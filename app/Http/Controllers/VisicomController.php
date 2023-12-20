@@ -80,8 +80,8 @@ class VisicomController extends Controller
         $result = ["keyVisicom" => ""];
         switch ($appName) {
             case "PAS2":
-                $result = ["keyVisicom" => config("app.keyVisicom")];
-                break;
+//                $result = ["keyVisicom" => config("app.keyVisicom")];
+//                break;
             case "PAS1":
             case "PAS4":
                 $result = ["keyVisicom" => config("app.keyVisicomMy")];
