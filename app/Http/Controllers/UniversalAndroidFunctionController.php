@@ -1902,19 +1902,28 @@ class UniversalAndroidFunctionController extends Controller
         IPController::getIP("/android/$androidDom/startPage");
         $user =  BlackList::where('email', $email)->first();
 
+        $response_error["order_cost"] = 0;
         if ($user == null) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "Не черном списке";
+            switch ($androidDom) {
+                case "PAS1":
+                    $response_error["Message"] = config("app.version-PAS1");
+                    break;
+                case "PAS2":
+                    $response_error["Message"] = config("app.version-PAS2");
+                    break;
+                case "PAS3":
+                    $response_error["Message"] = config("app.version-PAS3");
+                    break;
+                case "PAS4":
+                    $response_error["Message"] = config("app.version-PAS4");
+                    break;
+            }
 
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
         } else {
-            $response_error["order_cost"] = 0;
             $response_error["Message"] = "В черном списке";
-
-            return response($response_error, 200)
-                ->header('Content-Type', 'json');
         }
+        return response($response_error, 200)
+            ->header('Content-Type', 'json');
     }
 
     public function geoDataSearch(
