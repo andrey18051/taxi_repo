@@ -1628,7 +1628,7 @@ class AndroidTestController extends Controller
                     . " (" . $response_arr_from["properties"]["settlement"] . ")";
 
                 $response_ok["order_cost"] = 100;
-                $response_ok["route_address_from"] = $from;
+                $response_ok["route_address_from"] = $from . "\t";
 
 
 
@@ -1658,7 +1658,7 @@ class AndroidTestController extends Controller
                 . " " . $visicom["settlement"];
 
             $response_ok["order_cost"] = 100;
-            $response_ok["route_address_from"] = $from;
+            $response_ok["route_address_from"] = $from . "\t";
 //            dd($response_ok);
             return  response($response_ok, 200)
                 ->header('Content-Type', 'json');

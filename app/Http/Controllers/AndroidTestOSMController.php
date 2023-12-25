@@ -2135,14 +2135,14 @@ class AndroidTestOSMController extends Controller
                 $response["house"] = $addressArr['house'];
             } else {
                 $response["name"] = 'name';
-                $response["house"] = 'house';
+                $response["house"] = 'house' . "\t";
             }
 
         } else {
             $from = $osmAddress;
 
             $response["order_cost"] = 100;
-            $response["route_address_from"] = $from;
+            $response["route_address_from"] = $from . "\t";
 
         }
 

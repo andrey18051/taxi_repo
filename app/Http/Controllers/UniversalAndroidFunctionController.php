@@ -1917,6 +1917,9 @@ class UniversalAndroidFunctionController extends Controller
                 case "PAS4":
                     $response_error["Message"] = config("app.version-PAS4");
                     break;
+                case "PAS5":
+                    $response_error["Message"] = config("app.version-PAS5");
+                    break;
             }
 
         } else {
