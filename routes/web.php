@@ -19,6 +19,7 @@ use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
+use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PromoController;
@@ -1061,6 +1062,7 @@ Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'delete
   */
 Route::get('/ip/city', [IPController::class,'ipCity'])->name('ipCity');
 Route::get('/ip/ipCityOne/{ip}', [IPController::class,'ipCityOne'])->name('ipCity');
+Route::get('/ip/countryName/{ip}', [IPController::class,'countryName'])->name('countryName');
 Route::get('/ip/address', [IPController::class,'address'])->name('address');
  /**
   * City
@@ -1231,6 +1233,8 @@ Route::post('/server-callback', [FondyController::class, 'handleCallback']);
 Route::get('/get-card-token/{email}/{pay_system}', [UniversalAndroidFunctionController::class, 'getCardToken']);
 Route::get('/delete-card-token/{rectoken}', [UniversalAndroidFunctionController::class, 'deleteCardToken']);
 Route::get('/visicomKeyInfo/{appName}', [VisicomController::class, 'visicomKeyInfo'])
+    ->middleware('throttle:10000,60');
+Route::get('/maxBoxKeyInfo/{appName}', [MaxboxController::class, 'maxBoxKeyInfo'])
     ->middleware('throttle:10000,60');
 /**
  *Phone section

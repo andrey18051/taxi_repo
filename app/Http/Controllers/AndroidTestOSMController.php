@@ -1295,6 +1295,9 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
 //        $city = "OdessaTest";
 //        $application = "PAS2";
         $connectAPI = self::connectApi($city);
@@ -1493,8 +1496,9 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-//        $city = "OdessaTest";
-//        $application = "PAS2";
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
         $connectAPI = self::connectApi($city);
 
         if ($connectAPI == 400) {
@@ -1822,8 +1826,9 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-//        $city = "OdessaTest";
-//        $application = "PAS2";
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
         $connectAPI = self::connectApi($city);
 
         if ($connectAPI == 400) {
@@ -2416,13 +2421,9 @@ class AndroidTestOSMController extends Controller
 
         $base = env('DB_DATABASE');
 
-        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
-        /**
-         * Проверка подключения к серверам
-         */
         $application = "PAS2";
         $connectAPI = self::connectApi($city);
-
+        $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         if ($connectAPI == 400) {
             return redirect()->route('home-news')
                 ->with('error', 'Вибачте. Помилка підключення до сервера. Спробуйте трохи згодом.');
