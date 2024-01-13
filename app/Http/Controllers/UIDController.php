@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\City;
 use App\Models\Orderweb;
+use Carbon\Carbon;
 use DateInterval;
 use DateTime;
 use Illuminate\Http\Request;
@@ -81,17 +82,20 @@ class UIDController extends Controller
 
     public function UIDStatusShowEmail($email)
     {
+
         $order = Orderweb:: where("email", $email)
-            -> where("closeReason", "!=", null)
-            -> where("server", "!=", null)
-            -> where("comment", "!=", null)
+
+            ->where("closeReason", "!=", null)
+            ->where("server", "!=", null)
+            ->where("comment", "!=", null)
             ->orderBy("created_at", "desc")
             ->get();
-
+//dd($order);
         $response = null;
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
             $orderUpdate = Orderweb::where("email", $email)
+
                 -> where("closeReason", "!=", null)
                 -> where("server", "!=", null)
                 -> where("comment", "!=", null)
@@ -103,18 +107,45 @@ class UIDController extends Controller
             date_default_timezone_set('Europe/Kiev');
 
             foreach ($orderUpdate as $value) {
-                $response[$i] = [
-                    'routefrom' => $value["routefrom"],
-                    'routefromnumber' => $value["routefromnumber"],
-                    'routeto' => $value["routeto"],
-                    'routetonumber' => $value["routetonumber"],
-                    'web_cost' => $value["web_cost"],
-                    'closeReason' => $value["closeReason"],
-                    'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
-                ];
+                if ($i < 5) {
+                    $response[] = [
+                        'routefrom' => $value["routefrom"],
+                        'routefromnumber' => $value["routefromnumber"],
+                        'routeto' => $value["routeto"],
+                        'routetonumber' => $value["routetonumber"],
+                        'web_cost' => $value["web_cost"],
+                        'closeReason' => $value["closeReason"],
+                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                    ];
+                } else {
+//                    if ($value["closeReason"] == "0" ) {
+                    if ($value["closeReason"] == 0 || $value["closeReason"] == 8 ||$value["closeReason"] == 9) {
+                        $response[] = [
+                            'routefrom' => $value["routefrom"],
+                            'routefromnumber' => $value["routefromnumber"],
+                            'routeto' => $value["routeto"],
+                            'routetonumber' => $value["routetonumber"],
+                            'web_cost' => $value["web_cost"],
+                            'closeReason' => $value["closeReason"],
+                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                        ];
+                    }
+                }
                 $i++;
             }
+        } else {
+            $response = null;
+            $response[] = [
+                'routefrom' => "*",
+                'routefromnumber' => "*",
+                'routeto' => "*",
+                'routetonumber' => "*",
+                'web_cost' => "*",
+                'closeReason' => "*",
+                'created_at' => "*",
+            ];
         }
+
         return $response;
     }
 

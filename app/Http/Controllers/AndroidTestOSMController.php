@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\Check;
 use App\Mail\Server;
+use App\Mail\ServerServiceMessage;
 use App\Models\BlackList;
 use App\Models\CherkasyCombo;
 use App\Models\City;
@@ -15,9 +16,12 @@ use App\Models\DoubleOrder;
 use App\Models\OdessaCombo;
 use App\Models\Orderweb;
 use App\Models\ZaporizhzhiaCombo;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
@@ -386,34 +390,13 @@ class AndroidTestOSMController extends Controller
         $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
 
 
-//        $payment_type = 0;
-//        $authorizationBonus = null;
-//        $authorizationDouble = null;
-
-
         $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
         $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
-//        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-//
-//        if ($userArr[2] == 'fondy_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'mono_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'bonus_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
+
 
 
         $identificationId = self::identificationId($application);
@@ -1870,27 +1853,6 @@ class AndroidTestOSMController extends Controller
         $payment_type = $authorizationChoiceArr["payment_type"];
 
 
-//        $payment_type = 0;
-//        $authorizationBonus = null;
-//        $authorizationDouble = null;
-//        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-//
-//        if ($userArr[2] == 'fondy_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'mono_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'bonus_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-
         $identificationId = self::identificationId($application);
         $apiVersion = (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI);
 
@@ -1933,15 +1895,6 @@ class AndroidTestOSMController extends Controller
 
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
-//
-//        $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
-//        if ($addressFrom['name'] != "name") {
-//            $params['from'] = $addressFrom['name'];
-//            $params['from_number'] = $addressFrom['house'];
-//        } else {
-//            $params['from'] = 'Місце відправлення';
-//            $params['from_number'] = ' ';
-//        }
         $params['from'] = $start;
         $params['from_number'] = "";
 
@@ -2294,6 +2247,71 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
+    public function sentCancelInfo($orderweb)
+    {
+
+        $user_full_name = $orderweb->user_full_name;
+        $user_phone = $orderweb->user_phone;
+        $email = $orderweb->email;
+        $routefrom = $orderweb->routefrom;
+        $routeto = $orderweb->routeto;
+        $web_cost = $orderweb->web_cost;
+        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+        $server = $orderweb->server;
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+        }
+
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+
+        $dateTime = new DateTime($orderweb->updated_at);
+
+
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $updated_at = $formattedTime;
+        Log::debug("updated_at " .$updated_at);
+
+        $subject = "Отмена заказа";
+
+        $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
+        $paramsAdmin = [
+            'subject' => $subject,
+            'message' => $messageAdmin,
+        ];
+
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+        Mail::to('cartaxi4@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+        Mail::to('taxi.easy.ua@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function myHistory()
     {
 
@@ -2338,10 +2356,15 @@ class AndroidTestOSMController extends Controller
      * @return string|string[]
      * @throws \Exception
      */
-    public function webordersCancel($uid)
-    {
-        $city = "OdessaTest";
-        $application = "PAS2";
+    public function webordersCancel(
+        $uid,
+        $city,
+        $application
+    ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
+
         $connectAPI = self::connectApi($city);
         $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $url = $connectAPI . '/api/weborders/cancel/' . $uid;
@@ -2371,6 +2394,7 @@ class AndroidTestOSMController extends Controller
         if ($orderweb) {
             $orderweb->closeReason = "1";
             $orderweb->save();
+            self::sentCancelInfo($orderweb);
         }
 
         return [
@@ -2381,10 +2405,15 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
-    public function historyUIDStatus($uid)
-    {
-        $city = "OdessaTest";
-        $application = "PAS2";
+    public function historyUIDStatus(
+        $uid,
+        $city,
+        $application
+    ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
+
         $connectAPI = self::connectApi($city);
         $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $url = $connectAPI . '/api/weborders/' . $uid;

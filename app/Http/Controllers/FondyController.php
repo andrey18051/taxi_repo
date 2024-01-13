@@ -473,6 +473,11 @@ class FondyController extends Controller
 
             if (isset($additionalInfo['card_type'], $additionalInfo['bank_name'])) {
                 $cardType = $additionalInfo['card_type'];
+                if ($additionalInfo['bank_name'] != null) {
+                    $bankName = $additionalInfo['bank_name'];
+                } else {
+                    $bankName = " ";
+                }
                 $bankName = $additionalInfo['bank_name'];
 
                 $card = Card::where('pay_system', 'fondy')

@@ -117,10 +117,10 @@ Route::get('/android/geoLatLanSearch/{originLatitude}/{originLongitude}', [Andro
 Route::get('/android/visicom/show/{settlement}', [VisicomController::class, 'show'])
     ->name('visicom_show');
 
-Route::get('/android/webordersCancel/{uid}', [AndroidTestOSMController::class, 'webordersCancel'])
+Route::get('/android/webordersCancel/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancel'])
     ->name('webordersCancel');
 
-Route::get('/android/historyUIDStatus/{uid}', [AndroidTestOSMController::class, 'historyUIDStatus'])
+Route::get('/android/historyUIDStatus/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
 
 
