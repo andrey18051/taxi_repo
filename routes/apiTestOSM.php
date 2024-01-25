@@ -4,6 +4,7 @@ use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\VisicomController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -138,3 +139,9 @@ Route::get('/android/UIDStatus/{uid}', [AndroidTestOSMController::class, 'UIDSta
 
 Route::get('/versionComboOdessa', [AndroidTestOSMController::class, 'versionComboOdessa'])
     ->name('versionComboOdessa');
+
+/**
+ * Permissions
+ */
+Route::get('/android/permissions/{email}', [UniversalAndroidFunctionController::class, 'userPermissions'])
+    ->name('userPermissions');

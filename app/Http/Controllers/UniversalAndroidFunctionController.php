@@ -1838,19 +1838,37 @@ class UniversalAndroidFunctionController extends Controller
         $user->user_phone = $params["user_phone"];
         $user->save();
 
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+        }
+
         /**
          * Сообщение о заказе
          */
 //        dd($params);
 
+        $user_phone  = $params["user_phone"];//Телефон пользователя
+
+        $email = $params['email'];//Телефон пользователя
         if (!$params["route_undefined"]) {
-            $order = "Нове замовлення від " . $params['user_full_name'] .
+            $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
                 ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
                 $params['dispatching_order_uid'];
         } else {
-            $order = "Нове замовлення від " . $params['user_full_name'] .
+            $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
                 $params['dispatching_order_uid'];
@@ -1859,12 +1877,13 @@ class UniversalAndroidFunctionController extends Controller
         $subject = 'Інформація про нову поїздку:';
         $paramsCheck = [
             'subject' => $subject,
-            'message' => $order,
+            'message' => $order . ". Приложение $pas",
         ];
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+
         $message = new TelegramController();
         try {
-            $message->sendMeMessage($order);
+            $message->sendMeMessage($order . ". Приложение $pas");
+            $message->sendAlarmMessage($order . ". Приложение $pas");
         } catch (Exception $e) {
             $subject = 'Ошибка в телеграмм';
             $paramsCheck = [
@@ -1873,6 +1892,9 @@ class UniversalAndroidFunctionController extends Controller
             ];
             Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
         };
+
+        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
     }
     public function addUser($name, $email)
     {
@@ -1895,6 +1917,34 @@ class UniversalAndroidFunctionController extends Controller
             $user = User::where('email', $email)->first();
             (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
         }
+    }
+    public function addUserNoName($email)
+    {
+        $newUser = User::whereRaw('BINARY email = ?', [$email])->first();
+        if ($newUser == null) {
+            $newUser = new User();
+
+            $newUser->name = "user_";
+            $newUser->email = $email;
+            $newUser->password = "123245687";
+
+            $newUser->facebook_id = null;
+            $newUser->google_id = null;
+            $newUser->linkedin_id = null;
+            $newUser->github_id = null;
+            $newUser->twitter_id = null;
+            $newUser->telegram_id = null;
+            $newUser->viber_id = null;
+            $newUser->save();
+
+            $user = User::where('email', $email)->first();
+            $username = "user_" . $newUser->id;
+            $user->name = $username;
+            $user->save();
+
+            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
+        }
+        return ["user_name" => $username];
     }
 
     public function verifyBlackListUser($email, $androidDom)
@@ -2286,5 +2336,16 @@ class UniversalAndroidFunctionController extends Controller
     {
         $user = User::where("email", $email)->first();
         return ["phone"=>$user->user_phone];
+    }
+    public function userPermissions(string $email): array
+    {
+        $user = User::where("email", $email)->first();
+        if ($user->card_pay == null) {
+            $user->card_pay = 0;
+        }
+        if ($user->bonus_pay == null) {
+            $user->bonus_pay = 0;
+        }
+        return ["card_pay"=>$user->card_pay, "bonus_pay"=>$user->bonus_pay,];
     }
 }

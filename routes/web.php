@@ -1173,6 +1173,7 @@ Route::get('/bonusBalance/balanceReviewDaily/', [BonusBalanceController::class, 
  * User add
  */
 Route::get('/android/addUser/{name}/{email}', [UniversalAndroidFunctionController::class, 'addUser'])->name('addUser');
+Route::get('/android/addUserNoName/{email}', [UniversalAndroidFunctionController::class, 'addUserNoName'])->name('addUserNoName');
 Route::get('/android/bonusType1ForAll', [WebOrderController::class, 'bonusType1ForAll'])->name('bonusType1ForAll');
 Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNameEmail'])->name('fixIncorrectNameEmail');
 
