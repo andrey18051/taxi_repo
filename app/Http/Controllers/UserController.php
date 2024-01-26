@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -53,18 +54,36 @@ class UserController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id, $name, $email, $bonus)
+    public function edit($id, $name, $email, $bonus, $bonus_pay, $card_pay)
     {
+        Log::info("bonus_pay  $bonus_pay");
+        Log::info("card_pay  $card_pay");
+
+        $bon_pay = 1;
+
+        if ($bonus_pay === "false" || $bonus_pay === "0"|| $bonus_pay === "null") {
+            $bon_pay = 0;
+        }
+
+        $c_pay = 1;
+
+        if ($card_pay === "false" || $card_pay === "0" || $card_pay === "null") {
+            $c_pay = 0;
+        }
+        Log::info("bon_pay  $bon_pay");
+        Log::info("c_pay  $c_pay");
         $user = User::find($id);
 
         $user->name = $name;
         $user->email = $email;
         $user->bonus = $bonus;
+        $user->bonus_pay = $bon_pay;
+        $user->card_pay = $c_pay;
         $user->save();
 
-      return response()->json(User::find($id));
+        return response()->json(User::find($id));
     }
 
     /**
@@ -78,6 +97,20 @@ class UserController extends Controller
     {
         //
     }
+
+
+
+    public function setForAllPermissionsTrue()
+    {
+        User::where('id', '>', 0) // Укажите условие, которое выберет все записи (в данном случае, все записи)
+        ->update([
+            'bonus_pay' => 1,
+            'card_pay' => 1,
+        ]);
+
+        // Дополнительные действия или возвращение результата, если необходимо
+    }
+
 
     /**
      * @param $id

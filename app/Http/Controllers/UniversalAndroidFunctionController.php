@@ -1912,6 +1912,10 @@ class UniversalAndroidFunctionController extends Controller
             $newUser->twitter_id = null;
             $newUser->telegram_id = null;
             $newUser->viber_id = null;
+            $newUser->bonus = 0;
+            $newUser->bonus_pay = 1;
+            $newUser->card_pay = 1;
+
             $newUser->save();
 
             $user = User::where('email', $email)->first();
@@ -1935,6 +1939,9 @@ class UniversalAndroidFunctionController extends Controller
             $newUser->twitter_id = null;
             $newUser->telegram_id = null;
             $newUser->viber_id = null;
+            $newUser->bonus = 0;
+            $newUser->bonus_pay = 1;
+            $newUser->card_pay = 1;
             $newUser->save();
 
             $user = User::where('email', $email)->first();
