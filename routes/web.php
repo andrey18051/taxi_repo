@@ -34,6 +34,7 @@ use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UIDController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserMessageController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
 use App\Http\Controllers\VisicomController;
@@ -1244,3 +1245,12 @@ Route::get('/maxBoxKeyInfo/{appName}', [MaxboxController::class, 'maxBoxKeyInfo'
  */
 Route::get('/userPhone', [UniversalAndroidFunctionController::class, 'userPhone']);
 Route::get('/userPhoneReturn/{email}', [UniversalAndroidFunctionController::class, 'userPhoneReturn']);
+
+/**
+ * Message for Android users
+ */
+Route::get('/showMessageAll', [UserMessageController::class,'index']);
+Route::get('/showMessage/{email}', [UserMessageController::class, 'show']);
+Route::get('/messages/update/{id}/{text_message}/{sent_message_info}', [UserMessageController::class, 'update']);
+Route::get('/newMessage/{email}/{text_message}', [UserMessageController::class, 'newMessage']);
+Route::delete('/messages/destroy/{id}', [UserMessageController::class, 'destroy']);

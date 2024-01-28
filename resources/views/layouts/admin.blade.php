@@ -38,10 +38,11 @@
                     <!-- Left Side Of Navbar -->
                     <input type="checkbox" id="nav-toggle" hidden>
                     <nav class="nav">
-                        <label for="nav-toggle" class="nav-toggle" onclick></label>
+                        <label for="nav-toggle" class="nav-toggle" @click></label>
                         <ul class="navbar-nav">
                             <li><a href="{{ asset('/laratrust') }}">Roles</a>
                             <li><router-link to="/admin/users">Users</router-link></li>
+                            <li><router-link to="/admin/user_messages">User's messages</router-link></li>
                             <li><router-link to="/admin/services">Services</router-link></li>
                             <li><a href="{{ asset('/services/serviceNew') }}">Services Add</a>
                             <li><a href="{{ asset('/blacklist') }}">Android settings</a>
@@ -97,5 +98,22 @@
             @yield('content')
         </main>
     </div>
+    <script>
+        // Add this script to handle automatic collapse
+        document.addEventListener("DOMContentLoaded", function () {
+            var navToggle = document.getElementById('nav-toggle');
+            var navLinks = document.querySelectorAll('.nav a');
+
+            navLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    // Check if the checkbox is checked (visible)
+                    if (navToggle.checked) {
+                        // Uncheck the checkbox to hide the left panel
+                        navToggle.checked = false;
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

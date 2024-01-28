@@ -24,6 +24,7 @@
         "vue-template-compiler": "^2.7.4"
     },
     "dependencies": {
+        "v-autocomplete": "^1.8.2",
         "vue-axios": "^3.4.1",
         "vue-router": "^3.5.4",
         "vue-server-renderer": "^2.7.4",

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -114,9 +116,31 @@ class UserController extends Controller
 
     /**
      * @param $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
-        User::find($id)->delete();
+        try {
+            DB::beginTransaction();
+
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json(['error' => 'Пользователь не найден'], 404);
+            }
+
+            $user->delete();
+
+            // Удаление сообщений пользователя
+            UserMessage::where('user_id', $id)->delete();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Пользователь успешно удален'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['error' => 'Произошла ошибка при удалении пользователя'], 500);
+        }
     }
 }

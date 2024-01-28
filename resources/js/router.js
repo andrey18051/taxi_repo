@@ -12,6 +12,7 @@ import CityHome from "./views/city/CityHome";
 import CloseReasonHome from "./views/close_reason/CloseReasonHome";
 import BonusHome from "./views/bonuses/BonusHome";
 import FondyHome from "./views/fondy/FondyHome";
+import UserMessages from "./views/user/UserMessages";
 
 const  routes = [
     {
@@ -21,6 +22,10 @@ const  routes = [
     {
         path: "/admin/users",
         component: Users
+    },
+    {
+        path: "/admin/user_messages",
+        component: UserMessages
     },
     {
         path: "/admin/services",
