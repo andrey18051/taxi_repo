@@ -718,6 +718,7 @@ Route::get('/search', function () {
 Route::get('/autocompleteSearchComboHidname', [TypeaheadController::class, 'autocompleteSearchComboHidname'])->name('autocompleteSearchComboHid');
 Route::get('/search-home', [TypeaheadController::class, 'index'])->name('search-home');
 Route::get('/autocomplete-search', [TypeaheadController::class, 'autocompleteSearch']);
+Route::get('/autocomplete-search-user', [TypeaheadController::class, 'autocompleteSearchUser']);
 Route::get('/autocomplete-search2', [TypeaheadController::class, 'autocompleteSearch2']);
 Route::get('/autocomplete-search-combo', [TypeaheadController::class, 'autocompleteSearchCombo']);
 Route::get('/autocomplete-search-combo-hid/{name}', [TypeaheadController::class, 'autocompleteSearchComboHid'])
@@ -1250,7 +1251,7 @@ Route::get('/userPhoneReturn/{email}', [UniversalAndroidFunctionController::clas
  * Message for Android users
  */
 Route::get('/showMessageAll', [UserMessageController::class,'index']);
-Route::get('/showMessage/{email}', [UserMessageController::class, 'show']);
+Route::get('/showMessage/{email}/{app}', [UserMessageController::class, 'show']);
 Route::get('/messages/update/{id}/{text_message}/{sent_message_info}', [UserMessageController::class, 'update']);
-Route::get('/newMessage/{email}/{text_message}', [UserMessageController::class, 'newMessage']);
+Route::get('/newMessage/{email}/{text_message}/{app}', [UserMessageController::class, 'newMessage']);
 Route::delete('/messages/destroy/{id}', [UserMessageController::class, 'destroy']);

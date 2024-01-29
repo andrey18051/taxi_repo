@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserMessage;
+use App\Models\UserVisit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -64,7 +66,7 @@ class UserMessageController extends Controller
      */
 
 
-    public function show($email): \Illuminate\Http\JsonResponse
+    public function show($email, $app): \Illuminate\Http\JsonResponse
     {
         // Найти пользователя по email
         $user = User::where("email", $email)->first();
@@ -75,9 +77,13 @@ class UserMessageController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
+
+        (new UserVisitController)->create($user->id, $app);
+
         // Найти сообщения пользователя, где sent_message_info равно 0
         $userMessages = UserMessage::where('user_id', $user->id)
             ->where('sent_message_info', 0)
+            ->where('app', $app)
             ->get();
 
         // Проверить, найдены ли сообщения
@@ -86,8 +92,13 @@ class UserMessageController extends Controller
             return response()->json(['error' => 'No messages found for the user with sent_message_info equal to 0'], 404);
         } else {
             // Обновить sent_message_info на 1 для всех сообщений пользователя
-            UserMessage::where('user_id', $user->id)->update(['sent_message_info' => 1]);
+            UserMessage::where('user_id', $user->id)
+                ->where('app', $app)
+                ->update(['sent_message_info' => 1]);
         }
+
+
+
 
         // Возвращение JSON-ответа с данными сообщений пользователя
         $responseData = $userMessages->map(function ($message) {
@@ -96,6 +107,7 @@ class UserMessageController extends Controller
                 'user_id' => $message->user_id,
                 'text_message' => $message->text_message,
                 'sent_message_info' => $message->sent_message_info,
+                'app' => $message->app,
                 'created_at' => $message->created_at,
                 'updated_at' => $message->updated_at,
             ];
@@ -106,35 +118,26 @@ class UserMessageController extends Controller
 
 
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function newMessage($email, $text_message)
+
+    public function newMessage($email, $text_message, $app)
     {
-        $user = User::where('email', $email)->first();
+        $emailString = $email;
 
-        // Проверить, найден ли пользователь
-        if ($user) {
-            // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
-            $newMessage = new UserMessage();
-            $newMessage->user_id = $user->id;
-            $newMessage->text_message = $text_message;
-            $newMessage->sent_message_info = 0;
-            $newMessage->save();
+        $emailArray = explode(',', $emailString);
 
-//            UserMessage::create([
-//                'user_id' => $user->id,
-//                'text_message' => $text_message,
-//                'sent_message_info' => 0,
-//                // Другие поля сообщения, которые вы хотите добавить
-//            ]);
+        foreach ($emailArray as $value) {
+            $user = User::where('email', $value)->first();
 
-            return response()->json(['message' => 'Сообщение успешно добавлено'], 200);
-        } else {
-            return response()->json(['message' => 'Пользователь с указанным email не найден'], 404);
+            // Проверить, найден ли пользователь
+            if ($user) {
+                // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
+                $newMessage = new UserMessage();
+                $newMessage->user_id = $user->id;
+                $newMessage->text_message = $text_message;
+                $newMessage->sent_message_info = 0;
+                $newMessage->app = $app;
+                $newMessage->save();
+            }
         }
     }
 

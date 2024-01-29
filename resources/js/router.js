@@ -13,6 +13,7 @@ import CloseReasonHome from "./views/close_reason/CloseReasonHome";
 import BonusHome from "./views/bonuses/BonusHome";
 import FondyHome from "./views/fondy/FondyHome";
 import UserMessages from "./views/user/UserMessages";
+import NewMessage from "./views/user/NewMessage";
 
 const  routes = [
     {
@@ -26,6 +27,10 @@ const  routes = [
     {
         path: "/admin/user_messages",
         component: UserMessages
+    },
+    {
+        path: "/admin/new_message",
+        component: NewMessage
     },
     {
         path: "/admin/services",

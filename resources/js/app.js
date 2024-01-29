@@ -40,6 +40,7 @@ Vue.component('closeReason-component', require('./views/close_reason/CloseReason
 Vue.component('bonuses-component', require('./views/bonuses/BonusHome.vue').default);
 Vue.component('fondy-component', require('./views/fondy/FondyHome.vue').default);
 Vue.component('user-messages', require('./views/user/UserMessages').default);
+Vue.component('new-message', require('./views/user/NewMessage').default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

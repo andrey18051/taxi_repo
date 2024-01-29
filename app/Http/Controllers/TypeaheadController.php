@@ -135,6 +135,19 @@ class TypeaheadController extends Controller
         return  $data;
     }
 
+    public function autocompleteSearchUser()
+    {
+        $i = 0;
+
+        $users = User::all()->sortByDesc('name');
+        foreach ($users as $object) {
+            $data[$i] = $object->user_phone . " - " . $object->name . " - " .$object->email;
+            $i++;
+        }
+
+        return  $data;
+    }
+
     public function autocompleteSearchComboHid($name)
     {
         $combo = Combo::select(['name', 'street'])->where('name', 'like', $name . '%')->first();

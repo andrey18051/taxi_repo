@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserMessage extends Model
+class UserVisit extends Model
 {
     use HasFactory;
 
@@ -16,13 +16,5 @@ class UserMessage extends Model
     /**
      * @var mixed
      */
-    private $text_message;
-    /**
-     * @var int|mixed
-     */
-    private $sent_message_info;
-    /**
-     * @var mixed
-     */
-    private $app;
+    private $app_name;
 }
