@@ -1066,6 +1066,7 @@ Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'delete
   */
 Route::get('/ip/city', [IPController::class,'ipCity'])->name('ipCity');
 Route::get('/ip/ipCityOne/{ip}', [IPController::class,'ipCityOne'])->name('ipCity');
+Route::get('/ip/ipCityPush', [IPController::class,'ipCityPush'])->name('ipCityPush');
 Route::get('/ip/countryName/{ip}', [IPController::class,'countryName'])->name('countryName');
 Route::get('/ip/address', [IPController::class,'address'])->name('address');
  /**
@@ -1252,6 +1253,6 @@ Route::get('/userPhoneReturn/{email}', [UniversalAndroidFunctionController::clas
  */
 Route::get('/showMessageAll', [UserMessageController::class,'index']);
 Route::get('/showMessage/{email}/{app}', [UserMessageController::class, 'show']);
-Route::get('/messages/update/{id}/{text_message}/{sent_message_info}', [UserMessageController::class, 'update']);
-Route::get('/newMessage/{email}/{text_message}/{app}', [UserMessageController::class, 'newMessage']);
+Route::get('/messages/update/{id}/{text_message}/{sent_message_info}/{app}/{city}', [UserMessageController::class, 'update']);
+Route::get('/newMessage/{email}/{text_message}/{app}/{city}', [UserMessageController::class, 'newMessage']);
 Route::delete('/messages/destroy/{id}', [UserMessageController::class, 'destroy']);

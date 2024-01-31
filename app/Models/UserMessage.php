@@ -25,4 +25,8 @@ class UserMessage extends Model
      * @var mixed
      */
     private $app;
+    /**
+     * @var mixed
+     */
+    private $city;
 }

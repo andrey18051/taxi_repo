@@ -23,7 +23,8 @@
             <v-th sortKey="text_message" style="width: 200px">text_message</v-th>
             <v-th sortKey="sent_message_info" style="width: 30px">sent</v-th>
             <v-th sortKey="app"style="width: 80px">APP</v-th>
-            <v-th sortKey="created_at" style="width: 200px">created_at</v-th>
+            <v-th sortKey="city"style="width: 150px">CITY</v-th>
+<!--            <v-th sortKey="created_at" style="width: 200px">created_at</v-th>-->
             <v-th sortKey="updated_at" style="width: 200px">updated_at</v-th>
             <v-th sortKey="name" style="width: 200px">Name</v-th>
             <v-th sortKey="email"style="width: 200px">Email</v-th>
@@ -36,7 +37,8 @@
                 <td><input class="form-input input-lg" style="width: 200px" v-model="filters.text_message.value" placeholder="Select by text_message"></td>
                 <td style="width: 30px"></td>
                 <td><input class="form-input input-lg" style="width: 80px" v-model="filters.app.value"  placeholder=""></td>
-                <td><input class="form-input input-lg" style="width: 200px" v-model="filters.created_at.value" placeholder="Select by created_at"></td>
+                <td><input class="form-input input-lg" style="width: 150px" v-model="filters.city.value"  placeholder=""></td>
+<!--                <td><input class="form-input input-lg" style="width: 200px" v-model="filters.created_at.value" placeholder="Select by created_at"></td>-->
                 <td><input class="form-input input-lg" style="width: 200px" v-model="filters.updated_at.value" placeholder="Select by updated_at"></td>
                 <td><input class="form-input input-lg" style="width: 200px" v-model="filters.name.value" placeholder="Select by name"></td>
                 <td><input class="form-input input-lg" style="width: 200px" v-model="filters.email.value"  placeholder="Select by email"></td>
@@ -54,8 +56,29 @@
                 <td>
                     <input type="checkbox" id="sent_message_info" style="width: 30px" v-model="row.sent_message_info" >
                 </td>
-                <td><input id="app" class="form-control" style="width: 80px" v-model.text="row.app" readonly></td>
-                <td><input id="created_at" class="form-control" style="width: 200px" v-model.text="row.created_at" readonly></td>
+                <td>
+<!--                    <input id="app" class="form-control" style="width: 80px" v-model.text="row.app" readonly>-->
+                    <select id="app" class="form-control" style="width: 80px" v-model.text="row.app" >
+                        <option value="PAS1">ПАС 1</option>
+                        <option value="PAS2">ПАС 2</option>
+                        <option value="PAS4">ПАС 4</option>
+                        <option value="ALL PASS">Все приложения</option>
+                    </select>
+                </td>
+                <td>
+<!--                    <input id="app" class="form-control" style="width: 80px" v-model.text="row.app" readonly>-->
+                    <select id="city" class="form-control" style="width: 150px" v-model.text="row.city" >
+                        <option value="Kyiv City">Киев</option>
+                        <option value="Dnipropetrovsk Oblast">Днепр</option>
+                        <option value="Odessa">Одесса</option>
+                        <option value="Zaporizhzhia">Запорожье</option>
+                        <option value="Cherkasy Oblast">Черкассы</option>
+                        <option value="foreign countries">Другое</option>
+                        <option value="ALL CITY">Все города</option>
+                    </select>
+                </td>
+<!--                <td><input id="city" class="form-control" style="width: 150px" v-model.text="row.city" readonly></td>-->
+<!--                <td><input id="created_at" class="form-control" style="width: 200px" v-model.text="row.created_at" readonly></td>-->
                 <td><input id="updated_at" class="form-control" style="width: 200px" v-model.text="row.updated_at" readonly></td>
                 <td><input id="name" class="form-control" style="width: 200px" v-model.text="row.name" readonly ></td>
                 <td><input id="email" class="form-control" style="width: 200px" v-model.text="row.email" readonly ></td>
@@ -69,6 +92,8 @@
                                      row.id,
                                      row.text_message,
                                      row.sent_message_info,
+                                     row.app,
+                                     row.city,
                                     )" style="margin-left: 5px">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                     <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
@@ -120,7 +145,8 @@ export default {
                 name: { value: "", keys: ["name"] },
                 email: { value: "", keys: ["email"] },
                 user_phone: { value: "", keys: ["user_phone"] },
-                app: { value: "", keys: ["app"] }
+                app: { value: "", keys: ["app"] },
+                city: { value: "", keys: ["city"] },
             },
 
             selectedUser: '', // Новое свойство для хранения выбранного пользователя
@@ -171,8 +197,9 @@ export default {
         },
 
 // Обновление сообщения по id
-        updateMessage(id, text_message, sent_message_info) {
-            axios.get(`/messages/update/${id}/${text_message}/${sent_message_info}`)
+        updateMessage(id, text_message, sent_message_info, app, city) {
+            const encodedNewMessage = encodeURIComponent(text_message);
+            axios.get(`/messages/update/${id}/${encodedNewMessage}/${sent_message_info}/${app}/${city}`)
                 .then(response => {
                     // Проверяем успешность операции
                     if (response.status === 200) {
@@ -185,33 +212,6 @@ export default {
                     console.error(error);
                     window.alert("Произошла ошибка при обновлении данных" + error);
                 });
-        },
-        sendMessage() {
-            if (!this.selectedUser || !this.newMessage) {
-                window.alert('Пожалуйста, выберите пользователя и введите сообщение.');
-                return;
-            }
-            // window.alert(`Phone: ${this.selectedUser.user_phone}, Name: ${this.selectedUser.name}, Email: ${this.selectedUser.email}`);
-            axios.get(`/newMessage/${this.selectedUser.email}/${this.newMessage}`)
-                .then(response => {
-                    // Проверяем успешность операции
-                    if (response.status === 200) {
-                        window.alert("Данные успешно обновлены");
-                        window.location.reload();
-                    } else {
-                        window.alert("Произошла ошибка при обновлении данных " + response.status);
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    window.alert("Произошла ошибка при обновлении данных" + error);
-                });
-
-            // Здесь вы можете использовать this.selectedUser и this.newMessage
-            // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
-            // Очистите поля после успешной отправки, если это необходимо.
-            this.selectedUser = '';
-            this.newMessage = '';
         },
         newMessageButton() {
             // Переход по адресу "/admin/new_message"

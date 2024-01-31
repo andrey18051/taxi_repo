@@ -22,6 +22,7 @@ class UserMessageController extends Controller
         $userMessages = DB::table('user_messages')
             ->join('users', 'user_messages.user_id', '=', 'users.id')
             ->select('user_messages.*', 'users.name', 'users.user_phone', 'users.email')
+            ->orderBy('id', 'desc')
             ->get();
 
         return response()->json($userMessages);
@@ -76,15 +77,41 @@ class UserMessageController extends Controller
             // Возвращение ошибки, если пользователь не найден
             return response()->json(['error' => 'User not found'], 404);
         }
-
+        $city = (new IPController)->ipCityPush();
 
         (new UserVisitController)->create($user->id, $app);
 
-        // Найти сообщения пользователя, где sent_message_info равно 0
+//        // Найти сообщения пользователя, где sent_message_info равно 0
+//        $userMessages = UserMessage::where('user_id', $user->id)
+//            ->where('sent_message_info', 0)
+//            ->where('app', $app)
+//            ->where('city', $city)
+//            ->orderBy('updated_at', 'desc')  // Упорядочиваем по убыванию даты обновления
+//            ->get();
+
+// Найти сообщения пользователя, где sent_message_info равно 0
         $userMessages = UserMessage::where('user_id', $user->id)
-            ->where('sent_message_info', 0)
-            ->where('app', $app)
-            ->get();
+            ->where('sent_message_info', 0);
+
+// Условие для app (включая "ALL PASS")
+        if ($app !== null) {
+            $userMessages->where(function ($query) use ($app) {
+                $query->where('app', $app)
+                    ->orWhere('app', 'ALL PASS');
+            });
+        }
+
+// Условие для city (включая "ALL CITY")
+        if ($city !== null) {
+            $userMessages->where(function ($query) use ($city) {
+                $query->where('city', $city)
+                    ->orWhere('city', 'ALL CITY');
+            });
+        }
+
+        $userMessages = $userMessages->orderBy('id', 'desc')->get();
+
+
 
         // Проверить, найдены ли сообщения
         if ($userMessages->isEmpty()) {
@@ -93,7 +120,6 @@ class UserMessageController extends Controller
         } else {
             // Обновить sent_message_info на 1 для всех сообщений пользователя
             UserMessage::where('user_id', $user->id)
-                ->where('app', $app)
                 ->update(['sent_message_info' => 1]);
         }
 
@@ -119,7 +145,7 @@ class UserMessageController extends Controller
 
 
 
-    public function newMessage($email, $text_message, $app)
+    public function newMessage($email, $text_message, $app, $city)
     {
         $emailString = $email;
 
@@ -136,13 +162,14 @@ class UserMessageController extends Controller
                 $newMessage->text_message = $text_message;
                 $newMessage->sent_message_info = 0;
                 $newMessage->app = $app;
+                $newMessage->city = $city;
                 $newMessage->save();
             }
         }
     }
 
 
-    public function update(int $id, string $text_message, $sent_message_info)
+    public function update(int $id, string $text_message, $sent_message_info, $app, $city)
     {
         try {
             $s_message_info = 1;
@@ -163,6 +190,8 @@ class UserMessageController extends Controller
 
             $userMessage->text_message = $text_message;
             $userMessage->sent_message_info = $s_message_info;
+            $userMessage->app = $app;
+            $userMessage->city = $city;
             // Добавьте обновление других полей, если необходимо
 
             // Сохраняем изменения

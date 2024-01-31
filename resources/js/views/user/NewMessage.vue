@@ -5,6 +5,9 @@
             <h1 class="display-5">Users</h1>
             <p class="lead">User's messages</p>
         </div>
+        <button class="btn btn-outline-primary" @click="newMessageButton()" style="margin-left: 5px">
+            Список сообщений
+        </button>
         <v-table
             :data="users"
             :filters="filter"
@@ -55,10 +58,23 @@
                         <div>
                             <label for="userSearch">Выберите приложение:</label>
                             <select v-model="selectedApp" id="userSearch" class="form-control">
-                                <option value="PAS1">PAS 1</option>
-                                <option value="PAS2">PAS 2</option>
-                                <option value="PAS3">PAS 4</option>
-                                <option value="ALL PASS">ALL PASS</option>
+                                <option value="ALL PASS">Все приложения</option>
+                                <option value="PAS1">ПАС 1</option>
+                                <option value="PAS2">ПАС 2</option>
+                                <option value="PAS4">ПАС 4</option>
+                            </select>
+
+                        </div>
+                    <div>
+                            <label for="city">Выберите город:</label>
+                            <select v-model="city" id="city" class="form-control">
+                                <option value="ALL CITY">Все города</option>
+                                <option value="Kyiv City"> Киев</option>
+                                <option value="Dnipropetrovsk Oblast">Днепр</option>
+                                <option value="Odessa">Одесса</option>
+                                <option value="Zaporizhzhia">Запорожье</option>
+                                <option value="Cherkasy Oblast">Черкассы</option>
+                                <option value="foreign countries">Другое</option>
                             </select>
 
                         </div>
@@ -101,6 +117,7 @@ export default {
                 user_phone: { value: "", keys: ["user_phone"] }
             },
             sent: '',
+            city: '',
             selectedUser: '', // Новое свойство для хранения выбранного пользователя
             newMessage: '', // Новое свойство для хранения нового сообщения
             selectedEmails: [],
@@ -143,14 +160,14 @@ export default {
         },
 
         sendMessage() {
-            if (!this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-                window.alert('Пожалуйста, выберите приложение и введите сообщение, а также убедитесь, что выбран хотя бы один email.');
+            if (!this.city || !this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+                window.alert('Пожалуйста, проерьте выбор приложения, города  и ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
                 return;
             }
 
             const encodedNewMessage = encodeURIComponent(this.newMessage);
 
-            axios.get(`/newMessage/${this.selectedEmails.join(',')}/${encodedNewMessage}/${this.selectedApp}`)
+            axios.get(`/newMessage/${this.selectedEmails.join(',')}/${encodedNewMessage}/${this.selectedApp}/${this.city}`)
                 .then(response => {
                     // Проверяем успешность операции
                     if (response.status === 200) {
@@ -172,7 +189,10 @@ export default {
             this.newMessage = '';
             this.selectedEmails = []; // Очистить массив выбранных email после отправки
         },
-
+        newMessageButton() {
+            // Переход по адресу "/admin/new_message"
+            this.$router.push('/admin/user_messages');
+        }
 
 
     }
