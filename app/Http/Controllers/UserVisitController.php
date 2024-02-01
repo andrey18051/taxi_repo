@@ -21,12 +21,13 @@ class UserVisitController extends Controller
      * @param $user_id
      * @param $app_name
      */
-    public function create($user_id, $app)
+    public function create($user_id, $app, $city)
     {
         $visit = new UserVisit();
 
         $visit->user_id = $user_id;
         $visit->app_name = $app;
+        $visit->city = $city;
         $visit->save();
     }
 

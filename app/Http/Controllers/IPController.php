@@ -77,18 +77,7 @@ class IPController extends Controller
 //        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
 //        $LocationData = Location::get("91.244.56.202"); //Cherkasy Oblast
 
-        switch ($LocationData->regionName) {
-            case "Kyiv City":
-            case "Dnipropetrovsk Oblast":
-            case "Odessa":
-            case "Zaporizhzhia":
-            case "Cherkasy Oblast":
-                $result = $LocationData->regionName;
-                break;
-            default:
-                $result ="foreign countries";
-        }
-        return $result;
+        return $LocationData->regionName;
     }
 
     public function countryName($ip): \Illuminate\Http\JsonResponse

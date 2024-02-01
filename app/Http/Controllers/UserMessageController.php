@@ -77,17 +77,19 @@ class UserMessageController extends Controller
             // Возвращение ошибки, если пользователь не найден
             return response()->json(['error' => 'User not found'], 404);
         }
-        $city = (new IPController)->ipCityPush();
-
-        (new UserVisitController)->create($user->id, $app);
-
-//        // Найти сообщения пользователя, где sent_message_info равно 0
-//        $userMessages = UserMessage::where('user_id', $user->id)
-//            ->where('sent_message_info', 0)
-//            ->where('app', $app)
-//            ->where('city', $city)
-//            ->orderBy('updated_at', 'desc')  // Упорядочиваем по убыванию даты обновления
-//            ->get();
+        $city_result = (new IPController)->ipCityPush();
+        switch ($city_result) {
+            case "Kyiv City":
+            case "Dnipropetrovsk Oblast":
+            case "Odessa":
+            case "Zaporizhzhia":
+            case "Cherkasy Oblast":
+                $city = $city_result;
+                break;
+            default:
+                $city = "foreign countries";
+        }
+        (new UserVisitController)->create($user->id, $app, $city_result);
 
 // Найти сообщения пользователя, где sent_message_info равно 0
         $userMessages = UserMessage::where('user_id', $user->id)
@@ -118,26 +120,27 @@ class UserMessageController extends Controller
             // Возвращение ошибки, если сообщения не найдены
             return response()->json(['error' => 'No messages found for the user with sent_message_info equal to 0'], 404);
         } else {
-            // Обновить sent_message_info на 1 для всех сообщений пользователя
-            UserMessage::where('user_id', $user->id)
-                ->update(['sent_message_info' => 1]);
+            // Возвращение JSON-ответа с данными сообщений пользователя
+            $responseData = $userMessages->map(function ($message) {
+                return [
+                    'id' => $message->id,
+                    'user_id' => $message->user_id,
+                    'text_message' => $message->text_message,
+                    'sent_message_info' => $message->sent_message_info,
+                    'app' => $message->app,
+                    'created_at' => $message->created_at,
+                    'updated_at' => $message->updated_at,
+                ];
+            });
+            $userMessages->each(function ($message) {
+                $message->update(['sent_message_info' => 1]);
+            });
         }
 
 
 
 
-        // Возвращение JSON-ответа с данными сообщений пользователя
-        $responseData = $userMessages->map(function ($message) {
-            return [
-                'id' => $message->id,
-                'user_id' => $message->user_id,
-                'text_message' => $message->text_message,
-                'sent_message_info' => $message->sent_message_info,
-                'app' => $message->app,
-                'created_at' => $message->created_at,
-                'updated_at' => $message->updated_at,
-            ];
-        });
+
 
         return response()->json($responseData, 200);
     }

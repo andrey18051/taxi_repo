@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class UserMessage extends Model
 {
     use HasFactory;
+    protected $fillable = [
+
+        'sent_message_info',
+
+    ];
 
     /**
      * @var mixed
@@ -29,4 +34,5 @@ class UserMessage extends Model
      * @var mixed
      */
     private $city;
+
 }

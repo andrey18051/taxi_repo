@@ -17,4 +17,8 @@ class UserVisit extends Model
      * @var mixed
      */
     private $app_name;
+    /**
+     * @var mixed
+     */
+    private $city;
 }
