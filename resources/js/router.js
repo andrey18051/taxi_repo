@@ -14,6 +14,8 @@ import BonusHome from "./views/bonuses/BonusHome";
 import FondyHome from "./views/fondy/FondyHome";
 import UserMessages from "./views/user/UserMessages";
 import NewMessage from "./views/user/NewMessage";
+import UserMessagesEmail from "./views/user/UserMessagesEmail";
+import NewMessageEmail from "./views/user/NewMessageEmail";
 
 const  routes = [
     {
@@ -31,6 +33,14 @@ const  routes = [
     {
         path: "/admin/new_message",
         component: NewMessage
+    },
+    {
+        path: "/admin/user_messages_email",
+        component: UserMessagesEmail
+    },
+    {
+        path: "/admin/new_message_email",
+        component: NewMessageEmail
     },
     {
         path: "/admin/services",

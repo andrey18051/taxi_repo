@@ -34,6 +34,7 @@ use App\Http\Controllers\TypeaheadObjectController;
 use App\Http\Controllers\UIDController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserEmailController;
 use App\Http\Controllers\UserMessageController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
@@ -1256,3 +1257,19 @@ Route::get('/showMessage/{email}/{app}', [UserMessageController::class, 'show'])
 Route::get('/messages/update/{id}/{text_message}/{sent_message_info}/{app}/{city}', [UserMessageController::class, 'update']);
 Route::get('/newMessage/{email}/{text_message}/{app}/{city}', [UserMessageController::class, 'newMessage']);
 Route::delete('/messages/destroy/{id}', [UserMessageController::class, 'destroy']);
+
+/**
+ * Test
+ */
+Route::get('/testConnection', [UniversalAndroidFunctionController::class, 'testConnection']);
+
+/**
+ * Emails for Android users
+ */
+Route::get('/showEmailsAll', [UserEmailController::class,'index']);
+Route::get('/usersForEmail', [UserEmailController::class,'usersForEmail']);
+Route::get('/repeatEmail/{id}', [UserEmailController::class, 'repeatEmail']);
+Route::get('/emails/update/{id}/{text_message}/{sent_message_info}/', [UserEmailController::class, 'update']);
+Route::get('/newEmail/{email}/{subject}/{text_message}', [UserEmailController::class, 'newMessage']);
+Route::delete('/emails/destroy/{id}', [UserEmailController::class, 'destroy']);
+Route::get('/unsubscribe/{email}', [UserEmailController::class, 'unsubscribe']);

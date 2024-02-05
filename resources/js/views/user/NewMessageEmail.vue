@@ -3,7 +3,7 @@
     <div class="container" style="overflow-x: auto;">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
             <h1 class="display-5">Users</h1>
-            <p class="lead">User's messages</p>
+            <p class="lead">User's emails</p>
         </div>
         <button class="btn btn-outline-primary" @click="newMessageButton()" style="margin-left: 5px">
             Список сообщений
@@ -52,42 +52,23 @@
         />
             <div class="card offset-4 col-4">
                 <div class="card-body">
-                <tr>
-                    <td colspan="9">
-                        <!-- Новые поля для ввода -->
-                        <div>
-                            <label for="userSearch">Выберите приложение:</label>
-                            <select v-model="selectedApp" id="userSearch" class="form-control">
-                                <option value="ALL PASS">Все приложения</option>
-                                <option value="PAS1">ПАС 1</option>
-                                <option value="PAS2">ПАС 2</option>
-                                <option value="PAS4">ПАС 4</option>
-                            </select>
+                    <tr>
+                        <td >
+                            <label for="subject">Введите тему:</label>
+                            <input id="subject" v-model="subject" class="form-control col-12" style="width: 100%;">
+                        </td>
+                    </tr>
+                    <tr>
 
-                        </div>
-                    <div>
-                            <label for="city">Выберите город:</label>
-                            <select v-model="city" id="city" class="form-control">
-                                <option value="ALL CITY">Все города</option>
-                                <option value="Kyiv City"> Киев</option>
-                                <option value="Dnipropetrovsk Oblast">Днепр</option>
-                                <option value="Odessa">Одесса</option>
-                                <option value="Zaporizhzhia">Запорожье</option>
-                                <option value="Cherkasy Oblast">Черкассы</option>
-                                <option value="foreign countries">Другое</option>
-                            </select>
+                        <td >
+                            <label for="newMessage">Введите новое сообщение:</label>
+                            <textarea v-model="newMessage" id="newMessage" class="form-control" rows="3" style="width: 100%;"></textarea>
 
-                        </div>
-
-
-                        <!-- Новое поле для ввода нового сообщения -->
-                        <label for="newMessage">Введите новое сообщение:</label>
-                        <textarea v-model="newMessage" id="newMessage" class="form-control" rows="3"></textarea>
-                        <br>
-                        <!-- Кнопка для сохранения сообщения -->
-                        <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
-                    </td>
-                </tr>
+                            <br>
+                            <!-- Кнопка для сохранения сообщения -->
+                            <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
+                        </td>
+                    </tr>
             </div>
 
         </div>
@@ -119,9 +100,9 @@ export default {
             sent: '',
             city: '',
             selectedUser: '', // Новое свойство для хранения выбранного пользователя
+            subject: '', // Новое свойство для хранения нового сообщения
             newMessage: '', // Новое свойство для хранения нового сообщения
-            selectedEmails: [],
-            selectedApp: ''
+            selectedEmails: []
         };
     },
     mounted() {
@@ -132,7 +113,7 @@ export default {
 
     methods: {
         getUsers() {
-            axios.get('/users/all')
+            axios.get('/usersForEmail')
                 .then(
                     res => {
                         this.users = res.data;
@@ -160,14 +141,14 @@ export default {
         },
 
         sendMessage() {
-            if (!this.city || !this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-                window.alert('Пожалуйста, проверьте выбор приложения, города  и ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+            if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+                window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
                 return;
             }
 
             const encodedNewMessage = encodeURIComponent(this.newMessage);
-
-            axios.get(`/newMessage/${this.selectedEmails.join(',')}/${encodedNewMessage}/${this.selectedApp}/${this.city}`)
+            const url = `/newEmail/${this.selectedEmails.join(',')}/${this.subject}/${encodedNewMessage}`
+            axios.get(`/newEmail/${this.selectedEmails.join(',')}/${this.subject}/${encodedNewMessage}`)
                 .then(response => {
                     // Проверяем успешность операции
                     if (response.status === 200) {
@@ -179,7 +160,7 @@ export default {
                 })
                 .catch(error => {
                     console.error(error);
-                    window.alert("Произошла ошибка при обновлении данных" + error);
+                    window.alert("Произошла ошибка при обновлении данных" + url);
                 });
 
             // Здесь вы можете использовать this.selectedUser и this.newMessage
@@ -191,7 +172,7 @@ export default {
         },
         newMessageButton() {
             // Переход по адресу "/admin/new_message"
-            this.$router.push('/admin/user_messages');
+            this.$router.push('/admin/user_messages_email');
         }
 
 

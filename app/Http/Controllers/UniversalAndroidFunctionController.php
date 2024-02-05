@@ -2355,4 +2355,9 @@ class UniversalAndroidFunctionController extends Controller
         }
         return ["card_pay"=>$user->card_pay, "bonus_pay"=>$user->bonus_pay,];
     }
+
+    public function testConnection(): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(["test"=>"ok"], 200);
+    }
 }
