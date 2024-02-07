@@ -25,7 +25,7 @@ class UserEmailController extends Controller
         $userMessages = DB::table('user_emails')
             ->join('users', 'user_emails.user_id', '=', 'users.id')
             ->select('user_emails.*', 'users.name', 'users.user_phone', 'users.email')
-            ->where('user_emails.sent_email', '!=', 1) // Exclude users with sent_email equal to 1
+//            ->where('user_emails.sent_email', '!=', 1) // Exclude users with sent_email equal to 1
             ->orderBy('id', 'desc')
             ->get();
 
@@ -171,16 +171,21 @@ class UserEmailController extends Controller
                     // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
                     $newMessage = new UserEmail();
                     $newMessage->user_id = $user->id;
-                    $newMessage->subject = $subject;
+                    $newMessage->subject = $user->name . " по " . $subject;
                     $newMessage->text_message = $text_message;
                     $newMessage->sent_message_info = 0;
                     $newMessage->save();
 
+                    $introLines = "Заголовок";
+                    $outroLines = "© 2024 All rights reserved.";
+
                     $paramsMail = [
-                        'subject' => $subject,
+                        'subject' => $user->name . " по " .$subject,
                         'message' => $text_message,
                         'email' => $user->email,
-                        'text_button' => "Відписатися",
+                        'introLines' => $introLines,
+                        'outroLines' => $outroLines,
+                        'text_button' => "Відписатися для $user->name",
                         'url' =>"https://m.easy-order-taxi.site/unsubscribe/$user->email"
                     ];
                     Mail::to($value)->send(new InfoEmail($paramsMail));
@@ -204,7 +209,7 @@ class UserEmailController extends Controller
                         'subject' => $email->subject,
                         'message' => $email->text_message,
                         'email' => $user->email,
-                        'text_button' => "Відписатися",
+                        'text_button' => "Відписатися  для $user->name",
                         'url' =>"https://m.easy-order-taxi.site/unsubscribe/$user->email"
                     ];
                     Mail::to($user->email)->send(new InfoEmail($paramsMail));
