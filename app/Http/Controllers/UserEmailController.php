@@ -223,7 +223,7 @@ class UserEmailController extends Controller
         $user = User::where("email", $email)->first();
         $user->sent_email = 1;
         $user->save();
-        $subject = "Повідомлення с сайту Такси Лайт Юа.";
+        $subject = "Повідомлення с сайту Такси Лайт Юа для $user->name.";
         $text_message  = "Підписка на повідомлення з сайту Таксі Лайт Юа успішно скасована.";
         $paramsMail = [
             'subject' => $subject,
