@@ -6,6 +6,7 @@ use App\Mail\InfoEmail;
 use App\Mail\PromoList;
 use App\Models\User;
 use App\Models\UserEmail;
+use App\Models\UserVisit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -157,38 +158,67 @@ class UserEmailController extends Controller
 
         }
     }
-    public function newMessage($email, $subject, $text_message)
+    public function newMessage($email, $subject, $text_message, $app)
     {
         $emailString = $email;
+        if ($emailString !== "xx") {
+            $emailArray = explode(',', $emailString);
 
-        $emailArray = explode(',', $emailString);
+            foreach ($emailArray as $value) {
+                $user = User::where('email', $value)->first();
+                if (!$user->sent_email) {
+                    // Проверить, найден ли пользователь
+                    if ($user) {
+                        // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
+                        $newMessage = new UserEmail();
+                         $newMessage->user_id = $user->id;
+                        $newMessage->subject = $user->name . " по " . $subject;
+                        $newMessage->text_message = $text_message;
+                        $newMessage->sent_message_info = 0;
+                        $newMessage->save();
 
-        foreach ($emailArray as $value) {
-            $user = User::where('email', $value)->first();
-            if (!$user->sent_email) {
+                        $paramsMail = [
+                            'subject' => $user->name . " по " .$subject,
+                            'message' => $text_message,
+                            'email' => $user->email,
+                            'text_button' => "Відписатися для $user->name",
+                            'url' =>"https://m.easy-order-taxi.site/unsubscribe/$user->email"
+                        ];
+                        Mail::to($value)->send(new InfoEmail($paramsMail));
+                    }
+                }
+            }
+        } else {
+            $userVisits = UserVisit::where("app_name", $app)->get()->unique('user_id')->toArray();
+            $userIds = array_column($userVisits, 'user_id');
+            $users = User::whereIn('id', $userIds)->get()->toArray();
+
+
+//            dd($users );
+            foreach ($users as $value) {
                 // Проверить, найден ли пользователь
-                if ($user) {
-                    // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
-                    $newMessage = new UserEmail();
-                    $newMessage->user_id = $user->id;
-                    $newMessage->subject = $user->name . " по " . $subject;
-                    $newMessage->text_message = $text_message;
-                    $newMessage->sent_message_info = 0;
-                    $newMessage->save();
+                if ($value["sent_email"] != 1) {
+                    if ($value["id"] == "33" || $value["id"] == "125") {
+                        // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
+                        $newMessage = new UserEmail();
+                        $newMessage->user_id = $value["id"];
+                        $newMessage->subject = $value["name"] . " по " . $subject;
+                        $newMessage->text_message = $text_message;
+                        $newMessage->sent_message_info = 0;
+                        $newMessage->save();
 
-                    $introLines = "Заголовок";
-                    $outroLines = "© 2024 All rights reserved.";
+                        $name = $value["name"];
+                        $email = $value['email'];
 
-                    $paramsMail = [
-                        'subject' => $user->name . " по " .$subject,
-                        'message' => $text_message,
-                        'email' => $user->email,
-                        'introLines' => $introLines,
-                        'outroLines' => $outroLines,
-                        'text_button' => "Відписатися для $user->name",
-                        'url' =>"https://m.easy-order-taxi.site/unsubscribe/$user->email"
-                    ];
-                    Mail::to($value)->send(new InfoEmail($paramsMail));
+                        $paramsMail = [
+                            'subject' => $value["name"] . " по " .$subject,
+                            'message' => $text_message,
+                            'email' => $email,
+                            'text_button' => "Відписатися для $name",
+                            'url' =>"https://m.easy-order-taxi.site/unsubscribe/$email"
+                        ];
+                        Mail::to($email)->send(new InfoEmail($paramsMail));
+                    }
                 }
             }
         }

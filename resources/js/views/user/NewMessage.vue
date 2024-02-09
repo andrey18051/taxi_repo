@@ -52,8 +52,8 @@
         />
             <div class="card offset-4 col-4">
                 <div class="card-body">
-                <tr>
-                    <td colspan="9">
+
+
                         <!-- Новые поля для ввода -->
                         <div>
                             <label for="userSearch">Выберите приложение:</label>
@@ -86,8 +86,8 @@
                         <br>
                         <!-- Кнопка для сохранения сообщения -->
                         <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
-                    </td>
-                </tr>
+
+
             </div>
 
         </div>

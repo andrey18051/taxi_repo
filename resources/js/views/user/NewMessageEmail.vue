@@ -52,30 +52,36 @@
         />
             <div class="card offset-4 col-4">
                 <div class="card-body">
-                    <tr>
-                        <td >
-                            <label for="subject">Введите тему:</label>
-                            <input id="subject" v-model="subject" class="form-control col-12" style="width: 100%;">
-                        </td>
-                    </tr>
-                    <tr>
+                    <div>
+                        <label for="userSearch">Выберите приложение:</label>
+                        <select v-model="selectedApp" id="userSearch" class="form-control">
+                            <option value="PAS1">ПАС 1</option>
+                            <option value="PAS2">ПАС 2</option>
+                            <option value="PAS4">ПАС 4</option>
+                        </select>
+                    </div>
+                    <div>
 
-                        <td >
-                            <label for="newMessage">Введите новое сообщение:</label>
-                            <textarea v-model="newMessage" id="newMessage" class="form-control" rows="3" style="width: 100%;"></textarea>
+                        <label for="subject">Введите тему:</label>
+                        <input id="subject" v-model="subject" class="form-control" style="width: 100%;">
 
-                            <br>
-                            <!-- Кнопка для сохранения сообщения -->
-                            <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
-                        </td>
-                    </tr>
+                    </div>
+                    <div>
+
+
+                        <label for="newMessage">Введите новое сообщение:</label>
+                        <textarea v-model="newMessage" id="newMessage" class="form-control" rows="3" style="width: 100%;"></textarea>
+
+                        <br>
+                        <!-- Кнопка для сохранения сообщения -->
+                        <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
+
+                    </div>
+                </div>
             </div>
 
         </div>
 
-
-
-    </div>
 
 </template>
 
@@ -102,7 +108,8 @@ export default {
             selectedUser: '', // Новое свойство для хранения выбранного пользователя
             subject: '', // Новое свойство для хранения нового сообщения
             newMessage: '', // Новое свойство для хранения нового сообщения
-            selectedEmails: []
+            selectedEmails: [],
+            selectedApp: ''
         };
     },
     mounted() {
@@ -141,14 +148,28 @@ export default {
         },
 
         sendMessage() {
-            if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-                window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
-                return;
+            let url = null;
+            if(!this.selectedApp) {
+                if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+                    window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+                    return;
+                } else{
+                    const encodedNewMessage = encodeURIComponent(this.newMessage);
+                    url = `/newEmail/${this.selectedEmails.join(',')}/${this.subject}/${encodedNewMessage}/${this.selectedApp}`
+                }
+            } else {
+                const encodedNewMessage = encodeURIComponent(this.newMessage);
+                url = `/newEmail/xx/${this.subject}/${encodedNewMessage}/${this.selectedApp}`
+                if (!this.subject || !this.newMessage) {
+                    window.alert('Пожалуйста, проверьте ввод сообщения.');
+                    return;
+                }
             }
 
-            const encodedNewMessage = encodeURIComponent(this.newMessage);
-            const url = `/newEmail/${this.selectedEmails.join(',')}/${this.subject}/${encodedNewMessage}`
-            axios.get(`/newEmail/${this.selectedEmails.join(',')}/${this.subject}/${encodedNewMessage}`)
+
+
+
+            axios.get(url)
                 .then(response => {
                     // Проверяем успешность операции
                     if (response.status === 200) {

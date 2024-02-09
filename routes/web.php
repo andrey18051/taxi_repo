@@ -1270,6 +1270,6 @@ Route::get('/showEmailsAll', [UserEmailController::class,'index']);
 Route::get('/usersForEmail', [UserEmailController::class,'usersForEmail']);
 Route::get('/repeatEmail/{id}', [UserEmailController::class, 'repeatEmail']);
 Route::get('/emails/update/{id}/{text_message}/{sent_message_info}/', [UserEmailController::class, 'update']);
-Route::get('/newEmail/{email}/{subject}/{text_message}', [UserEmailController::class, 'newMessage']);
+Route::get('/newEmail/{email}/{subject}/{text_message}/{app}', [UserEmailController::class, 'newMessage']);
 Route::delete('/emails/destroy/{id}', [UserEmailController::class, 'destroy']);
 Route::get('/unsubscribe/{email}', [UserEmailController::class, 'unsubscribe']);

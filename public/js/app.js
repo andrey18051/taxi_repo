@@ -6864,6 +6864,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserMessages",
@@ -6901,7 +6907,8 @@ __webpack_require__.r(__webpack_exports__);
       // Новое свойство для хранения нового сообщения
       newMessage: '',
       // Новое свойство для хранения нового сообщения
-      selectedEmails: []
+      selectedEmails: [],
+      selectedApp: ''
     };
   },
   mounted: function mounted() {
@@ -6935,14 +6942,28 @@ __webpack_require__.r(__webpack_exports__);
 
     },
     sendMessage: function sendMessage() {
-      if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-        window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
-        return;
+      var url = null;
+
+      if (!this.selectedApp) {
+        if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+          window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+          return;
+        } else {
+          var encodedNewMessage = encodeURIComponent(this.newMessage);
+          url = "/newEmail/".concat(this.selectedEmails.join(','), "/").concat(this.subject, "/").concat(encodedNewMessage, "/").concat(this.selectedApp);
+        }
+      } else {
+        var _encodedNewMessage = encodeURIComponent(this.newMessage);
+
+        url = "/newEmail/xx/".concat(this.subject, "/").concat(_encodedNewMessage, "/").concat(this.selectedApp);
+
+        if (!this.subject || !this.newMessage) {
+          window.alert('Пожалуйста, проверьте ввод сообщения.');
+          return;
+        }
       }
 
-      var encodedNewMessage = encodeURIComponent(this.newMessage);
-      var url = "/newEmail/".concat(this.selectedEmails.join(','), "/").concat(this.subject, "/").concat(encodedNewMessage);
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/newEmail/".concat(this.selectedEmails.join(','), "/").concat(this.subject, "/").concat(encodedNewMessage)).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get(url).then(function (response) {
         // Проверяем успешность операции
         if (response.status === 200) {
           window.alert("Данные успешно обновлены");
@@ -37572,168 +37593,156 @@ var render = function () {
       _vm._v(" "),
       _c("div", { staticClass: "card offset-4 col-4" }, [
         _c("div", { staticClass: "card-body" }, [
-          _c("tr", [
-            _c("td", { attrs: { colspan: "9" } }, [
-              _c("div", [
-                _c("label", { attrs: { for: "userSearch" } }, [
-                  _vm._v("Выберите приложение:"),
-                ]),
-                _vm._v(" "),
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.selectedApp,
-                        expression: "selectedApp",
-                      },
-                    ],
-                    staticClass: "form-control",
-                    attrs: { id: "userSearch" },
-                    on: {
-                      change: function ($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function (o) {
-                            return o.selected
-                          })
-                          .map(function (o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.selectedApp = $event.target.multiple
-                          ? $$selectedVal
-                          : $$selectedVal[0]
-                      },
-                    },
-                  },
-                  [
-                    _c("option", { attrs: { value: "ALL PASS" } }, [
-                      _vm._v("Все приложения"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "PAS1" } }, [
-                      _vm._v("ПАС 1"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "PAS2" } }, [
-                      _vm._v("ПАС 2"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "PAS4" } }, [
-                      _vm._v("ПАС 4"),
-                    ]),
-                  ]
-                ),
-              ]),
-              _vm._v(" "),
-              _c("div", [
-                _c("label", { attrs: { for: "city" } }, [
-                  _vm._v("Выберите город:"),
-                ]),
-                _vm._v(" "),
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.city,
-                        expression: "city",
-                      },
-                    ],
-                    staticClass: "form-control",
-                    attrs: { id: "city" },
-                    on: {
-                      change: function ($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function (o) {
-                            return o.selected
-                          })
-                          .map(function (o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.city = $event.target.multiple
-                          ? $$selectedVal
-                          : $$selectedVal[0]
-                      },
-                    },
-                  },
-                  [
-                    _c("option", { attrs: { value: "ALL CITY" } }, [
-                      _vm._v("Все города"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "Kyiv City" } }, [
-                      _vm._v(" Киев"),
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "option",
-                      { attrs: { value: "Dnipropetrovsk Oblast" } },
-                      [_vm._v("Днепр")]
-                    ),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "Odessa" } }, [
-                      _vm._v("Одесса"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "Zaporizhzhia" } }, [
-                      _vm._v("Запорожье"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "Cherkasy Oblast" } }, [
-                      _vm._v("Черкассы"),
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "foreign countries" } }, [
-                      _vm._v("Другое"),
-                    ]),
-                  ]
-                ),
-              ]),
-              _vm._v(" "),
-              _c("label", { attrs: { for: "newMessage" } }, [
-                _vm._v("Введите новое сообщение:"),
-              ]),
-              _vm._v(" "),
-              _c("textarea", {
+          _c("div", [
+            _c("label", { attrs: { for: "userSearch" } }, [
+              _vm._v("Выберите приложение:"),
+            ]),
+            _vm._v(" "),
+            _c(
+              "select",
+              {
                 directives: [
                   {
                     name: "model",
                     rawName: "v-model",
-                    value: _vm.newMessage,
-                    expression: "newMessage",
+                    value: _vm.selectedApp,
+                    expression: "selectedApp",
                   },
                 ],
                 staticClass: "form-control",
-                attrs: { id: "newMessage", rows: "3" },
-                domProps: { value: _vm.newMessage },
+                attrs: { id: "userSearch" },
                 on: {
-                  input: function ($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.newMessage = $event.target.value
+                  change: function ($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function (o) {
+                        return o.selected
+                      })
+                      .map(function (o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.selectedApp = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
                   },
                 },
-              }),
-              _vm._v(" "),
-              _c("br"),
-              _vm._v(" "),
-              _c(
-                "button",
-                {
-                  staticClass: "btn btn-outline-success",
-                  on: { click: _vm.sendMessage },
-                },
-                [_vm._v("Сохранить сообщение")]
-              ),
-            ]),
+              },
+              [
+                _c("option", { attrs: { value: "ALL PASS" } }, [
+                  _vm._v("Все приложения"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "PAS1" } }, [_vm._v("ПАС 1")]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "PAS2" } }, [_vm._v("ПАС 2")]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "PAS4" } }, [_vm._v("ПАС 4")]),
+              ]
+            ),
           ]),
+          _vm._v(" "),
+          _c("div", [
+            _c("label", { attrs: { for: "city" } }, [
+              _vm._v("Выберите город:"),
+            ]),
+            _vm._v(" "),
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.city,
+                    expression: "city",
+                  },
+                ],
+                staticClass: "form-control",
+                attrs: { id: "city" },
+                on: {
+                  change: function ($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function (o) {
+                        return o.selected
+                      })
+                      .map(function (o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.city = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  },
+                },
+              },
+              [
+                _c("option", { attrs: { value: "ALL CITY" } }, [
+                  _vm._v("Все города"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "Kyiv City" } }, [
+                  _vm._v(" Киев"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "Dnipropetrovsk Oblast" } }, [
+                  _vm._v("Днепр"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "Odessa" } }, [
+                  _vm._v("Одесса"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "Zaporizhzhia" } }, [
+                  _vm._v("Запорожье"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "Cherkasy Oblast" } }, [
+                  _vm._v("Черкассы"),
+                ]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "foreign countries" } }, [
+                  _vm._v("Другое"),
+                ]),
+              ]
+            ),
+          ]),
+          _vm._v(" "),
+          _c("label", { attrs: { for: "newMessage" } }, [
+            _vm._v("Введите новое сообщение:"),
+          ]),
+          _vm._v(" "),
+          _c("textarea", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.newMessage,
+                expression: "newMessage",
+              },
+            ],
+            staticClass: "form-control",
+            attrs: { id: "newMessage", rows: "3" },
+            domProps: { value: _vm.newMessage },
+            on: {
+              input: function ($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.newMessage = $event.target.value
+              },
+            },
+          }),
+          _vm._v(" "),
+          _c("br"),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-outline-success",
+              on: { click: _vm.sendMessage },
+            },
+            [_vm._v("Сохранить сообщение")]
+          ),
         ]),
       ]),
     ],
@@ -38166,77 +38175,117 @@ var render = function () {
       _vm._v(" "),
       _c("div", { staticClass: "card offset-4 col-4" }, [
         _c("div", { staticClass: "card-body" }, [
-          _c("tr", [
-            _c("td", [
-              _c("label", { attrs: { for: "subject" } }, [
-                _vm._v("Введите тему:"),
-              ]),
-              _vm._v(" "),
-              _c("input", {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.subject,
-                    expression: "subject",
-                  },
-                ],
-                staticClass: "form-control col-12",
-                staticStyle: { width: "100%" },
-                attrs: { id: "subject" },
-                domProps: { value: _vm.subject },
-                on: {
-                  input: function ($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.subject = $event.target.value
-                  },
-                },
-              }),
+          _c("div", [
+            _c("label", { attrs: { for: "userSearch" } }, [
+              _vm._v("Выберите приложение:"),
             ]),
-          ]),
-          _vm._v(" "),
-          _c("tr", [
-            _c("td", [
-              _c("label", { attrs: { for: "newMessage" } }, [
-                _vm._v("Введите новое сообщение:"),
-              ]),
-              _vm._v(" "),
-              _c("textarea", {
+            _vm._v(" "),
+            _c(
+              "select",
+              {
                 directives: [
                   {
                     name: "model",
                     rawName: "v-model",
-                    value: _vm.newMessage,
-                    expression: "newMessage",
+                    value: _vm.selectedApp,
+                    expression: "selectedApp",
                   },
                 ],
                 staticClass: "form-control",
-                staticStyle: { width: "100%" },
-                attrs: { id: "newMessage", rows: "3" },
-                domProps: { value: _vm.newMessage },
+                attrs: { id: "userSearch" },
                 on: {
-                  input: function ($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.newMessage = $event.target.value
+                  change: function ($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function (o) {
+                        return o.selected
+                      })
+                      .map(function (o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.selectedApp = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
                   },
                 },
-              }),
-              _vm._v(" "),
-              _c("br"),
-              _vm._v(" "),
-              _c(
-                "button",
-                {
-                  staticClass: "btn btn-outline-success",
-                  on: { click: _vm.sendMessage },
-                },
-                [_vm._v("Сохранить сообщение")]
-              ),
+              },
+              [
+                _c("option", { attrs: { value: "PAS1" } }, [_vm._v("ПАС 1")]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "PAS2" } }, [_vm._v("ПАС 2")]),
+                _vm._v(" "),
+                _c("option", { attrs: { value: "PAS4" } }, [_vm._v("ПАС 4")]),
+              ]
+            ),
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c("label", { attrs: { for: "subject" } }, [
+              _vm._v("Введите тему:"),
             ]),
+            _vm._v(" "),
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.subject,
+                  expression: "subject",
+                },
+              ],
+              staticClass: "form-control",
+              staticStyle: { width: "100%" },
+              attrs: { id: "subject" },
+              domProps: { value: _vm.subject },
+              on: {
+                input: function ($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.subject = $event.target.value
+                },
+              },
+            }),
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c("label", { attrs: { for: "newMessage" } }, [
+              _vm._v("Введите новое сообщение:"),
+            ]),
+            _vm._v(" "),
+            _c("textarea", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.newMessage,
+                  expression: "newMessage",
+                },
+              ],
+              staticClass: "form-control",
+              staticStyle: { width: "100%" },
+              attrs: { id: "newMessage", rows: "3" },
+              domProps: { value: _vm.newMessage },
+              on: {
+                input: function ($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.newMessage = $event.target.value
+                },
+              },
+            }),
+            _vm._v(" "),
+            _c("br"),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-outline-success",
+                on: { click: _vm.sendMessage },
+              },
+              [_vm._v("Сохранить сообщение")]
+            ),
           ]),
         ]),
       ]),
