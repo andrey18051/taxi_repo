@@ -27,8 +27,10 @@ class UIDController extends Controller
 
             if ($old_order_closeReason == $response_arr["close_reason"]) {
                 $order->closeReasonI += 1;
+                $order->auto = $response_arr["order_car_info"];
             } else {
                 $order->closeReason = $response_arr["close_reason"];
+                $order->auto = $response_arr["order_car_info"];
                 $order->closeReasonI = 1;
             }
             $order->save();
@@ -115,6 +117,7 @@ class UIDController extends Controller
                         'routetonumber' => $value["routetonumber"],
                         'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
+                        'auto' => $value["auto"],
                         'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                     ];
                 } else {
@@ -127,6 +130,7 @@ class UIDController extends Controller
                             'routetonumber' => $value["routetonumber"],
                             'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
+                            'auto' => $value["auto"],
                             'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                         ];
                     }
@@ -142,6 +146,7 @@ class UIDController extends Controller
                 'routetonumber' => "*",
                 'web_cost' => "*",
                 'closeReason' => "*",
+                'auto' => "*",
                 'created_at' => "*",
             ];
         }

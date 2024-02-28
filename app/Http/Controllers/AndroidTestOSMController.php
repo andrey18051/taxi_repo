@@ -124,23 +124,6 @@ class AndroidTestOSMController extends Controller
         $authorization = $authorizationChoiceArr["authorization"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
-//        if ($userArr[2] == 'fondy_payment') {
-//            $authorization = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'mono_payment') {
-//            $authorization = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'bonus_payment') {
-//            $authorization = (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'nal_payment') {
-//            $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-//            $payment_type = 0;
-//        }
-
         $params['user_phone'] = $phone;
 
         $params['client_sub_card'] = null;
@@ -208,7 +191,6 @@ class AndroidTestOSMController extends Controller
                     break;
             }
 
-//            $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
         }
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
@@ -2573,4 +2555,31 @@ class AndroidTestOSMController extends Controller
 
         return $authorizationChoiceArr;
     }
+
+    public function lastVersion($app_name)
+    {
+        // Путь к файлу
+        $file = "/var/www/www-root/data/www/m.easy-order-taxi.site/last_versions/$app_name/app-debug.apk";
+
+        // Проверяем, существует ли файл
+        if (file_exists($file)) {
+            // Устанавливаем заголовки для скачивания файла
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/vnd.android.package-archive');
+            header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($file));
+
+            // Отправляем содержимое файла в вывод
+            readfile($file);
+            exit;
+        } else {
+            // Если файл не найден, возвращаем ошибку 404
+            http_response_code(404);
+            echo 'Файл не найден.';
+        }
+    }
+
 }

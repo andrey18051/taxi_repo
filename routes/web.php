@@ -6,6 +6,7 @@ use App\Http\Controllers\AndroidPAS2_Odessa_Controller;
 use App\Http\Controllers\AndroidPAS2_Zaporizhzhia_Controller;
 use App\Http\Controllers\AndroidPas4001_Dnipro_Controller;
 use App\Http\Controllers\AndroidTestController;
+use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\BonusBalanceController;
 use App\Http\Controllers\BonusController;
@@ -1273,3 +1274,7 @@ Route::get('/emails/update/{id}/{text_message}/{sent_message_info}/', [UserEmail
 Route::get('/newEmail/{email}/{subject}/{text_message}/{app}', [UserEmailController::class, 'newMessage']);
 Route::delete('/emails/destroy/{id}', [UserEmailController::class, 'destroy']);
 Route::get('/unsubscribe/{email}', [UserEmailController::class, 'unsubscribe']);
+/**
+ * Version upload
+ */
+Route::get('/last_versions/{app_name}', [AndroidTestOSMController::class, 'lastVersion']);

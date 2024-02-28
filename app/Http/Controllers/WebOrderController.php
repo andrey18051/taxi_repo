@@ -923,11 +923,16 @@ class WebOrderController extends Controller
                     $alarmMessage = new TelegramController();
 
                     if ($route_undefined === true) {
-                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info по місту. Оплата: $payment_type_info. $auto_type";
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info по місту.
+                         Оплата: $payment_type_info. $auto_type.
+                         Телефон клиента $user_phone";
                     } else {
-                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info до $to $to_number_info.
+                         Оплата: $payment_type_info. $auto_type.
+                         Телефон клиента $user_phone";
                     };
                     $alarmMessage->sendAlarmMessage($message);
+                    $alarmMessage->sendMeMessage($message);
                     $json_arr = WebOrderController::tariffs();
                     return view('taxi.homeCombo', ['json_arr' => $json_arr, 'params' => $params,
                         'info' => $info]);
@@ -1695,11 +1700,16 @@ class WebOrderController extends Controller
                     $alarmMessage = new TelegramController();
 
                     if ($route_undefined === true) {
-                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info по місту. Оплата: $payment_type_info. $auto_type";
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info по місту.
+                         Оплата: $payment_type_info. $auto_type.
+                         Телефон клиента $user_phone";
                     } else {
-                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info до $to. Оплата: $payment_type_info. $auto_type";
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from $from_number_info до $to.
+                         Оплата: $payment_type_info. $auto_type.
+                         Телефон клиента $user_phone";
                     };
                     $alarmMessage->sendAlarmMessage($message);
+                    $alarmMessage->sendMeMessage($message);
                     return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
                 }
             }
@@ -1951,11 +1961,16 @@ class WebOrderController extends Controller
                     $alarmMessage = new TelegramController();
 
                     if ($route_undefined === true) {
-                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from по місту. Оплата: $payment_type_info. $auto_type";
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from по місту.
+                         Оплата: $payment_type_info. $auto_type.
+                         Телефон клиента $user_phone";
                     } else {
-                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from  до $to $to_number_info. Оплата: $payment_type_info. $auto_type";
+                        $message = "Увага 🔥! Помилка розрахунку вартості за маршрутом від $from  до $to $to_number_info.
+                         Оплата: $payment_type_info. $auto_type.
+                         Телефон клиента $user_phone";
                     };
                     $alarmMessage->sendAlarmMessage($message);
+                    $alarmMessage->sendMeMessage($message);
                     return view($page, ['json_arr' => $json_arr, 'params' => $params, 'info' => $info]);
                 }
             }
