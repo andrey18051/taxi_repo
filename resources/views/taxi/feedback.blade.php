@@ -100,7 +100,7 @@
                                         <button type="submit" class="btn btn-primary btn-block mb-4">
                                             Надіслати повідомлення адміністратору сайту
                                         </button>
-
+                                    </div>
 
                                 </form>
                             </div>

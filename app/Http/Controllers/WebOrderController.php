@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class WebOrderController extends Controller
@@ -2898,6 +2899,7 @@ class WebOrderController extends Controller
      */
     public function feedbackEmail(Request $req)
     {
+        Log::info($req);
         $error = true;
         $secret = config('app.RECAPTCHA_SECRET_KEY');
 

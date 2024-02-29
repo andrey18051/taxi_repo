@@ -2395,16 +2395,27 @@ class AndroidTestOSMController extends Controller
         if ($city == "foreign countries") {
             $city = "Kyiv City";
         }
-
         $connectAPI = self::connectApi($city);
         $authorization = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
         $url = $connectAPI . '/api/weborders/' . $uid;
 
-        return Http::withHeaders([
+        $response = Http::withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => self::identificationId($application),
             "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
         ])->get($url);
+
+        $response_arr = json_decode($response, true);
+        Log::debug($response_arr);
+
+        $order = Orderweb:: where("dispatching_order_uid", $uid)->first();
+        if($order != null) {
+            $order->auto = $response_arr["order_car_info"];
+
+            $order->save();
+        }
+
+        return $response;
     }
 
 

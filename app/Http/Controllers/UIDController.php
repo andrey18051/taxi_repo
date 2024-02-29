@@ -27,12 +27,16 @@ class UIDController extends Controller
 
             if ($old_order_closeReason == $response_arr["close_reason"]) {
                 $order->closeReasonI += 1;
-                $order->auto = $response_arr["order_car_info"];
+
+
             } else {
                 $order->closeReason = $response_arr["close_reason"];
-                $order->auto = $response_arr["order_car_info"];
+
                 $order->closeReasonI = 1;
             }
+
+                $order->auto = $response_arr["order_car_info"];
+
             $order->save();
         }
     }
@@ -328,7 +332,7 @@ class UIDController extends Controller
         }
     }
 
-    private function autorization($connectApi)
+    public function autorization($connectApi)
     {
 
         $city = City::where('address', str_replace('http://', '', $connectApi))->first();

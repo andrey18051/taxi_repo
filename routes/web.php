@@ -250,7 +250,7 @@ Route::get('auth/facebook/callback', [FacebookController::class, 'handleFacebook
 Route::get('/welcome', function () {
     return view('welcome');
 });
-
+Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
 Auth::routes(['verify' => true]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home-admin')->middleware('role:superadministrator');
@@ -922,7 +922,7 @@ Route::get('/feedbackInfo/{info}', function ($info) {
 })->name('feedbackInfo');
 
 
-Route::get('/feedback/email', [WebOrderController::class, 'feedbackEmail'])->name('feedback-email');
+
 
 Route::get('/callBackForm', function () {
     IPController::getIP('/callBackForm');
