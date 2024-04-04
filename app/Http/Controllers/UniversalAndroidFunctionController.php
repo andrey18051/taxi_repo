@@ -2173,11 +2173,12 @@ class UniversalAndroidFunctionController extends Controller
         $orderweb->save();
     }
 
-    public function getCardToken($email, $pay_system)
+    public function getCardToken($email, $pay_system, $merchantId): \Illuminate\Http\JsonResponse
     {
         $user = User::where('email', $email)->first();
         $cards = Card::where('pay_system', $pay_system)
             ->where('user_id', $user->id)
+            ->where('merchant', $merchantId)
             ->get();
 
         $response = [];
@@ -2190,21 +2191,18 @@ class UniversalAndroidFunctionController extends Controller
                 'masked_card' => $card->masked_card,
                 'card_type' => $card->card_type,
                 'bank_name' => $card->bank_name,
+                'merchant' => $card->merchant,
                 'rectoken' => $card->rectoken
             ];
 
             if ($rectokenLifetimeDateTime instanceof DateTime) {
                 $currentTime = new DateTime();
 
-                if ($rectokenLifetimeDateTime > $currentTime) {
-                    $response[] = $cardData;
-                } else {
+                if ($rectokenLifetimeDateTime < $currentTime) {
                     $card->delete();
-                    $response[] = $cardData;
                 }
-            } else {
-                $response[] = $cardData;
             }
+            $response[] = $cardData;
         }
 
         return response()->json(['cards' => $response]);

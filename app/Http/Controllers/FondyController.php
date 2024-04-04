@@ -454,13 +454,13 @@ class FondyController extends Controller
     public function handleCallback(Request $request)
     {
         // Проверьте IP-адрес запроса, чтобы убедиться, что это запрос от FONDY
-        $allowedIP = '54.154.216.60';
-        $clientIP = $request->ip();
-
-        if ($clientIP !== $allowedIP) {
-            return response('Access Denied', 403);
-        }
-        Log::debug('handleCallback request->getContent(): ' . $request->getContent());
+//        $allowedIP = '54.154.216.60';
+//        $clientIP = $request->ip();
+//
+//        if ($clientIP !== $allowedIP) {
+//            return response('Access Denied', 403);
+//        }
+//        Log::debug('handleCallback request->getContent(): ' . $request->getContent());
 
         $data = json_decode($request->getContent(), true);
         Log::debug($data['sender_email']);
@@ -478,11 +478,11 @@ class FondyController extends Controller
                 } else {
                     $bankName = " ";
                 }
-                $bankName = $additionalInfo['bank_name'];
 
                 $card = Card::where('pay_system', 'fondy')
                     ->where('user_id', $user->id)
                     ->where('rectoken', $data['rectoken'])
+                    ->where('merchant', $data['merchant_id'])
                     ->first();
 
                 if (!$card) {
@@ -495,6 +495,7 @@ class FondyController extends Controller
                 $card->card_type = $cardType;
                 $card->bank_name = $bankName;
                 $card->rectoken = $data['rectoken'];
+                $card->merchant = $data['merchant_id'];
                 $card->rectoken_lifetime = $data['rectoken_lifetime'];
 
                 $card->save();

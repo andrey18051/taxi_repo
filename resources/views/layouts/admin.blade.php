@@ -44,6 +44,8 @@
                             <li><router-link to="/admin/users">Users</router-link></li>
                             <li><router-link to="/admin/user_messages">User's messages</router-link></li>
                             <li><router-link to="/admin/user_messages_email">User's emails</router-link></li>
+                            <li><router-link to="/admin/partners">Partners</router-link></li>
+                            <li><router-link to="/admin/partner_email">Partners` emails</router-link></li>
                             <li><router-link to="/admin/services">Services</router-link></li>
                             <li><a href="{{ asset('/services/serviceNew') }}">Services Add</a>
                             <li><a href="{{ asset('/blacklist') }}">Android settings</a>

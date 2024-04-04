@@ -43,6 +43,9 @@ Vue.component('user-messages', require('./views/user/UserMessages').default);
 Vue.component('new-message', require('./views/user/NewMessage').default);
 Vue.component('user-messages-email', require('./views/user/UserMessagesEmail').default);
 Vue.component('new-message-email', require('./views/user/NewMessageEmail').default);
+Vue.component('partner-email', require('./views/partners/PartnerEmail').default);
+Vue.component('new-partner-email', require('./views/partners/NewPartnerEmail').default);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

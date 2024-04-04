@@ -22,6 +22,8 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
+use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\PartnerEmailController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
@@ -1238,7 +1240,7 @@ Route::post('/server-callback', [FondyController::class, 'handleCallback']);
 /**
  * Token
  */
-Route::get('/get-card-token/{email}/{pay_system}', [UniversalAndroidFunctionController::class, 'getCardToken']);
+Route::get('/get-card-token/{email}/{pay_system}/{merchantId}', [UniversalAndroidFunctionController::class, 'getCardToken']);
 Route::get('/delete-card-token/{rectoken}', [UniversalAndroidFunctionController::class, 'deleteCardToken']);
 Route::get('/visicomKeyInfo/{appName}', [VisicomController::class, 'visicomKeyInfo'])
     ->middleware('throttle:10000,60');
@@ -1278,3 +1280,23 @@ Route::get('/unsubscribe/{email}', [UserEmailController::class, 'unsubscribe']);
  * Version upload
  */
 Route::get('/last_versions/{app_name}', [AndroidTestOSMController::class, 'lastVersion']);
+
+/**
+ * Partners
+ */
+Route::get('/partners/all', [PartnerController::class,'index']);
+Route::get('/partners/destroy/{id}', [PartnerController::class,'destroy']);
+Route::get('/partners/edit/{id}/{name}/{email}/{service}/{city}/{phone}', [PartnerController::class,'edit']);
+Route::get('/partners/show/{id}', [PartnerController::class,'show']);
+Route::get('/partners/create', [PartnerController::class,'create']);
+
+/**
+ * Emails for Partners
+ */
+Route::get('/partners/showEmailsAll', [PartnerEmailController::class,'index']);
+Route::get('/partners/usersForEmail', [PartnerEmailController::class,'partnersForEmail']);
+Route::get('/partners/repeatEmail/{id}', [PartnerEmailController::class, 'repeatEmail']);
+Route::get('/partners/emails/update/{id}/{text_message}/{sent_message_info}/', [PartnerEmailController::class, 'update']);
+Route::get('/partners/newEmail/{email}/{subject}/{text_message}', [PartnerEmailController::class, 'newMessage']);
+Route::delete('/partners/emails/destroy/{id}', [PartnerEmailController::class, 'destroy']);
+Route::get('/partners/unsubscribe/{email}', [PartnerEmailController::class, 'unsubscribe']);

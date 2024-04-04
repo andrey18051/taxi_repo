@@ -15,7 +15,7 @@ class OpenStreetMapController extends Controller
         $response_arr = json_decode($response, true);
 
         if (empty($response_arr)) {
-            $r = 50;
+            $r = 200;
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                 . $originLongitude
                 . "," . $originLatitude
@@ -36,9 +36,13 @@ class OpenStreetMapController extends Controller
             }
         } else {
             if ($response_arr["category"] == "building") {
-                return $response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"] .", місто " . $response_arr["address"]["city"];
+                $address_string = $response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"];
+                if (isset($response_arr["address"]["city"])) {
+                    $address_string .= ", місто " . $response_arr["address"]["city"];
+                }
+                return $address_string;
             } else {
-                $r = 50;
+                $r = 200;
                 $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                     . $originLongitude
                     . "," . $originLatitude
@@ -74,7 +78,7 @@ class OpenStreetMapController extends Controller
         $response_arr = json_decode($response, true);
 
         if (empty($response_arr)) {
-            $r = 50;
+            $r = 200;
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                 . $originLongitude
                 . "," . $originLatitude
@@ -97,7 +101,7 @@ class OpenStreetMapController extends Controller
             if ($response_arr["category"] == "building") {
                 return ["result" =>$response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"] .", місто " . $response_arr["address"]["city"]];
             } else {
-                $r = 50;
+                $r = 200;
                 $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                     . $originLongitude
                     . "," . $originLatitude

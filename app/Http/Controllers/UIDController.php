@@ -23,21 +23,27 @@ class UIDController extends Controller
             $response_arr = json_decode($response, true);
 
             $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-            $old_order_closeReason = $order->closeReason;
+            if ($order != null) {
+                $old_order_closeReason = $order->closeReason;
 
-            if ($old_order_closeReason == $response_arr["close_reason"]) {
-                $order->closeReasonI += 1;
+                if ($old_order_closeReason == $response_arr["close_reason"]) {
+                    $order->closeReasonI += 1;
+                } else {
+                    $order->closeReason = $response_arr["close_reason"];
 
+                    $order->closeReasonI = 1;
+                }
+                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
 
-            } else {
-                $order->closeReason = $response_arr["close_reason"];
+                $order->routefrom = $nameFrom;
+                $order->routeto = $nameTo;
 
-                $order->closeReasonI = 1;
+                if ($response_arr["order_car_info"] != null) {
+                    $order->auto = $response_arr["order_car_info"];
+                }
+                $order->save();
             }
-
-                $order->auto = $response_arr["order_car_info"];
-
-            $order->save();
         }
     }
 

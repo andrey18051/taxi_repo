@@ -16,6 +16,9 @@ import UserMessages from "./views/user/UserMessages";
 import NewMessage from "./views/user/NewMessage";
 import UserMessagesEmail from "./views/user/UserMessagesEmail";
 import NewMessageEmail from "./views/user/NewMessageEmail";
+import Partners from './views/partners/PartnerHome';
+import PartnerEmail from "./views/partners/PartnerEmail";
+import NewPartnerEmail from "./views/partners/NewPartnerEmail";
 
 const  routes = [
     {
@@ -86,7 +89,22 @@ const  routes = [
     {
         name: 'breakingNews',
         path: "/breakingNews/:id/"
-    }
+    },
+
+    {
+        path: "/admin/partners",
+        component: Partners
+    },
+
+    {
+        path: "/admin/partner_email",
+        component: PartnerEmail
+    },
+    {
+        path: "/admin/new-partner-email",
+        component: NewPartnerEmail
+    },
+
     ];
 
     export default new vueRouter({

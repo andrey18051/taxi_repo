@@ -1353,13 +1353,16 @@ class AndroidTestOSMController extends Controller
          * Сохранние расчетов в базе
          */
         $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
-        if ($addressFrom['name'] != "name") {
+
+        if (isset($addressFrom['name']) && $addressFrom['name'] != "name") {
             $params['from'] = $addressFrom['name'];
             $params['from_number'] = $addressFrom['house'];
         } else {
             $params['from'] = 'Місце відправлення';
             $params['from_number'] = ' ';
         }
+
+
         $route_undefined = false;
 
         (new UniversalAndroidFunctionController)->saveCost($params);
@@ -2407,10 +2410,17 @@ class AndroidTestOSMController extends Controller
 
         $response_arr = json_decode($response, true);
         Log::debug($response_arr);
+        $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+        $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
 
         $order = Orderweb:: where("dispatching_order_uid", $uid)->first();
-        if($order != null) {
-            $order->auto = $response_arr["order_car_info"];
+        if ($order != null) {
+            $order->routefrom = $nameFrom;
+            $order->routeto = $nameTo;
+
+            if ($response_arr["order_car_info"] != null) {
+                $order->auto = $response_arr["order_car_info"];
+            }
 
             $order->save();
         }
