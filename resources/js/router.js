@@ -19,6 +19,7 @@ import NewMessageEmail from "./views/user/NewMessageEmail";
 import Partners from './views/partners/PartnerHome';
 import PartnerEmail from "./views/partners/PartnerEmail";
 import NewPartnerEmail from "./views/partners/NewPartnerEmail";
+import PartnerGroup from "./views/partners/PartnerGroup";
 
 const  routes = [
     {
@@ -103,6 +104,10 @@ const  routes = [
     {
         path: "/admin/new-partner-email",
         component: NewPartnerEmail
+    },
+    {
+        path: "/admin/partner_group",
+        component: PartnerGroup
     },
 
     ];

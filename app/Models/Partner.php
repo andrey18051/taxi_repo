@@ -29,4 +29,8 @@ class Partner extends Model
      * @var mixed|string
      */
     private $city;
+    /**
+     * @var mixed|string
+     */
+    private $group_id;
 }

@@ -11,6 +11,9 @@
         <button class="btn btn-outline-primary"  @click="sendMessage" style="margin-left: 5px">
            Повторить отправку
         </button>
+        <button class="btn btn-outline-primary" @click="partnerButton()" style="margin-left: 5px">
+            Партнеры
+        </button>
         <v-table
             :data="messages"
             :filters="filters"
@@ -233,6 +236,9 @@ export default {
                 });
             this.selectedEmails = []; // Очистить массив выбранных email после отправки
         },
+        partnerButton () {
+            this.$router.push('/admin/partners');
+        }
     }
 }
 </script>

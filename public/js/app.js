@@ -6094,6 +6094,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "PartnerMessages",
@@ -6101,6 +6106,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       loading: true,
       users: [],
+      partnerGroups: [],
       messages: [],
       currentPage: 1,
       totalPages: 0,
@@ -6135,7 +6141,8 @@ __webpack_require__.r(__webpack_exports__);
       // Новое свойство для хранения нового сообщения
       newMessage: '',
       // Новое свойство для хранения нового сообщения
-      selectedEmails: []
+      selectedEmails: [],
+      group_id: null
     };
   },
   mounted: function mounted() {
@@ -6147,6 +6154,10 @@ __webpack_require__.r(__webpack_exports__);
 
       axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partners/usersForEmail').then(function (res) {
         _this.users = res.data;
+        _this.loading = false;
+      });
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partnerGroups/showPartnerGroupsAll').then(function (res) {
+        _this.partnerGroups = res.data;
         _this.loading = false;
       });
     },
@@ -6171,14 +6182,25 @@ __webpack_require__.r(__webpack_exports__);
     sendMessage: function sendMessage() {
       var url = null;
 
-      if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-        window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
-        return;
+      if (this.group_id == null) {
+        if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+          window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+          return;
+        } else {
+          var encodedNewMessage = encodeURIComponent(this.newMessage);
+          url = "https://m.easy-order-taxi.site/partners/newEmail/".concat(this.selectedEmails.join(','), "/").concat(this.subject, "/").concat(encodedNewMessage);
+        }
       } else {
-        var encodedNewMessage = encodeURIComponent(this.newMessage);
-        url = "https://m.easy-order-taxi.site/partners/newEmail/".concat(this.selectedEmails.join(','), "/").concat(this.subject, "/").concat(encodedNewMessage);
-      } // window.alert( url);
+        if (!this.subject || !this.newMessage) {
+          window.alert('Пожалуйста, проверьте ввод сообщения.');
+          return;
+        } else {
+          var _encodedNewMessage = encodeURIComponent(this.newMessage);
 
+          url = "https://m.easy-order-taxi.site/partners/groupEmail/".concat(this.group_id, "/").concat(this.subject, "/").concat(_encodedNewMessage);
+          console.log(url);
+        }
+      }
 
       axios__WEBPACK_IMPORTED_MODULE_0___default().get(url).then(function (response) {
         // Проверяем успешность операции
@@ -6204,10 +6226,7 @@ __webpack_require__.r(__webpack_exports__);
           console.error('Error:', error.message);
           window.alert("Произошла ошибка: " + error.message);
         }
-      }); // Здесь вы можете использовать this.selectedUser и this.newMessage
-      // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
-      // Очистите поля после успешной отправки, если это необходимо.
-
+      });
       this.newMessage = '';
       this.selectedEmails = []; // Очистить массив выбранных email после отправки
     },
@@ -6233,6 +6252,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
 //
 //
 //
@@ -6486,6 +6508,162 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Произошла ошибка при обновлении данных" + url);
       });
       this.selectedEmails = []; // Очистить массив выбранных email после отправки
+    },
+    partnerButton: function partnerButton() {
+      this.$router.push('/admin/partners');
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerGroup.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerGroup.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: "PartnerGroup",
+  data: function data() {
+    return {
+      loading: true,
+      partnerGroups: [],
+      currentPage: 1,
+      totalPages: 0,
+      maxPageLinks: 10,
+      filters: {
+        id: {
+          value: "",
+          keys: ["id"]
+        },
+        name: {
+          value: "",
+          keys: ["name"]
+        },
+        description: {
+          value: "",
+          keys: ["description"]
+        }
+      }
+    };
+  },
+  mounted: function mounted() {
+    this.getPartnerGroups();
+  },
+  methods: {
+    getPartnerGroups: function getPartnerGroups() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partnerGroups/showPartnerGroupsAll').then(function (res) {
+        _this.partnerGroups = res.data;
+        _this.loading = false;
+      });
+    },
+    deletePartnerGroup: function deletePartnerGroup(id) {
+      var _this2 = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partnerGroups/destroy/' + id).then(function (response) {
+        var i = _this2.partnerGroups.map(function (data) {
+          return data.id;
+        }).indexOf(id);
+
+        _this2.users.splice(i, 1);
+      });
+      window.location.reload();
+    },
+    editPartnerGroup: function editPartnerGroup(id, name, description) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partnerGroups/edit/' + id + '/' + name + '/' + description).then(function (ret) {
+        console.log(ret.data); // window.location.reload();
+
+        window.alert("Данные обновлены");
+      });
+    },
+    newPartnerGroupButton: function newPartnerGroupButton() {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partnerGroups/create');
+      this.getPartnerGroups();
+    },
+    emailButton: function emailButton() {
+      this.$router.push('/admin/partner_email');
     }
   }
 });
@@ -6586,6 +6764,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Partners",
@@ -6593,6 +6781,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       loading: true,
       partners: [],
+      partnerGroups: [],
       currentPage: 1,
       totalPages: 0,
       maxPageLinks: 10,
@@ -6608,6 +6797,10 @@ __webpack_require__.r(__webpack_exports__);
         email: {
           value: "",
           keys: ["email"]
+        },
+        group_id: {
+          value: "",
+          keys: ["group_id"]
         },
         service: {
           value: "",
@@ -6635,6 +6828,10 @@ __webpack_require__.r(__webpack_exports__);
         _this.partners = res.data;
         _this.loading = false;
       });
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partnerGroups/showPartnerGroupsAll').then(function (res) {
+        _this.partnerGroups = res.data;
+        _this.loading = false;
+      });
     },
     deletePartner: function deletePartner(id) {
       var _this2 = this;
@@ -6648,8 +6845,8 @@ __webpack_require__.r(__webpack_exports__);
       });
       window.location.reload();
     },
-    editPartner: function editPartner(id, name, email, service, city, phone) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partners/edit/' + id + '/' + name + '/' + email + '/' + service + '/' + city + '/' + phone).then(function (ret) {
+    editPartner: function editPartner(id, name, email, group_id, service, city, phone) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/partners/edit/' + id + '/' + name + '/' + email + '/' + group_id + '/' + service + '/' + city + '/' + phone).then(function (ret) {
         console.log(ret.data); // window.location.reload();
 
         window.alert("Данные обновлены");
@@ -6668,6 +6865,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     emailButton: function emailButton() {
       this.$router.push('/admin/partner_email');
+    },
+    groupButton: function groupButton() {
+      this.$router.push('/admin/partner_group');
     }
   }
 });
@@ -8536,6 +8736,7 @@ vue__WEBPACK_IMPORTED_MODULE_2__["default"].component('user-messages-email', (__
 vue__WEBPACK_IMPORTED_MODULE_2__["default"].component('new-message-email', (__webpack_require__(/*! ./views/user/NewMessageEmail */ "./resources/js/views/user/NewMessageEmail.vue")["default"]));
 vue__WEBPACK_IMPORTED_MODULE_2__["default"].component('partner-email', (__webpack_require__(/*! ./views/partners/PartnerEmail */ "./resources/js/views/partners/PartnerEmail.vue")["default"]));
 vue__WEBPACK_IMPORTED_MODULE_2__["default"].component('new-partner-email', (__webpack_require__(/*! ./views/partners/NewPartnerEmail */ "./resources/js/views/partners/NewPartnerEmail.vue")["default"]));
+vue__WEBPACK_IMPORTED_MODULE_2__["default"].component('partner-group', (__webpack_require__(/*! ./views/partners/PartnerGroup */ "./resources/js/views/partners/PartnerGroup.vue")["default"]));
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -8617,9 +8818,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _views_partners_PartnerHome__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./views/partners/PartnerHome */ "./resources/js/views/partners/PartnerHome.vue");
 /* harmony import */ var _views_partners_PartnerEmail__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./views/partners/PartnerEmail */ "./resources/js/views/partners/PartnerEmail.vue");
 /* harmony import */ var _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./views/partners/NewPartnerEmail */ "./resources/js/views/partners/NewPartnerEmail.vue");
+/* harmony import */ var _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./views/partners/PartnerGroup */ "./resources/js/views/partners/PartnerGroup.vue");
 
 
 vue__WEBPACK_IMPORTED_MODULE_0__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
 
 
 
@@ -8696,6 +8899,9 @@ var routes = [{
 }, {
   path: "/admin/new-partner-email",
   component: _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_17__["default"]
+}, {
+  path: "/admin/partner_group",
+  component: _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_18__["default"]
 }];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: "history",
@@ -32983,6 +33189,45 @@ component.options.__file = "resources/js/views/partners/PartnerEmail.vue"
 
 /***/ }),
 
+/***/ "./resources/js/views/partners/PartnerGroup.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/views/partners/PartnerGroup.vue ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _PartnerGroup_vue_vue_type_template_id_b820e6a8_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true& */ "./resources/js/views/partners/PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true&");
+/* harmony import */ var _PartnerGroup_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PartnerGroup.vue?vue&type=script&lang=js& */ "./resources/js/views/partners/PartnerGroup.vue?vue&type=script&lang=js&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _PartnerGroup_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _PartnerGroup_vue_vue_type_template_id_b820e6a8_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
+  _PartnerGroup_vue_vue_type_template_id_b820e6a8_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "b820e6a8",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/views/partners/PartnerGroup.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/views/partners/PartnerHome.vue":
 /*!*****************************************************!*\
   !*** ./resources/js/views/partners/PartnerHome.vue ***!
@@ -33540,6 +33785,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/views/partners/PartnerGroup.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/views/partners/PartnerGroup.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerGroup_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PartnerGroup.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerGroup.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerGroup_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
 /***/ "./resources/js/views/partners/PartnerHome.vue?vue&type=script&lang=js&":
 /*!******************************************************************************!*\
   !*** ./resources/js/views/partners/PartnerHome.vue?vue&type=script&lang=js& ***!
@@ -34006,6 +34267,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerEmail_vue_vue_type_template_id_7ab70b49_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerEmail_vue_vue_type_template_id_7ab70b49_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PartnerEmail.vue?vue&type=template&id=7ab70b49&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerEmail.vue?vue&type=template&id=7ab70b49&scoped=true&");
+
+
+/***/ }),
+
+/***/ "./resources/js/views/partners/PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true&":
+/*!*************************************************************************************************!*\
+  !*** ./resources/js/views/partners/PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true& ***!
+  \*************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerGroup_vue_vue_type_template_id_b820e6a8_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerGroup_vue_vue_type_template_id_b820e6a8_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PartnerGroup_vue_vue_type_template_id_b820e6a8_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true&");
 
 
 /***/ }),
@@ -37399,6 +37677,51 @@ var render = function () {
       _c("div", { staticClass: "card offset-4 col-4" }, [
         _c("div", { staticClass: "card-body" }, [
           _c("div", [
+            _c("label", { attrs: { for: "group_id" } }, [
+              _vm._v("Выберите группу партнеров:"),
+            ]),
+            _vm._v(" "),
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.group_id,
+                    expression: "group_id",
+                  },
+                ],
+                staticClass: "form-control",
+                attrs: { id: "group_id" },
+                on: {
+                  change: function ($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function (o) {
+                        return o.selected
+                      })
+                      .map(function (o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.group_id = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  },
+                },
+              },
+              _vm._l(_vm.partnerGroups, function (partnerGroup) {
+                return _c("option", { domProps: { value: partnerGroup.id } }, [
+                  _vm._v(
+                    _vm._s("(" + partnerGroup.id + ") " + partnerGroup.name)
+                  ),
+                ])
+              }),
+              0
+            ),
+          ]),
+          _vm._v(" "),
+          _c("div", [
             _c("label", { attrs: { for: "subject" } }, [
               _vm._v("Введите тему:"),
             ]),
@@ -37463,7 +37786,7 @@ var render = function () {
                 staticClass: "btn btn-outline-success",
                 on: { click: _vm.sendMessage },
               },
-              [_vm._v("Сохранить сообщение")]
+              [_vm._v("Отправить сообщение")]
             ),
           ]),
         ]),
@@ -37541,6 +37864,20 @@ var render = function () {
           on: { click: _vm.sendMessage },
         },
         [_vm._v("\n       Повторить отправку\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.partnerButton()
+            },
+          },
+        },
+        [_vm._v("\n        Партнеры\n    ")]
       ),
       _vm._v(" "),
       _c(
@@ -38287,6 +38624,451 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true&":
+/*!****************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerGroup.vue?vue&type=template&id=b820e6a8&scoped=true& ***!
+  \****************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function () {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "container", staticStyle: { "overflow-x": "auto" } },
+    [
+      _vm._m(0),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.newPartnerGroupButton()
+            },
+          },
+        },
+        [_vm._v("\n        Добавить группу партнеров\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.emailButton()
+            },
+          },
+        },
+        [_vm._v("\n        Сообщение\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticStyle: { width: "1200px", "overflow-x": "auto" } },
+        [
+          _c(
+            "v-table",
+            {
+              staticClass: "my-2 table table-striped",
+              attrs: {
+                data: _vm.partnerGroups,
+                filters: _vm.filters,
+                hideSortIcons: true,
+                currentPage: _vm.currentPage,
+                pageSize: 10,
+              },
+              on: {
+                "update:currentPage": function ($event) {
+                  _vm.currentPage = $event
+                },
+                "update:current-page": function ($event) {
+                  _vm.currentPage = $event
+                },
+                totalPagesChanged: function ($event) {
+                  _vm.totalPages = $event
+                },
+              },
+              scopedSlots: _vm._u([
+                {
+                  key: "body",
+                  fn: function (ref) {
+                    var displayData = ref.displayData
+                    return _c(
+                      "tbody",
+                      {},
+                      [
+                        _c("tr", [
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.id.value,
+                                  expression: "filters.id.value",
+                                },
+                              ],
+                              staticClass: "form-input input-sm",
+                              staticStyle: { width: "30px" },
+                              attrs: { placeholder: "Select by id" },
+                              domProps: { value: _vm.filters.id.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.id,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.name.value,
+                                  expression: "filters.name.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "200px" },
+                              attrs: { placeholder: "Select by name" },
+                              domProps: { value: _vm.filters.name.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.name,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.description.value,
+                                  expression: "filters.description.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "200px" },
+                              attrs: { placeholder: "Select by description" },
+                              domProps: {
+                                value: _vm.filters.description.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.description,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", { staticStyle: { width: "100px" } }),
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(displayData, function (row) {
+                          return _c(
+                            "tr",
+                            { key: row.id, staticStyle: { width: "30px" } },
+                            [
+                              _c("td", [_vm._v(_vm._s(row.id))]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.name,
+                                      expression: "row.name",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "200px" },
+                                  attrs: { id: "name", required: "" },
+                                  domProps: { value: row.name },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(row, "name", $event.target.value)
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.description,
+                                      expression: "row.description",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "200px" },
+                                  attrs: { id: "description", required: "" },
+                                  domProps: { value: row.description },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "description",
+                                        $event.target.value
+                                      )
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c(
+                                  "div",
+                                  {
+                                    staticClass: "container-fluid",
+                                    staticStyle: { width: "100px" },
+                                  },
+                                  [
+                                    _c(
+                                      "div",
+                                      {
+                                        staticClass: "btn-group",
+                                        attrs: { role: "group" },
+                                      },
+                                      [
+                                        _c(
+                                          "button",
+                                          {
+                                            staticClass: "btn btn-success",
+                                            staticStyle: {
+                                              "margin-left": "5px",
+                                            },
+                                            on: {
+                                              click: function ($event) {
+                                                _vm.editPartnerGroup(
+                                                  row.id,
+                                                  row.name,
+                                                  row.description
+                                                )
+                                              },
+                                            },
+                                          },
+                                          [
+                                            _c(
+                                              "svg",
+                                              {
+                                                staticClass: "bi bi-save2",
+                                                attrs: {
+                                                  xmlns:
+                                                    "http://www.w3.org/2000/svg",
+                                                  width: "16",
+                                                  height: "16",
+                                                  fill: "currentColor",
+                                                  viewBox: "0 0 16 16",
+                                                },
+                                              },
+                                              [
+                                                _c("path", {
+                                                  attrs: {
+                                                    d: "M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z",
+                                                  },
+                                                }),
+                                              ]
+                                            ),
+                                          ]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "button",
+                                          {
+                                            staticClass: "btn btn-danger",
+                                            staticStyle: {
+                                              "margin-left": "5px",
+                                            },
+                                            on: {
+                                              click: function ($event) {
+                                                return _vm.deletePartnerGroup(
+                                                  row.id
+                                                )
+                                              },
+                                            },
+                                          },
+                                          [
+                                            _c(
+                                              "svg",
+                                              {
+                                                staticClass: "bi bi-trash",
+                                                attrs: {
+                                                  xmlns:
+                                                    "http://www.w3.org/2000/svg",
+                                                  width: "16",
+                                                  height: "16",
+                                                  fill: "currentColor",
+                                                  viewBox: "0 0 16 16",
+                                                },
+                                              },
+                                              [
+                                                _c("path", {
+                                                  attrs: {
+                                                    d: "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z",
+                                                  },
+                                                }),
+                                                _vm._v(" "),
+                                                _c("path", {
+                                                  attrs: {
+                                                    "fill-rule": "evenodd",
+                                                    d: "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                                                  },
+                                                }),
+                                              ]
+                                            ),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                  ]
+                                ),
+                              ]),
+                            ]
+                          )
+                        }),
+                      ],
+                      2
+                    )
+                  },
+                },
+              ]),
+            },
+            [
+              _c(
+                "thead",
+                { attrs: { slot: "head" }, slot: "head" },
+                [
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "30px" },
+                      attrs: { sortKey: "id" },
+                    },
+                    [_vm._v("#")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "200px" },
+                      attrs: { sortKey: "name" },
+                    },
+                    [_vm._v("Name")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "200px" },
+                      attrs: { sortKey: "description" },
+                    },
+                    [_vm._v("description")]
+                  ),
+                ],
+                1
+              ),
+            ]
+          ),
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c("smart-pagination", {
+        attrs: {
+          currentPage: _vm.currentPage,
+          totalPages: _vm.totalPages,
+          maxPageLinks: _vm.maxPageLinks,
+        },
+        on: {
+          "update:currentPage": function ($event) {
+            _vm.currentPage = $event
+          },
+          "update:current-page": function ($event) {
+            _vm.currentPage = $event
+          },
+        },
+      }),
+    ],
+    1
+  )
+}
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass:
+          "pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center",
+      },
+      [
+        _c("h1", { staticClass: "display-5" }, [_vm._v("Partner`s Groups")]),
+        _vm._v(" "),
+        _c("p", { staticClass: "lead" }, [
+          _vm._v("Information about groups of partnerGroups"),
+        ]),
+      ]
+    )
+  },
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerHome.vue?vue&type=template&id=0c20ae42&scoped=true&":
 /*!***************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/partners/PartnerHome.vue?vue&type=template&id=0c20ae42&scoped=true& ***!
@@ -38305,7 +39087,7 @@ var render = function () {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "container", staticStyle: { "overflow-x": "auto" } },
+    { staticClass: "container-fluid", staticStyle: { "overflow-x": "auto" } },
     [
       _vm._m(0),
       _vm._v(" "),
@@ -38338,8 +39120,22 @@ var render = function () {
       ),
       _vm._v(" "),
       _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.groupButton()
+            },
+          },
+        },
+        [_vm._v("\n        Группы партнеров\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
         "div",
-        { staticStyle: { width: "1200px", "overflow-x": "auto" } },
+        { staticClass: "container-fluid" },
         [
           _c(
             "v-table",
@@ -38452,6 +39248,35 @@ var render = function () {
                                   }
                                   _vm.$set(
                                     _vm.filters.email,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.group_id.value,
+                                  expression: "filters.group_id.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "200px" },
+                              attrs: { placeholder: "Select by group ID" },
+                              domProps: { value: _vm.filters.group_id.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.group_id,
                                     "value",
                                     $event.target.value
                                   )
@@ -38614,6 +39439,74 @@ var render = function () {
                               ]),
                               _vm._v(" "),
                               _c("td", [
+                                _c(
+                                  "select",
+                                  {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model.text",
+                                        value: row.group_id,
+                                        expression: "row.group_id",
+                                        modifiers: { text: true },
+                                      },
+                                    ],
+                                    staticClass: "form-control",
+                                    staticStyle: { width: "200px" },
+                                    attrs: { id: "group_id" },
+                                    on: {
+                                      change: function ($event) {
+                                        var $$selectedVal =
+                                          Array.prototype.filter
+                                            .call(
+                                              $event.target.options,
+                                              function (o) {
+                                                return o.selected
+                                              }
+                                            )
+                                            .map(function (o) {
+                                              var val =
+                                                "_value" in o
+                                                  ? o._value
+                                                  : o.value
+                                              return val
+                                            })
+                                        _vm.$set(
+                                          row,
+                                          "group_id",
+                                          $event.target.multiple
+                                            ? $$selectedVal
+                                            : $$selectedVal[0]
+                                        )
+                                      },
+                                    },
+                                  },
+                                  _vm._l(
+                                    _vm.partnerGroups,
+                                    function (partnerGroup) {
+                                      return _c(
+                                        "option",
+                                        {
+                                          domProps: { value: partnerGroup.id },
+                                        },
+                                        [
+                                          _vm._v(
+                                            _vm._s(
+                                              "(" +
+                                                partnerGroup.id +
+                                                ") " +
+                                                partnerGroup.name
+                                            )
+                                          ),
+                                        ]
+                                      )
+                                    }
+                                  ),
+                                  0
+                                ),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
                                 _c("input", {
                                   directives: [
                                     {
@@ -38727,6 +39620,7 @@ var render = function () {
                                                   row.id,
                                                   row.name,
                                                   row.email,
+                                                  row.group_id,
                                                   row.service,
                                                   row.city,
                                                   row.phone
@@ -38848,6 +39742,15 @@ var render = function () {
                       attrs: { sortKey: "email" },
                     },
                     [_vm._v("Email")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "200px" },
+                      attrs: { sortKey: "email" },
+                    },
+                    [_vm._v("Group")]
                   ),
                   _vm._v(" "),
                   _c(

@@ -55,7 +55,12 @@
         />
         <div class="card offset-4 col-4">
             <div class="card-body">
-
+                <div>
+                    <label for="group_id">Выберите группу партнеров:</label>
+                    <select id="group_id" class="form-control" v-model="group_id">
+                        <option v-for="partnerGroup in partnerGroups" :value="partnerGroup.id">{{"(" + partnerGroup.id +") " + partnerGroup.name }}</option>
+                    </select>
+                </div>
                 <div>
 
                     <label for="subject">Введите тему:</label>
@@ -70,7 +75,7 @@
 
                     <br>
                     <!-- Кнопка для сохранения сообщения -->
-                    <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
+                    <button class="btn btn-outline-success" @click="sendMessage">Отправить сообщение</button>
 
                 </div>
             </div>
@@ -89,6 +94,7 @@ export default {
         return {
             loading: true,
             users: [],
+            partnerGroups: [],
             messages: [],
             currentPage: 1,
             totalPages: 0,
@@ -106,6 +112,7 @@ export default {
             subject: 'інформація по корисним новинам для таксі від українських розробників', // Новое свойство для хранения нового сообщения
             newMessage: '', // Новое свойство для хранения нового сообщения
             selectedEmails: [],
+            group_id: null,
 
         };
     },
@@ -121,6 +128,13 @@ export default {
                 .then(
                     res => {
                         this.users = res.data;
+                        this.loading = false;
+                    }
+                );
+            axios.get('/partnerGroups/showPartnerGroupsAll')
+                .then(
+                    res => {
+                        this.partnerGroups = res.data;
                         this.loading = false;
                     }
                 )
@@ -145,8 +159,9 @@ export default {
         },
 
         sendMessage() {
-            let url = null;
 
+            let url = null;
+            if(this.group_id == null) {
                 if (!this.subject || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
                     window.alert('Пожалуйста, проверьте ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
                     return;
@@ -156,10 +171,17 @@ export default {
 
 
                 }
+            } else {
+                if (!this.subject || !this.newMessage) {
+                    window.alert('Пожалуйста, проверьте ввод сообщения.');
+                    return;
+                } else{
+                    const encodedNewMessage = encodeURIComponent(this.newMessage);
+                    url = `https://m.easy-order-taxi.site/partners/groupEmail/${this.group_id}/${this.subject}/${encodedNewMessage}`;
+                    console.log(url);
+                }
 
-            // window.alert( url);
-
-
+            }
             axios.get(url)
                 .then(response => {
 
@@ -187,13 +209,11 @@ export default {
                         window.alert("Произошла ошибка: " + error.message);
                     }
                 });
-
-            // Здесь вы можете использовать this.selectedUser и this.newMessage
-            // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
-            // Очистите поля после успешной отправки, если это необходимо.
-
             this.newMessage = '';
             this.selectedEmails = []; // Очистить массив выбранных email после отправки
+
+
+
         },
         newMessageButton() {
             // Переход по адресу "/admin/new_message"

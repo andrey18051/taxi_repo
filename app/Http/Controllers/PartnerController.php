@@ -30,6 +30,7 @@ class PartnerController extends Controller
         } while (Partner::where('email', $randomEmail)->exists());
 
         $partner->email = $randomEmail;
+        $partner->group_id = "2";
         $partner->service = " ";
         $partner->city = " ";
 
@@ -73,6 +74,7 @@ class PartnerController extends Controller
         $id,
         $name,
         $email,
+        $group_id,
         $service,
         $city,
         $phone
@@ -81,6 +83,7 @@ class PartnerController extends Controller
 
         $partner->name = $name;
         $partner->email = $email;
+        $partner->group_id = $group_id;
         $partner->phone = $phone;
         $partner->service =  $service;
         $partner->city = $city;

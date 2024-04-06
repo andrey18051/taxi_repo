@@ -24,6 +24,7 @@ use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerEmailController;
+use App\Http\Controllers\PartnerGroupController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
@@ -1286,7 +1287,7 @@ Route::get('/last_versions/{app_name}', [AndroidTestOSMController::class, 'lastV
  */
 Route::get('/partners/all', [PartnerController::class,'index']);
 Route::get('/partners/destroy/{id}', [PartnerController::class,'destroy']);
-Route::get('/partners/edit/{id}/{name}/{email}/{service}/{city}/{phone}', [PartnerController::class,'edit']);
+Route::get('/partners/edit/{id}/{name}/{email}/{group_id}/{service}/{city}/{phone}', [PartnerController::class,'edit']);
 Route::get('/partners/show/{id}', [PartnerController::class,'show']);
 Route::get('/partners/create', [PartnerController::class,'create']);
 
@@ -1296,7 +1297,16 @@ Route::get('/partners/create', [PartnerController::class,'create']);
 Route::get('/partners/showEmailsAll', [PartnerEmailController::class,'index']);
 Route::get('/partners/usersForEmail', [PartnerEmailController::class,'partnersForEmail']);
 Route::get('/partners/repeatEmail/{id}', [PartnerEmailController::class, 'repeatEmail']);
+Route::get('/partners/groupEmail/{group_id}/{subject}/{text_message}', [PartnerEmailController::class, 'groupEmail']);
 Route::get('/partners/emails/update/{id}/{text_message}/{sent_message_info}/', [PartnerEmailController::class, 'update']);
 Route::get('/partners/newEmail/{email}/{subject}/{text_message}', [PartnerEmailController::class, 'newMessage']);
 Route::delete('/partners/emails/destroy/{id}', [PartnerEmailController::class, 'destroy']);
 Route::get('/partners/unsubscribe/{email}', [PartnerEmailController::class, 'unsubscribe']);
+
+/**
+ * Partner`s groups
+ */
+Route::get('/partnerGroups/showPartnerGroupsAll', [PartnerGroupController::class,'index']);
+Route::delete('/partnerGroups/destroy/{id}', [PartnerGroupController::class, 'destroy']);
+Route::get('/partnerGroups/edit/{id}/{name}/{description}', [PartnerGroupController::class, 'edit']);
+Route::get('/partnerGroups/create', [PartnerGroupController::class,'create']);

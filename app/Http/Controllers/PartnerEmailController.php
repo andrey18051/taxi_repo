@@ -174,67 +174,48 @@ class PartnerEmailController extends Controller
                         // Если пользователь найден, добавить новое сообщение в таблицу partnerMessage
                         $newMessage = new PartnerEmail();
                         $newMessage->partner_id = $partner->id;
-                        $newMessage->subject = $partner->name . " по " . $subject;
+                        $newMessage->subject = $subject;
                         $newMessage->text_message = $text_message;
                         $newMessage->sent_message_info = 0;
                         $newMessage->save();
 
-                        $paramsMail = [
-                            'subject' => $partner->name . " по " . $subject,
-                            'message' => $text_message,
-                            'email' => $partner->email,
-                            'text_button' => "Відписатися для $partner->name",
-                            'url' =>"https://m.easy-order-taxi.site/unsubscribe/$partner->email"
-                        ];
-                        $subject = $partner->name . " по " .$subject;
+
+                        $subject_email = $partner->name . " по " .$subject;
                         $message = $text_message;
                         $url = "https://m.easy-order-taxi.site/partners/unsubscribe/$partner->email";
                         $text_button = "Відписатися для $partner->email";
 
 //                        Mail::to($partner->email)->send(new PartnerInfoEmail('custom_template', $paramsMail));
                         Mail::to($partner->email)
-                            ->send(new PInfoEmail('custom_template', $subject, $message, $url, $text_button));
+                            ->send(new PInfoEmail('custom_template', $subject_email, $message, $url, $text_button));
 
                     }
 //                }
             }
         }
-//        else {
-//            $userVisits = UserVisit::where("app_name", $app)->get()->unique('user_id')->toArray();
-//            $userIds = array_column($userVisits, 'user_id');
-//            $users = User::whereIn('id', $userIds)->get()->toArray();
-//
-//
-////            dd($users );
-//            foreach ($users as $value) {
-//                // Проверить, найден ли пользователь
-//                if ($value["sent_email"] != 1) {
-//                    if ($value["id"] == "33" || $value["id"] == "125") {
-//                        // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
-//                        $newMessage = new UserEmail();
-//                        $newMessage->user_id = $value["id"];
-//                        $newMessage->subject = $value["name"] . " по " . $subject;
-//                        $newMessage->text_message = $text_message;
-//                        $newMessage->sent_message_info = 0;
-//                        $newMessage->save();
-//
-//                        $name = $value["name"];
-//                        $email = $value['email'];
-//
-//                        $paramsMail = [
-//                            'subject' => $value["name"] . " по " .$subject,
-//                            'message' => $text_message,
-//                            'email' => $email,
-//                            'text_button' => "Відписатися для $name",
-//                            'url' =>"https://m.easy-order-taxi.site/unsubscribe/$email"
-//                        ];
-//                        Mail::to($email)->send(new InfoEmail($paramsMail));
-//                    }
-//                }
-//            }
-//        }
-
     }
+
+    public function groupEmail($group_id, $subject, $text_message)
+    {
+        $partnerArr = Partner::where('group_id', $group_id)->get();
+        foreach ($partnerArr as $partner) {
+            $newMessage = new PartnerEmail();
+            $newMessage->partner_id = $partner->id;
+            $newMessage->subject = $subject;
+            $newMessage->text_message = $text_message;
+            $newMessage->sent_message_info = 0;
+            $newMessage->save();
+
+            $subject_email = $partner->name . " по " .$subject;
+            $message = $text_message;
+            $url = "https://m.easy-order-taxi.site/partners/unsubscribe/$partner->email";
+            $text_button = "Відписатися для $partner->email";
+
+            Mail::to($partner->email)
+                ->send(new PInfoEmail('custom_template', $subject_email, $message, $url, $text_button));
+        }
+    }
+
     public function repeatEmail($id_array)
     {
         $idArray = explode(',', $id_array);
