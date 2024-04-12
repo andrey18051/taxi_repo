@@ -105,8 +105,8 @@ class CityController extends Controller
                         $city->save();
                         return "http://" . $value["address"];
                     } else {
-                        $city->online = "true";
-                        $city->save();
+//                        $city->online = "true";
+//                        $city->save();
                         $city->online = "false";
                         $city->save();
                         $alarmMessage = new TelegramController();

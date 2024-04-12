@@ -1866,12 +1866,15 @@ class UniversalAndroidFunctionController extends Controller
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
                 ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                $params['dispatching_order_uid'];
+                $params['dispatching_order_uid'] .
+                ", сервер " . $params['server'];
+            ;
         } else {
             $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
-                $params['dispatching_order_uid'];
+                $params['dispatching_order_uid'] .
+                ", сервер " . $params['server'];
         }
 
         $subject = 'Інформація про нову поїздку:';
