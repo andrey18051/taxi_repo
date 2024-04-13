@@ -145,5 +145,3 @@ Route::get('/versionComboOdessa', [AndroidTestOSMController::class, 'versionComb
  */
 Route::get('/android/permissions/{email}', [UniversalAndroidFunctionController::class, 'userPermissions'])
     ->name('userPermissions');
-
-
