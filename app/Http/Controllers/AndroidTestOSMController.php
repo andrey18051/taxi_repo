@@ -1263,10 +1263,10 @@ class AndroidTestOSMController extends Controller
         if ($city == "foreign countries") {
             $city = "Kyiv City";
         }
-//        $city = "OdessaTest";
-//        $application = "PAS2";
+
         $connectAPI = self::connectApi($city);
-//dd($connectAPI);
+        Log::debug("1 connectAPI $connectAPI");
+
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
             $response_error["Message"] = "Ошибка соединения с сервером.";
@@ -1287,7 +1287,7 @@ class AndroidTestOSMController extends Controller
             $params['email'] = "no email";
         }
 
-        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+        $authorizationChoiceArr = self::authorizationChoiceCost($userArr[2], $city, $connectAPI);
         $authorization = $authorizationChoiceArr["authorization"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
@@ -1332,23 +1332,23 @@ class AndroidTestOSMController extends Controller
         $params['route_undefined'] = $route_undefined; //По городу: True, False
 
 
-        /**
-         * Сохранние расчетов в базе
-         */
-        $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
-
-        if (isset($addressFrom['name']) && $addressFrom['name'] != "name") {
-            $params['from'] = $addressFrom['name'];
-            $params['from_number'] = $addressFrom['house'];
-        } else {
-            $params['from'] = 'Місце відправлення';
-            $params['from_number'] = ' ';
-        }
-
+//        /**
+//         * Сохранние расчетов в базе
+//         */
+//        $addressFrom = self::geoLatLanSearch($originLatitude, $originLongitude);
+//
+//        if (isset($addressFrom['name']) && $addressFrom['name'] != "name") {
+//            $params['from'] = $addressFrom['name'];
+//            $params['from_number'] = $addressFrom['house'];
+//        } else {
+//            $params['from'] = 'Місце відправлення';
+//            $params['from_number'] = ' ';
+//        }
+//
+//        (new UniversalAndroidFunctionController)->saveCost($params);
 
         $route_undefined = false;
 
-        (new UniversalAndroidFunctionController)->saveCost($params);
 
         $url = $connectAPI . '/api/weborders/cost';
 
@@ -1376,6 +1376,7 @@ class AndroidTestOSMController extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
+        Log::debug("parameter ", $parameter);
         $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
@@ -1384,8 +1385,11 @@ class AndroidTestOSMController extends Controller
             (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
         );
         $response_arr = json_decode($response, true);
-//        dd( $response_arr);
+        Log::debug("response_arr: ", $response_arr);
+
         if (isset($response_arr["Message"])) {
+//        if (!isset($response_arr["Message"])) {
+
             $connectAPI = str_replace('http://', '', $connectAPI);
 
             $cityServer = City::where('address', $connectAPI)->first();
@@ -1394,8 +1398,16 @@ class AndroidTestOSMController extends Controller
 
             while (self::connectAPI($city) != 400) {
                 $connectAPI = self::connectAPI($city);
-                $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
-                $authorization = $authorizationChoiceArr["authorization"];
+                $url = $connectAPI . '/api/weborders/cost';
+                Log::debug(" _____________________________");
+                Log::debug(" connectAPI while $userArr[2]");
+                Log::debug(" connectAPI while $city ");
+                Log::debug(" connectAPI while $connectAPI ");
+                Log::debug(" connectAPI while $url ");
+                Log::debug(" ______________________________");
+
+                $authorizationChoiceArrNew = self::authorizationChoiceCost($userArr[2], $city, $connectAPI);
+                $authorization = $authorizationChoiceArrNew["authorization"];
 
                 $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                     $url,
@@ -1405,6 +1417,7 @@ class AndroidTestOSMController extends Controller
                     (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
                 );
                 $response_arr = json_decode($response, true);
+                Log::debug("response_arr: ", $response_arr);
                 if (!isset($response_arr["Message"])) {
                     if ($response->status() == 200) {
                         $response_arr = json_decode($response, true);
@@ -1448,14 +1461,15 @@ class AndroidTestOSMController extends Controller
             }
             if (self::connectAPI($city) == 400) {
                 $response_error["order_cost"] = 0;
-                $response_error["Message"] = $response_arr["Message"];
+                $response_error["Message"] = "ErrorMessage";
 
                 return response($response_error, 200)
                     ->header('Content-Type', 'json');
             }
 
         } else {
-//            dd($response->status());
+            Log::debug("response Message 33333333");
+
             if ($response->status() == 200) {
                 $response_arr = json_decode($response, true);
 
@@ -1495,8 +1509,9 @@ class AndroidTestOSMController extends Controller
 
                 while (self::connectAPI($city) != 400) {
                     $connectAPI = self::connectAPI($city);
-                    $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
-                    $authorization = $authorizationChoiceArr["authorization"];
+                    $url = $connectAPI . '/api/weborders/cost';
+                    $authorizationChoiceArrNew = self::authorizationChoiceCost($userArr[2], $city, $connectAPI);
+                    $authorization = $authorizationChoiceArrNew["authorization"];
 
                     $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                         $url,
@@ -1773,49 +1788,51 @@ class AndroidTestOSMController extends Controller
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 //        dd($authorizationDouble);
-        if ($authorizationDouble != null) {
-            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                $url,
-                $parameter,
-                $authorizationBonus,
-                $identificationId,
-                $apiVersion
-            );
-            $responseBonus = json_decode($response, true);
-            $responseBonus["url"] = $url;
-            $responseBonus["parameter"] = $parameter;
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion
+        );
+        $response_arr = json_decode($response, true);
+        Log::debug("response_arr: ", $response_arr);
+
+        if (!isset($response_arr["Message"])) {
+             if ($authorizationDouble != null) {
+                 $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                     $url,
+                     $parameter,
+                     $authorizationBonus,
+                     $identificationId,
+                     $apiVersion
+                 );
+                 $responseBonus = json_decode($response, true);
+                 $responseBonus["url"] = $url;
+                 $responseBonus["parameter"] = $parameter;
 
 //            $originalString = $parameter['user_phone'];
 //            $parameter['phone'] = substr($originalString, 0, -1);
 //            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
-            $parameter['payment_type'] = 0;
+                 $parameter['payment_type'] = 0;
 
-            $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                $url,
-                $parameter,
-                $authorizationDouble,
-                $identificationId,
-                $apiVersion
-            );
+                 $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                     $url,
+                     $parameter,
+                     $authorizationDouble,
+                     $identificationId,
+                     $apiVersion
+                 );
 
-            $responseDouble = json_decode($responseDouble, true);
+                 $responseDouble = json_decode($responseDouble, true);
 //            dd($responseDouble);
-            $responseDouble["url"] = $url;
-            $responseDouble["parameter"] = $parameter;
-
-
-        } else {
-            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                $url,
-                $parameter,
-                $authorization,
-                $identificationId,
-                $apiVersion
-            );
-            $responseDouble = null;
-        }
-
-
+                 $responseDouble["url"] = $url;
+                 $responseDouble["parameter"] = $parameter;
+           } else {
+                 $responseDouble = null;
+             }
+         }
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
             if ($response_arr["order_cost"] != 0) {
@@ -2066,46 +2083,52 @@ class AndroidTestOSMController extends Controller
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 //dd($parameter);
-        if ($authorizationDouble != null) {
-            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                $url,
-                $parameter,
-                $authorizationBonus,
-                $identificationId,
-                $apiVersion
-            );
-            $responseBonus = json_decode($response, true);
-            $responseBonus["url"] = $url;
-            $responseBonus["parameter"] = $parameter;
+        Log::debug("response_arr: wwwwww ", $parameter);
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion
+        );
+        $response_arr = json_decode($response, true);
+        Log::debug("response_arr: eeeeee ", $response_arr);
 
-            $parameter['payment_type'] = 0;
+        if (!isset($response_arr["Message"])) {
+            if ($authorizationDouble != null) {
+                $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                    $url,
+                    $parameter,
+                    $authorizationBonus,
+                    $identificationId,
+                    $apiVersion
+                );
+                $responseBonus = json_decode($response, true);
+                $responseBonus["url"] = $url;
+                $responseBonus["parameter"] = $parameter;
 
-            $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                $url,
-                $parameter,
-                $authorizationDouble,
-                $identificationId,
-                $apiVersion
-            );
+                $parameter['payment_type'] = 0;
 
-            $responseDouble = json_decode($responseDouble, true);
+                $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                    $url,
+                    $parameter,
+                    $authorizationDouble,
+                    $identificationId,
+                    $apiVersion
+                );
 
-            $responseDouble["url"] = $url;
-            $responseDouble["parameter"] = $parameter;
+                $responseDouble = json_decode($responseDouble, true);
+
+                $responseDouble["url"] = $url;
+                $responseDouble["parameter"] = $parameter;
 
 
+            } else {
+                $responseDouble = null;
+            }
         } else {
-            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                $url,
-                $parameter,
-                $authorization,
-                $identificationId,
-                $apiVersion
-            );
             $responseDouble = null;
         }
-
-
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
             if ($response_arr["order_cost"] != 0) {
@@ -2634,6 +2657,34 @@ class AndroidTestOSMController extends Controller
         return redirect()->route('home-admin')->with('success', "База $base обновлена.");
     }
 
+    private function authorizationChoiceCost(
+        $payment,
+        $city,
+        $connectAPI
+    ): array {
+        $authorizationChoiceArr = array();
+
+        Log::debug("authorizationChoiceCost *********************");
+        Log::debug("payment $payment");
+        Log::debug("city $city");
+        Log::debug("connectAPI $connectAPI");
+        Log::debug("authorizationChoiceCost *********************");
+
+        $authorizationChoiceArr["authorization"] = (new UniversalAndroidFunctionController)->authorization($city, $connectAPI);
+
+        switch ($payment) {
+            case 'fondy_payment':
+            case 'mono_payment':
+            case 'bonus_payment':
+                $authorizationChoiceArr["payment_type"] = 1;
+                break;
+            case 'nal_payment':
+                $authorizationChoiceArr["payment_type"] = 0;
+                break;
+        }
+
+        return $authorizationChoiceArr;
+    }
     private function authorizationChoice(
         $payment,
         $city,
@@ -2655,9 +2706,8 @@ class AndroidTestOSMController extends Controller
                         $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo", $connectAPI);
                         break;
                     case "Kyiv City":
-                        $connectAPI = "http://31.43.107.151:7303";
-                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay", $connectAPI);
-                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo", $connectAPI);
+                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorization("Kyiv City", $connectAPI);
+                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("Kyiv City", $connectAPI);
                         break;
                     case "Dnipropetrovsk Oblast":
                     case "Odessa":

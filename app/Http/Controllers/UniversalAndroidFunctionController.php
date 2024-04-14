@@ -2144,6 +2144,10 @@ class UniversalAndroidFunctionController extends Controller
             ->first();
         $username = $city->login;
         $password = hash('SHA512', $city->password);
+        Log::debug("connectAPI $connectAPI");
+        Log::debug("username $username");
+        Log::debug("password $city->password");
+
         return 'Basic ' . base64_encode($username . ':' . $password);
     }
     public function apiVersion($name, $address)
