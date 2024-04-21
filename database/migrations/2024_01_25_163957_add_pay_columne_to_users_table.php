@@ -15,8 +15,8 @@ class AddPayColumneToUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->after('telegram_id', function ($table) {
-                $table->string('card_pay')->nullable();
-                $table->string('bonus_pay')->nullable();
+                $table->boolean('bonus_pay')->nullable();
+                $table->boolean('card_pay')->nullable();
             });
         });
     }

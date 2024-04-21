@@ -3,7 +3,7 @@
     <div class="container-fluid" style="overflow-x: auto;">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 
-                <h1 class="display-5">City</h1>
+                <h1 class="display-5">City  PAS 2</h1>
 
         </div>
         <button class="btn btn-outline-primary" @click="newCityButton()" style="margin-left: 5px">
@@ -11,9 +11,6 @@
         </button>
         <button class="btn btn-outline-primary" @click="cityPas1Button()" style="margin-left: 5px">
             PAS 1
-        </button>
-        <button class="btn btn-outline-primary" @click="cityPas2Button()" style="margin-left: 5px">
-            PAS 2
         </button>
         <button class="btn btn-outline-primary" @click="cityPas4Button()" style="margin-left: 5px">
             PAS 4
@@ -99,7 +96,7 @@
 <script>
 import axios from 'axios';
 export default {
-    name: "CityComponent",
+    name: "CityHomePas2",
     data: () => ({
         loading: true,
         cities: [],
@@ -122,7 +119,7 @@ export default {
     },
     methods: {
         getCities() {
-            axios.get('/city/all')
+            axios.get('/pas2/city/all')
                 .then(
                     res => {
                         this.cities = res.data;
@@ -133,7 +130,7 @@ export default {
 
         deleteCities(id) {
 
-            axios.get('/city/destroy/'+ id)
+            axios.get('/pas2/city/destroy/'+ id)
                 .then(response => {
                     let i = this.cities.map(data => data.id).indexOf(id);
                     this.cities.splice(i, 1);
@@ -142,7 +139,7 @@ export default {
                 });
         },
         editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay) {
-            axios.get('/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay)
+            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay)
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();
@@ -150,7 +147,7 @@ export default {
                 })
         },
         newCityButton() {
-            axios.get('/city/newCityCreat')
+            axios.get('/pas2/city/newCityCreat')
                 .then(res => {
                     this.partners = res.data;
                     this.loading = false;

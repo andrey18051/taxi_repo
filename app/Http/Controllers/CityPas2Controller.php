@@ -5,20 +5,18 @@ namespace App\Http\Controllers;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\City;
-use App\Models\City_PAS1;
 use App\Models\City_PAS2;
-use App\Models\City_PAS4;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
-class CityController extends Controller
+class CityPas2Controller extends Controller
 {
 //    public function cityAdd(Request $request)
 //    {
-//        $city = new City();
+//        $city = new City_PAS2();
 //        $city->name = $request->input('name');
 //        $city->address = $request->input('address');
 //        $city->login = $request->input('login');
@@ -29,7 +27,7 @@ class CityController extends Controller
 
     public function index(): \Illuminate\Http\JsonResponse
     {
-        return response()->json(City::get());
+        return response()->json(City_PAS2::get());
     }
 
 
@@ -43,7 +41,7 @@ class CityController extends Controller
         $card_max_pay,
         $bonus_max_pay
     ) {
-        $city = City::find($id);
+        $city = City_PAS2::find($id);
 
         if (!$city) {
             // Обработка ошибки, если город не найден
@@ -64,12 +62,12 @@ class CityController extends Controller
 
     public function destroy($id)
     {
-        City::find($id)->delete();
+        City_PAS2::find($id)->delete();
     }
 
     public function cityCreat(Request $req)
     {
-        $city = new City();
+        $city = new City_PAS2();
 
         $city->name = $req->name;
         $city->address = $req->address;
@@ -82,7 +80,7 @@ class CityController extends Controller
 
     public function newCityCreat()
     {
-        $city = new City();
+        $city = new City_PAS2();
 
         $city->name = "";
         $city->address = "";
@@ -94,7 +92,7 @@ class CityController extends Controller
 
     public function cityAll($city): array
     {
-        return City::where('name', $city)->get()->toArray();
+        return City_PAS2::where('name', $city)->get()->toArray();
     }
 
     /**
@@ -110,7 +108,7 @@ class CityController extends Controller
             $checking = self::checkDomain($value["address"]);
             $online = $value["online"];
 
-            $city = City::where('address', $value["address"])->first();
+            $city = City_PAS2::where('address', $value["address"])->first();
 //            dd($value["address"]);
 //            dd( $timeFive);
             if ($online == "false") {
@@ -190,7 +188,7 @@ class CityController extends Controller
         ));
         $response = curl_exec($curlInit);
 //dd($domainFull);
-        $city = City::where('address', $domain)->first();
+        $city = City_PAS2::where('address', $domain)->first();
         if (curl_errno($curlInit)) {
 
             return false;
@@ -201,12 +199,12 @@ class CityController extends Controller
 
         curl_close($curlInit);
 //        if ($response) {
-//            $city = City::where('address', $domain)->first();
+//            $city = City_PAS2::where('address', $domain)->first();
 //            $city->online = "true";
 //            $city->save();
 //            return true;
 //        } else {
-//            $city = City::where('address', $domain)->first();
+//            $city = City_PAS2::where('address', $domain)->first();
 //            $city->online = "false";
 //            $city->save();
 //            return false;
@@ -215,7 +213,7 @@ class CityController extends Controller
 
     public function checkDomains()
     {
-        $city = City::all()->toArray();
+        $city = City_PAS2::all()->toArray();
 //dd($city);
         foreach ($city as $value) {
             $domainFull = "http://" . $value['address'] . "/api/time";
@@ -264,9 +262,9 @@ class CityController extends Controller
 
     public function versionAPICitiesUpdate()
     {
-        $cities = City::all()->toArray();
+        $cities = City_PAS2::all()->toArray();
         foreach ($cities as $value) {
-            $city = City::where('name', $value["name"])->first();
+            $city = City_PAS2::where('name', $value["name"])->first();
             $url = "http://" . $city->address . '/api/version';
             $response = Http::get($url);
             $response_arr = json_decode($response, true);
@@ -285,7 +283,7 @@ class CityController extends Controller
 
     public function maxPayValue($city): array
     {
-        $city = City::where('name', $city)->first();
+        $city = City_PAS2::where('name', $city)->first();
 
         return [
             'card_max_pay' => $city->card_max_pay,
@@ -294,46 +292,7 @@ class CityController extends Controller
     }
     public function merchantFondy($city): array
     {
-        $city = City::where('name', $city)->first();
-
-        return [
-            'merchant_fondy' => $city->merchant_fondy,
-            'fondy_key_storage' => $city->fondy_key_storage
-        ];
-    }
-    public function maxPayValueApp($city, $app): array
-    {
-        switch ($app) {
-            case "PAS1":
-                $city = City_PAS1::where('name', $city)->first();
-                break;
-            case "PAS2":
-                $city = City_PAS2::where('name', $city)->first();
-                break;
-            //case "PAS4":
-            default:
-                $city = City_PAS4::where('name', $city)->first();
-                break;
-        }
-        return [
-            'card_max_pay' => $city->card_max_pay,
-            'bonus_max_pay' => $city->bonus_max_pay
-            ];
-    }
-    public function merchantFondyApp($city, $app): array
-    {
-        switch ($app) {
-            case "PAS1":
-                $city = City_PAS1::where('name', $city)->first();
-                break;
-            case "PAS2":
-                $city = City_PAS2::where('name', $city)->first();
-                break;
-            //case "PAS4":
-            default:
-                $city = City_PAS4::where('name', $city)->first();
-                break;
-        }
+        $city = City_PAS2::where('name', $city)->first();
 
         return [
             'merchant_fondy' => $city->merchant_fondy,

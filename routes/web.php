@@ -12,6 +12,9 @@ use App\Http\Controllers\BonusBalanceController;
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\BredoGeneratorController;
 use App\Http\Controllers\CityController;
+use App\Http\Controllers\CityPas1Controller;
+use App\Http\Controllers\CityPas2Controller;
+use App\Http\Controllers\CityPas4Controller;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FondyController;
@@ -1085,6 +1088,7 @@ Route::get('/city/cityNew', function () {
     return view('admin.cities');
 })->name('city-new');
 Route::get('/city/cityCreat', [CityController::class,'cityCreat'])->name('city-save');
+Route::get('/city/newCityCreat', [CityController::class,'newCityCreat'])->name('newCityCreat');
 Route::get('/city/verification', [CityController::class,'checkDomains'])->name('checkDomains');
 
 Route::get('/city/versionAPICitiesUpdate', [CityController::class,'versionAPICitiesUpdate'])
@@ -1092,12 +1096,65 @@ Route::get('/city/versionAPICitiesUpdate', [CityController::class,'versionAPICit
 
 Route::get('/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionController::class,'apiVersion'])
     ->name('apiVersion');
+Route::get('/city/apiVersion/{name}/{address}/{app}', [UniversalAndroidFunctionController::class,'apiVersionApp'])
+    ->name('apiVersionApp');
 
 Route::get('/city/maxPayValue/{city}', [CityController::class,'maxPayValue'])
     ->name('maxPayValue');
 
 Route::get('/city/merchantFondy/{city}', [CityController::class,'merchantFondy'])
     ->name('mercantFondy');
+
+Route::get('/city/maxPayValueApp/{city}/{app}', [CityController::class,'maxPayValueApp'])
+    ->name('maxPayValue');
+
+Route::get('/city/merchantFondyApp/{city}/{app}', [CityController::class,'merchantFondyApp'])
+    ->name('mercantFondy');
+
+/**
+ * City PAS1
+ */
+Route::get('/pas1/city/all', [CityPas1Controller::class,'index']);
+Route::get('/pas1/city/online/{city}', [CityPas1Controller::class,'cityOnline']);
+Route::get('/pas1/city/destroy/{id}', [CityPas1Controller::class,'destroy']);
+Route::get('/pas1/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}', [CityPas1Controller::class,'edit']);
+Route::get('/pas1/city/newCityCreat', [CityPas1Controller::class,'newCityCreat'])->name('newCityCreat');
+Route::get('/pas1/city/verification', [CityPas1Controller::class,'checkDomains'])->name('checkDomains');
+
+Route::get('/pas1/city/versionAPICitiesUpdate', [CityPas1Controller::class,'versionAPICitiesUpdate']);
+
+Route::get('/pas1/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionController::class,'apiVersion'])
+    ->name('apiVersion');
+
+/**
+ * City PAS2
+ */
+Route::get('/pas2/city/all', [CityPas2Controller::class,'index']);
+Route::get('/pas2/city/online/{city}', [CityPas2Controller::class,'cityOnline']);
+Route::get('/pas2/city/destroy/{id}', [CityPas2Controller::class,'destroy']);
+Route::get('/pas2/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}', [CityPas2Controller::class,'edit']);
+Route::get('/pas2/city/newCityCreat', [CityPas2Controller::class,'newCityCreat']);
+Route::get('/pas2/city/verification', [CityPas2Controller::class,'checkDomains']);
+
+Route::get('/pas2/city/versionAPICitiesUpdate', [CityPas2Controller::class,'versionAPICitiesUpdate']);
+
+Route::get('/pas2/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionController::class,'apiVersion'])
+    ->name('apiVersion');
+
+/**
+ * City PAS4
+ */
+Route::get('/pas4/city/all', [CityPas4Controller::class,'index']);
+Route::get('/pas4/city/online/{city}', [CityPas4Controller::class,'cityOnline']);
+Route::get('/pas4/city/destroy/{id}', [CityPas4Controller::class,'destroy']);
+Route::get('/pas4/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}', [CityPas4Controller::class,'edit']);
+Route::get('/pas4/city/newCityCreat', [CityPas4Controller::class,'newCityCreat']);
+Route::get('/pas4/city/verification', [CityPas4Controller::class,'checkDomains']);
+
+Route::get('/pas4/city/versionAPICitiesUpdate', [CityPas4Controller::class,'versionAPICitiesUpdate']);
+
+Route::get('/pas4/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionController::class,'apiVersion'])
+    ->name('apiVersion');
 
 
 

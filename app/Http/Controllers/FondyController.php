@@ -468,7 +468,7 @@ class FondyController extends Controller
 
         $user = User::where('email', $data['sender_email'])->first();
 
-        if ($user) {
+        if ($user && isset($data['rectoken']) && !empty($data['rectoken'])) {
             $additionalInfo = json_decode($data['additional_info'], true);
 
             if (isset($additionalInfo['card_type'], $additionalInfo['bank_name'])) {

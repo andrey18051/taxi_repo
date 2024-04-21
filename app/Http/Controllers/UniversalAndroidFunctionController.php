@@ -6,6 +6,9 @@ use App\Mail\Check;
 use App\Models\BlackList;
 use App\Models\Card;
 use App\Models\City;
+use App\Models\City_PAS1;
+use App\Models\City_PAS2;
+use App\Models\City_PAS4;
 use App\Models\DoubleOrder;
 use App\Models\ExecStatusHistory;
 use App\Models\ExecutionStatus;
@@ -2150,6 +2153,37 @@ class UniversalAndroidFunctionController extends Controller
 
         return 'Basic ' . base64_encode($username . ':' . $password);
     }
+    public function authorizationApp($cityString, $connectAPI, $app): string
+    {
+
+
+        switch ($app) {
+            case "PAS1":
+                $city = City_PAS1::where('name', $cityString)
+                    ->where("address", str_replace("http://", "", $connectAPI))
+                    ->first();
+                break;
+            case "PAS2":
+                $city = City_PAS2::where('name', $cityString)
+                    ->where("address", str_replace("http://", "", $connectAPI))
+                    ->first();
+                break;
+            //case "PAS4":
+            default:
+                $city = City_PAS4::where('name', $cityString)
+                    ->where("address", str_replace("http://", "", $connectAPI))
+                    ->first();
+        }
+
+
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
+        Log::debug("connectAPI $connectAPI");
+        Log::debug("username $username");
+        Log::debug("password $city->password");
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
+    }
     public function apiVersion($name, $address)
     {
 
@@ -2161,6 +2195,31 @@ class UniversalAndroidFunctionController extends Controller
             $cleanedUrl = $url;
         }
         $city = City::where('name', $name)->where('address', $cleanedUrl)->first();
+//dd($city);
+        return $city->toArray()['versionApi'];
+    }
+    public function apiVersionApp($name, $address, $app)
+    {
+
+        $url = $address;
+        if (strpos($url, "http://") !== false) {
+            $cleanedUrl = str_replace("http://", "", $url);
+        } else {
+            // Если "http://" не найдено, сохраняем исходный URL
+            $cleanedUrl = $url;
+        }
+        switch ($app) {
+            case "PAS1":
+                $city = City_PAS1::where('name', $name)->where('address', $cleanedUrl)->first();
+                break;
+            case "PAS2":
+                $city = City_PAS2::where('name', $name)->where('address', $cleanedUrl)->first();
+                break;
+           //case "PAS4":
+            default:
+                $city = City_PAS4::where('name', $name)->where('address', $cleanedUrl)->first();
+        }
+
 //dd($city);
         return $city->toArray()['versionApi'];
     }

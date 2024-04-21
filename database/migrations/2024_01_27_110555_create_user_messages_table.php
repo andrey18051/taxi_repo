@@ -10,8 +10,7 @@ class CreateUserMessagesTable extends Migration
     {
         Schema::create('user_messages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->integer('user_id')->nullable();
             $table->string('text_message')->nullable();
             $table->boolean('sent_message_info')->nullable();
             $table->timestamps();

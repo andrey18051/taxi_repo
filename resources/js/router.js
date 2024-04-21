@@ -9,6 +9,9 @@ import Services from './views/service/ServiceHome';
 import UserEdit from './views/user/UserEdit';
 import TaxiAccount from './views/taxi/account';
 import CityHome from "./views/city/CityHome";
+import CityHomePas1 from "./views/city/CityHome_PAS_1";
+import CityHomePas2 from "./views/city/CityHome_PAS_2";
+import CityHomePas4 from "./views/city/CityHome_PAS_4";
 import CloseReasonHome from "./views/close_reason/CloseReasonHome";
 import BonusHome from "./views/bonuses/BonusHome";
 import FondyHome from "./views/fondy/FondyHome";
@@ -54,6 +57,19 @@ const  routes = [
         path: "/admin/city",
         component: CityHome
     },
+    {
+        path: "/admin/city-pas1",
+        component: CityHomePas1
+    },
+    {
+        path: "/admin/city-pas2",
+        component: CityHomePas2
+    },
+    {
+        path: "/admin/city-pas4",
+        component: CityHomePas4
+    },
+
     {
         path: "/admin/fondy",
         component: FondyHome

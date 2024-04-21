@@ -121,6 +121,9 @@ Route::get('/android/visicom/show/{settlement}', [VisicomController::class, 'sho
 Route::get('/android/webordersCancel/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancel'])
     ->name('webordersCancel');
 
+Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDouble'])
+    ->name('webordersCancelDouble');
+
 Route::get('/android/historyUIDStatus/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
 
