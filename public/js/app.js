@@ -8739,6 +8739,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserComponent",
@@ -8762,6 +8770,10 @@ __webpack_require__.r(__webpack_exports__);
           value: "",
           keys: ["email"]
         },
+        user_phone: {
+          value: "",
+          keys: ["user_phone"]
+        },
         bonus: {
           value: "",
           keys: ["bonus"]
@@ -8773,6 +8785,10 @@ __webpack_require__.r(__webpack_exports__);
         card_pay: {
           value: "",
           keys: ["card_pay"]
+        },
+        black_list: {
+          value: "",
+          keys: ["black_list"]
         }
       }
     };
@@ -8803,8 +8819,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editUser: function editUser(id, name, email, bonus, bonus_pay, card_pay) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email + '/' + bonus + '/' + bonus_pay + '/' + card_pay).then(function (ret) {
+    editUser: function editUser(id, name, email, bonus, bonus_pay, card_pay, black_list) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email + '/' + bonus + '/' + bonus_pay + '/' + card_pay + '/' + black_list).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -45607,13 +45623,13 @@ var render = function () {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "container", staticStyle: { "overflow-x": "auto" } },
+    { staticClass: "container-fluid", staticStyle: { "overflow-x": "auto" } },
     [
       _vm._m(0),
       _vm._v(" "),
       _c(
         "div",
-        { staticStyle: { width: "1200px", "overflow-x": "auto" } },
+        { staticClass: "container-fluid" },
         [
           _c(
             "v-table",
@@ -45740,6 +45756,35 @@ var render = function () {
                                 {
                                   name: "model",
                                   rawName: "v-model",
+                                  value: _vm.filters.user_phone.value,
+                                  expression: "filters.user_phone.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "300px" },
+                              attrs: { placeholder: "Select by user_phone" },
+                              domProps: { value: _vm.filters.user_phone.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.user_phone,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
                                   value: _vm.filters.bonus.value,
                                   expression: "filters.bonus.value",
                                 },
@@ -45755,6 +45800,35 @@ var render = function () {
                                   }
                                   _vm.$set(
                                     _vm.filters.bonus,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.black_list.value,
+                                  expression: "filters.black_list.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Select by black_list" },
+                              domProps: { value: _vm.filters.black_list.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.black_list,
                                     "value",
                                     $event.target.value
                                   )
@@ -45826,6 +45900,36 @@ var render = function () {
                                       _vm.$set(
                                         row,
                                         "email",
+                                        $event.target.value
+                                      )
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.user_phone,
+                                      expression: "row.user_phone",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "300px" },
+                                  attrs: { id: "user_phone", required: "" },
+                                  domProps: { value: row.user_phone },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "user_phone",
                                         $event.target.value
                                       )
                                     },
@@ -45964,6 +46068,56 @@ var render = function () {
                               ]),
                               _vm._v(" "),
                               _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.black_list,
+                                      expression: "row.black_list",
+                                    },
+                                  ],
+                                  staticStyle: { width: "30px" },
+                                  attrs: { type: "checkbox", id: "black_list" },
+                                  domProps: {
+                                    checked: Array.isArray(row.black_list)
+                                      ? _vm._i(row.black_list, null) > -1
+                                      : row.black_list,
+                                  },
+                                  on: {
+                                    change: function ($event) {
+                                      var $$a = row.black_list,
+                                        $$el = $event.target,
+                                        $$c = $$el.checked ? true : false
+                                      if (Array.isArray($$a)) {
+                                        var $$v = null,
+                                          $$i = _vm._i($$a, $$v)
+                                        if ($$el.checked) {
+                                          $$i < 0 &&
+                                            _vm.$set(
+                                              row,
+                                              "black_list",
+                                              $$a.concat([$$v])
+                                            )
+                                        } else {
+                                          $$i > -1 &&
+                                            _vm.$set(
+                                              row,
+                                              "black_list",
+                                              $$a
+                                                .slice(0, $$i)
+                                                .concat($$a.slice($$i + 1))
+                                            )
+                                        }
+                                      } else {
+                                        _vm.$set(row, "black_list", $$c)
+                                      }
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
                                 _c(
                                   "div",
                                   {
@@ -45993,7 +46147,8 @@ var render = function () {
                                                   row.email,
                                                   row.bonus,
                                                   row.bonus_pay,
-                                                  row.card_pay
+                                                  row.card_pay,
+                                                  row.black_list
                                                 )
                                               },
                                             },
@@ -46117,6 +46272,15 @@ var render = function () {
                   _c(
                     "v-th",
                     {
+                      staticStyle: { width: "300px" },
+                      attrs: { sortKey: "user_phone" },
+                    },
+                    [_vm._v("user_phone")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
                       staticStyle: { width: "100px" },
                       attrs: { sortKey: "bonus" },
                     },
@@ -46139,6 +46303,15 @@ var render = function () {
                       attrs: { sortKey: "card_pay" },
                     },
                     [_vm._v("Карта")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "30px" },
+                      attrs: { sortKey: "black_list" },
+                    },
+                    [_vm._v("Black list")]
                   ),
                 ],
                 1

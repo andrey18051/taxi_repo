@@ -266,7 +266,7 @@ Route::get('/users/all', [UserController::class,'index']);
 Route::get('/show/{id}', [UserController::class,'show']);
 Route::get('/setForAllPermissionsTrue', [UserController::class,'setForAllPermissionsTrue']);
 Route::get('/users/destroy/{id}', [UserController::class,'destroy'])->middleware('verified');
-Route::get('/users/edit/{id}/{name}/{email}/{bonus}/{bonus_pay}/{card_pay}', [UserController::class,'edit']);
+Route::get('/users/edit/{id}/{name}/{email}/{bonus}/{bonus_pay}/{card_pay}/{black_list}', [UserController::class,'edit']);
 
 Route::get('/users/show/{id}', [UserController::class,'show']);
 

@@ -58,7 +58,7 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id, $name, $email, $bonus, $bonus_pay, $card_pay)
+    public function edit($id, $name, $email, $bonus, $bonus_pay, $card_pay, $black_list)
     {
         Log::info("bonus_pay  $bonus_pay");
         Log::info("card_pay  $card_pay");
@@ -74,6 +74,11 @@ class UserController extends Controller
         if ($card_pay === "false" || $card_pay === "0" || $card_pay === "null") {
             $c_pay = 0;
         }
+        $b_list = 1;
+
+        if ($black_list === "false" || $black_list === "0" || $black_list === "null") {
+            $b_list = 0;
+        }
         Log::info("bon_pay  $bon_pay");
         Log::info("c_pay  $c_pay");
         $user = User::find($id);
@@ -83,6 +88,7 @@ class UserController extends Controller
         $user->bonus = $bonus;
         $user->bonus_pay = $bon_pay;
         $user->card_pay = $c_pay;
+        $user->black_list = $b_list;
         $user->save();
 
         return response()->json(User::find($id));

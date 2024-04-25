@@ -1963,7 +1963,7 @@ class UniversalAndroidFunctionController extends Controller
     public function verifyBlackListUser($email, $androidDom)
     {
         IPController::getIP("/android/$androidDom/startPage");
-        $user =  BlackList::where('email', $email)->first();
+        $user =  User::where('email', $email)->first();
 
         $response_error["order_cost"] = 0;
         if ($user == null) {
@@ -1986,7 +1986,9 @@ class UniversalAndroidFunctionController extends Controller
             }
 
         } else {
-            $response_error["Message"] = "В черном списке";
+            if ($user->black_list == "1") {
+                $response_error["Message"] = "В черном списке";
+            }
         }
         return response($response_error, 200)
             ->header('Content-Type', 'json');

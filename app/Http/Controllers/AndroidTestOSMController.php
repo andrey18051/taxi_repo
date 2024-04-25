@@ -2480,6 +2480,8 @@ class AndroidTestOSMController extends Controller
                 case '2':
                     $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
                     break;
+                default:
+                    $resp_answer = $resp_answer . "Статус поїздки дізнайтесь у диспетчера.";
             }
 //        dd($resp_answer);
 
