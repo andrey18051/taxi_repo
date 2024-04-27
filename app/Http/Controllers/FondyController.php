@@ -147,12 +147,24 @@ class FondyController extends Controller
             'Content-Type' => 'application/json',
         ])->post($url, $requestData);
 
-
         $responseData = $response->json();
-        Log::debug('fondyOrderIdStatus responseData' . json_encode($responseData));
 
-        return $responseData['response']['order_status'];
+        // Проверяем наличие ключа 'response' в ответе
+        if (isset($responseData['response'])) {
+            // Проверяем наличие ключа 'order_status' внутри 'response'
+            if (isset($responseData['response']['order_status'])) {
+                return $responseData['response']['order_status'];
+            } else {
+                // Если ключ 'order_status' отсутствует, возвращаем ошибку или другое значение по умолчанию
+                return 'Unknown'; // Можно заменить на другое значение или бросить исключение
+            }
+        } else {
+            // Если ключ 'response' отсутствует, значит произошла ошибка во время запроса к API Fondy
+            Log::error('fondyOrderIdStatus: Error in response from Fondy API');
+            return 'Error'; // Можно заменить на другое значение или бросить исключение
+        }
     }
+
 
     public function fondyOrderIdReverse($fondy_order_id)
     {
