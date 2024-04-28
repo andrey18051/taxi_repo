@@ -1175,6 +1175,7 @@ Route::get('/showLatLng/{Lat}/{lng}', [\App\Http\Controllers\VisicomController::
 
 Route::get('/reverse/{Lat}/{lng}', [OpenStreetMapController::class,'reverse'])->name('reverse');
 Route::get('/reverseAddress/{Lat}/{lng}', [OpenStreetMapController::class,'reverseAddress'])->name('reverse');
+Route::get('/reverseAddressLocal/{Lat}/{lng}/{local}', [OpenStreetMapController::class,'reverseAddressLocal']);
  /**
   * UID
   */
