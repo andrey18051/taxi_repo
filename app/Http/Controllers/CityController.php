@@ -298,7 +298,8 @@ class CityController extends Controller
 
         return [
             'merchant_fondy' => $city->merchant_fondy,
-            'fondy_key_storage' => $city->fondy_key_storage
+//            'fondy_key_storage' => $city->fondy_key_storage
+            'fondy_key_storage' => ""
         ];
     }
     public function maxPayValueApp($city, $app): array

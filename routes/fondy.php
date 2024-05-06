@@ -22,5 +22,5 @@ Route::get('/errorView', [FondyController::class, 'errorView'])->name('errorView
 Route::get('/subscriptionView', [FondyController::class, 'subscriptionView'])->name('subscriptionView');
 Route::get('/callBack', [FondyController::class, 'callBack'])->name('callBack');
 Route::get('/chargebackCallBack', [FondyController::class, 'chargebackCallBack'])->name('chargebackCallBack');
-
+Route::get('/generateSignatureApp/{paramsString}', [FondyController::class, 'generateSignatureApp'])->name('generateSignatureApp');
 

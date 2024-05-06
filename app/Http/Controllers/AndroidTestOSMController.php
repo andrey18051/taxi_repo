@@ -1578,6 +1578,542 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    public function costSearchMarkersLocal(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $user,
+        $services,
+        $city,
+        $application,
+        $local
+    ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
+
+        $connectAPI = self::connectApi($city);
+//        Log::debug("1 connectAPI $connectAPI");
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return $response_error;
+        }
+
+        if ($tariff == " ") {
+            $tariff = null;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+        $params['user_phone'] = $phone;
+
+        $params['client_sub_card'] = null;
+        $params['required_time'] = null; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        $params['wagon'] = 0;
+        $params['minibus'] = 0;
+        $params['premium'] = 0;
+        $params['route_address_entrance_from'] = null;
+
+        $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
+        $params['comment'] = " "; //Комментарий к заказу
+        $params['add_cost'] = 0; //Добавленная стоимость
+        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+
+        $params['route_undefined'] = false; //По городу: True, False
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        if ($originLatitude == $toLatitude) {
+            $route_undefined = true;
+            $params['to'] = 'по місту';
+        } else {
+            $route_undefined = false;
+
+            $osmAddress = (new OpenStreetMapController)->reverseAddressLocal($toLatitude, $toLongitude, $local);
+
+            $params['routetonumber'] = $osmAddress;
+
+            $params['to'] = $osmAddress["result"];
+            $params['to_number'] = " ";
+
+        }
+        $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
+            ['name' => "name", 'lat' => $toLatitude, 'lng' => $toLongitude]
+        ];
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
+
+        $route_undefined = false;
+
+
+        $url = $connectAPI . '/api/weborders/cost';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+        $parameter = [
+            'user_full_name' => null, //Полное имя пользователя
+            'user_phone' => null, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => null, //Время подачи предварительного заказа
+            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'add_cost' => 0,
+            'wagon' => 0, //Универсал: True, False
+            'minibus' => 0, //Микроавтобус: True, False
+            'premium' => 0, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $tariff, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ];
+        Log::debug("parameter ", $parameter);
+        if ($payment_type == 0) {
+            $authorization = $authorizationChoiceArr["authorization"];
+            Log::debug("authorization $authorization");
+        } else {
+            $authorization = $authorizationChoiceArr["authorizationBonus"];
+            Log::debug("authorizationBonus $authorization");
+        }
+        Log::debug("____________________________________");
+        Log::debug("authorization  $authorization");
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+        );
+        $response_arr = json_decode($response, true);
+        Log::debug("response_arr: ", $response_arr);
+
+        if (isset($response_arr["Message"])) {
+//        if (!isset($response_arr["Message"])) {
+
+            $connectAPI = str_replace('http://', '', $connectAPI);
+
+            $cityServer = City::where('address', $connectAPI)->first();
+            $cityServer->online = "false";
+            $cityServer->save();
+
+            while (self::connectAPI($city) != 400) {
+                $connectAPI = self::connectAPI($city);
+                $url = $connectAPI . '/api/weborders/cost';
+                Log::debug(" _____________________________");
+                Log::debug(" connectAPI while $userArr[2]");
+                Log::debug(" connectAPI while $city ");
+                Log::debug(" connectAPI while $connectAPI ");
+                Log::debug(" connectAPI while $url ");
+                Log::debug(" ______________________________");
+
+                $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+
+                if ($payment_type == 0) {
+                    $authorization = $authorizationChoiceArr["authorization"];
+                    Log::debug("authorization $authorization");
+                } else {
+                    $authorization = $authorizationChoiceArr["authorizationBonus"];
+                    Log::debug("authorizationBonus $authorization");
+                }
+                $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                    $url,
+                    $parameter,
+                    $authorization,
+                    self::identificationId($application),
+                    (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+                );
+                $response_arr = json_decode($response, true);
+                Log::debug("response_arr: ", $response_arr);
+                if (!isset($response_arr["Message"])) {
+                    if ($response->status() == 200) {
+                        $response_arr = json_decode($response, true);
+
+                        $response_ok["from_lat"] = $originLatitude;
+                        $response_ok["from_lng"] = $originLongitude;
+
+                        if ($route_undefined == false) {
+                            $response_ok["lat"] = $toLatitude;
+                            $response_ok["lng"] = $toLongitude;
+                        } else {
+                            $response_ok["lat"] = 0;
+                            $response_ok["lng"] = 0;
+                        }
+
+                        $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                        $response_ok["order_cost"] = $response_arr["order_cost"];
+
+                        $response_ok["currency"] = $response_arr["currency"];
+
+                        if ($originLatitude != $toLatitude) {
+                            $response_ok["routeto"] = $params["to"];
+                            $response_ok["to_number"] = $params["to_number"];
+                        } else {
+                            $response_ok["routeto"] = $toLatitude;
+                            $response_ok["to_number"] = " ";
+                        }
+                        $response_ok["routefrom"] = $originLatitude;
+                        $response_ok["routefromnumber"] = " ";
+
+                        return response($response_ok, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                } else {
+                    $connectAPI = str_replace('http://', '', $connectAPI);
+
+                    $cityServer = City::where('address', $connectAPI)->first();
+                    $cityServer->online = "false";
+                    $cityServer->save();
+                }
+            }
+            if (self::connectAPI($city) == 400) {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "ErrorMessage";
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+
+        } else {
+            Log::debug("response Message 33333333");
+
+            if ($response->status() == 200) {
+                $response_arr = json_decode($response, true);
+
+                $response_ok["from_lat"] = $originLatitude;
+                $response_ok["from_lng"] = $originLongitude;
+
+                if ($route_undefined == false) {
+                    $response_ok["lat"] = $toLatitude;
+                    $response_ok["lng"] = $toLongitude;
+                } else {
+                    $response_ok["lat"] = 0;
+                    $response_ok["lng"] = 0;
+                }
+
+                $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                $response_ok["order_cost"] = $response_arr["order_cost"];
+                $response_ok["currency"] = $response_arr["currency"];
+
+                if ($originLatitude != $toLatitude) {
+                    $response_ok["routeto"] = $params["to"];
+                    $response_ok["to_number"] = $params["to_number"];
+                } else {
+                    $response_ok["routeto"] = $toLatitude;
+                    $response_ok["to_number"] = " ";
+                }
+                $response_ok["routefrom"] = $originLatitude;
+                $response_ok["routefromnumber"] = " ";
+
+                return response($response_ok, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+
+                $cityServer = City::where('address', $connectAPI)->first();
+                $cityServer->online = "false";
+                $cityServer->save();
+
+                while (self::connectAPI($city) != 400) {
+                    $connectAPI = self::connectAPI($city);
+                    $url = $connectAPI . '/api/weborders/cost';
+                    $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+                    );
+                    $response_arr = json_decode($response, true);
+                    if (!isset($response_arr["Message"])) {
+                        if ($response->status() == 200) {
+                            $response_arr = json_decode($response, true);
+
+                            $response_ok["from_lat"] = $originLatitude;
+                            $response_ok["from_lng"] = $originLongitude;
+
+                            if ($route_undefined == false) {
+                                $response_ok["lat"] = $toLatitude;
+                                $response_ok["lng"] = $toLongitude;
+                            } else {
+                                $response_ok["lat"] = 0;
+                                $response_ok["lng"] = 0;
+                            }
+
+                            $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                            $response_ok["order_cost"] = $response_arr["order_cost"];
+                            $response_ok["currency"] = $response_arr["currency"];
+
+                            if ($originLatitude != $toLatitude) {
+                                $response_ok["routeto"] = $params["to"];
+                                $response_ok["to_number"] = $params["to_number"];
+                            } else {
+                                $response_ok["routeto"] = $toLatitude;
+                                $response_ok["to_number"] = " ";
+                            }
+                            $response_ok["routefrom"] = $originLatitude;
+                            $response_ok["routefromnumber"] = " ";
+
+                            return response($response_ok, 200)
+                                ->header('Content-Type', 'json');
+                        }
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+
+                        $cityServer = City::where('address', $connectAPI)->first();
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                    }
+                }
+                if (self::connectAPI($city) == 400) {
+                    $response_arr = json_decode($response, true);
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = $response_arr["Message"];
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+        }
+    }
+
+    public function costSearchMarkersLocalTariffs(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $user,
+        $services,
+        $city,
+        $application
+    ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
+
+        $connectAPI = self::connectApi($city);
+        Log::debug("1 connectAPI $connectAPI");
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Ошибка соединения с сервером.";
+
+            return $response_error;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        if ($originLatitude == $toLatitude) {
+            $route_undefined = true;
+        } else {
+            $route_undefined = false;
+
+        }
+        $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
+            ['name' => "name", 'lat' => $toLatitude, 'lng' => $toLongitude]
+        ];
+
+        $url = $connectAPI . '/api/weborders/tariffs/cost';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+
+        $calculated_tariff_names = [
+            "Базовый",
+            "Эконом-класс",
+            "Бизнес-класс",
+            "Премиум-класс",
+            "Универсал",
+            "Микроавтобус",
+        ];
+
+        $parameter = [
+            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'calculated_tariff_names' => $calculated_tariff_names,
+            'required_time' => null, //Время подачи предварительного заказа
+            'route_address_entrance_from' => null,
+            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'add_cost' => 0,
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'route_undefined' => $route_undefined, //По городу: True, False
+        ];
+        Log::debug("parameter ", $parameter);
+        if ($payment_type == 0) {
+            $authorization = $authorizationChoiceArr["authorization"];
+        } else {
+            $authorization = $authorizationChoiceArr["authorizationBonus"];
+        }
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+        );
+        $response_arr = json_decode($response, true);
+        Log::debug("response_arr: ", $response_arr);
+
+        if (isset($response_arr["Message"])) {
+//        if (!isset($response_arr["Message"])) {
+
+            $connectAPI = str_replace('http://', '', $connectAPI);
+
+            $cityServer = City::where('address', $connectAPI)->first();
+            $cityServer->online = "false";
+            $cityServer->save();
+
+            while (self::connectAPI($city) != 400) {
+                $connectAPI = self::connectAPI($city);
+                $url = $connectAPI . '/api/weborders/tariffs/cost';
+                Log::debug(" _____________________________");
+                Log::debug(" connectAPI while $userArr[2]");
+                Log::debug(" connectAPI while $city ");
+                Log::debug(" connectAPI while $connectAPI ");
+                Log::debug(" connectAPI while $url ");
+                Log::debug(" ______________________________");
+
+                $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+
+                if ($payment_type == 0) {
+                    $authorization = $authorizationChoiceArr["authorization"];
+                    Log::debug("authorization $authorization");
+                } else {
+                    $authorization = $authorizationChoiceArr["authorizationBonus"];
+                    Log::debug("authorizationBonus $authorization");
+                }
+                $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                    $url,
+                    $parameter,
+                    $authorization,
+                    self::identificationId($application),
+                    (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+                );
+                $response_arr = json_decode($response, true);
+                Log::debug("response_arr: ", $response_arr);
+                if (!isset($response_arr["Message"])) {
+                    if ($response->status() == 200) {
+                        return response($response, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                } else {
+                    $connectAPI = str_replace('http://', '', $connectAPI);
+
+                    $cityServer = City::where('address', $connectAPI)->first();
+                    $cityServer->online = "false";
+                    $cityServer->save();
+                }
+            }
+            if (self::connectAPI($city) == 400) {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "Не удалось рассчитать стоимость заказа. Попробуйте немного позже";
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+
+        } else {
+            Log::debug("response Message 33333333");
+
+            if ($response->status() == 200) {
+                return response($response, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+
+                $cityServer = City::where('address', $connectAPI)->first();
+                $cityServer->online = "false";
+                $cityServer->save();
+
+                while (self::connectAPI($city) != 400) {
+                    $connectAPI = self::connectAPI($city);
+                    $url = $connectAPI . '/api/weborders/tariffs/cost';
+                    $authorizationChoiceArr = self::authorizationChoice($userArr[2], $city, $connectAPI);
+
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+                    );
+                    $response_arr = json_decode($response, true);
+                    if (!isset($response_arr["Message"])) {
+                        if ($response->status() == 200) {
+                            return response($response, 200)
+                                ->header('Content-Type', 'json');
+                        }
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+
+                        $cityServer = City::where('address', $connectAPI)->first();
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                    }
+                }
+                if (self::connectAPI($city) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "Не удалось рассчитать стоимость заказа. Попробуйте немного позже";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+        }
+    }
+
     /**
      * @throws \Exception
      */
@@ -2194,6 +2730,25 @@ class AndroidTestOSMController extends Controller
         return response($response, 200)
             ->header('Content-Type', 'json');
     }
+    /**
+     * @throws \Exception
+     */
+    public function fromSearchGeoLocal($originLatitude, $originLongitude, $local)
+    {
+
+        $osmAddress = (new OpenStreetMapController)->reverseAddressLocal($originLatitude, $originLongitude, $local);
+
+        if ($osmAddress != "404") {
+            $from = $osmAddress;
+
+            $response["order_cost"] = 100;
+            $response["route_address_from"] = $osmAddress['result'] . "\t";
+
+        }
+//        dd( $response);
+        return response($response, 200)
+            ->header('Content-Type', 'json');
+    }
 
     /**
      * @throws \Exception
@@ -2548,6 +3103,8 @@ class AndroidTestOSMController extends Controller
             $orderweb->closeReason = "1";
             $orderweb->save();
             self::sentCancelInfo($orderweb);
+/// тут доюавит проерку системы оплаты картой
+            (new FondyController)->fondyUidReverse($uid);
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
             Http::withHeaders([

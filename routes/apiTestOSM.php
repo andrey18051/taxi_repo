@@ -63,6 +63,8 @@ Route::get('/android/orderSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_
 
 Route::get('/android/fromSearchGeo/{originLatitude}/{originLongitude}', [AndroidTestOSMController::class, 'fromSearchGeo'])
     ->name('fromSearchGeo');
+Route::get('/android/fromSearchGeoLocal/{originLatitude}/{originLongitude}/{local}', [AndroidTestOSMController::class, 'fromSearchGeoLocal'])
+    ->name('fromSearchGeo');
 
 
 Route::get('/android/sendCode/{phone}', [AndroidTestOSMController::class, 'sendCode'])->name('sendCode');
@@ -84,6 +86,12 @@ Route::get('/android/verifyBlackListUser/{email}', [AndroidTestOSMController::cl
 
 Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'costSearchMarkers'])
     ->name('costSearchMarkers');
+
+Route::get('/android/costSearchMarkersLocal/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/{city}/{application}/{local}', [AndroidTestOSMController::class, 'costSearchMarkersLocal'])
+    ->name('costSearchMarkersLocal');
+
+Route::get('/android/costSearchMarkersLocalTariffs/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{user}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'costSearchMarkersLocalTariffs'])
+    ->name('costSearchMarkersLocalTariffs');
 
 Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearchMarkers'])
     ->name('orderSearchMarkers');

@@ -214,119 +214,119 @@ class BonusBalanceController extends Controller
             // Если записей не найдено, вы можете выполнить соответствующие действия.
             self::recordsAdd(0, $users_id, 3, 1);
         }
-//        /**
-//         * Начисление бонусов за первую поездку
-//         */
-//        $orderBalanceRecord2 = BonusBalance::where("users_id", $users_id)
-//            ->where("bonus_types_id", 2)
-//            ->first();
-//
-//        $orderBalanceRecord7 = BonusBalance::where("users_id", $users_id)
-//            ->where("bonus_types_id", 7)
-//            ->first();
-//
-//        if ($orderBalanceRecord2 != null && $orderBalanceRecord7 == null) {
-//             self::recordsAdd(0, $users_id, 7, 1);
-//        }
-//        /**
-//         * Начисление бонусов за выполненную поездку
-//         */
-//
-//        $user = User::find($users_id);
-//
-//        $orderNotComplete = Orderweb::where("email", $user->email)
-//            ->where("closeReason", "-1")->get();
-//
-//        if ($orderNotComplete != null) {
-//            $orderNotCompleteArray = $orderNotComplete->toArray();
-//            foreach ($orderNotCompleteArray as $value) {
-//                UIDController::UIDStatusReviewAdmin($value['dispatching_order_uid']);
-//            }
-//        }
-//
-//        $orderComplete = Orderweb::where("email", $user->email)
-//            ->where(function ($query) {
-//                $query->where("closeReason", 0)
-//                ->orWhere("closeReason", 8);
-//            })->get();
-//
-//        if ($orderComplete != null) {
-//            $orderCompleteArray = $orderComplete->toArray();
-//
-//            $orderBalanceRecord = BonusBalance::where("users_id", $users_id)
-//                ->where("bonus_types_id", 2)
-//                ->get();
-//            if ($orderBalanceRecord != null) {
-//                $orderBalanceRecordArray = $orderBalanceRecord->toArray();
-//
-//                foreach ($orderCompleteArray as $value) {
-//                    $verify = false;
-//                    foreach ($orderBalanceRecordArray as $item) {
-//                        if ($value["id"] == $item['orderwebs_id']) {
-//                            $verify = true;
-//                            break;
-//                        };
-//                    }
-//                    if (false == $verify) {
-//                        $bonus = self::historyUID($value["id"]);
-//                        self::recordsAdd($value["id"], $users_id, 2, $bonus);
-//                    };
-//                }
-//            } else {
-//                foreach ($orderCompleteArray as $value) {
-//                    $bonus = self::historyUID($value["id"]);
-//                    self::recordsAdd($value["id"], $users_id, 2, $bonus);
-//                }
-//            }
-//        }
-//
-//
-//        /**
-//         * Разблокировка бонусов
-//         */
-//
-//        $totalBonus = BonusBalance::where('users_id', $users_id)->sum('bonusBloke');
-//
-//        if ($totalBonus != 0) {
-//            $bonusBlockedBalanceRecord = BonusBalance::where("users_id", $users_id)
-//                ->where(function ($query) {
-//                    $query->where("bonus_types_id", 4)
-//                        ->orWhere("bonus_types_id", 6);
-//                })
-////                ->where('orderwebs_id', '!=', 0)
-////                ->select('orderwebs_id', 'bonusBloke')
-//                ->get()->toArray();
-//
-//            $bonusSumByOrderwebsId = [];
-//
-//            $uniqueArray = [];
-//
-//            foreach ($bonusBlockedBalanceRecord as $item) {
-//                $orderwebsId = $item["orderwebs_id"];
-//                $bonusBloke = $item["bonusBloke"];
-//
-//                // Если запись с таким orderwebs_id уже есть в результате
-//                if (isset($bonusSumByOrderwebsId[$orderwebsId])) {
-//                    // Обновляем сумму bonusBloke для данного orderwebs_id
-//                    $bonusSumByOrderwebsId[$orderwebsId] += $bonusBloke;
-//                } else {
-//                    // Если записи с таким orderwebs_id нет, добавляем ее в результат
-//                    $bonusSumByOrderwebsId[$orderwebsId] = $bonusBloke;
-//                }
-//            }
-//
-//// Проходим по уникальным записям и добавляем их в результат
-//            foreach ($bonusBlockedBalanceRecord as $item) {
-//                $orderwebsId = $item["orderwebs_id"];
-//                if ($bonusSumByOrderwebsId[$orderwebsId] !== 0) {
-//                    $uniqueArray[] = $item;
-//                }
-//            }
-////            dd($uniqueArray);
-//            foreach ($uniqueArray as $value) {
-//                self::historyUIDunBlocked($value['orderwebs_id']);
-//            }
-//        }
+        /**
+         * Начисление бонусов за первую поездку
+         */
+        $orderBalanceRecord2 = BonusBalance::where("users_id", $users_id)
+            ->where("bonus_types_id", 2)
+            ->first();
+
+        $orderBalanceRecord7 = BonusBalance::where("users_id", $users_id)
+            ->where("bonus_types_id", 7)
+            ->first();
+
+        if ($orderBalanceRecord2 != null && $orderBalanceRecord7 == null) {
+             self::recordsAdd(0, $users_id, 7, 1);
+        }
+        /**
+         * Начисление бонусов за выполненную поездку
+         */
+
+        $user = User::find($users_id);
+
+        $orderNotComplete = Orderweb::where("email", $user->email)
+            ->where("closeReason", "-1")->get();
+
+        if ($orderNotComplete != null) {
+            $orderNotCompleteArray = $orderNotComplete->toArray();
+            foreach ($orderNotCompleteArray as $value) {
+                UIDController::UIDStatusReviewAdmin($value['dispatching_order_uid']);
+            }
+        }
+
+        $orderComplete = Orderweb::where("email", $user->email)
+            ->where(function ($query) {
+                $query->where("closeReason", 0)
+                ->orWhere("closeReason", 8);
+            })->get();
+
+        if ($orderComplete != null) {
+            $orderCompleteArray = $orderComplete->toArray();
+
+            $orderBalanceRecord = BonusBalance::where("users_id", $users_id)
+                ->where("bonus_types_id", 2)
+                ->get();
+            if ($orderBalanceRecord != null) {
+                $orderBalanceRecordArray = $orderBalanceRecord->toArray();
+
+                foreach ($orderCompleteArray as $value) {
+                    $verify = false;
+                    foreach ($orderBalanceRecordArray as $item) {
+                        if ($value["id"] == $item['orderwebs_id']) {
+                            $verify = true;
+                            break;
+                        };
+                    }
+                    if (false == $verify) {
+                        $bonus = self::historyUID($value["id"]);
+                        self::recordsAdd($value["id"], $users_id, 2, $bonus);
+                    };
+                }
+            } else {
+                foreach ($orderCompleteArray as $value) {
+                    $bonus = self::historyUID($value["id"]);
+                    self::recordsAdd($value["id"], $users_id, 2, $bonus);
+                }
+            }
+        }
+
+
+        /**
+         * Разблокировка бонусов
+         */
+
+        $totalBonus = BonusBalance::where('users_id', $users_id)->sum('bonusBloke');
+
+        if ($totalBonus != 0) {
+            $bonusBlockedBalanceRecord = BonusBalance::where("users_id", $users_id)
+                ->where(function ($query) {
+                    $query->where("bonus_types_id", 4)
+                        ->orWhere("bonus_types_id", 6);
+                })
+//                ->where('orderwebs_id', '!=', 0)
+//                ->select('orderwebs_id', 'bonusBloke')
+                ->get()->toArray();
+
+            $bonusSumByOrderwebsId = [];
+
+            $uniqueArray = [];
+
+            foreach ($bonusBlockedBalanceRecord as $item) {
+                $orderwebsId = $item["orderwebs_id"];
+                $bonusBloke = $item["bonusBloke"];
+
+                // Если запись с таким orderwebs_id уже есть в результате
+                if (isset($bonusSumByOrderwebsId[$orderwebsId])) {
+                    // Обновляем сумму bonusBloke для данного orderwebs_id
+                    $bonusSumByOrderwebsId[$orderwebsId] += $bonusBloke;
+                } else {
+                    // Если записи с таким orderwebs_id нет, добавляем ее в результат
+                    $bonusSumByOrderwebsId[$orderwebsId] = $bonusBloke;
+                }
+            }
+
+// Проходим по уникальным записям и добавляем их в результат
+            foreach ($bonusBlockedBalanceRecord as $item) {
+                $orderwebsId = $item["orderwebs_id"];
+                if ($bonusSumByOrderwebsId[$orderwebsId] !== 0) {
+                    $uniqueArray[] = $item;
+                }
+            }
+//            dd($uniqueArray);
+            foreach ($uniqueArray as $value) {
+                self::historyUIDunBlocked($value['orderwebs_id']);
+            }
+        }
      }
 
     public function balanceReviewDaily()

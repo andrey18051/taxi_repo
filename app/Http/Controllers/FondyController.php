@@ -165,7 +165,41 @@ class FondyController extends Controller
         }
     }
 
+    public function fondyUidReverse($uid)
+    {
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
 
+        $url = "https://pay.fondy.eu/api/reverse/order_id";
+        $params =  array(
+            "order_id" => $order->fondy_order_id,
+            "currency" => "UAH",
+            "amount" => $order->web_cost . "00",
+            "merchant_id" => config('app.merchantId'),
+        );
+
+        $signature = self::generateSignature($params);
+        $requestData = array(
+            "request" => array(
+                "order_id" => $order->fondy_order_id,
+                "currency" => "UAH",
+                "amount" => $order->web_cost . "00",
+                "merchant_id" => config('app.merchantId'),
+                "signature" => $signature
+            )
+        );
+        Log::debug("fondyOrderIdReverse requestData:" . json_encode($requestData));
+
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($url, $requestData);
+
+// Получаем JSON-ответ
+        $responseData = $response->json();
+        Log::debug("fondyOrderIdReverse responseData:" . json_encode($responseData));
+
+        return $responseData;
+    }
     public function fondyOrderIdReverse($fondy_order_id)
     {
         $order = Orderweb::where("fondy_order_id", $fondy_order_id)->first();
@@ -543,6 +577,56 @@ class FondyController extends Controller
             return null;
         }
     }
+
+
+    public function generateSignatureApp($paramsString)
+    {
+        // Удаляем фигурные скобки из строки параметров
+        $paramsString = trim($paramsString, '{}');
+
+        // Разбиваем строку на пары ключ-значение
+        $paramsArray = explode('&', $paramsString);
+
+        // Создаем пустой ассоциативный массив для параметров
+        $params = [];
+
+        // Проходим по каждой паре ключ-значение и добавляем их в массив
+        foreach ($paramsArray as $param) {
+            // Разбиваем каждую пару на ключ и значение по знаку "="
+            list($key, $value) = explode('=', $param, 2);
+
+            // URL декодируем значение
+            $value = urldecode($value);
+
+            // Добавляем пару ключ-значение в массив параметров
+            $params[$key] = $value;
+        }
+
+        // Сортируем параметры по ключам (алфавитный порядок)
+        ksort($params);
+
+        // Создаем строку для подписи
+        $signatureData = config('app.merchantPassword'); // Добавляем пароль мерчанта
+
+        // Добавляем все отсортированные параметры, разделенные символом вертикальной черты
+        foreach ($params as $value) {
+            $signatureData .= '|' . $value;
+        }
+
+        try {
+            // Вычисляем SHA-1 хеш
+            $digest = sha1($signatureData);
+
+            // Возвращаем хеш в виде ассоциативного массива
+            return ["digest" => $digest];
+        } catch (Exception $e) {
+            // Обработка ошибки
+            return null;
+        }
+    }
+
+
+
 
     private function autorization($connectApi)
     {

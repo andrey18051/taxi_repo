@@ -1988,6 +1988,8 @@ class UniversalAndroidFunctionController extends Controller
         } else {
             if ($user->black_list == "1") {
                 $response_error["Message"] = "В черном списке";
+            } else {
+                $response_error["Message"] = "Не черном списке";
             }
         }
         return response($response_error, 200)

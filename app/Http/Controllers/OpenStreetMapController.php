@@ -165,7 +165,7 @@ class OpenStreetMapController extends Controller
                     . ", " . $response_arr_from["properties"]["settlement_type"]
                     . " " . $response_arr_from["properties"]["settlement"]];
             } else {
-                return ["result" => "404"];
+                return ["result" => "Точка на карте"];
             }
         } else {
             if ($response_arr["category"] == "building") {
@@ -188,7 +188,7 @@ class OpenStreetMapController extends Controller
                         . ", " . $response_arr_from["properties"]["settlement_type"]
                         . " " . $response_arr_from["properties"]["settlement"]];
                 } else {
-                    return ["result" =>"404"];
+                    return ["result" => "Точка на карте"];
                 }
             }
         }
