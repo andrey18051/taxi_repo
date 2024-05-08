@@ -42,6 +42,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/android_set.php'));
+            Route::prefix('wfp')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/wfp.php'));
             Route::prefix('mono')
                 ->middleware('api')
                 ->namespace($this->namespace)

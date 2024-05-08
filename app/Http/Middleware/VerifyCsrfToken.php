@@ -15,6 +15,9 @@ class VerifyCsrfToken extends Middleware
         '/webhook',
         '/webhookViber',
         '/webhookViberCustoms',
-        '/server-callback'
+        '/server-callback',
+        '/serviceUrl',
+        '/returnUrl',
+        '/serviceUrl/verify',
     ];
 }
