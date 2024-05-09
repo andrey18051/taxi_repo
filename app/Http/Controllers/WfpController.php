@@ -152,6 +152,7 @@ class WfpController extends Controller
             "amount" => $amount,
             "currency" => "UAH",
             "orderTimeout" => 86400,
+            "merchantTransactionType" => "AUTH",
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
