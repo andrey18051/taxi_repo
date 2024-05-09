@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -12,6 +13,37 @@ use Illuminate\Support\Facades\Log;
 
 class WfpController extends Controller
 {
+    public function returnUrl()
+    {
+        Log::debug("returnUrl");
+        return "returnUrl";
+    }
+
+    public function serviceUrl(Request $request)
+    {
+        Log::debug($request);
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $secretKey = "7aca3657f12fca79d876dcb50e2d84d71f544516";
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+    public function serviceUrlVerify(Request $request)
+    {
+        Log::debug($request);
+    }
     public function createInvoice(
         $application,
         $city,
@@ -21,7 +53,7 @@ class WfpController extends Controller
         $productName,
         $clientEmail,
         $clientPhone
-    ): \Illuminate\Http\Client\Response {
+    ): Response {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -71,7 +103,7 @@ class WfpController extends Controller
             "merchantAccount" => $merchantAccount,
             "merchantAuthType" => "SimpleSignature",
             "merchantDomainName" => "m.easy-order-taxi.site",
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey),
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "createInvoice"),
             "apiVersion" => 1,
             "language" => $language,
             "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
@@ -93,37 +125,6 @@ class WfpController extends Controller
         return Http::post('https://api.wayforpay.com/api', $params);
     }
 
-    public function returnUrl()
-    {
-        Log::debug("returnUrl");
-        return "returnUrl";
-    }
-
-    public function serviceUrl(Request $request)
-    {
-        Log::debug($request);
-        $time = strtotime(date('Y-m-d H:i:s'));
-
-        $params = [
-            "orderReference" => $request->orderReference,
-            "status" => "accept",
-            "time" => $time
-        ];
-        $secretKey = "7aca3657f12fca79d876dcb50e2d84d71f544516";
-
-        $signature = self::generateHmacMd5Signature($params, $secretKey);
-
-        return [
-            "orderReference" => $request->orderReference,
-            "status" => "accept",
-            "time" => $time,
-             "signature" =>  $signature
-        ];
-    }
-    public function serviceUrlVerify(Request $request)
-    {
-        Log::debug($request);
-    }
 
     public function verify(
         $application,
@@ -131,7 +132,7 @@ class WfpController extends Controller
         $orderReference,
         $clientEmail,
         $clientPhone
-    ): \Illuminate\Http\Client\Response {
+    ): Response {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -165,7 +166,7 @@ class WfpController extends Controller
             "merchantAccount" => $merchantAccount,
             "merchantDomainName" => "m.easy-order-taxi.site",
             "merchantAuthType" => "SimpleSignature",
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey),
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "verify"),
             "orderReference" => $orderReference,
             "amount" => "0",
             "currency" => "UAH",
@@ -195,19 +196,63 @@ class WfpController extends Controller
 //        ];
 
 // Відправлення POST-запиту
-        return Http::post('https://secure.wayforpay.com/verify', $params);
+        $response = Http::post('https://secure.wayforpay.com/verify?behavior=offline', $params);
+
+        Log::debug("verify: ", $response);
+        return $response;
     }
 
-    public function pay(
+    public function checkStatus(
+        $application,
+        $city,
+        $orderReference
+    ): Response {
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+        }
+
+        $params = [
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+        ];
+//dd($params);
+
+//        $merchantAccount = "test_merch_n1";
+//        $secretKey = "flk3409refn54t54t*FNJRET";
+
+        $params = [
+            "transactionType" => "CHECK_STATUS",
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "checkStatus"),
+            "apiVersion" => 1,
+        ];
+
+// Відправлення POST-запиту
+        $response = Http::post('https://api.wayforpay.com/api', $params);
+        Log::debug($response);
+        return $response;
+    }
+
+    public function refund(
         $application,
         $city,
         $orderReference,
-        $amount,
-        $language,
-        $productName,
-        $clientEmail,
-        $clientPhone
-    )  {
+        $amount
+    ): Response {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -234,9 +279,131 @@ class WfpController extends Controller
 //                . " /clientPhone- " . $clientPhone
 //            );
 //
-        $orderDate =  1421412898;
-//        $currentTimestampMillis = round(microtime(true) * 1000);
-//        dd( "Поточний час в мілісекундах: " . $currentTimestampMillis);
+        $params = [
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "amount" => $amount,
+            "currency" => "UAH",
+        ];
+//dd($params);
+
+//        $merchantAccount = "test_merch_n1";
+//        $secretKey = "flk3409refn54t54t*FNJRET";
+
+        $params = [
+            "transactionType" => "REFUND",
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "amount" => $amount,
+            "comment" => "Повернення платежу",
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
+            "apiVersion" => 1
+        ];
+
+// Відправлення POST-запиту
+        $response = Http::post('https://api.wayforpay.com/api', $params);
+        Log::debug("CHECK_STATUS:" . $response);
+
+        return $response;
+    }
+
+
+    public function settle(
+        $application,
+        $city,
+        $orderReference,
+        $amount
+    ): Response {
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+        }
+//            dd(" /merchantAccount- " . $merchantAccount . "\n"
+//                . " /secretKey- " . $secretKey . "\n"
+//                . " /orderReference- " . $orderReference . "\n"
+//                . " /amount- " . $amount . "\n"
+//                . " /language- " . $language . "\n"
+//                . " /productName- " . $productName . "\n"
+//                . " /clientEmail- " . $clientEmail . "\n"
+//                . " /clientPhone- " . $clientPhone
+//            );
+//
+        $params = [
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "amount" => $amount,
+            "currency" => "UAH",
+        ];
+//dd($params);
+
+//        $merchantAccount = "test_merch_n1";
+//        $secretKey = "flk3409refn54t54t*FNJRET";
+
+        $params = [
+            "transactionType" => "SETTLE",
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "amount" => $amount,
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
+            "apiVersion" => 1
+        ];
+
+// Відправлення POST-запиту
+        $response = Http::post('https://api.wayforpay.com/api', $params);
+        Log::debug("SETTLE:" . $response);
+
+        return $response;
+    }
+
+
+    public function purchase(
+        $application,
+        $city,
+        $orderReference,
+        $amount,
+        $productName,
+        $recToken
+    ) {
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+        }
+//            dd(" /merchantAccount- " . $merchantAccount . "\n"
+//                . " /secretKey- " . $secretKey . "\n"
+//                . " /orderReference- " . $orderReference . "\n"
+//                . " /amount- " . $amount . "\n"
+//                . " /language- " . $language . "\n"
+//                . " /productName- " . $productName . "\n"
+//                . " /clientEmail- " . $clientEmail . "\n"
+//                . " /clientPhone- " . $clientPhone
+//            );
+//
+
+        $orderDate =  strtotime(date('Y-m-d H:i:s'));
 
         $params = [
             "merchantAccount" => $merchantAccount,
@@ -245,6 +412,7 @@ class WfpController extends Controller
             "orderDate" => $orderDate,
             "amount" => $amount,
             "currency" => "UAH",
+            "recToken" => $recToken,
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1]
@@ -256,55 +424,36 @@ class WfpController extends Controller
 
         $params = [
             "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "purchase"),
             "merchantAuthType" => "SimpleSignature",
             "merchantDomainName" => "m.easy-order-taxi.site",
             "merchantTransactionSecureType" => "AUTO",
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey),
             "apiVersion" => 1,
-            "language" => $language,
-//            "returnUrl" => "http://returnUrl.com",
-            "serviceUrl" => "http://serviceUrl.com",
-            "orderReference" => $orderReference,
+            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
+            "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
             "orderDate" => $orderDate,
             "amount" => $amount,
             "currency" => "UAH",
-            "holdTimeout" => 60,
-//            "recToken" => "recToken",
-
+            "recToken" => "recToken",
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
             "paymentSystems" => "card;privat24",
-            "clientAccountId" => $clientEmail,
-            "clientEmail" => $clientEmail,
-            "clientPhone" => $clientPhone
         ];
 
 // Відправлення POST-запиту
-        $response = Http::post('https://secure.wayforpay.com/pay', $params);
-
-        if ($response->successful()) {
-            // Отримуємо URL з тіла відповіді
-            $url = 'https://secure.wayforpay.com/pay'; // Змініть на фактичний URL, якщо він різний
-
-            // Перенаправлення користувача за URL
-            return new RedirectResponse($url);
-        } else {
-            // Обробка помилки, якщо перенаправлення неможливе
-            // Виводимо повідомлення про помилку
-            dd('Неможливо перенаправити користувача на сторінку оплати');
-        }
-
-
-//        return ["response" => $responseData, "errorCode" =>$response->status()];
-
+        $response = Http::post('https:https://secure.wayforpay.com/pay', $params);
+        Log::debug("purchase: ", $response);
+        return $response;
     }
 
-    private function generateHmacMd5Signature($params, $secretKey)
+    private function generateHmacMd5Signature($params, $secretKey, $type)
     {
         // Формуємо рядок, який підлягає підпису
-        if (isset($params['merchantAccount'])) {
-            if ($params['amount'] != 0) {
+
+        switch ($type) {
+            case "createInvoice":
                 $signatureString = implode(';', [
                     $params['merchantAccount'],
                     $params['merchantDomainName'],
@@ -316,7 +465,15 @@ class WfpController extends Controller
                 foreach ($params['productName'] as $index => $productName) {
                     $signatureString .= ';' . $productName . ';' . $params['productCount'][$index] . ';' . $params['productPrice'][$index];
                 }
-            } else {
+                break;
+            case "serviceUrl":
+                $signatureString = implode(';', [
+                    $params['orderReference'],
+                    $params['status'],
+                    $params['time']
+                ]);
+                break;
+            case "verify":
                 $signatureString = implode(';', [
                     $params['merchantAccount'],
                     $params['merchantDomainName'],
@@ -324,14 +481,38 @@ class WfpController extends Controller
                     $params['amount'],
                     $params['currency']
                 ]);
-            }
-        } else {
-            $signatureString = implode(';', [
-                $params['orderReference'],
-                $params['status'],
-                $params['time']
-            ]);
+                break;
+            case "checkStatus":
+                $signatureString = implode(';', [
+                    $params['merchantAccount'],
+                    $params['orderReference'],
+                ]);
+                break;
+            case "refund":
+            case "settle":
+                $signatureString = implode(';', [
+                    $params['merchantAccount'],
+                    $params['orderReference'],
+                    $params['amount'],
+                    $params['currency']
+                ]);
+                break;
+            case "purchase":
+                $signatureString = implode(';', [
+                    $params['merchantAccount'],
+                    $params['merchantDomainName'],
+                    $params['orderReference'],
+                    $params['orderDate'],
+                    $params['amount'],
+                    $params['currency'],
+                    $params['recToken'],
+                ]);
+                foreach ($params['productName'] as $index => $productName) {
+                    $signatureString .= ';' . $productName . ';' . $params['productCount'][$index] . ';' . $params['productPrice'][$index];
+                }
+                break;
         }
+
 
         // Генеруємо HMAC_MD5 контрольний підпис
         return hash_hmac('md5', $signatureString, $secretKey);
