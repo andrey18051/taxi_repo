@@ -99,11 +99,10 @@
                                 <select class="form-select" id="pay_system" name="pay_system">
 
                                         <option>{{$pay_system}}</option>
-                                    @if($pay_system == 'fondy')
-                                        <option>mono</option>
-                                    @else
+                                        <option>wfp</option>
                                         <option>fondy</option>
-                                    @endif
+                                        <option>mono</option>
+
                                 </select>
                             </div>
                                 <!-- Submit button -->

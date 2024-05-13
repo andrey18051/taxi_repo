@@ -2232,6 +2232,9 @@ class UniversalAndroidFunctionController extends Controller
     {
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         switch ($pay_system) {
+            case "wfp_payment":
+                $orderweb->wfp_order_id = $order_id;
+                break;
             case "fondy_payment":
                 $orderweb->fondy_order_id = $order_id;
                 break;
@@ -2278,11 +2281,65 @@ class UniversalAndroidFunctionController extends Controller
         return response()->json(['cards' => $response]);
     }
 
+    public function getCardTokenApp(
+        $application,
+        $city,
+        $email,
+        $pay_system
+    ): \Illuminate\Http\JsonResponse {
+        $user = User::where('email', $email)->first();
+//        dd($application);
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+        }
+//dd( $merchantAccount);
+
+        $cards = Card::where('pay_system', $pay_system)
+            ->where('user_id', $user->id)
+            ->where('merchant', $merchantAccount)
+            ->get();
+
+        $response = [];
+
+        foreach ($cards as $card) {
+            $rectokenLifetimeString = $card->rectoken_lifetime;
+            $rectokenLifetimeDateTime = DateTime::createFromFormat('d.m.Y H:i:s', $rectokenLifetimeString);
+
+            $cardData = [
+                'masked_card' => $card->masked_card,
+                'card_type' => $card->card_type,
+                'bank_name' => $card->bank_name,
+                'merchant' => $card->merchant,
+                'rectoken' => $card->rectoken
+            ];
+
+            if ($rectokenLifetimeDateTime instanceof DateTime) {
+                $currentTime = new DateTime();
+
+                if ($rectokenLifetimeDateTime < $currentTime) {
+                    $card->delete();
+                }
+            }
+            $response[] = $cardData;
+        }
+
+        return response()->json(['cards' => $response]);
+    }
+
     public function deleteCardToken($rectoken)
     {
 
-        $card = Card::where('pay_system', 'fondy')
-            ->where('rectoken', $rectoken)
+        $card = Card::where('rectoken', $rectoken)
             ->first();
 
         $card->delete();

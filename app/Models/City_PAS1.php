@@ -30,4 +30,12 @@ class City_PAS1 extends Model
      * @var mixed|string
      */
     private $online;
+    /**
+     * @var mixed|string
+     */
+    private $wfp_merchantAccount;
+    /**
+     * @var mixed|string
+     */
+    private $wfp_merchantSecretKey;
 }

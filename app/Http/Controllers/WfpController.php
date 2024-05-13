@@ -6,6 +6,7 @@ use App\Models\Card;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
@@ -109,16 +110,7 @@ class WfpController extends Controller
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
         }
-//            dd(" /merchantAccount- " . $merchantAccount . "\n"
-//                . " /secretKey- " . $secretKey . "\n"
-//                . " /orderReference- " . $orderReference . "\n"
-//                . " /amount- " . $amount . "\n"
-//                . " /language- " . $language . "\n"
-//                . " /productName- " . $productName . "\n"
-//                . " /clientEmail- " . $clientEmail . "\n"
-//                . " /clientPhone- " . $clientPhone
-//            );
-//
+
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
 
         $params = [
@@ -145,7 +137,7 @@ class WfpController extends Controller
             "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "createInvoice"),
             "apiVersion" => 1,
             "language" => $language,
-            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
+//            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
             "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
             "orderReference" => $orderReference,
             "orderDate" => $orderDate,
@@ -158,7 +150,8 @@ class WfpController extends Controller
             "productCount" => [1],
             "paymentSystems" => "card;privat24",
             "clientEmail" => $clientEmail,
-            "clientPhone" => $clientPhone
+            "clientPhone" => $clientPhone,
+            "notifyMethod" => "bot"
         ];
 
 // Відправлення POST-запиту
@@ -214,28 +207,12 @@ class WfpController extends Controller
             "currency" => "UAH",
             "clientEmail" => $clientEmail,
             "clientPhone" => $clientPhone,
-            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
+//            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
             "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
             "language"=> "RU",
             "paymentSystems" => "lookupCard",
             "verifyType" => "confirm",
         ];
-//        $params = [
-//            "merchantAccount" => $merchantAccount,
-//            "merchantDomainName" => "merchant.com.ua",
-//            "merchantAuthType" => "SimpleSignature",
-//            "merchantSignature" => "9a9b6f197eea8319ee87c4b7079c4c28",
-//            "orderReference" => "VRF-PP-1445852171",
-//            "amount" => "0",
-//            "currency" => "UAH",
-//            "clientEmail" => "some@mail.com",
-//            "clientPhone" => "+38(066)0000000",
-//            "returnUrl" => "http://local.com/service",
-//            "serviceUrl" => "http://local.com/service",
-//            "language"=> "RU",
-//            "paymentSystems" => "card",
-//            "verifyType" => "simple",
-//        ];
 
 // Відправлення POST-запиту
         $response = Http::post('https://secure.wayforpay.com/verify?behavior=offline', $params);
@@ -311,26 +288,13 @@ class WfpController extends Controller
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
         }
-//            dd(" /merchantAccount- " . $merchantAccount . "\n"
-//                . " /secretKey- " . $secretKey . "\n"
-//                . " /orderReference- " . $orderReference . "\n"
-//                . " /amount- " . $amount . "\n"
-//                . " /language- " . $language . "\n"
-//                . " /productName- " . $productName . "\n"
-//                . " /clientEmail- " . $clientEmail . "\n"
-//                . " /clientPhone- " . $clientPhone
-//            );
-//
+
         $params = [
             "merchantAccount" => $merchantAccount,
             "orderReference" => $orderReference,
             "amount" => $amount,
             "currency" => "UAH",
         ];
-//dd($params);
-
-//        $merchantAccount = "test_merch_n1";
-//        $secretKey = "flk3409refn54t54t*FNJRET";
 
         $params = [
             "transactionType" => "REFUND",
@@ -417,8 +381,16 @@ class WfpController extends Controller
         $orderReference,
         $amount,
         $productName,
+        $clientEmail,
+        $clientPhone,
         $recToken
     ) {
+//        dd($application . " " .
+//            $city . " " .
+//            $orderReference . " " .
+//            $amount . " " .
+//            $productName . " " .
+//            $recToken . " " );
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -435,16 +407,6 @@ class WfpController extends Controller
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
         }
-//            dd(" /merchantAccount- " . $merchantAccount . "\n"
-//                . " /secretKey- " . $secretKey . "\n"
-//                . " /orderReference- " . $orderReference . "\n"
-//                . " /amount- " . $amount . "\n"
-//                . " /language- " . $language . "\n"
-//                . " /productName- " . $productName . "\n"
-//                . " /clientEmail- " . $clientEmail . "\n"
-//                . " /clientPhone- " . $clientPhone
-//            );
-//
 
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
 
@@ -455,16 +417,11 @@ class WfpController extends Controller
             "orderDate" => $orderDate,
             "amount" => $amount,
             "currency" => "UAH",
-            "recToken" => $recToken,
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1]
         ];
-//dd($params);
-
-//        $merchantAccount = "test_merch_n1";
-//        $secretKey = "flk3409refn54t54t*FNJRET";
-
+//        dd($params);
         $params = [
             "merchantAccount" => $merchantAccount,
             "orderReference" => $orderReference,
@@ -473,12 +430,13 @@ class WfpController extends Controller
             "merchantDomainName" => "m.easy-order-taxi.site",
             "merchantTransactionSecureType" => "AUTO",
             "apiVersion" => 1,
-            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
+//            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
             "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
             "orderDate" => $orderDate,
             "amount" => $amount,
             "currency" => "UAH",
             "recToken" => "recToken",
+            "merchantTransactionType" => "AUTH",
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
@@ -486,7 +444,7 @@ class WfpController extends Controller
         ];
 
 // Відправлення POST-запиту
-        $response = Http::post('https:https://secure.wayforpay.com/pay', $params);
+        $response = Http::dd()->post('https:https://secure.wayforpay.com/pay', $params);
         Log::debug("purchase: ", $response);
         return $response;
     }
@@ -552,11 +510,10 @@ class WfpController extends Controller
             "merchantAuthType" => "SimpleSignature",
             "merchantDomainName" => "m.easy-order-taxi.site",
             "merchantTransactionType" => "AUTH",
-            "merchantTransactionSecureType" => "AUTO",
+//            "merchantTransactionSecureType" => "AUTO",
+            "merchantTransactionSecureType" => "NON3DS",
             "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "charge"),
             "apiVersion" => 1,
-            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
-            "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
             "orderReference" => $orderReference,
             "orderDate" => $orderDate,
             "amount" => $amount,
@@ -565,15 +522,16 @@ class WfpController extends Controller
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
-            "clientFirstName" => "clientFirstName",
-            "clientLastName" => "clientFirstName",
+            "clientFirstName" => "Bulba",
+            "clientLastName" => "Taras",
             "clientEmail" => $clientEmail,
             "clientPhone" => $clientPhone,
             "clientCountry" => "UKR",
+            "notifyMethod" => "bot"
         ];
 
 // Відправлення POST-запиту
-        $response = Http::post('https:https://secure.wayforpay.com/pay', $params);
+        $response = Http::post('https://api.wayforpay.com/api ', $params);
         Log::debug("purchase: ", ['response' => $response->body()]);
         return $response;
     }
@@ -635,8 +593,7 @@ class WfpController extends Controller
                     $params['orderReference'],
                     $params['orderDate'],
                     $params['amount'],
-                    $params['currency'],
-                    $params['recToken'],
+                    $params['currency']
                 ]);
                 foreach ($params['productName'] as $index => $productName) {
                     $signatureString .= ';' . $productName . ';' . $params['productCount'][$index] . ';' . $params['productPrice'][$index];
@@ -662,4 +619,80 @@ class WfpController extends Controller
         // Генеруємо HMAC_MD5 контрольний підпис
         return hash_hmac('md5', $signatureString, $secretKey);
     }
+
+    public function checkoutOneMinuteForCancelled(
+        $uid,
+        $uid_double,
+        $authorization
+    ) {
+// Устанавливаем задержку в 60 секунд
+        sleep(60);
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                $identificationId = config('app.version-PAS1');
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                $identificationId = config('app.version-PAS2');
+                break;
+            default:
+                $application = "PAS4";
+                $identificationId = config('app.version-PAS4');
+        }
+        switch ($orderweb->server) {
+            case "http://31.43.107.151:7303":
+                $city = "OdessaTest";
+                break;
+            case "http://167.235.113.231:7307":
+            case "http://167.235.113.231:7306":
+            case "http://134.249.181.173:7208":
+            case "http://91.205.17.153:7208":
+                $city = "Kyiv City";
+                break;
+            case "http://142.132.213.111:8071":
+            case "http://167.235.113.231:7308":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "http://142.132.213.111:8072":
+                $city = "Odessa";
+                break;
+            case "http://142.132.213.111:8073":
+                $city = "Zaporizhzhia";
+                break;
+            default:
+                $city = "Cherkasy Oblast";
+        }
+
+        if ($orderweb->wfp_order_id != null) {
+            $orderReference = $orderweb->wfp_order_id;
+            $response = self::checkStatus(
+                $application,
+                $city,
+                $orderReference
+            );
+            $data = json_decode($response, true);
+
+            if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+                $transactionStatus = $data['transactionStatus'];
+                if ($transactionStatus != "Approved" ||
+                    $transactionStatus != "WaitingAuthComplete") {
+                    $connectAPI = $orderweb->server;
+                    $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                    Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId
+                    ])->put($url);
+                    $url = $connectAPI . '/api/weborders/cancel/' .  $uid_double;
+                    Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId
+                    ])->put($url);
+                }
+            }
+        }
+    }
+
 }

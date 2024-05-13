@@ -3103,8 +3103,24 @@ class AndroidTestOSMController extends Controller
             $orderweb->closeReason = "1";
             $orderweb->save();
             self::sentCancelInfo($orderweb);
-/// тут доюавит проерку системы оплаты картой
-            (new FondyController)->fondyUidReverse($uid);
+
+            switch ($orderweb->pay_system) {
+                case "fondy_payment":
+                    (new FondyController)->fondyUidReverse($uid);
+                    break;
+                case "wfp_payment":
+                    $orderReference = $orderweb->wfp_order_id;
+                    $amount = $orderweb->web_cost;
+                    (new WfpController())->refund(
+                        $application,
+                        $city,
+                        $orderReference,
+                        $amount
+                    );
+                    break;
+
+            }
+
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
             Http::withHeaders([
@@ -3275,6 +3291,7 @@ class AndroidTestOSMController extends Controller
             case 'fondy_payment':
             case 'mono_payment':
             case 'bonus_payment':
+            case 'wfp_payment':
                 $authorizationChoiceArr["payment_type"] = 1;
                 break;
             case 'nal_payment':
@@ -3297,6 +3314,7 @@ class AndroidTestOSMController extends Controller
         switch ($payment) {
             case 'fondy_payment':
             case 'mono_payment':
+            case 'wfp_payment':
                 $authorizationChoiceArr["payment_type"] = 1;
 
                 switch ($city) {

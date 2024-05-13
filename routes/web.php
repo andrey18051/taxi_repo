@@ -1300,6 +1300,7 @@ Route::post('/server-callback', [FondyController::class, 'handleCallback']);
  * Token
  */
 Route::get('/get-card-token/{email}/{pay_system}/{merchantId}', [UniversalAndroidFunctionController::class, 'getCardToken']);
+Route::get('/get-card-token-app/{application}/{city}/{email}/{pay_system}', [UniversalAndroidFunctionController::class, 'getCardTokenApp']);
 Route::get('/delete-card-token/{rectoken}', [UniversalAndroidFunctionController::class, 'deleteCardToken']);
 Route::get('/visicomKeyInfo/{appName}', [VisicomController::class, 'visicomKeyInfo'])
     ->middleware('throttle:10000,60');
