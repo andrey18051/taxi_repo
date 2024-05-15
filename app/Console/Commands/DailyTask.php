@@ -30,6 +30,16 @@ class DailyTask extends Command
             // Ваш код для обработки каждой записи
             (new \App\Http\Controllers\FondyController)->fondyStatusReviewAdmin($orderweb['fondy_order_id']);
         }
+
+        $orderwebs = Orderweb::whereNotNull('wfp_order_id')
+            ->where('wfp_status_pay', 'Approved')
+            ->where('wfp_status_pay', 'WaitingAuthComplete')
+            ->get();
+
+        foreach ($orderwebs as $orderweb) {
+            // Ваш код для обработки каждой записи
+            (new \App\Http\Controllers\WfpController())->wfpStatusReviewAdmin($orderweb['wfp_order_id']);
+        }
         (new \App\Http\Controllers\BonusBalanceController)->balanceReviewDaily();
     }
 }
