@@ -51,6 +51,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WebhookViberController;
 use App\Http\Controllers\WebhookCustomsViberController;
 use App\Http\Controllers\WebOrderController;
+use App\Http\Controllers\WfpController;
 use App\Http\Controllers\WidgetsController;
 use App\Models\NewsList;
 use App\Models\Order;
@@ -1295,6 +1296,11 @@ Route::get('/fondyOrderIdReverse/{order_uid}', [FondyController::class, 'fondyOr
 
 Route::post('/server-callback', [FondyController::class, 'handleCallback']);
 
+/**
+ * Wfp
+ */
+Route::get('/wfpData/all', [WfpController::class, 'wfpStatusShowAdmin'])
+    ->name('wfpStatusShowAdmin');
 
 /**
  * Token

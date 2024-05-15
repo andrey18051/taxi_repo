@@ -23,6 +23,7 @@ import Partners from './views/partners/PartnerHome';
 import PartnerEmail from "./views/partners/PartnerEmail";
 import NewPartnerEmail from "./views/partners/NewPartnerEmail";
 import PartnerGroup from "./views/partners/PartnerGroup";
+import WfpHome from "./views/wfp/WfpHome";
 
 const  routes = [
     {
@@ -73,6 +74,10 @@ const  routes = [
     {
         path: "/admin/fondy",
         component: FondyHome
+    },
+    {
+        path: "/admin/wfp",
+        component: WfpHome
     },
     {
         path: "/admin/bonus",

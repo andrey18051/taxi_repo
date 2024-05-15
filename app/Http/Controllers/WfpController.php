@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\Orderweb;
 use App\Models\User;
+use DateInterval;
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\RedirectResponse;
@@ -363,6 +366,7 @@ class WfpController extends Controller
             "merchantAccount" => $merchantAccount,
             "orderReference" => $orderReference,
             "amount" => $amount,
+            "currency" => "UAH",
             "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
             "apiVersion" => 1
         ];
@@ -694,5 +698,248 @@ class WfpController extends Controller
             }
         }
     }
+    public function wfpStatusReviewAdmin($wfp_order_id)
+    {
+        $order = Orderweb::where("wfp_order_id", $wfp_order_id)->first();
 
+        $connectAPI =  $order->server;
+        $autorization = self::autorization($connectAPI);
+        $identificationId = $order->comment;
+
+        $order->closeReason = self::closeReasonUIDStatusFirst(
+            $order->dispatching_order_uid,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        )["close_reason"];
+
+        Log::debug("fondyStatusReviewAdmin order->closeReason:" . strval($order->closeReason));
+
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+        }
+        switch ($order->server) {
+            case "http://31.43.107.151:7303":
+                $city = "OdessaTest";
+                break;
+            case "http://167.235.113.231:7307":
+            case "http://167.235.113.231:7306":
+            case "http://134.249.181.173:7208":
+            case "http://91.205.17.153:7208":
+                $city = "Kyiv City";
+                break;
+            case "http://142.132.213.111:8071":
+            case "http://167.235.113.231:7308":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "http://142.132.213.111:8072":
+                $city = "Odessa";
+                break;
+            case "http://142.132.213.111:8073":
+                $city = "Zaporizhzhia";
+                break;
+            default:
+                $city = "Cherkasy Oblast";
+        }
+        $orderReference = $wfp_order_id;
+        $amount = $order->web_cost;
+
+        switch ($order->closeReason) {
+            case "-1":
+                break;
+            case "0":
+            case "8":
+                self::settle(
+                    $application,
+                    $city,
+                    $orderReference,
+                    $amount
+                );
+                break;
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "9":
+                self::refund(
+                    $application,
+                    $city,
+                    $orderReference,
+                    $amount
+                );
+                break;
+        }
+        $response = self::checkStatus(
+            $application,
+            $city,
+            $orderReference
+        );
+        $data = json_decode($response, true);
+
+        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+            $order->wfp_status_pay = $data['transactionStatus'];
+        }
+
+        $order->save();
+    }
+
+    private function autorization($connectApi)
+    {
+
+        $city = City::where('address', str_replace('http://', '', $connectApi))->first();
+
+        $username = $city->login;
+        $password = hash('SHA512', $city->password);
+
+        return 'Basic ' . base64_encode($username . ':' . $password);
+    }
+
+    public function wfpStatusShowAdmin(): array
+    {
+        $order = Orderweb::where("closeReason", "!=", null)
+            ->where("wfp_order_id", "!=", null)
+            ->orderByDesc('created_at')
+            ->get();
+        $response = null;
+//        dd($order->toArray());
+        if (!$order->isEmpty()) {
+            $i=0;
+
+            foreach ($order->toArray() as $value) {
+                if ($value["wfp_status_pay"] == null) {
+                    $orderF = Orderweb::where("wfp_order_id", $value["wfp_order_id"])->first();
+                    $orderF->wfp_status_pay = self::wfpOrderIdStatus($orderF->wfp_order_id);
+                    $orderF->save();
+                    $wfp_status_pay = $orderF->wfp_status_pay;
+                } else {
+                    $wfp_status_pay = $value["wfp_status_pay"];
+                }
+
+                switch ($value["closeReason"]) {
+                    case "-1":
+                        $closeReasonText = "(-1) В обработке";
+                        break;
+                    case "0":
+                        $closeReasonText = "(0) Выполнен";
+                        break;
+                    case "1":
+                        $closeReasonText = "(1) Снят клиентом";
+                        break;
+                    case "2":
+                        $closeReasonText = "(2) Не выполнено";
+                        break;
+                    case "3":
+                        $closeReasonText = "(3) Не выполнено";
+                        break;
+                    case "4":
+                        $closeReasonText = "(4) Не выполнено";
+                        break;
+                    case "5":
+                        $closeReasonText = "(5) Не выполнено";
+                        break;
+                    case "6":
+                        $closeReasonText = "(6) Снят клиентом";
+                        break;
+                    case "7":
+                        $closeReasonText = "(7) Снят клиентом";
+                        break;
+                    case "8":
+                        $closeReasonText = "(8) Выполнен";
+                        break;
+                    case "9":
+                        $closeReasonText = "(9) Снят клиентом";
+                        break;
+                    default:
+                        $closeReasonText = "не известное значение";
+                        break;
+
+                }
+
+
+                date_default_timezone_set('Europe/Kiev');
+
+
+                $date = new DateTime($value["created_at"]);
+                $date->add(new DateInterval('PT3H'));
+
+                $formatted_date = $date->format('d.m.Y H:i:s');
+
+
+                $response[$i] = [
+                    'id' => $value["id"],
+                    'first' =>$formatted_date,
+                    'cost' => $value["web_cost"],
+                    'wfp_order_id' => $value["wfp_order_id"],
+                    'wfp_status_pay' => $wfp_status_pay,
+                    'uid' => $value["dispatching_order_uid"],
+                    'reason' => $closeReasonText,
+                ];
+                $i++;
+            }
+        }
+//        dd($response);
+        return $response;
+    }
+    public function wfpOrderIdStatus($wfp_order_id)
+    {
+        Log::debug('wfpOrderIdStatus wfp_order_id' . $wfp_order_id);
+        $orderweb = Orderweb::where("wfp_order_id", $wfp_order_id)->first();
+
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+        }
+        switch ($orderweb->server) {
+            case "http://31.43.107.151:7303":
+                $city = "OdessaTest";
+                break;
+            case "http://167.235.113.231:7307":
+            case "http://167.235.113.231:7306":
+            case "http://134.249.181.173:7208":
+            case "http://91.205.17.153:7208":
+                $city = "Kyiv City";
+                break;
+            case "http://142.132.213.111:8071":
+            case "http://167.235.113.231:7308":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "http://142.132.213.111:8072":
+                $city = "Odessa";
+                break;
+            case "http://142.132.213.111:8073":
+                $city = "Zaporizhzhia";
+                break;
+            default:
+                $city = "Cherkasy Oblast";
+        }
+        $orderReference = $wfp_order_id;
+
+        $response = (new WfpController)->checkStatus(
+            $application,
+            $city,
+            $orderReference
+        );
+        $data = json_decode($response, true);
+        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+            return $data['transactionStatus'];
+        } else {
+            return 'Unknown'; // Можно заменить на другое значение или бросить исключение
+        }
+    }
 }

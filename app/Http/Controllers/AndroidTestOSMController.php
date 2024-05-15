@@ -3111,12 +3111,25 @@ class AndroidTestOSMController extends Controller
                 case "wfp_payment":
                     $orderReference = $orderweb->wfp_order_id;
                     $amount = $orderweb->web_cost;
-                    (new WfpController())->refund(
+                    $response = (new WfpController)->checkStatus(
                         $application,
                         $city,
-                        $orderReference,
-                        $amount
+                        $orderReference
                     );
+                    $data = json_decode($response, true);
+                    if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+                        $transactionStatus = $data['transactionStatus'];
+                        if ($transactionStatus == "Approved" ||
+                            $transactionStatus == "WaitingAuthComplete") {
+                            (new WfpController())->refund(
+                                $application,
+                                $city,
+                                $orderReference,
+                                $amount
+                            );
+                        }
+                    }
+
                     break;
 
             }

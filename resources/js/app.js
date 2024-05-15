@@ -42,6 +42,7 @@ Vue.component('city-pas4-component', require('./views/city/CityHome_PAS_4.vue').
 Vue.component('closeReason-component', require('./views/close_reason/CloseReasonHome.vue').default);
 Vue.component('bonuses-component', require('./views/bonuses/BonusHome.vue').default);
 Vue.component('fondy-component', require('./views/fondy/FondyHome.vue').default);
+Vue.component('wfp-component', require('./views/wfp/WfpHome.vue').default);
 Vue.component('user-messages', require('./views/user/UserMessages').default);
 Vue.component('new-message', require('./views/user/NewMessage').default);
 Vue.component('user-messages-email', require('./views/user/UserMessagesEmail').default);
