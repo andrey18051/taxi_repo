@@ -706,7 +706,7 @@ class WfpController extends Controller
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
 
-        $order->closeReason = self::closeReasonUIDStatusFirst(
+        $order->closeReason = UIDController::closeReasonUIDStatusFirst(
             $order->dispatching_order_uid,
             $connectAPI,
             $autorization,
@@ -777,6 +777,152 @@ class WfpController extends Controller
                     $orderReference,
                     $amount
                 );
+                break;
+        }
+        $response = self::checkStatus(
+            $application,
+            $city,
+            $orderReference
+        );
+        $data = json_decode($response, true);
+
+        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+            $order->wfp_status_pay = $data['transactionStatus'];
+        }
+
+        $order->save();
+    }
+    public function wfpStatus($uid, $uid_hold)
+    {
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $wfp_order_id = $order->wfp_order_id;
+        $connectAPI = $order->server;
+        $autorization = self::autorization($connectAPI);
+        $identificationId = $order->comment;
+
+        $closeReason_hold = UIDController::closeReasonUIDStatusFirst(
+            $uid_hold,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        )["close_reason"];
+
+        $closeReason = UIDController::closeReasonUIDStatusFirst(
+            $uid,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        )["close_reason"];
+
+        Log::debug("wfpStatus closeReason:" . strval($closeReason));
+
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+        }
+        switch ($order->server) {
+            case "http://31.43.107.151:7303":
+                $city = "OdessaTest";
+                break;
+            case "http://167.235.113.231:7307":
+            case "http://167.235.113.231:7306":
+            case "http://134.249.181.173:7208":
+            case "http://91.205.17.153:7208":
+                $city = "Kyiv City";
+                break;
+            case "http://142.132.213.111:8071":
+            case "http://167.235.113.231:7308":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "http://142.132.213.111:8072":
+                $city = "Odessa";
+                break;
+            case "http://142.132.213.111:8073":
+                $city = "Zaporizhzhia";
+                break;
+            default:
+                $city = "Cherkasy Oblast";
+        }
+        $orderReference = $wfp_order_id;
+        $amount = $order->web_cost;
+
+
+        switch ($closeReason_hold) {
+            case "-1":
+                break;
+            case "0":
+            case "8":
+                self::settle(
+                    $application,
+                    $city,
+                    $orderReference,
+                    $amount
+                );
+                break;
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "9":
+            switch ($closeReason) {
+                case "-1":
+                    break;
+                case "0":
+                case "8":
+                    self::settle(
+                        $application,
+                        $city,
+                        $orderReference,
+                        $amount
+                    );
+                    break;
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "9":
+                switch ($closeReason) {
+                    case "-1":
+                        break;
+                    case "0":
+                    case "8":
+                        self::settle(
+                            $application,
+                            $city,
+                            $orderReference,
+                            $amount
+                        );
+                        break;
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "9":
+                        self::refund(
+                            $application,
+                            $city,
+                            $orderReference,
+                            $amount
+                        );
+                        break;
+                }
+                    break;
+            }
                 break;
         }
         $response = self::checkStatus(

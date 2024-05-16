@@ -12,9 +12,9 @@ class BonusTypes extends Model
     /**
      * @var mixed
      */
-    private $name;
+    public $name;
     /**
      * @var mixed
      */
-    private $size;
+    public $size;
 }

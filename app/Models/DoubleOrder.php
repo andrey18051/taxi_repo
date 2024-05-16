@@ -12,35 +12,35 @@ class DoubleOrder extends Model
     /**
      * @var false|mixed|string
      */
-    private $responseBonusStr;
+    public $responseBonusStr;
     /**
      * @var false|mixed|string
      */
-    private $responseDoubleStr;
+    public $responseDoubleStr;
     /**
      * @var mixed|string|null
      */
-    private $authorizationBonus;
+    public $authorizationBonus;
     /**
      * @var mixed|string|null
      */
-    private $authorizationDouble;
+    public $authorizationDouble;
     /**
      * @var mixed|string
      */
-    private $connectAPI;
+    public $connectAPI;
     /**
      * @var \Illuminate\Config\Repository|\Illuminate\Contracts\Foundation\Application|mixed
      */
-    private $identificationId;
+    public $identificationId;
     /**
      * @var mixed
      */
-    private $apiVersion;
+    public $apiVersion;
     /**
      * @var mixed
      */
-    private $id;
+    public $id;
 
 
 }

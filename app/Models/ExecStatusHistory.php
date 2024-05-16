@@ -12,7 +12,7 @@ class ExecStatusHistory extends Model
     /**
      * @var mixed
      */
-    private $order;
+    public $order;
     /**
      * @var mixed
      */
@@ -20,9 +20,9 @@ class ExecStatusHistory extends Model
     /**
      * @var mixed|string
      */
-    private $cancel;
+    public $cancel;
     /**
      * @var mixed
      */
-    private $execution_status;
+    public $execution_status;
 }

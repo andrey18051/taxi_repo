@@ -3084,16 +3084,25 @@ class AndroidTestOSMController extends Controller
                 "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
             ])->put($url);
 
+            $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+            Http::withHeaders([
+                "Authorization" => $authorizationDouble,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
+            ])->put($url);
             $json_arrWeb = json_decode($response, true);
+            Log::debug("webordersCancel $uid : $json_arrWeb");
 
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
+            $hold = false;
             switch ($json_arrWeb['order_client_cancel_result']) {
                 case '0':
                     $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
                     break;
                 case '1':
                     $resp_answer = $resp_answer . "Замовлення скасоване.";
+                    $hold = true;
                     break;
                 case '2':
                     $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
@@ -3103,44 +3112,41 @@ class AndroidTestOSMController extends Controller
             $orderweb->closeReason = "1";
             $orderweb->save();
             self::sentCancelInfo($orderweb);
-
-            switch ($orderweb->pay_system) {
-                case "fondy_payment":
-                    (new FondyController)->fondyUidReverse($uid);
-                    break;
-                case "wfp_payment":
-                    $orderReference = $orderweb->wfp_order_id;
-                    $amount = $orderweb->web_cost;
-                    $response = (new WfpController)->checkStatus(
-                        $application,
-                        $city,
-                        $orderReference
-                    );
-                    $data = json_decode($response, true);
-                    if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-                        $transactionStatus = $data['transactionStatus'];
-                        if ($transactionStatus == "Approved" ||
-                            $transactionStatus == "WaitingAuthComplete") {
-                            (new WfpController())->refund(
-                                $application,
-                                $city,
-                                $orderReference,
-                                $amount
-                            );
+            if($hold) {
+                switch ($orderweb->pay_system) {
+                    case "fondy_payment":
+                        (new FondyController)->fondyUidReverse($uid);
+                        break;
+                    case "wfp_payment":
+                        $orderReference = $orderweb->wfp_order_id;
+                        $amount = $orderweb->web_cost;
+                        $response = (new WfpController)->checkStatus(
+                            $application,
+                            $city,
+                            $orderReference
+                        );
+                        $data = json_decode($response, true);
+                        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+                            $transactionStatus = $data['transactionStatus'];
+                            if ($transactionStatus == "Approved" ||
+                                $transactionStatus == "WaitingAuthComplete") {
+                                (new WfpController())->refund(
+                                    $application,
+                                    $city,
+                                    $orderReference,
+                                    $amount
+                                );
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
+                }
             }
 
 
-            $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
-            Http::withHeaders([
-                "Authorization" => $authorizationDouble,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
-            ])->put($url);
+
+
         }
         Log::debug("webordersCancelDouble response $resp_answer");
         Log::debug("**********************************************************");

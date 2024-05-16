@@ -12,9 +12,9 @@ class ComboTest extends Model
     /**
      * @var mixed
      */
-    private $name;
+    public $name;
     /**
      * @var int|mixed
      */
-    private $street;
+    public $street;
 }
