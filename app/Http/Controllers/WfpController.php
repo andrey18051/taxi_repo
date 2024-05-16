@@ -792,30 +792,34 @@ class WfpController extends Controller
 
         $order->save();
     }
-    public function wfpStatus($uid, $uid_hold)
+    public function wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
-        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
         $wfp_order_id = $order->wfp_order_id;
         $connectAPI = $order->server;
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
-
-        $closeReason_hold = UIDController::closeReasonUIDStatusFirst(
-            $uid_hold,
+        $hold = false;
+        $closeReason_bonusOrder = UIDController::closeReasonUIDStatusFirst(
+            $bonusOrder,
             $connectAPI,
             $autorization,
             $identificationId
         )["close_reason"];
 
-        $closeReason = UIDController::closeReasonUIDStatusFirst(
-            $uid,
+        $closeReason_doubleOrder = UIDController::closeReasonUIDStatusFirst(
+            $doubleOrder,
             $connectAPI,
             $autorization,
             $identificationId
         )["close_reason"];
 
-        Log::debug("wfpStatus closeReason:" . strval($closeReason));
-
+        $closeReason_bonusOrderHold = UIDController::closeReasonUIDStatusFirst(
+            $bonusOrderHold,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        )["close_reason"];
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
                 $application = "PAS1";
@@ -853,17 +857,12 @@ class WfpController extends Controller
         $amount = $order->web_cost;
 
 
-        switch ($closeReason_hold) {
+        switch ($closeReason_bonusOrder) {
             case "-1":
                 break;
             case "0":
             case "8":
-                self::settle(
-                    $application,
-                    $city,
-                    $orderReference,
-                    $amount
-                );
+                $hold_bonusOrder = true;
                 break;
             case "1":
             case "2":
@@ -873,58 +872,62 @@ class WfpController extends Controller
             case "6":
             case "7":
             case "9":
-            switch ($closeReason) {
-                case "-1":
-                    break;
-                case "0":
-                case "8":
-                    self::settle(
-                        $application,
-                        $city,
-                        $orderReference,
-                        $amount
-                    );
-                    break;
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                case "5":
-                case "6":
-                case "7":
-                case "9":
-                switch ($closeReason) {
-                    case "-1":
-                        break;
-                    case "0":
-                    case "8":
-                        self::settle(
-                            $application,
-                            $city,
-                            $orderReference,
-                            $amount
-                        );
-                        break;
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                    case "9":
-                        self::refund(
-                            $application,
-                            $city,
-                            $orderReference,
-                            $amount
-                        );
-                        break;
-                }
-                    break;
-            }
+                $hold_bonusOrder = false;
                 break;
         }
+        switch ($closeReason_doubleOrder) {
+            case "-1":
+                break;
+            case "0":
+            case "8":
+                $hold_doubleOrder = true;
+                break;
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "9":
+                $hold_doubleOrder = false;
+                break;
+        }
+        switch ($closeReason_bonusOrderHold) {
+            case "-1":
+                break;
+            case "0":
+            case "8":
+                $hold_bonusOrderHold = true;
+                break;
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "9":
+                $hold_bonusOrderHold = false;
+                break;
+        }
+        if($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
+            self::settle(
+                $application,
+                $city,
+                $orderReference,
+                $amount
+            );
+        } else {
+            self::refund(
+                $application,
+                $city,
+                $orderReference,
+                $amount
+            );
+        }
+
+
         $response = self::checkStatus(
             $application,
             $city,

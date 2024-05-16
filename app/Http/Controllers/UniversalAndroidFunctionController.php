@@ -1755,7 +1755,7 @@ class UniversalAndroidFunctionController extends Controller
                 //Возврат денег по Моно
             }
             if ($order->wfp_order_id == null) {
-                (new WfpController)->wfpStatus($bonusOrder,$bonusOrderHold);
+                (new WfpController)->wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold);
             }
         }
     }
