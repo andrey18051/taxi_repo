@@ -3078,41 +3078,62 @@ class AndroidTestOSMController extends Controller
             $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-            $response = Http::withHeaders([
+            $response_bonus = Http::withHeaders([
                 "Authorization" => $authorizationBonus,
                 "X-WO-API-APP-ID" => self::identificationId($application),
                 "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
             ])->put($url);
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
-            Http::withHeaders([
+            $response_double =Http::withHeaders([
                 "Authorization" => $authorizationDouble,
                 "X-WO-API-APP-ID" => self::identificationId($application),
                 "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersion($city, $connectAPI)
             ])->put($url);
-            $json_arrWeb = json_decode($response, true);
-            Log::debug("webordersCancel $uid : $json_arrWeb");
+            $json_arrWeb_bonus = json_decode($response_bonus, true);
+            $json_arrWeb_double = json_decode($response_double, true);
+
+            Log::debug("webordersCancel $uid : $json_arrWeb_bonus");
+            Log::debug("webordersCancel $uid_Double : $json_arrWeb_double");
 
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
             $hold = false;
-            switch ($json_arrWeb['order_client_cancel_result']) {
-                case '0':
-                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
-                    break;
-                case '1':
-                    $resp_answer = $resp_answer . "Замовлення скасоване.";
-                    $hold = true;
-                    break;
-                case '2':
-                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
-                    break;
+            if($json_arrWeb_bonus['order_client_cancel_result'] == 1) {
+                $hold = true;
+            } else if($json_arrWeb_double['order_client_cancel_result'] == 1) {
+                $hold = true;
             }
+//            switch ($json_arrWeb_bonus['order_client_cancel_result']) {
+//                case '0':
+//                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
+//                    break;
+//                case '1':
+//                    $resp_answer = $resp_answer . "Замовлення скасоване.";
+//                    $hold = true;
+//                    break;
+//                case '2':
+//                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
+//                    break;
+//            }
+//            switch ($hold) {
+//                case '0':
+//                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
+//                    break;
+//                case '1':
+//                    $resp_answer = $resp_answer . "Замовлення скасоване.";
+//                    $hold = true;
+//                    break;
+//                case '2':
+//                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
+//                    break;
+//            }
 
             $orderweb->closeReason = "1";
             $orderweb->save();
             self::sentCancelInfo($orderweb);
             if($hold) {
+                $resp_answer = $resp_answer . "Замовлення скасоване.";
                 switch ($orderweb->pay_system) {
                     case "fondy_payment":
                         (new FondyController)->fondyUidReverse($uid);
@@ -3142,6 +3163,8 @@ class AndroidTestOSMController extends Controller
                         break;
 
                 }
+            } else {
+                $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
             }
 
 
