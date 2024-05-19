@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Check;
+use App\Mail\Server;
 use App\Models\Card;
 use App\Models\City;
 use App\Models\City_PAS1;
@@ -17,6 +19,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use SebastianBergmann\Diff\Exception;
 
 class WfpController extends Controller
 {
@@ -799,27 +803,35 @@ class WfpController extends Controller
         $connectAPI = $order->server;
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
-        $hold = false;
-        $closeReason_bonusOrder = UIDController::closeReasonUIDStatusFirst(
+
+
+        $bonusOrder_response = UIDController::closeReasonUIDStatusFirst(
             $bonusOrder,
             $connectAPI,
             $autorization,
             $identificationId
-        )["close_reason"];
+        );
+        $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
+        $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
 
-        $closeReason_doubleOrder = UIDController::closeReasonUIDStatusFirst(
+        $doubleOrder_response = UIDController::closeReasonUIDStatusFirst(
             $doubleOrder,
             $connectAPI,
             $autorization,
             $identificationId
-        )["close_reason"];
+        );
+        $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
+        $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
 
-        $closeReason_bonusOrderHold = UIDController::closeReasonUIDStatusFirst(
+        $bonusOrderHold_response = UIDController::closeReasonUIDStatusFirst(
             $bonusOrderHold,
             $connectAPI,
             $autorization,
             $identificationId
-        )["close_reason"];
+        );
+        $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
+        $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
                 $application = "PAS1";
@@ -855,14 +867,16 @@ class WfpController extends Controller
         }
         $orderReference = $wfp_order_id;
         $amount = $order->web_cost;
+        $amount_settle = $amount;
 
-
+        $hold_bonusOrder = false;
         switch ($closeReason_bonusOrder) {
             case "-1":
                 break;
             case "0":
             case "8":
                 $hold_bonusOrder = true;
+                $amount_settle = $order_cost_bonusOrder;
                 break;
             case "1":
             case "2":
@@ -875,12 +889,14 @@ class WfpController extends Controller
                 $hold_bonusOrder = false;
                 break;
         }
+        $hold_doubleOrder = false;
         switch ($closeReason_doubleOrder) {
             case "-1":
                 break;
             case "0":
             case "8":
                 $hold_doubleOrder = true;
+                $amount_settle = $order_cost_doubleOrder;
                 break;
             case "1":
             case "2":
@@ -893,12 +909,14 @@ class WfpController extends Controller
                 $hold_doubleOrder = false;
                 break;
         }
+        $hold_bonusOrderHold = false;
         switch ($closeReason_bonusOrderHold) {
             case "-1":
                 break;
             case "0":
             case "8":
                 $hold_bonusOrderHold = true;
+                $amount_settle = $order_cost_bonusOrderHold;
                 break;
             case "1":
             case "2":
@@ -911,7 +929,38 @@ class WfpController extends Controller
                 $hold_bonusOrderHold = false;
                 break;
         }
-        if($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
+        if ($amount >= $amount_settle) {
+            $amount = $amount_settle;
+        } else {
+            $subject = "Оплата поездки больше холда";
+
+            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $order->created_at.
+                 Маршрут $order->routefrom - $order->routeto.
+                 Телефон клиента:  $order->user_phone.
+                 Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
+            $paramsAdmin = [
+                'subject' => $subject,
+                'message' => $messageAdmin,
+            ];
+            $alarmMessage = new TelegramController();
+
+            try {
+                $alarmMessage->sendAlarmMessage($messageAdmin);
+                $alarmMessage->sendMeMessage($messageAdmin);
+            } catch (Exception $e) {
+                $subject = 'Ошибка в телеграмм';
+                $paramsCheck = [
+                    'subject' => $subject,
+                    'message' => $e,
+                ];
+
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            };
+
+            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        }
+        if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
             self::settle(
                 $application,
                 $city,
