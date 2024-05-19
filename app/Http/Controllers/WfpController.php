@@ -1023,8 +1023,6 @@ class WfpController extends Controller
 
                 $formatted_date = $date->format('d.m.Y H:i:s');
 
-
-
                 $response[$i] = [
                     'id' => $value["id"],
                     'first' =>$formatted_date,
