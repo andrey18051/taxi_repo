@@ -2617,7 +2617,7 @@ class AndroidTestOSMController extends Controller
             );
             $responseBonus = json_decode($response, true);
             $responseBonus["url"] = $url;
-            Log::debug("response_arr: 22222222 ", $responseBonus);
+            Log::debug("response_arr: 3333333333 ", $responseBonus);
 
             if (!isset($response_arr["Message"])) {
                 if ($authorizationDouble != null) {
@@ -2667,7 +2667,25 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
 
+                Log::debug("response_arr: 44444444 ", $responseDouble);
                 if ($responseDouble != null) {
+                    $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
+
+                    Log::debug("******************************" );
+                    Log::debug("DoubleOrder parameters1111: ", [
+                        'responseBonusStr' => json_encode($responseBonus),
+                        'responseDoubleStr' => json_encode($responseDouble),
+                        'authorizationBonus' => $authorizationBonus,
+                        'authorizationDouble' => $authorizationDouble,
+                        'connectAPI' => $connectAPI,
+                        'identificationId' => $identificationId,
+                        'apiVersion' => $apiVersion
+                    ]);
+
+                    Log::debug("******************************" );
+
+
+
                     $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
                     $doubleOrder = new DoubleOrder();
                     $doubleOrder->responseBonusStr = json_encode($responseBonus);
@@ -2677,10 +2695,24 @@ class AndroidTestOSMController extends Controller
                     $doubleOrder->connectAPI = $connectAPI;
                     $doubleOrder->identificationId = $identificationId;
                     $doubleOrder->apiVersion = $apiVersion;
+
+                    Log::debug("Values set in DoubleOrder:", [
+                        'responseBonusStr' => $doubleOrder->responseBonusStr,
+                        'responseDoubleStr' => $doubleOrder->responseDoubleStr,
+                        'authorizationBonus' => $doubleOrder->authorizationBonus,
+                        'authorizationDouble' => $doubleOrder->authorizationDouble,
+                        'connectAPI' => $doubleOrder->connectAPI,
+                        'identificationId' => $doubleOrder->identificationId,
+                        'apiVersion' => $doubleOrder->apiVersion,
+                    ]);
+
                     $doubleOrder->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
+                    Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
+
                 }
+
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
             }
@@ -3092,9 +3124,6 @@ class AndroidTestOSMController extends Controller
             ])->put($url);
             $json_arrWeb_bonus = json_decode($response_bonus, true);
             $json_arrWeb_double = json_decode($response_double, true);
-
-            Log::debug("webordersCancel $uid : $json_arrWeb_bonus");
-            Log::debug("webordersCancel $uid_Double : $json_arrWeb_double");
 
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 

@@ -798,6 +798,7 @@ class WfpController extends Controller
     }
     public function wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
+        $result = 0;
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
         $wfp_order_id = $order->wfp_order_id;
         $connectAPI = $order->server;
@@ -877,6 +878,7 @@ class WfpController extends Controller
             case "8":
                 $hold_bonusOrder = true;
                 $amount_settle = $order_cost_bonusOrder;
+                $result = 1;
                 break;
             case "1":
             case "2":
@@ -897,6 +899,7 @@ class WfpController extends Controller
             case "8":
                 $hold_doubleOrder = true;
                 $amount_settle = $order_cost_doubleOrder;
+                $result = 1;
                 break;
             case "1":
             case "2":
@@ -917,6 +920,7 @@ class WfpController extends Controller
             case "8":
                 $hold_bonusOrderHold = true;
                 $amount_settle = $order_cost_bonusOrderHold;
+                $result = 1;
                 break;
             case "1":
             case "2":
@@ -989,6 +993,7 @@ class WfpController extends Controller
         }
 
         $order->save();
+        return $result;
     }
 
     private function autorization($connectApi)

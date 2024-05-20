@@ -1748,14 +1748,11 @@ class UniversalAndroidFunctionController extends Controller
             //Возврат денег по Фонди
             return (new FondyController)->fondyStatusReview($bonusOrder, $doubleOrder, $bonusOrderHold);
         } else {
-            if ($order->mono_order_id == null) {
-                //Возврат бонусов
-                return   (new BonusBalanceController)->bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold);
+            if ($order->wfp_order_id != null) {
+                return  (new WfpController)->wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold);
             } else {
-                //Возврат денег по Моно
-            }
-            if ($order->wfp_order_id == null) {
-                (new WfpController)->wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold);
+                return   (new BonusBalanceController)->bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold);
+
             }
         }
     }
