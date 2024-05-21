@@ -60,6 +60,18 @@ class UIDController extends Controller
         }
         return "-1";
     }
+    public function closeReasonUIDStatusFirstWfp($uid, $connectAPI, $autorization, $identificationId)
+    {
+        $url = $connectAPI . '/api/weborders/' . $uid;
+        $response = Http::withHeaders([
+            "Authorization" => $autorization,
+            "X-WO-API-APP-ID" => $identificationId,
+        ])->get($url);
+        if ($response->status() == 200) {
+            return json_decode($response, true);
+        }
+        return "-1";
+    }
 
     public function UIDStatusShow($user_full_name)
     {
@@ -110,6 +122,10 @@ class UIDController extends Controller
 
                 -> where("closeReason", "!=", null)
                 -> where("server", "!=", null)
+                -> where("startLat", "!=", null)
+                -> where("startLan", "!=", null)
+                -> where("to_lat", "!=", null)
+                -> where("to_lng", "!=", null)
                 -> where("comment", "!=", null)
                 -> orderBy("created_at", "desc")
                 -> get()
@@ -123,8 +139,12 @@ class UIDController extends Controller
                     $response[] = [
                         'routefrom' => $value["routefrom"],
                         'routefromnumber' => $value["routefromnumber"],
+                        'startLat' => $value["startLat"],
+                        'startLan' => $value["startLan"],
                         'routeto' => $value["routeto"],
                         'routetonumber' => $value["routetonumber"],
+                        'to_lat' => $value["to_lat"],
+                        'to_lng' => $value["to_lng"],
                         'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $value["auto"],
@@ -136,8 +156,12 @@ class UIDController extends Controller
                         $response[] = [
                             'routefrom' => $value["routefrom"],
                             'routefromnumber' => $value["routefromnumber"],
+                            'startLat' => $value["startLat"],
+                            'startLan' => $value["startLan"],
                             'routeto' => $value["routeto"],
                             'routetonumber' => $value["routetonumber"],
+                            'to_lat' => $value["to_lat"],
+                            'to_lng' => $value["to_lng"],
                             'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $value["auto"],

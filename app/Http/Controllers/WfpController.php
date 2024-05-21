@@ -24,6 +24,46 @@ use SebastianBergmann\Diff\Exception;
 
 class WfpController extends Controller
 {
+    private static function messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $uid)
+    {
+        $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
+        $wfp_order_id = $order->wfp_order_id;
+        $amount = $order->web_cost;
+        $connectAPI = $order->server;
+
+        $subject = "Ошибка проерки статуса заказа";
+
+        $messageAdmin = "Заказ холд $bonusOrderHold.
+                 Время $order->created_at.
+                 Ошибка проверки статуса заказа $uid. Сервер $connectAPI.
+                 Маршрут $order->routefrom - $order->routeto.
+                 Телефон клиента:  $order->user_phone.
+                 Номер заказа WFP: $wfp_order_id.
+                 Сумма холда $amount грн.";
+        $paramsAdmin = [
+            'subject' => $subject,
+            'message' => $messageAdmin,
+        ];
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+
+        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+
+    }
+
     public function returnUrl()
     {
         Log::debug("returnUrl");
@@ -317,7 +357,29 @@ class WfpController extends Controller
 // Відправлення POST-запиту
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug("CHECK_STATUS:", ['response' => $response->body()]);
+        $alarmMessage = new TelegramController();
 
+        try {
+            $alarmMessage->sendAlarmMessage($response->body());
+            $alarmMessage->sendMeMessage($response->body());
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+
+        $subject = "Возврат холда";
+        $paramsAdmin = [
+            'subject' => $subject,
+            'message' => $response->body(),
+        ];
+
+        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         return $response;
     }
 
@@ -379,6 +441,29 @@ class WfpController extends Controller
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug("SETTLE:", ['response' => $response->body()]);
 
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($response->body());
+            $alarmMessage->sendMeMessage($response->body());
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+
+        $subject = "Списание холда";
+        $paramsAdmin = [
+            'subject' => $subject,
+            'message' => $response->body(),
+        ];
+
+        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         return $response;
     }
 
@@ -804,35 +889,59 @@ class WfpController extends Controller
         $connectAPI = $order->server;
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
+        $amount = $order->web_cost;
+        $amount_settle = $amount;
 
-
-        $bonusOrder_response = UIDController::closeReasonUIDStatusFirst(
+        $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
-        $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
-        $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
-
-        $doubleOrder_response = UIDController::closeReasonUIDStatusFirst(
+        if ($bonusOrder_response != -1) {
+            $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
+            $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
+            Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
+            Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
+        } else {
+            $closeReason_bonusOrder = -1;
+            $order_cost_bonusOrder = $amount;
+            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
+        }
+        $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $doubleOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
-        $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
-        $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+        if ($doubleOrder_response != -1) {
+            $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
+            $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+            Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
+            Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
+        } else {
+            $closeReason_doubleOrder = -1;
+            $order_cost_doubleOrder = $amount;
+            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
+        }
 
-        $bonusOrderHold_response = UIDController::closeReasonUIDStatusFirst(
+
+        $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrderHold,
             $connectAPI,
             $autorization,
             $identificationId
         );
-        $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
-        $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
-
+        if ($bonusOrderHold_response != -1) {
+            $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
+            $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+            Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
+            Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
+        } else {
+            $closeReason_bonusOrderHold = -1;
+            $order_cost_bonusOrderHold = $amount;
+            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
+        }
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
                 $application = "PAS1";
@@ -867,70 +976,33 @@ class WfpController extends Controller
                 $city = "Cherkasy Oblast";
         }
         $orderReference = $wfp_order_id;
-        $amount = $order->web_cost;
-        $amount_settle = $amount;
+
 
         $hold_bonusOrder = false;
         switch ($closeReason_bonusOrder) {
-            case "-1":
-                break;
             case "0":
             case "8":
                 $hold_bonusOrder = true;
                 $amount_settle = $order_cost_bonusOrder;
                 $result = 1;
                 break;
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "9":
-                $hold_bonusOrder = false;
-                break;
         }
         $hold_doubleOrder = false;
         switch ($closeReason_doubleOrder) {
-            case "-1":
-                break;
             case "0":
             case "8":
                 $hold_doubleOrder = true;
                 $amount_settle = $order_cost_doubleOrder;
                 $result = 1;
                 break;
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "9":
-                $hold_doubleOrder = false;
-                break;
         }
         $hold_bonusOrderHold = false;
         switch ($closeReason_bonusOrderHold) {
-            case "-1":
-                break;
             case "0":
             case "8":
                 $hold_bonusOrderHold = true;
                 $amount_settle = $order_cost_bonusOrderHold;
                 $result = 1;
-                break;
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "9":
-                $hold_bonusOrderHold = false;
                 break;
         }
         if ($amount >= $amount_settle) {
@@ -964,6 +1036,7 @@ class WfpController extends Controller
             Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
             Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         }
+
         if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
             self::settle(
                 $application,

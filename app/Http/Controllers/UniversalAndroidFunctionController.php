@@ -1551,7 +1551,7 @@ class UniversalAndroidFunctionController extends Controller
                 $apiVersion
             );
 
-            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+//            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
         }
 
         $doubleOrderRecord->delete();
@@ -1825,8 +1825,12 @@ class UniversalAndroidFunctionController extends Controller
         $order->route_undefined = $params["route_undefined"]; //По городу: True, False
         $order->routefrom = $params["from"]; //Обязательный. Улица откуда.
         $order->routefromnumber = $params["from_number"]; //Обязательный. Дом откуда.
+        $order->startLat = $params["startLat"]; //
+        $order->startLan = $params["startLan"]; //
         $order->routeto = $params["to"]; //Обязательный. Улица куда.
         $order->routetonumber = $params["to_number"]; //Обязательный. Дом куда.
+        $order->to_lat = $params["to_lat"]; //
+        $order->to_lng = $params["to_lng"]; //
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
         $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];

@@ -236,6 +236,8 @@ class AndroidTestOSMController extends Controller
 
         $from_lat = $LatLngFrom["lat"];
         $from_lng = $LatLngFrom["lng"];
+        $params["startLat"] = $from_lat; //
+        $params["startLan"] = $from_lng; //
 
         $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
@@ -247,6 +249,8 @@ class AndroidTestOSMController extends Controller
         );
         $to_lat = $LatLngTo["lat"];
         $to_lng = $LatLngTo["lng"];
+        $params["to_lat"] = $to_lat; //
+        $params["to_lng"] = $to_lng; //
 
         if ($from_lat != 0 && $from_lng != 0) {
             $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
@@ -479,7 +483,8 @@ class AndroidTestOSMController extends Controller
         );
         $from_lat = $LatLngFrom["lat"];
         $from_lng = $LatLngFrom["lng"];
-
+        $params["startLat"] = $from_lat; //
+        $params["startLan"] = $from_lng; //
         $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
             $to,
             $to_number,
@@ -490,6 +495,8 @@ class AndroidTestOSMController extends Controller
         );
         $to_lat = $LatLngTo["lat"];
         $to_lng = $LatLngTo["lng"];
+        $params["to_lat"] = $to_lat; //
+        $params["to_lng"] = $to_lng; //
 
         if ($from_lat != 0 && $from_lng != 0) {
             $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
@@ -897,6 +904,7 @@ class AndroidTestOSMController extends Controller
         $date,
         $services
     ) {
+        /////////////////////////////////////////////
         $city = "OdessaTest";
         $application = "PAS2";
         $connectAPI = self::connectApi($city);
@@ -907,6 +915,12 @@ class AndroidTestOSMController extends Controller
 
             return $response_error;
         }
+
+//        $params["startLat"] = $from_lat; //
+//        $params["startLan"] = $from_lng; //
+//        $params["to_lat"] = $to_lat; //
+//        $params["to_lng"] = $to_lng; //
+
         if ($tariff == " ") {
             $tariff = null;
         }
@@ -937,27 +951,6 @@ class AndroidTestOSMController extends Controller
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
         $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
         $payment_type = $authorizationChoiceArr["payment_type"];
-
-
-//        $payment_type = 0;
-//        $authorizationBonus = null;
-//        $authorizationDouble = null;
-//        $authorization = (new UniversalAndroidFunctionController)->authorization("OdessaTest");
-//        if ($userArr[2] == 'fondy_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'mono_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("GoogleTestPay");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
-//        if ($userArr[2] == 'bonus_payment') {
-//            $authorizationBonus = (new UniversalAndroidFunctionController)->authorization("BonusTestOne");
-//            $authorizationDouble = (new UniversalAndroidFunctionController)->authorization("BonusTestTwo");
-//            $payment_type = 1;
-//        }
 
 
         $identificationId = self::identificationId($application);
@@ -2144,6 +2137,12 @@ class AndroidTestOSMController extends Controller
 
             return $response_error;
         }
+        $params["startLat"] = $originLatitude; //
+        $params["startLan"] = $originLongitude; //
+        $params["to_lat"] = $toLatitude; //
+        $params["to_lng"] = $toLongitude; //
+
+
         if ($tariff == " ") {
             $tariff = null;
         }
@@ -2447,6 +2446,11 @@ class AndroidTestOSMController extends Controller
 
             return $response_error;
         }
+        $params["startLat"] = $originLatitude; //
+        $params["startLan"] = $originLongitude; //
+        $params["to_lat"] = $toLatitude; //
+        $params["to_lng"] = $toLongitude; //
+
         if ($tariff == " ") {
             $tariff = null;
         }
@@ -2649,7 +2653,7 @@ class AndroidTestOSMController extends Controller
                 $params['server'] = $connectAPI;
 
                 $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst($response_arr['dispatching_order_uid'], self::connectAPI($city), $authorization, self::identificationId($application));
-
+                Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -2667,8 +2671,8 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
 
-                Log::debug("response_arr: 44444444 ", $responseDouble);
                 if ($responseDouble != null) {
+                    Log::debug("response_arr: 44444444 ", $responseDouble);
                     $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
 
                     Log::debug("******************************" );
