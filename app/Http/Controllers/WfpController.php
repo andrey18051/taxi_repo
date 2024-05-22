@@ -24,14 +24,14 @@ use SebastianBergmann\Diff\Exception;
 
 class WfpController extends Controller
 {
-    private static function messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $uid)
+    public static function messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $uid)
     {
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
         $wfp_order_id = $order->wfp_order_id;
         $amount = $order->web_cost;
         $connectAPI = $order->server;
 
-        $subject = "Ошибка проерки статуса заказа";
+        $subject = "Ошибка проверки статуса заказа";
 
         $messageAdmin = "Заказ холд $bonusOrderHold.
                  Время $order->created_at.
@@ -61,7 +61,6 @@ class WfpController extends Controller
 
         Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
         Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-
     }
 
     public function returnUrl()
@@ -310,6 +309,13 @@ class WfpController extends Controller
 // Відправлення POST-запиту
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug(["checkStatus " . 'response' => $response->body()]);
+
+        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+            $order->wfp_status_pay = $data['transactionStatus'];
+            $order->save();
+        }
+
         return $response;
     }
 
@@ -791,18 +797,18 @@ class WfpController extends Controller
     {
         $order = Orderweb::where("wfp_order_id", $wfp_order_id)->first();
 
-        $connectAPI =  $order->server;
-        $autorization = self::autorization($connectAPI);
-        $identificationId = $order->comment;
+//        $connectAPI =  $order->server;
+//        $autorization = self::autorization($connectAPI);
+//        $identificationId = $order->comment;
 
-        $order->closeReason = UIDController::closeReasonUIDStatusFirst(
-            $order->dispatching_order_uid,
-            $connectAPI,
-            $autorization,
-            $identificationId
-        )["close_reason"];
+//        $order->closeReason = UIDController::closeReasonUIDStatusFirst(
+//            $order->dispatching_order_uid,
+//            $connectAPI,
+//            $autorization,
+//            $identificationId
+//        )["close_reason"];
 
-        Log::debug("fondyStatusReviewAdmin order->closeReason:" . strval($order->closeReason));
+//        Log::debug("fondyStatusReviewAdmin order->closeReason:" . strval($order->closeReason));
 
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
@@ -838,48 +844,48 @@ class WfpController extends Controller
                 $city = "Cherkasy Oblast";
         }
         $orderReference = $wfp_order_id;
-        $amount = $order->web_cost;
+//        $amount = $order->web_cost;
 
-        switch ($order->closeReason) {
-            case "-1":
-                break;
-            case "0":
-            case "8":
-                self::settle(
-                    $application,
-                    $city,
-                    $orderReference,
-                    $amount
-                );
-                break;
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "9":
-                self::refund(
-                    $application,
-                    $city,
-                    $orderReference,
-                    $amount
-                );
-                break;
-        }
-        $response = self::checkStatus(
+//        switch ($order->closeReason) {
+//            case "-1":
+//                break;
+//            case "0":
+//            case "8":
+//                self::settle(
+//                    $application,
+//                    $city,
+//                    $orderReference,
+//                    $amount
+//                );
+//                break;
+//            case "1":
+//            case "2":
+//            case "3":
+//            case "4":
+//            case "5":
+//            case "6":
+//            case "7":
+//            case "9":
+//                self::refund(
+//                    $application,
+//                    $city,
+//                    $orderReference,
+//                    $amount
+//                );
+//                break;
+//        }
+        self::checkStatus(
             $application,
             $city,
             $orderReference
         );
-        $data = json_decode($response, true);
-
-        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-            $order->wfp_status_pay = $data['transactionStatus'];
-        }
-
-        $order->save();
+//        $data = json_decode($response, true);
+//
+//        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+//            $order->wfp_status_pay = $data['transactionStatus'];
+//        }
+//
+//        $order->save();
     }
     public function wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
@@ -1007,6 +1013,8 @@ class WfpController extends Controller
         }
         if ($amount >= $amount_settle) {
             $amount = $amount_settle;
+            $order->web_cost = $amount;
+            $order->save();
         } else {
             $subject = "Оплата поездки больше холда";
 
@@ -1044,28 +1052,45 @@ class WfpController extends Controller
                 $orderReference,
                 $amount
             );
+            if ($hold_bonusOrder) {
+                $order->closeReason = $closeReason_bonusOrder;
+            }
+            if ($hold_doubleOrder) {
+                $order->closeReason = $closeReason_doubleOrder;
+            }
+            if ($hold_bonusOrderHold) {
+                $order->closeReason = $closeReason_bonusOrderHold;
+            }
         } else {
-            self::refund(
-                $application,
-                $city,
-                $orderReference,
-                $amount
-            );
+            if ($closeReason_bonusOrder != "-1"
+                || $closeReason_doubleOrder != "-1"
+                || $closeReason_bonusOrderHold != "-1") {
+                self::refund(
+                    $application,
+                    $city,
+                    $orderReference,
+                    $amount
+                );
+                $order->closeReason = $closeReason_bonusOrderHold;
+            }
         }
 
 
-        $response = self::checkStatus(
+        self::checkStatus(
             $application,
             $city,
             $orderReference
         );
-        $data = json_decode($response, true);
+//        $data = json_decode($response, true);
+//
+//        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+//            $order->wfp_status_pay = $data['transactionStatus'];
+//        }
+//
 
-        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-            $order->wfp_status_pay = $data['transactionStatus'];
-        }
 
         $order->save();
+
         return $result;
     }
 

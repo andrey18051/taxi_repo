@@ -8,13 +8,4 @@ use Illuminate\Database\Eloquent\Model;
 class BonusTypes extends Model
 {
     use HasFactory;
-
-    /**
-     * @var mixed
-     */
-    public $name;
-    /**
-     * @var mixed
-     */
-    public $size;
 }

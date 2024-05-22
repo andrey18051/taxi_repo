@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Check;
+use App\Mail\Server;
 use App\Models\BonusBalance;
 use App\Models\BonusTypes;
 use App\Models\City;
@@ -9,6 +11,8 @@ use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use SebastianBergmann\Diff\Exception;
 
 class BonusBalanceController extends Controller
 {
@@ -63,6 +67,12 @@ class BonusBalanceController extends Controller
             $users_id = $user[0]['id'];
             $bonus_types_size = BonusTypes::find(6)->size;
 
+            Log::debug("BonusBalance:", [
+                '$orderwebs_id ' => $orderwebs_id,
+                '$users_id ' => $users_id,
+                '$bonusBloke' => $bonusBloke,
+                '$bonus_types_size' => $bonus_types_size
+            ]);
             $balance_records = new BonusBalance();
             $balance_records->orderwebs_id = $orderwebs_id;
             $balance_records->users_id = $users_id;
@@ -96,8 +106,11 @@ class BonusBalanceController extends Controller
         }
 
         $user = User::find($users_id);
-        $user->bonus = $userBalance;
-        $user->save();
+//        if ($user->bonus < $userBalance) {
+            $user->bonus = $userBalance;
+            $user->save();
+//        }
+
 
         return $userBalance;
     }
@@ -504,113 +517,148 @@ class BonusBalanceController extends Controller
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
 
-        $holdOrderCost = $order->web_cost;
-        Log::debug("bonusUnBlockedUid holdOrderCost" . $holdOrderCost);
+        $amount = $order->web_cost;
+        $amount_settle = $amount;
 
-        $uidBonus = self::closeReasonUIDStatusFirst(
+        Log::debug("bonusUnBlockedUid holdOrderCost" .$amount);
+
+        $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
-
-        $bonusOrderCloseReason = $uidBonus["close_reason"];
-        Log::debug("bonusUnBlockedUid bonusOrderCloseReason" . $bonusOrderCloseReason);
-
-        $bonusOrderCost = $uidBonus["order_cost"];
-        Log::debug("bonusUnBlockedUid bonusOrderCost" . $bonusOrderCost);
-
-        $uidDouble = self::closeReasonUIDStatusFirst(
+        if ($bonusOrder_response != -1) {
+            $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
+            $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
+            Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
+            Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
+        } else {
+            $closeReason_bonusOrder = -1;
+            $order_cost_bonusOrder = $amount;
+            WfpController::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
+        }
+        $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $doubleOrder,
             $connectAPI,
             $autorization,
             $identificationId
         );
-
-        $doubleOrderCloseReason = $uidDouble["close_reason"];
-        $doubleOrderCost =  $uidDouble["order_cost"];
-
-        Log::debug("bonusUnBlockedUid doubleOrderCost" . $doubleOrderCost);
-
-        Log::debug("bonusUnBlockedUid order->closeReason:" . $doubleOrderCloseReason);
-
-        switch ($bonusOrderCloseReason) {
-            case "-1":
-                break;
-            case "0":
-            case "8":
-                switch ($doubleOrderCloseReason) {
-                    case "-1":
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                    case "9":
-                        if ($holdOrderCost >= $bonusOrderCost) {
-                            self::blockBonusToDeleteCost($order->id, $bonusOrderCost);
-                        } else {
-                            self::blockBonusToDeleteCost($order->id, $holdOrderCost);
-                        }
-                        $result = 1;
-                        break;
-                    case "0":
-                    case "8":
-                        if ($bonusOrderCost >= $doubleOrderCost) {
-                            if ($holdOrderCost >= $bonusOrderCost) {
-                                self::blockBonusToDeleteCost($order->id, $bonusOrderCost);
-                            } else {
-                                self::blockBonusToDeleteCost($order->id, $holdOrderCost);
-                            }
-                        } else {
-                            if ($holdOrderCost >= $doubleOrderCost) {
-                                self::blockBonusToDeleteCost($order->id, $doubleOrderCost);
-                            } else {
-                                self::blockBonusToDeleteCost($order->id, $holdOrderCost);
-                            }
-                        }
-                        $result = 1;
-                        break;
-                }
-                break;
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "9":
-                switch ($doubleOrderCloseReason) {
-                    case "-1":
-                        break;
-                    case "0":
-                    case "8":
-                        if ($holdOrderCost >= $doubleOrderCost) {
-                            self::blockBonusToDeleteCost($order->id, $doubleOrderCost);
-                        } else {
-                            self::blockBonusToDeleteCost($order->id, $holdOrderCost);
-                        }
-                        $result = 1;
-                        break;
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                    case "9":
-                        self::blockBonusReturn($order->id);
-                        $result = 1;
-                        break;
-                }
-                break;
+        if ($doubleOrder_response != -1) {
+            $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
+            $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+            Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
+            Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
+        } else {
+            $closeReason_doubleOrder = -1;
+            $order_cost_doubleOrder = $amount;
+            WfpController::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
         }
 
-        $order->closeReason = $bonusOrderCloseReason;
+
+        $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+            $bonusOrderHold,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        );
+        if ($bonusOrderHold_response != -1) {
+            $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
+            $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+            Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
+            Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
+        } else {
+            $closeReason_bonusOrderHold = -1;
+            $order_cost_bonusOrderHold = $amount;
+            WfpController::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
+        }
+
+        $hold_bonusOrder = false;
+        switch ($closeReason_bonusOrder) {
+            case "0":
+            case "8":
+                $hold_bonusOrder = true;
+                $amount_settle = $order_cost_bonusOrder;
+                $result = 1;
+                break;
+        }
+        $hold_doubleOrder = false;
+        switch ($closeReason_doubleOrder) {
+            case "0":
+            case "8":
+                $hold_doubleOrder = true;
+                $amount_settle = $order_cost_doubleOrder;
+                $result = 1;
+                break;
+        }
+        $hold_bonusOrderHold = false;
+        switch ($closeReason_bonusOrderHold) {
+            case "0":
+            case "8":
+                $hold_bonusOrderHold = true;
+                $amount_settle = $order_cost_bonusOrderHold;
+                $result = 1;
+                break;
+        }
+        if ($amount >= $amount_settle) {
+            self::blockBonusReturn($order->id);
+            $amount = $amount_settle;
+            $order->web_cost = $amount;
+            $order->save();
+            self::recordsBloke($bonusOrderHold);
+        } else {
+            $subject = "Оплата поездки больше холда";
+
+            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $order->created_at.
+                 Маршрут $order->routefrom - $order->routeto.
+                 Телефон клиента:  $order->user_phone.
+                 Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
+            $paramsAdmin = [
+                'subject' => $subject,
+                'message' => $messageAdmin,
+            ];
+            $alarmMessage = new TelegramController();
+
+            try {
+                $alarmMessage->sendAlarmMessage($messageAdmin);
+                $alarmMessage->sendMeMessage($messageAdmin);
+            } catch (Exception $e) {
+                $subject = 'Ошибка в телеграмм';
+                $paramsCheck = [
+                    'subject' => $subject,
+                    'message' => $e,
+                ];
+
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            };
+
+            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        }
+        if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
+            self::blockBonusToDeleteCost($order->id, $amount);
+
+            $result = 1;
+            if ($hold_bonusOrder) {
+                $order->closeReason = $closeReason_bonusOrder;
+            }
+            if ($hold_doubleOrder) {
+                $order->closeReason = $closeReason_doubleOrder;
+            }
+            if ($hold_bonusOrderHold) {
+                $order->closeReason = $closeReason_bonusOrderHold;
+            }
+        } else {
+            if ($closeReason_bonusOrder != "-1"
+                || $closeReason_doubleOrder != "-1"
+                || $closeReason_bonusOrderHold != "-1") {
+                self::blockBonusReturn($order->id);
+
+                $result = 1;
+                $order->closeReason = $closeReason_bonusOrderHold;
+            }
+        }
+
         $order->save();
         return $result;
     }

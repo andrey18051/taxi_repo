@@ -28,6 +28,6 @@ class Server extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.server')->with($this->params)->subject('Отсутствует доступ к серверу.');
+        return $this->markdown('emails.server')->with($this->params)->subject($this->params["subject"]);
     }
 }
