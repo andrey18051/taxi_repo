@@ -78,7 +78,10 @@ class UniversalAndroidFunctionController extends Controller
 
         $responseDouble = json_decode($responseDoubleStr, true);
         $doubleOrder = $responseDouble['dispatching_order_uid'];
-
+        ////////////////////////////////////////////////////////////////
+//        (new BonusBalanceController)->bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold);
+//        return 0;
+        //////////////////////////////////////////////////////////////
         $newStatusBonus =  self::newStatus(
             $authorizationBonus,
             $identificationId,

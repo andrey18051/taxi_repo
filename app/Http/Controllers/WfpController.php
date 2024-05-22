@@ -11,6 +11,7 @@ use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\Orderweb;
 use App\Models\User;
+use Carbon\Carbon;
 use DateInterval;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
@@ -32,9 +33,9 @@ class WfpController extends Controller
         $connectAPI = $order->server;
 
         $subject = "Ошибка проверки статуса заказа";
-
+        $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
         $messageAdmin = "Заказ холд $bonusOrderHold.
-                 Время $order->created_at.
+                 Время $localCreatedAt.
                  Ошибка проверки статуса заказа $uid. Сервер $connectAPI.
                  Маршрут $order->routefrom - $order->routeto.
                  Телефон клиента:  $order->user_phone.
@@ -1017,8 +1018,8 @@ class WfpController extends Controller
             $order->save();
         } else {
             $subject = "Оплата поездки больше холда";
-
-            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $order->created_at.
+            $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
+            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $localCreatedAt.
                  Маршрут $order->routefrom - $order->routeto.
                  Телефон клиента:  $order->user_phone.
                  Сумма холда $amount грн. Сумма заказа $amount_settle грн.";

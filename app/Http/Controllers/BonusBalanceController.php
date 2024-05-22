@@ -9,6 +9,7 @@ use App\Models\BonusTypes;
 use App\Models\City;
 use App\Models\Orderweb;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -155,29 +156,38 @@ class BonusBalanceController extends Controller
 
     private function blockBonusToDeleteCost($orderwebs_id, $cost)
     {
+        Log::debug("blockBonusToDeleteCost $orderwebs_id, $cost" );
         $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)
             ->where("bonus_types_id", 6)
             ->where("bonusBloke", "!=", 0)
             ->first();
-        $balance_records_2 = BonusBalance::where("orderwebs_id", $orderwebs_id)
-            ->where(function ($query) {
-                $query->where("bonus_types_id", 4)
-                    ->orWhere("bonus_types_id", 5);
-            })
-            ->first();
+//        $balance_records_2 = BonusBalance::where("orderwebs_id", $orderwebs_id)
+//            ->where(function ($query) {
+//                $query->where("bonus_types_id", 4)
+//                    ->orWhere("bonus_types_id", 5);
+//            })
+//            ->first();
 
         $bonusType = BonusTypes::where("id", 5)->first();
+        Log::debug("blockBonusToDeleteCost", [
+            '$cost' =>$cost,
+            '$bonusType->size' =>$bonusType->size,
+            '$orderwebs_id' =>$orderwebs_id,
+//            '$balance_records->users_id' =>$balance_records->users_id,
+            '(-1) *  $balance_records->bonusBloke' =>(-1) *  $cost * $bonusType->size,
+            '$balance_records_new->bonus_types_id' => 5,
+        ]);
+//        if (!$balance_records_2) {
 
-        if (!$balance_records_2) {
             $balance_records_new = new BonusBalance();
 
             $balance_records_new->bonusDel = $cost * $bonusType->size;
             $balance_records_new->orderwebs_id = $orderwebs_id;
             $balance_records_new->users_id = $balance_records->users_id;
-            $balance_records_new->bonusBloke = (-1) *  $balance_records->bonusBloke;
+            $balance_records_new->bonusBloke = (-1) *  $cost * $bonusType->size;
             $balance_records_new->bonus_types_id = 5;
             $balance_records_new->save();
-        }
+//        }
     }
 
     public function blockBonusReturn($orderwebs_id)
@@ -608,8 +618,9 @@ class BonusBalanceController extends Controller
             self::recordsBloke($bonusOrderHold);
         } else {
             $subject = "Оплата поездки больше холда";
+            $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
 
-            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $order->created_at.
+            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $localCreatedAt.
                  Маршрут $order->routefrom - $order->routeto.
                  Телефон клиента:  $order->user_phone.
                  Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
@@ -635,7 +646,10 @@ class BonusBalanceController extends Controller
             Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
             Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         }
+
+//        $hold_bonusOrderHold = true;
         if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
+            Log::debug("hold_bonusOrderHold $hold_bonusOrderHold" );
             self::blockBonusToDeleteCost($order->id, $amount);
 
             $result = 1;
@@ -646,7 +660,8 @@ class BonusBalanceController extends Controller
                 $order->closeReason = $closeReason_doubleOrder;
             }
             if ($hold_bonusOrderHold) {
-                $order->closeReason = $closeReason_bonusOrderHold;
+//                $order->closeReason = $closeReason_bonusOrderHold;
+                $order->closeReason = 0;
             }
         } else {
             if ($closeReason_bonusOrder != "-1"
