@@ -1062,6 +1062,10 @@ class WfpController extends Controller
                 $orderReference,
                 $amount
             );
+            $user = User::where("email", $order->email)->first();
+            (new BonusBalanceController)->recordsAdd($order->id, $user->id, "2", $amount);
+            (new BonusBalanceController)->userBalance($user->id);
+
             if ($hold_bonusOrder) {
                 $order->closeReason = $closeReason_bonusOrder;
             }
