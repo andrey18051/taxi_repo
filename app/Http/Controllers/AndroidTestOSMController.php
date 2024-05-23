@@ -15,6 +15,7 @@ use App\Models\DniproCombo;
 use App\Models\DoubleOrder;
 use App\Models\OdessaCombo;
 use App\Models\Orderweb;
+use App\Models\User;
 use App\Models\ZaporizhzhiaCombo;
 use DateTime;
 use DateTimeZone;
@@ -3137,35 +3138,11 @@ class AndroidTestOSMController extends Controller
             } else if($json_arrWeb_double['order_client_cancel_result'] == 1) {
                 $hold = true;
             }
-//            switch ($json_arrWeb_bonus['order_client_cancel_result']) {
-//                case '0':
-//                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
-//                    break;
-//                case '1':
-//                    $resp_answer = $resp_answer . "Замовлення скасоване.";
-//                    $hold = true;
-//                    break;
-//                case '2':
-//                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
-//                    break;
-//            }
-//            switch ($hold) {
-//                case '0':
-//                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
-//                    break;
-//                case '1':
-//                    $resp_answer = $resp_answer . "Замовлення скасоване.";
-//                    $hold = true;
-//                    break;
-//                case '2':
-//                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
-//                    break;
-//            }
 
             $orderweb->closeReason = "1";
             $orderweb->save();
             self::sentCancelInfo($orderweb);
-            if($hold) {
+            if ($hold) {
                 $resp_answer = $resp_answer . "Замовлення скасоване.";
                 switch ($orderweb->pay_system) {
                     case "fondy_payment":
@@ -3195,14 +3172,17 @@ class AndroidTestOSMController extends Controller
 
                         break;
 
+
+
                 }
             } else {
                 $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
             }
-
-
-
-
+        }
+        if ($orderweb->pay_system != "nal_payment") {
+            (new BonusBalanceController)->blockBonusReturn($orderweb->id);
+            $user = User::where("email", $orderweb->email)->first();
+            (new BonusBalanceController)->userBalance($user->id);
         }
         Log::debug("webordersCancelDouble response $resp_answer");
         Log::debug("**********************************************************");
