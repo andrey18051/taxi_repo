@@ -908,11 +908,13 @@ class WfpController extends Controller
         if ($bonusOrder_response != -1) {
             $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
             $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
+            $order_car_info_bonusOrder = $bonusOrder_response["order_car_info"];
             Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
             Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
         } else {
             $closeReason_bonusOrder = -1;
             $order_cost_bonusOrder = $amount;
+            $order_car_info_bonusOrder = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
         }
         $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
@@ -924,11 +926,13 @@ class WfpController extends Controller
         if ($doubleOrder_response != -1) {
             $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
             $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+            $order_car_info_doubleOrder = $doubleOrder_response["order_car_info"];
             Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
             Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
         } else {
             $closeReason_doubleOrder = -1;
             $order_cost_doubleOrder = $amount;
+            $order_car_info_doubleOrder = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
         }
 
@@ -942,11 +946,13 @@ class WfpController extends Controller
         if ($bonusOrderHold_response != -1) {
             $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
             $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+            $order_car_info_bonusOrderHold = $bonusOrderHold_response["order_car_info"];
             Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
             Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
         } else {
             $closeReason_bonusOrderHold = -1;
             $order_cost_bonusOrderHold = $amount;
+            $order_car_info_bonusOrderHold = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
         }
         switch ($order->comment) {
@@ -992,6 +998,7 @@ class WfpController extends Controller
                 $hold_bonusOrder = true;
                 $amount_settle = $order_cost_bonusOrder;
                 $result = 1;
+                $order->auto = $order_car_info_bonusOrder;
                 break;
         }
         $hold_doubleOrder = false;
@@ -1001,6 +1008,7 @@ class WfpController extends Controller
                 $hold_doubleOrder = true;
                 $amount_settle = $order_cost_doubleOrder;
                 $result = 1;
+                $order->auto = $order_car_info_doubleOrder;
                 break;
         }
         $hold_bonusOrderHold = false;
@@ -1010,6 +1018,7 @@ class WfpController extends Controller
                 $hold_bonusOrderHold = true;
                 $amount_settle = $order_cost_bonusOrderHold;
                 $result = 1;
+                $order->auto = $order_car_info_bonusOrderHold;
                 break;
         }
         if ($amount >= $amount_settle) {
@@ -1082,13 +1091,6 @@ class WfpController extends Controller
             $city,
             $orderReference
         );
-//        $data = json_decode($response, true);
-//
-//        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-//            $order->wfp_status_pay = $data['transactionStatus'];
-//        }
-//
-
 
         $order->save();
 

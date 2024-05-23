@@ -86,6 +86,39 @@ class BonusBalanceController extends Controller
             return response($response, 200)
                 ->header('Content-Type', 'json');
         }
+    }public function recordsBlokeAmount($uid)
+    {
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $email = $order->email;
+
+        $bonusBloke = $order->web_cost;
+        $orderwebs_id = $order->id;
+
+        $user = User::where('email', $email)->get()->toArray();
+
+        $users_id = $user[0]['id'];
+        $bonus_types_size = BonusTypes::find(6)->size;
+
+        Log::debug("BonusBalance:", [
+            '$orderwebs_id ' => $orderwebs_id,
+            '$users_id ' => $users_id,
+            '$bonusBloke' => $bonusBloke,
+            '$bonus_types_size' => $bonus_types_size
+        ]);
+        $balance_records = new BonusBalance();
+        $balance_records->orderwebs_id = $orderwebs_id;
+        $balance_records->users_id = $users_id;
+        $balance_records->bonus_types_id = 6;
+        $balance_records->bonusBloke = $bonusBloke * $bonus_types_size;
+        $balance_records->save();
+
+        $response["bonus"] = $bonusBloke * $bonus_types_size;
+
+        return response($response, 200)
+            ->header('Content-Type', 'json');
+
+
+
     }
 
     public function userBalance($users_id)
@@ -541,11 +574,13 @@ class BonusBalanceController extends Controller
         if ($bonusOrder_response != -1) {
             $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
             $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
+            $order_car_info_bonusOrder = $bonusOrder_response["order_car_info"];
             Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
             Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
         } else {
             $closeReason_bonusOrder = -1;
             $order_cost_bonusOrder = $amount;
+            $order_car_info_bonusOrder = null;
             WfpController::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
         }
         $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
@@ -557,11 +592,13 @@ class BonusBalanceController extends Controller
         if ($doubleOrder_response != -1) {
             $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
             $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+            $order_car_info_doubleOrder = $doubleOrder_response["order_car_info"];
             Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
             Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
         } else {
             $closeReason_doubleOrder = -1;
             $order_cost_doubleOrder = $amount;
+            $order_car_info_doubleOrder = null;
             WfpController::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
         }
 
@@ -575,11 +612,13 @@ class BonusBalanceController extends Controller
         if ($bonusOrderHold_response != -1) {
             $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
             $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+            $order_car_info_bonusOrderHold = $bonusOrderHold_response["order_car_info"];
             Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
             Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
         } else {
             $closeReason_bonusOrderHold = -1;
             $order_cost_bonusOrderHold = $amount;
+            $order_car_info_bonusOrderHold = null;
             WfpController::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
         }
 
@@ -590,6 +629,7 @@ class BonusBalanceController extends Controller
                 $hold_bonusOrder = true;
                 $amount_settle = $order_cost_bonusOrder;
                 $result = 1;
+                $order->auto = $order_car_info_bonusOrder;
                 break;
         }
         $hold_doubleOrder = false;
@@ -598,6 +638,7 @@ class BonusBalanceController extends Controller
             case "8":
                 $hold_doubleOrder = true;
                 $amount_settle = $order_cost_doubleOrder;
+                $order->auto = $order_car_info_doubleOrder;
                 $result = 1;
                 break;
         }
@@ -607,6 +648,7 @@ class BonusBalanceController extends Controller
             case "8":
                 $hold_bonusOrderHold = true;
                 $amount_settle = $order_cost_bonusOrderHold;
+                $order->auto = $order_car_info_bonusOrderHold;
                 $result = 1;
                 break;
         }
@@ -615,7 +657,7 @@ class BonusBalanceController extends Controller
             $amount = $amount_settle;
             $order->web_cost = $amount;
             $order->save();
-            self::recordsBloke($bonusOrderHold);
+            self::recordsBlokeAmount($bonusOrderHold);
         } else {
             $subject = "Оплата поездки больше холда";
             $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
@@ -647,9 +689,8 @@ class BonusBalanceController extends Controller
             Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         }
 
-//        $hold_bonusOrderHold = true;
         if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
-            Log::debug("hold_bonusOrderHold $hold_bonusOrderHold" );
+            Log::debug("hold_bonusOrderHold $hold_bonusOrderHold");
             self::blockBonusToDeleteCost($order->id, $amount);
 
             $result = 1;
@@ -660,8 +701,7 @@ class BonusBalanceController extends Controller
                 $order->closeReason = $closeReason_doubleOrder;
             }
             if ($hold_bonusOrderHold) {
-//                $order->closeReason = $closeReason_bonusOrderHold;
-                $order->closeReason = 0;
+                $order->closeReason = $closeReason_bonusOrderHold;
             }
         } else {
             if ($closeReason_bonusOrder != "-1"
