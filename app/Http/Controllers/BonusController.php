@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BonusTypes;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class BonusController extends Controller
 {
@@ -60,6 +61,37 @@ class BonusController extends Controller
             $response = [
                 'bonus' => $user->toArray()['bonus'],
             ];
+        } else {
+            $response = [
+                'bonus' => 0,
+            ];
+        }
+        return $response;
+    }
+    public function bonusUserShowApp($email, $app)
+    {
+        $user = User::where('email', $email)->first();
+        Log::debug($user);
+        if ($user != null) {
+            (new BonusBalanceController)->userBalanceApp($user->id, $app);
+            $user = User::where('email', $email)->first();
+            switch ($app) {
+                case "PAS1":
+                    $response = [
+                        'bonus' => $user->toArray()['bonus_pas_1'],
+                    ];
+                    break;
+                case "PAS2":
+                    $response = [
+                        'bonus' => $user->toArray()['bonus_pas_2'],
+                    ];
+                    break;
+                default:
+                    $response = [
+                        'bonus' => $user->toArray()['bonus_pas_4'],
+                    ];
+            }
+
         } else {
             $response = [
                 'bonus' => 0,

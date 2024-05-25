@@ -21,6 +21,9 @@
                 <v-th sortKey="email"style="width: 300px">Email</v-th>
                 <v-th sortKey="user_phone"style="width: 300px">user_phone</v-th>
                 <v-th sortKey="bonus"style="width: 100px">Bonus</v-th>
+                <v-th sortKey="bonus"style="width: 100px">Bonus_pas_1</v-th>
+                <v-th sortKey="bonus"style="width: 100px">Bonus_pas_2</v-th>
+                <v-th sortKey="bonus"style="width: 100px">Bonus_pas_4</v-th>
                 <v-th sortKey="bonus_pay" style="width: 30px">Бонус</v-th>
                 <v-th sortKey="card_pay" style="width: 30px">Карта</v-th>
                 <v-th sortKey="black_list" style="width: 30px">Black list</v-th>
@@ -32,6 +35,9 @@
                     <td><input class="form-input input-lg" style="width: 300px"v-model="filters.email.value"  placeholder="Select by email"></td>
                     <td><input class="form-input input-lg" style="width: 300px"v-model="filters.user_phone.value"  placeholder="Select by user_phone"></td>
                     <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus_pas_1.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus_pas_2.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus_pas_4.value"  placeholder="Select by bonus"></td>
                     <td><input class="form-input input-lg" style="width: 100px"v-model="filters.black_list.value"  placeholder="Select by black_list"></td>
                     <td style="width: 30px"></td>
                     <td style="width: 30px"></td>
@@ -43,6 +49,9 @@
                     <td><input id="email" class="form-control" style="width: 300px" v-model.text="row.email" required ></td>
                     <td><input id="user_phone" class="form-control" style="width: 300px" v-model.text="row.user_phone" required ></td>
                     <td><input id="bonus" class="form-control" style="width: 100px" v-model.text="row.bonus" value="0"></td>
+                    <td><input id="bonus_pas_1" class="form-control" style="width: 100px" v-model.text="row.bonus_pas_1" value="0"></td>
+                    <td><input id="bonus_pas_2" class="form-control" style="width: 100px" v-model.text="row.bonus_pas_2" value="0"></td>
+                    <td><input id="bonus_pas_4" class="form-control" style="width: 100px" v-model.text="row.bonus_pas_4" value="0"></td>
                     <td>
                         <input type="checkbox" id="bonus_pay" style="width: 30px" v-model="row.bonus_pay" >
                     </td>
@@ -106,6 +115,9 @@ export default {
             email: { value: "", keys: ["email"] },
             user_phone: { value: "", keys: ["user_phone"] },
             bonus: { value: "", keys: ["bonus"] },
+            bonus_pas_1: { value: "", keys: ["bonus_pas_1"] },
+            bonus_pas_2: { value: "", keys: ["bonus_pas_2"] },
+            bonus_pas_4: { value: "", keys: ["bonus_pas_4"] },
             bonus_pay: { value: "", keys: ["bonus_pay"] },
             card_pay: { value: "", keys: ["card_pay"] },
             black_list: { value: "", keys: ["black_list"] }

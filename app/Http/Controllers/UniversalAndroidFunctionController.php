@@ -62,7 +62,7 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
-        $maxExecutionTime = 5*60; // Максимальное время выполнения - 4 часа
+        $maxExecutionTime =5*60; // Максимальное время выполнения - 4 часа
 //          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
         $startTime = time();
 

@@ -8747,6 +8747,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserComponent",
@@ -8777,6 +8786,18 @@ __webpack_require__.r(__webpack_exports__);
         bonus: {
           value: "",
           keys: ["bonus"]
+        },
+        bonus_pas_1: {
+          value: "",
+          keys: ["bonus_pas_1"]
+        },
+        bonus_pas_2: {
+          value: "",
+          keys: ["bonus_pas_2"]
+        },
+        bonus_pas_4: {
+          value: "",
+          keys: ["bonus_pas_4"]
         },
         bonus_pay: {
           value: "",
@@ -46049,6 +46070,99 @@ var render = function () {
                                 {
                                   name: "model",
                                   rawName: "v-model",
+                                  value: _vm.filters.bonus_pas_1.value,
+                                  expression: "filters.bonus_pas_1.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Select by bonus" },
+                              domProps: {
+                                value: _vm.filters.bonus_pas_1.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.bonus_pas_1,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.bonus_pas_2.value,
+                                  expression: "filters.bonus_pas_2.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Select by bonus" },
+                              domProps: {
+                                value: _vm.filters.bonus_pas_2.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.bonus_pas_2,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.bonus_pas_4.value,
+                                  expression: "filters.bonus_pas_4.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Select by bonus" },
+                              domProps: {
+                                value: _vm.filters.bonus_pas_4.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.bonus_pas_4,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
                                   value: _vm.filters.black_list.value,
                                   expression: "filters.black_list.value",
                                 },
@@ -46195,6 +46309,96 @@ var render = function () {
                                       _vm.$set(
                                         row,
                                         "bonus",
+                                        $event.target.value
+                                      )
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.bonus_pas_1,
+                                      expression: "row.bonus_pas_1",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "100px" },
+                                  attrs: { id: "bonus_pas_1", value: "0" },
+                                  domProps: { value: row.bonus_pas_1 },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "bonus_pas_1",
+                                        $event.target.value
+                                      )
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.bonus_pas_2,
+                                      expression: "row.bonus_pas_2",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "100px" },
+                                  attrs: { id: "bonus_pas_2", value: "0" },
+                                  domProps: { value: row.bonus_pas_2 },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "bonus_pas_2",
+                                        $event.target.value
+                                      )
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model.text",
+                                      value: row.bonus_pas_4,
+                                      expression: "row.bonus_pas_4",
+                                      modifiers: { text: true },
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "100px" },
+                                  attrs: { id: "bonus_pas_4", value: "0" },
+                                  domProps: { value: row.bonus_pas_4 },
+                                  on: {
+                                    input: function ($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        row,
+                                        "bonus_pas_4",
                                         $event.target.value
                                       )
                                     },
@@ -46520,6 +46724,33 @@ var render = function () {
                       attrs: { sortKey: "bonus" },
                     },
                     [_vm._v("Bonus")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "100px" },
+                      attrs: { sortKey: "bonus" },
+                    },
+                    [_vm._v("Bonus_pas_1")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "100px" },
+                      attrs: { sortKey: "bonus" },
+                    },
+                    [_vm._v("Bonus_pas_2")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "100px" },
+                      attrs: { sortKey: "bonus" },
+                    },
+                    [_vm._v("Bonus_pas_4")]
                   ),
                   _vm._v(" "),
                   _c(

@@ -23,4 +23,7 @@ Route::get('/checkStatus/{application}/{city}/{orderReference}', [WfpController:
 Route::get('/purchase/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/{recToken}', [WfpController::class, 'purchase'])->name('purchase');
 Route::post('/returnUrl', [WfpController::class, 'returnUrl'])->name('returnUrl');
 Route::post('/serviceUrl', [WfpController::class, 'serviceUrl'])->name('serviceUrl');
+Route::post('/serviceUrl/PAS1', [WfpController::class, 'serviceUrl_PAS1'])->name('serviceUrl_PAS1');
+Route::post('/serviceUrl/PAS2', [WfpController::class, 'serviceUrl_PAS2'])->name('serviceUrl_PAS2');
+Route::post('/serviceUrl/PAS4', [WfpController::class, 'serviceUrl_PAS4'])->name('serviceUrl_PAS4');
 Route::post('/serviceUrl/verify', [WfpController::class, 'serviceUrlVerify'])->name('serviceUrl');

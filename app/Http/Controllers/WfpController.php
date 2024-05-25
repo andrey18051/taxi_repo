@@ -127,6 +127,185 @@ class WfpController extends Controller
             "signature" =>  $signature
         ];
     }
+    public function serviceUrl_PAS1(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('rectoken', $data['recToken'])
+                ->where('merchant', $data['merchantAccount'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+            }
+
+            $card->pay_system = 'wfp';
+            $card->masked_card = $data['cardPan'];
+            $card->card_type = $cardType;
+            $card->bank_name = $bankName;
+            $card->rectoken = $data['recToken'];
+            $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+            $card->save();
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS1::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+//        $secretKey = "7aca3657f12fca79d876dcb50e2d84d71f544516";
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+    public function serviceUrl_PAS2(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('rectoken', $data['recToken'])
+                ->where('merchant', $data['merchantAccount'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+            }
+
+            $card->pay_system = 'wfp';
+            $card->masked_card = $data['cardPan'];
+            $card->card_type = $cardType;
+            $card->bank_name = $bankName;
+            $card->rectoken = $data['recToken'];
+            $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+            $card->save();
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS2::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+//        $secretKey = "7aca3657f12fca79d876dcb50e2d84d71f544516";
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+    public function serviceUrl_PAS4(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('rectoken', $data['recToken'])
+                ->where('merchant', $data['merchantAccount'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+            }
+
+            $card->pay_system = 'wfp';
+            $card->masked_card = $data['cardPan'];
+            $card->card_type = $cardType;
+            $card->bank_name = $bankName;
+            $card->rectoken = $data['recToken'];
+            $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+            $card->save();
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS4::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
     public function serviceUrlVerify(Request $request)
     {
         Log::debug($request);
@@ -146,16 +325,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
@@ -185,7 +367,7 @@ class WfpController extends Controller
             "apiVersion" => 1,
             "language" => $language,
 //            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
-            "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
+            "serviceUrl" => $serviceUrl,
             "orderReference" => $orderReference,
             "orderDate" => $orderDate,
             "amount" => $amount,
@@ -220,16 +402,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 
         $params = [
@@ -255,7 +440,7 @@ class WfpController extends Controller
             "clientEmail" => $clientEmail,
             "clientPhone" => $clientPhone,
 //            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
-            "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
+            "serviceUrl" => $serviceUrl,
             "language"=> "RU",
             "paymentSystems" => "lookupCard",
             "verifyType" => "confirm",
@@ -278,16 +463,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 
         $params = [
@@ -331,16 +519,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 
         $params = [
@@ -402,16 +593,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 //            dd(" /merchantAccount- " . $merchantAccount . "\n"
 //                . " /secretKey- " . $secretKey . "\n"
@@ -496,16 +690,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
@@ -531,7 +728,7 @@ class WfpController extends Controller
             "merchantTransactionSecureType" => "AUTO",
             "apiVersion" => 1,
 //            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
-            "serviceUrl" => "https://m.easy-order-taxi.site/wfp/serviceUrl",
+            "serviceUrl" => $serviceUrl,
             "orderDate" => $orderDate,
             "amount" => $amount,
             "currency" => "UAH",
@@ -564,16 +761,19 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 //            dd(" /merchantAccount- " . $merchantAccount . "\n"
 //                . " /secretKey- " . $secretKey . "\n"
@@ -1006,7 +1206,7 @@ class WfpController extends Controller
             case "0":
             case "8":
                 $hold_doubleOrder = true;
-                $amount_settle = $order_cost_doubleOrder;
+                $amount_settle = $order_cost_bonusOrderHold;
                 $result = 1;
                 $order->auto = $order_car_info_doubleOrder;
                 break;
@@ -1076,9 +1276,9 @@ class WfpController extends Controller
                 $order->closeReason = $closeReason_bonusOrderHold;
             }
         } else {
-            if ($closeReason_bonusOrder != "-1"
-                || $closeReason_doubleOrder != "-1"
-                || $closeReason_bonusOrderHold != "-1") {
+//            if ($closeReason_bonusOrder != "-1"
+//                || $closeReason_doubleOrder != "-1"
+//                || $closeReason_bonusOrderHold != "-1") {
                 self::refund(
                     $application,
                     $city,
@@ -1086,7 +1286,7 @@ class WfpController extends Controller
                     $amount
                 );
                 $order->closeReason = $closeReason_bonusOrderHold;
-            }
+//            }
         }
 
 

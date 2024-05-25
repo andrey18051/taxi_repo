@@ -11,6 +11,7 @@ use App\Models\City_PAS4;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
@@ -104,11 +105,15 @@ class CityController extends Controller
     {
 
         $serverArr = self::cityAll($city);
-//dd($serverArr);
+        Log::debug("serverArr", $serverArr);
+
         foreach ($serverArr as $value) {
             $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
             $checking = self::checkDomain($value["address"]);
             $online = $value["online"];
+            Log::debug("timeFive $timeFive");
+            Log::debug("checking $checking");
+            Log::debug("online $online");
 
             $city = City::where('address', $value["address"])->first();
 //            dd($value["address"]);
@@ -126,6 +131,7 @@ class CityController extends Controller
                         $city->save();
                         $alarmMessage = new TelegramController();
                         $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ".";
+                        Log::debug($messageAdmin);
                         try {
                             $alarmMessage->sendAlarmMessage($messageAdmin);
                             $alarmMessage->sendMeMessage($messageAdmin);
@@ -147,6 +153,7 @@ class CityController extends Controller
                     $city->save();
                     $alarmMessage = new TelegramController();
                     $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ".";
+                    Log::debug($messageAdmin);
                     try {
                         $alarmMessage->sendAlarmMessage($messageAdmin);
                         $alarmMessage->sendMeMessage($messageAdmin);
@@ -173,6 +180,7 @@ class CityController extends Controller
     {
 
         $domainFull = "http://" . $domain . "/api/version";
+        Log::debug("domainFull $domainFull");
 //        $curlInit = curl_init($domainFull);
 //        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
 //        curl_setopt($curlInit, CURLOPT_HEADER, true);
@@ -212,6 +220,37 @@ class CityController extends Controller
 //            return false;
 //        }
     }
+//    public function checkDomain($domain): bool
+//    {
+//
+//        $url = "http://" . $domain;
+//        Log::debug("url $url");
+//
+//        try {
+//            $response = Http::get($url);
+//
+//            if ($response->successful()) {
+//                Log::debug('Connected to server successfully.');
+////                $city = City::where('address', $domain)->first();
+////                $city->online = "true";
+////                $city->save();
+//                return true;
+//            } else {
+//                Log::debug('Failed to connect to server.');
+//                $city = City::where('address', $domain)->first();
+//                $city->online = "false";
+//                $city->save();
+//
+//                return false;
+//            }
+//        } catch (\Exception $e) {
+//            Log::debug('Error: ' . $e->getMessage());
+////            $city = City::where('address', $domain)->first();
+////            $city->online = "false";
+////            $city->save();
+//            return false;
+//        }
+//    }
 
     public function checkDomains()
     {

@@ -3179,10 +3179,11 @@ class AndroidTestOSMController extends Controller
                 $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
             }
         }
-        if ($orderweb->pay_system != "nal_payment") {
-            (new BonusBalanceController)->blockBonusReturn($orderweb->id);
-            $user = User::where("email", $orderweb->email)->first();
-            (new BonusBalanceController)->userBalance($user->id);
+        $wfp_order_id = $orderweb->wfp_order_id;
+        $fondy_order_id = $orderweb->fondy_order_id;
+
+        if ($wfp_order_id  == null && $fondy_order_id == null) {
+            (new BonusBalanceController)->blockBonusReturnCancel($orderweb->id);
         }
         Log::debug("webordersCancelDouble response $resp_answer");
         Log::debug("**********************************************************");
