@@ -39,6 +39,36 @@ class BonusBalanceController extends Controller
 
         Log::debug("recordsAdd", $balance_records->toArray());
     }
+    public function recordsAddApp(
+        $orderwebs_id,
+        $users_id,
+        $bonus_types_id,
+        $bonusAdd,
+        $app
+    ) {
+        $bonus_types_size = BonusTypes::find($bonus_types_id)->size;
+
+//        $balance_records = new BonusBalance();
+        switch ($app) {
+            case "PAS1":
+                $balance_records = new BonusBalancePas1();
+                break;
+            case "PAS2":
+                $balance_records = new BonusBalancePas2();
+                break;
+            default:
+                $balance_records = new BonusBalancePas4();
+        }
+
+
+        $balance_records->orderwebs_id = $orderwebs_id;
+        $balance_records->users_id = $users_id;
+        $balance_records->bonus_types_id = $bonus_types_id;
+        $balance_records->bonusAdd = $bonusAdd * $bonus_types_size;
+        $balance_records->save();
+
+        Log::debug("recordsAddApp", $balance_records->toArray());
+    }
     public function recordsDel(
         $orderwebs_id,
         $users_id,
@@ -90,7 +120,64 @@ class BonusBalanceController extends Controller
             return response($response, 200)
                 ->header('Content-Type', 'json');
         }
-    }public function recordsBlokeAmount($uid)
+    }
+
+    public function recordsBlokeApp($uid, $app)
+    {
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+//        $bonusBlockedBalanceRecord = BonusBalance::where("orderwebs_id", $order->id)->first();
+        switch ($app) {
+            case "PAS1":
+                $bonusBlockedBalanceRecord = BonusBalancePas1::where("orderwebs_id", $order->id)->first();
+                break;
+            case "PAS2":
+                $bonusBlockedBalanceRecord = BonusBalancePas2::where("orderwebs_id", $order->id)->first();
+                break;
+            default:
+                $bonusBlockedBalanceRecord = BonusBalancePas4::where("orderwebs_id", $order->id)->first();
+        }
+        if (!$bonusBlockedBalanceRecord) {
+            $email = $order->email;
+
+            $bonusBloke = $order->web_cost;
+            $orderwebs_id = $order->id;
+
+            $user = User::where('email', $email)->get()->toArray();
+
+            $users_id = $user[0]['id'];
+            $bonus_types_size = BonusTypes::find(6)->size;
+
+            Log::debug("BonusBalance:", [
+                '$orderwebs_id ' => $orderwebs_id,
+                '$users_id ' => $users_id,
+                '$bonusBloke' => $bonusBloke,
+                '$bonus_types_size' => $bonus_types_size
+            ]);
+
+            switch ($app) {
+                case "PAS1":
+                    $balance_records = new BonusBalancePas1();
+                    break;
+                case "PAS2":
+                    $balance_records = new BonusBalancePas2();
+                    break;
+                default:
+                    $balance_records = new BonusBalancePas4();
+            }
+            $balance_records->orderwebs_id = $orderwebs_id;
+            $balance_records->users_id = $users_id;
+            $balance_records->bonus_types_id = 6;
+            $balance_records->bonusBloke = $bonusBloke * $bonus_types_size;
+            $balance_records->save();
+
+            $response["bonus"] = $bonusBloke * $bonus_types_size;
+            Log::debug("recordsBloke", $response);
+            return response($response, 200)
+                ->header('Content-Type', 'json');
+        }
+    }
+    public function recordsBlokeAmount($uid)
     {
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
         $email = $order->email;
@@ -267,6 +354,73 @@ class BonusBalanceController extends Controller
         self::recordsAdd($orderwebs_id, $balance_records->users_id, "2", $cost);
         self::userBalance($balance_records->users_id);
     }
+    private function blockBonusToDeleteCostApp($orderwebs_id, $cost, $app)
+    {
+        Log::debug("blockBonusToDeleteCost $orderwebs_id, $cost");
+//        $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)
+//            ->where("bonus_types_id", 6)
+//            ->where("bonusBloke", "!=", 0)
+//            ->first();
+
+        switch ($app) {
+            case "PAS1":
+                $balance_records = BonusBalancePas1::where("orderwebs_id", $orderwebs_id)
+                    ->where("bonus_types_id", 6)
+                    ->where("bonusBloke", "!=", 0)
+                    ->first();
+                break;
+            case "PAS2":
+                $balance_records = BonusBalancePas2::where("orderwebs_id", $orderwebs_id)
+                    ->where("bonus_types_id", 6)
+                    ->where("bonusBloke", "!=", 0)
+                    ->first();
+                break;
+            default:
+                $balance_records = BonusBalancePas4::where("orderwebs_id", $orderwebs_id)
+                    ->where("bonus_types_id", 6)
+                    ->where("bonusBloke", "!=", 0)
+                    ->first();
+        }
+
+//        $balance_records_2 = BonusBalance::where("orderwebs_id", $orderwebs_id)
+//            ->where(function ($query) {
+//                $query->where("bonus_types_id", 4)
+//                    ->orWhere("bonus_types_id", 5);
+//            })
+//            ->first();
+
+        $bonusType = BonusTypes::where("id", 5)->first();
+        Log::debug("blockBonusToDeleteCost", [
+            '$cost' =>$cost,
+            '$bonusType->size' =>$bonusType->size,
+            '$orderwebs_id' =>$orderwebs_id,
+//            '$balance_records->users_id' =>$balance_records->users_id,
+            '(-1) *  $balance_records->bonusBloke' =>(-1) *  $cost * $bonusType->size,
+            '$balance_records_new->bonus_types_id' => 5,
+        ]);
+//        if (!$balance_records_2) {
+
+//            $balance_records_new = new BonusBalance();
+        switch ($app) {
+            case "PAS1":
+                $balance_records_new = new BonusBalancePas1();
+                break;
+            case "PAS2":
+                $balance_records_new = new BonusBalancePas2();
+                break;
+            default:
+                $balance_records_new = new BonusBalancePas4();
+        }
+            $balance_records_new->bonusDel = $cost * $bonusType->size;
+            $balance_records_new->orderwebs_id = $orderwebs_id;
+            $balance_records_new->users_id = $balance_records->users_id;
+            $balance_records_new->bonusBloke = (-1) *  $cost * $bonusType->size;
+            $balance_records_new->bonus_types_id = 5;
+            $balance_records_new->save();
+//        }
+        self::recordsAddApp($orderwebs_id, $balance_records->users_id, "2", $cost, $app);
+        self::userBalanceApp($balance_records->users_id, $app);
+    }
 
     public function blockBonusReturn($orderwebs_id, $bonusBloke)
     {
@@ -276,6 +430,32 @@ class BonusBalanceController extends Controller
 
         $balance_records_new = new BonusBalance();
 
+        $balance_records_new->orderwebs_id = $orderwebs_id;
+        $balance_records_new->users_id = $balance_records->users_id;
+        $balance_records_new->bonusBloke = (-1) * $bonusBloke * $bonusType->size;
+        $balance_records_new->bonus_types_id = 4;
+
+        $balance_records_new->save();
+
+        self::userBalance($balance_records->users_id);
+    }
+    public function blockBonusReturnApp($orderwebs_id, $bonusBloke, $app)
+    {
+        $bonusType = BonusTypes::where("id", 5)->first();
+
+//        $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)->first();
+
+        $balance_records_new = new BonusBalance();
+        switch ($app) {
+            case "PAS1":
+                $balance_records = new BonusBalancePas1();
+                break;
+            case "PAS2":
+                $balance_records = new BonusBalancePas2();
+                break;
+            default:
+                $balance_records = new BonusBalancePas4();
+        }
         $balance_records_new->orderwebs_id = $orderwebs_id;
         $balance_records_new->users_id = $balance_records->users_id;
         $balance_records_new->bonusBloke = (-1) * $bonusBloke * $bonusType->size;
@@ -309,11 +489,85 @@ class BonusBalanceController extends Controller
             $balance_records_new->bonus_types_id = 4;
 
             $balance_records_new->save();
-            Log::debug( "blockBonusReturnCancel balance_records_new" , $balance_records_new->toArray());
+            Log::debug("blockBonusReturnCancel balance_records_new", $balance_records_new->toArray());
 
             self::userBalance($balance_records->users_id);
         } else {
-            Log::debug( "blockBonusReturnCancel balance_records_2", $balance_records_2->toArray());
+            Log::debug("blockBonusReturnCancel balance_records_2", $balance_records_2->toArray());
+        }
+    }
+    public function blockBonusReturnCancelApp($orderwebs_id, $app)
+    {
+//        $balance_records_2 = BonusBalance::where("orderwebs_id", $orderwebs_id)
+//            ->where(function ($query) {
+//                $query->where("bonus_types_id", 4)
+//                    ->orWhere("bonus_types_id", 5);
+//            })
+//            ->first();
+        switch ($app) {
+            case "PAS1":
+                $balance_records_2 = BonusBalancePas1::where("orderwebs_id", $orderwebs_id)
+                    ->where(function ($query) {
+                        $query->where("bonus_types_id", 4)
+                            ->orWhere("bonus_types_id", 5);
+                    })
+                    ->first();
+                break;
+            case "PAS2":
+                $balance_records_2 = BonusBalancePas2::where("orderwebs_id", $orderwebs_id)
+                    ->where(function ($query) {
+                        $query->where("bonus_types_id", 4)
+                            ->orWhere("bonus_types_id", 5);
+                    })
+                    ->first();
+                break;
+            default:
+                $balance_records_2 = BonusBalancePas4::where("orderwebs_id", $orderwebs_id)
+                    ->where(function ($query) {
+                        $query->where("bonus_types_id", 4)
+                            ->orWhere("bonus_types_id", 5);
+                    })
+                    ->first();
+        }
+        if (!$balance_records_2) {
+            switch ($app) {
+                case "PAS1":
+                    $balance_records = BonusBalancePas1::where("orderwebs_id", $orderwebs_id)->first();
+                    break;
+                case "PAS2":
+                    $balance_records = BonusBalancePas2::where("orderwebs_id", $orderwebs_id)->first();
+                    break;
+                default:
+                    $balance_records = BonusBalancePas4::where("orderwebs_id", $orderwebs_id)->first();
+            }
+
+//            $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)->first();
+            $bonusType = BonusTypes::where("id", 5)->first();
+
+            $order = Orderweb::where("id", $orderwebs_id)->first();
+
+//            $balance_records_new = new BonusBalance();
+            switch ($app) {
+                case "PAS1":
+                    $balance_records_new = new BonusBalancePas1();
+                    break;
+                case "PAS2":
+                    $balance_records_new = new BonusBalancePas2();
+                    break;
+                default:
+                    $balance_records_new = new BonusBalancePas4();
+            }
+            $balance_records_new->orderwebs_id = $orderwebs_id;
+            $balance_records_new->users_id = $balance_records->users_id;
+            $balance_records_new->bonusBloke = (-1) * $order->web_cost * $bonusType->size;
+            $balance_records_new->bonus_types_id = 4;
+
+            $balance_records_new->save();
+            Log::debug("blockBonusReturnCancel balance_records_new", $balance_records_new->toArray());
+
+            self::userBalance($balance_records->users_id);
+        } else {
+            Log::debug("blockBonusReturnCancel balance_records_2", $balance_records_2->toArray());
         }
     }
 
@@ -569,10 +823,22 @@ class BonusBalanceController extends Controller
             Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
             Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         }
-
+        $app = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first()->comment;
+        Log::debug("app $app");
+        switch ($app) {
+            case "taxi_easy_ua_pas1":
+                $app = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $app = "PAS2";
+                break;
+            default:
+                $app = "PAS4";
+        }
         if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
             Log::debug("hold_bonusOrderHold $hold_bonusOrderHold");
-            self::blockBonusToDeleteCost($order->id, $amount);
+//            self::blockBonusToDeleteCost($order->id, $amount);
+            self::blockBonusToDeleteCostApp($order->id, $amount, $app);
 
             $result = 1;
             if ($hold_bonusOrder) {
@@ -588,7 +854,7 @@ class BonusBalanceController extends Controller
 //            if ($closeReason_bonusOrder != "-1"
 //                || $closeReason_doubleOrder != "-1"
 //                || $closeReason_bonusOrderHold != "-1") {
-                self::blockBonusReturn($order->id, $amount);
+                self::blockBonusReturnApp($order->id, $amount, $app);
 
                 $result = 1;
                 $order->closeReason = $closeReason_bonusOrderHold;

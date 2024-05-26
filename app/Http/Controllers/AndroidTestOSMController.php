@@ -2599,6 +2599,7 @@ class AndroidTestOSMController extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
+
 //dd($parameter);
         Log::debug("response_arr: 11111111 ", $parameter);
         $responseDouble = null;
@@ -3183,7 +3184,9 @@ class AndroidTestOSMController extends Controller
         $fondy_order_id = $orderweb->fondy_order_id;
 
         if ($wfp_order_id  == null && $fondy_order_id == null) {
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             (new BonusBalanceController)->blockBonusReturnCancel($orderweb->id);
+            (new BonusBalanceController)->blockBonusReturnCancelApp($orderweb->id, $application);
         }
         Log::debug("webordersCancelDouble response $resp_answer");
         Log::debug("**********************************************************");

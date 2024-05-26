@@ -1215,6 +1215,8 @@ Route::get('/bonusBalance/recordsDel/{orderwebs_id}/{users_id}/{bonus_types_id}/
     ->name('recordsDel');
 Route::get('/bonusBalance/recordsBloke/{uid}', [BonusBalanceController::class, 'recordsBloke'])
     ->name('recordsBloke');
+Route::get('/bonusBalance/recordsBloke/{uid}/{app}', [BonusBalanceController::class, 'recordsBlokeApp'])
+    ->name('recordsBloke');
 Route::get('/bonusBalance/userBalance/{users_id}', [BonusBalanceController::class, 'userBalance'])
     ->name('userBalance');
 Route::get('/bonusBalance/userBalanceBloke/{users_id}', [BonusBalanceController::class, 'userBalanceBloke'])
