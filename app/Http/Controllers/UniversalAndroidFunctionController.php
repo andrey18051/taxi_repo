@@ -1975,7 +1975,6 @@ class UniversalAndroidFunctionController extends Controller
         $lastStatusBonus,
         $lastStatusDouble
     ): bool {
-        $canceledAll = false;
 // проверка нала
         switch ($lastStatusDouble) {
             case "Canceled":
@@ -1985,12 +1984,9 @@ class UniversalAndroidFunctionController extends Controller
                     case "Canceled":
                     case "Executed":
                     case "CostCalculation":
-                        $canceledAll = true;
-                        break;
+                        return true;
                 }
                 break;
-            default:
-                $canceledAll = false;
         }
 // проверка безнала
         switch ($lastStatusBonus) {
@@ -2001,14 +1997,11 @@ class UniversalAndroidFunctionController extends Controller
                     case "Canceled":
                     case "Executed":
                     case "CostCalculation":
-                        $canceledAll = true;
-                        break;
+                        return true;
                 }
                 break;
-            default:
-                $canceledAll = false;
         }
-        return $canceledAll;
+        return false;
     }
 
     public function orderCanceled(
