@@ -60,7 +60,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $doubleOrderRecord->delete();
 
-        $maxExecutionTime =5*60; // Максимальное время выполнения - 4 часа
+        $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
 //          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
         $startTime = time();
 
@@ -1976,26 +1976,38 @@ class UniversalAndroidFunctionController extends Controller
         $lastStatusDouble
     ): bool {
         $canceledAll = false;
-        switch ($lastStatusBonus) {
-            case "Executed":
-                $canceledAll = true;
-                break;
-        }
+// проверка нала
         switch ($lastStatusDouble) {
-            case "Executed":
-                $canceledAll = true;
-                break;
             case "Canceled":
+            case "Executed":
+            case "CostCalculation":
                 switch ($lastStatusBonus) {
-                    case "SearchesForCar":
-                    case "WaitingCarSearch":
                     case "Canceled":
+                    case "Executed":
+                    case "CostCalculation":
                         $canceledAll = true;
                         break;
                 }
                 break;
+            default:
+                $canceledAll = false;
         }
-
+// проверка безнала
+        switch ($lastStatusBonus) {
+            case "Canceled":
+            case "Executed":
+            case "CostCalculation":
+                switch ($lastStatusDouble) {
+                    case "Canceled":
+                    case "Executed":
+                    case "CostCalculation":
+                        $canceledAll = true;
+                        break;
+                }
+                break;
+            default:
+                $canceledAll = false;
+        }
         return $canceledAll;
     }
 

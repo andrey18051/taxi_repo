@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\BonusBalance;
+use App\Models\BonusBalancePas1;
+use App\Models\BonusBalancePas2;
+use App\Models\BonusBalancePas4;
 use App\Models\BonusTypes;
 use App\Models\IP;
 use App\Models\NewsList;
@@ -11,8 +14,6 @@ use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -685,10 +686,13 @@ class ReportController extends Controller
 
     }
 
+    /**
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
     public function bonusReport(Request $request)
     {
         $user = User::where('email', $request->email)->get();
-        $bonusRecords = BonusBalance::where('users_id', $user->toArray()[0]['id'])->get();
 
 //        dd($bonusRecords->toArray());
 
@@ -696,6 +700,103 @@ class ReportController extends Controller
         $spreadsheet->getActiveSheet()->setTitle('Бонусы');
         $sheet = $spreadsheet->getActiveSheet();
 
+        $bonusRecords = BonusBalance::where('users_id', $user->toArray()[0]['id'])->get();
+        if ($bonusRecords != null) {
+            $sheet->getColumnDimension('A')->setAutoSize(true);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setAutoSize(true);
+            $sheet->getColumnDimension('F')->setAutoSize(true);
+            $sheet->getColumnDimension('G')->setAutoSize(true);
+            $sheet->getColumnDimension('H')->setAutoSize(true);
+
+            $sheet->setCellValue('B1', 'Это список движения бонусов');
+            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
+            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+
+            $sheet->setCellValue('A2', 'N п/п');
+            $sheet->setCellValue('B2', 'UID');
+            $sheet->setCellValue('C2', 'Операция');
+            $sheet->setCellValue('D2', 'Зачисление');
+            $sheet->setCellValue('E2', 'Списание');
+            $sheet->setCellValue('F2', 'Блокировка');
+            $sheet->setCellValue('G2', 'Создано');
+            $sheet->setCellValue('H2', 'Обновлено');
+
+
+            $sheet->getStyle('A2:O2')->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => [
+                            'rgb' => '808080'
+                        ]
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $coordN = count($bonusRecords) + 2;
+
+            $sheet->getStyle('A2:H2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+            $sheet->getStyle('A3:H' . $coordN)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $i = 3;
+            $bonusAdd = 0;
+            $bonusDel = 0;
+            $bonusBloke = 0;
+
+            foreach ($bonusRecords as $value) {
+                $sheet->setCellValue('A' . $i, $i - 2);
+                if ($value->orderwebs_id != 0) {
+                    $sheet->setCellValue('B' . $i, Orderweb::find($value->orderwebs_id)->dispatching_order_uid);
+                }
+                $sheet->setCellValue('C' . $i, BonusTypes::find($value->bonus_types_id)->name);
+                $sheet->setCellValue('D' . $i, $value->bonusAdd);
+                $bonusAdd += $value->bonusAdd;
+                $sheet->setCellValue('E' . $i, $value->bonusDel);
+                $bonusDel += $value->bonusDel;
+                $sheet->setCellValue('F' . $i, $value->bonusBloke);
+                $bonusBloke += $value->bonusBloke;
+                $sheet->setCellValue('G' . $i, date('d-m-Y H:m:s', strtotime( $value->created_at)));
+                $sheet->setCellValue('H' . $i, date('d-m-Y H:m:s', strtotime( $value->updated_at)));
+                $i++;
+            }
+            $sheet->setCellValue('C' . $i, "ИТОГО");
+            $sheet->setCellValue('D' . $i, $bonusAdd);
+            $sheet->setCellValue('E' . $i, $bonusDel);
+            $sheet->setCellValue('F' . $i, $bonusBloke);
+            $i++;
+            $sheet->setCellValue('C' . $i, "Баланс");
+            $sheet->setCellValue('D' . $i, $bonusAdd - $bonusDel - $bonusBloke);
+        } else {
+            $sheet->setCellValue('A1', 'Нет данных в период');
+        }
+        // Добавляем лист PAS 1
+        $newSheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'PAS 1');
+        $spreadsheet->addSheet($newSheet);
+
+        // Переключаемся на PAS 1
+        $spreadsheet->setActiveSheetIndexByName('PAS 1');
+        $sheet = $spreadsheet->getActiveSheet();
+        $bonusRecords = BonusBalancePas1::where('users_id', $user->toArray()[0]['id'])->get();
         if ($bonusRecords != null) {
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -785,6 +886,200 @@ class ReportController extends Controller
             $sheet->setCellValue('A1', 'Нет данных в период');
         }
 
+        // Добавляем  лист PAS 2
+        $newSheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'PAS 2');
+        $spreadsheet->addSheet($newSheet);
+
+        // Переключаемся на PAS 2
+        $spreadsheet->setActiveSheetIndexByName('PAS 2');
+        $sheet = $spreadsheet->getActiveSheet();
+        $bonusRecords = BonusBalancePas2::where('users_id', $user->toArray()[0]['id'])->get();
+        if ($bonusRecords != null) {
+            $sheet->getColumnDimension('A')->setAutoSize(true);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setAutoSize(true);
+            $sheet->getColumnDimension('F')->setAutoSize(true);
+            $sheet->getColumnDimension('G')->setAutoSize(true);
+            $sheet->getColumnDimension('H')->setAutoSize(true);
+
+            $sheet->setCellValue('B1', 'Это список движения бонусов');
+            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
+            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+
+            $sheet->setCellValue('A2', 'N п/п');
+            $sheet->setCellValue('B2', 'UID');
+            $sheet->setCellValue('C2', 'Операция');
+            $sheet->setCellValue('D2', 'Зачисление');
+            $sheet->setCellValue('E2', 'Списание');
+            $sheet->setCellValue('F2', 'Блокировка');
+            $sheet->setCellValue('G2', 'Создано');
+            $sheet->setCellValue('H2', 'Обновлено');
+
+
+            $sheet->getStyle('A2:O2')->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => [
+                            'rgb' => '808080'
+                        ]
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $coordN = count($bonusRecords) + 2;
+
+            $sheet->getStyle('A2:H2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+            $sheet->getStyle('A3:H' . $coordN)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $i = 3;
+            $bonusAdd = 0;
+            $bonusDel = 0;
+            $bonusBloke = 0;
+
+            foreach ($bonusRecords as $value) {
+                $sheet->setCellValue('A' . $i, $i - 2);
+                if ($value->orderwebs_id != 0) {
+                    $sheet->setCellValue('B' . $i, Orderweb::find($value->orderwebs_id)->dispatching_order_uid);
+                }
+                $sheet->setCellValue('C' . $i, BonusTypes::find($value->bonus_types_id)->name);
+                $sheet->setCellValue('D' . $i, $value->bonusAdd);
+                $bonusAdd += $value->bonusAdd;
+                $sheet->setCellValue('E' . $i, $value->bonusDel);
+                $bonusDel += $value->bonusDel;
+                $sheet->setCellValue('F' . $i, $value->bonusBloke);
+                $bonusBloke += $value->bonusBloke;
+                $sheet->setCellValue('G' . $i, date('d-m-Y H:m:s', strtotime( $value->created_at)));
+                $sheet->setCellValue('H' . $i, date('d-m-Y H:m:s', strtotime( $value->updated_at)));
+                $i++;
+            }
+            $sheet->setCellValue('C' . $i, "ИТОГО");
+            $sheet->setCellValue('D' . $i, $bonusAdd);
+            $sheet->setCellValue('E' . $i, $bonusDel);
+            $sheet->setCellValue('F' . $i, $bonusBloke);
+            $i++;
+            $sheet->setCellValue('C' . $i, "Баланс");
+            $sheet->setCellValue('D' . $i, $bonusAdd - $bonusDel - $bonusBloke);
+        } else {
+            $sheet->setCellValue('A1', 'Нет данных в период');
+        }
+
+        // Добавляем  лист PAS 4
+        $newSheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'PAS 4');
+        $spreadsheet->addSheet($newSheet);
+
+        // Переключаемся на PAS 4
+        $spreadsheet->setActiveSheetIndexByName('PAS 4');
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $bonusRecords = BonusBalancePas4::where('users_id', $user->toArray()[0]['id'])->get();
+        if ($bonusRecords != null) {
+            $sheet->getColumnDimension('A')->setAutoSize(true);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setAutoSize(true);
+            $sheet->getColumnDimension('F')->setAutoSize(true);
+            $sheet->getColumnDimension('G')->setAutoSize(true);
+            $sheet->getColumnDimension('H')->setAutoSize(true);
+
+            $sheet->setCellValue('B1', 'Это список движения бонусов');
+            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
+            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+
+            $sheet->setCellValue('A2', 'N п/п');
+            $sheet->setCellValue('B2', 'UID');
+            $sheet->setCellValue('C2', 'Операция');
+            $sheet->setCellValue('D2', 'Зачисление');
+            $sheet->setCellValue('E2', 'Списание');
+            $sheet->setCellValue('F2', 'Блокировка');
+            $sheet->setCellValue('G2', 'Создано');
+            $sheet->setCellValue('H2', 'Обновлено');
+
+
+            $sheet->getStyle('A2:O2')->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => [
+                            'rgb' => '808080'
+                        ]
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $coordN = count($bonusRecords) + 2;
+
+            $sheet->getStyle('A2:H2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+            $sheet->getStyle('A3:H' . $coordN)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ]
+            ]);
+
+            $i = 3;
+            $bonusAdd = 0;
+            $bonusDel = 0;
+            $bonusBloke = 0;
+
+            foreach ($bonusRecords as $value) {
+                $sheet->setCellValue('A' . $i, $i - 2);
+                if ($value->orderwebs_id != 0) {
+                    $sheet->setCellValue('B' . $i, Orderweb::find($value->orderwebs_id)->dispatching_order_uid);
+                }
+                $sheet->setCellValue('C' . $i, BonusTypes::find($value->bonus_types_id)->name);
+                $sheet->setCellValue('D' . $i, $value->bonusAdd);
+                $bonusAdd += $value->bonusAdd;
+                $sheet->setCellValue('E' . $i, $value->bonusDel);
+                $bonusDel += $value->bonusDel;
+                $sheet->setCellValue('F' . $i, $value->bonusBloke);
+                $bonusBloke += $value->bonusBloke;
+                $sheet->setCellValue('G' . $i, date('d-m-Y H:m:s', strtotime( $value->created_at)));
+                $sheet->setCellValue('H' . $i, date('d-m-Y H:m:s', strtotime( $value->updated_at)));
+                $i++;
+            }
+            $sheet->setCellValue('C' . $i, "ИТОГО");
+            $sheet->setCellValue('D' . $i, $bonusAdd);
+            $sheet->setCellValue('E' . $i, $bonusDel);
+            $sheet->setCellValue('F' . $i, $bonusBloke);
+            $i++;
+            $sheet->setCellValue('C' . $i, "Баланс");
+            $sheet->setCellValue('D' . $i, $bonusAdd - $bonusDel - $bonusBloke);
+        } else {
+            $sheet->setCellValue('A1', 'Нет данных в период');
+        }
 
 
         $reportIP_path = Storage::path('public/reports/reportBonus.xlsx');
