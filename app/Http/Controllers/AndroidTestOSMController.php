@@ -2624,12 +2624,15 @@ class AndroidTestOSMController extends Controller
         }
 
         Log::debug("historyUIDStatus uid $uid");
+        $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
 
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        Log::debug("historyUIDStatus orderweb $orderweb");
-        if ($orderweb) {
-            // Проверяем, существует ли свойство 'server'
-            $connectAPI = $orderweb->server;
+        $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+        $connectAPI = $orderweb_uid->server;
+        if ($uid_history) {
+            $uid = $uid_history->uid_bonusOrder;
+            $uid_Double = $uid_history->uid_doubleOrder;
+
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/' . $uid;
 
@@ -2640,22 +2643,66 @@ class AndroidTestOSMController extends Controller
             ])->get($url);
 
             $response_arr = json_decode($response, true);
-            Log::debug($response_arr);
+            Log::debug("$url: ", $response_arr);
+            if ($response_arr["close_reason"] == 0 || $response_arr["close_reason"] == 8) {
+                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+
+                $orderweb_uid->routefrom = $nameFrom;
+                $orderweb_uid->routeto = $nameTo;
+
+                if ($response_arr["order_car_info"] != null) {
+                    $orderweb_uid->auto = $response_arr["order_car_info"];
+                }
+
+                $orderweb_uid->save();
+                return $response;
+            } else {
+                $url = $connectAPI . '/api/weborders/' . $uid_Double;
+
+                $response_Double = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => self::identificationId($application),
+                    "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                ])->get($url);
+                $response_arr = json_decode($response_Double, true);
+                Log::debug("$url: ", $response_arr);
+                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+
+                $orderweb_uid->routefrom = $nameFrom;
+                $orderweb_uid->routeto = $nameTo;
+
+                if ($response_arr["order_car_info"] != null) {
+                    $orderweb_uid->auto = $response_arr["order_car_info"];
+                }
+
+                $orderweb_uid->save();
+                return $response_Double;
+            }
+        } else {
+            $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
+            $url = $connectAPI . '/api/weborders/' . $uid;
+
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+            ])->get($url);
+
+            $response_arr = json_decode($response, true);
+            Log::debug("$url: ", $response_arr);
             $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
             $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
 
-            $order = Orderweb:: where("dispatching_order_uid", $uid)->first();
-            if ($order != null) {
-                $order->routefrom = $nameFrom;
-                $order->routeto = $nameTo;
+            $orderweb_uid->routefrom = $nameFrom;
+            $orderweb_uid->routeto = $nameTo;
 
-                if ($response_arr["order_car_info"] != null) {
-                    $order->auto = $response_arr["order_car_info"];
-                }
-
-                $order->save();
+            if ($response_arr["order_car_info"] != null) {
+                $orderweb_uid->auto = $response_arr["order_car_info"];
             }
 
+            $orderweb_uid->save();
             return $response;
         }
     }

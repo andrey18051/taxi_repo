@@ -169,7 +169,11 @@ class OpenStreetMapController extends Controller
             }
         } else {
             if ($response_arr["category"] == "building") {
-                return ["result" =>$response_arr["address"]["road"] . " $building_text" . $response_arr["address"]["house_number"] .", $city_text" . $response_arr["address"]["city"]];
+                if (isset($response_arr["address"]["city"])) {
+                    return ["result" =>$response_arr["address"]["road"] . " $building_text" . $response_arr["address"]["house_number"] .", $city_text" . $response_arr["address"]["city"]];
+                } else {
+                    return ["result" =>$response_arr["address"]["road"] . " $building_text" . $response_arr["address"]["house_number"] .", $city_text"];
+                }
             } else {
                 $r = 200;
                 $url = "https://api.visicom.ua/data-api/5.0/$local/geocode.json?categories=adr_address&near="
