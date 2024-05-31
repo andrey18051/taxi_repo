@@ -324,11 +324,11 @@ class CityController extends Controller
 
     public function maxPayValue($city): array
     {
-        $city = City::where('name', $city)->first();
+        $city = City::where('name', $city)->first()->toArray();
 
         return [
-            'card_max_pay' => $city->card_max_pay,
-            'bonus_max_pay' => $city->bonus_max_pay
+            'card_max_pay' => $city["card_max_pay"],
+            'bonus_max_pay' => $city["bonus_max_pay"]
             ];
     }
     public function merchantFondy($city): array
@@ -345,39 +345,39 @@ class CityController extends Controller
     {
         switch ($app) {
             case "PAS1":
-                $city = City_PAS1::where('name', $city)->first();
+                $city = City_PAS1::where('name', $city)->first()->toArray();
                 break;
             case "PAS2":
-                $city = City_PAS2::where('name', $city)->first();
+                $city = City_PAS2::where('name', $city)->first()->toArray();
                 break;
             //case "PAS4":
             default:
-                $city = City_PAS4::where('name', $city)->first();
+                $city = City_PAS4::where('name', $city)->first()->toArray();
                 break;
         }
         return [
-            'card_max_pay' => $city->card_max_pay,
-            'bonus_max_pay' => $city->bonus_max_pay
-            ];
+            'card_max_pay' => $city["card_max_pay"],
+            'bonus_max_pay' => $city["bonus_max_pay"]
+        ];
     }
     public function merchantFondyApp($city, $app): array
     {
         switch ($app) {
             case "PAS1":
-                $city = City_PAS1::where('name', $city)->first();
+                $city = City_PAS1::where('name', $city)->first()->toArray();
                 break;
             case "PAS2":
-                $city = City_PAS2::where('name', $city)->first();
+                $city = City_PAS2::where('name', $city)->first()->toArray();
                 break;
             //case "PAS4":
             default:
-                $city = City_PAS4::where('name', $city)->first();
+                $city = City_PAS4::where('name', $city)->first()->toArray();
                 break;
         }
 
         return [
-            'merchant_fondy' => $city->merchant_fondy,
-            'fondy_key_storage' => $city->fondy_key_storage
+            'card_max_pay' => $city["card_max_pay"],
+            'bonus_max_pay' => $city["bonus_max_pay"]
         ];
     }
 }

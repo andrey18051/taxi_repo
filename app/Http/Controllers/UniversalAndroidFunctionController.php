@@ -14,8 +14,10 @@ use App\Models\ExecStatusHistory;
 use App\Models\ExecutionStatus;
 use App\Models\Order;
 use App\Models\Orderweb;
+use App\Models\Uid_history;
 use App\Models\User;
 use DateTime;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -60,6 +62,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $doubleOrderRecord->delete();
 
+
         $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
 //          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
         $startTime = time();
@@ -75,12 +78,19 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         $lastTimeUpdate = time();
+
         $upDateTimeInterval = 0;
 
-// Безнал
         $responseDouble = json_decode($responseDoubleStr, true);
         $doubleOrder = $responseDouble['dispatching_order_uid'];
 
+        $uid_history = new Uid_history();
+        $uid_history->uid_bonusOrder = $bonusOrder;
+        $uid_history->uid_doubleOrder = $doubleOrder;
+        $uid_history->uid_bonusOrderHold = $bonusOrder;
+        $uid_history->save();
+
+// Безнал
 
         $newStatusBonus =  self::newStatus(
             $authorizationBonus,
@@ -90,7 +100,8 @@ class UniversalAndroidFunctionController extends Controller
             $bonusOrder,
             "bonus",
             $lastTimeUpdate,
-            $upDateTimeInterval
+            $upDateTimeInterval,
+            $uid_history
         );
 
         $lastStatusBonusTime = $lastTimeUpdate;
@@ -112,7 +123,8 @@ class UniversalAndroidFunctionController extends Controller
             $doubleOrder,
             "double",
             $lastTimeUpdate,
-            $upDateTimeInterval
+            $upDateTimeInterval,
+            $uid_history
         );
         $lastStatusDoubleTime = time();
         $lastStatusDouble = $newStatusDouble;
@@ -134,9 +146,13 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("canceledFinish: " . $canceledAll);
 
         if ($canceledAll) {
-            $doubleOrderRecord->delete();
+            $uid_history->delete();
             return "finish Canceled by User";
         };
+
+//запись истории uid
+
+
 
 
         while (time() - $startTime < $maxExecutionTime) {
@@ -150,8 +166,11 @@ class UniversalAndroidFunctionController extends Controller
                 Log::debug("lastStatusBonus: " . $lastStatusBonus);
                 Log::debug("lastStatusDouble: " . $lastStatusDouble);
                 Log::debug("canceledFinish: " . $canceledAll);
-                $doubleOrderRecord->delete();
-                break;
+
+                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+
+                $uid_history->delete();
+                return "finish";
             }
 
             if (time() <= strtotime($orderwebs->required_time)) {
@@ -180,7 +199,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             switch ($newStatusBonus) {
@@ -214,7 +234,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
 
@@ -239,7 +260,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
 
@@ -271,7 +293,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -303,7 +326,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -336,7 +360,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -371,7 +396,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -395,7 +421,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -421,7 +448,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -454,7 +482,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -487,7 +516,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -513,7 +543,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -557,7 +588,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $bonusOrder,
                                         "bonus",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusBonusTime = time();
                                     if ($no_required_time) {
@@ -581,7 +613,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $doubleOrder,
                                         "double",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
@@ -611,7 +644,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $doubleOrder,
                                         "double",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
@@ -649,7 +683,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $bonusOrder,
                                         "bonus",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusBonusTime = time();
                                     if ($no_required_time) {
@@ -674,7 +709,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $doubleOrder,
                                         "double",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
@@ -703,7 +739,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -738,7 +775,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -771,7 +809,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -798,7 +837,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -837,7 +877,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -861,7 +902,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -892,7 +934,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $doubleOrder,
                                         "double",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
@@ -912,8 +955,23 @@ class UniversalAndroidFunctionController extends Controller
                     break;
             }
             $lastStatusBonus = $newStatusBonus;
-            Log::debug(" Безнал после обработки new Status: " . $newStatusBonus);
+            Log::debug(" Безнал после обработки new Status: " . $lastStatusBonus);
+            $canceledAll = self::canceledFinish(
+                $lastStatusBonus,
+                $lastStatusDouble
+            );
 
+            if ($canceledAll) {
+                Log::debug("canceled while ");
+                Log::debug("lastStatusBonus: " . $lastStatusBonus);
+                Log::debug("lastStatusDouble: " . $lastStatusDouble);
+                Log::debug("canceledFinish: " . $canceledAll);
+
+                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+
+                $uid_history->delete();
+                return "finish";
+            }
 //Нал ОБРАБОТКА статуса
             switch ($newStatusDouble) {
                 case "SearchesForCar":
@@ -931,7 +989,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -967,7 +1026,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -993,7 +1053,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1026,7 +1087,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1057,7 +1119,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1093,7 +1156,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1119,7 +1183,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1151,7 +1216,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1182,7 +1248,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1215,7 +1282,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1251,7 +1319,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1275,7 +1344,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1301,7 +1371,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1333,7 +1404,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1366,7 +1438,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1401,7 +1474,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1425,7 +1499,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1451,7 +1526,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1493,7 +1569,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $bonusOrder,
                                         "bonus",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusBonusTime = time();
                                     if ($no_required_time) {
@@ -1532,7 +1609,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $doubleOrder,
                                         "double",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
@@ -1556,7 +1634,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $bonusOrder,
                                         "bonus",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusBonusTime = time();
                                     if ($no_required_time) {
@@ -1596,7 +1675,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $bonusOrder,
                                         "bonus",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusBonusTime = time();
                                     if ($no_required_time) {
@@ -1634,7 +1714,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $doubleOrder,
                                         "double",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
@@ -1658,7 +1739,8 @@ class UniversalAndroidFunctionController extends Controller
                                         $bonusOrder,
                                         "bonus",
                                         $lastTimeUpdate,
-                                        $upDateTimeInterval
+                                        $upDateTimeInterval,
+                                        $uid_history
                                     );
                                     $lastStatusBonusTime = time();
                                     if ($no_required_time) {
@@ -1687,7 +1769,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1722,7 +1805,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1755,7 +1839,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1781,7 +1866,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1821,7 +1907,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $doubleOrder,
                                 "double",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusDoubleTime = time();
                             if ($no_required_time) {
@@ -1845,7 +1932,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1872,7 +1960,8 @@ class UniversalAndroidFunctionController extends Controller
                                 $bonusOrder,
                                 "bonus",
                                 $lastTimeUpdate,
-                                $upDateTimeInterval
+                                $upDateTimeInterval,
+                                $uid_history
                             );
                             $lastStatusBonusTime = time();
                             if ($no_required_time) {
@@ -1893,6 +1982,23 @@ class UniversalAndroidFunctionController extends Controller
             }
             $lastStatusDouble = $newStatusDouble;
             Log::debug(" Нал после обработки new Status: " . $lastStatusDouble);
+            $canceledAll = self::canceledFinish(
+                $lastStatusBonus,
+                $lastStatusDouble
+            );
+
+            if ($canceledAll) {
+                Log::debug("canceled while ");
+                Log::debug("lastStatusBonus: " . $lastStatusBonus);
+                Log::debug("lastStatusDouble: " . $lastStatusDouble);
+                Log::debug("canceledFinish: " . $canceledAll);
+
+                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+
+                $uid_history->delete();
+                return "finish";
+            }
+
         }
 
         if (time() - $startTime >= $maxExecutionTime) {
@@ -1917,7 +2023,7 @@ class UniversalAndroidFunctionController extends Controller
 //            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
         }
         self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-        $doubleOrderRecord->delete();
+        $uid_history->delete();
         return "finish by time is out";
     }
 
@@ -1929,7 +2035,8 @@ class UniversalAndroidFunctionController extends Controller
         $order,
         $orderType,
         $lastTimeUpdate,
-        $upDateTimeInterval
+        $upDateTimeInterval,
+        $uid_history
     ) {
 
         Log::debug("lastTimeUpdate" . $lastTimeUpdate);
@@ -1950,10 +2057,22 @@ class UniversalAndroidFunctionController extends Controller
             $order
         )["execution_status"];
 
+        switch ($orderType) {
+            case "bonus":
+                $uid_history->uid_bonusOrder = $order;
+                break;
+            case "double":
+                $uid_history->uid_doubleOrder = $order;
+                break;
+        }
+        $uid_history->save();
+        Log::debug("uid_history: $uid_history");
+
         $message = "в работе";
         if ($newStatus == "Canceled") {
             $message = "закрыт";
         }
+
 
         self::ordersExecStatusHistory(
             $order,
@@ -2122,7 +2241,6 @@ class UniversalAndroidFunctionController extends Controller
     {
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
 
-        Log::debug("function webordersCancel: order->fondy_order_id " . $order->fondy_order_id);
 
         if ($order->fondy_order_id != null) {
             //Возврат денег по Фонди
@@ -2308,8 +2426,8 @@ class UniversalAndroidFunctionController extends Controller
 
             $newUser->save();
 
-            $user = User::where('email', $email)->first();
-            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
+//            $user = User::where('email', $email)->first();
+//            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
         }
     }
     public function addUserNoName($email)
@@ -2339,9 +2457,11 @@ class UniversalAndroidFunctionController extends Controller
             $user->name = $username;
             $user->save();
 
-            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
+//            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
+            return ["user_name" => $username];
+        } else {
+            return ["user_name" => "no_name"];
         }
-        return ["user_name" => $username];
     }
 
     public function verifyBlackListUser($email, $androidDom)
@@ -2586,6 +2706,7 @@ class UniversalAndroidFunctionController extends Controller
 //dd($city);
         return $city->toArray()['versionApi'];
     }
+
     public function apiVersionApp($name, $address, $app)
     {
 
@@ -2675,16 +2796,16 @@ class UniversalAndroidFunctionController extends Controller
 //        dd($application);
         switch ($application) {
             case "PAS1":
-                $merchant = City_PAS1::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
+                $merchant = City_PAS1::where("name", $city)->first()->toArray();
+                $merchantAccount = $merchant["wfp_merchantAccount"];
                 break;
             case "PAS2":
-                $merchant = City_PAS2::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
+                $merchant = City_PAS2::where("name", $city)->first()->toArray();
+                $merchantAccount = $merchant["wfp_merchantAccount"];
                 break;
             default:
-                $merchant = City_PAS4::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
+                $merchant = City_PAS4::where("name", $city)->first()->toArray();
+                $merchantAccount = $merchant["wfp_merchantAccount"];
         }
 //dd( $merchantAccount);
 

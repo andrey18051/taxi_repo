@@ -283,20 +283,20 @@ class CityPas2Controller extends Controller
 
     public function maxPayValue($city): array
     {
-        $city = City_PAS2::where('name', $city)->first();
+        $city = City_PAS2::where('name', $city)->first()->toArray();
 
         return [
-            'card_max_pay' => $city->card_max_pay,
-            'bonus_max_pay' => $city->bonus_max_pay
-            ];
+            'card_max_pay' => $city["card_max_pay"],
+            'bonus_max_pay' => $city["bonus_max_pay"]
+        ];
     }
     public function merchantFondy($city): array
     {
-        $city = City_PAS2::where('name', $city)->first();
+        $city = City_PAS2::where('name', $city)->first()->toArray();
 
         return [
-            'merchant_fondy' => $city->merchant_fondy,
-            'fondy_key_storage' => $city->fondy_key_storage
+            'card_max_pay' => $city["merchant_fondy"],
+            'bonus_max_pay' => $city["fondy_key_storage"]
         ];
     }
 }
