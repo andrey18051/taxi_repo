@@ -2564,6 +2564,9 @@ class AndroidTestOSMController extends Controller
             if ($uid_history) {
                 $uid = $uid_history->uid_bonusOrder;
                 $uid_Double = $uid_history->uid_doubleOrder;
+                $uid_history->cancel = true;
+                $uid_history->save();
+
             }
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;

@@ -88,6 +88,7 @@ class UniversalAndroidFunctionController extends Controller
         $uid_history->uid_bonusOrder = $bonusOrder;
         $uid_history->uid_doubleOrder = $doubleOrder;
         $uid_history->uid_bonusOrderHold = $bonusOrder;
+        $uid_history->cancel = false;
         $uid_history->save();
 
 // Безнал
@@ -139,7 +140,8 @@ class UniversalAndroidFunctionController extends Controller
 
         $canceledAll = self::canceledFinish(
             $lastStatusBonus,
-            $lastStatusDouble
+            $lastStatusDouble,
+            $uid_history
         );
         Log::debug("lastStatusBonus0: " . $lastStatusBonus);
         Log::debug("lastStatusDouble0: " . $lastStatusDouble);
@@ -189,7 +191,8 @@ class UniversalAndroidFunctionController extends Controller
                 Log::debug("lastStatusDouble 1: $lastStatusDouble");
                 $canceledAll = self::canceledFinish(
                     $lastStatusBonus,
-                    $lastStatusDouble
+                    $lastStatusDouble,
+                    $uid_history
                 );
 
                 if ($canceledAll) {
@@ -1009,7 +1012,8 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("lastStatusDouble 2: $lastStatusDouble");
                     $canceledAll = self::canceledFinish(
                         $lastStatusBonus,
-                        $lastStatusDouble
+                        $lastStatusDouble,
+                        $uid_history
                     );
 
                     if ($canceledAll) {
@@ -2065,7 +2069,8 @@ class UniversalAndroidFunctionController extends Controller
                         Log::debug("lastStatusDouble 3: $lastStatusDouble");
                         $canceledAll = self::canceledFinish(
                             $lastStatusBonus,
-                            $lastStatusDouble
+                            $lastStatusDouble,
+                            $uid_history
                         );
 
                         if ($canceledAll) {
@@ -2173,35 +2178,42 @@ class UniversalAndroidFunctionController extends Controller
      */
     public function canceledFinish(
         $lastStatusBonus,
-        $lastStatusDouble
+        $lastStatusDouble,
+        $uid_history
     ): bool {
-// проверка нала
-        switch ($lastStatusDouble) {
-            case "Canceled":
-            case "Executed":
-            case "CostCalculation":
-                switch ($lastStatusBonus) {
-                    case "Canceled":
-                    case "Executed":
-                    case "CostCalculation":
-                        return true;
-                }
-                break;
+        if($uid_history->cancel) {
+            return true;
+        } else {
+            // проверка нала
+            switch ($lastStatusDouble) {
+                case "Canceled":
+                case "Executed":
+                case "CostCalculation":
+                    switch ($lastStatusBonus) {
+                        case "Canceled":
+                        case "Executed":
+                        case "CostCalculation":
+                            return true;
+                    }
+                    break;
+            }
+            // проверка безнала
+            switch ($lastStatusBonus) {
+                case "Canceled":
+                case "Executed":
+                case "CostCalculation":
+                    switch ($lastStatusDouble) {
+                        case "Canceled":
+                        case "Executed":
+                        case "CostCalculation":
+                            return true;
+                    }
+                    break;
+            }
+            return false;
         }
-// проверка безнала
-        switch ($lastStatusBonus) {
-            case "Canceled":
-            case "Executed":
-            case "CostCalculation":
-                switch ($lastStatusDouble) {
-                    case "Canceled":
-                    case "Executed":
-                    case "CostCalculation":
-                        return true;
-                }
-                break;
-        }
-        return false;
+
+
     }
 
     public function orderCanceled(
