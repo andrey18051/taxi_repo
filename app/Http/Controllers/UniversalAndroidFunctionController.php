@@ -2109,6 +2109,7 @@ class UniversalAndroidFunctionController extends Controller
                 self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
 //                $uid_history->delete();
             }
+            $uid_history->delete();
             return "finish by time is out";
         }
     }
@@ -2181,7 +2182,9 @@ class UniversalAndroidFunctionController extends Controller
         $lastStatusDouble,
         $uid_history
     ): bool {
-        if($uid_history->cancel) {
+        if ($uid_history->cancel) {
+            Log::debug("uid_history->cancel");
+            $uid_history->delete();
             return true;
         } else {
             // проверка нала
@@ -2193,6 +2196,8 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
+                            $uid_history->delete();
+                            Log::debug("отмена по налу");
                             return true;
                     }
                     break;
@@ -2206,14 +2211,14 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
+                            $uid_history->delete();
+                            Log::debug("отмена по безналу");
                             return true;
                     }
                     break;
             }
             return false;
         }
-
-
     }
 
     public function orderCanceled(
