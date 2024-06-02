@@ -60,7 +60,7 @@ class UniversalAndroidFunctionController extends Controller
         $identificationId = $doubleOrderRecord->identificationId;
         $apiVersion = $doubleOrderRecord->apiVersion;
 
-        $doubleOrderRecord->delete();
+//        $doubleOrderRecord->delete();
 
 
         $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
