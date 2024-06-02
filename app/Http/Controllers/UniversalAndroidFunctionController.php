@@ -110,10 +110,10 @@ class UniversalAndroidFunctionController extends Controller
         switch ($newStatusBonus) {
             case "SearchesForCar":
             case "WaitingCarSearch":
-                $upDateTimeBonusInterval = 5;
+                $updateTime = 5;
                 break;
             default:
-                $upDateTimeBonusInterval = 30;
+                $updateTime = 30;
         }
 //Нал
         $newStatusDouble = self::newStatus(
@@ -132,10 +132,10 @@ class UniversalAndroidFunctionController extends Controller
         switch ($newStatusDouble) {
             case "SearchesForCar":
             case "WaitingCarSearch":
-                $upDateTimeDoubleInterval = 5;
+                $updateTime = 5;
                 break;
             default:
-                $upDateTimeDoubleInterval = 30;
+                $updateTime = 30;
         }
 
         $canceledAll = self::canceledFinish(
@@ -153,8 +153,8 @@ class UniversalAndroidFunctionController extends Controller
         } else {
             while (time() - $startTime < $maxExecutionTime) {
                 if (time() <= strtotime($orderwebs->required_time)) {
-                    $upDateTimeBonusInterval = 60;
-                    $upDateTimeDoubleInterval = 60;
+                    $updateTime = 60;
+                    $updateTime = 60;
                     $no_required_time = false;
                 } else {
                     $no_required_time = true;
@@ -214,7 +214,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "WaitingCarSearch":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -230,10 +230,10 @@ class UniversalAndroidFunctionController extends Controller
                                     switch ($newStatusBonus) {
                                         case "SearchesForCar":
                                         case "WaitingCarSearch":
-                                            $upDateTimeBonusInterval = 5;
+                                            $updateTime = 5;
                                             break;
                                         default:
-                                            $upDateTimeBonusInterval = 30;
+                                            $updateTime = 30;
                                     }
                                     break;
                                 case "CarFound":
@@ -266,16 +266,16 @@ class UniversalAndroidFunctionController extends Controller
                                     switch ($newStatusBonus) {
                                         case "SearchesForCar":
                                         case "WaitingCarSearch":
-                                            $upDateTimeBonusInterval = 5;
+                                            $updateTime = 5;
                                             break;
                                         default:
-                                            $upDateTimeBonusInterval = 30;
+                                            $updateTime = 30;
                                     }
                                     break;
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -292,10 +292,10 @@ class UniversalAndroidFunctionController extends Controller
                                     switch ($newStatusBonus) {
                                         case "SearchesForCar":
                                         case "WaitingCarSearch":
-                                            $upDateTimeBonusInterval = 5;
+                                            $updateTime = 5;
                                             break;
                                         default:
-                                            $upDateTimeBonusInterval = 30;
+                                            $updateTime = 30;
                                     }
 
                                     //Восстановление нала
@@ -325,10 +325,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
@@ -341,7 +341,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CarFound":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -358,10 +358,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     //Отмена нала
@@ -392,10 +392,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
@@ -428,15 +428,15 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -453,17 +453,17 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -480,10 +480,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
@@ -497,7 +497,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "Running":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -514,10 +514,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     //Отмена нала
@@ -548,17 +548,17 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -575,10 +575,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
@@ -620,15 +620,15 @@ class UniversalAndroidFunctionController extends Controller
                                                 switch ($newStatusBonus) {
                                                     case "SearchesForCar":
                                                     case "WaitingCarSearch":
-                                                        $upDateTimeBonusInterval = 5;
+                                                        $updateTime = 5;
                                                         break;
                                                     default:
-                                                        $upDateTimeBonusInterval = 30;
+                                                        $updateTime = 30;
                                                 }
                                             }
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                            $upDateTimeInterval = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -645,10 +645,10 @@ class UniversalAndroidFunctionController extends Controller
                                                 switch ($newStatusDouble) {
                                                     case "SearchesForCar":
                                                     case "WaitingCarSearch":
-                                                        $upDateTimeDoubleInterval = 5;
+                                                        $updateTime = 5;
                                                         break;
                                                     default:
-                                                        $upDateTimeDoubleInterval = 30;
+                                                        $updateTime = 30;
                                                 }
                                             }
                                     }
@@ -659,7 +659,7 @@ class UniversalAndroidFunctionController extends Controller
                                         case "WaitingCarSearch":
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                            $upDateTimeInterval = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -676,10 +676,10 @@ class UniversalAndroidFunctionController extends Controller
                                                 switch ($newStatusDouble) {
                                                     case "SearchesForCar":
                                                     case "WaitingCarSearch":
-                                                        $upDateTimeDoubleInterval = 5;
+                                                        $updateTime = 5;
                                                         break;
                                                     default:
-                                                        $upDateTimeDoubleInterval = 30;
+                                                        $updateTime = 30;
                                                 }
                                             }
                                             break;
@@ -715,16 +715,16 @@ class UniversalAndroidFunctionController extends Controller
                                                 switch ($newStatusBonus) {
                                                     case "SearchesForCar":
                                                     case "WaitingCarSearch":
-                                                        $upDateTimeBonusInterval = 5;
+                                                        $updateTime = 5;
                                                         break;
                                                     default:
-                                                        $upDateTimeBonusInterval = 30;
+                                                        $updateTime = 30;
                                                 }
                                             }
 
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                            $upDateTimeInterval = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -741,10 +741,10 @@ class UniversalAndroidFunctionController extends Controller
                                                 switch ($newStatusDouble) {
                                                     case "SearchesForCar":
                                                     case "WaitingCarSearch":
-                                                        $upDateTimeDoubleInterval = 5;
+                                                        $updateTime = 5;
                                                         break;
                                                     default:
-                                                        $upDateTimeDoubleInterval = 30;
+                                                        $updateTime = 30;
                                                 }
                                             }
                                             break;
@@ -754,7 +754,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "Running":
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -771,10 +771,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
@@ -790,7 +790,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "Running":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -807,10 +807,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     //Отмена нала
@@ -841,10 +841,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
 
@@ -852,7 +852,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $upDateTimeInterval = $upDateTimeBonusInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -869,10 +869,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     break;
@@ -909,15 +909,15 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusBonus) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeBonusInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeBonusInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                    $upDateTimeInterval = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -934,10 +934,10 @@ class UniversalAndroidFunctionController extends Controller
                                         switch ($newStatusDouble) {
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
-                                                $upDateTimeDoubleInterval = 5;
+                                                $updateTime = 5;
                                                 break;
                                             default:
-                                                $upDateTimeDoubleInterval = 30;
+                                                $updateTime = 30;
                                         }
                                     }
 
@@ -949,7 +949,7 @@ class UniversalAndroidFunctionController extends Controller
                                         case "SearchesForCar":
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                            $upDateTimeInterval = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -966,10 +966,10 @@ class UniversalAndroidFunctionController extends Controller
                                                 switch ($newStatusDouble) {
                                                     case "SearchesForCar":
                                                     case "WaitingCarSearch":
-                                                        $upDateTimeDoubleInterval = 5;
+                                                        $updateTime = 5;
                                                         break;
                                                     default:
-                                                        $upDateTimeDoubleInterval = 30;
+                                                        $updateTime = 30;
                                                 }
                                             }
                                             break;
@@ -1035,7 +1035,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "WaitingCarSearch":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1052,10 +1052,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1089,17 +1089,17 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1116,10 +1116,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
 
@@ -1150,10 +1150,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1165,7 +1165,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "WaitingCarSearch":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1182,10 +1182,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1219,17 +1219,17 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1246,10 +1246,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Восстановление безнала
@@ -1279,10 +1279,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1294,7 +1294,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "WaitingCarSearch":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1311,10 +1311,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Отмена безнала
@@ -1345,10 +1345,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1382,15 +1382,15 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1407,17 +1407,17 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1434,10 +1434,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1450,7 +1450,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CarFound":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1467,10 +1467,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Отмена Bonus
@@ -1501,10 +1501,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1537,15 +1537,15 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $upDateTimeInterval = $upDateTimeBonusInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1562,17 +1562,17 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1589,10 +1589,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1632,10 +1632,10 @@ class UniversalAndroidFunctionController extends Controller
                                                     switch ($newStatusBonus) {
                                                         case "SearchesForCar":
                                                         case "WaitingCarSearch":
-                                                            $upDateTimeBonusInterval = 5;
+                                                            $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $upDateTimeBonusInterval = 30;
+                                                            $updateTime = 30;
                                                     }
                                                 }
                                                 break;
@@ -1655,7 +1655,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 );
                                                 //Опрос нала
                                                 $lastTimeUpdate = $lastStatusDoubleTime;
-                                                $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                                $upDateTimeInterval = $updateTime;
                                                 $newStatusDouble = self::newStatus(
                                                     $authorizationDouble,
                                                     $identificationId,
@@ -1672,15 +1672,15 @@ class UniversalAndroidFunctionController extends Controller
                                                     switch ($newStatusDouble) {
                                                         case "SearchesForCar":
                                                         case "WaitingCarSearch":
-                                                            $upDateTimeDoubleInterval = 5;
+                                                            $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $upDateTimeDoubleInterval = 30;
+                                                            $updateTime = 30;
                                                     }
                                                 }
                                                 //Опрос безнала
                                                 $lastTimeUpdate = $lastStatusBonusTime;
-                                                $upDateTimeInterval = $upDateTimeBonusInterval;
+                                                $upDateTimeInterval = $updateTime;
                                                 $newStatusBonus = self::newStatus(
                                                     $authorizationBonus,
                                                     $identificationId,
@@ -1697,10 +1697,10 @@ class UniversalAndroidFunctionController extends Controller
                                                     switch ($newStatusBonus) {
                                                         case "SearchesForCar":
                                                         case "WaitingCarSearch":
-                                                            $upDateTimeBonusInterval = 5;
+                                                            $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $upDateTimeBonusInterval = 30;
+                                                            $updateTime = 30;
                                                     }
                                                 }
                                                 break;
@@ -1738,10 +1738,10 @@ class UniversalAndroidFunctionController extends Controller
                                                     switch ($newStatusBonus) {
                                                         case "SearchesForCar":
                                                         case "WaitingCarSearch":
-                                                            $upDateTimeBonusInterval = 5;
+                                                            $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $upDateTimeBonusInterval = 30;
+                                                            $updateTime = 30;
                                                     }
                                                 }
                                                 break;
@@ -1760,7 +1760,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 );
                                                 //Опрос нала
                                                 $lastTimeUpdate = $lastStatusDoubleTime;
-                                                $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                                $upDateTimeInterval = $updateTime;
                                                 $newStatusDouble = self::newStatus(
                                                     $authorizationDouble,
                                                     $identificationId,
@@ -1777,15 +1777,15 @@ class UniversalAndroidFunctionController extends Controller
                                                     switch ($newStatusDouble) {
                                                         case "SearchesForCar":
                                                         case "WaitingCarSearch":
-                                                            $upDateTimeDoubleInterval = 5;
+                                                            $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $upDateTimeDoubleInterval = 30;
+                                                            $updateTime = 30;
                                                     }
                                                 }
                                                 //Опрос безнала
                                                 $lastTimeUpdate = $lastStatusBonusTime;
-                                                $upDateTimeInterval = $upDateTimeBonusInterval;
+                                                $upDateTimeInterval = $updateTime;
                                                 $newStatusBonus = self::newStatus(
                                                     $authorizationBonus,
                                                     $identificationId,
@@ -1802,10 +1802,10 @@ class UniversalAndroidFunctionController extends Controller
                                                     switch ($newStatusBonus) {
                                                         case "SearchesForCar":
                                                         case "WaitingCarSearch":
-                                                            $upDateTimeBonusInterval = 5;
+                                                            $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $upDateTimeBonusInterval = 30;
+                                                            $updateTime = 30;
                                                     }
                                                 }
                                                 break;
@@ -1815,7 +1815,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Running":
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $upDateTimeInterval = $upDateTimeBonusInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1832,10 +1832,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1851,7 +1851,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Running":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1868,10 +1868,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Отмена безнала
@@ -1902,17 +1902,17 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1929,10 +1929,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -1953,7 +1953,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $upDateTimeInterval = $upDateTimeDoubleInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1970,15 +1970,15 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusDouble) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeDoubleInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeDoubleInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $upDateTimeInterval = $upDateTimeBonusInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1995,10 +1995,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
@@ -2006,7 +2006,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Running":
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $upDateTimeInterval = $upDateTimeBonusInterval;
+                                        $upDateTimeInterval = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -2023,10 +2023,10 @@ class UniversalAndroidFunctionController extends Controller
                                             switch ($newStatusBonus) {
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
-                                                    $upDateTimeBonusInterval = 5;
+                                                    $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $upDateTimeBonusInterval = 30;
+                                                    $updateTime = 30;
                                             }
                                         }
                                         break;
