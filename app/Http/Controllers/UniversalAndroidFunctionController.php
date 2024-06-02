@@ -107,14 +107,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $lastStatusBonusTime = $lastTimeUpdate;
         $lastStatusBonus = $newStatusBonus;
-        switch ($newStatusBonus) {
-            case "SearchesForCar":
-            case "WaitingCarSearch":
-                $updateTime = 5;
-                break;
-            default:
-                $updateTime = 30;
-        }
+
 //Нал
         $newStatusDouble = self::newStatus(
             $authorizationDouble,
@@ -135,7 +128,14 @@ class UniversalAndroidFunctionController extends Controller
                 $updateTime = 5;
                 break;
             default:
-                $updateTime = 30;
+                switch ($newStatusBonus) {
+                    case "SearchesForCar":
+                    case "WaitingCarSearch":
+                        $updateTime = 5;
+                        break;
+                    default:
+                        $updateTime = 30;
+                }
         }
 
         $canceledAll = self::canceledFinish(
@@ -233,7 +233,35 @@ class UniversalAndroidFunctionController extends Controller
                                             $updateTime = 5;
                                             break;
                                         default:
-                                            $updateTime = 30;
+                                            switch ($newStatusDouble) {
+                                                case "SearchesForCar":
+                                                case "WaitingCarSearch":
+                                                    $updateTime = 5;
+                                                    break;
+                                                default:
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
+                                            }
                                     }
                                     break;
                                 case "CarFound":
@@ -269,7 +297,35 @@ class UniversalAndroidFunctionController extends Controller
                                             $updateTime = 5;
                                             break;
                                         default:
-                                            $updateTime = 30;
+                                            switch ($newStatusDouble) {
+                                                case "SearchesForCar":
+                                                case "WaitingCarSearch":
+                                                    $updateTime = 5;
+                                                    break;
+                                                default:
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
+                                            }
                                     }
                                     break;
                                 case "CostCalculation":
@@ -295,7 +351,35 @@ class UniversalAndroidFunctionController extends Controller
                                             $updateTime = 5;
                                             break;
                                         default:
-                                            $updateTime = 30;
+                                            switch ($newStatusDouble) {
+                                                case "SearchesForCar":
+                                                case "WaitingCarSearch":
+                                                    $updateTime = 5;
+                                                    break;
+                                                default:
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
+                                            }
                                     }
 
                                     //Восстановление нала
@@ -1055,7 +1139,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1092,7 +1197,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1119,7 +1245,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
 
@@ -1185,7 +1332,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1222,7 +1390,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1249,7 +1438,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         //Восстановление безнала
@@ -1314,7 +1524,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         //Отмена безнала
@@ -1410,7 +1641,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1437,7 +1689,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1470,7 +1743,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         //Отмена Bonus
@@ -1540,7 +1834,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         //Опрос безнала
@@ -1592,7 +1907,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1635,7 +1971,21 @@ class UniversalAndroidFunctionController extends Controller
                                                             $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $updateTime = 30;
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
                                                     }
                                                 }
                                                 break;
@@ -1700,7 +2050,21 @@ class UniversalAndroidFunctionController extends Controller
                                                             $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $updateTime = 30;
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
                                                     }
                                                 }
                                                 break;
@@ -1741,7 +2105,21 @@ class UniversalAndroidFunctionController extends Controller
                                                             $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $updateTime = 30;
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
                                                     }
                                                 }
                                                 break;
@@ -1805,7 +2183,21 @@ class UniversalAndroidFunctionController extends Controller
                                                             $updateTime = 5;
                                                             break;
                                                         default:
-                                                            $updateTime = 30;
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
                                                     }
                                                 }
                                                 break;
@@ -1871,7 +2263,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         //Отмена безнала
@@ -1932,7 +2345,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         break;
@@ -1973,7 +2407,28 @@ class UniversalAndroidFunctionController extends Controller
                                                     $updateTime = 5;
                                                     break;
                                                 default:
-                                                    $updateTime = 30;
+                                                    switch ($newStatusBonus) {
+                                                        case "SearchesForCar":
+                                                        case "WaitingCarSearch":
+                                                            $updateTime = 5;
+                                                            break;
+                                                        default:
+                                                            switch ($newStatusDouble) {
+                                                                case "SearchesForCar":
+                                                                case "WaitingCarSearch":
+                                                                    $updateTime = 5;
+                                                                    break;
+                                                                default:
+                                                                    switch ($newStatusBonus) {
+                                                                        case "SearchesForCar":
+                                                                        case "WaitingCarSearch":
+                                                                            $updateTime = 5;
+                                                                            break;
+                                                                        default:
+                                                                            $updateTime = 30;
+                                                                    }
+                                                            }
+                                                    }
                                             }
                                         }
                                         //Опрос безнала
