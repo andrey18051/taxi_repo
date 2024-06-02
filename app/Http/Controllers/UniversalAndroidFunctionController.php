@@ -141,14 +141,14 @@ class UniversalAndroidFunctionController extends Controller
         $canceledAll = self::canceledFinish(
             $lastStatusBonus,
             $lastStatusDouble,
-            $uid_history
+            $bonusOrderHold
         );
         Log::debug("lastStatusBonus0: " . $lastStatusBonus);
         Log::debug("lastStatusDouble0: " . $lastStatusDouble);
         Log::debug("canceledFinish:0 " . $canceledAll);
 
         if ($canceledAll) {
-//            $uid_history->delete();
+            $uid_history->delete();
             return "finish Canceled by User";
         } else {
             while (time() - $startTime < $maxExecutionTime) {
@@ -192,7 +192,7 @@ class UniversalAndroidFunctionController extends Controller
                 $canceledAll = self::canceledFinish(
                     $lastStatusBonus,
                     $lastStatusDouble,
-                    $uid_history
+                    $bonusOrderHold
                 );
 
                 if ($canceledAll) {
@@ -1013,7 +1013,7 @@ class UniversalAndroidFunctionController extends Controller
                     $canceledAll = self::canceledFinish(
                         $lastStatusBonus,
                         $lastStatusDouble,
-                        $uid_history
+                        $bonusOrderHold
                     );
 
                     if ($canceledAll) {
@@ -2070,7 +2070,7 @@ class UniversalAndroidFunctionController extends Controller
                         $canceledAll = self::canceledFinish(
                             $lastStatusBonus,
                             $lastStatusDouble,
-                            $uid_history
+                            $bonusOrderHold
                         );
 
                         if ($canceledAll) {
@@ -2180,11 +2180,13 @@ class UniversalAndroidFunctionController extends Controller
     public function canceledFinish(
         $lastStatusBonus,
         $lastStatusDouble,
-        $uid_history
+        $uid_bonusOrderHold
     ): bool {
+        $uid_history = Uid_history::where("uid_bonusOrderHold", $uid_bonusOrderHold)->first();
+        Log::debug("uid_history canceledFinish : $uid_history");
         if ($uid_history->cancel) {
             Log::debug("uid_history->cancel");
-            $uid_history->delete();
+//            $uid_history->delete();
             return true;
         } else {
             // проверка нала
@@ -2196,7 +2198,7 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
-                            $uid_history->delete();
+//                            $uid_history->delete();
                             Log::debug("отмена по налу");
                             return true;
                     }
@@ -2211,7 +2213,7 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
-                            $uid_history->delete();
+//                            $uid_history->delete();
                             Log::debug("отмена по безналу");
                             return true;
                     }

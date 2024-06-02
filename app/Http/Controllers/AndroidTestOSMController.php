@@ -2568,7 +2568,7 @@ class AndroidTestOSMController extends Controller
                 $uid_history->save();
 
             }
-
+            Log::debug("uid_history webordersCancelDouble : $uid_history");
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
             $response_bonus = Http::withHeaders([
                 "Authorization" => $authorizationBonus,
