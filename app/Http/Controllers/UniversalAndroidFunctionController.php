@@ -47,7 +47,7 @@ class UniversalAndroidFunctionController extends Controller
         ])->post($url, $parameter);
     }
 
-    public function startNewProcessExecutionStatusEmu($doubleOrderId)
+    public function startNewProcessExecutionStatusEmu($doubleOrderId): string
     {
         ExecStatusHistory::truncate();
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
@@ -159,32 +159,32 @@ class UniversalAndroidFunctionController extends Controller
                     $no_required_time = true;
                 }
                 $bonusOrder = $uid_history->uid_bonusOrder;
-                $lastStatusBonus = self::newStatus(
-                    $authorizationBonus,
-                    $identificationId,
-                    $apiVersion,
-                    $responseBonus["url"],
-                    $bonusOrder,
-                    "bonus",
-                    $lastTimeUpdate,
-                    $updateTime,
-                    $uid_history
-                );
+//                $lastStatusBonus = self::newStatus(
+//                    $authorizationBonus,
+//                    $identificationId,
+//                    $apiVersion,
+//                    $responseBonus["url"],
+//                    $bonusOrder,
+//                    "bonus",
+//                    $lastTimeUpdate,
+//                    $updateTime,
+//                    $uid_history
+//                );
                 Log::debug("bonusOrder  1: $bonusOrder");
                 Log::debug("lastStatusBonus 1: $lastStatusBonus");
 
                 $doubleOrder = $uid_history->uid_doubleOrder;
-                $lastStatusDouble = self::newStatus(
-                    $authorizationDouble,
-                    $identificationId,
-                    $apiVersion,
-                    $responseDouble["url"],
-                    $doubleOrder,
-                    "double",
-                    $lastTimeUpdate,
-                    $updateTime,
-                    $uid_history
-                );
+//                $lastStatusDouble = self::newStatus(
+//                    $authorizationDouble,
+//                    $identificationId,
+//                    $apiVersion,
+//                    $responseDouble["url"],
+//                    $doubleOrder,
+//                    "double",
+//                    $lastTimeUpdate,
+//                    $updateTime,
+//                    $uid_history
+//                );
 
                 Log::debug("doubleOrder  1: $doubleOrder");
                 Log::debug("lastStatusDouble 1: $lastStatusDouble");
@@ -213,7 +213,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "WaitingCarSearch":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -226,42 +226,24 @@ class UniversalAndroidFunctionController extends Controller
                                         $uid_history
                                     );
                                     $lastStatusBonusTime = time();
-                                    switch ($newStatusBonus) {
-                                        case "SearchesForCar":
-                                        case "WaitingCarSearch":
-                                            $updateTime = 5;
-                                            break;
-                                        default:
-                                            switch ($newStatusDouble) {
-                                                case "SearchesForCar":
-                                                case "WaitingCarSearch":
-                                                    $updateTime = 5;
-                                                    break;
-                                                default:
-                                                    switch ($newStatusBonus) {
-                                                        case "SearchesForCar":
-                                                        case "WaitingCarSearch":
-                                                            $updateTime = 5;
-                                                            break;
-                                                        default:
-                                                            switch ($newStatusDouble) {
-                                                                case "SearchesForCar":
-                                                                case "WaitingCarSearch":
-                                                                    $updateTime = 5;
-                                                                    break;
-                                                                default:
-                                                                    switch ($newStatusBonus) {
-                                                                        case "SearchesForCar":
-                                                                        case "WaitingCarSearch":
-                                                                            $updateTime = 5;
-                                                                            break;
-                                                                        default:
-                                                                            $updateTime = 30;
-                                                                    }
-                                                            }
-                                                    }
-                                            }
+                                    if ($no_required_time) {
+                                        switch ($newStatusBonus) {
+                                            case "SearchesForCar":
+                                            case "WaitingCarSearch":
+                                                $updateTime = 5;
+                                                break;
+                                            default:
+                                                switch ($newStatusDouble) {
+                                                    case "SearchesForCar":
+                                                    case "WaitingCarSearch":
+                                                        $updateTime = 5;
+                                                        break;
+                                                    default:
+                                                        $updateTime = 30;
+                                                }
+                                        }
                                     }
+
                                     break;
                                 case "CarFound":
                                 case "Running":
@@ -276,7 +258,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -289,48 +271,29 @@ class UniversalAndroidFunctionController extends Controller
                                         $uid_history
                                     );
                                     $lastStatusBonusTime = time();
-
-                                    switch ($newStatusBonus) {
-                                        case "SearchesForCar":
-                                        case "WaitingCarSearch":
-                                            $updateTime = 5;
-                                            break;
-                                        default:
-                                            switch ($newStatusDouble) {
-                                                case "SearchesForCar":
-                                                case "WaitingCarSearch":
-                                                    $updateTime = 5;
-                                                    break;
-                                                default:
-                                                    switch ($newStatusBonus) {
-                                                        case "SearchesForCar":
-                                                        case "WaitingCarSearch":
-                                                            $updateTime = 5;
-                                                            break;
-                                                        default:
-                                                            switch ($newStatusDouble) {
-                                                                case "SearchesForCar":
-                                                                case "WaitingCarSearch":
-                                                                    $updateTime = 5;
-                                                                    break;
-                                                                default:
-                                                                    switch ($newStatusBonus) {
-                                                                        case "SearchesForCar":
-                                                                        case "WaitingCarSearch":
-                                                                            $updateTime = 5;
-                                                                            break;
-                                                                        default:
-                                                                            $updateTime = 30;
-                                                                    }
-                                                            }
-                                                    }
-                                            }
+                                    if ($no_required_time) {
+                                        switch ($newStatusBonus) {
+                                            case "SearchesForCar":
+                                            case "WaitingCarSearch":
+                                                $updateTime = 5;
+                                                break;
+                                            default:
+                                                switch ($newStatusDouble) {
+                                                    case "SearchesForCar":
+                                                    case "WaitingCarSearch":
+                                                        $updateTime = 5;
+                                                        break;
+                                                    default:
+                                                        $updateTime = 30;
+                                                }
+                                        }
                                     }
+
                                     break;
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -343,43 +306,24 @@ class UniversalAndroidFunctionController extends Controller
                                         $uid_history
                                     );
                                     $lastStatusBonusTime = time();
-
-                                    switch ($newStatusBonus) {
-                                        case "SearchesForCar":
-                                        case "WaitingCarSearch":
-                                            $updateTime = 5;
-                                            break;
-                                        default:
-                                            switch ($newStatusDouble) {
-                                                case "SearchesForCar":
-                                                case "WaitingCarSearch":
-                                                    $updateTime = 5;
-                                                    break;
-                                                default:
-                                                    switch ($newStatusBonus) {
-                                                        case "SearchesForCar":
-                                                        case "WaitingCarSearch":
-                                                            $updateTime = 5;
-                                                            break;
-                                                        default:
-                                                            switch ($newStatusDouble) {
-                                                                case "SearchesForCar":
-                                                                case "WaitingCarSearch":
-                                                                    $updateTime = 5;
-                                                                    break;
-                                                                default:
-                                                                    switch ($newStatusBonus) {
-                                                                        case "SearchesForCar":
-                                                                        case "WaitingCarSearch":
-                                                                            $updateTime = 5;
-                                                                            break;
-                                                                        default:
-                                                                            $updateTime = 30;
-                                                                    }
-                                                            }
-                                                    }
-                                            }
+                                    if ($no_required_time) {
+                                        switch ($newStatusBonus) {
+                                            case "SearchesForCar":
+                                            case "WaitingCarSearch":
+                                                $updateTime = 5;
+                                                break;
+                                            default:
+                                                switch ($newStatusDouble) {
+                                                    case "SearchesForCar":
+                                                    case "WaitingCarSearch":
+                                                        $updateTime = 5;
+                                                        break;
+                                                    default:
+                                                        $updateTime = 30;
+                                                }
+                                        }
                                     }
+
 
                                     //Восстановление нала
                                     $doubleOrder = self::orderNewCreat(
@@ -391,7 +335,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -431,7 +375,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CarFound":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -472,7 +416,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -515,7 +459,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -547,7 +491,7 @@ class UniversalAndroidFunctionController extends Controller
                                     }
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -581,7 +525,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -622,7 +566,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "Running":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -663,7 +607,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -697,7 +641,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -749,7 +693,7 @@ class UniversalAndroidFunctionController extends Controller
                                             );
                                             //Опрос безнала
                                             $lastTimeUpdate = $lastStatusBonusTime;
-                                            $updateTime = 5;
+//                                            $updateTime = 5;
                                             $newStatusBonus = self::newStatus(
                                                 $authorizationBonus,
                                                 $identificationId,
@@ -781,7 +725,7 @@ class UniversalAndroidFunctionController extends Controller
                                             }
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $updateTime = $updateTime;
+//                                            $updateTime = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -819,7 +763,7 @@ class UniversalAndroidFunctionController extends Controller
                                         case "WaitingCarSearch":
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $updateTime = $updateTime;
+//                                            $updateTime = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -865,7 +809,7 @@ class UniversalAndroidFunctionController extends Controller
                                             );
                                             //Опрос безнала
                                             $lastTimeUpdate = $lastStatusBonusTime;
-                                            $updateTime = 5;
+//                                            $updateTime = 5;
                                             $newStatusBonus = self::newStatus(
                                                 $authorizationBonus,
                                                 $identificationId,
@@ -898,7 +842,7 @@ class UniversalAndroidFunctionController extends Controller
 
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $updateTime = $updateTime;
+//                                            $updateTime = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -935,7 +879,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "Running":
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -978,7 +922,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "Running":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -1019,7 +963,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -1054,7 +998,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CostCalculation":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -1101,7 +1045,7 @@ class UniversalAndroidFunctionController extends Controller
                                     );
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-                                    $updateTime = 5;
+//                                    $updateTime = 5;
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -1133,7 +1077,7 @@ class UniversalAndroidFunctionController extends Controller
                                     }
                                     //Опрос нала
                                     $lastTimeUpdate = $lastStatusDoubleTime;
-                                    $updateTime = $updateTime;
+//                                    $updateTime = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
                                         $identificationId,
@@ -1172,7 +1116,7 @@ class UniversalAndroidFunctionController extends Controller
                                         case "SearchesForCar":
                                             //Опрос нала
                                             $lastTimeUpdate = $lastStatusDoubleTime;
-                                            $updateTime = $updateTime;
+//                                            $updateTime = $updateTime;
                                             $newStatusDouble = self::newStatus(
                                                 $authorizationDouble,
                                                 $identificationId,
@@ -1211,32 +1155,32 @@ class UniversalAndroidFunctionController extends Controller
                     $lastStatusBonus = $newStatusBonus;
                     Log::debug(" Безнал после обработки new Status: " . $lastStatusBonus);
                     $bonusOrder = $uid_history->uid_bonusOrder;
-                    $lastStatusBonus = self::newStatus(
-                        $authorizationBonus,
-                        $identificationId,
-                        $apiVersion,
-                        $responseBonus["url"],
-                        $bonusOrder,
-                        "bonus",
-                        $lastTimeUpdate,
-                        $updateTime,
-                        $uid_history
-                    );
+//                    $lastStatusBonus = self::newStatus(
+//                        $authorizationBonus,
+//                        $identificationId,
+//                        $apiVersion,
+//                        $responseBonus["url"],
+//                        $bonusOrder,
+//                        "bonus",
+//                        $lastTimeUpdate,
+//                        $updateTime,
+//                        $uid_history
+//                    );
                     Log::debug("bonusOrder  2: $bonusOrder");
                     Log::debug("lastStatusBonus 2: $lastStatusBonus");
 
                     $doubleOrder = $uid_history->uid_doubleOrder;
-                    $lastStatusDouble = self::newStatus(
-                        $authorizationDouble,
-                        $identificationId,
-                        $apiVersion,
-                        $responseDouble["url"],
-                        $doubleOrder,
-                        "double",
-                        $lastTimeUpdate,
-                        $updateTime,
-                        $uid_history
-                    );
+//                    $lastStatusDouble = self::newStatus(
+//                        $authorizationDouble,
+//                        $identificationId,
+//                        $apiVersion,
+//                        $responseDouble["url"],
+//                        $doubleOrder,
+//                        "double",
+//                        $lastTimeUpdate,
+//                        $updateTime,
+//                        $uid_history
+//                    );
 
                     Log::debug("doubleOrder  2: $doubleOrder");
                     Log::debug("lastStatusDouble 2: $lastStatusDouble");
@@ -1265,7 +1209,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "WaitingCarSearch":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1309,7 +1253,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1343,7 +1287,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1384,7 +1328,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1423,7 +1367,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "WaitingCarSearch":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1467,7 +1411,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1501,7 +1445,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1541,7 +1485,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1580,7 +1524,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "WaitingCarSearch":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1621,7 +1565,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1665,7 +1609,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1697,7 +1641,7 @@ class UniversalAndroidFunctionController extends Controller
                                         }
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1731,7 +1675,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1771,7 +1715,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CarFound":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1812,7 +1756,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1855,7 +1799,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1887,7 +1831,7 @@ class UniversalAndroidFunctionController extends Controller
                                         }
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -1921,7 +1865,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -1971,7 +1915,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 );
                                                 //Опрос безнала
                                                 $lastTimeUpdate = $lastStatusBonusTime;
-                                                $updateTime = 5;
+//                                                $updateTime = 5;
                                                 $newStatusBonus = self::newStatus(
                                                     $authorizationBonus,
                                                     $identificationId,
@@ -2018,7 +1962,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 );
                                                 //Опрос нала
                                                 $lastTimeUpdate = $lastStatusDoubleTime;
-                                                $updateTime = $updateTime;
+//                                                $updateTime = $updateTime;
                                                 $newStatusDouble = self::newStatus(
                                                     $authorizationDouble,
                                                     $identificationId,
@@ -2050,7 +1994,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 }
                                                 //Опрос безнала
                                                 $lastTimeUpdate = $lastStatusBonusTime;
-                                                $updateTime = $updateTime;
+//                                                $updateTime = $updateTime;
                                                 $newStatusBonus = self::newStatus(
                                                     $authorizationBonus,
                                                     $identificationId,
@@ -2098,7 +2042,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 );
                                                 //Опрос безнала
                                                 $lastTimeUpdate = $lastStatusBonusTime;
-                                                $updateTime = 5;
+//                                                $updateTime = 5;
                                                 $newStatusBonus = self::newStatus(
                                                     $authorizationBonus,
                                                     $identificationId,
@@ -2144,7 +2088,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 );
                                                 //Опрос нала
                                                 $lastTimeUpdate = $lastStatusDoubleTime;
-                                                $updateTime = $updateTime;
+//                                                $updateTime = $updateTime;
                                                 $newStatusDouble = self::newStatus(
                                                     $authorizationDouble,
                                                     $identificationId,
@@ -2176,7 +2120,7 @@ class UniversalAndroidFunctionController extends Controller
                                                 }
                                                 //Опрос безнала
                                                 $lastTimeUpdate = $lastStatusBonusTime;
-                                                $updateTime = $updateTime;
+//                                                $updateTime = $updateTime;
                                                 $newStatusBonus = self::newStatus(
                                                     $authorizationBonus,
                                                     $identificationId,
@@ -2213,7 +2157,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Running":
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -2256,7 +2200,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Running":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -2297,7 +2241,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = 5;
+//                                        $updateTime = 5;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -2331,7 +2275,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "CostCalculation":
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -2379,7 +2323,7 @@ class UniversalAndroidFunctionController extends Controller
                                         );
                                         //Опрос нала
                                         $lastTimeUpdate = $lastStatusDoubleTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusDouble = self::newStatus(
                                             $authorizationDouble,
                                             $identificationId,
@@ -2411,7 +2355,7 @@ class UniversalAndroidFunctionController extends Controller
                                         }
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -2446,7 +2390,7 @@ class UniversalAndroidFunctionController extends Controller
                                     case "Running":
                                         //Опрос безнала
                                         $lastTimeUpdate = $lastStatusBonusTime;
-                                        $updateTime = $updateTime;
+//                                        $updateTime = $updateTime;
                                         $newStatusBonus = self::newStatus(
                                             $authorizationBonus,
                                             $identificationId,
@@ -2485,32 +2429,32 @@ class UniversalAndroidFunctionController extends Controller
                         $lastStatusDouble = $newStatusDouble;
                         Log::debug(" Нал после обработки new Status: " . $lastStatusDouble);
                         $bonusOrder = $uid_history->uid_bonusOrder;
-                        $lastStatusBonus = self::newStatus(
-                            $authorizationBonus,
-                            $identificationId,
-                            $apiVersion,
-                            $responseBonus["url"],
-                            $bonusOrder,
-                            "bonus",
-                            $lastTimeUpdate,
-                            $updateTime,
-                            $uid_history
-                        );
+//                        $lastStatusBonus = self::newStatus(
+//                            $authorizationBonus,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $responseBonus["url"],
+//                            $bonusOrder,
+//                            "bonus",
+//                            $lastTimeUpdate,
+//                            $updateTime,
+//                            $uid_history
+//                        );
                         Log::debug("bonusOrder  3: $bonusOrder");
                         Log::debug("lastStatusBonus 3: $lastStatusBonus");
 
                         $doubleOrder = $uid_history->uid_doubleOrder;
-                        $lastStatusDouble = self::newStatus(
-                            $authorizationDouble,
-                            $identificationId,
-                            $apiVersion,
-                            $responseDouble["url"],
-                            $doubleOrder,
-                            "double",
-                            $lastTimeUpdate,
-                            $updateTime,
-                            $uid_history
-                        );
+//                        $lastStatusDouble = self::newStatus(
+//                            $authorizationDouble,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $responseDouble["url"],
+//                            $doubleOrder,
+//                            "double",
+//                            $lastTimeUpdate,
+//                            $updateTime,
+//                            $uid_history
+//                        );
 
                         Log::debug("doubleOrder  3: $doubleOrder");
                         Log::debug("lastStatusDouble 3: $lastStatusDouble");
@@ -2524,7 +2468,6 @@ class UniversalAndroidFunctionController extends Controller
                             Log::debug("canceled while ");
                             Log::debug("lastStatusBonus3: " . $lastStatusBonus);
                             Log::debug("lastStatusDouble3: " . $lastStatusDouble);
-                            Log::debug("canceledFinish3: " . $canceledAll);
 
                             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
 
