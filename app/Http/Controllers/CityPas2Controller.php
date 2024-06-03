@@ -164,18 +164,42 @@ class CityPas2Controller extends Controller
         }
         return 400;
     }
-/**
+    /**
      * @throws \Exception
      */
     public function cityOnlineOrder($city)
     {
+//        $servers = City_PAS2::where('name', $city)->get();
+//        if (isset($servers)) {
+//            $serverArr = $servers->toArray();
+//
+//            foreach ($serverArr as $value) {
+//                $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
+//
+//                $online = $value["online"];
+//
+//                $city = City_PAS2::where('address', $value["address"])->first();
+//
+//                if ($online == "false") {
+//                    if ($timeFive == true) {
+//                        $city->online = "true";
+//                        $city->save();
+//                    }
+//                }
+//
+//            }
+//        }
+
 
         $server = City_PAS2::where('name', $city)
-            ->where('online', "true")
-            ->first()->toArray();
-        Log::debug("cityOnlineOrder", $server);
+            ->where('online', "true")->first();
+
+
+        Log::debug("cityOnlineOrder" . $server);
         if (isset($server) && $server != null) {
-            Log::debug("cityOnlineOrder". "http://" . $server["address"]);
+            $serverArr = $server->toArray();
+
+            Log::debug("cityOnlineOrder". "http://" . $serverArr["address"]);
 
             return "http://" . $server["address"];
         } else {
