@@ -746,7 +746,7 @@ class AndroidTestOSMController extends Controller
             $city = "Kyiv City";
         }
 
-        $connectAPI = self::connectAPIApp($city, $application);
+        $connectAPI = self::connectAPIAppOrder($city, $application);
 //        Log::debug("1 connectAPI $connectAPI");
 
         if ($connectAPI == 400) {
@@ -895,8 +895,8 @@ class AndroidTestOSMController extends Controller
             $cityServer->online = "false";
             $cityServer->save();
 
-            while (self::connectAPIApp($city, $application) != 400) {
-                $connectAPI = self::connectAPIApp($city, $application);
+            while (self::connectAPIAppOrder($city, $application) != 400) {
+                $connectAPI = self::connectAPIAppOrder($city, $application);
                 $url = $connectAPI . '/api/weborders/cost';
                 Log::debug(" _____________________________");
                 Log::debug(" connectAPI while $userArr[2]");
@@ -978,7 +978,7 @@ class AndroidTestOSMController extends Controller
                         ->header('Content-Type', 'json');
                 }
             }
-            if (self::connectAPIApp($city, $application) == 400) {
+            if (self::connectAPIAppOrder($city, $application) == 400) {
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
 
@@ -1049,7 +1049,7 @@ class AndroidTestOSMController extends Controller
             $city = "Kyiv City";
         }
 
-        $connectAPI = self::connectApiApp($city, $application);
+        $connectAPI = self::connectAPIAppOrder($city, $application);
 //        Log::debug("1 connectAPI $connectAPI");
 
         if ($connectAPI == 400) {
@@ -1197,8 +1197,8 @@ class AndroidTestOSMController extends Controller
             $cityServer->online = "false";
             $cityServer->save();
 
-            while (self::connectAPIApp($city, $application) != 400) {
-                $connectAPI = self::connectAPIApp($city, $application);
+            while (self::connectAPIAppOrder($city, $application) != 400) {
+                $connectAPI = self::connectAPIAppOrder($city, $application);
                 $url = $connectAPI . '/api/weborders/cost';
                 Log::debug(" _____________________________");
                 Log::debug(" connectAPI while $userArr[2]");
@@ -1280,7 +1280,7 @@ class AndroidTestOSMController extends Controller
                         ->header('Content-Type', 'json');
                 }
             }
-            if (self::connectAPIApp($city, $application) == 400) {
+            if (self::connectAPIAppOrder($city, $application) == 400) {
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
 
@@ -1348,7 +1348,7 @@ class AndroidTestOSMController extends Controller
             $city = "Kyiv City";
         }
 
-        $connectAPI = self::connectAPIApp($city, $application);
+        $connectAPI = self::connectAPIAppOrder($city, $application);
         Log::debug("1 connectAPI $connectAPI");
 
         if ($connectAPI == 400) {

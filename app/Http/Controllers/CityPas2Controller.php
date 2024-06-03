@@ -173,15 +173,14 @@ class CityPas2Controller extends Controller
         $server = City_PAS2::where('name', $city)
             ->where('online', "true")
             ->first()->toArray();
-        Log::debug("cityOnlineOrder" , $server);
-        if(isset($server) && $server != null) {
+        Log::debug("cityOnlineOrder", $server);
+        if (isset($server) && $server != null) {
             Log::debug("cityOnlineOrder". "http://" . $server["address"]);
 
             return "http://" . $server["address"];
         } else {
             return 400;
         }
-
     }
 
 
