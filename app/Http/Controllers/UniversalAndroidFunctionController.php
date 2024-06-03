@@ -38,13 +38,15 @@ class UniversalAndroidFunctionController extends Controller
 //            "X-WO-API-APP-ID" => $identificationId,
 //            "X-API-VERSION" => $apiVersion
 //        ])->post($url, $parameter)->body();
-
-        return Http::withHeaders([
+        $respons = Http::withHeaders([
 //            return  Http::dd()->withHeaders([
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => $identificationId,
             "X-API-VERSION" => $apiVersion
         ])->post($url, $parameter);
+
+        Log::debug( "postRequestHTTP:" . $respons->body());
+        return $respons;
     }
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId): string
@@ -79,7 +81,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $lastTimeUpdate = time();
 
-        $updateTime = 0;
+        $updateTime = 5;
 
         $responseDouble = json_decode($responseDoubleStr, true);
         $doubleOrder = $responseDouble['dispatching_order_uid'];
@@ -2518,7 +2520,7 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::debug("lastTimeUpdate" . $lastTimeUpdate);
 //        Log::debug("strtotime lastTimeUpdate", strtotime($lastTimeUpdate));
-        Log::debug("time()" . time());
+        Log::debug("Опрос $orderType $order");
 
         $time_sleep = time() -  $lastTimeUpdate;
         Log::debug("time_sleep" . $time_sleep);

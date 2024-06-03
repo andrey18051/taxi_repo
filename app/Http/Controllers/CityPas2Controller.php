@@ -9,6 +9,7 @@ use App\Models\City_PAS2;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
@@ -102,6 +103,7 @@ class CityPas2Controller extends Controller
     {
 
         $serverArr = self::cityAll($city);
+
 //dd($serverArr);
         foreach ($serverArr as $value) {
             $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
@@ -162,6 +164,25 @@ class CityPas2Controller extends Controller
         }
         return 400;
     }
+/**
+     * @throws \Exception
+     */
+    public function cityOnlineOrder($city)
+    {
+
+        $server = City_PAS2::where('name', $city)
+            ->where('online', "true")
+            ->first()->toArray();
+        Log::debug("cityOnlineOrder" , $server);
+        if(isset($server) && $server != null) {
+            Log::debug("cityOnlineOrder". "http://" . $server["address"]);
+
+            return "http://" . $server["address"];
+        } else {
+            return 400;
+        }
+
+    }
 
 
     /**
@@ -171,6 +192,7 @@ class CityPas2Controller extends Controller
     {
 
         $domainFull = "http://" . $domain . "/api/version";
+        Log::debug("checkDomain: " . $domainFull);
 //        $curlInit = curl_init($domainFull);
 //        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
 //        curl_setopt($curlInit, CURLOPT_HEADER, true);

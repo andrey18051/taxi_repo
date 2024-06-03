@@ -82,13 +82,22 @@ class AndroidTestOSMController extends Controller
     public function connectAPI(string $city): string
     {
         return self::onlineAPI($city);
-    }/**
+    }
+    /**
      * @throws \Exception
      */
 
     public function connectAPIApp(string $city, $app): string
     {
         return self::onlineAPIApp($city, $app);
+    }
+    /**
+     * @throws \Exception
+     */
+
+    public function connectAPIAppOrder(string $city, $app): string
+    {
+        return self::onlineAPIAppOrder($city, $app);
     }
 
     /**
@@ -1866,7 +1875,8 @@ class AndroidTestOSMController extends Controller
         if ($city == "foreign countries") {
             $city = "Kyiv City";
         }
-        $connectAPI = self::connectAPIApp($city, $application);
+//        $connectAPI = self::connectAPIApp($city, $application);
+        $connectAPI = self::connectAPIAppOrder($city, $application);
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;
@@ -2094,7 +2104,9 @@ class AndroidTestOSMController extends Controller
 
                 $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
                     $response_arr['dispatching_order_uid'],
-                    self::connectAPIApp($city, $application),
+// ***************************************************************
+//                    self::connectAPIAppOrder($city, $application),
+                    $connectAPI,
                     $authorization,
                     self::identificationId($application)
                 );
@@ -2734,6 +2746,21 @@ class AndroidTestOSMController extends Controller
                 return (new CityPas1Controller)->cityOnline($city);
             case "PAS2":
                 return (new CityPas2Controller)->cityOnline($city);
+            //case "PAS4":
+            default:
+                return (new CityPas4Controller)->cityOnline($city);
+        }
+    }
+    /**
+     * @throws \Exception
+     */
+    public function onlineAPIAppOrder(string $city, $app): string
+    {
+        switch ($app) {
+            case "PAS1":
+                return (new CityPas1Controller)->cityOnline($city);
+            case "PAS2":
+                return (new CityPas2Controller)->cityOnlineOrder($city);
             //case "PAS4":
             default:
                 return (new CityPas4Controller)->cityOnline($city);
