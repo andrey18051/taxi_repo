@@ -110,6 +110,7 @@ class UIDController extends Controller
         $order = Orderweb:: where("email", $email)
 
             ->where("closeReason", "!=", null)
+            ->where("closeReason", "!=", "-1")
             ->where("server", "!=", null)
             ->where("comment", "!=", null)
             ->orderBy("created_at", "desc")
@@ -118,20 +119,21 @@ class UIDController extends Controller
         $response = null;
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
-            $orderUpdate = Orderweb::where("email", $email)
+        }
+        $orderHistory = Orderweb::where("email", $email)
 
-                -> where("closeReason", "!=", null)
-                -> where("server", "!=", null)
-                -> where("startLat", "!=", null)
-                -> where("startLan", "!=", null)
-                -> where("to_lat", "!=", null)
-                -> where("to_lng", "!=", null)
-                -> where("comment", "!=", null)
-                -> orderBy("created_at", "desc")
-                -> get()
-                -> toArray();
+            -> where("closeReason", "!=", null)
+            -> where("server", "!=", null)
+            -> where("startLat", "!=", null)
+            -> where("startLan", "!=", null)
+            -> where("to_lat", "!=", null)
+            -> where("to_lng", "!=", null)
+            -> where("comment", "!=", null)
+            -> orderBy("created_at", "desc")
+            -> get();
+        if (!$orderHistory->isEmpty()) {
             $i=0;
-
+            $orderUpdate = $orderHistory->toArray();
             date_default_timezone_set('Europe/Kiev');
 
             foreach ($orderUpdate as $value) {
@@ -184,7 +186,6 @@ class UIDController extends Controller
                 'created_at' => "*",
             ];
         }
-
         return $response;
     }
 

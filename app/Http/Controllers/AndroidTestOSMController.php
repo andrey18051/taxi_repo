@@ -770,14 +770,14 @@ class AndroidTestOSMController extends Controller
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
-
-            $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
-                $response_arr['dispatching_order_uid'],
-                self::connectAPIAppOrder($city, $application),
-                $authorization,
-                self::identificationId($application)
-            );
-
+//            sleep(5);
+//            $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
+//                $response_arr['dispatching_order_uid'],
+//                self::connectAPIAppOrder($city, $application),
+//                $authorization,
+//                self::identificationId($application)
+//            );
+            $params['closeReason'] = "-1";
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
             $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
@@ -1940,13 +1940,14 @@ class AndroidTestOSMController extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
-
-                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
-                    $response_arr['dispatching_order_uid'],
-                    self::connectAPIAppOrder($city, $application),
-                    $authorization,
-                    self::identificationId($application)
-                );
+//                sleep(5);
+//                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
+//                    $response_arr['dispatching_order_uid'],
+//                    self::connectAPIAppOrder($city, $application),
+//                    $authorization,
+//                    self::identificationId($application)
+//                );
+                $params['closeReason'] = "-1";
 
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
@@ -2259,15 +2260,16 @@ class AndroidTestOSMController extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
-
-                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
-                    $response_arr['dispatching_order_uid'],
-// ***************************************************************
-//                    self::connectAPIAppOrder($city, $application),
-                    $connectAPI,
-                    $authorization,
-                    self::identificationId($application)
-                );
+                sleep(5);
+//                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
+//                    $response_arr['dispatching_order_uid'],
+//// ***************************************************************
+////                    self::connectAPIAppOrder($city, $application),
+//                    $connectAPI,
+//                    $authorization,
+//                    self::identificationId($application)
+//                );
+                $params['closeReason'] = "-1";
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
