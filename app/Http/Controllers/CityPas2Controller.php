@@ -169,27 +169,32 @@ class CityPas2Controller extends Controller
      */
     public function cityOnlineOrder($city)
     {
-//        $servers = City_PAS2::where('name', $city)->get();
-//        if (isset($servers)) {
-//            $serverArr = $servers->toArray();
-//
-//            foreach ($serverArr as $value) {
-//                $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
-//
-//                $online = $value["online"];
-//
-//                $city = City_PAS2::where('address', $value["address"])->first();
-//
-//                if ($online == "false") {
-//                    if ($timeFive == true) {
-//                        $city->online = "true";
-//                        $city->save();
-//                    }
-//                }
-//
-//            }
-//        }
+//Разморозка
+        $serverFalse = City_PAS2::where('name', $city)
+            ->where('online', "false")->get();
+        Log::debug("cityOnlineOrder serverFalse: " . json_encode($serverFalse));
+        if (!$serverFalse->isEmpty()) {
+            $serverArr = $serverFalse->toArray();
 
+            foreach ($serverArr as $value) {
+                $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
+
+                if ($timeFive) {
+                    $cityRecord = City_PAS2::find($value["id"]);
+
+                    if ($cityRecord) {
+                        Log::debug("cityOnlineOrder city: " . json_encode($cityRecord));
+
+                        $cityRecord->online = "true";
+                        $cityRecord->save();
+                    } else {
+                        Log::warning("cityOnlineOrder: City record with id " . $value["id"] . " not found.");
+                    }
+                }
+            }
+        }
+
+ //Получение доступного сервера
 
         $server = City_PAS2::where('name', $city)
             ->where('online', "true")->first();
