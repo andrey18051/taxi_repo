@@ -894,7 +894,7 @@ class AndroidTestOSMController extends Controller
 
             $cityServer->online = "false";
             $cityServer->save();
-
+            (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
             while (self::connectAPIAppOrder($city, $application) != 400) {
                 $connectAPI = self::connectAPIAppOrder($city, $application);
                 $url = $connectAPI . '/api/weborders/cost';
@@ -970,6 +970,7 @@ class AndroidTestOSMController extends Controller
                     }
                     $cityServer->online = "false";
                     $cityServer->save();
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
                 } else {
                     $response_error["order_cost"] = 0;
                     $response_error["Message"] = "ErrorMessage";
@@ -1196,7 +1197,7 @@ class AndroidTestOSMController extends Controller
 
             $cityServer->online = "false";
             $cityServer->save();
-
+            (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
             while (self::connectAPIAppOrder($city, $application) != 400) {
                 $connectAPI = self::connectAPIAppOrder($city, $application);
                 $url = $connectAPI . '/api/weborders/cost';
@@ -1272,6 +1273,7 @@ class AndroidTestOSMController extends Controller
                     }
                     $cityServer->online = "false";
                     $cityServer->save();
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
                 } else {
                     $response_error["order_cost"] = 0;
                     $response_error["Message"] = "ErrorMessage";
@@ -1450,7 +1452,7 @@ class AndroidTestOSMController extends Controller
             }
             $cityServer->online = "false";
             $cityServer->save();
-
+            (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
             while (self::connectAPIApp($city, $application) != 400) {
                 $connectAPI = self::connectAPIApp($city, $application);
                 $url = $connectAPI . '/api/weborders/tariffs/cost';
@@ -1498,6 +1500,7 @@ class AndroidTestOSMController extends Controller
                     }
                     $cityServer->online = "false";
                     $cityServer->save();
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
                 } else {
                     $response_error["order_cost"] = 0;
                     $response_error["Message"] = "ErrorMessage";

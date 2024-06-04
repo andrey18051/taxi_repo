@@ -3482,4 +3482,22 @@ class UniversalAndroidFunctionController extends Controller
     {
         return response()->json(["test"=>"ok"], 200);
     }
+    public function cityNoOnlineMessage($id)
+    {
+
+        $serverFalse = City_PAS2::find($id);
+        $alarmMessage = new TelegramController();
+        $messageAdmin = "Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address . ".";
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            $paramsCheck = [
+                'subject' => 'Ошибка в телеграмм',
+                'message' => $e,
+            ];
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+    }
+
 }
