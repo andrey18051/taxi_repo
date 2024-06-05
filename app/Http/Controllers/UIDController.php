@@ -19,35 +19,51 @@ class UIDController extends Controller
     public function closeReasonUIDStatus($uid, $connectAPI, $autorization, $identificationId)
     {
         $url = $connectAPI . '/api/weborders/' . $uid;
-        $response = Http::withHeaders([
-            "Authorization" => $autorization,
-            "X-WO-API-APP-ID" => $identificationId,
-        ])->get($url);
-        if ($response->successful() && $response->status() == 200) {
-            $response_arr = json_decode($response, true);
 
-            $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-            if ($order != null) {
-                $old_order_closeReason = $order->closeReason;
+        try {
+            $response = Http::withHeaders([
+                "Authorization" => $autorization,
+                "X-WO-API-APP-ID" => $identificationId,
+            ])->timeout(5) // Устанавливаем таймаут в 10 секунд
+            ->get($url);
 
-                if ($old_order_closeReason == $response_arr["close_reason"]) {
-                    $order->closeReasonI += 1;
-                } else {
-                    $order->closeReason = $response_arr["close_reason"];
+            // Логируем тело ответа
+            Log::debug("postRequestHTTP: " . $response->body());
 
-                    $order->closeReasonI = 1;
+            // Проверяем успешность ответа
+            if ($response->successful() && $response->status() == 200) {
+                $response_arr = json_decode($response, true);
+
+                $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+                if ($order != null) {
+                    $old_order_closeReason = $order->closeReason;
+
+                    if ($old_order_closeReason == $response_arr["close_reason"]) {
+                        $order->closeReasonI += 1;
+                    } else {
+                        $order->closeReason = $response_arr["close_reason"];
+
+                        $order->closeReasonI = 1;
+                    }
+                    $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                    $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+
+                    $order->routefrom = $nameFrom;
+                    $order->routeto = $nameTo;
+
+                    if ($response_arr["order_car_info"] != null) {
+                        $order->auto = $response_arr["order_car_info"];
+                    }
+                    $order->save();
                 }
-                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-
-                $order->routefrom = $nameFrom;
-                $order->routeto = $nameTo;
-
-                if ($response_arr["order_car_info"] != null) {
-                    $order->auto = $response_arr["order_car_info"];
-                }
-                $order->save();
+            } else {
+                // Логируем ошибки в случае неудачного запроса
+                Log::error("Request failed with status: " . $response->status());
+                Log::error("Response: " . $response->body());
             }
+        } catch (\Exception $e) {
+            // Обработка исключений
+            Log::error("Exception caught: " . $e->getMessage());
         }
     }
 

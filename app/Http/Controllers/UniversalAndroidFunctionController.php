@@ -38,15 +38,34 @@ class UniversalAndroidFunctionController extends Controller
 //            "X-WO-API-APP-ID" => $identificationId,
 //            "X-API-VERSION" => $apiVersion
 //        ])->post($url, $parameter)->body();
-        $respons = Http::withHeaders([
-//            return  Http::dd()->withHeaders([
-            "Authorization" => $authorization,
-            "X-WO-API-APP-ID" => $identificationId,
-            "X-API-VERSION" => $apiVersion
-        ])->post($url, $parameter);
 
-        Log::debug( "postRequestHTTP:" . $respons->body());
-        return $respons;
+        try {
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])->timeout(5) // Устанавливаем таймаут в 10 секунд
+              ->post($url, $parameter);
+
+            // Логируем тело ответа
+            Log::debug("postRequestHTTP: " . $response->body());
+
+            // Проверяем успешность ответа
+            if ($response->successful()) {
+                // Обрабатываем успешный ответ
+                // Ваш код для обработки успешного ответа
+                return $response;
+            } else {
+                // Логируем ошибки в случае неудачного запроса
+                Log::error("Request failed with status: " . $response->status());
+                Log::error("Response: " . $response->body());
+                return null;
+            }
+        } catch (\Exception $e) {
+            // Обработка исключений
+            Log::error("Exception caught: " . $e->getMessage());
+            return null;
+        }
     }
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId): string
