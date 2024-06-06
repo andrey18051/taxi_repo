@@ -130,7 +130,7 @@ class UIDController extends Controller
         $order = Orderweb:: where("email", $email)
 
             ->where("closeReason", "!=", null)
-            ->where("closeReason", "!=", "-1")
+            ->where("closeReason", "-1")
             ->where("server", "!=", null)
             ->where("comment", "!=", null)
             ->orderBy("created_at", "desc")

@@ -2688,7 +2688,6 @@ class UniversalAndroidFunctionController extends Controller
                     $responseArr = json_decode($response, true);
                     $order = $responseArr["dispatching_order_uid"];
                     Log::debug(" orderNewCreat: " . $url . $order);
-                    $result = true;
                     return $order;
                 } else {
                     // Логируем ошибки в случае неудачного запроса
