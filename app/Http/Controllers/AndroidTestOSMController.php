@@ -46,7 +46,7 @@ class AndroidTestOSMController extends Controller
         $result = false;
 
         do {
-            sleap(5);
+
             try {
                 $response = Http::withHeaders([
                     "Authorization" => $authorization,
@@ -98,7 +98,7 @@ class AndroidTestOSMController extends Controller
                 Log::error("Exception caught: " . $e->getMessage());
                 $result = false;
             }
-
+            sleap(5);
         } while (!$result && time() - $startTime < $maxExecutionTime);
 
         if (!$result) {
@@ -3474,16 +3474,16 @@ class AndroidTestOSMController extends Controller
             $json_arrWeb = json_decode($response, true);
 
             Log::debug("json_arrWeb_bonus", $json_arrWeb);
-            if ($json_arrWeb["order_client_cancel_result"] != 1) {
-                self::repeatCancel(
-                    $url,
-                    $authorization,
-                    $application,
-                    $city,
-                    $connectAPI,
-                    $uid
-                );
-            }
+//            if ($json_arrWeb["order_client_cancel_result"] != 1) {
+//                self::repeatCancel(
+//                    $url,
+//                    $authorization,
+//                    $application,
+//                    $city,
+//                    $connectAPI,
+//                    $uid
+//                );
+//            }
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
             switch ($json_arrWeb['order_client_cancel_result']) {
@@ -3550,15 +3550,15 @@ class AndroidTestOSMController extends Controller
             Log::debug("uid_history webordersCancelDouble : $uid_history");
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-            $response_bonus = Http::withHeaders([
-                "Authorization" => $authorizationBonus,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                    ->apiVersionApp($city, $connectAPI, $application)
-            ])->put($url);
-            $json_arrWeb_bonus = json_decode($response_bonus, true);
-            Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
-            if ($json_arrWeb_bonus["order_client_cancel_result"] != 1) {
+//            $response_bonus = Http::withHeaders([
+//                "Authorization" => $authorizationBonus,
+//                "X-WO-API-APP-ID" => self::identificationId($application),
+//                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                    ->apiVersionApp($city, $connectAPI, $application)
+//            ])->put($url);
+//            $json_arrWeb_bonus = json_decode($response_bonus, true);
+//            Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
+//            if ($json_arrWeb_bonus["order_client_cancel_result"] != 1) {
                 self::repeatCancel(
                     $url,
                     $authorizationBonus,
@@ -3567,20 +3567,20 @@ class AndroidTestOSMController extends Controller
                     $connectAPI,
                     $uid
                 );
-            }
+//            }
 
-            $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
-            $response_double =Http::withHeaders([
-                "Authorization" => $authorizationDouble,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                    ->apiVersionApp($city, $connectAPI, $application)
-            ])->put($url);
-
-
-            $json_arrWeb_double = json_decode($response_double, true);
-            Log::debug("json_arrWeb_double", $json_arrWeb_double);
-            if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
+//            $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+//            $response_double =Http::withHeaders([
+//                "Authorization" => $authorizationDouble,
+//                "X-WO-API-APP-ID" => self::identificationId($application),
+//                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                    ->apiVersionApp($city, $connectAPI, $application)
+//            ])->put($url);
+//
+//
+//            $json_arrWeb_double = json_decode($response_double, true);
+//            Log::debug("json_arrWeb_double", $json_arrWeb_double);
+//            if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
                 self::repeatCancel(
                     $url,
                     $authorizationBonus,
@@ -3589,7 +3589,7 @@ class AndroidTestOSMController extends Controller
                     $connectAPI,
                     $uid_Double
                 );
-            }
+//            }
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
             $hold = false;

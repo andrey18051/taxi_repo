@@ -412,7 +412,8 @@ class UIDController extends Controller
 
     public function UIDStatusReview($order)
     {
-        foreach ($order as $value) {
+        Log::debug("UIDStatusReview", $order->toArray());
+        foreach ($order->toArray() as $value) {
             $currentTime = time();
             $uid = $value["dispatching_order_uid"];
             $timeElapsed = $currentTime - strtotime($value["updated_at"]);

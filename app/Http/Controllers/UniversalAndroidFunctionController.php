@@ -2668,16 +2668,41 @@ class UniversalAndroidFunctionController extends Controller
         $parameter
     ): string {
         $order = "New UID ";
-        $response = Http::withHeaders([
-            "Authorization" => $authorization,
-            "X-WO-API-APP-ID" => $identificationId,
-            "X-API-VERSION" => $apiVersion
-        ])->post($url, $parameter);
+        $maxExecutionTime = 60; // Максимальное время выполнения - 3 часа
 
-        $responseArr = json_decode($response, true);
-        $order = $responseArr["dispatching_order_uid"];
-        Log::debug(" orderNewCreat: " . $url . $order);
-        return $order;
+        $startTime = time();
+        $result = false;
+
+        do {
+            try {
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId,
+                    "X-API-VERSION" => $apiVersion
+                ])->post($url, $parameter);
+
+
+                // Проверяем успешность ответа
+                if ($response->successful() && $response->status() == 200) {
+                    //проверка статуса после отмены
+                    $responseArr = json_decode($response, true);
+                    $order = $responseArr["dispatching_order_uid"];
+                    Log::debug(" orderNewCreat: " . $url . $order);
+                    $result = true;
+                    return $order;
+                } else {
+                    // Логируем ошибки в случае неудачного запроса
+                    Log::error("Request failed with status: " . $response->status());
+                    Log::error("Response: " . $response->body());
+                    $result = false;
+                }
+            } catch (\Exception $e) {
+                // Обработка исключений
+                Log::error("Exception caught: " . $e->getMessage());
+                $result = false;
+            }
+            sleep(5);
+        } while (!$result && time() - $startTime < $maxExecutionTime);
     }
 
     public function getExecutionStatus(
