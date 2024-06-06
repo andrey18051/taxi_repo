@@ -46,14 +46,14 @@ class AndroidTestOSMController extends Controller
         $result = false;
 
         do {
+            sleap(5);
             try {
                 $response = Http::withHeaders([
                     "Authorization" => $authorization,
                     "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
                     "X-API-VERSION" => (new UniversalAndroidFunctionController)
                         ->apiVersionApp($city, $connectAPI, $application)
-                ])->timeout(5) // Устанавливаем таймаут в 5 секунд
-                ->put($url);
+                ])->put($url);
 
                 // Логируем тело ответа
                 Log::debug("postRequestHTTP: " . $response->body());
@@ -61,14 +61,14 @@ class AndroidTestOSMController extends Controller
                 // Проверяем успешность ответа
                 if ($response->successful() && $response->status() == 200) {
                     //проверка статуса после отмены
+                    sleep(5);
                     $url = $connectAPI . '/api/weborders/' . $orderweb;
                     try {
                         $response_uid = Http::withHeaders([
                             "Authorization" => $authorization,
                             "X-API-VERSION" => (new UniversalAndroidFunctionController)
                                 ->apiVersionApp($city, $connectAPI, $application)
-                        ])->timeout(5) // Устанавливаем таймаут в 10 секунд
-                        ->get($url);
+                        ])->get($url);
 
                         if ($response_uid->successful() && $response->status() == 200) {
                             $response_arr = json_decode($response_uid, true);
