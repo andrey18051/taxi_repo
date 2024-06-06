@@ -34,7 +34,7 @@ class AndroidTestOSMController extends Controller
 {
     private static function repeatCancel(
         $url,
-        $authorizationBonus,
+        $authorization,
         $application,
         $city,
         $connectAPI,
@@ -43,19 +43,65 @@ class AndroidTestOSMController extends Controller
         $maxExecutionTime = 3*60*60; // Максимальное время выполнения - 3 часа
 
         $startTime = time();
+        $result = false;
 
         do {
-            sleep(5);
-            $response = Http::withHeaders([
-                "Authorization" => $authorizationBonus,
-                "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-            ])->put($url);
-            $json_arrWeb = json_decode($response, true);
-            Log::debug("repeatCancel json_arrWeb", $json_arrWeb);
-        } while ($json_arrWeb["order_client_cancel_result"] != 1 && time() - $startTime < $maxExecutionTime);
+            try {
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
+                    "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                        ->apiVersionApp($city, $connectAPI, $application)
+                ])->timeout(5) // Устанавливаем таймаут в 5 секунд
+                ->put($url);
 
-        if ($json_arrWeb["order_client_cancel_result"] != 1) {
+                // Логируем тело ответа
+                Log::debug("postRequestHTTP: " . $response->body());
+
+                // Проверяем успешность ответа
+                if ($response->successful() && $response->status() == 200) {
+                    //проверка статуса после отмены
+                    $url = $connectAPI . '/api/weborders/' . $orderweb;
+                    try {
+                        $response_uid = Http::withHeaders([
+                            "Authorization" => $authorization,
+                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                                ->apiVersionApp($city, $connectAPI, $application)
+                        ])->timeout(5) // Устанавливаем таймаут в 10 секунд
+                        ->get($url);
+
+                        if ($response_uid->successful() && $response->status() == 200) {
+                            $response_arr = json_decode($response_uid, true);
+                            if ($response_arr['close_reason'] != "-1") {
+                                $result = false;
+                            } else {
+                                $result = true;
+                            }
+                        } else {
+                            // Логируем ошибки в случае неудачного запроса
+                            Log::error("Request failed with status: " . $response->status());
+                            Log::error("Response: " . $response->body());
+                        }
+                    } catch (\Exception $e) {
+                        // Обработка исключений
+                        Log::error("Exception caught: " . $e->getMessage());
+                        $result = false;
+                    }
+                } else {
+                    // Логируем ошибки в случае неудачного запроса
+                    Log::error("Request failed with status: " . $response->status());
+                    Log::error("Response: " . $response->body());
+                    $result = false;
+                }
+            } catch (\Exception $e) {
+                // Обработка исключений
+                Log::error("Exception caught: " . $e->getMessage());
+                $result = false;
+            }
+
+        } while (!$result && time() - $startTime < $maxExecutionTime);
+
+        if (!$result) {
             (new AndroidTestOSMController)->sentNoCancelInfo($orderweb);
         }
     }
@@ -3507,7 +3553,8 @@ class AndroidTestOSMController extends Controller
             $response_bonus = Http::withHeaders([
                 "Authorization" => $authorizationBonus,
                 "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                    ->apiVersionApp($city, $connectAPI, $application)
             ])->put($url);
             $json_arrWeb_bonus = json_decode($response_bonus, true);
             Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
@@ -3526,7 +3573,8 @@ class AndroidTestOSMController extends Controller
             $response_double =Http::withHeaders([
                 "Authorization" => $authorizationDouble,
                 "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                    ->apiVersionApp($city, $connectAPI, $application)
             ])->put($url);
 
 
