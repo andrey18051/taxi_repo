@@ -208,7 +208,7 @@ class UIDController extends Controller
                 'created_at' => "*",
             ];
         }
-        Log::debug("UIDStatusShowEmail response", $response);
+//        Log::debug("UIDStatusShowEmail response", $response);
         return $response;
     }
 
