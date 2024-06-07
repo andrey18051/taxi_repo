@@ -51,8 +51,9 @@ class AndroidTestOSMController extends Controller
                 $response = Http::withHeaders([
                     "Authorization" => $authorization,
                     "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
-                    "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                        ->apiVersionApp($city, $connectAPI, $application)
+
+//                    "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                        ->apiVersionApp($city, $connectAPI, $application)
                 ])->put($url);
 
                 // Логируем тело ответа
@@ -66,8 +67,10 @@ class AndroidTestOSMController extends Controller
                     try {
                         $response_uid = Http::withHeaders([
                             "Authorization" => $authorization,
-                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                                ->apiVersionApp($city, $connectAPI, $application)
+                            "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
+//
+//                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                                ->apiVersionApp($city, $connectAPI, $application)
                         ])->get($url);
 
                         if ($response_uid->successful() && $response->status() == 200) {
@@ -3546,15 +3549,16 @@ class AndroidTestOSMController extends Controller
                 $uid_history->cancel = true;
                 $uid_history->save();
 
+                Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
             }
-            Log::debug("uid_history webordersCancelDouble : $uid_history");
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+            Log::debug(" webordersCancelDouble bonus $url");
             $response_bonus = Http::withHeaders([
                 "Authorization" => $authorizationBonus,
                 "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                    ->apiVersionApp($city, $connectAPI, $application)
+//                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                    ->apiVersionApp($city, $connectAPI, $application)
             ])->put($url);
             $json_arrWeb_bonus = json_decode($response_bonus, true);
             Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
@@ -3570,11 +3574,13 @@ class AndroidTestOSMController extends Controller
             }
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+            Log::debug(" webordersCancelDouble double $url");
+
             $response_double =Http::withHeaders([
                 "Authorization" => $authorizationDouble,
                 "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                    ->apiVersionApp($city, $connectAPI, $application)
+//                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                    ->apiVersionApp($city, $connectAPI, $application)
             ])->put($url);
 
 
@@ -3583,7 +3589,7 @@ class AndroidTestOSMController extends Controller
             if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
                 self::repeatCancel(
                     $url,
-                    $authorizationBonus,
+                    $authorizationDouble,
                     $application,
                     $city,
                     $connectAPI,
