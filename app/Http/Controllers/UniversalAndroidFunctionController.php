@@ -180,32 +180,12 @@ class UniversalAndroidFunctionController extends Controller
                     $no_required_time = true;
                 }
                 $bonusOrder = $uid_history->uid_bonusOrder;
-//                $lastStatusBonus = self::newStatus(
-//                    $authorizationBonus,
-//                    $identificationId,
-//                    $apiVersion,
-//                    $responseBonus["url"],
-//                    $bonusOrder,
-//                    "bonus",
-//                    $lastTimeUpdate,
-//                    $updateTime,
-//                    $uid_history
-//                );
+
                 Log::debug("bonusOrder  1: $bonusOrder");
                 Log::debug("lastStatusBonus 1: $lastStatusBonus");
 
                 $doubleOrder = $uid_history->uid_doubleOrder;
-//                $lastStatusDouble = self::newStatus(
-//                    $authorizationDouble,
-//                    $identificationId,
-//                    $apiVersion,
-//                    $responseDouble["url"],
-//                    $doubleOrder,
-//                    "double",
-//                    $lastTimeUpdate,
-//                    $updateTime,
-//                    $uid_history
-//                );
+
 
                 Log::debug("doubleOrder  1: $doubleOrder");
                 Log::debug("lastStatusDouble 1: $lastStatusDouble");
@@ -2547,14 +2527,21 @@ class UniversalAndroidFunctionController extends Controller
         if ($time_sleep < $updateTime) {
             sleep($updateTime - $time_sleep);
         }
-        $newStatus = self::getExecutionStatus(
+        $newStatusArr = self::getExecutionStatus(
             $authorization,
             $identificationId,
             $apiVersion,
             $url,
             $order
-        )["execution_status"];
-
+        );
+        $newStatus = $newStatusArr["execution_status"];
+        Log::debug("function newStatus $orderType: " . $newStatus);
+        Log::debug("function newStatus $orderType close_reason: " . $newStatusArr["close_reason"]);
+        if ($newStatus == "Canceled") {
+            if ($newStatusArr["close_reason"] == "-1") {
+                $newStatus == "CarFound";
+            }
+        }
         switch ($orderType) {
             case "bonus":
                 $uid_history->uid_bonusOrder = $order;
