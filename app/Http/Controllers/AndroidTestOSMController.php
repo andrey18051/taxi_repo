@@ -2849,7 +2849,7 @@ class AndroidTestOSMController extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
             ];
-
+            $comment = "!!!!!по городу!!!!";
         } else {
             $route_undefined = false;
 
@@ -2882,8 +2882,8 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if ($comment == "no_comment") {
-            $comment = "Оператору набрать заказчика и согласовать весь заказ";
+        if ($comment == "no_comment" || $comment == "!!!!!по городу!!!!") {
+            $comment = $comment . "Оператору набрать заказчика и согласовать весь заказ";
             if ($userArr[2] == 'bonus_payment' && $route_undefined) {
                 $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
                 $route_undefined = false;
@@ -2914,9 +2914,7 @@ class AndroidTestOSMController extends Controller
                 $route_undefined = false;
             }
         }
-        if ($route_undefined) {
-            $comment = $comment . "!!!!!по городу!!!!";
-        }
+
         $url = $connectAPI . '/api/weborders';
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
