@@ -2539,9 +2539,10 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("function newStatus $orderType close_reason: " . $newStatusArr["close_reason"]);
         if ($newStatus == "Canceled") {
             if ($newStatusArr["close_reason"] == "-1") {
-                $newStatus == "CarFound";
+                $newStatus = "CarFound";
             }
         }
+        Log::debug("function newStatus  после $orderType: " . $newStatus);
         switch ($orderType) {
             case "bonus":
                 $uid_history->uid_bonusOrder = $order;
@@ -2673,6 +2674,7 @@ class UniversalAndroidFunctionController extends Controller
                 if ($response->successful() && $response->status() == 200) {
                     //проверка статуса после отмены
                     $responseArr = json_decode($response, true);
+                    Log::debug(" orderNewCreat responseArr: ", $responseArr);
                     $order = $responseArr["dispatching_order_uid"];
                     Log::debug(" orderNewCreat: " . $url . $order);
                     return $order;
@@ -2680,12 +2682,12 @@ class UniversalAndroidFunctionController extends Controller
                     // Логируем ошибки в случае неудачного запроса
                     Log::error("Request failed with status: " . $response->status());
                     Log::error("Response: " . $response->body());
-                    $result = false;
+                    $result = null;
                 }
             } catch (\Exception $e) {
                 // Обработка исключений
                 Log::error("Exception caught: " . $e->getMessage());
-                $result = false;
+                $result = null;
             }
             sleep(5);
         } while (!$result && time() - $startTime < $maxExecutionTime);
@@ -3337,28 +3339,30 @@ class UniversalAndroidFunctionController extends Controller
             ->get();
 
         $response = [];
+        if ($cards != null) {
+            foreach ($cards as $card) {
+                $rectokenLifetimeString = $card->rectoken_lifetime;
+                $rectokenLifetimeDateTime = DateTime::createFromFormat('d.m.Y H:i:s', $rectokenLifetimeString);
 
-        foreach ($cards as $card) {
-            $rectokenLifetimeString = $card->rectoken_lifetime;
-            $rectokenLifetimeDateTime = DateTime::createFromFormat('d.m.Y H:i:s', $rectokenLifetimeString);
+                $cardData = [
+                    'masked_card' => $card->masked_card,
+                    'card_type' => $card->card_type,
+                    'bank_name' => $card->bank_name,
+                    'merchant' => $card->merchant,
+                    'rectoken' => $card->rectoken
+                ];
 
-            $cardData = [
-                'masked_card' => $card->masked_card,
-                'card_type' => $card->card_type,
-                'bank_name' => $card->bank_name,
-                'merchant' => $card->merchant,
-                'rectoken' => $card->rectoken
-            ];
+                if ($rectokenLifetimeDateTime instanceof DateTime) {
+                    $currentTime = new DateTime();
 
-            if ($rectokenLifetimeDateTime instanceof DateTime) {
-                $currentTime = new DateTime();
-
-                if ($rectokenLifetimeDateTime < $currentTime) {
-                    $card->delete();
+                    if ($rectokenLifetimeDateTime < $currentTime) {
+                        $card->delete();
+                    }
                 }
+                $response[] = $cardData;
             }
-            $response[] = $cardData;
         }
+
 
         return response()->json(['cards' => $response]);
     }

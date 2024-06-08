@@ -3346,7 +3346,11 @@ class AndroidTestOSMController extends Controller
     public function sentNoCancelInfo($orderweb)
     {
 
-        $user_full_name = $orderweb->user_full_name;
+        if ($orderweb->user_full_name) {
+            $user_full_name = $orderweb->user_full_name;
+        } else {
+            $user_full_name = "no_name";
+        }
         $user_phone = $orderweb->user_phone;
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
