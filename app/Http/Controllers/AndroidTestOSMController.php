@@ -2997,7 +2997,7 @@ class AndroidTestOSMController extends Controller
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
-                sleep(5);
+//                sleep(5);
 //                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
 //                    $response_arr['dispatching_order_uid'],
 //// ***************************************************************
@@ -3648,75 +3648,132 @@ class AndroidTestOSMController extends Controller
 
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/' . $uid;
-
-            $response = Http::withHeaders([
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-            ])->get($url);
-
-            $response_arr = json_decode($response, true);
-            Log::debug("$url: ", $response_arr);
-            if ($response_arr["close_reason"] == 0 || $response_arr["close_reason"] == 8) {
-                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-
-                $orderweb_uid->routefrom = $nameFrom;
-                $orderweb_uid->routeto = $nameTo;
-
-                if ($response_arr["order_car_info"] != null) {
-                    $orderweb_uid->auto = $response_arr["order_car_info"];
-                }
-
-                $orderweb_uid->save();
-                return $response;
-            } else {
-                $url = $connectAPI . '/api/weborders/' . $uid_Double;
-
-                $response_Double = Http::withHeaders([
+            try {
+                $response = Http::withHeaders([
                     "Authorization" => $authorization,
                     "X-WO-API-APP-ID" => self::identificationId($application),
                     "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
                 ])->get($url);
-                $response_arr = json_decode($response_Double, true);
-                Log::debug("$url: ", $response_arr);
-                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
 
-                $orderweb_uid->routefrom = $nameFrom;
-                $orderweb_uid->routeto = $nameTo;
+                // Логируем тело ответа
+                Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
 
-                if ($response_arr["order_car_info"] != null) {
-                    $orderweb_uid->auto = $response_arr["order_car_info"];
+                // Проверяем успешность ответа
+                if ($response->successful()) {
+                    // Обрабатываем успешный ответ
+                    $response_arr = json_decode($response, true);
+                    Log::debug("$url: ", $response_arr);
+                    if ($response_arr["close_reason"] == 0 || $response_arr["close_reason"] == 8) {
+                        $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                        $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+
+                        $orderweb_uid->routefrom = $nameFrom;
+                        $orderweb_uid->routeto = $nameTo;
+
+                        if ($response_arr["order_car_info"] != null) {
+                            $orderweb_uid->auto = $response_arr["order_car_info"];
+                        }
+
+                        $orderweb_uid->save();
+                        return $response;
+                    } else {
+                        $url = $connectAPI . '/api/weborders/' . $uid_Double;
+                        try {
+                            $response_Double = Http::withHeaders([
+                                "Authorization" => $authorization,
+                                "X-WO-API-APP-ID" => self::identificationId($application),
+                                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                            ])->get($url);
+
+                            // Логируем тело ответа
+                            Log::debug("postRequestHTTP: " . $response->body());
+
+                            // Проверяем успешность ответа
+                            if ($response->successful()) {
+                                // Обрабатываем успешный ответ
+                                $response_arr = json_decode($response_Double, true);
+                                Log::debug("$url: ", $response_arr);
+                                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+
+                                $orderweb_uid->routefrom = $nameFrom;
+                                $orderweb_uid->routeto = $nameTo;
+
+                                if ($response_arr["order_car_info"] != null) {
+                                    $orderweb_uid->auto = $response_arr["order_car_info"];
+                                }
+
+                                $orderweb_uid->save();
+                                return $response_Double;
+                            } else {
+                                // Логируем ошибки в случае неудачного запроса
+                                Log::error("historyUIDStatus Request failed with status: " . $response->status());
+                                Log::error("historyUIDStatus Response: " . $response->body());
+                                return null;
+                            }
+                        } catch (\Exception $e) {
+                            // Обработка исключений
+                            Log::error("Exception caught: " . $e->getMessage());
+                            return null;
+                        }
+                    }
+                } else {
+                    // Логируем ошибки в случае неудачного запроса
+                    Log::error("historyUIDStatus Request failed with status: " . $response->status());
+                    Log::error("historyUIDStatus Response: " . $response->body());
+                    return null;
                 }
-
-                $orderweb_uid->save();
-                return $response_Double;
+            } catch (\Exception $e) {
+                // Обработка исключений
+                Log::error("Exception caught: " . $e->getMessage());
+                return null;
             }
+
+
+
         } else {
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/' . $uid;
+            try {
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => self::identificationId($application),
+                    "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                ])->get($url);
 
-            $response = Http::withHeaders([
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-            ])->get($url);
+                // Логируем тело ответа
+                Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
 
-            $response_arr = json_decode($response, true);
-            Log::debug("$url: ", $response_arr);
-            $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-            $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+                // Проверяем успешность ответа
+                if ($response->successful()) {
+                    // Обрабатываем успешный ответ
+                    $response_arr = json_decode($response, true);
+                    Log::debug("$url: ", $response_arr);
+                    $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+                    $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
 
-            $orderweb_uid->routefrom = $nameFrom;
-            $orderweb_uid->routeto = $nameTo;
+                    $orderweb_uid->routefrom = $nameFrom;
+                    $orderweb_uid->routeto = $nameTo;
 
-            if ($response_arr["order_car_info"] != null) {
-                $orderweb_uid->auto = $response_arr["order_car_info"];
+                    if ($response_arr["order_car_info"] != null) {
+                        $orderweb_uid->auto = $response_arr["order_car_info"];
+                    }
+
+                    $orderweb_uid->save();
+                    return $response;
+
+                } else {
+                    // Логируем ошибки в случае неудачного запроса
+                    Log::error("historyUIDStatus Request failed with status: " . $response->status());
+                    Log::error("historyUIDStatus Response: " . $response->body());
+                    return null;
+                }
+            } catch (\Exception $e) {
+                // Обработка исключений
+                Log::error("Exception caught: " . $e->getMessage());
+                return null;
             }
 
-            $orderweb_uid->save();
-            return $response;
         }
     }
 
