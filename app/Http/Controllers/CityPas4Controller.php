@@ -9,6 +9,7 @@ use App\Models\City_PAS4;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
@@ -163,6 +164,56 @@ class CityPas4Controller extends Controller
         return 400;
     }
 
+
+
+
+    /**
+     * @throws \Exception
+     */
+    public function cityOnlineOrder($city)
+    {
+//Разморозка
+        $serverFalse = City_PAS2::where('name', $city)
+            ->where('online', "false")->get();
+        Log::debug("cityOnlineOrder serverFalse: " . json_encode($serverFalse));
+        if (!$serverFalse->isEmpty()) {
+            $serverArr = $serverFalse->toArray();
+
+            foreach ($serverArr as $value) {
+                $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
+
+                if ($timeFive) {
+                    $cityRecord = City_PAS4::find($value["id"]);
+
+                    if ($cityRecord) {
+                        Log::debug("cityOnlineOrder city: " . json_encode($cityRecord));
+
+                        $cityRecord->online = "true";
+                        $cityRecord->save();
+                    } else {
+                        Log::warning("cityOnlineOrder: City record with id " . $value["id"] . " not found.");
+                    }
+                }
+            }
+        }
+
+        //Получение доступного сервера
+
+        $server = City_PAS4::where('name', $city)
+            ->where('online', "true")->first();
+
+
+        Log::debug("cityOnlineOrder" . $server);
+        if (isset($server) && $server != null) {
+            $serverArr = $server->toArray();
+
+            Log::debug("cityOnlineOrder". "http://" . $serverArr["address"]);
+
+            return "http://" . $server["address"];
+        } else {
+            return 400;
+        }
+    }
 
     /**
      * @throws \Exception

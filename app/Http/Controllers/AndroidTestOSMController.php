@@ -435,7 +435,7 @@ class AndroidTestOSMController extends Controller
             }
             $cityServer->online = "false";
             $cityServer->save();
-            (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+            (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
 
             while (self::connectAPIAppOrder($city, $application) != 400) {
                 $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -484,7 +484,7 @@ class AndroidTestOSMController extends Controller
                     }
                     $cityServer->online = "false";
                     $cityServer->save();
-                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 } else {
                     $connectAPI = str_replace('http://', '', $connectAPI);
                     switch ($application) {
@@ -499,7 +499,7 @@ class AndroidTestOSMController extends Controller
                             $cityServer = City_PAS4::where('address', $connectAPI)->first();
                             break;
                     }
-                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
 
                     $response_error["order_cost"] = 0;
                     $response_error["Message"] = "ErrorMessage";
@@ -561,7 +561,7 @@ class AndroidTestOSMController extends Controller
 
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/cost';
@@ -609,7 +609,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
@@ -624,7 +624,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
 
@@ -656,7 +656,7 @@ class AndroidTestOSMController extends Controller
                 }
 
 
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
                 Log::debug("response_error", $response_error);
@@ -685,7 +685,7 @@ class AndroidTestOSMController extends Controller
 
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/cost';
@@ -733,7 +733,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
@@ -748,7 +748,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
 
@@ -1323,7 +1323,7 @@ class AndroidTestOSMController extends Controller
 
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/cost';
@@ -1399,7 +1399,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
@@ -1414,7 +1414,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
 
@@ -1446,7 +1446,7 @@ class AndroidTestOSMController extends Controller
                 }
 
 
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
                 Log::debug("response_error", $response_error);
@@ -1475,7 +1475,7 @@ class AndroidTestOSMController extends Controller
 
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/cost';
@@ -1551,7 +1551,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
@@ -1566,7 +1566,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
 
@@ -1790,7 +1790,7 @@ class AndroidTestOSMController extends Controller
 
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/cost';
@@ -1866,7 +1866,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
@@ -1881,7 +1881,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
 
@@ -1913,7 +1913,7 @@ class AndroidTestOSMController extends Controller
                 }
 
 
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
                 Log::debug("response_error", $response_error);
@@ -1942,7 +1942,7 @@ class AndroidTestOSMController extends Controller
 
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/cost';
@@ -2018,7 +2018,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
@@ -2033,7 +2033,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
 
@@ -2216,7 +2216,7 @@ class AndroidTestOSMController extends Controller
                 }
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/tariffs/cost';
@@ -2264,7 +2264,7 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
 
                         $connectAPI = str_replace('http://', '', $connectAPI);
@@ -2280,7 +2280,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
 
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
@@ -2327,7 +2327,7 @@ class AndroidTestOSMController extends Controller
                 }
                 $cityServer->online = "false";
                 $cityServer->save();
-                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 while (self::connectAPIAppOrder($city, $application) != 400) {
                     $connectAPI = self::connectAPIAppOrder($city, $application);
                     $url = $connectAPI . '/api/weborders/tariffs/cost';
@@ -2375,9 +2375,8 @@ class AndroidTestOSMController extends Controller
                         }
                         $cityServer->online = "false";
                         $cityServer->save();
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
-
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
                             case "PAS1":
@@ -2391,7 +2390,7 @@ class AndroidTestOSMController extends Controller
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
                                 break;
                         }
-                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id);
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
 
                         $response_error["order_cost"] = 0;
                         $response_error["Message"] = "ErrorMessage";
@@ -3815,12 +3814,12 @@ class AndroidTestOSMController extends Controller
     {
         switch ($app) {
             case "PAS1":
-                return (new CityPas1Controller)->cityOnline($city);
+                return (new CityPas1Controller)->cityOnlineOrder($city);
             case "PAS2":
                 return (new CityPas2Controller)->cityOnlineOrder($city);
             //case "PAS4":
             default:
-                return (new CityPas4Controller)->cityOnline($city);
+                return (new CityPas4Controller)->cityOnlineOrder($city);
         }
     }
 

@@ -169,7 +169,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("canceledFinish:0 " . $canceledAll);
 
         if ($canceledAll) {
-            $uid_history->delete();
+            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
             return "finish Canceled by User";
         } else {
             while (time() - $startTime < $maxExecutionTime) {
@@ -3516,12 +3516,24 @@ class UniversalAndroidFunctionController extends Controller
     {
         return response()->json(["test"=>"ok"], 200);
     }
-    public function cityNoOnlineMessage($id)
+    public function cityNoOnlineMessage($id, $application)
     {
+        switch ($application) {
+            case "PAS1":
+                $serverFalse = City_PAS1::find($id);
+                break;
+            case "PAS2":
+                $serverFalse = City_PAS2::find($id);
+                break;
+            //case "PAS4":
+            default:
+                $serverFalse = City_PAS4::find($id);
+                break;
+        }
 
-        $serverFalse = City_PAS2::find($id);
         $alarmMessage = new TelegramController();
         $messageAdmin = "Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address . ".";
+        Log::debug("cityNoOnlineMessage $messageAdmin");
         try {
             $alarmMessage->sendAlarmMessage($messageAdmin);
             $alarmMessage->sendMeMessage($messageAdmin);

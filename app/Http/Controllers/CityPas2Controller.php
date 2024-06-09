@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Check;
-use App\Mail\Server;
-use App\Models\City;
 use App\Models\City_PAS2;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
