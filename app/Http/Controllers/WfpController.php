@@ -589,6 +589,7 @@ class WfpController extends Controller
         while (true) { // Бесконечный цикл
             // Отправка POST-запроса к API
             sleep(60);
+
             $response = Http::post('https://api.wayforpay.com/api', $params);
             $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
             Log::debug("refund responseArray", $responseArray);
