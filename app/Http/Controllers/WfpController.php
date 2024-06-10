@@ -528,6 +528,7 @@ class WfpController extends Controller
 // Відправлення POST-запиту
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug(["checkStatus " . 'response' => $response->body()]);
+        $data = json_decode($response, true);
 
         if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
             $order = Orderweb::where("wfp_order_id", $orderReference)->first();
