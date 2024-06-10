@@ -593,10 +593,10 @@ class WfpController extends Controller
             Log::debug("refund responseArray", $responseArray);
 
             // Проверка статуса транзакции
-            if ($responseArray['transactionStatus'] == 'Refunded') {
-                Log::debug("refund Статус транзакции: Refunded ");
+            if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
+                Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
                 break; // Прерываем цикл, если статус "Refunded"
-            } elseif ($responseArray['transactionStatus'] == 'Declined') {
+            } elseif ($responseArray['transactionStatus']) {
                 // Проверяем, прошло ли более 72 часов
                 if (time() - $startTime > $maxDuration) {
                     Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
