@@ -25,6 +25,36 @@ use SebastianBergmann\Diff\Exception;
 
 class WfpController extends Controller
 {
+    private static function orderInfo($orderReference): string
+    {
+        $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->first();
+        if ($orderwebs) {
+            $params = $orderwebs->toArray();
+
+            $user_phone  = $params["user_phone"];//Телефон пользователя
+
+            $email = $params['email'];//Телефон пользователя
+            if ($params["route_undefined"] != 0) {
+                $order = "Замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
+                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                    " до "  . $params['to'] . " " . $params['to_number'] .
+                    ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    $params['dispatching_order_uid'] .
+                    ", сервер " . $params['server'];
+                ;
+            } else {
+                $order = "Замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
+                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                    " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    $params['dispatching_order_uid'] .
+                    ", сервер " . $params['server'];
+            }
+            return $order;
+        } else {
+            return "";
+        }
+    }
+
     public static function messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $uid)
     {
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
@@ -553,13 +583,38 @@ class WfpController extends Controller
         ];
 
 // Відправлення POST-запиту
-        $response = Http::post('https://api.wayforpay.com/api', $params);
-        Log::debug("CHECK_STATUS:", ['response' => $response->body()]);
+        $startTime = time(); // Время начала выполнения скрипта
+        $maxDuration = 72 * 60 * 60; // 72 часа в секундах
+
+        while (true) { // Бесконечный цикл
+            // Отправка POST-запроса к API
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
+            Log::debug("refund responseArray", $responseArray);
+
+            // Проверка статуса транзакции
+            if ($responseArray['transactionStatus'] == 'Refunded') {
+                Log::debug("refund Статус транзакции: Refunded ");
+                break; // Прерываем цикл, если статус "Refunded"
+            } elseif ($responseArray['transactionStatus'] == 'Declined') {
+                // Проверяем, прошло ли более 72 часов
+                if (time() - $startTime > $maxDuration) {
+                    Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
+                    break;
+                }
+                Log::debug("refund Статус транзакции: Declined. Повторная попытка через 15 минут...");
+                sleep(900); // Пауза на 900 секунд (15 минут)
+            }
+        }
+
+        Log::debug("refund CHECK_STATUS:", ['response' => $response->body()]);
         $alarmMessage = new TelegramController();
 
         try {
-            $alarmMessage->sendAlarmMessage($response->body());
-            $alarmMessage->sendMeMessage($response->body());
+            $alarmMessage->sendAlarmMessage(self::orderInfo($orderReference) .
+                "WFP refund response:" . $response->body());
+            $alarmMessage->sendMeMessage(self::orderInfo($orderReference) .
+                "WFP refund response:" . $response->body());
         } catch (Exception $e) {
             $subject = 'Ошибка в телеграмм';
             $paramsCheck = [
@@ -568,16 +623,17 @@ class WfpController extends Controller
             ];
 
             Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            $subject = "Возврат холда";
+            $paramsAdmin = [
+                'subject' => $subject,
+                'message' => self::orderInfo($orderReference) . "WFP refund response:" . $response->body(),
+            ];
+
+            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         };
 
-        $subject = "Возврат холда";
-        $paramsAdmin = [
-            'subject' => $subject,
-            'message' => $response->body(),
-        ];
 
-        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         return $response;
     }
 
@@ -645,8 +701,10 @@ class WfpController extends Controller
         $alarmMessage = new TelegramController();
 
         try {
-            $alarmMessage->sendAlarmMessage($response->body());
-            $alarmMessage->sendMeMessage($response->body());
+            $alarmMessage->sendAlarmMessage(self::orderInfo($orderReference) .
+                "WFP refund response:" . $response->body());
+            $alarmMessage->sendMeMessage(self::orderInfo($orderReference) .
+                "WFP refund response:" . $response->body());
         } catch (Exception $e) {
             $subject = 'Ошибка в телеграмм';
             $paramsCheck = [
@@ -655,16 +713,16 @@ class WfpController extends Controller
             ];
 
             Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            $subject = "Списание холда";
+            $paramsAdmin = [
+                'subject' => $subject,
+                'message' => self::orderInfo($orderReference) . "WFP settle response:" . $response->body(),
+            ];
+
+            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         };
 
-        $subject = "Списание холда";
-        $paramsAdmin = [
-            'subject' => $subject,
-            'message' => $response->body(),
-        ];
-
-        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
         return $response;
     }
 

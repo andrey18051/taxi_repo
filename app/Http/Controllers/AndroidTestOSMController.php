@@ -3729,9 +3729,6 @@ class AndroidTestOSMController extends Controller
                 Log::error("Exception caught: " . $e->getMessage());
                 return null;
             }
-
-
-
         } else {
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/' . $uid;
