@@ -17,6 +17,7 @@ use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Models\User;
 use DateTime;
+use False\True;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -2583,8 +2584,10 @@ class UniversalAndroidFunctionController extends Controller
     ): bool {
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid_bonusOrderHold)->first();
         Log::debug("uid_history canceledFinish : $uid_history");
+        $canceledOneMinute = self::canceledOneMinute($uid_bonusOrderHold);
+        Log::debug("uid_history canceledOneMinute : $canceledOneMinute");
 
-        if (self::canceledOneMinute($uid_bonusOrderHold) == true) { //Выход по 1 минуте
+        if ($canceledOneMinute) { //Выход по 1 минуте
             return true;
         } elseif ($uid_history->cancel) { //Выход по нажатию отмены
             Log::debug("uid_history->cancel");
@@ -2629,7 +2632,7 @@ class UniversalAndroidFunctionController extends Controller
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
 // Заданное время
         $created_at = $order->created_at;
-
+        Log::debug("canceledOneMinute created_at $created_at");
 // Текущие дата и время
         $current_time = date('Y-m-d H:i:s');
 
@@ -2638,65 +2641,70 @@ class UniversalAndroidFunctionController extends Controller
         $current_time_timestamp = strtotime($current_time);
 
 // Проверка, прошла ли одна минута
-        if (($current_time_timestamp - $created_at_timestamp) < 60) {
+        if (($current_time_timestamp - $created_at_timestamp) <= 60) {
             return false;
-        }
+        } else {
+            $orderReference = $order->wfp_order_id;
+            Log::debug("canceledOneMinute orderReference $orderReference");
+            if ($orderReference) {
+                switch ($order->comment) {
+                    case "taxi_easy_ua_pas1":
+                        $application = "PAS1";
+                        break;
+                    case "taxi_easy_ua_pas2":
+                        $application = "PAS2";
+                        break;
+                    default:
+                        $application = "PAS4";
+                }
+                switch ($order->server) {
+                    case "http://167.235.113.231:7307":
+                    case "http://167.235.113.231:7306":
+                    case "http://134.249.181.173:7208":
+                    case "http://91.205.17.153:7208":
+                        $city = "Kyiv City";
+                        break;
+                    case "http://142.132.213.111:8071":
+                    case "http://167.235.113.231:7308":
+                        $city = "Dnipropetrovsk Oblast";
+                        break;
+                    case "http://142.132.213.111:8072":
+                        $city = "Odessa";
+                        break;
+                    case "http://3142.132.213.111:8073":
+                        $city = "Zaporizhzhia";
+                        break;
+                    case "http://134.249.181.173:7201":
+                    case "http://91.205.17.153:7201":
+                        $city = "Cherkasy Oblast";
+                        break;
+                    default:
+                        $city = "OdessaTest";
+                }
+                $response = (new WfpController)->checkStatus(
+                    $application,
+                    $city,
+                    $orderReference
+                );
+                $data = json_decode($response, true);
+                Log::debug("canceledOneMinute data", $data);
 
-
-        $orderReference = $order->wfp_order_id;
-        if ($orderReference) {
-            switch ($order->comment) {
-                case "taxi_easy_ua_pas1":
-                    $application = "PAS1";
-                    break;
-                case "taxi_easy_ua_pas2":
-                    $application = "PAS2";
-                    break;
-                default:
-                    $application = "PAS4";
-            }
-            switch ($order->server) {
-                case "http://167.235.113.231:7307":
-                case "http://167.235.113.231:7306":
-                case "http://134.249.181.173:7208":
-                case "http://91.205.17.153:7208":
-                    $city = "Kyiv City";
-                    break;
-                case "http://142.132.213.111:8071":
-                case "http://167.235.113.231:7308":
-                    $city = "Dnipropetrovsk Oblast";
-                    break;
-                case "http://142.132.213.111:8072":
-                    $city = "Odessa";
-                    break;
-                case "http://3142.132.213.111:8073":
-                    $city = "Zaporizhzhia";
-                    break;
-                case "http://134.249.181.173:7201":
-                case "http://91.205.17.153:7201":
-                    $city = "Cherkasy Oblast";
-                    break;
-                default:
-                    $city = "OdessaTest";
-            }
-            $response = (new WfpController)->checkStatus(
-                $application,
-                $city,
-                $orderReference
-            );
-            $data = json_decode($response, true);
-            if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-                if ($data['transactionStatus'] == "Approved" || $data['transactionStatus'] == "WaitingAuthComplete") {
-                    return false;
+                if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+                    if ($data['transactionStatus'] == "Approved" || $data['transactionStatus'] == "WaitingAuthComplete") {
+                        return false;
+                    } else {
+                        return true;
+                    }
                 } else {
-                    return true;
+                    return false;
                 }
             } else {
                 return false;
             }
-        } else {
-            return false;
         }
+
+
+
     }
     public function orderCanceled(
         $order,
