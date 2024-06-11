@@ -36,16 +36,17 @@ class WfpController extends Controller
             $email = $params['email'];//Телефон пользователя
             if ($params["route_undefined"] != 0) {
                 $order = "Замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
-                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                    " до "  . $params['to'] . " " . $params['to_number'] .
-                    ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    " за маршрутом від " . $params['routefrom'] . " " . $params['routefromnumber'] .
+                    " до "  . $params['routeto'] . " " . $params['routetonumber'] .
+                    ". Вартість поїздки становитиме: " . $params['web_cost'] . "грн. Номер замовлення: " .
                     $params['dispatching_order_uid'] .
                     ", сервер " . $params['server'];
                 ;
             } else {
                 $order = "Замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
-                    " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
+                    " за маршрутом від " . $params['routefrom'] . " " . $params['routefromnumber'] .
                     " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                    ". Вартість поїздки становитиме: " . $params['web_cost'] . "грн. Номер замовлення: " .
                     $params['dispatching_order_uid'] .
                     ", сервер " . $params['server'];
             }
@@ -528,13 +529,21 @@ class WfpController extends Controller
 // Відправлення POST-запиту
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug(["checkStatus " . 'response' => $response->body()]);
-        $data = json_decode($response, true);
 
-        if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+        if (isset($response)) {
+            $data = json_decode($response->body(), true);
             $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-            $order->wfp_status_pay = $data['transactionStatus'];
-            $order->save();
+
+            if ($order) {
+                $order->wfp_status_pay = $data['transactionStatus'];
+                $order->save();
+            } else {
+                Log::error("Order not found for wfp_order_id: $orderReference");
+            }
+        } else {
+            Log::error("No response received from WayforPay API");
         }
+
 
         return $response;
     }

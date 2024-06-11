@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Check;
+use App\Mail\Server;
 use App\Models\BlackList;
 use App\Models\Card;
 use App\Models\City;
@@ -16,9 +17,8 @@ use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTime;
-use False\True;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -163,7 +163,14 @@ class UniversalAndroidFunctionController extends Controller
         $canceledAll = self::canceledFinish(
             $lastStatusBonus,
             $lastStatusDouble,
-            $bonusOrderHold
+            $bonusOrderHold,
+            $bonusOrder,
+            $connectAPI,
+            $authorizationBonus,
+            $identificationId,
+            $apiVersion,
+            $doubleOrder,
+            $authorizationDouble
         );
         Log::debug("lastStatusBonus0: " . $lastStatusBonus);
         Log::debug("lastStatusDouble0: " . $lastStatusDouble);
@@ -193,7 +200,14 @@ class UniversalAndroidFunctionController extends Controller
                 $canceledAll = self::canceledFinish(
                     $lastStatusBonus,
                     $lastStatusDouble,
-                    $bonusOrderHold
+                    $bonusOrderHold,
+                    $bonusOrder,
+                    $connectAPI,
+                    $authorizationBonus,
+                    $identificationId,
+                    $apiVersion,
+                    $doubleOrder,
+                    $authorizationDouble
                 );
 
                 if ($canceledAll) {
@@ -1189,7 +1203,14 @@ class UniversalAndroidFunctionController extends Controller
                     $canceledAll = self::canceledFinish(
                         $lastStatusBonus,
                         $lastStatusDouble,
-                        $bonusOrderHold
+                        $bonusOrderHold,
+                        $bonusOrder,
+                        $connectAPI,
+                        $authorizationBonus,
+                        $identificationId,
+                        $apiVersion,
+                        $doubleOrder,
+                        $authorizationDouble
                     );
 
                     if ($canceledAll) {
@@ -2463,7 +2484,14 @@ class UniversalAndroidFunctionController extends Controller
                         $canceledAll = self::canceledFinish(
                             $lastStatusBonus,
                             $lastStatusDouble,
-                            $bonusOrderHold
+                            $bonusOrderHold,
+                            $bonusOrder,
+                            $connectAPI,
+                            $authorizationBonus,
+                            $identificationId,
+                            $apiVersion,
+                            $doubleOrder,
+                            $authorizationDouble
                         );
 
                         if ($canceledAll) {
@@ -2580,18 +2608,45 @@ class UniversalAndroidFunctionController extends Controller
     public function canceledFinish(
         $lastStatusBonus,
         $lastStatusDouble,
-        $uid_bonusOrderHold
+        $uid_bonusOrderHold,
+        $bonusOrder,
+        $connectAPI,
+        $authorizationBonus,
+        $identificationId,
+        $apiVersion,
+        $doubleOrder,
+        $authorizationDouble
     ): bool {
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid_bonusOrderHold)->first();
         Log::debug("uid_history canceledFinish : $uid_history");
-        $canceledOneMinute = self::canceledOneMinute($uid_bonusOrderHold);
-        Log::debug("uid_history canceledOneMinute : $canceledOneMinute");
 
-        if ($canceledOneMinute) { //Выход по 1 минуте
-            return true;
-        } elseif ($uid_history->cancel) { //Выход по нажатию отмены
-            Log::debug("uid_history->cancel");
-            return true;
+        // Пример вызова функции
+        $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
+        Log::debug("uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false'));
+
+        if ($canceledOneMinute || $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
+            $orderCanceledBonus = self::orderCanceled(
+                $bonusOrder,
+                'bonus',
+                $connectAPI,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
+
+            $orderCanceledDouble = self::orderCanceled(
+                $doubleOrder,
+                "double",
+                $connectAPI,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion
+            );
+            if ($orderCanceledBonus && $orderCanceledDouble) {
+                return true;
+            } else {
+                return false;
+            }
         } else { //Выход по стаутсам опроса
             // проверка нала
             switch ($lastStatusDouble) {
@@ -2630,22 +2685,31 @@ class UniversalAndroidFunctionController extends Controller
     private function canceledOneMinute($uid)
     {
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-// Заданное время
+
+        if (!$order) {
+            Log::error("Order not found with UID: $uid");
+            return false;
+        }
+
+        // Заданное время
         $created_at = $order->created_at;
         Log::debug("canceledOneMinute created_at $created_at");
-// Текущие дата и время
+
+        // Текущие дата и время
         $current_time = date('Y-m-d H:i:s');
 
-// Преобразование строковых дат во временные метки
+        // Преобразование строковых дат во временные метки
         $created_at_timestamp = strtotime($created_at);
         $current_time_timestamp = strtotime($current_time);
 
-// Проверка, прошла ли одна минута
+        // Проверка, прошла ли одна минута
         if (($current_time_timestamp - $created_at_timestamp) <= 60) {
+            Log::debug("Less than one minute has passed since order creation.");
             return false;
         } else {
             $orderReference = $order->wfp_order_id;
             Log::debug("canceledOneMinute orderReference $orderReference");
+
             if ($orderReference) {
                 switch ($order->comment) {
                     case "taxi_easy_ua_pas1":
@@ -2657,6 +2721,7 @@ class UniversalAndroidFunctionController extends Controller
                     default:
                         $application = "PAS4";
                 }
+
                 switch ($order->server) {
                     case "http://167.235.113.231:7307":
                     case "http://167.235.113.231:7306":
@@ -2681,31 +2746,34 @@ class UniversalAndroidFunctionController extends Controller
                     default:
                         $city = "OdessaTest";
                 }
-                $response = (new WfpController)->checkStatus(
-                    $application,
-                    $city,
-                    $orderReference
-                );
+
+                Log::debug("canceledOneMinute application: $application, city: $city, orderReference: $orderReference");
+
+                $response = (new WfpController)->checkStatus($application, $city, $orderReference);
                 $data = json_decode($response, true);
-                Log::debug("canceledOneMinute data", $data);
+                Log::debug("canceledOneMinute response data", $data);
 
                 if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
                     if ($data['transactionStatus'] == "Approved" || $data['transactionStatus'] == "WaitingAuthComplete") {
+                        Log::debug("Transaction status is Approved or WaitingAuthComplete.");
                         return false;
                     } else {
+                        Log::debug("Transaction status is not Approved or WaitingAuthComplete.");
                         return true;
                     }
                 } else {
+                    Log::debug("Transaction status not found in response.");
                     return false;
                 }
             } else {
+                Log::error("OrderReference not found for UID: $uid");
                 return false;
             }
         }
-
-
-
     }
+
+
+
     public function orderCanceled(
         $order,
         $orderType,
@@ -2713,8 +2781,8 @@ class UniversalAndroidFunctionController extends Controller
         $authorization,
         $identificationId,
         $apiVersion
-    ) {
-        self::webordersCancel(
+    ): bool {
+        return self::webordersCancel(
             $order,
             $orderType,
             $connectAPI,
@@ -2722,14 +2790,6 @@ class UniversalAndroidFunctionController extends Controller
             $identificationId,
             $apiVersion
         );
-
-        self::ordersExecStatusHistory(
-            $order,
-            $orderType,
-            "Canceled",
-            "снят"
-        );
-        Log::debug("function orderCanceled: ". $order);
     }
 
     public function orderNewCreat(
@@ -2825,7 +2885,6 @@ class UniversalAndroidFunctionController extends Controller
     }
     /**
      * Запрос отмены заказа
-     * @return string
      */
     public function webordersCancel(
         $uid,
@@ -2834,17 +2893,165 @@ class UniversalAndroidFunctionController extends Controller
         $authorization,
         $identificationId,
         $apiVersion
-    ) {
-        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-        Http::withHeaders([
-            "Authorization" => $authorization,
-            "X-WO-API-APP-ID" => $identificationId,
-            "X-API-VERSION" => $apiVersion
-        ])->put($url);
-        Log::debug("function webordersCancel: " . $url);
-        Log::debug("function webordersCancel orderType: " . $orderType);
-    }
+    ): bool {
 
+        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+        $startTime = time(); // Начальное время
+        $result = false; // Инициализация результата
+        $maxExecutionTime = 3*60*60; //время жизни отмены
+        do {
+            try {
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId,
+                    "X-API-VERSION" => $apiVersion
+                ])->put($url);
+
+                // Логируем тело ответа
+                Log::debug("postRequestHTTP: " . $response->body());
+
+                // Проверяем успешность ответа
+                if ($response->successful()) {
+                    $responseArr = json_decode($response, true);
+                    // Обрабатываем успешный ответ
+                    Log::debug("Request successful.");
+                    if ($responseArr['order_client_cancel_result'] != 1) {
+                        Log::debug("function webordersCancel: " . $url);
+                        Log::debug("function webordersCancel orderType: " . $orderType);
+
+                        // Проверяем успешность ответа
+                        if ($response->successful() && $response->status() == 200) {
+                            //проверка статуса после отмены
+                            sleep(5);
+                            $url = $connectAPI . '/api/weborders/' . $uid;
+                            try {
+                                $response_uid = Http::withHeaders([
+                                    "Authorization" => $authorization,
+                                    "X-WO-API-APP-ID" => $identificationId,
+                                ])->get($url);
+
+                                if ($response_uid->successful() && $response->status() == 200) {
+                                    $response_arr = json_decode($response_uid, true);
+                                    if ($response_arr['close_reason'] != "-1") {
+                                        $result = false;
+                                    } else {
+                                        $result = true;
+                                    }
+                                } else {
+                                    // Логируем ошибки в случае неудачного запроса
+                                    Log::error("Request failed with status: " . $response->status());
+                                    Log::error("Response: " . $response->body());
+                                    $result = false;
+                                }
+                            } catch (\Exception $e) {
+                                // Обработка исключений
+                                Log::error("Exception caught: " . $e->getMessage());
+                                $result = false;
+                            }
+                        } else {
+                            // Логируем ошибки в случае неудачного запроса
+                            Log::error("Request failed with status: " . $response->status());
+                            Log::error("Response: " . $response->body());
+                            $result = false;
+                        }
+                    } else {
+                            self::messageAboutTrueCanceled($uid);
+                            $result = true; // Устанавливаем результат в true, если запрос успешен
+                    }
+                } else {
+                    // Логируем ошибки в случае неудачного запроса
+                    Log::error("Request failed with status: " . $response->status());
+                    Log::error("Response: " . $response->body());
+                    $result = false; // Устанавливаем результат в false, если запрос неудачен
+                }
+            } catch (\Exception $e) {
+                // Обработка исключений
+                Log::error("Exception caught: " . $e->getMessage());
+                $result = false; // Устанавливаем результат в false, если поймано исключение
+            }
+            sleep(5);
+        } while (!$result && time() - $startTime < $maxExecutionTime);
+        if (!$result && time() - $startTime >= $maxExecutionTime) {
+            self::messageAboutFalseCanceled($uid);
+        }
+        return $result;
+    }
+    public static function messageAboutFalseCanceled($uid)
+    {
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $wfp_order_id = $order->wfp_order_id;
+        $amount = $order->web_cost;
+        $connectAPI = $order->server;
+
+        $subject = "Ошибка проверки статуса заказа";
+        $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
+        $messageAdmin = "Заказ холд $uid.
+                 Время $localCreatedAt.
+                 Ошибка отмены заказа по максимальному времени отмены $uid. Сервер $connectAPI.
+                 Маршрут $order->routefrom - $order->routeto.
+                 Телефон клиента:  $order->user_phone.
+                 Номер заказа WFP: $wfp_order_id.
+                 Сумма холда $amount грн.";
+        $paramsAdmin = [
+            'subject' => $subject,
+            'message' => $messageAdmin,
+        ];
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+
+        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+    }
+    public static function messageAboutTrueCanceled($uid)
+    {
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $wfp_order_id = $order->wfp_order_id;
+        $amount = $order->web_cost;
+        $connectAPI = $order->server;
+
+        $subject = "Ошибка проверки статуса заказа";
+        $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
+        $messageAdmin = "Заказ холд $uid.
+                 Время $localCreatedAt.
+                 Отмена $uid. Сервер $connectAPI.
+                 Маршрут $order->routefrom - $order->routeto.
+                 Телефон клиента:  $order->user_phone.
+                 Номер заказа WFP: $wfp_order_id.
+                 Сумма холда $amount грн.";
+        $paramsAdmin = [
+            'subject' => $subject,
+            'message' => $messageAdmin,
+        ];
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            $subject = 'Ошибка в телеграмм';
+            $paramsCheck = [
+                'subject' => $subject,
+                'message' => $e,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+
+        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+    }
     public function orderReview($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();

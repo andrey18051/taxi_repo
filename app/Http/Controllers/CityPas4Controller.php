@@ -173,7 +173,7 @@ class CityPas4Controller extends Controller
     public function cityOnlineOrder($city)
     {
 //Разморозка
-        $serverFalse = City_PAS2::where('name', $city)
+        $serverFalse = City_PAS4::where('name', $city)
             ->where('online', "false")->get();
         Log::debug("cityOnlineOrder serverFalse: " . json_encode($serverFalse));
         if (!$serverFalse->isEmpty()) {
