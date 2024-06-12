@@ -2575,9 +2575,11 @@ class UniversalAndroidFunctionController extends Controller
         switch ($orderType) {
             case "bonus":
                 $uid_history->uid_bonusOrder = $order;
+                $uid_history->bonus_status = json_encode($newStatusArr);
                 break;
             case "double":
                 $uid_history->uid_doubleOrder = $order;
+                $uid_history->double_status = json_encode($newStatusArr);
                 break;
         }
         $uid_history->save();
