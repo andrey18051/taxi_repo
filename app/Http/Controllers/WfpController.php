@@ -605,6 +605,7 @@ class WfpController extends Controller
             Log::debug("refund responseArray", $responseArray);
 
             // Проверка статуса транзакции
+            // || $responseArray['transactionStatus'] == 'Declined'
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
                 break; // Прерываем цикл, если статус "Refunded"

@@ -32,14 +32,17 @@ use SebastianBergmann\Diff\Exception;
 
 class AndroidTestOSMController extends Controller
 {
+    /**
+     * @throws \Exception
+     */
     private static function repeatCancel(
         $url,
         $authorization,
         $application,
         $city,
         $connectAPI,
-        $orderweb
-    ) {
+        $uid
+    ): void {
         $maxExecutionTime = 3*60*60; // Максимальное время выполнения - 3 часа
         $maxExecutionTime = 2*60; // Максимальное время выполнения - 3 часа
 
@@ -47,65 +50,36 @@ class AndroidTestOSMController extends Controller
         $result = false;
 
         do {
+            // Проверка статуса после отмены
+            sleep(5);
+            $urlCheck = $connectAPI . '/api/weborders/' . $uid;
             try {
-                $response = Http::withHeaders([
+                $response_uid = Http::withHeaders([
                     "Authorization" => $authorization,
                     "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
+                ])->get($urlCheck);
 
-//                    "X-API-VERSION" => (new UniversalAndroidFunctionController)
-//                        ->apiVersionApp($city, $connectAPI, $application)
-                ])->put($url);
-
-                // Логируем тело ответа
-                Log::debug("postRequestHTTP: " . $response->body());
-
-                // Проверяем успешность ответа
-                if ($response->successful() && $response->status() == 200) {
-                    //проверка статуса после отмены
-                    sleep(5);
-                    $url = $connectAPI . '/api/weborders/' . $orderweb;
-                    try {
-                        $response_uid = Http::withHeaders([
-                            "Authorization" => $authorization,
-                            "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
-//
-//                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
-//                                ->apiVersionApp($city, $connectAPI, $application)
-                        ])->get($url);
-
-                        if ($response_uid->successful() && $response->status() == 200) {
-                            $response_arr = json_decode($response_uid, true);
-                            if ($response_arr['close_reason'] != "-1") {
-                                $result = false;
-                            } else {
-                                $result = true;
-                            }
-                        } else {
-                            // Логируем ошибки в случае неудачного запроса
-                            Log::error("Request failed with status: " . $response->status());
-                            Log::error("Response: " . $response->body());
-                        }
-                    } catch (\Exception $e) {
-                        // Обработка исключений
-                        Log::error("Exception caught: " . $e->getMessage());
-                        $result = false;
+                if ($response_uid->successful() && $response_uid->status() == 200) {
+                    $response_arr = json_decode($response_uid->body(), true);
+                    if ($response_arr['close_reason'] == 1) {
+                        Log::debug("repeatCancel: close_reason is 1, exiting.");
+                        return;
+                    } else {
+                        Log::debug("repeatCancel: close_reason is not 1, continuing.");
                     }
                 } else {
                     // Логируем ошибки в случае неудачного запроса
-                    Log::error("Request failed with status: " . $response->status());
-                    Log::error("Response: " . $response->body());
-                    $result = false;
+                    Log::error("repeatCancel Request failed with status: " . $response_uid->status());
+                    Log::error("repeatCancel Response: " . $response_uid->body());
                 }
             } catch (\Exception $e) {
                 // Обработка исключений
-                Log::error("Exception caught: " . $e->getMessage());
-                $result = false;
+                Log::error("repeatCancel Exception caught: " . $e->getMessage());
             }
             sleep(5);
-        } while (!$result && time() - $startTime < $maxExecutionTime);
-
+        } while (time() - $startTime < $maxExecutionTime);
         if (!$result) {
-            (new AndroidTestOSMController)->sentNoCancelInfo($orderweb);
+            (new AndroidTestOSMController)->sentNoCancelInfo($uid);
         }
     }
 
@@ -527,7 +501,8 @@ class AndroidTestOSMController extends Controller
 
                 return response($response_error, 200)
                     ->header('Content-Type', 'json');
-            }        }
+            }
+        }
 
         switch ($application) {
             case "PAS1":
@@ -3318,10 +3293,6 @@ class AndroidTestOSMController extends Controller
         $subject = "Отмена заказа";
 
         $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
-        $paramsAdmin = [
-            'subject' => $subject,
-            'message' => $messageAdmin,
-        ];
 
         $alarmMessage = new TelegramController();
 
@@ -3329,17 +3300,14 @@ class AndroidTestOSMController extends Controller
             $alarmMessage->sendAlarmMessage($messageAdmin);
             $alarmMessage->sendMeMessage($messageAdmin);
         } catch (Exception $e) {
-            $subject = 'Ошибка в телеграмм';
-            $paramsCheck = [
-                'subject' => $subject,
-                'message' => $e,
-            ];
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-        };
-        Mail::to('cartaxi4@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+        }
+        Log::debug("sentCancelInfo  $messageAdmin");
     }
 
+    /**
+     * @throws \Exception
+     */
     public function sentNoCancelInfo($orderweb)
     {
 
@@ -3381,13 +3349,7 @@ class AndroidTestOSMController extends Controller
         $updated_at = $formattedTime;
         Log::debug("updated_at " .$updated_at);
 
-        $subject = "НЕТ ОТМЕНЫ заказа";
-
         $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) НЕ МОЖЕТ ОТМЕНИТЬ заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
-        $paramsAdmin = [
-            'subject' => $subject,
-            'message' => $messageAdmin,
-        ];
 
         $alarmMessage = new TelegramController();
 
@@ -3395,15 +3357,9 @@ class AndroidTestOSMController extends Controller
             $alarmMessage->sendAlarmMessage($messageAdmin);
             $alarmMessage->sendMeMessage($messageAdmin);
         } catch (Exception $e) {
-            $subject = 'Ошибка в телеграмм';
-            $paramsCheck = [
-                'subject' => $subject,
-                'message' => $e,
-            ];
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            Log::debug("sentNoCancelInfo Ошибка в телеграмм $messageAdmin");
         };
-        Mail::to('cartaxi4@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+        Log::debug("sentNoCancelInfo  $messageAdmin");
     }
 
     /**
@@ -3644,15 +3600,19 @@ class AndroidTestOSMController extends Controller
 
         $connectAPI = $orderweb_uid->server;
         if ($uid_history) {
+            sleep(5);
             $response_bonus = $uid_history->bonus_status;
             // Логируем тело ответа
-            Log::debug("respons bonus: " . $response_bonus);
+            Log::debug("historyUIDStatus respons bonus: " . $response_bonus);
             // Обрабатываем успешный ответ
             $response_bonus_arr = json_decode($response_bonus, true);
-            Log::debug("responseArr bonus: ", $response_bonus_arr);
-            if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8 || $response_bonus_arr["close_reason"] == -1) {
-                $nameFrom = $response_bonus_arr['route_address_from']['name'] . " " . $response_bonus_arr['route_address_from']['number'];
-                $nameTo = $response_bonus_arr['route_address_to']['name'] . " " . $response_bonus_arr['route_address_to']['number'];
+//            Log::debug("responseArr bonus: ". $response_bonus_arr);
+            if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
+                || $response_bonus_arr["close_reason"] == -1) {
+                $nameFrom = $response_bonus_arr['route_address_from']['name']
+                    . " " . $response_bonus_arr['route_address_from']['number'];
+                $nameTo = $response_bonus_arr['route_address_to']['name']
+                    . " " . $response_bonus_arr['route_address_to']['number'];
 
                 $orderweb_uid->routefrom = $nameFrom;
                 $orderweb_uid->routeto = $nameTo;
@@ -3664,11 +3624,10 @@ class AndroidTestOSMController extends Controller
                 $orderweb_uid->save();
                 return $response_bonus;
             } else {
-
                 $response_double = $uid_history->double_status;
 
                 // Логируем тело ответа
-                Log::debug("response double: " . $response_double);
+                Log::debug("historyUIDStatus response double: " . $response_double);
 
                 // Обрабатываем успешный ответ
                 $response_double_arr = json_decode($response_double, true);
@@ -3686,89 +3645,6 @@ class AndroidTestOSMController extends Controller
                 $orderweb_uid->save();
                 return $response_double;
             }
-
-//            $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
-//            $url = $connectAPI . '/api/weborders/' . $uid;
-//            try {
-//                $response = Http::withHeaders([
-//                    "Authorization" => $authorization,
-//                    "X-WO-API-APP-ID" => self::identificationId($application),
-//                    "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-//                ])->get($url);
-//
-//                // Логируем тело ответа
-//                Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
-//
-//                // Проверяем успешность ответа
-//                if ($response->successful()) {
-//                    // Обрабатываем успешный ответ
-//                    $response_arr = json_decode($response, true);
-//                    Log::debug("$url: ", $response_arr);
-//                    if ($response_arr["close_reason"] == 0 || $response_arr["close_reason"] == 8) {
-//                        $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-//                        $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-//
-//                        $orderweb_uid->routefrom = $nameFrom;
-//                        $orderweb_uid->routeto = $nameTo;
-//
-//                        if ($response_arr["order_car_info"] != null) {
-//                            $orderweb_uid->auto = $response_arr["order_car_info"];
-//                        }
-//
-//                        $orderweb_uid->save();
-//                        return $response;
-//                    } else {
-//                        $url = $connectAPI . '/api/weborders/' . $uid_Double;
-//                        try {
-//                            $response_Double = Http::withHeaders([
-//                                "Authorization" => $authorization,
-//                                "X-WO-API-APP-ID" => self::identificationId($application),
-//                                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-//                            ])->get($url);
-//
-//                            // Логируем тело ответа
-//                            Log::debug("postRequestHTTP: " . $response->body());
-//
-//                            // Проверяем успешность ответа
-//                            if ($response->successful()) {
-//                                // Обрабатываем успешный ответ
-//                                $response_arr = json_decode($response_Double, true);
-//                                Log::debug("$url: ", $response_arr);
-//                                $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-//                                $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-//
-//                                $orderweb_uid->routefrom = $nameFrom;
-//                                $orderweb_uid->routeto = $nameTo;
-//
-//                                if ($response_arr["order_car_info"] != null) {
-//                                    $orderweb_uid->auto = $response_arr["order_car_info"];
-//                                }
-//
-//                                $orderweb_uid->save();
-//                                return $response_Double;
-//                            } else {
-//                                // Логируем ошибки в случае неудачного запроса
-//                                Log::error("historyUIDStatus Request failed with status: " . $response->status());
-//                                Log::error("historyUIDStatus Response: " . $response->body());
-//                                return null;
-//                            }
-//                        } catch (\Exception $e) {
-//                            // Обработка исключений
-//                            Log::error("Exception caught: " . $e->getMessage());
-//                            return null;
-//                        }
-//                    }
-//                } else {
-//                    // Логируем ошибки в случае неудачного запроса
-//                    Log::error("historyUIDStatus Request failed with status: " . $response->status());
-//                    Log::error("historyUIDStatus Response: " . $response->body());
-//                    return null;
-//                }
-//            } catch (\Exception $e) {
-//                // Обработка исключений
-//                Log::error("Exception caught: " . $e->getMessage());
-//                return null;
-//            }
         } else {
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/' . $uid;
@@ -3808,7 +3684,7 @@ class AndroidTestOSMController extends Controller
                 }
             } catch (\Exception $e) {
                 // Обработка исключений
-                Log::error("Exception caught: " . $e->getMessage());
+                Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
                 return null;
             }
 
