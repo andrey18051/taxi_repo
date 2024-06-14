@@ -19,7 +19,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('daily-task:run')->daily();
+        $schedule->command('daily-task:run')
+            ->hourly()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
+
     }
 
 
