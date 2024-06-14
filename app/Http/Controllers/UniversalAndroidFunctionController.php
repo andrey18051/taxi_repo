@@ -35,7 +35,7 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     ) {
         $startTime = time(); // Начальное время
-        $maxExecutionTime = 0.5*60*60; //время жизни отмены
+        $maxExecutionTime = 1*60*60; //время жизни отмены
         do {
             try {
                 $response = Http::withHeaders([
@@ -66,8 +66,6 @@ class UniversalAndroidFunctionController extends Controller
         if (time() - $startTime >= $maxExecutionTime) {
             return null;
         }
-
-
     }
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId): string

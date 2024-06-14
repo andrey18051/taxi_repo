@@ -1120,6 +1120,7 @@ class AndroidTestOSMController extends Controller
                 $doubleOrder->save();
 
                 $response_ok["doubleOrder"] = $doubleOrder->id;
+                (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
             }
             return response($response_ok, 200)
                 ->header('Content-Type', 'json');
@@ -2690,6 +2691,7 @@ class AndroidTestOSMController extends Controller
                     $doubleOrder->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
+                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
@@ -3039,6 +3041,8 @@ class AndroidTestOSMController extends Controller
                     $doubleOrder->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
+                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
 
                 }

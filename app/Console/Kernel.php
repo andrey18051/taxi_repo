@@ -10,6 +10,7 @@ class Kernel extends ConsoleKernel
 {
     protected $commands = [
         \App\Console\Commands\DailyTask::class,
+        \App\Console\Commands\RestartTask::class,
     ];
     /**
      * Define the application's command schedule.
@@ -24,7 +25,6 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground();
-
     }
 
 
