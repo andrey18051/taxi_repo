@@ -21,6 +21,7 @@ class DailyTask extends Command
     public function handle()
     {
         $message = "Запущена проверка холдов";
+        Log::info("DailyTask" . $message);
         (new DailyTaskController)->sentTaskMessage($message);
         (new DailyTaskController)->orderReviewTask();
 

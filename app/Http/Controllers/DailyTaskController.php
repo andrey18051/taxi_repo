@@ -96,20 +96,29 @@ class DailyTaskController extends Controller
      */
     public function orderReviewTask()
     {
-        $orderwebs = Orderweb::where('wfp_status_pay', 'WaitingAuthComplete')
-            ->where('wfp_status_pay', 'InProcessing')
-            ->where('pay_system', "bonus_payment")
-            ->get();
+        $orderwebs = Orderweb::where(function ($query) {
+            $query->where('wfp_status_pay', 'WaitingAuthComplete')
+                ->orWhere('wfp_status_pay', 'InProcessing')
+                ->orWhere('pay_system', 'bonus_payment');
+        })->get();
 
+        if ($orderwebs->isNotEmpty()) {
+            Log::info("orderReviewTask", $orderwebs->toArray());
 
-        foreach ($orderwebs as $value) {
-            $uid = $value->dispatching_order_uid;
+            foreach ($orderwebs as $value) {
+                $uid = $value->dispatching_order_uid;
 
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-            $bonusOrder = $uid_history->bonusOrder;
-            $doubleOrder = $uid_history->doubleOrder;
-            $bonusOrderHold  = $uid_history->bonusOrderHold;
-            StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+                $bonusOrder = $uid_history->bonusOrder;
+                $doubleOrder = $uid_history->doubleOrder;
+                $bonusOrderHold  = $uid_history->bonusOrderHold;
+                StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+            }
+        } else {
+            $message = "orderReviewTask нет холдов для пересмотра";
+            self::sentTaskMessage($message);
+            Log::info("orderReviewTask нет холдов для пересмотра");
         }
     }
+
 }
