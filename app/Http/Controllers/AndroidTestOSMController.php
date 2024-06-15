@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\StartNewProcessExecution;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Mail\ServerServiceMessage;
@@ -1120,7 +1121,8 @@ class AndroidTestOSMController extends Controller
                 $doubleOrder->save();
 
                 $response_ok["doubleOrder"] = $doubleOrder->id;
-                (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+                StartNewProcessExecution::dispatch($doubleOrder->id);
+//                (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
             }
             return response($response_ok, 200)
                 ->header('Content-Type', 'json');
@@ -2242,7 +2244,6 @@ class AndroidTestOSMController extends Controller
                         $cityServer->save();
                         (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                     } else {
-
                         $connectAPI = str_replace('http://', '', $connectAPI);
                         switch ($application) {
                             case "PAS1":
@@ -2691,7 +2692,8 @@ class AndroidTestOSMController extends Controller
                     $doubleOrder->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
-                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+                    StartNewProcessExecution::dispatch($doubleOrder->id);
+//                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
@@ -2958,28 +2960,31 @@ class AndroidTestOSMController extends Controller
                     );
 
                     $responseDouble = json_decode($responseDouble, true);
-
-                    $responseDouble["url"] = $url;
-                    $responseDouble["parameter"] = $parameter;
+                    if (!isset($response_arr["Message"])) {
+                        $responseDouble["url"] = $url;
+                        $responseDouble["parameter"] = $parameter;
+                    } else {
+                        $responseDouble = null;
+                    }
                 }
+            } else {
+                $response_error["order_cost"] = "0";
+                $response_error["Message"] = $response_arr["Message"];
+                $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . $parameter;
+                Log::error("orderSearchMarkersVisicom 111" . $message);
+                (new DailyTaskController)->sentTaskMessage($message);
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
             }
         }
 
         if ($response->status() == 200) {
             $response_arr = json_decode($response, true);
-            if ($response_arr["order_cost"] != 0) {
+            if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
-//                sleep(5);
-//                $params['closeReason'] = (new UIDController)->closeReasonUIDStatusFirst(
-//                    $response_arr['dispatching_order_uid'],
-//// ***************************************************************
-////                    self::connectAPIAppOrder($city, $application),
-//                    $connectAPI,
-//                    $authorization,
-//                    self::identificationId($application)
-//                );
+
                 $params['closeReason'] = "-1";
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
@@ -3041,7 +3046,8 @@ class AndroidTestOSMController extends Controller
                     $doubleOrder->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
-                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+                    StartNewProcessExecution::dispatch($doubleOrder->id);
+//                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
 
@@ -3071,7 +3077,9 @@ class AndroidTestOSMController extends Controller
             $response_arr = json_decode($response, true);
             $response_error["order_cost"] = "0";
             $response_error["Message"] = $response_arr["Message"];
-
+            $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . $parameter;
+            Log::error("orderSearchMarkersVisicom 222" . $message);
+            (new DailyTaskController)->sentTaskMessage($message);
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }

@@ -20,8 +20,10 @@ class DailyTask extends Command
 
     public function handle()
     {
-        $message = "Это тестовое сообщение запалнировано отправляться каждый час с сервера";
-        (new \App\Http\Controllers\DailyTaskController)->sentTaskMessage($message);
+        $message = "Запущена проверка холдов";
+        (new DailyTaskController)->sentTaskMessage($message);
+        (new DailyTaskController)->orderReviewTask();
+
                // Выполняйте вашу логику здесь
 //        $orderwebs = Orderweb::whereNotNull('fondy_order_id')
 //            ->where('fondy_status_pay', 'approved')

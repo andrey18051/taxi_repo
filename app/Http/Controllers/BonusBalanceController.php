@@ -419,14 +419,17 @@ class BonusBalanceController extends Controller
                 $balance_records = BonusBalancePas4::where("orderwebs_id", $orderwebs_id)->first();
                 $balance_records_new = new BonusBalancePas4();
         }
-        $balance_records_new->orderwebs_id = $orderwebs_id;
-        $balance_records_new->users_id = $balance_records->users_id;
-        $balance_records_new->bonusBloke = (-1) * $bonusBloke * $bonusType->size;
-        $balance_records_new->bonus_types_id = 4;
+        if ($balance_records != null) {
+            $balance_records_new->orderwebs_id = $orderwebs_id;
+            $balance_records_new->users_id = $balance_records->users_id;
+            $balance_records_new->bonusBloke = (-1) * $bonusBloke * $bonusType->size;
+            $balance_records_new->bonus_types_id = 4;
+            $balance_records_new->save();
+            self::userBalanceApp($balance_records_new->users_id, $app);
+        }
 
-        $balance_records_new->save();
 
-        self::userBalanceApp($balance_records_new->users_id, $app);
+
     }
 
     public function blockBonusReturnCancel($orderwebs_id)

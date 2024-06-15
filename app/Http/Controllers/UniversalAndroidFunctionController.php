@@ -86,6 +86,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
 //          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
+        $maxExecutionTime = 10*60; // Максимальное время выполнения - 3 суток
         $startTime = time();
 
 
@@ -105,12 +106,18 @@ class UniversalAndroidFunctionController extends Controller
         $responseDouble = json_decode($responseDoubleStr, true);
         $doubleOrder = $responseDouble['dispatching_order_uid'];
 
-        $uid_history = new Uid_history();
-        $uid_history->uid_bonusOrder = $bonusOrder;
-        $uid_history->uid_doubleOrder = $doubleOrder;
-        $uid_history->uid_bonusOrderHold = $bonusOrder;
-        $uid_history->cancel = false;
-        $uid_history->save();
+        $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
+        if ($uid_history == null) {
+            $uid_history = new Uid_history();
+            $uid_history->uid_bonusOrder = $bonusOrder;
+            $uid_history->uid_doubleOrder = $doubleOrder;
+            $uid_history->uid_bonusOrderHold = $bonusOrder;
+            $uid_history->cancel = false;
+            $uid_history->save();
+        } else {
+            $bonusOrder = $uid_history->uid_bonusOrder;
+            $doubleOrder = $uid_history->uid_doubleOrder;
+        }
 
 // Безнал
 
@@ -177,6 +184,8 @@ class UniversalAndroidFunctionController extends Controller
 
         if ($canceledAll) {
             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+//            $uid_history->delete();
+            $doubleOrderRecord->delete();
             return "finish Canceled by User";
         } else {
             while (time() - $startTime < $maxExecutionTime) {
@@ -213,10 +222,9 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("canceled while 1 **********************************************");
                     Log::debug("lastStatusBonus1: " . $lastStatusBonus);
                     Log::debug("lastStatusDouble1: " . $lastStatusDouble);
-
-                    self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-
 //                    $uid_history->delete();
+                    $doubleOrderRecord->delete();
+                    self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                     break;
                 } else {
                     //Безнал ОБРАБОТКА статуса
@@ -1216,11 +1224,10 @@ class UniversalAndroidFunctionController extends Controller
                         Log::debug("canceled while ");
                         Log::debug("lastStatusBonus2: " . $lastStatusBonus);
                         Log::debug("lastStatusDouble2: " . $lastStatusDouble);
-                        Log::debug("canceledFinish2: " . $canceledAll);
-
-                        self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
 
 //                        $uid_history->delete();
+                        $doubleOrderRecord->delete();
+                        self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                         break;
                     } else {
                         //Нал ОБРАБОТКА статуса
@@ -2497,10 +2504,9 @@ class UniversalAndroidFunctionController extends Controller
                             Log::debug("canceled while ");
                             Log::debug("lastStatusBonus3: " . $lastStatusBonus);
                             Log::debug("lastStatusDouble3: " . $lastStatusDouble);
-
-                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-
 //                            $uid_history->delete();
+                            $doubleOrderRecord->delete();
+                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                             break;
                         }
                     }
@@ -2524,11 +2530,10 @@ class UniversalAndroidFunctionController extends Controller
                     $identificationId,
                     $apiVersion
                 );
-
-                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
 //                $uid_history->delete();
+                $doubleOrderRecord->delete();
+                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
             }
-            $uid_history->delete();
             return "finish by time is out";
         }
     }
