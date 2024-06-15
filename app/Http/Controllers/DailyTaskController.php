@@ -96,7 +96,11 @@ class DailyTaskController extends Controller
      */
     public function orderReviewTask()
     {
-        $orderwebs = Orderweb::where("wfp_status_pay", "WaitingAuthComplete")->get();
+        $orderwebs = Orderweb::where('wfp_status_pay', 'WaitingAuthComplete')
+            ->where('wfp_status_pay', 'InProcessing')
+            ->where('pay_system', "bonus_payment")
+            ->get();
+
 
         foreach ($orderwebs as $value) {
             $uid = $value->dispatching_order_uid;

@@ -3201,7 +3201,8 @@ class UniversalAndroidFunctionController extends Controller
         $order->to_lat = $params["to_lat"]; //
         $order->to_lng = $params["to_lng"]; //
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-        $order->payment_type = "0"; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->payment_type = $params["payment_type"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->pay_system = $params["pay_system"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
         $order->closeReason = $params['closeReason'];

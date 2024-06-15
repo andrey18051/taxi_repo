@@ -817,14 +817,14 @@ class BonusBalanceController extends Controller
                 $order->closeReason = $closeReason_bonusOrderHold;
             }
         } else {
-//            if ($closeReason_bonusOrder != "-1"
-//                || $closeReason_doubleOrder != "-1"
-//                || $closeReason_bonusOrderHold != "-1") {
+            if ($closeReason_bonusOrder != "-1"
+                && $closeReason_doubleOrder != "-1"
+                && $closeReason_bonusOrderHold != "-1") {
                 self::blockBonusReturnApp($order->id, $amount, $app);
 
                 $result = 1;
                 $order->closeReason = $closeReason_bonusOrderHold;
-//            }
+            }
         }
 
         $order->save();

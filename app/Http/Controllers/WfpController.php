@@ -1347,9 +1347,9 @@ class WfpController extends Controller
                 $order->closeReason = $closeReason_bonusOrderHold;
             }
         } else {
-//            if ($closeReason_bonusOrder != "-1"
-//                || $closeReason_doubleOrder != "-1"
-//                || $closeReason_bonusOrderHold != "-1") {
+            if ($closeReason_bonusOrder != "-1"
+                && $closeReason_doubleOrder != "-1"
+                && $closeReason_bonusOrderHold != "-1") {
                 self::refund(
                     $application,
                     $city,
@@ -1357,7 +1357,7 @@ class WfpController extends Controller
                     $amount
                 );
                 $order->closeReason = $closeReason_bonusOrderHold;
-//            }
+            }
         }
 
 

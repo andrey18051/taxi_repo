@@ -1075,6 +1075,9 @@ class AndroidTestOSMController extends Controller
             $params['server'] = $connectAPI;
 
             $params['closeReason'] = "-1";
+            $params['payment_type'] = $payment_type;
+            $params['pay_system'] = $userArr[2];
+            Log::debug('Order Parameters:', $params);
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
             $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
@@ -2661,7 +2664,9 @@ class AndroidTestOSMController extends Controller
 //                    self::identificationId($application)
 //                );
                 $params['closeReason'] = "-1";
-
+                $params['payment_type'] = $payment_type;
+                $params['pay_system'] = $userArr[2];
+                Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -2986,6 +2991,8 @@ class AndroidTestOSMController extends Controller
                 $params['server'] = $connectAPI;
 
                 $params['closeReason'] = "-1";
+                $params['payment_type'] = $payment_type;
+                $params['pay_system'] = $userArr[2];
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
