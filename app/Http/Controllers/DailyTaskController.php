@@ -101,11 +101,11 @@ class DailyTaskController extends Controller
                 ->orWhere('wfp_status_pay', 'InProcessing');
         })->get();
 
-        if ($orderwebs) {
-            Log::info("orderReviewTask", $orderwebs->toArray());
+        if (!$orderwebs->isEmpty()) {
+            Log::info("orderCardWfpReviewTask", $orderwebs->toArray());
 
-            foreach ($orderwebs as $value) {
-                $uid = $value->dispatching_order_uid;
+            foreach ($orderwebs->toArray() as $value) {
+                $uid = $value['dispatching_order_uid'];
 
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
                 if ($uid_history != null) {
@@ -116,18 +116,26 @@ class DailyTaskController extends Controller
                     Log::info("uid_history bonusOrder $bonusOrder");
                     Log::info("uid_history doubleOrder $doubleOrder");
                     Log::info("uid_history bonusOrderHold $bonusOrderHold");
-                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
-//                    (new UniversalAndroidFunctionController)->orderReview(
-//                        $bonusOrder,
-//                        $doubleOrder,
-//                        $bonusOrderHold
-//                    );
+//                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+                    (new UniversalAndroidFunctionController)->orderReview(
+                        $bonusOrder,
+                        $doubleOrder,
+                        $bonusOrderHold
+                    );
+                } else {
+                    $message = "Оператор проверьте холд по счету WFP: " .  $value['wfp_order_id'] . "для пересмотра";
+                    $order = Orderweb::where('wfp_order_id', $value['wfp_order_id'])->first();
+                    $order->wfp_status_pay = 'Declined';
+                    $order->save();
+
+                    self::sentTaskMessage($message);
+                    Log::info("orderCardWfpReviewTask $message");
                 }
             }
         } else {
-            $message = "orderReviewTask нет холдов для пересмотра";
+            $message = "orderCardWfpReviewTask нет холдов WFP для пересмотра";
             self::sentTaskMessage($message);
-            Log::info("orderReviewTask нет холдов для пересмотра");
+            Log::info("orderCardWfpReviewTask $message");
         }
     }
     public function orderBonusReviewTask()
@@ -135,11 +143,11 @@ class DailyTaskController extends Controller
         $orderwebs = Orderweb::where('pay_system', 'bonus_payment')
                 ->where('bonus_status', 'hold')->get();
 
-        if ($orderwebs) {
-            Log::info("orderReviewTask", $orderwebs->toArray());
+        if (!$orderwebs->isEmpty()) {
+            Log::info("orderBonusReviewTask", $orderwebs->toArray());
 
-            foreach ($orderwebs as $value) {
-                $uid = $value->dispatching_order_uid;
+            foreach ($orderwebs->toArray() as $value) {
+                $uid = $value['dispatching_order_uid'];
 
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
                 if ($uid_history != null) {
@@ -150,18 +158,23 @@ class DailyTaskController extends Controller
                     Log::info("uid_history bonusOrder $bonusOrder");
                     Log::info("uid_history doubleOrder $doubleOrder");
                     Log::info("uid_history bonusOrderHold $bonusOrderHold");
-                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
-//                    (new UniversalAndroidFunctionController)->orderReview(
-//                        $bonusOrder,
-//                        $doubleOrder,
-//                        $bonusOrderHold
-//                    );
+//                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+                    (new UniversalAndroidFunctionController)->orderReview(
+                        $bonusOrder,
+                        $doubleOrder,
+                        $bonusOrderHold
+                    );
+                } else {
+                    $message = "Оператор проверьте холд бонусов: " .  $value['uid_bonusOrderHold'] . "для пересмотра";
+
+                    self::sentTaskMessage($message);
+                    Log::info("orderCardWfpReviewTask $message");
                 }
             }
         } else {
-            $message = "orderReviewTask нет холдов для пересмотра";
+            $message = "orderBonusReviewTask нет холдов бонусов для пересмотра";
             self::sentTaskMessage($message);
-            Log::info("orderReviewTask нет холдов для пересмотра");
+            Log::info("orderReviewTask $message");
         }
     }
 
