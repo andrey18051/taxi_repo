@@ -71,7 +71,7 @@ class DailyTaskController extends Controller
             Log::info("restartProcessExecutionStatus: Перезапуск сервера");
             self::sentTaskMessage($message);
 
-            if ($doubleOrder->isNotEmpty()) {
+            if ($doubleOrder) {
                 foreach ($doubleOrder as $value) {
                     $responseBonusStrArr = json_decode($value->responseBonusStr, true);
                     $message = "Запущен заново процесс опроса статусов заказа: "
@@ -94,25 +94,69 @@ class DailyTaskController extends Controller
     /**
      * Пересмотр холдов
      */
-    public function orderReviewTask()
+    public function orderCardWfpReviewTask()
     {
         $orderwebs = Orderweb::where(function ($query) {
             $query->where('wfp_status_pay', 'WaitingAuthComplete')
-                ->orWhere('wfp_status_pay', 'InProcessing')
-                ->orWhere('pay_system', 'bonus_payment');
+                ->orWhere('wfp_status_pay', 'InProcessing');
         })->get();
 
-        if ($orderwebs->isNotEmpty()) {
+        if ($orderwebs) {
             Log::info("orderReviewTask", $orderwebs->toArray());
 
             foreach ($orderwebs as $value) {
                 $uid = $value->dispatching_order_uid;
 
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-                $bonusOrder = $uid_history->bonusOrder;
-                $doubleOrder = $uid_history->doubleOrder;
-                $bonusOrderHold  = $uid_history->bonusOrderHold;
-                StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+                if ($uid_history != null) {
+                    Log::info("uid_history $uid_history");
+                    $bonusOrder = $uid_history->uid_bonusOrder;
+                    $doubleOrder = $uid_history->uid_doubleOrder;
+                    $bonusOrderHold  = $uid_history->uid_bonusOrder;
+                    Log::info("uid_history bonusOrder $bonusOrder");
+                    Log::info("uid_history doubleOrder $doubleOrder");
+                    Log::info("uid_history bonusOrderHold $bonusOrderHold");
+                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+//                    (new UniversalAndroidFunctionController)->orderReview(
+//                        $bonusOrder,
+//                        $doubleOrder,
+//                        $bonusOrderHold
+//                    );
+                }
+            }
+        } else {
+            $message = "orderReviewTask нет холдов для пересмотра";
+            self::sentTaskMessage($message);
+            Log::info("orderReviewTask нет холдов для пересмотра");
+        }
+    }
+    public function orderBonusReviewTask()
+    {
+        $orderwebs = Orderweb::where('pay_system', 'bonus_payment')
+                ->where('bonus_status', 'hold')->get();
+
+        if ($orderwebs) {
+            Log::info("orderReviewTask", $orderwebs->toArray());
+
+            foreach ($orderwebs as $value) {
+                $uid = $value->dispatching_order_uid;
+
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+                if ($uid_history != null) {
+                    Log::info("uid_history $uid_history");
+                    $bonusOrder = $uid_history->uid_bonusOrder;
+                    $doubleOrder = $uid_history->uid_doubleOrder;
+                    $bonusOrderHold  = $uid_history->uid_bonusOrder;
+                    Log::info("uid_history bonusOrder $bonusOrder");
+                    Log::info("uid_history doubleOrder $doubleOrder");
+                    Log::info("uid_history bonusOrderHold $bonusOrderHold");
+                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+//                    (new UniversalAndroidFunctionController)->orderReview(
+//                        $bonusOrder,
+//                        $doubleOrder,
+//                        $bonusOrderHold
+//                    );
+                }
             }
         } else {
             $message = "orderReviewTask нет холдов для пересмотра";

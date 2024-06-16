@@ -19,6 +19,7 @@ use App\Models\Uid_history;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -67,10 +68,29 @@ class UniversalAndroidFunctionController extends Controller
             return null;
         }
     }
+    public function checkAndRestoreDatabaseConnection()
+    {
+        do {
+            try {
+                // Проверяем, что подключение к базе данных установлено
+                if (!DB::connection()->getPdo()) {
+                    DB::connection()->reconnect(); // Пытаемся восстановить подключение
+                }
+
+                Log::info("Database connection established");
+
+            } catch (\Exception $e) {
+                Log::error("Error establishing database connection: " . $e->getMessage());
+            }
+        } while (!DB::connection()->getPdo());
+    }
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId): string
     {
+        self::checkAndRestoreDatabaseConnection();
         ExecStatusHistory::truncate();
+        Log::info("startNewProcessExecutionStatusEmu");
+
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
 
         $responseBonusStr = $doubleOrderRecord->responseBonusStr;
@@ -107,6 +127,7 @@ class UniversalAndroidFunctionController extends Controller
         $doubleOrder = $responseDouble['dispatching_order_uid'];
 
         $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
+
         if ($uid_history == null) {
             $uid_history = new Uid_history();
             $uid_history->uid_bonusOrder = $bonusOrder;
@@ -185,6 +206,7 @@ class UniversalAndroidFunctionController extends Controller
         if ($canceledAll) {
             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
 //            $uid_history->delete();
+            Log::info("doubleOrderRecord 0 $doubleOrderRecord");
             $doubleOrderRecord->delete();
             return "finish Canceled by User";
         } else {
@@ -223,6 +245,7 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("lastStatusBonus1: " . $lastStatusBonus);
                     Log::debug("lastStatusDouble1: " . $lastStatusDouble);
 //                    $uid_history->delete();
+                    Log::info("doubleOrderRecord 1 $doubleOrderRecord");
                     $doubleOrderRecord->delete();
                     self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                     break;
@@ -1226,6 +1249,7 @@ class UniversalAndroidFunctionController extends Controller
                         Log::debug("lastStatusDouble2: " . $lastStatusDouble);
 
 //                        $uid_history->delete();
+                        Log::info("doubleOrderRecord 2 $doubleOrderRecord");
                         $doubleOrderRecord->delete();
                         self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                         break;
@@ -2505,6 +2529,7 @@ class UniversalAndroidFunctionController extends Controller
                             Log::debug("lastStatusBonus3: " . $lastStatusBonus);
                             Log::debug("lastStatusDouble3: " . $lastStatusDouble);
 //                            $uid_history->delete();
+                            Log::info("doubleOrderRecord 3 $doubleOrderRecord");
                             $doubleOrderRecord->delete();
                             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                             break;
@@ -2531,6 +2556,7 @@ class UniversalAndroidFunctionController extends Controller
                     $apiVersion
                 );
 //                $uid_history->delete();
+                Log::info("doubleOrderRecord orderCanceled $doubleOrderRecord");
                 $doubleOrderRecord->delete();
                 self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
             }
@@ -2648,6 +2674,8 @@ class UniversalAndroidFunctionController extends Controller
                         $identificationId,
                         $apiVersion
                     );
+                } else {
+                    $orderCanceledBonus = true;
                 }
             }
 
@@ -2667,10 +2695,12 @@ class UniversalAndroidFunctionController extends Controller
                         $identificationId,
                         $apiVersion
                     );
+                } else {
+                    $orderCanceledDouble = true;
                 }
             }
 
-            if ($orderCanceledBonus && $orderCanceledDouble) {
+            if ($orderCanceledBonus && $orderCanceledDouble || $canceledOneMinute) {
                 return true;
             } else {
                 return false;
@@ -3110,9 +3140,12 @@ class UniversalAndroidFunctionController extends Controller
     }
     public function orderReview($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
+        Log::info("orderReview $bonusOrder, $doubleOrder, $bonusOrderHold");
+        self::checkAndRestoreDatabaseConnection();
+
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
 
-
+        Log::info("orderReview");
         if ($order->fondy_order_id != null) {
             //Возврат денег по Фонди
             return (new FondyController)->fondyStatusReview($bonusOrder, $doubleOrder, $bonusOrderHold);
@@ -3202,6 +3235,7 @@ class UniversalAndroidFunctionController extends Controller
         $order->to_lng = $params["to_lng"]; //
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
         $order->payment_type = $params["payment_type"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->bonus_status = $params['bonus_status'];
         $order->pay_system = $params["pay_system"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
         $order->dispatching_order_uid = $params['dispatching_order_uid'];

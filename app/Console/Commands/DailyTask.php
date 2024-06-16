@@ -23,7 +23,8 @@ class DailyTask extends Command
         $message = "Запущена проверка холдов";
         Log::info("DailyTask" . $message);
         (new DailyTaskController)->sentTaskMessage($message);
-        (new DailyTaskController)->orderReviewTask();
+        (new DailyTaskController)->orderCardWfpReviewTask();
+        (new DailyTaskController)->orderBonusReviewTask();
 
                // Выполняйте вашу логику здесь
 //        $orderwebs = Orderweb::whereNotNull('fondy_order_id')

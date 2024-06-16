@@ -19,9 +19,9 @@ class StartNewProcessExecution implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($orderId)
     {
-        //
+        $this->orderId = $orderId;
     }
 
     /**

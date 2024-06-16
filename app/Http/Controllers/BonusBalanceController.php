@@ -404,6 +404,7 @@ class BonusBalanceController extends Controller
     }
     public function blockBonusReturnApp($orderwebs_id, $bonusBloke, $app)
     {
+        Log::info("blockBonusReturnApp");
         $bonusType = BonusTypes::where("id", 5)->first();
 
         switch ($app) {
@@ -656,6 +657,7 @@ class BonusBalanceController extends Controller
      */
     public function bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold): int
     {
+        Log::info("bonusUnBlockedUid");
         $result = 0;
 
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
@@ -805,7 +807,7 @@ class BonusBalanceController extends Controller
             Log::debug("hold_bonusOrderHold $hold_bonusOrderHold");
 //            self::blockBonusToDeleteCost($order->id, $amount);
             self::blockBonusToDeleteCostApp($order->id, $amount, $app);
-
+            $order->bonus_status = "settle";
             $result = 1;
             if ($hold_bonusOrder) {
                 $order->closeReason = $closeReason_bonusOrder;
@@ -821,7 +823,7 @@ class BonusBalanceController extends Controller
                 && $closeReason_doubleOrder != "-1"
                 && $closeReason_bonusOrderHold != "-1") {
                 self::blockBonusReturnApp($order->id, $amount, $app);
-
+                $order->bonus_status = "refund";
                 $result = 1;
                 $order->closeReason = $closeReason_bonusOrderHold;
             }

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class StartOrderReview implements ShouldQueue
 {
@@ -20,9 +21,14 @@ class StartOrderReview implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        $bonusOrder,
+        $doubleOrder,
+        $bonusOrderHold
+    ) {
+        $this->bonusOrder = $bonusOrder;
+        $this->doubleOrder = $doubleOrder;
+        $this->bonusOrderHold = $bonusOrderHold;
     }
 
     /**
@@ -32,6 +38,9 @@ class StartOrderReview implements ShouldQueue
      */
     public function handle()
     {
+        Log::info("orderReview $this->bonusOrder,
+            $this->doubleOrder,
+            $this->bonusOrderHold");
         (new UniversalAndroidFunctionController)->orderReview(
             $this->bonusOrder,
             $this->doubleOrder,

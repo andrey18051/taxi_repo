@@ -1077,6 +1077,11 @@ class AndroidTestOSMController extends Controller
             $params['closeReason'] = "-1";
             $params['payment_type'] = $payment_type;
             $params['pay_system'] = $userArr[2];
+            if ($params['pay_system'] == "bonus_payment") {
+                $params['bonus_status'] = 'hold';
+            } else {
+                $params['bonus_status'] = '';
+            }
             Log::debug('Order Parameters:', $params);
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
@@ -2666,6 +2671,11 @@ class AndroidTestOSMController extends Controller
                 $params['closeReason'] = "-1";
                 $params['payment_type'] = $payment_type;
                 $params['pay_system'] = $userArr[2];
+                if ($params['pay_system'] == "bonus_payment") {
+                    $params['bonus_status'] = 'hold';
+                } else {
+                    $params['bonus_status'] = '';
+                }
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
@@ -2993,6 +3003,11 @@ class AndroidTestOSMController extends Controller
                 $params['closeReason'] = "-1";
                 $params['payment_type'] = $payment_type;
                 $params['pay_system'] = $userArr[2];
+                if ($params['pay_system'] == "bonus_payment") {
+                    $params['bonus_status'] = 'hold';
+                } else {
+                    $params['bonus_status'] = '';
+                }
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
@@ -3053,6 +3068,7 @@ class AndroidTestOSMController extends Controller
                     $doubleOrder->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
+                    Log::info("doubleOrder->id" . $doubleOrder->id);
                     StartNewProcessExecution::dispatch($doubleOrder->id);
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 

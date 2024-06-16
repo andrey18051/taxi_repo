@@ -1161,6 +1161,7 @@ class WfpController extends Controller
     }
     public function wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
+        Log::info("wfpStatus");
         $result = 0;
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
         $wfp_order_id = $order->wfp_order_id;
