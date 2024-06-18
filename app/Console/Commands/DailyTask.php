@@ -22,7 +22,7 @@ class DailyTask extends Command
     {
         $message = "Запущена проверка холдов";
         Log::info("DailyTask" . $message);
-        (new DailyTaskController)->sentTaskMessage($message);
+//        (new DailyTaskController)->sentTaskMessage($message);
         (new DailyTaskController)->orderCardWfpReviewTask();
         (new DailyTaskController)->orderBonusReviewTask();
 

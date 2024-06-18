@@ -18,7 +18,7 @@ Route::get('/createInvoice/{application}/{city}/{orderReference}/{amount}/{langu
 Route::get('/charge/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/{recToken}', [WfpController::class, 'charge'])->name('charge');
 Route::get('/refund/{application}/{city}/{orderReference}/{amount}', [WfpController::class, 'refund'])->name('refund');
 Route::get('/settle/{application}/{city}/{orderReference}/{amount}', [WfpController::class, 'settle'])->name('settle');
-Route::get('/verify/{application}/{city}/{orderReference}/{clientEmail}/{clientPhone}', [WfpController::class, 'verify'])->name('verify');
+Route::get('/verify/{application}/{city}/{orderReference}/{clientEmail}/{clientPhone}/{language}', [WfpController::class, 'verify'])->name('verify');
 Route::get('/checkStatus/{application}/{city}/{orderReference}', [WfpController::class, 'checkStatus'])->name('checkStatus');
 Route::get('/purchase/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/{recToken}', [WfpController::class, 'purchase'])->name('purchase');
 Route::post('/returnUrl', [WfpController::class, 'returnUrl'])->name('returnUrl');

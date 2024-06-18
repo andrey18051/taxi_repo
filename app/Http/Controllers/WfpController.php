@@ -426,8 +426,9 @@ class WfpController extends Controller
         $city,
         $orderReference,
         $clientEmail,
-        $clientPhone
-    ): Response {
+        $clientPhone,
+        $language
+    ): string {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -472,15 +473,16 @@ class WfpController extends Controller
             "clientPhone" => $clientPhone,
 //            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
             "serviceUrl" => $serviceUrl,
-            "language"=> "RU",
+            "language"=> $language,
             "paymentSystems" => "lookupCard",
             "verifyType" => "confirm",
         ];
 
 // Відправлення POST-запиту
         $response = Http::post('https://secure.wayforpay.com/verify?behavior=offline', $params);
+//        $response = Http::post('https://secure.wayforpay.com/verify?behavior=online', $params);
 
-        Log::debug("verify: ", ['response' => $response->body()]);
+        Log::debug("verify response sent: ");
         return $response;
     }
 

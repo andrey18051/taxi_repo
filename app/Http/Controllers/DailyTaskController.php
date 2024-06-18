@@ -165,7 +165,7 @@ class DailyTaskController extends Controller
                         $bonusOrderHold
                     );
                 } else {
-                    $message = "Оператор проверьте холд бонусов: " .  $value['uid_bonusOrderHold'] . "для пересмотра";
+                    $message = "Оператор проверьте холд бонусов: " .  $uid . "для пересмотра";
 
                     self::sentTaskMessage($message);
                     Log::info("orderCardWfpReviewTask $message");
