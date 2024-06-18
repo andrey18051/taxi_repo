@@ -606,6 +606,7 @@ class WfpController extends Controller
             $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
             Log::debug("refund responseArray", $responseArray);
 
+            (new DailyTaskController)->sentTaskMessage("Попытка Refunded холда: " . $responseArray);
             // Проверка статуса транзакции
             // || $responseArray['transactionStatus'] == 'Declined'
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {

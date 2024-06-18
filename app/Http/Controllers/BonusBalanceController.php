@@ -319,7 +319,9 @@ class BonusBalanceController extends Controller
 
     private function blockBonusToDeleteCostApp($orderwebs_id, $cost, $app)
     {
-        Log::debug("blockBonusToDeleteCost $orderwebs_id, $cost");
+        $message = "blockBonusToDeleteCost $orderwebs_id, $cost";
+        Log::debug($message);
+        DailyTaskController::sentTaskMessage($message);
 //        $balance_records = BonusBalance::where("orderwebs_id", $orderwebs_id)
 //            ->where("bonus_types_id", 6)
 //            ->where("bonusBloke", "!=", 0)
@@ -657,7 +659,10 @@ class BonusBalanceController extends Controller
      */
     public function bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold): int
     {
-        Log::info("bonusUnBlockedUid");
+        $message = "bonusUnBlockedUid";
+        Log::info($message);
+
+        Log::debug($message);
         $result = 0;
 
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
@@ -669,7 +674,9 @@ class BonusBalanceController extends Controller
         $amount = $order->web_cost;
         $amount_settle = $amount;
 
-        Log::debug("bonusUnBlockedUid holdOrderCost" .$amount);
+        $message = "bonusUnBlockedUid $bonusOrderHold : " .$amount;
+        Log::debug($message);
+        DailyTaskController::sentTaskMessage($message);
 
         $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrder,

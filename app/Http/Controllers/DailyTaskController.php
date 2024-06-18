@@ -158,18 +158,25 @@ class DailyTaskController extends Controller
                     Log::info("uid_history bonusOrder $bonusOrder");
                     Log::info("uid_history doubleOrder $doubleOrder");
                     Log::info("uid_history bonusOrderHold $bonusOrderHold");
-//                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
-                    (new UniversalAndroidFunctionController)->orderReview(
-                        $bonusOrder,
-                        $doubleOrder,
-                        $bonusOrderHold
-                    );
+
                 } else {
                     $message = "Оператор проверьте холд бонусов: " .  $uid . "для пересмотра";
 
                     self::sentTaskMessage($message);
+
                     Log::info("orderCardWfpReviewTask $message");
+                    $bonusOrder = $uid;
+                    $doubleOrder = $uid;
+                    $bonusOrderHold  = $uid;
+                    Log::info("uid_history bonusOrder $bonusOrder");
+                    Log::info("uid_history doubleOrder $doubleOrder");
+                    Log::info("uid_history bonusOrderHold $bonusOrderHold");
                 }
+                (new UniversalAndroidFunctionController)->orderReview(
+                    $bonusOrder,
+                    $doubleOrder,
+                    $bonusOrderHold
+                );
             }
         } else {
             $message = "orderBonusReviewTask нет холдов бонусов для пересмотра";
