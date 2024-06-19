@@ -2656,7 +2656,8 @@ class UniversalAndroidFunctionController extends Controller
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
         Log::debug("uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false'));
 
-        if ($canceledOneMinute || $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
+        if ($canceledOneMinute == true || $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
+//        if ($uid_history->cancel == true) { //Выход по 1 минуте или нажатию отмены
             $responseBonusLast =  $uid_history->bonus_status;
             $orderCanceledBonus = false;
             if ($responseBonusLast) {
@@ -2736,8 +2737,8 @@ class UniversalAndroidFunctionController extends Controller
                     }
                     break;
             }
-            return false;
         }
+        return false;
     }
 
     private function canceledOneMinute($uid)

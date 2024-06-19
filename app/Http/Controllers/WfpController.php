@@ -611,6 +611,12 @@ class WfpController extends Controller
             // || $responseArray['transactionStatus'] == 'Declined'
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
+
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                $order->wfp_status_pay = $responseArray['transactionStatus'];
+                $order->save();
+
+
                 break; // Прерываем цикл, если статус "Refunded"
             } elseif ($responseArray['transactionStatus']) {
                 // Проверяем, прошло ли более 72 часов
@@ -624,31 +630,6 @@ class WfpController extends Controller
         }
 
         Log::debug("refund CHECK_STATUS:", ['response' => $response->body()]);
-        $alarmMessage = new TelegramController();
-
-        try {
-            $alarmMessage->sendAlarmMessage(self::orderInfo($orderReference) .
-                "WFP refund response:" . $response->body());
-            $alarmMessage->sendMeMessage(self::orderInfo($orderReference) .
-                "WFP refund response:" . $response->body());
-        } catch (Exception $e) {
-            $subject = 'Ошибка в телеграмм';
-            $paramsCheck = [
-                'subject' => $subject,
-                'message' => $e,
-            ];
-
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            $subject = "Возврат холда";
-            $paramsAdmin = [
-                'subject' => $subject,
-                'message' => self::orderInfo($orderReference) . "WFP refund response:" . $response->body(),
-            ];
-
-            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-        };
-
 
         return $response;
     }
@@ -679,26 +660,13 @@ class WfpController extends Controller
                 $secretKey = $merchant->wfp_merchantSecretKey;
                 $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
-//            dd(" /merchantAccount- " . $merchantAccount . "\n"
-//                . " /secretKey- " . $secretKey . "\n"
-//                . " /orderReference- " . $orderReference . "\n"
-//                . " /amount- " . $amount . "\n"
-//                . " /language- " . $language . "\n"
-//                . " /productName- " . $productName . "\n"
-//                . " /clientEmail- " . $clientEmail . "\n"
-//                . " /clientPhone- " . $clientPhone
-//            );
-//
+
         $params = [
             "merchantAccount" => $merchantAccount,
             "orderReference" => $orderReference,
             "amount" => $amount,
             "currency" => "UAH",
         ];
-//dd($params);
-
-//        $merchantAccount = "test_merch_n1";
-//        $secretKey = "flk3409refn54t54t*FNJRET";
 
         $params = [
             "transactionType" => "SETTLE",
@@ -710,35 +678,40 @@ class WfpController extends Controller
             "apiVersion" => 1
         ];
 
-// Відправлення POST-запиту
-        $response = Http::post('https://api.wayforpay.com/api', $params);
-        Log::debug("SETTLE:", ['response' => $response->body()]);
 
-        $alarmMessage = new TelegramController();
+        // Відправлення POST-запиту
+        $startTime = time(); // Время начала выполнения скрипта
+        $maxDuration = 72 * 60 * 60; // 72 часа в секундах
 
-        try {
-            $alarmMessage->sendAlarmMessage(self::orderInfo($orderReference) .
-                "WFP refund response:" . $response->body());
-            $alarmMessage->sendMeMessage(self::orderInfo($orderReference) .
-                "WFP refund response:" . $response->body());
-        } catch (Exception $e) {
-            $subject = 'Ошибка в телеграмм';
-            $paramsCheck = [
-                'subject' => $subject,
-                'message' => $e,
-            ];
+        while (true) { // Бесконечный цикл
+            // Отправка POST-запроса к API
+            sleep(60);
 
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            $subject = "Списание холда";
-            $paramsAdmin = [
-                'subject' => $subject,
-                'message' => self::orderInfo($orderReference) . "WFP settle response:" . $response->body(),
-            ];
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            Log::debug("SETTLE:", ['response' => $response->body()]);
+            $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
 
-            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
-        };
+            (new DailyTaskController)->sentTaskMessage("Попытка SETTLE холда: " . $responseArray);
+            // Проверка статуса транзакции
 
+            if ($responseArray['transactionStatus'] == 'Approved' || $responseArray['transactionStatus'] == 'Voided') {
+                Log::debug("SETTLE Статус транзакции: " . $responseArray['transactionStatus']);
+
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                $order->wfp_status_pay = $responseArray['transactionStatus'];
+                $order->save();
+
+                break; // Прерываем цикл, если статус "Approved"
+            } elseif ($responseArray['transactionStatus']) {
+                // Проверяем, прошло ли более 72 часов
+                if (time() - $startTime > $maxDuration) {
+                    Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
+                    break;
+                }
+                Log::debug("refund Статус транзакции: Declined. Повторная попытка через 15 минут...");
+                sleep(900); // Пауза на 900 секунд (15 минут)
+            }
+        }
         return $response;
     }
 
