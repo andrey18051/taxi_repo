@@ -204,6 +204,31 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("canceledFinish:0 " . $canceledAll);
 
         if ($canceledAll) {
+//БезНал
+            self::newStatus(
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion,
+                $responseBonus["url"],
+                $bonusOrder,
+                "bonus",
+                $lastTimeUpdate,
+                $updateTime,
+                $uid_history
+            );
+
+//Нал
+            self::newStatus(
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion,
+                $responseDouble["url"],
+                $doubleOrder,
+                "double",
+                $lastTimeUpdate,
+                $updateTime,
+                $uid_history
+            );
             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
 //            $uid_history->delete();
             Log::info("doubleOrderRecord 0 $doubleOrderRecord");
@@ -241,6 +266,31 @@ class UniversalAndroidFunctionController extends Controller
                 );
 
                 if ($canceledAll) {
+                    //БезНал
+                    self::newStatus(
+                        $authorizationBonus,
+                        $identificationId,
+                        $apiVersion,
+                        $responseBonus["url"],
+                        $bonusOrder,
+                        "bonus",
+                        $lastTimeUpdate,
+                        $updateTime,
+                        $uid_history
+                    );
+
+//Нал
+                    self::newStatus(
+                        $authorizationDouble,
+                        $identificationId,
+                        $apiVersion,
+                        $responseDouble["url"],
+                        $doubleOrder,
+                        "double",
+                        $lastTimeUpdate,
+                        $updateTime,
+                        $uid_history
+                    );
                     Log::debug("canceled while 1 **********************************************");
                     Log::debug("lastStatusBonus1: " . $lastStatusBonus);
                     Log::debug("lastStatusDouble1: " . $lastStatusDouble);
@@ -1244,6 +1294,31 @@ class UniversalAndroidFunctionController extends Controller
                     );
 
                     if ($canceledAll) {
+                        //БезНал
+                        self::newStatus(
+                            $authorizationBonus,
+                            $identificationId,
+                            $apiVersion,
+                            $responseBonus["url"],
+                            $bonusOrder,
+                            "bonus",
+                            $lastTimeUpdate,
+                            $updateTime,
+                            $uid_history
+                        );
+
+//Нал
+                        self::newStatus(
+                            $authorizationDouble,
+                            $identificationId,
+                            $apiVersion,
+                            $responseDouble["url"],
+                            $doubleOrder,
+                            "double",
+                            $lastTimeUpdate,
+                            $updateTime,
+                            $uid_history
+                        );
                         Log::debug("canceled while ");
                         Log::debug("lastStatusBonus2: " . $lastStatusBonus);
                         Log::debug("lastStatusDouble2: " . $lastStatusDouble);
@@ -2525,6 +2600,31 @@ class UniversalAndroidFunctionController extends Controller
                         );
 
                         if ($canceledAll) {
+                            //БезНал
+                            self::newStatus(
+                                $authorizationBonus,
+                                $identificationId,
+                                $apiVersion,
+                                $responseBonus["url"],
+                                $bonusOrder,
+                                "bonus",
+                                $lastTimeUpdate,
+                                $updateTime,
+                                $uid_history
+                            );
+
+//Нал
+                            self::newStatus(
+                                $authorizationDouble,
+                                $identificationId,
+                                $apiVersion,
+                                $responseDouble["url"],
+                                $doubleOrder,
+                                "double",
+                                $lastTimeUpdate,
+                                $updateTime,
+                                $uid_history
+                            );
                             Log::debug("canceled while ");
                             Log::debug("lastStatusBonus3: " . $lastStatusBonus);
                             Log::debug("lastStatusDouble3: " . $lastStatusDouble);
