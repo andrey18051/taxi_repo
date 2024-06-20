@@ -38,6 +38,11 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
+            Route::prefix('inf')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/inf.php'));
+
             Route::prefix('android_set')
                 ->middleware('api')
                 ->namespace($this->namespace)

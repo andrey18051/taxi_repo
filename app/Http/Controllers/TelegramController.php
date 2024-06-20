@@ -177,6 +177,15 @@ class TelegramController extends Controller
             'parse_mode' => 'html'
         ]);
     }
+    public function sendInformMessage($message): \Illuminate\Http\Client\Response
+    {
+        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg';//@andrey_info_bot
+        return Http::post(Telegram::url . $bot . '/sendMessage', [
+            'chat_id' => 120352595,
+            'text' => $message,
+            'parse_mode' => 'html'
+        ]);
+    }
 
     public function sendAboutDriverMessage($chat_id, $message)
     {
