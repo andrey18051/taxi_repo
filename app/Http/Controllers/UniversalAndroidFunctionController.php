@@ -36,7 +36,7 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     ) {
         $startTime = time(); // Начальное время
-        $maxExecutionTime = 1*60*60; //время жизни отмены
+        $maxExecutionTime = 2*60; //время жизни отмены
         do {
             try {
                 $response = Http::withHeaders([
@@ -44,12 +44,10 @@ class UniversalAndroidFunctionController extends Controller
                     "X-WO-API-APP-ID" => $identificationId,
                     "X-API-VERSION" => $apiVersion
                 ])->post($url, $parameter);
-
-                // Логируем тело ответа
-                Log::debug("function postRequestHTTP " . $response->body());
-
                 // Проверяем успешность ответа
                 if ($response->successful()) {
+                    // Логируем тело ответа
+                    Log::debug("function postRequestHTTP " . $response->body());
                     // Обрабатываем успешный ответ
                     // Ваш код для обработки успешного ответа
                     return $response;
@@ -64,9 +62,7 @@ class UniversalAndroidFunctionController extends Controller
             }
             sleep(5);
         } while (time() - $startTime < $maxExecutionTime);
-        if (time() - $startTime >= $maxExecutionTime) {
-            return null;
-        }
+        return null;
     }
     public function checkAndRestoreDatabaseConnection()
     {
@@ -2700,7 +2696,11 @@ class UniversalAndroidFunctionController extends Controller
                 }
             }
 
-            if ($orderCanceledBonus && $orderCanceledDouble || $canceledOneMinute) {
+            if ($orderCanceledBonus && $orderCanceledDouble || $canceledOneMinute  || $uid_history->cancel) {
+                $uid_history->bonus_status = null;
+                $uid_history->double_status = null;
+                $uid_history->save();
+
                 return true;
             } else {
                 return false;
@@ -3150,15 +3150,17 @@ class UniversalAndroidFunctionController extends Controller
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
 
         Log::info("orderReview");
-        if ($order->fondy_order_id != null) {
-            //Возврат денег по Фонди
-            return (new FondyController)->fondyStatusReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-        } else {
-            if ($order->wfp_order_id != null) {
-                return  (new WfpController)->wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold);
+        if($order) {
+            if ($order->fondy_order_id != null) {
+                //Возврат денег по Фонди
+                return (new FondyController)->fondyStatusReview($bonusOrder, $doubleOrder, $bonusOrderHold);
             } else {
-                return   (new BonusBalanceController)->bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold);
+                if ($order->wfp_order_id != null) {
+                    return  (new WfpController)->wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold);
+                } else {
+                    return   (new BonusBalanceController)->bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold);
 
+                }
             }
         }
     }

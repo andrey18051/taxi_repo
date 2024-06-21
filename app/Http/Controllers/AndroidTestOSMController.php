@@ -1431,7 +1431,6 @@ class AndroidTestOSMController extends Controller
                         break;
                 }
 
-
                 (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
@@ -3735,7 +3734,7 @@ class AndroidTestOSMController extends Controller
             } else {
                 $response_bonus = $uid_history->bonus_status;
                 // Логируем тело ответа
-                Log::debug("historyUIDStatus respons bonus: " . $response_bonus);
+                Log::debug("15 historyUIDStatus respons bonus: " . $response_bonus);
                 // Обрабатываем успешный ответ
                 $response_bonus_arr = json_decode($response_bonus, true);
                 if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
