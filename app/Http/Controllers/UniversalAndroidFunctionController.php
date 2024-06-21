@@ -2666,11 +2666,7 @@ class UniversalAndroidFunctionController extends Controller
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
         Log::debug("uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false'));
 
-        if ($canceledOneMinute == true || $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
-            $uid_history->bonus_status = null;
-            $uid_history->double_status = null;
-            $uid_history->save();
-
+        if ($canceledOneMinute|| $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
             $responseBonusLast =  $uid_history->bonus_status;
             $orderCanceledBonus = false;
             if ($responseBonusLast) {
@@ -2689,8 +2685,10 @@ class UniversalAndroidFunctionController extends Controller
                         $apiVersion
                     );
                 } else {
+                    Log::debug("canceledFinish $orderCanceledBonus");
                     $orderCanceledBonus = true;
                 }
+                (new DailyTaskController)->sentTaskMessage("Отмена по 1 минуте $bonusOrder");
             }
 
             $responseDoubleLast =  $uid_history->double_status;
@@ -2834,9 +2832,13 @@ class UniversalAndroidFunctionController extends Controller
                 Log::debug("canceledOneMinute response data", $data);
 
                 if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-                    if ($data['transactionStatus'] == "Approved" || $data['transactionStatus'] == "WaitingAuthComplete") {
+                    if ($data['transactionStatus'] == "Approved"
+                        || $data['transactionStatus'] == "WaitingAuthComplete") {
                         Log::debug("Transaction status is Approved or WaitingAuthComplete.");
                         return false;
+                    } elseif ($data['transactionStatus'] == "Declined") {
+                        Log::debug("Transaction status is Declined");
+                        return true;
                     } else {
                         Log::debug("Transaction status is not Approved or WaitingAuthComplete.");
                         return true;

@@ -4,16 +4,18 @@ namespace App\Jobs;
 
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class StartNewProcessExecution implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     protected $orderId;
+
     /**
      * Create a new job instance.
      *
@@ -31,6 +33,14 @@ class StartNewProcessExecution implements ShouldQueue
      */
     public function handle()
     {
-        (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
+        Log::channel('single')->debug("StartNewProcessExecution job started for order ID: {$this->orderId}");
+
+        try {
+            (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
+            Log::channel('single')->debug("StartNewProcessExecution job finished successfully for order ID: {$this->orderId}");
+        } catch (\Exception $e) {
+            Log::channel('single')->error("StartNewProcessExecution job failed for order ID: {$this->orderId} with error: " . $e->getMessage());
+        }
     }
 }
+
