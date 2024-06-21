@@ -3628,60 +3628,159 @@ class AndroidTestOSMController extends Controller
             $city = "Kyiv City";
         }
 
-        Log::debug("historyUIDStatus uid $uid");
+        Log::debug("1 historyUIDStatus uid $uid");
         $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
 
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
         $connectAPI = $orderweb_uid->server;
         if ($uid_history) {
-            sleep(5);
-            $response_bonus = $uid_history->bonus_status;
-            // Логируем тело ответа
-            Log::debug("historyUIDStatus respons bonus: " . $response_bonus);
-            // Обрабатываем успешный ответ
-            $response_bonus_arr = json_decode($response_bonus, true);
-//            Log::debug("responseArr bonus: ". $response_bonus_arr);
-            if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
-                || $response_bonus_arr["close_reason"] == -1) {
-                $nameFrom = $response_bonus_arr['route_address_from']['name']
-                    . " " . $response_bonus_arr['route_address_from']['number'];
-                $nameTo = $response_bonus_arr['route_address_to']['name']
-                    . " " . $response_bonus_arr['route_address_to']['number'];
+            //Запрос статуса по ветке
+            if ($uid_history->bonus_status == null) {
+                //Запрос по окончанию вилки статуса безнала
+                $authorization = (new UniversalAndroidFunctionController)
+                    ->authorizationApp($city, $connectAPI, $application);
+                $url = $connectAPI . '/api/weborders/' . $uid_history->uid_bonusOrder;
+                try {
+                    $response_bonus = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => self::identificationId($application),
+                        "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                            ->apiVersionApp($city, $connectAPI, $application)
+                    ])->get($url);
 
-                $orderweb_uid->routefrom = $nameFrom;
-                $orderweb_uid->routeto = $nameTo;
+                    // Логируем тело ответа
+                    Log::debug(" 2 historyUIDStatus postRequestHTTP: " . $response_bonus->body());
 
-                if ($response_bonus_arr["order_car_info"] != null) {
-                    $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
+                    // Проверяем успешность ответа
+                    if ($response_bonus->successful()) {
+                        // Обрабатываем успешный ответ
+                        $response_bonus_arr = json_decode($response_bonus, true);
+                        if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
+                            || $response_bonus_arr["close_reason"] == -1) {
+                            //Безнал по окончанию вилки выполнен или в работе
+                            $nameFrom = $response_bonus_arr['route_address_from']['name']
+                                . " " . $response_bonus_arr['route_address_from']['number'];
+                            $nameTo = $response_bonus_arr['route_address_to']['name']
+                                . " " . $response_bonus_arr['route_address_to']['number'];
+
+                            $orderweb_uid->routefrom = $nameFrom;
+                            $orderweb_uid->routeto = $nameTo;
+
+                            if ($response_bonus_arr["order_car_info"] != null) {
+                                $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
+                            }
+
+                            $orderweb_uid->save();
+                            return $response_bonus;
+                        } else {
+                            //Безнал по окончанию вилки закрыт
+                            //Запрос по окончанию вилки статуса нала
+                            $url = $connectAPI . '/api/weborders/' . $uid_history->uid_doubleOrder;
+                            try {
+                                $response_double = Http::withHeaders([
+                                    "Authorization" => $authorization,
+                                    "X-WO-API-APP-ID" => self::identificationId($application),
+                                    "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                                        ->apiVersionApp($city, $connectAPI, $application)
+                                ])->get($url);
+
+                                // Логируем тело ответа
+                                Log::debug("3 historyUIDStatus postRequestHTTP: " . $response_double->body());
+
+                                // Проверяем успешность ответа
+                                if ($response_double->successful()) {
+                                    // Обрабатываем успешный ответ
+                                    $response_arr_double = json_decode($response_double, true);
+                                    Log::debug("4 $url: ", $response_arr_double);
+                                    $nameFrom = $response_arr_double['route_address_from']['name']
+                                        . " " . $response_arr_double['route_address_from']['number'];
+                                    $nameTo = $response_arr_double['route_address_to']['name']
+                                        . " " . $response_arr_double['route_address_to']['number'];
+
+                                    $orderweb_uid->routefrom = $nameFrom;
+                                    $orderweb_uid->routeto = $nameTo;
+
+                                    if ($response_arr_double["order_car_info"] != null) {
+                                        $orderweb_uid->auto = $response_arr_double["order_car_info"];
+                                    }
+
+                                    $orderweb_uid->save();
+                                    return $response_double;
+
+                                } else {
+                                    // Логируем ошибки в случае неудачного запроса
+                                    Log::error("5 historyUIDStatus Request failed with status: "
+                                        . $response_double->status());
+                                    Log::error("6 historyUIDStatus Response: " . $response_double->body());
+                                    return null;
+                                }
+                            } catch (\Exception $e) {
+                                // Обработка исключений
+                                Log::error("7 historyUIDStatus Exception caught: " . $e->getMessage());
+                                return null;
+                            }
+                        }
+                    } else {
+                        // Логируем ошибки в случае неудачного запроса
+                        Log::error("11 historyUIDStatus Request failed with status: " . $response_bonus->status());
+                        Log::error("12 historyUIDStatus Response: " . $response_bonus->body());
+                        return null;
+                    }
+                } catch (\Exception $e) {
+                    // Обработка исключений
+                    Log::error("13 historyUIDStatus Exception caught: " . $e->getMessage());
+                    return null;
                 }
-
-                $orderweb_uid->save();
-                return $response_bonus;
             } else {
-                $response_double = $uid_history->double_status;
-
+                $response_bonus = $uid_history->bonus_status;
                 // Логируем тело ответа
-                Log::debug("historyUIDStatus response double: " . $response_double);
-
+                Log::debug("historyUIDStatus respons bonus: " . $response_bonus);
                 // Обрабатываем успешный ответ
-                $response_double_arr = json_decode($response_double, true);
-                Log::debug("responseArr double: ", $response_double_arr);
-                $nameFrom = $response_double_arr['route_address_from']['name'] . " " . $response_double_arr['route_address_from']['number'];
-                $nameTo = $response_double_arr['route_address_to']['name'] . " " . $response_double_arr['route_address_to']['number'];
+                $response_bonus_arr = json_decode($response_bonus, true);
+                if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
+                    || $response_bonus_arr["close_reason"] == -1) {
+                    $nameFrom = $response_bonus_arr['route_address_from']['name']
+                        . " " . $response_bonus_arr['route_address_from']['number'];
+                    $nameTo = $response_bonus_arr['route_address_to']['name']
+                        . " " . $response_bonus_arr['route_address_to']['number'];
 
-                $orderweb_uid->routefrom = $nameFrom;
-                $orderweb_uid->routeto = $nameTo;
+                    $orderweb_uid->routefrom = $nameFrom;
+                    $orderweb_uid->routeto = $nameTo;
 
-                if ($response_double_arr["order_car_info"] != null) {
-                    $orderweb_uid->auto = $response_double_arr["order_car_info"];
+                    if ($response_bonus_arr["order_car_info"] != null) {
+                        $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
+                    }
+
+                    $orderweb_uid->save();
+                    return $response_bonus;
+                } else {
+                    $response_double = $uid_history->double_status;
+
+                    // Логируем тело ответа
+                    Log::debug("historyUIDStatus response double: " . $response_double);
+
+                    // Обрабатываем успешный ответ
+                    $response_double_arr = json_decode($response_double, true);
+                    Log::debug("responseArr double: ", $response_double_arr);
+                    $nameFrom = $response_double_arr['route_address_from']['name'] . " " . $response_double_arr['route_address_from']['number'];
+                    $nameTo = $response_double_arr['route_address_to']['name'] . " " . $response_double_arr['route_address_to']['number'];
+
+                    $orderweb_uid->routefrom = $nameFrom;
+                    $orderweb_uid->routeto = $nameTo;
+
+                    if ($response_double_arr["order_car_info"] != null) {
+                        $orderweb_uid->auto = $response_double_arr["order_car_info"];
+                    }
+
+                    $orderweb_uid->save();
+                    return $response_double;
                 }
-
-                $orderweb_uid->save();
-                return $response_double;
             }
         } else {
-            $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
+            //Запрос статуса одиночного заказа
+            $authorization = (new UniversalAndroidFunctionController)
+                ->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/' . $uid;
             try {
                 $response = Http::withHeaders([

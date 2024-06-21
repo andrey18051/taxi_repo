@@ -204,33 +204,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("canceledFinish:0 " . $canceledAll);
 
         if ($canceledAll) {
-//БезНал
-            self::newStatus(
-                $authorizationBonus,
-                $identificationId,
-                $apiVersion,
-                $responseBonus["url"],
-                $bonusOrder,
-                "bonus",
-                $lastTimeUpdate,
-                $updateTime,
-                $uid_history
-            );
-
-//Нал
-            self::newStatus(
-                $authorizationDouble,
-                $identificationId,
-                $apiVersion,
-                $responseDouble["url"],
-                $doubleOrder,
-                "double",
-                $lastTimeUpdate,
-                $updateTime,
-                $uid_history
-            );
             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-//            $uid_history->delete();
             Log::info("doubleOrderRecord 0 $doubleOrderRecord");
             $doubleOrderRecord->delete();
             return "finish Canceled by User";
@@ -266,31 +240,6 @@ class UniversalAndroidFunctionController extends Controller
                 );
 
                 if ($canceledAll) {
-                    //БезНал
-                    self::newStatus(
-                        $authorizationBonus,
-                        $identificationId,
-                        $apiVersion,
-                        $responseBonus["url"],
-                        $bonusOrder,
-                        "bonus",
-                        $lastTimeUpdate,
-                        $updateTime,
-                        $uid_history
-                    );
-
-//Нал
-                    self::newStatus(
-                        $authorizationDouble,
-                        $identificationId,
-                        $apiVersion,
-                        $responseDouble["url"],
-                        $doubleOrder,
-                        "double",
-                        $lastTimeUpdate,
-                        $updateTime,
-                        $uid_history
-                    );
                     Log::debug("canceled while 1 **********************************************");
                     Log::debug("lastStatusBonus1: " . $lastStatusBonus);
                     Log::debug("lastStatusDouble1: " . $lastStatusDouble);
@@ -1294,36 +1243,9 @@ class UniversalAndroidFunctionController extends Controller
                     );
 
                     if ($canceledAll) {
-                        //БезНал
-                        self::newStatus(
-                            $authorizationBonus,
-                            $identificationId,
-                            $apiVersion,
-                            $responseBonus["url"],
-                            $bonusOrder,
-                            "bonus",
-                            $lastTimeUpdate,
-                            $updateTime,
-                            $uid_history
-                        );
-
-//Нал
-                        self::newStatus(
-                            $authorizationDouble,
-                            $identificationId,
-                            $apiVersion,
-                            $responseDouble["url"],
-                            $doubleOrder,
-                            "double",
-                            $lastTimeUpdate,
-                            $updateTime,
-                            $uid_history
-                        );
                         Log::debug("canceled while ");
                         Log::debug("lastStatusBonus2: " . $lastStatusBonus);
                         Log::debug("lastStatusDouble2: " . $lastStatusDouble);
-
-//                        $uid_history->delete();
                         Log::info("doubleOrderRecord 2 $doubleOrderRecord");
                         $doubleOrderRecord->delete();
                         self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
@@ -2600,35 +2522,9 @@ class UniversalAndroidFunctionController extends Controller
                         );
 
                         if ($canceledAll) {
-                            //БезНал
-                            self::newStatus(
-                                $authorizationBonus,
-                                $identificationId,
-                                $apiVersion,
-                                $responseBonus["url"],
-                                $bonusOrder,
-                                "bonus",
-                                $lastTimeUpdate,
-                                $updateTime,
-                                $uid_history
-                            );
-
-//Нал
-                            self::newStatus(
-                                $authorizationDouble,
-                                $identificationId,
-                                $apiVersion,
-                                $responseDouble["url"],
-                                $doubleOrder,
-                                "double",
-                                $lastTimeUpdate,
-                                $updateTime,
-                                $uid_history
-                            );
                             Log::debug("canceled while ");
                             Log::debug("lastStatusBonus3: " . $lastStatusBonus);
                             Log::debug("lastStatusDouble3: " . $lastStatusDouble);
-//                            $uid_history->delete();
                             Log::info("doubleOrderRecord 3 $doubleOrderRecord");
                             $doubleOrderRecord->delete();
                             self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
@@ -2757,7 +2653,10 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false'));
 
         if ($canceledOneMinute == true || $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
-//        if ($uid_history->cancel == true) { //Выход по 1 минуте или нажатию отмены
+            $uid_history->bonus_status = null;
+            $uid_history->double_status = null;
+            $uid_history->save();
+
             $responseBonusLast =  $uid_history->bonus_status;
             $orderCanceledBonus = false;
             if ($responseBonusLast) {
@@ -2816,8 +2715,10 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
-//                            $uid_history->delete();
                             Log::debug("отмена по налу");
+                            $uid_history->bonus_status = null;
+                            $uid_history->double_status = null;
+                            $uid_history->save();
                             return true;
                     }
                     break;
@@ -2831,8 +2732,10 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
-//                            $uid_history->delete();
                             Log::debug("отмена по безналу");
+                            $uid_history->bonus_status = null;
+                            $uid_history->double_status = null;
+                            $uid_history->save();
                             return true;
                     }
                     break;
