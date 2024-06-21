@@ -38,28 +38,46 @@ class UniversalAndroidFunctionController extends Controller
         $startTime = time(); // Начальное время
         $maxExecutionTime = 2*60; //время жизни отмены
         do {
-            try {
-                $response = Http::withHeaders([
-                    "Authorization" => $authorization,
-                    "X-WO-API-APP-ID" => $identificationId,
-                    "X-API-VERSION" => $apiVersion
-                ])->post($url, $parameter);
-                // Проверяем успешность ответа
-                if ($response->successful()) {
-                    // Логируем тело ответа
-                    Log::debug("function postRequestHTTP " . $response->body());
-                    // Обрабатываем успешный ответ
-                    // Ваш код для обработки успешного ответа
-                    return $response;
-                } else {
-                    // Логируем ошибки в случае неудачного запроса
-                    Log::error("function postRequestHTTP Request failed with status: " . $response->status());
-                    Log::error("function postRequestHTTP Response: " . $response->body());
-                }
-            } catch (\Exception $e) {
-                // Обработка исключений
-                Log::error("function postRequestHTTP Exception caught: " . $e->getMessage());
+//            try {
+//                $response = Http::withHeaders([
+//                    "Authorization" => $authorization,
+//                    "X-WO-API-APP-ID" => $identificationId,
+//                    "X-API-VERSION" => $apiVersion
+//                ])->post($url, $parameter);
+//                // Проверяем успешность ответа
+//                if ($response->successful()) {
+//                    // Логируем тело ответа
+//                    Log::debug("function postRequestHTTP " . $response->body());
+//                    // Обрабатываем успешный ответ
+//                    // Ваш код для обработки успешного ответа
+//                    return $response;
+//                } else {
+//                    // Логируем ошибки в случае неудачного запроса
+//                    Log::error("function postRequestHTTP Request failed with status: " . $response->status());
+//                    Log::error("function postRequestHTTP Response: " . $response->body());
+//                }
+//            } catch (\Exception $e) {
+//                // Обработка исключений
+//                Log::error("function postRequestHTTP Exception caught: " . $e->getMessage());
+//            }
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])->post($url, $parameter);
+            // Проверяем успешность ответа
+            if ($response->successful()) {
+                // Логируем тело ответа
+                Log::debug("function postRequestHTTP " . $response->body());
+                // Обрабатываем успешный ответ
+                // Ваш код для обработки успешного ответа
+                return $response;
+            } else {
+                // Логируем ошибки в случае неудачного запроса
+                Log::error("function postRequestHTTP Request failed with status: " . $response->status());
+                Log::error("function postRequestHTTP Response: " . $response->body());
             }
+
             sleep(5);
         } while (time() - $startTime < $maxExecutionTime);
         return null;
@@ -3150,7 +3168,7 @@ class UniversalAndroidFunctionController extends Controller
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
 
         Log::info("orderReview");
-        if($order) {
+        if ($order) {
             if ($order->fondy_order_id != null) {
                 //Возврат денег по Фонди
                 return (new FondyController)->fondyStatusReview($bonusOrder, $doubleOrder, $bonusOrderHold);
