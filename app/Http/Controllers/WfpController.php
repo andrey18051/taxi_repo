@@ -597,41 +597,52 @@ class WfpController extends Controller
 // Відправлення POST-запиту
         $startTime = time(); // Время начала выполнения скрипта
         $maxDuration = 72 * 60 * 60; // 72 часа в секундах
+        $response_st = self::checkStatus(
+            $application,
+            $city,
+            $orderReference
+        );
+        $responseArray = $response_st->json();
+        Log::info("refund responseArray ", $responseArray);
+        if ($responseArray['transactionStatus'] == 'WaitingAuthComplete') {
+            Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
 
-        while (true) { // Бесконечный цикл
-            // Отправка POST-запроса к API
-            sleep(60);
+            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+            $order->wfp_status_pay = $responseArray['transactionStatus'];
+            $order->save();
+            while (true) { // Бесконечный цикл
+                // Отправка POST-запроса к API
+                sleep(60);
 
-            $response = Http::post('https://api.wayforpay.com/api', $params);
-            $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
-            Log::debug("refund responseArray", $responseArray);
+                $response = Http::post('https://api.wayforpay.com/api', $params);
+                $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
+                Log::debug("refund responseArray", $responseArray);
 
-            (new DailyTaskController)->sentTaskMessage("Попытка Refunded холда: " . $response);
-            // Проверка статуса транзакции
-            // || $responseArray['transactionStatus'] == 'Declined'
-            if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
-                Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
+                (new DailyTaskController)->sentTaskMessage("Попытка Refunded холда: " . $response);
+                // Проверка статуса транзакции
+                // || $responseArray['transactionStatus'] == 'Declined'
+                if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
+                    Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
 
-                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-                $order->wfp_status_pay = $responseArray['transactionStatus'];
-                $order->save();
+                    $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                    $order->wfp_status_pay = $responseArray['transactionStatus'];
+                    $order->save();
 
 
-                break; // Прерываем цикл, если статус "Refunded"
-            } elseif ($responseArray['transactionStatus']) {
-                // Проверяем, прошло ли более 72 часов
-                if (time() - $startTime > $maxDuration) {
-                    Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
-                    break;
+                    break; // Прерываем цикл, если статус "Refunded"
+                } elseif ($responseArray['transactionStatus']) {
+                    // Проверяем, прошло ли более 72 часов
+                    if (time() - $startTime > $maxDuration) {
+                        Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
+                        break;
+                    }
+                    Log::debug("refund Статус транзакции: Declined. Повторная попытка через 15 минут...");
+                    sleep(900); // Пауза на 900 секунд (15 минут)
                 }
-                Log::debug("refund Статус транзакции: Declined. Повторная попытка через 15 минут...");
-                sleep(900); // Пауза на 900 секунд (15 минут)
             }
+            Log::debug("refund CHECK_STATUS:", ['response' => $response->body()]);
+            return $response;
         }
-
-        Log::debug("refund CHECK_STATUS:", ['response' => $response->body()]);
-
-        return $response;
     }
 
 
