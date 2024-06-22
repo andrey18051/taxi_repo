@@ -555,7 +555,7 @@ class WfpController extends Controller
         $city,
         $orderReference,
         $amount
-    ): Response {
+    ) {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
