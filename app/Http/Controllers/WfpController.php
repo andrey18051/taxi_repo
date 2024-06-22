@@ -1179,191 +1179,191 @@ class WfpController extends Controller
 
         $orderReference = $wfp_order_id;
 
-        $response_st = self::checkStatus(
-            $application,
-            $city,
-            $orderReference
+//        $response_st = self::checkStatus(
+//            $application,
+//            $city,
+//            $orderReference
+//        );
+//        $responseArray = $response_st->json();
+//        if ($responseArray['transactionStatus'] == 'WaitingAuthComplete') {
+//            Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
+//
+//            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+//            $order->wfp_status_pay = $responseArray['transactionStatus'];
+//            $order->save();
+
+
+
+        $autorization = self::autorization($connectAPI);
+        $identificationId = $order->comment;
+        $amount = $order->web_cost;
+        $amount_settle = $amount;
+
+        $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+            $bonusOrder,
+            $connectAPI,
+            $autorization,
+            $identificationId
         );
-        $responseArray = $response_st->json();
-        if ($responseArray['transactionStatus'] == 'WaitingAuthComplete') {
-            Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
+        if ($bonusOrder_response != -1) {
+            $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
+            $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
+            $order_car_info_bonusOrder = $bonusOrder_response["order_car_info"];
+            Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
+            Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
+        } else {
+            $closeReason_bonusOrder = -1;
+            $order_cost_bonusOrder = $amount;
+            $order_car_info_bonusOrder = null;
+            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
+        }
+        $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+            $doubleOrder,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        );
+        if ($doubleOrder_response != -1) {
+            $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
+            $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+            $order_car_info_doubleOrder = $doubleOrder_response["order_car_info"];
+            Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
+            Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
+        } else {
+            $closeReason_doubleOrder = -1;
+            $order_cost_doubleOrder = $amount;
+            $order_car_info_doubleOrder = null;
+            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
+        }
 
-            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-            $order->wfp_status_pay = $responseArray['transactionStatus'];
+
+        $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+            $bonusOrderHold,
+            $connectAPI,
+            $autorization,
+            $identificationId
+        );
+        if ($bonusOrderHold_response != -1) {
+            $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
+            $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+            $order_car_info_bonusOrderHold = $bonusOrderHold_response["order_car_info"];
+            Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
+            Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
+        } else {
+            $closeReason_bonusOrderHold = -1;
+            $order_cost_bonusOrderHold = $amount;
+            $order_car_info_bonusOrderHold = null;
+            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
+        }
+
+
+        $hold_bonusOrder = false;
+        switch ($closeReason_bonusOrder) {
+            case "0":
+            case "8":
+                $hold_bonusOrder = true;
+                $amount_settle = $order_cost_bonusOrder;
+                $result = 1;
+                $order->auto = $order_car_info_bonusOrder;
+                break;
+        }
+        $hold_doubleOrder = false;
+        switch ($closeReason_doubleOrder) {
+            case "0":
+            case "8":
+                $hold_doubleOrder = true;
+                $amount_settle = $order_cost_bonusOrderHold;
+                $result = 1;
+                $order->auto = $order_car_info_doubleOrder;
+                break;
+        }
+        $hold_bonusOrderHold = false;
+        switch ($closeReason_bonusOrderHold) {
+            case "0":
+            case "8":
+                $hold_bonusOrderHold = true;
+                $amount_settle = $order_cost_bonusOrderHold;
+                $result = 1;
+                $order->auto = $order_car_info_bonusOrderHold;
+                break;
+        }
+        if ($amount >= $amount_settle) {
+            $amount = $amount_settle;
+            $order->web_cost = $amount;
             $order->save();
-
-
-
-            $autorization = self::autorization($connectAPI);
-            $identificationId = $order->comment;
-            $amount = $order->web_cost;
-            $amount_settle = $amount;
-
-            $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
-                $bonusOrder,
-                $connectAPI,
-                $autorization,
-                $identificationId
-            );
-            if ($bonusOrder_response != -1) {
-                $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
-                $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
-                $order_car_info_bonusOrder = $bonusOrder_response["order_car_info"];
-                Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
-                Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
-            } else {
-                $closeReason_bonusOrder = -1;
-                $order_cost_bonusOrder = $amount;
-                $order_car_info_bonusOrder = null;
-                self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
-            }
-            $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
-                $doubleOrder,
-                $connectAPI,
-                $autorization,
-                $identificationId
-            );
-            if ($doubleOrder_response != -1) {
-                $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
-                $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
-                $order_car_info_doubleOrder = $doubleOrder_response["order_car_info"];
-                Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
-                Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
-            } else {
-                $closeReason_doubleOrder = -1;
-                $order_cost_doubleOrder = $amount;
-                $order_car_info_doubleOrder = null;
-                self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
-            }
-
-
-            $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
-                $bonusOrderHold,
-                $connectAPI,
-                $autorization,
-                $identificationId
-            );
-            if ($bonusOrderHold_response != -1) {
-                $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
-                $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
-                $order_car_info_bonusOrderHold = $bonusOrderHold_response["order_car_info"];
-                Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
-                Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
-            } else {
-                $closeReason_bonusOrderHold = -1;
-                $order_cost_bonusOrderHold = $amount;
-                $order_car_info_bonusOrderHold = null;
-                self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
-            }
-
-
-            $hold_bonusOrder = false;
-            switch ($closeReason_bonusOrder) {
-                case "0":
-                case "8":
-                    $hold_bonusOrder = true;
-                    $amount_settle = $order_cost_bonusOrder;
-                    $result = 1;
-                    $order->auto = $order_car_info_bonusOrder;
-                    break;
-            }
-            $hold_doubleOrder = false;
-            switch ($closeReason_doubleOrder) {
-                case "0":
-                case "8":
-                    $hold_doubleOrder = true;
-                    $amount_settle = $order_cost_bonusOrderHold;
-                    $result = 1;
-                    $order->auto = $order_car_info_doubleOrder;
-                    break;
-            }
-            $hold_bonusOrderHold = false;
-            switch ($closeReason_bonusOrderHold) {
-                case "0":
-                case "8":
-                    $hold_bonusOrderHold = true;
-                    $amount_settle = $order_cost_bonusOrderHold;
-                    $result = 1;
-                    $order->auto = $order_car_info_bonusOrderHold;
-                    break;
-            }
-            if ($amount >= $amount_settle) {
-                $amount = $amount_settle;
-                $order->web_cost = $amount;
-                $order->save();
-            } else {
-                $subject = "Оплата поездки больше холда";
-                $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
-                $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $localCreatedAt.
+        } else {
+            $subject = "Оплата поездки больше холда";
+            $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
+            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $localCreatedAt.
                  Маршрут $order->routefrom - $order->routeto.
                  Телефон клиента:  $order->user_phone.
                  Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
-                $paramsAdmin = [
+            $paramsAdmin = [
+                'subject' => $subject,
+                'message' => $messageAdmin,
+            ];
+            $alarmMessage = new TelegramController();
+
+            try {
+                $alarmMessage->sendAlarmMessage($messageAdmin);
+                $alarmMessage->sendMeMessage($messageAdmin);
+            } catch (Exception $e) {
+                $subject = 'Ошибка в телеграмм';
+                $paramsCheck = [
                     'subject' => $subject,
-                    'message' => $messageAdmin,
+                    'message' => $e,
                 ];
-                $alarmMessage = new TelegramController();
 
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                    $alarmMessage->sendMeMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $subject = 'Ошибка в телеграмм';
-                    $paramsCheck = [
-                        'subject' => $subject,
-                        'message' => $e,
-                    ];
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            };
 
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                };
+            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        }
 
-                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
+            self::settle(
+                $application,
+                $city,
+                $orderReference,
+                $amount
+            );
+            $user = User::where("email", $order->email)->first();
+            (new BonusBalanceController)->recordsAddApp($order->id, $user->id, "2", $amount, $application);
+            (new BonusBalanceController)->userBalanceApp($user->id, $application);
+
+            if ($hold_bonusOrder) {
+                $order->closeReason = $closeReason_bonusOrder;
             }
-
-            if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
-                self::settle(
+            if ($hold_doubleOrder) {
+                $order->closeReason = $closeReason_doubleOrder;
+            }
+            if ($hold_bonusOrderHold) {
+                $order->closeReason = $closeReason_bonusOrderHold;
+            }
+        } else {
+            if ($closeReason_bonusOrder != "-1"
+                && $closeReason_doubleOrder != "-1"
+                && $closeReason_bonusOrderHold != "-1") {
+                self::refund(
                     $application,
                     $city,
                     $orderReference,
                     $amount
                 );
-                $user = User::where("email", $order->email)->first();
-                (new BonusBalanceController)->recordsAddApp($order->id, $user->id, "2", $amount, $application);
-                (new BonusBalanceController)->userBalanceApp($user->id, $application);
-
-                if ($hold_bonusOrder) {
-                    $order->closeReason = $closeReason_bonusOrder;
-                }
-                if ($hold_doubleOrder) {
-                    $order->closeReason = $closeReason_doubleOrder;
-                }
-                if ($hold_bonusOrderHold) {
-                    $order->closeReason = $closeReason_bonusOrderHold;
-                }
-            } else {
-                if ($closeReason_bonusOrder != "-1"
-                    && $closeReason_doubleOrder != "-1"
-                    && $closeReason_bonusOrderHold != "-1") {
-                    self::refund(
-                        $application,
-                        $city,
-                        $orderReference,
-                        $amount
-                    );
-                    $order->closeReason = $closeReason_bonusOrderHold;
-                }
+                $order->closeReason = $closeReason_bonusOrderHold;
             }
-
-
-            self::checkStatus(
-                $application,
-                $city,
-                $orderReference
-            );
-
-            $order->save();
         }
+
+
+        self::checkStatus(
+            $application,
+            $city,
+            $orderReference
+        );
+
+        $order->save();
+//        }
         return $result;
 
     }

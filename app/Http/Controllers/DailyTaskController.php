@@ -134,7 +134,7 @@ class DailyTaskController extends Controller
             }
         } else {
             $message = "orderCardWfpReviewTask нет холдов WFP для пересмотра";
-            self::sentTaskMessage($message);
+//            self::sentTaskMessage($message);
             Log::info("orderCardWfpReviewTask $message");
         }
     }
@@ -180,7 +180,7 @@ class DailyTaskController extends Controller
             }
         } else {
             $message = "orderBonusReviewTask нет холдов бонусов для пересмотра";
-            self::sentTaskMessage($message);
+//            self::sentTaskMessage($message);
             Log::info("orderReviewTask $message");
         }
     }
