@@ -3148,8 +3148,7 @@ class UniversalAndroidFunctionController extends Controller
             $amount = "Сумма $order->web_cost грн";
             $connectAPI = $order->server;
             $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
-            $messageAdmin = "Заказ $uid. Время $localCreatedAt. Отмена $uid. $connectAPI.
-        Маршрут $order->routefrom - $order->routeto. Телефон клиента:  $order->user_phone. $wfp_order_id. $amount";
+            $messageAdmin = "Отмена заказ $uid. Время $localCreatedAt. Сервер $connectAPI. Маршрут $order->routefrom - $order->routeto. Телефон клиента:  $order->user_phone. $wfp_order_id. $amount";
 
             $alarmMessage = new TelegramController();
 
