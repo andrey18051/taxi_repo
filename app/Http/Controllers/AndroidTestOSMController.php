@@ -877,7 +877,11 @@ class AndroidTestOSMController extends Controller
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
-            $comment = "!!!!!по городу!!!!";
+            if ($comment == "no_comment") {
+                $comment = "!!!!!по городу!!!!";
+            } else {
+                $comment = "!!!!!по городу!!!! " . $comment;
+            }
         } else {
             $route_undefined = false;
         }
@@ -964,39 +968,16 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if ($comment == "no_comment" || $comment == "!!!!!по городу!!!!") {
-            $comment = "Оператору набрать заказчика и согласовать весь заказ";
-            if ($userArr[2] == 'bonus_payment' && $from == $to) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+        if (strpos($comment, "по городу") !== false) {
+            $comment .= ".Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment'
+                || $userArr[2] == 'fondy_payment'
+                || $userArr[2] == 'mono_payment'
+                || $userArr[2] == 'wfp_payment'
+            ) {
+                $comment .= ". Может быть продление маршрута.";
                 $route_undefined = false;
             }
-            if ($userArr[2] == 'fondy_payment' && $from == $to) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'mono_payment' && $from == $to) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-        } else {
-            if ($userArr[2] == 'bonus_payment' && $from == $to) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'fondy_payment' && $from == $to) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'mono_payment' && $from == $to) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }if ($userArr[2] == 'wfp_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-        }
-        if ($route_undefined) {
-            $comment = $comment . "!!!!!по городу!!!!";
         }
 
         $url = $connectAPI . '/api/weborders';
@@ -2511,7 +2492,11 @@ class AndroidTestOSMController extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
             ];
-            $comment = "!!!!!по городу!!!!";
+            if ($comment == "no_comment") {
+                $comment = "!!!!!по городу!!!!";
+            } else {
+                $comment = "!!!!!по городу!!!! " . $comment;
+            }
         } else {
             $route_undefined = false;
 
@@ -2555,41 +2540,18 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if ($comment == "no_comment" || $comment == "!!!!!по городу!!!!") {
-            $comment = "Оператору набрать заказчика и согласовать весь заказ";
-            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'mono_payment' && $route_undefined) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-        } else {
-            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'mono_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'wfp_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+        if (strpos($comment, "по городу") !== false) {
+            $comment .= ".Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment'
+                || $userArr[2] == 'fondy_payment'
+                || $userArr[2] == 'mono_payment'
+                || $userArr[2] == 'wfp_payment'
+            ) {
+                $comment .= ". Может быть продление маршрута.";
                 $route_undefined = false;
             }
         }
-        if ($route_undefined) {
-            $comment = $comment . "!!!!!по городу!!!!";
-        }
+
         $url = $connectAPI . '/api/weborders';
 
         $extra_charge_codes = preg_split("/[*]+/", $services);
@@ -2842,7 +2804,11 @@ class AndroidTestOSMController extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
             ];
-            $comment = "!!!!!по городу!!!!";
+            if ($comment == "no_comment") {
+                $comment = "!!!!!по городу!!!!";
+            } else {
+                $comment = "!!!!!по городу!!!! " . $comment;
+            }
         } else {
             $route_undefined = false;
 
@@ -2875,38 +2841,18 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if ($comment == "no_comment" || $comment == "!!!!!по городу!!!!") {
-            $comment = $comment . "Оператору набрать заказчика и согласовать весь заказ";
-            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'mono_payment' && $route_undefined) {
-                $comment = "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-        } else {
-            if ($userArr[2] == 'bonus_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'fondy_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'mono_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
-                $route_undefined = false;
-            }
-            if ($userArr[2] == 'wfp_payment' && $route_undefined) {
-                $comment = $comment . "Может быть продление маршрута. Оператору набрать заказчика и согласовать весь заказ";
+        if (strpos($comment, "по городу") !== false) {
+            $comment .= ".Оператору набрать заказчика и согласовать весь заказ";
+            if ($userArr[2] == 'bonus_payment'
+                || $userArr[2] == 'fondy_payment'
+                || $userArr[2] == 'mono_payment'
+                || $userArr[2] == 'wfp_payment'
+            ) {
+                $comment .= ". Может быть продление маршрута.";
                 $route_undefined = false;
             }
         }
+
 
         $url = $connectAPI . '/api/weborders';
 
