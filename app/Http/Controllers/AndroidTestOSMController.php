@@ -878,9 +878,9 @@ class AndroidTestOSMController extends Controller
             $route_undefined = true;
             $combos_to = $combos_from;
             if ($comment == "no_comment") {
-                $comment = "!!!!!по городу!!!!";
+                $comment = "ПО ГОРОДУ.";
             } else {
-                $comment = "!!!!!по городу!!!! " . $comment;
+                $comment = "ПО ГОРОДУ. " . $comment;
             }
         } else {
             $route_undefined = false;
@@ -968,8 +968,8 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if (strpos($comment, "по городу") !== false) {
-            $comment .= ".Оператору набрать заказчика и согласовать весь заказ";
+        if (strpos($comment, "ПО ГОРОДУ.") !== false) {
+            $comment .= " Оператору набрать заказчика и согласовать весь заказ";
             if ($userArr[2] == 'bonus_payment'
                 || $userArr[2] == 'fondy_payment'
                 || $userArr[2] == 'mono_payment'
@@ -986,7 +986,7 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
-
+        $comment = str_replace("no_comment", "", $comment);
         $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -2493,9 +2493,9 @@ class AndroidTestOSMController extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
             ];
             if ($comment == "no_comment") {
-                $comment = "!!!!!по городу!!!!";
+                $comment = "ПО ГОРОДУ.";
             } else {
-                $comment = "!!!!!по городу!!!! " . $comment;
+                $comment = "ПО ГОРОДУ. " . $comment;
             }
         } else {
             $route_undefined = false;
@@ -2540,8 +2540,8 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if (strpos($comment, "по городу") !== false) {
-            $comment .= ".Оператору набрать заказчика и согласовать весь заказ";
+        if (strpos($comment, "ПО ГОРОДУ.") !== false) {
+            $comment .= " Оператору набрать заказчика и согласовать весь заказ";
             if ($userArr[2] == 'bonus_payment'
                 || $userArr[2] == 'fondy_payment'
                 || $userArr[2] == 'mono_payment'
@@ -2558,6 +2558,7 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
+        $comment = str_replace("no_comment", "", $comment);
         $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -2805,9 +2806,9 @@ class AndroidTestOSMController extends Controller
                 ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
             ];
             if ($comment == "no_comment") {
-                $comment = "!!!!!по городу!!!!";
+                $comment = "ПО ГОРОДУ.";
             } else {
-                $comment = "!!!!!по городу!!!! " . $comment;
+                $comment = "ПО ГОРОДУ. " . $comment;
             }
         } else {
             $route_undefined = false;
@@ -2841,8 +2842,8 @@ class AndroidTestOSMController extends Controller
 
         $params["required_time"] = $required_time;
 
-        if (strpos($comment, "по городу") !== false) {
-            $comment .= ".Оператору набрать заказчика и согласовать весь заказ";
+        if (strpos($comment, "ПО ГОРОДУ.") !== false) {
+            $comment .= " Оператору набрать заказчика и согласовать весь заказ";
             if ($userArr[2] == 'bonus_payment'
                 || $userArr[2] == 'fondy_payment'
                 || $userArr[2] == 'mono_payment'
@@ -2860,6 +2861,7 @@ class AndroidTestOSMController extends Controller
         if ($extra_charge_codes[0] == "no_extra_charge_codes") {
             $extra_charge_codes = [];
         };
+        $comment = str_replace("no_comment", "", $comment);
         $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
