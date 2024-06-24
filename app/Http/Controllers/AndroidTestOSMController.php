@@ -987,6 +987,10 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $comment = str_replace("no_comment", "", $comment);
+        if ($userArr[2] == 'nal_payment') {
+            $comment = str_replace("ПО ГОРОДУ.", "", $comment);
+        }
+
         $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -2559,6 +2563,9 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $comment = str_replace("no_comment", "", $comment);
+        if ($userArr[2] == 'nal_payment') {
+            $comment = str_replace("ПО ГОРОДУ.", "", $comment);
+        }
         $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
@@ -2862,6 +2869,9 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $comment = str_replace("no_comment", "", $comment);
+        if ($userArr[2] == 'nal_payment') {
+            $comment = str_replace("ПО ГОРОДУ.", "", $comment);
+        }
         $parameter = [
             'user_full_name' => $userArr[0], //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
