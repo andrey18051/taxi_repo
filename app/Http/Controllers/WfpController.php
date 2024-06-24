@@ -408,7 +408,7 @@ class WfpController extends Controller
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
-            "paymentSystems" => "card;privat24",
+            "paymentSystems" => "card;privat24;googlePay;applePay",
             "clientEmail" => $clientEmail,
             "clientPhone" => $clientPhone,
             "notifyMethod" => "bot"
