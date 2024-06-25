@@ -641,7 +641,7 @@ class WfpController extends Controller
                 }
             }
             Log::debug("refund CHECK_STATUS:", ['response' => $response->body()]);
-            return $response;
+       //     return $response;
         }
     }
 
@@ -651,7 +651,7 @@ class WfpController extends Controller
         $city,
         $orderReference,
         $amount
-    ): Response {
+    ) {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -716,14 +716,14 @@ class WfpController extends Controller
             } elseif ($responseArray['transactionStatus']) {
                 // Проверяем, прошло ли более 72 часов
                 if (time() - $startTime > $maxDuration) {
-                    Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
+                    Log::debug("SETTLE Превышен лимит времени в 72 часа. Прекращение попыток.");
                     break;
                 }
-                Log::debug("refund Статус транзакции: Declined. Повторная попытка через 15 минут...");
+                Log::debug("SETTLE Статус транзакции: Declined. Повторная попытка через 15 минут...");
                 sleep(900); // Пауза на 900 секунд (15 минут)
             }
         }
-        return $response;
+   //     return $response;
     }
 
 

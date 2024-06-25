@@ -2666,7 +2666,10 @@ class UniversalAndroidFunctionController extends Controller
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
         Log::debug("uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false'));
 
-        if ($canceledOneMinute|| $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
+        $order = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
+        $wfp_order_id = $order->wfp_order_id;
+
+        if ($canceledOneMinute|| $uid_history->cancel || $wfp_order_id == null) { //Выход по 1 минуте или нажатию отмены
             $responseBonusLast =  $uid_history->bonus_status;
             $orderCanceledBonus = false;
             if ($responseBonusLast) {
@@ -3176,9 +3179,8 @@ class UniversalAndroidFunctionController extends Controller
             } else {
                 if ($order->wfp_order_id != null) {
                     return  (new WfpController)->wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold);
-                } else {
+                } elseif ($order->pay_system == 'bonus_payment') {
                     return   (new BonusBalanceController)->bonusUnBlockedUid($bonusOrder, $doubleOrder, $bonusOrderHold);
-
                 }
             }
         }
