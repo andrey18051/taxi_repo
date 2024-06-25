@@ -1150,7 +1150,7 @@ class AndroidTestOSMController extends Controller
         }
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
-//        Log::debug("1 connectAPI $connectAPI");
+        Log::debug("1 connectAPI $connectAPI");
 
         if ($connectAPI == 400) {
             $response_error["order_cost"] = 0;

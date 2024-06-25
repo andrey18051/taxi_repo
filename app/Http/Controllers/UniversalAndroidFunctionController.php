@@ -36,7 +36,7 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     ) {
         $startTime = time(); // Начальное время
-        $maxExecutionTime = 2*60; //время жизни отмены
+        $maxExecutionTime = 0.5*60; //время жизни отмены
         do {
 //            try {
 //                $response = Http::withHeaders([
