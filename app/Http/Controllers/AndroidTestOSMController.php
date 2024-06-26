@@ -795,10 +795,12 @@ class AndroidTestOSMController extends Controller
         $params['user_full_name'] = $userArr[0];
         if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
+            (new UniversalAndroidFunctionController)->addUserNoNameWithEmailAndPhone($params['email'], $phone);
         } else {
             $params['email'] = "no email";
         }
         $params['user_phone'] = $phone;
+
         $params['client_sub_card'] = null;
         $params['wagon'] = 0;
         $params['minibus'] = 0;
@@ -2438,6 +2440,7 @@ class AndroidTestOSMController extends Controller
         $params['user_full_name'] = $userArr[0];
         if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
+            (new UniversalAndroidFunctionController)->addUserNoNameWithEmailAndPhone($params['email'], $phone);
         } else {
             $params['email'] = "no email";
         }
@@ -2757,6 +2760,7 @@ class AndroidTestOSMController extends Controller
         $params['user_full_name'] = $userArr[0];
         if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
+            (new UniversalAndroidFunctionController)->addUserNoNameWithEmailAndPhone($params['email'], $phone);
         } else {
             $params['email'] = "no email";
         }

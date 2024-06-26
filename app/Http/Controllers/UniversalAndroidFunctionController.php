@@ -3397,6 +3397,36 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
+    public function addUserNoNameWithEmailAndPhone($email, $phone)
+    {
+        $newUser = User::whereRaw('BINARY email = ?', [$email])->first();
+        if ($newUser == null) {
+            $newUser = new User();
+
+            $newUser->name = "user_";
+            $newUser->email = $email;
+            $newUser->user_phone = $phone;
+            $newUser->password = "123245687";
+
+            $newUser->facebook_id = null;
+            $newUser->google_id = null;
+            $newUser->linkedin_id = null;
+            $newUser->github_id = null;
+            $newUser->twitter_id = null;
+            $newUser->telegram_id = null;
+            $newUser->viber_id = null;
+            $newUser->bonus = 0;
+            $newUser->bonus_pay = 1;
+            $newUser->card_pay = 1;
+            $newUser->save();
+
+            $user = User::where('email', $email)->first();
+            $username = "user_" . $newUser->id;
+            $user->name = $username;
+            $user->save();
+        }
+    }
+
     public function verifyBlackListUser($email, $androidDom)
     {
         IPController::getIP("/android/$androidDom/startPage");
