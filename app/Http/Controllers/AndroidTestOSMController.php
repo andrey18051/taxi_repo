@@ -484,6 +484,8 @@ class AndroidTestOSMController extends Controller
                 }
             }
             if (self::connectAPIAppOrder($city, $application) == 400) {
+
+
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
 
@@ -497,6 +499,9 @@ class AndroidTestOSMController extends Controller
                 return response($response, 200)
                     ->header('Content-Type', 'json');
             } else {
+                $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
+                (new UniversalAndroidFunctionController)->sentErrorMessage ($message);
+
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
 
@@ -3052,6 +3057,9 @@ class AndroidTestOSMController extends Controller
             if ($response_arr["order_cost"] == null) {
                 $response_arr = json_decode($response, true);
 
+                $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
+                (new UniversalAndroidFunctionController)->sentErrorMessage ($message);
+
                 $response_error["order_cost"] = "0";
                 $response_error["Message"] = $response_arr["Message"];
 
@@ -3060,11 +3068,17 @@ class AndroidTestOSMController extends Controller
             }
         } else {
             $response_arr = json_decode($response, true);
+
+            $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
+            (new UniversalAndroidFunctionController)->sentErrorMessage ($message);
+
             $response_error["order_cost"] = "0";
             $response_error["Message"] = $response_arr["Message"];
+
             $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . $parameter;
             Log::error("orderSearchMarkersVisicom 222" . $message);
             (new DailyTaskController)->sentTaskMessage($message);
+
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }

@@ -28,6 +28,19 @@ use function Symfony\Component\Translation\t;
 
 class UniversalAndroidFunctionController extends Controller
 {
+    public function sentErrorMessage($message)
+    {
+        $alarmMessage = new TelegramController();
+        Log::error("sentErrorMessage: $message");
+        try {
+            $alarmMessage->sendAlarmMessage($message);
+            $alarmMessage->sendMeMessage($message);
+            Log::info("sentTaskMessage: $message");
+        } catch (Exception $e) {
+            Log::error("sentErrorMessage: Ошибка отправки в телеграмм");
+        };
+    }
+
     public function postRequestHTTP(
         $url,
         $parameter,
@@ -37,29 +50,8 @@ class UniversalAndroidFunctionController extends Controller
     ) {
         $startTime = time(); // Начальное время
         $maxExecutionTime = 0.5*60; //время жизни отмены
+        $response = null;
         do {
-//            try {
-//                $response = Http::withHeaders([
-//                    "Authorization" => $authorization,
-//                    "X-WO-API-APP-ID" => $identificationId,
-//                    "X-API-VERSION" => $apiVersion
-//                ])->post($url, $parameter);
-//                // Проверяем успешность ответа
-//                if ($response->successful()) {
-//                    // Логируем тело ответа
-//                    Log::debug("function postRequestHTTP " . $response->body());
-//                    // Обрабатываем успешный ответ
-//                    // Ваш код для обработки успешного ответа
-//                    return $response;
-//                } else {
-//                    // Логируем ошибки в случае неудачного запроса
-//                    Log::error("function postRequestHTTP Request failed with status: " . $response->status());
-//                    Log::error("function postRequestHTTP Response: " . $response->body());
-//                }
-//            } catch (\Exception $e) {
-//                // Обработка исключений
-//                Log::error("function postRequestHTTP Exception caught: " . $e->getMessage());
-//            }
             $response = Http::withHeaders([
                 "Authorization" => $authorization,
                 "X-WO-API-APP-ID" => $identificationId,
@@ -71,7 +63,7 @@ class UniversalAndroidFunctionController extends Controller
                 Log::debug("function postRequestHTTP " . $response->body());
                 // Обрабатываем успешный ответ
                 // Ваш код для обработки успешного ответа
-                return $response;
+                break;
             } else {
                 // Логируем ошибки в случае неудачного запроса
                 Log::error("function postRequestHTTP Request failed with status: " . $response->status());
@@ -80,7 +72,7 @@ class UniversalAndroidFunctionController extends Controller
 
             sleep(5);
         } while (time() - $startTime < $maxExecutionTime);
-        return null;
+        return $response;
     }
     public function checkAndRestoreDatabaseConnection()
     {
