@@ -31,11 +31,10 @@ class UniversalAndroidFunctionController extends Controller
     public function sentErrorMessage($message)
     {
         $alarmMessage = new TelegramController();
-        Log::error("sentErrorMessage: $message");
+        Log::debug("sentErrorMessage: $message");
         try {
             $alarmMessage->sendAlarmMessage($message);
             $alarmMessage->sendMeMessage($message);
-            Log::info("sentTaskMessage: $message");
         } catch (Exception $e) {
             Log::error("sentErrorMessage: Ошибка отправки в телеграмм");
         };
@@ -2683,7 +2682,7 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("canceledFinish $orderCanceledBonus");
                     $orderCanceledBonus = true;
                 }
-                (new DailyTaskController)->sentTaskMessage("Отмена по 1 минуте $bonusOrder");
+                $this->sentErrorMessage("sentErrorMessage Отмена по 1 минуте $bonusOrder");
             }
 
             $responseDoubleLast =  $uid_history->double_status;
