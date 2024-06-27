@@ -155,7 +155,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
 // Безнал
-
+        sleep($updateTime);
         $newStatusBonus =  self::newStatus(
             $authorizationBonus,
             $identificationId,

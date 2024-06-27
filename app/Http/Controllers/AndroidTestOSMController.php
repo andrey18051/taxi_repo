@@ -3600,6 +3600,7 @@ class AndroidTestOSMController extends Controller
             //Запрос статуса по ветке
             if ($uid_history->bonus_status == null) {
                 //Запрос по окончанию вилки статуса безнала
+                sleep(5);
                 $authorization = (new UniversalAndroidFunctionController)
                     ->authorizationApp($city, $connectAPI, $application);
                 $url = $connectAPI . '/api/weborders/' . $uid_history->uid_bonusOrder;
