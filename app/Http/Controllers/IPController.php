@@ -38,8 +38,8 @@ class IPController extends Controller
 
     public function ipCityOne($ip): \Illuminate\Http\JsonResponse
     {
-
-        $LocationData = Location::get($ip);
+        $client_ip = $_SERVER['REMOTE_ADDR'];
+        $LocationData = Location::get($client_ip);
 //        dd($LocationData);
 //        $url = "//api.ip2location.io/?key=" . config('app.keyIP2Location') . '&ip=' . $ip;
 //        https://api.ip2whois.com/v2?key=F9B017964A5A721A183DAFEDAE47F94E&ip=37.73.155.251

@@ -48,7 +48,7 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     ) {
         $startTime = time(); // Начальное время
-        $maxExecutionTime = 0.5*60; //время жизни отмены
+        $maxExecutionTime = 15; //время жизни отмены
         $response = null;
         do {
             $response = Http::withHeaders([
@@ -3960,7 +3960,9 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         $alarmMessage = new TelegramController();
-        $messageAdmin = "Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address . ".";
+        $client_ip = $_SERVER['REMOTE_ADDR'];
+        $messageAdmin = "Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address
+            . ". Приложение $application. IP $client_ip";
         Log::debug("cityNoOnlineMessage $messageAdmin");
         try {
             $alarmMessage->sendAlarmMessage($messageAdmin);

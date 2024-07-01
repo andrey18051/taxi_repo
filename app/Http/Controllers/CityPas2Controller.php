@@ -123,7 +123,7 @@ class CityPas2Controller extends Controller
                         $city->online = "false";
                         $city->save();
                         $alarmMessage = new TelegramController();
-                        $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ".";
+                        $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ". PAS_2";
                         try {
                             $alarmMessage->sendAlarmMessage($messageAdmin);
                             $alarmMessage->sendMeMessage($messageAdmin);
