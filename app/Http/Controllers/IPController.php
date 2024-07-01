@@ -38,7 +38,7 @@ class IPController extends Controller
 
     public function ipCityOne($ip): \Illuminate\Http\JsonResponse
     {
-        $client_ip = $_SERVER['REMOTE_ADDR'];
+        $client_ip = getenv("REMOTE_ADDR");
         $LocationData = Location::get($client_ip);
 //        dd($LocationData);
 //        $url = "//api.ip2location.io/?key=" . config('app.keyIP2Location') . '&ip=' . $ip;
@@ -59,7 +59,7 @@ class IPController extends Controller
             return response()->json(['response' => $LocationData->regionName]);
         }
     }
-    public function ipCityPush(): ?string
+    public function ipCityPush()
     {
         $ip = getenv("REMOTE_ADDR");
         $LocationData = Location::get($ip);
@@ -77,14 +77,14 @@ class IPController extends Controller
 //        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
 //        $LocationData = Location::get("91.244.56.202"); //Cherkasy Oblast
 
-        return $LocationData->regionName;
+//        return $LocationData->regionName;
+        return $LocationData->toArray();
     }
 
     public function countryName($ip): \Illuminate\Http\JsonResponse
     {
 
-        $LocationData = Location::get($ip);
-
+        $LocationData = Location::get(getenv("REMOTE_ADDR"));
         return response()->json(['response' => $LocationData->countryCode]);
     }
 
