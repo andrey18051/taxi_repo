@@ -123,8 +123,10 @@ class CityPas2Controller extends Controller
                         $city->online = "false";
                         $city->save();
                         $alarmMessage = new TelegramController();
-                        $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ". PAS_2";
-                        try {
+                        $client_ip = $_SERVER['REMOTE_ADDR'];
+                        $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $serverFalse->address
+                            . ". IP $client_ip";Log::debug($messageAdmin);
+                            try {
                             $alarmMessage->sendAlarmMessage($messageAdmin);
                             $alarmMessage->sendMeMessage($messageAdmin);
                         } catch (Exception $e) {
@@ -144,8 +146,9 @@ class CityPas2Controller extends Controller
                     $city->online = "false";
                     $city->save();
                     $alarmMessage = new TelegramController();
-                    $messageAdmin = "Нет подключения к серверу города $city->name http://" . $value["address"]. ".";
-                    try {
+                        $client_ip = $_SERVER['REMOTE_ADDR'];
+                        $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $serverFalse->address
+                            . ". IP $client_ip";try {
                         $alarmMessage->sendAlarmMessage($messageAdmin);
                         $alarmMessage->sendMeMessage($messageAdmin);
                     } catch (Exception $e) {
