@@ -171,6 +171,29 @@ class UserMessageController extends Controller
         }
     }
 
+    public function sleepUsersMessages ()
+    {
+        $inactiveUserDetails = (new UserController)->userList();
+        $city = "ALL CITY";
+        $text_message = "Спишь бродяга";
+
+        foreach ($inactiveUserDetails as $user) {
+            $email = $user->email;
+            $app_1 = $user->app_pas_1;
+            $app_2= $user->app_pas_2;
+            $app_4 = $user->app_pas_4;
+
+            if ($app_1 == 1) {
+                self::newMessage($email, $text_message, "PAS1", $city);
+            }
+            if ($app_2 == 1) {
+                self::newMessage($email, $text_message, "PAS2", $city);
+            }
+            if ($app_4 == 1) {
+                self::newMessage($email, $text_message, "PAS4", $city);
+            }
+        }
+    }
 
     public function update(int $id, string $text_message, $sent_message_info, $app, $city)
     {

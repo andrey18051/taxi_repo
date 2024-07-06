@@ -223,6 +223,45 @@ class UserEmailController extends Controller
             }
         }
     }
+
+    public function newMessageEmail($email, $subject, $text_message)
+    {
+        $user = User::where('email', $email)->first();
+
+        // Проверить, найден ли пользователь
+        if ($user) {
+            $newMessage = new UserEmail();
+            $newMessage->user_id = $user->id;
+            $newMessage->subject = $user->name . " по " . $subject;
+            $newMessage->text_message = $text_message;
+            $newMessage->sent_message_info = 0;
+            $newMessage->save();
+        }
+    }
+
+    public function sleepUsersEmails()
+    {
+        $inactiveUserDetails = (new UserController)->userList();
+        $text_message = "Новое сообщение";
+
+        foreach ($inactiveUserDetails as $user) {
+            $email = $user->email;
+            $app_1 = $user->app_pas_1;
+            $app_2 = $user->app_pas_2;
+            $app_4 = $user->app_pas_4;
+
+            if ($app_1 == 1) {
+                self::newMessageEmail($email, "PAS1", $text_message);
+            }
+            if ($app_2 == 1) {
+                self::newMessageEmail($email, "PAS2", $text_message);
+            }
+            if ($app_4 == 1) {
+                self::newMessageEmail($email, "PAS4", $text_message);
+            }
+        }
+    }
+
     public function repeatEmail($id_array)
     {
         $idArray = explode(',', $id_array);

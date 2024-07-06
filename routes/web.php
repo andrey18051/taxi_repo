@@ -1383,3 +1383,5 @@ Route::get('/partnerGroups/create', [PartnerGroupController::class,'create']);
  */
 Route::get('/user_app', [UserController::class,'user_app']);
 Route::get('/userList', [UserController::class,'userList']);
+Route::get('/sleepUsersMessages', [UserMessageController::class,'sleepUsersMessages']);
+Route::get('/sleepUsersEmails', [UserEmailController::class,'sleepUsersEmails']);

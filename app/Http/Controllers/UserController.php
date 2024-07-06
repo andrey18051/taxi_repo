@@ -1330,6 +1330,10 @@ class UserController extends Controller
             ->get();
 // Получаем список email неактивных пользователей
         $inactiveUserDetails = User::whereIn('id', $inactiveUsers)
+            ->where(function ($query) {
+                $query->where('sent_email', '==', 1)
+                    ->orWhereNull('sent_email');
+            })
             ->select('email', 'app_pas_1', 'app_pas_2', 'app_pas_4')
             ->get();
 
