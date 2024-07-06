@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserMessage;
+use App\Models\UserVisit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -1313,5 +1315,25 @@ class UserController extends Controller
                 $user->save();
             }
         }
+    }
+
+
+    public function userList()
+    {
+        // Определяем пороговую дату (сегодняшняя дата минус 25 дней)
+        $thresholdDate = Carbon::now()->subDays(25);
+
+        // Ищем пользователей, которые не заходили после пороговой даты
+        $inactiveUsers = UserVisit::where('created_at', '<=', $thresholdDate)
+            ->select('user_id', 'app_name')
+            ->distinct()
+            ->get();
+// Получаем список email неактивных пользователей
+        $inactiveUserDetails = User::whereIn('id', $inactiveUsers)
+            ->select('email', 'app_pas_1', 'app_pas_2', 'app_pas_4')
+            ->get();
+
+        // Возвращаем список email
+        return $inactiveUserDetails;
     }
 }
