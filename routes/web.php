@@ -1378,3 +1378,7 @@ Route::get('/partnerGroups/showPartnerGroupsAll', [PartnerGroupController::class
 Route::delete('/partnerGroups/destroy/{id}', [PartnerGroupController::class, 'destroy']);
 Route::get('/partnerGroups/edit/{id}/{name}/{description}', [PartnerGroupController::class, 'edit']);
 Route::get('/partnerGroups/create', [PartnerGroupController::class,'create']);
+/**
+ *
+ */
+Route::get('/user_app', [UserController::class,'user_app']);
