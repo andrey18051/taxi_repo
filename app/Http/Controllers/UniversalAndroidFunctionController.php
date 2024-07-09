@@ -3388,7 +3388,53 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
-    public function addUserNoNameWithEmailAndPhone($email, $phone)
+    public function addUserNoNameApp($email, $app)
+    {
+        $newUser = User::whereRaw('BINARY email = ?', [$email])->first();
+        if ($newUser == null) {
+            $newUser = new User();
+
+            $newUser->name = "user_";
+            $newUser->email = $email;
+            $newUser->password = "123245687";
+
+            $newUser->facebook_id = null;
+            $newUser->google_id = null;
+            $newUser->linkedin_id = null;
+            $newUser->github_id = null;
+            $newUser->twitter_id = null;
+            $newUser->telegram_id = null;
+            $newUser->viber_id = null;
+            $newUser->bonus = 0;
+            $newUser->bonus_pay = 1;
+            $newUser->card_pay = 1;
+
+            switch ($app) {
+                case "PAS1":
+                    $newUser->app_pas_1 = 1;
+                    break;
+                case "PAS2":
+                    $newUser->app_pas_2 = 1;
+                    break;
+                default:
+                    $newUser->app_pas_4 = 1;
+            }
+
+            $newUser->save();
+
+            $user = User::where('email', $email)->first();
+            $username = "user_" . $newUser->id;
+            $user->name = $username;
+            $user->save();
+
+//            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
+            return ["user_name" => $username];
+        } else {
+            return ["user_name" => "no_name"];
+        }
+    }
+
+    public function addUserNoNameWithEmailAndPhoneApp($email, $phone, $app)
     {
         $newUser = User::whereRaw('BINARY email = ?', [$email])->first();
         if ($newUser == null) {
@@ -3409,6 +3455,19 @@ class UniversalAndroidFunctionController extends Controller
             $newUser->bonus = 0;
             $newUser->bonus_pay = 1;
             $newUser->card_pay = 1;
+
+            switch ($app) {
+                case "PAS1":
+                    $newUser->app_pas_1 = 1;
+                    break;
+                case "PAS2":
+                    $newUser->app_pas_2 = 1;
+                    break;
+                default:
+                    $newUser->app_pas_4 = 1;
+            }
+
+
             $newUser->save();
 
             $user = User::where('email', $email)->first();

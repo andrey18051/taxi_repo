@@ -43,6 +43,7 @@ use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailController;
 use App\Http\Controllers\UserMessageController;
+use App\Http\Controllers\UserTokenFmsController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
 use App\Http\Controllers\VisicomController;
@@ -1246,6 +1247,7 @@ Route::get('/bonusBalance/balanceReviewDaily/', [BonusBalanceController::class, 
  */
 Route::get('/android/addUser/{name}/{email}', [UniversalAndroidFunctionController::class, 'addUser'])->name('addUser');
 Route::get('/android/addUserNoName/{email}', [UniversalAndroidFunctionController::class, 'addUserNoName'])->name('addUserNoName');
+Route::get('/android/addUserNoNameApp/{email}/{app}', [UniversalAndroidFunctionController::class, 'addUserNoNameApp'])->name('addUserNoNameApp');
 Route::get('/android/bonusType1ForAll', [WebOrderController::class, 'bonusType1ForAll'])->name('bonusType1ForAll');
 Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNameEmail'])->name('fixIncorrectNameEmail');
 
@@ -1385,3 +1387,8 @@ Route::get('/user_app', [UserController::class,'user_app']);
 Route::get('/userList', [UserController::class,'userList']);
 Route::get('/sleepUsersMessages', [UserMessageController::class,'sleepUsersMessages']);
 Route::get('/sleepUsersEmails', [UserEmailController::class,'sleepUsersEmails']);
+
+/**
+ * Android token
+ */
+Route::get('/android_token/store/{email}/{app}/{token}/', [UserTokenFmsController::class,'store']);
