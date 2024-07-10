@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserTokenFmsS;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class UserTokenFmsController extends Controller
 {
@@ -51,6 +53,52 @@ class UserTokenFmsController extends Controller
                 $userToken->token_app_pas_4 = $token;
         }
         $userToken->save();
+    }
+
+    /**
+     * @param $title
+     * @param $body
+     * @param $app
+     * @param $to
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendMessage($body, $app, $user_id)
+    {
+        $userToken = UserTokenFmsS::where("user_id", $user_id)->first();
+//        dd($userToken);
+        if ($userToken != null) {
+            switch ($app) {
+                case "PAS1":
+                    $to = $userToken->token_app_pas_1;
+                    $firebaseApiKey = config("app.FIREBASE_API_KEY_PAS_1");
+                    break;
+                case "PAS2":
+                    $to = $userToken->token_app_pas_2;
+                    $firebaseApiKey = config("app.FIREBASE_API_KEY_PAS_2");
+                    break;
+                default:
+                    $to = $userToken->token_app_pas_4;
+                    $firebaseApiKey = config("app.FIREBASE_API_KEY_PAS_4");
+            }
+
+
+            $response = Http::withHeaders([
+                'Authorization' => 'key=' . $firebaseApiKey,
+                'Content-Type' => 'application/json',
+            ])->post('https://fcm.googleapis.com/fcm/send', [
+                'to' => $to, // FCM токен получателя
+                'notification' => [
+                    'title' => "title",
+                    'body' => $body,
+                ],
+                'data' => "", // Дополнительные данные (если есть)
+            ]);
+
+            return response()->json([
+                'status' => $response->status(),
+                'response' => $response->json(),
+            ]);
+        }
     }
 
     /**

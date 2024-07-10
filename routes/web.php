@@ -1389,6 +1389,7 @@ Route::get('/sleepUsersMessages', [UserMessageController::class,'sleepUsersMessa
 Route::get('/sleepUsersEmails', [UserEmailController::class,'sleepUsersEmails']);
 
 /**
- * Android token
+ * Android messages
  */
 Route::get('/android_token/store/{email}/{app}/{token}/', [UserTokenFmsController::class,'store']);
+Route::get('/android_token/sendMessage/{body}/{app}/{user_id}/', [UserTokenFmsController::class,'sendMessage']);
