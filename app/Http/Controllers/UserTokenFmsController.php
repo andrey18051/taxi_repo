@@ -81,11 +81,11 @@ class UserTokenFmsController extends Controller
                     $firebaseApiKey = config("app.FIREBASE_API_KEY_PAS_4");
             }
 
-
+            $url  = "https://fcm.googleapis.com/v1/projects/taxieasyuaback4app/messages:send";
             $response = Http::withHeaders([
-                'Authorization' => 'key=' . $firebaseApiKey,
+                'Authorization' => "Bearer ya29.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",
                 'Content-Type' => 'application/json',
-            ])->post('https://fcm.googleapis.com/fcm/send', [
+            ])->post($url, [
                 'to' => $to, // FCM токен получателя
                 'notification' => [
                     'title' => "title",

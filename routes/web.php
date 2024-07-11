@@ -17,6 +17,7 @@ use App\Http\Controllers\CityPas2Controller;
 use App\Http\Controllers\CityPas4Controller;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\FacebookController;
+use App\Http\Controllers\FCMController;
 use App\Http\Controllers\FondyController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
@@ -1393,3 +1394,4 @@ Route::get('/sleepUsersEmails', [UserEmailController::class,'sleepUsersEmails'])
  */
 Route::get('/android_token/store/{email}/{app}/{token}/', [UserTokenFmsController::class,'store']);
 Route::get('/android_token/sendMessage/{body}/{app}/{user_id}/', [UserTokenFmsController::class,'sendMessage']);
+Route::get('/fcm/sendNotification/{body}/{app}/{user_id}/', [FCMController::class,'sendNotification']);

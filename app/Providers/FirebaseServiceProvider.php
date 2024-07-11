@@ -14,13 +14,13 @@ class FirebaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('firebase', function ($app) {
-            $serviceAccountPath = env('FIREBASE_CREDENTIALS_PAS_2');
+         $this->app->singleton('firebase.messaging', function ($app) {
+             $serviceAccountPath = env('FIREBASE_CREDENTIALS_PAS_2');
 
-            return (new Factory)
-                ->withServiceAccount($serviceAccountPath)
-                ->create();
-        });
+             return (new Factory)
+                 ->withServiceAccount($serviceAccountPath)
+                 ->createMessaging(); // Создание экземпляра для облачного обмена сообщениями
+         });
     }
 
     /**
