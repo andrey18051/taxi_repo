@@ -171,6 +171,18 @@ class UserMessageController extends Controller
         }
     }
 
+    public function newMessageFcm($email, $text_message, $app)
+    {
+        $emailString = $email;
+
+        $emailArray = explode(',', $emailString);
+
+        foreach ($emailArray as $value) {
+            $user = User::where('email', $value)->first();
+            (new FCMController)->sendNotification($text_message, $app, $user->id);
+        }
+    }
+
     public function sleepUsersMessages ()
     {
         $inactiveUserDetails = (new UserController)->userList();

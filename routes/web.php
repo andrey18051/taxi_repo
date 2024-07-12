@@ -1331,6 +1331,7 @@ Route::get('/showMessageAll', [UserMessageController::class,'index']);
 Route::get('/showMessage/{email}/{app}', [UserMessageController::class, 'show']);
 Route::get('/messages/update/{id}/{text_message}/{sent_message_info}/{app}/{city}', [UserMessageController::class, 'update']);
 Route::get('/newMessage/{email}/{text_message}/{app}/{city}', [UserMessageController::class, 'newMessage']);
+Route::get('/newMessageFcm/{email}/{text_message}/{app}', [UserMessageController::class, 'newMessageFcm']);
 Route::delete('/messages/destroy/{id}', [UserMessageController::class, 'destroy']);
 
 /**

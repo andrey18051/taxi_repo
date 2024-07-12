@@ -86,6 +86,7 @@
                         <br>
                         <!-- Кнопка для сохранения сообщения -->
                         <button class="btn btn-outline-success" @click="sendMessage">Сохранить сообщение</button>
+                        <button class="btn btn-outline-success" @click="sendMessageFcm">Отправить сообщение</button>
 
 
             </div>
@@ -180,6 +181,36 @@ export default {
                 .catch(error => {
                     console.error(error);
                     window.alert("Произошла ошибка при обновлении данных" + error);
+                });
+
+            // Здесь вы можете использовать this.selectedUser и this.newMessage
+            // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
+            // Очистите поля после успешной отправки, если это необходимо.
+            this.selectedApp = '';
+            this.newMessage = '';
+            this.selectedEmails = []; // Очистить массив выбранных email после отправки
+        },
+        sendMessageFcm() {
+            if (!this.city || !this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+                window.alert('Пожалуйста, проверьте выбор приложения, города  и ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+                return;
+            }
+
+            const encodedNewMessage = encodeURIComponent(this.newMessage);
+            const url = `/newMessageFcm/${this.selectedEmails.join(',')}/${encodedNewMessage}/${this.selectedApp}`;
+            axios.get(url)
+                .then(response => {
+                    // Проверяем успешность операции
+                    if (response.status === 200) {
+                        window.alert("Данные успешно обновлены");
+                        window.location.reload();
+                    } else {
+                        window.alert("Произошла ошибка при обновлении данных url " + url + " "+ response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    window.alert("Произошла ошибка при обновлении данныхurl " + url + " " + error);
                 });
 
             // Здесь вы можете использовать this.selectedUser и this.newMessage

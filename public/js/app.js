@@ -8210,6 +8210,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserMessages",
@@ -8297,6 +8298,33 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {
         console.error(error);
         window.alert("Произошла ошибка при обновлении данных" + error);
+      }); // Здесь вы можете использовать this.selectedUser и this.newMessage
+      // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
+      // Очистите поля после успешной отправки, если это необходимо.
+
+      this.selectedApp = '';
+      this.newMessage = '';
+      this.selectedEmails = []; // Очистить массив выбранных email после отправки
+    },
+    sendMessageFcm: function sendMessageFcm() {
+      if (!this.city || !this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
+        window.alert('Пожалуйста, проверьте выбор приложения, города  и ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+        return;
+      }
+
+      var encodedNewMessage = encodeURIComponent(this.newMessage);
+      var url = "/newMessageFcm/".concat(this.selectedEmails.join(','), "/").concat(encodedNewMessage, "/").concat(this.selectedApp);
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get(url).then(function (response) {
+        // Проверяем успешность операции
+        if (response.status === 200) {
+          window.alert("Данные успешно обновлены");
+          window.location.reload();
+        } else {
+          window.alert("Произошла ошибка при обновлении данных url " + url + " " + response.status);
+        }
+      })["catch"](function (error) {
+        console.error(error);
+        window.alert("Произошла ошибка при обновлении данныхurl " + url + " " + error);
       }); // Здесь вы можете использовать this.selectedUser и this.newMessage
       // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
       // Очистите поля после успешной отправки, если это необходимо.
@@ -45055,6 +45083,15 @@ var render = function () {
               on: { click: _vm.sendMessage },
             },
             [_vm._v("Сохранить сообщение")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-outline-success",
+              on: { click: _vm.sendMessageFcm },
+            },
+            [_vm._v("Отправить сообщение")]
           ),
         ]),
       ]),
