@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\ServiceAccount;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
@@ -14,13 +14,29 @@ class FirebaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-         $this->app->singleton('firebase.messaging', function ($app) {
-             $serviceAccountPath = env('FIREBASE_CREDENTIALS_PAS_2');
+        $this->app->singleton('firebase.messaging', function ($app) {
+            $serviceAccountPath1 = env('FIREBASE_CREDENTIALS_PAS_1');
+            $serviceAccountPath2 = env('FIREBASE_CREDENTIALS_PAS_2');
+            $serviceAccountPath4 = env('FIREBASE_CREDENTIALS_PAS_4');
 
-             return (new Factory)
-                 ->withServiceAccount($serviceAccountPath)
-                 ->createMessaging(); // Создание экземпляра для облачного обмена сообщениями
-         });
+            $firebase1 = (new Factory)
+                ->withServiceAccount($serviceAccountPath1)
+                ->createMessaging();
+
+            $firebase2 = (new Factory)
+                ->withServiceAccount($serviceAccountPath2)
+                ->createMessaging();
+
+            $firebase4 = (new Factory)
+                ->withServiceAccount($serviceAccountPath4)
+                ->createMessaging();
+
+            return [
+                'app1' => $firebase1,
+                'app2' => $firebase2,
+                'app4' => $firebase4,
+            ];
+        });
     }
 
     /**

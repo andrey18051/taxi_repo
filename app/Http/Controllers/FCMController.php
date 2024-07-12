@@ -16,21 +16,22 @@ class FCMController extends Controller
             switch ($app) {
                 case "PAS1":
                     $to = $userToken->token_app_pas_1;
+                    $firebaseMessaging = app('firebase.messaging')['app1'];
                     break;
                 case "PAS2":
                     $to = $userToken->token_app_pas_2;
+                    $firebaseMessaging = app('firebase.messaging')['app2'];
                     break;
                 default:
                     $to = $userToken->token_app_pas_4;
+                    $firebaseMessaging = app('firebase.messaging')['app4'];
             }
-
-            $messaging = app('firebase.messaging'); // Получите экземпляр firebase.messaging напрямую
 
             $message = CloudMessage::withTarget('token', $to)
                 ->withNotification(Notification::create("Повідомлення", $body))
                 ->withData(['key' => 'value']);
 
-            $messaging->send($message);
+            $firebaseMessaging->send($message);
 
             return response()->json(['message' => 'Notification sent']);
         }
