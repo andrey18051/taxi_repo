@@ -1394,5 +1394,7 @@ Route::get('/sleepUsersEmails', [UserEmailController::class,'sleepUsersEmails'])
  * Android messages
  */
 Route::get('/android_token/store/{email}/{app}/{token}/', [UserTokenFmsController::class,'store']);
+Route::get('/android_token_local/store/{email}/{app}/{token}/{local}/', [UserTokenFmsController::class,'storeLocal']);
 Route::get('/android_token/sendMessage/{body}/{app}/{user_id}/', [UserTokenFmsController::class,'sendMessage']);
 Route::get('/fcm/sendNotification/{body}/{app}/{user_id}/', [FCMController::class,'sendNotification']);
+Route::get('/fcm/getUserByEmail/{email}/{app}/', [FCMController::class,'getTokenByEmail']);
