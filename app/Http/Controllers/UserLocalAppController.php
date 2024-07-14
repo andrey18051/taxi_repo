@@ -41,7 +41,7 @@ class UserLocalAppController extends Controller
         $user = User::where("email", $email)->first();
         $userLocal = UserLocalApp::where("user_id", $user->id)->first();
         if ($userLocal == null) {
-            $userLocal = new UserTokenFmsS();
+            $userLocal = new UserLocalApp();
         }
         $userLocal->user_id = $user->id;
         switch ($app) {

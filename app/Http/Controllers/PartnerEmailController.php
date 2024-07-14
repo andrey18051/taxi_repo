@@ -169,27 +169,27 @@ class PartnerEmailController extends Controller
                 $partner = Partner::where('email', $value)->first();
 
 //                if (!$partner->sent_email) {
-                    // Проверить, найден ли пользователь
-                    if ($partner) {
-                        // Если пользователь найден, добавить новое сообщение в таблицу partnerMessage
-                        $newMessage = new PartnerEmail();
-                        $newMessage->partner_id = $partner->id;
-                        $newMessage->subject = $subject;
-                        $newMessage->text_message = $text_message;
-                        $newMessage->sent_message_info = 0;
-                        $newMessage->save();
+                // Проверить, найден ли пользователь
+                if ($partner) {
+                    // Если пользователь найден, добавить новое сообщение в таблицу partnerMessage
+                    $newMessage = new PartnerEmail();
+                    $newMessage->partner_id = $partner->id;
+                    $newMessage->subject = $subject;
+                    $newMessage->text_message = $text_message;
+                    $newMessage->sent_message_info = 0;
+                    $newMessage->save();
 
 
-                        $subject_email = $partner->name . " по " .$subject;
-                        $message = $text_message;
-                        $url = "https://m.easy-order-taxi.site/partners/unsubscribe/$partner->email";
-                        $text_button = "Відписатися для $partner->email";
+                    $subject_email = $partner->name . " по " .$subject;
+                    $message = $text_message;
+                    $url = "https://m.easy-order-taxi.site/partners/unsubscribe/$partner->email";
+                    $text_button = "Відписатися для $partner->email";
 
 //                        Mail::to($partner->email)->send(new PartnerInfoEmail('custom_template', $paramsMail));
-                        Mail::to($partner->email)
-                            ->send(new PInfoEmail('custom_template', $subject_email, $message, $url, $text_button));
+                    Mail::to($partner->email)
+                        ->send(new PInfoEmail('custom_template', $subject_email, $message, $url, $text_button));
 
-                    }
+                }
 //                }
             }
         }

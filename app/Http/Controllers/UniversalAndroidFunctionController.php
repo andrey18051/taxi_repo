@@ -47,10 +47,8 @@ class UniversalAndroidFunctionController extends Controller
         $identificationId,
         $apiVersion
     ) {
-        $startTime = time(); // Начальное время
-        $maxExecutionTime = 15; //время жизни отмены
         $response = null;
-        do {
+        try {
             $response = Http::withHeaders([
                 "Authorization" => $authorization,
                 "X-WO-API-APP-ID" => $identificationId,
@@ -62,17 +60,39 @@ class UniversalAndroidFunctionController extends Controller
                 Log::debug("function postRequestHTTP " . $response->body());
                 // Обрабатываем успешный ответ
                 // Ваш код для обработки успешного ответа
-                break;
+
             } else {
                 // Логируем ошибки в случае неудачного запроса
                 Log::error("function postRequestHTTP Request failed with status: " . $response->status());
                 Log::error("function postRequestHTTP Response: " . $response->body());
+                self::sendCatchMessage($response->body());
             }
-
-            sleep(5);
-        } while (time() - $startTime < $maxExecutionTime);
+        } catch (\Exception $e) {
+            self::sendCatchMessage($e->getMessage());
+            Log::error("Error establishing database connection: " . $e->getMessage());
+        }
         return $response;
     }
+
+    private function sendCatchMessage($message)
+    {
+        $alarmMessage = new TelegramController();
+        $client_ip = $_SERVER['REMOTE_ADDR'];
+        $messageAdmin = "Ошибка подключения к серверу $message. IP $client_ip";
+        Log::debug("sendCatchMessage $messageAdmin");
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            $paramsCheck = [
+                'subject' => 'Ошибка в телеграмм',
+                'message' => $e,
+            ];
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        };
+    }
+
+
     public function checkAndRestoreDatabaseConnection()
     {
         do {

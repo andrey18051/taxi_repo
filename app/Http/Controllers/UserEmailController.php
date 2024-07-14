@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\InfoEmail;
 use App\Mail\PromoList;
+use App\Mail\UserSleepEmail;
 use App\Models\User;
 use App\Models\UserEmail;
 use App\Models\UserVisit;
@@ -224,20 +225,21 @@ class UserEmailController extends Controller
         }
     }
 
-    public function newMessageEmail($email, $subject, $text_message)
-    {
-        $user = User::where('email', $email)->first();
 
-        // Проверить, найден ли пользователь
-        if ($user) {
-            $newMessage = new UserEmail();
-            $newMessage->user_id = $user->id;
-            $newMessage->subject = $user->name . " по " . $subject;
-            $newMessage->text_message = $text_message;
-            $newMessage->sent_message_info = 0;
-            $newMessage->save();
-        }
-    }
+//    public function newMessageEmail($email, $subject, $text_message)
+//    {
+//        $user = User::where('email', $email)->first();
+//
+//        // Проверить, найден ли пользователь
+//        if ($user) {
+//            $newMessage = new UserEmail();
+//            $newMessage->user_id = $user->id;
+//            $newMessage->subject = $user->name . " по " . $subject;
+//            $newMessage->text_message = $text_message;
+//            $newMessage->sent_message_info = 0;
+//            $newMessage->save();
+//        }
+//    }
 
     public function sleepUsersEmails()
     {
@@ -251,14 +253,51 @@ class UserEmailController extends Controller
             $app_4 = $user->app_pas_4;
 
             if ($app_1 == 1) {
-                self::newMessageEmail($email, "PAS1", $text_message);
+                self::newMessageSleepUsers($email, "PAS1", $text_message);
             }
             if ($app_2 == 1) {
-                self::newMessageEmail($email, "PAS2", $text_message);
+                self::newMessageSleepUsers($email, "PAS2", $text_message);
             }
             if ($app_4 == 1) {
-                self::newMessageEmail($email, "PAS4", $text_message);
+                self::newMessageSleepUsers($email, "PAS4", $text_message);
             }
+        }
+    }
+    public function newMessageSleepUsers($email, $text_message, $app)
+    {
+        $users = User::where('email', $email)->first();
+        $subject = "";
+        if ($users->sent_email != 1) {
+            // Если пользователь найден, добавить новое сообщение в таблицу UserMessage
+            $newMessage = new UserEmail();
+            $newMessage->user_id = $users->id;
+            $newMessage->subject = $users->name . " по " . $subject;
+            $newMessage->text_message = $text_message;
+            $newMessage->sent_message_info = 0;
+            $newMessage->save();
+
+            $name = $users->name;
+            $email = $users->email;
+
+            switch ($app) {
+                case "PAS1":
+                    $app_url = 'https://play.google.com/store/apps/details?id=com.taxi.easy.ua';
+                    break;
+                case "PAS2":
+                    $app_url = 'https://play.google.com/store/apps/details?id=com.taxieasyua.back4app&pli=1';
+                    break;
+                default:
+                    $app_url = 'https://play.google.com/store/apps/details?id=com.taxi_pas_4';
+            }
+
+            $paramsMail = [
+                'subject' => $users->name . " по " . $subject,
+                'message' => $text_message,
+                'app_url' => $app_url,
+                'url' =>"https://m.easy-order-taxi.site/unsubscribe/$email",
+                'text_button' => "Відписатися для $name",
+            ];
+            Mail::to($email)->send(new UserSleepEmail($paramsMail));
         }
     }
 
