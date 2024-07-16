@@ -1189,6 +1189,9 @@ Route::get('/android/UIDStatusShow/{user_full_name}', [UIDController::class, 'UI
 Route::get('/android/UIDStatusShowEmail/{email}', [UIDController::class, 'UIDStatusShowEmail'])
     ->name('UIDStatusShowEmail');
 
+Route::get('/android/UIDStatusShowEmailCance/{email}', [UIDController::class, 'UIDStatusShowEmailCancel'])
+    ->name('UIDStatusShowEmailCancel');
+
 Route::get('/closeReasonData/all', [UIDController::class, 'UIDStatusShowAdmin'])
     ->name('UIDStatusShowAdmin');
 
