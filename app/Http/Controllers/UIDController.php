@@ -7,6 +7,7 @@ use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\Orderweb;
+use App\Models\Uid_history;
 use Carbon\Carbon;
 use DateInterval;
 use DateTime;
@@ -211,7 +212,7 @@ class UIDController extends Controller
 //        Log::debug("UIDStatusShowEmail response", $response);
         return $response;
     }
-    public function UIDStatusShowEmailCancel($email)
+    public function UIDStatusShowEmailCancel($email): array
     {
 
         $order = Orderweb:: where("email", $email)
@@ -246,6 +247,13 @@ class UIDController extends Controller
             date_default_timezone_set('Europe/Kiev');
 
             foreach ($orderUpdate as $value) {
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+                $dispatchingOrderUidDouble = "";
+                if ($uid_history) {
+                    $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
+                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+                }
+
                 $response[] = [
                     'uid' => $value["dispatching_order_uid"],
                     'routefrom' => $value["routefrom"],
@@ -259,6 +267,8 @@ class UIDController extends Controller
                     'web_cost' => $value["web_cost"],
                     'closeReason' => $value["closeReason"],
                     'auto' => $value["auto"],
+                    'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
+                    'pay_method' => $value["pay_system"],
                     'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                 ];
 
