@@ -212,7 +212,7 @@ class UIDController extends Controller
 //        Log::debug("UIDStatusShowEmail response", $response);
         return $response;
     }
-    public function UIDStatusShowEmailCancel($email): array
+    public function UIDStatusShowEmailCancel($email)
     {
 
         $order = Orderweb:: where("email", $email)
@@ -252,6 +252,8 @@ class UIDController extends Controller
                 if ($uid_history) {
                     $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
                     Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+                } else {
+                    $dispatchingOrderUidDouble = " ";
                 }
 
                 $response[] = [
