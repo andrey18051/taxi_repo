@@ -358,7 +358,7 @@ class AndroidTestOSMController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => "", //Комментарий к заказу
             'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -976,7 +976,7 @@ class AndroidTestOSMController extends Controller
         $params["required_time"] = $required_time;
 
         if (strpos($comment, "ПО ГОРОДУ.") !== false) {
-            $comment .= " Оператору набрать заказчика и согласовать весь заказ";
+            $comment .= " ";
             if ($userArr[2] == 'bonus_payment'
                 || $userArr[2] == 'fondy_payment'
                 || $userArr[2] == 'mono_payment'
@@ -1238,7 +1238,7 @@ class AndroidTestOSMController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => "", //Комментарий к заказу
             'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -1706,7 +1706,7 @@ class AndroidTestOSMController extends Controller
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => "", //Комментарий к заказу
             'add_cost' => 0,
             'wagon' => 0, //Универсал: True, False
             'minibus' => 0, //Микроавтобус: True, False
@@ -2139,7 +2139,7 @@ class AndroidTestOSMController extends Controller
             'calculated_tariff_names' => $calculated_tariff_names,
             'required_time' => null, //Время подачи предварительного заказа
             'route_address_entrance_from' => null,
-            'comment' => "Оператору набрать заказчика и согласовать весь заказ", //Комментарий к заказу
+            'comment' => "", //Комментарий к заказу
             'add_cost' => 0,
             'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
@@ -2553,7 +2553,7 @@ class AndroidTestOSMController extends Controller
         $params["required_time"] = $required_time;
 
         if (strpos($comment, "ПО ГОРОДУ.") !== false) {
-            $comment .= " Оператору набрать заказчика и согласовать весь заказ";
+            $comment .= " ";
             if ($userArr[2] == 'bonus_payment'
                 || $userArr[2] == 'fondy_payment'
                 || $userArr[2] == 'mono_payment'
@@ -2859,7 +2859,7 @@ class AndroidTestOSMController extends Controller
         $params["required_time"] = $required_time;
 
         if (strpos($comment, "ПО ГОРОДУ.") !== false) {
-            $comment .= " Оператору набрать заказчика и согласовать весь заказ";
+            $comment .= " ";
             if ($userArr[2] == 'bonus_payment'
                 || $userArr[2] == 'fondy_payment'
                 || $userArr[2] == 'mono_payment'
