@@ -352,8 +352,8 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $parameter = [
-            'user_full_name' => null, //Полное имя пользователя
-            'user_phone' => null, //Телефон пользователя
+            'user_full_name' => $params['user_full_name'] , //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
@@ -1232,8 +1232,8 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $parameter = [
-            'user_full_name' => null, //Полное имя пользователя
-            'user_phone' => null, //Телефон пользователя
+            'user_full_name' => $params['user_full_name'] , //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
@@ -1700,8 +1700,8 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $parameter = [
-            'user_full_name' => null, //Полное имя пользователя
-            'user_phone' => null, //Телефон пользователя
+            'user_full_name' => $params['user_full_name'] , //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
             'reservation' => false, //Обязательный. Признак предварительного заказа: True, False

@@ -39,7 +39,7 @@
     </div>
     <div class="changes">
          <p>
-             Зробить прям зараз заказ онлайн дешево водія з власним авто зі мобільного додатка "{{ $mes }}"
+             Зробить прямо зараз заказ онлайн дешево водія з власним авто зі мобільного додатка "{{ $mes }}"
          </p>
         <p>
             Оновити програму можна <a href={{  $app_url }}>за посиланням</a>
@@ -60,7 +60,7 @@
         <p>Вашу адресу отримано з відкритих джерел в інтернеті. Ви можете відписатися від розсилки нажавши нижче кнопку:</p>
         <a href="{{ $url }}" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">{{ $text_button }}</a>
     </div>
-
+    <p style="text-align: left;">{{$uniqueNumber}}</p>
 </div>
 
 </body>

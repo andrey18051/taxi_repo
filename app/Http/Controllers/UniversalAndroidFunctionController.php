@@ -65,10 +65,10 @@ class UniversalAndroidFunctionController extends Controller
                 // Логируем ошибки в случае неудачного запроса
                 Log::error("function postRequestHTTP Request failed with status: " . $response->status());
                 Log::error("function postRequestHTTP Response: " . $response->body());
-                self::sendCatchMessage($response->body());
+                self::sendCatchMessage("параметр запроса $parameter/ ответ сервера $response->body()");
             }
         } catch (\Exception $e) {
-            self::sendCatchMessage($e->getMessage());
+            self::sendCatchMessage("параметр запроса $parameter / ответ сервера $response->body()");
             Log::error("Error establishing database connection: " . $e->getMessage());
         }
         return $response;

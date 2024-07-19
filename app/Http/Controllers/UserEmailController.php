@@ -285,6 +285,7 @@ class UserEmailController extends Controller
             $message = $text_message;
             $url = "https://m.easy-order-taxi.site/unsubscribe/$email";
             $text_button = "Відписатися для $name";
+            $uniqueNumber = "Повідомлення №" . rand(1000000000, 9999999999) . " від " . date('d.m.Y');
 
             Mail::to($email)->send(new UserSleepEmail(
                 $subject,
@@ -292,6 +293,7 @@ class UserEmailController extends Controller
                 $app_url,
                 $url,
                 $text_button,
+                $uniqueNumber
             ));
         }
     }
