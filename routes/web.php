@@ -1392,6 +1392,7 @@ Route::get('/user_app', [UserController::class,'user_app']);
 Route::get('/userList', [UserController::class,'userList']);
 Route::get('/sleepUsersMessages', [UserMessageController::class,'sleepUsersMessages']);
 Route::get('/sleepUsersEmails', [UserEmailController::class,'sleepUsersEmails']);
+Route::get('/sleepUsersEmailsTest/{email}', [UserEmailController::class,'sleepUsersEmailsTest']);
 
 /**
  * Android messages
