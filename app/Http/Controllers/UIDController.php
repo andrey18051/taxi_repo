@@ -128,7 +128,7 @@ class UIDController extends Controller
     public function UIDStatusShowEmail($email)
     {
 
-        $order = Orderweb:: where("email", $email)
+        $order = Orderweb::where("email", $email)
 
             ->where("closeReason", "!=", null)
             ->where("closeReason", "-1")
@@ -212,6 +212,118 @@ class UIDController extends Controller
 //        Log::debug("UIDStatusShowEmail response", $response);
         return $response;
     }
+
+    public function getServerArray($city, $app): array
+    {
+        switch ($app) {
+            case "PAS1":
+                $serverInfo = City_PAS1::where("name", $city)->get();
+                break;
+            case "PAS2":
+                $serverInfo = City_PAS2::where("name", $city)->get();
+                break;
+            //case "PAS4":
+            default:
+                $serverInfo = City_PAS4::where("name", $city)->get();
+        }
+        $serverArray = [];
+        if ($serverInfo != null) {
+            foreach ($serverInfo as $value) {
+                $serverArray[] = 'http://' .$value->address;
+            }
+        }
+
+        return $serverArray;
+    }
+
+    public function UIDStatusShowEmailCityApp($email, $city, $app)
+    {
+        $serverArray = self::getServerArray($city, $app);
+        if ($serverArray != null) {
+            $order = Orderweb:: where("email", $email)
+                ->where("closeReason", "!=", null)
+                ->where("closeReason", "-1")
+                ->whereIn("server", $serverArray)
+                ->where("comment", "!=", null)
+                ->orderBy("created_at", "desc")
+                ->get();
+            Log::debug("UIDStatusShowEmail order", $order->toArray());
+            $response = null;
+            if (!$order->isEmpty()) {
+                self::UIDStatusReview($order);
+            }
+            $orderHistory = Orderweb::where("email", $email)
+
+                -> where("closeReason", "!=", null)
+                -> whereIn("server", $serverArray)
+                -> where("startLat", "!=", null)
+                -> where("startLan", "!=", null)
+                -> where("to_lat", "!=", null)
+                -> where("to_lng", "!=", null)
+                -> where("comment", "!=", null)
+                -> orderBy("created_at", "desc")
+                -> get();
+            if ($orderHistory) {
+                $i=0;
+                $orderUpdate = $orderHistory->toArray();
+                Log::debug("UIDStatusShowEmail orderUpdate", $orderUpdate);
+                date_default_timezone_set('Europe/Kiev');
+
+                foreach ($orderUpdate as $value) {
+                    if ($i < 5) {
+                        $response[] = [
+                            'routefrom' => $value["routefrom"],
+                            'routefromnumber' => $value["routefromnumber"],
+                            'startLat' => $value["startLat"],
+                            'startLan' => $value["startLan"],
+                            'routeto' => $value["routeto"],
+                            'routetonumber' => $value["routetonumber"],
+                            'to_lat' => $value["to_lat"],
+                            'to_lng' => $value["to_lng"],
+                            'web_cost' => $value["web_cost"],
+                            'closeReason' => $value["closeReason"],
+                            'auto' => $value["auto"],
+                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                        ];
+                    } else {
+//                    if ($value["closeReason"] == "0" ) {
+                        if ($value["closeReason"] == 0 || $value["closeReason"] == 8 ||$value["closeReason"] == 9) {
+                            $response[] = [
+                                'routefrom' => $value["routefrom"],
+                                'routefromnumber' => $value["routefromnumber"],
+                                'startLat' => $value["startLat"],
+                                'startLan' => $value["startLan"],
+                                'routeto' => $value["routeto"],
+                                'routetonumber' => $value["routetonumber"],
+                                'to_lat' => $value["to_lat"],
+                                'to_lng' => $value["to_lng"],
+                                'web_cost' => $value["web_cost"],
+                                'closeReason' => $value["closeReason"],
+                                'auto' => $value["auto"],
+                                'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                            ];
+                        }
+                    }
+                    $i++;
+                }
+            } else {
+                $response = null;
+                $response[] = [
+                    'routefrom' => "*",
+                    'routefromnumber' => "*",
+                    'routeto' => "*",
+                    'routetonumber' => "*",
+                    'web_cost' => "*",
+                    'closeReason' => "*",
+                    'auto' => "*",
+                    'created_at' => "*",
+                ];
+            }
+//        Log::debug("UIDStatusShowEmail response", $response);
+            return $response;
+        }
+    }
+
     public function UIDStatusShowEmailCancel($email)
     {
 

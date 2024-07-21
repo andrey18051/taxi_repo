@@ -1189,6 +1189,12 @@ Route::get('/android/UIDStatusShow/{user_full_name}', [UIDController::class, 'UI
 Route::get('/android/UIDStatusShowEmail/{email}', [UIDController::class, 'UIDStatusShowEmail'])
     ->name('UIDStatusShowEmail');
 
+Route::get('/android/getServerArray/{city}/{app}', [UIDController::class, 'getServerArray'])
+    ->name('getServerArray');
+
+Route::get('/android/UIDStatusShowEmailCityApp/{email}/{city}/{app}', [UIDController::class, 'UIDStatusShowEmailCityApp'])
+    ->name('UIDStatusShowEmailCityApp');
+
 Route::get('/android/UIDStatusShowEmailCancel/{email}', [UIDController::class, 'UIDStatusShowEmailCancel'])
     ->name('UIDStatusShowEmailCancel');
 

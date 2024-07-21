@@ -65,12 +65,27 @@ class UniversalAndroidFunctionController extends Controller
                 // Логируем ошибки в случае неудачного запроса
                 Log::error("function postRequestHTTP Request failed with status: " . $response->status());
                 Log::error("function postRequestHTTP Response: " . $response->body());
-                self::sendCatchMessage("параметр запроса $parameter/ ответ сервера $response->body()");
+
+// Check if $parameter is an array and convert it to a JSON string if it is
+                if (is_array($parameter)) {
+                    $parameter = json_encode($parameter);
+                }
+
+                // Check if $response->body() is an array and convert it to a JSON string if it is
+
+                self::sendCatchMessage("параметр запроса $parameter");
             }
         } catch (\Exception $e) {
-            self::sendCatchMessage("параметр запроса $parameter / ответ сервера $response->body()");
-            Log::error("Error establishing database connection: " . $e->getMessage());
+        // Check if $parameter is an array and convert it to a JSON string if it is
+            if (is_array($parameter)) {
+                $parameter = json_encode($parameter);
+            }
+
+            self::sendCatchMessage("параметр запроса $parameter");
+
+            Log::error("параметр запроса $parameter / ответ сервера. " . $e->getMessage());
         }
+
         return $response;
     }
 
