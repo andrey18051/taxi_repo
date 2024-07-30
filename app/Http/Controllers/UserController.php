@@ -151,6 +151,31 @@ class UserController extends Controller
             return response()->json(['error' => 'Произошла ошибка при удалении пользователя'], 500);
         }
     }
+    public function destroyEmail($email)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = User::where("email", $email)->first();
+
+            if (!$user) {
+                return response()->json(['error' => 'Пользователь не найден'], 404);
+            }
+
+            $user->delete();
+
+            // Удаление сообщений пользователя
+            UserMessage::where('user_id', $user->id)->delete();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Пользователь успешно удален'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['error' => 'Произошла ошибка при удалении пользователя'], 500);
+        }
+    }
 
     public function userPas_2()
     {

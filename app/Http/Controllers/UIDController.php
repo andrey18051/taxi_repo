@@ -340,53 +340,65 @@ class UIDController extends Controller
         Log::debug("UIDStatusShowEmailCancel order", $order->toArray());
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
-        }
-        $orderHistory = Orderweb::where("email", $email)
+            $orderHistory = Orderweb::where("email", $email)
 
-            -> where("closeReason", "-1")
-            -> where("server", "!=", null)
-            -> where("startLat", "!=", null)
-            -> where("startLan", "!=", null)
-            -> where("to_lat", "!=", null)
-            -> where("to_lng", "!=", null)
-            -> where("comment", "!=", null)
-            -> orderBy("created_at", "desc")
-            -> get();
-        if ($orderHistory) {
-            $i=0;
-            $orderUpdate = $orderHistory->toArray();
-            Log::debug("UIDStatusShowEmailCancel orderUpdate", $orderUpdate);
-            date_default_timezone_set('Europe/Kiev');
+                -> where("closeReason", "-1")
+                -> where("server", "!=", null)
+                -> where("startLat", "!=", null)
+                -> where("startLan", "!=", null)
+                -> where("to_lat", "!=", null)
+                -> where("to_lng", "!=", null)
+                -> where("comment", "!=", null)
+                -> orderBy("created_at", "desc")
+                -> get();
+            if ($orderHistory) {
+                $i=0;
+                $orderUpdate = $orderHistory->toArray();
+                Log::debug("UIDStatusShowEmailCancel orderUpdate", $orderUpdate);
+                date_default_timezone_set('Europe/Kiev');
 
-            foreach ($orderUpdate as $value) {
-                $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
-                $dispatchingOrderUidDouble = "";
-                if ($uid_history) {
-                    $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
-                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
-                } else {
-                    $dispatchingOrderUidDouble = " ";
+                foreach ($orderUpdate as $value) {
+                    $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+                    $dispatchingOrderUidDouble = "";
+                    if ($uid_history) {
+                        $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
+                        Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+                    } else {
+                        $dispatchingOrderUidDouble = " ";
+                    }
+
+                    $response[] = [
+                        'uid' => $value["dispatching_order_uid"],
+                        'routefrom' => $value["routefrom"],
+                        'routefromnumber' => $value["routefromnumber"],
+                        'startLat' => $value["startLat"],
+                        'startLan' => $value["startLan"],
+                        'routeto' => $value["routeto"],
+                        'routetonumber' => $value["routetonumber"],
+                        'to_lat' => $value["to_lat"],
+                        'to_lng' => $value["to_lng"],
+                        'web_cost' => $value["web_cost"],
+                        'closeReason' => $value["closeReason"],
+                        'auto' => $value["auto"],
+                        'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
+                        'pay_method' => $value["pay_system"],
+                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                    ];
+
+                    $i++;
                 }
-
+            } else {
+                $response = null;
                 $response[] = [
-                    'uid' => $value["dispatching_order_uid"],
-                    'routefrom' => $value["routefrom"],
-                    'routefromnumber' => $value["routefromnumber"],
-                    'startLat' => $value["startLat"],
-                    'startLan' => $value["startLan"],
-                    'routeto' => $value["routeto"],
-                    'routetonumber' => $value["routetonumber"],
-                    'to_lat' => $value["to_lat"],
-                    'to_lng' => $value["to_lng"],
-                    'web_cost' => $value["web_cost"],
-                    'closeReason' => $value["closeReason"],
-                    'auto' => $value["auto"],
-                    'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
-                    'pay_method' => $value["pay_system"],
-                    'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                    'routefrom' => "*",
+                    'routefromnumber' => "*",
+                    'routeto' => "*",
+                    'routetonumber' => "*",
+                    'web_cost' => "*",
+                    'closeReason' => "*",
+                    'auto' => "*",
+                    'created_at' => "*",
                 ];
-
-                $i++;
             }
         } else {
             $response = null;
