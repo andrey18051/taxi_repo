@@ -254,7 +254,7 @@ class UIDController extends Controller
             }
             $orderHistory = Orderweb::where("email", $email)
 
-                -> where("closeReason", "!=", null)
+                -> where("closeReason", "!=", "-1")
                 -> whereIn("server", $serverArray)
                 -> where("startLat", "!=", null)
                 -> where("startLan", "!=", null)
@@ -270,7 +270,7 @@ class UIDController extends Controller
                 date_default_timezone_set('Europe/Kiev');
 
                 foreach ($orderUpdate as $value) {
-                    if ($i < 5) {
+                    if ($i < 10) {
                         $response[] = [
                             'routefrom' => $value["routefrom"],
                             'routefromnumber' => $value["routefromnumber"],
