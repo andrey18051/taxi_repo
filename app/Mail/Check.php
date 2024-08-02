@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -28,6 +28,10 @@ class Check extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.check')->with($this->params)->subject('Замовлення таксі.');
+        $currentDate = Carbon::now()->format('d-m-Y'); // Форматирование текущей даты
+
+        return $this->markdown('emails.check')
+            ->with($this->params)
+            ->subject("{$currentDate} Замовлення таксі.");
     }
 }
