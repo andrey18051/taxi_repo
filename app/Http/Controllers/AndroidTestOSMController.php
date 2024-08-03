@@ -352,7 +352,7 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $parameter = [
-            'user_full_name' => $params['user_full_name'] , //Полное имя пользователя
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
@@ -999,7 +999,7 @@ class AndroidTestOSMController extends Controller
         }
 
         $parameter = [
-            'user_full_name' => $userArr[0], //Полное имя пользователя
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -1232,7 +1232,7 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $parameter = [
-            'user_full_name' => $params['user_full_name'] , //Полное имя пользователя
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']),
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
@@ -1700,7 +1700,7 @@ class AndroidTestOSMController extends Controller
             $extra_charge_codes = [];
         };
         $parameter = [
-            'user_full_name' => $params['user_full_name'] , //Полное имя пользователя
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => null, //Время подачи предварительного заказа
@@ -2575,7 +2575,7 @@ class AndroidTestOSMController extends Controller
             $comment = str_replace("ПО ГОРОДУ.", "", $comment);
         }
         $parameter = [
-            'user_full_name' => $userArr[0], //Полное имя пользователя
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -2608,7 +2608,7 @@ class AndroidTestOSMController extends Controller
         $responseBonus["url"] = $url;
         Log::debug("response_arr: 00002222 ", $responseBonus);
 
-        if (!isset($response_arr["Message"])) {
+        if (!isset($responseBonus["Message"])) {
             if ($authorizationDouble != null) {
                 $responseBonus["parameter"] = $parameter;
 
@@ -2882,7 +2882,7 @@ class AndroidTestOSMController extends Controller
             $comment = str_replace("ПО ГОРОДУ.", "", $comment);
         }
         $parameter = [
-            'user_full_name' => $userArr[0], //Полное имя пользователя
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
             'user_phone' => $phone, //Телефон пользователя
             'client_sub_card' => null,
             'required_time' => $required_time, //Время подачи предварительного заказа
@@ -2927,7 +2927,7 @@ class AndroidTestOSMController extends Controller
             $responseBonus["url"] = $url;
             Log::debug("response_arr: 3333333333 ", $responseBonus);
 
-            if (!isset($response_arr["Message"])) {
+            if (!isset($responseBonus["Message"])) {
                 if ($authorizationDouble != null) {
                     $responseBonus["parameter"] = $parameter;
 
@@ -2951,8 +2951,8 @@ class AndroidTestOSMController extends Controller
                 }
             } else {
                 $response_error["order_cost"] = "0";
-                $response_error["Message"] = $response_arr["Message"];
-                $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . $parameter;
+                $response_error["Message"] = $responseBonus["Message"];
+                $message = "Ошибка заказа: " . $responseBonus["Message"] . "Параметры запроса: " . $parameter;
                 Log::error("orderSearchMarkersVisicom 111" . $message);
                 (new DailyTaskController)->sentTaskMessage($message);
                 return response($response_error, 200)
