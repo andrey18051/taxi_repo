@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\StartDoubleStatusPaymentReview;
 use App\Jobs\StartNewProcessExecution;
 use App\Mail\Check;
 use App\Mail\Server;
+use App\Mail\ServerServiceMessage;
+use App\Models\BlackList;
 use App\Models\CherkasyCombo;
 use App\Models\City;
 use App\Models\City_PAS1;
@@ -19,6 +20,7 @@ use App\Models\DoubleOrder;
 use App\Models\OdessaCombo;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
+use App\Models\User;
 use App\Models\ZaporizhzhiaCombo;
 use DateTime;
 use DateTimeZone;
@@ -482,6 +484,8 @@ class AndroidTestOSMController extends Controller
                 }
             }
             if (self::connectAPIAppOrder($city, $application) == 400) {
+
+
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
 
@@ -496,7 +500,7 @@ class AndroidTestOSMController extends Controller
                     ->header('Content-Type', 'json');
             } else {
                 $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
-                (new UniversalAndroidFunctionController)->sentErrorMessage($message);
+                (new UniversalAndroidFunctionController)->sentErrorMessage ($message);
 
                 $response_error["order_cost"] = 0;
                 $response_error["Message"] = "ErrorMessage";
@@ -2900,11 +2904,7 @@ class AndroidTestOSMController extends Controller
 
 //dd($parameter);
         Log::debug("response_arr: 11111111 ", $parameter);
-
-        $responseDoubleArr = null;
-        $responseFinal = null;
-        $responseBonusArr = null;
-
+        $responseDouble = null;
         if ($payment_type == 0) {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
@@ -2915,7 +2915,6 @@ class AndroidTestOSMController extends Controller
             );
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 22222222 ", $responseArr);
-            $responseFinal = $response;
         } else {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
@@ -2924,60 +2923,45 @@ class AndroidTestOSMController extends Controller
                 $identificationId,
                 $apiVersion
             );
-            $responseBonusArr = json_decode($response, true);
-            $responseBonusArr["url"] = $url;
-            Log::debug("responseBonusArr: 3333333333 ", $responseBonusArr);
+            $responseBonus = json_decode($response, true);
+            $responseBonus["url"] = $url;
+            Log::debug("response_arr: 3333333333 ", $responseBonus);
 
-            if ($authorizationDouble != null) {
-                $responseBonusArr["parameter"] = $parameter;
+            if (!isset($responseBonus["Message"])) {
+                if ($authorizationDouble != null) {
+                    $responseBonus["parameter"] = $parameter;
 
-                $parameter['payment_type'] = 0;
+                    $parameter['payment_type'] = 0;
 
-                $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
-                    $url,
-                    $parameter,
-                    $authorizationDouble,
-                    $identificationId,
-                    $apiVersion
-                );
+                    $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorizationDouble,
+                        $identificationId,
+                        $apiVersion
+                    );
 
-                $responseDoubleArr = json_decode($responseDouble, true);
-                Log::debug("responseDoubleArr: 3333333333 ", $responseDoubleArr);
-
-                //Сообщение что нет обоих заказаов безнального и дубля
-                if ($responseBonusArr != null
-                    && isset($responseBonusArr["Message"])
-                    && $responseDoubleArr != null
-                    && isset($responseDoubleArr["Message"])
-                ) {
-                    $response_error["order_cost"] = "0";
-                    $response_error["Message"] = $responseBonusArr["Message"];
-                    $message = "Ошибка заказа: " . $responseBonusArr["Message"]
-                        . "Параметры запроса: " . json_encode($parameter);
-                    Log::error("orderSearchMarkersVisicom 111" . $message);
-                    (new DailyTaskController)->sentTaskMessage($message);
-                    return response($response_error, 200)
-                        ->header('Content-Type', 'json');
-                } else {
-                    $responseFinal = $responseDouble;
-
-                    //60 секунд на оплату водителю на карту
-                    Log::debug("StartDoubleStatusPaymentReview " . $responseFinal);
-                    Log::debug("dispatching_order_uid " . $responseDoubleArr["dispatching_order_uid"]);
-                    StartDoubleStatusPaymentReview::dispatch($responseDoubleArr["dispatching_order_uid"]);
-
-                    if (!isset($responseDoubleArr["Message"])) {
-                        $responseDoubleArr["url"] = $url;
-                        $responseDoubleArr["parameter"] = $parameter;
+                    $responseDouble = json_decode($responseDouble, true);
+                    if (!isset($response_arr["Message"])) {
+                        $responseDouble["url"] = $url;
+                        $responseDouble["parameter"] = $parameter;
                     } else {
-                        $responseDoubleArr = null;
+                        $responseDouble = null;
                     }
                 }
+            } else {
+                $response_error["order_cost"] = "0";
+                $response_error["Message"] = $responseBonus["Message"];
+                $message = "Ошибка заказа: " . $responseBonus["Message"] . "Параметры запроса: " . json_decode($parameter, true);
+                Log::error("orderSearchMarkersVisicom 111" . $message);
+                (new DailyTaskController)->sentTaskMessage($message);
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
             }
         }
 
-        if ($responseFinal->status() == 200) {
-            $response_arr = json_decode($responseFinal, true);
+        if ($response->status() == 200) {
+            $response_arr = json_decode($response, true);
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
@@ -3009,22 +2993,14 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
 
-                Log::debug("responseBonusArr", $responseBonusArr);
-                Log::debug("responseDoubleArr", $responseDoubleArr)
-                ;
-                //Запуск вилки
-                if ($responseBonusArr != null
-                    && $responseDoubleArr != null
-                    && isset($responseBonusArr["dispatching_order_uid"])
-                    && isset($responseDoubleArr["dispatching_order_uid"])
-                ) {
-                    Log::debug("responseDoubleArr: 44444444 ", $responseDoubleArr);
-                    $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+                if ($responseDouble != null && isset($responseDouble["dispatching_order_uid"])) {
+                    Log::debug("response_arr: 44444444 ", $responseDouble);
+                    $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
 
                     Log::debug("******************************");
                     Log::debug("DoubleOrder parameters1111: ", [
-                        'responseBonusStr' => json_encode($responseBonusArr),
-                        'responseDoubleStr' => json_encode($responseDoubleArr),
+                        'responseBonusStr' => json_encode($responseBonus),
+                        'responseDoubleStr' => json_encode($responseDouble),
                         'authorizationBonus' => $authorizationBonus,
                         'authorizationDouble' => $authorizationDouble,
                         'connectAPI' => $connectAPI,
@@ -3036,10 +3012,10 @@ class AndroidTestOSMController extends Controller
 
 
 
-                    $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+                    $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
                     $doubleOrder = new DoubleOrder();
-                    $doubleOrder->responseBonusStr = json_encode($responseBonusArr);
-                    $doubleOrder->responseDoubleStr = json_encode($responseDoubleArr);
+                    $doubleOrder->responseBonusStr = json_encode($responseBonus);
+                    $doubleOrder->responseDoubleStr = json_encode($responseDouble);
                     $doubleOrder->authorizationBonus = $authorizationBonus;
                     $doubleOrder->authorizationDouble = $authorizationDouble;
                     $doubleOrder->connectAPI = $connectAPI;
@@ -3081,8 +3057,8 @@ class AndroidTestOSMController extends Controller
             if ($response_arr["order_cost"] == null) {
                 $response_arr = json_decode($response, true);
 
-                $message = "Сбой в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
-                (new DailyTaskController)->sentTaskMessage($message);
+                $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
+                (new UniversalAndroidFunctionController)->sentErrorMessage ($message);
 
                 $response_error["order_cost"] = "0";
                 $response_error["Message"] = $response_arr["Message"];
@@ -3093,13 +3069,13 @@ class AndroidTestOSMController extends Controller
         } else {
             $response_arr = json_decode($response, true);
 
-            $message = "Сбой в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
-            (new DailyTaskController)->sentTaskMessage($message);
+            $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
+            (new UniversalAndroidFunctionController)->sentErrorMessage ($message);
 
             $response_error["order_cost"] = "0";
             $response_error["Message"] = $response_arr["Message"];
 
-            $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . json_encode($parameter);
+            $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . $parameter;
             Log::error("orderSearchMarkersVisicom 222" . $message);
             (new DailyTaskController)->sentTaskMessage($message);
 

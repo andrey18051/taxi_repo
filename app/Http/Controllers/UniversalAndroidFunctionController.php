@@ -73,7 +73,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 // Check if $response->body() is an array and convert it to a JSON string if it is
 
-                self::sendCatchMessage("параметр запроса $parameter");
+                self::sendCatchMessage("(response) Параметр запроса: $parameter / Ответ сервера: " . $response->body());
             }
         } catch (\Exception $e) {
         // Check if $parameter is an array and convert it to a JSON string if it is
@@ -81,7 +81,7 @@ class UniversalAndroidFunctionController extends Controller
                 $parameter = json_encode($parameter);
             }
 
-            self::sendCatchMessage("параметр запроса $parameter");
+            self::sendCatchMessage("(catch) Параметр запроса: $parameter / Ответ сервера: " . $e->getMessage());
 
             Log::error("параметр запроса $parameter / ответ сервера. " . $e->getMessage());
         }
@@ -2883,6 +2883,59 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function cancelOnlyDoubleUid($uid)
+    {
+        sleep(61);
+        if (self::canceledOneMinute($uid)) {
+            $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+            if (is_null($order)) {
+                Log::error("cancelOnlyDoubleUid Order not found with UID: $uid");
+                return false;
+            }
+
+            switch ($order->comment) {
+                case "taxi_easy_ua_pas1":
+                    $application = "PAS1";
+                    break;
+                case "taxi_easy_ua_pas2":
+                    $application = "PAS2";
+                    break;
+                default:
+                    $application = "PAS4";
+            }
+
+            switch ($order->server) {
+                case "http://167.235.113.231:7307":
+                case "http://167.235.113.231:7306":
+                case "http://134.249.181.173:7208":
+                case "http://91.205.17.153:7208":
+                    $city = "Kyiv City";
+                    break;
+                case "http://142.132.213.111:8071":
+                case "http://167.235.113.231:7308":
+                    $city = "Dnipropetrovsk Oblast";
+                    break;
+                case "http://142.132.213.111:8072":
+                    $city = "Odessa";
+                    break;
+                case "http://3142.132.213.111:8073":
+                    $city = "Zaporizhzhia";
+                    break;
+                case "http://134.249.181.173:7201":
+                case "http://91.205.17.153:7201":
+                    $city = "Cherkasy Oblast";
+                    break;
+                default:
+                    $city = "OdessaTest";
+            }
+
+            (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+        }
+    }
 
 
     public function orderCanceled(
