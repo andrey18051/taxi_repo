@@ -1014,6 +1014,7 @@ class AndroidTestOSMController extends Controller
             'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //                'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
+        $responseBonus = null;
 
         if ($authorizationDouble != null) {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -1024,12 +1025,11 @@ class AndroidTestOSMController extends Controller
                 $apiVersion
             );
             $responseBonus = json_decode($response, true);
+            $responseFinal = $response;
+
             $responseBonus["url"] = $url;
             $responseBonus["parameter"] = $parameter;
 
-//            $originalString = $parameter['user_phone'];
-//            $parameter['phone'] = substr($originalString, 0, -1);
-//            $parameter['comment'] = $parameter['comment'] . "(тел." . substr($originalString, -1) . ')';
             $parameter['payment_type'] = 0;
 
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -1040,12 +1040,38 @@ class AndroidTestOSMController extends Controller
                 $apiVersion
             );
 
-            $responseDouble = json_decode($responseDouble, true);
-//            dd($responseDouble);
-            $responseDouble["url"] = $url;
-            $responseDouble["parameter"] = $parameter;
+            $responseDoubleArr = json_decode($responseDouble, true);
+            //Сообщение что нет обоих заказаов безнального и дубля
+            if ($responseBonus != null
+                && isset($responseBonus["Message"])
+                && $responseDouble != null
+                && isset($responseDoubleArr["Message"])
+            ) {
+                $response_error["order_cost"] = "0";
+                $response_error["Message"] = $responseBonus["Message"];
+                $message = "Ошибка заказа: " . $responseBonus["Message"]
+                    . "Параметры запроса: " . json_encode($parameter);
+                Log::error("orderSearchMarkersVisicom 111" . $message);
+                (new DailyTaskController)->sentTaskMessage($message);
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+            if ($responseBonus == null
+                || isset($responseBonus["Message"])
+                && $responseDouble != null
+                && !isset($responseDoubleArr["Message"])
+            ) {
+                $responseFinal = $responseDouble;
 
-
+                //60 секунд на оплату водителю на карту
+                Log::debug("StartDoubleStatusPaymentReview " . $responseFinal);
+                Log::debug("dispatching_order_uid " . $responseDoubleArr["dispatching_order_uid"]);
+                StartDoubleStatusPaymentReview::dispatch($responseDoubleArr["dispatching_order_uid"]);
+            }
+            if (!isset($responseDoubleArr["Message"])) {
+                $responseDoubleArr["url"] = $url;
+                $responseDoubleArr["parameter"] = $parameter;
+            }
         } else {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
@@ -1054,11 +1080,12 @@ class AndroidTestOSMController extends Controller
                 $identificationId,
                 $apiVersion
             );
-            $responseDouble = null;
+            $responseDoubleArr = null;
+            $responseFinal = $response;
         }
 
-        if ($response->status() == 200) {
-            $response_arr = json_decode($response, true);
+        if ($responseFinal->status() == 200) {
+            $response_arr = json_decode($responseFinal, true);
             $params["order_cost"] = $response_arr["order_cost"];
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
@@ -1105,11 +1132,16 @@ class AndroidTestOSMController extends Controller
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
 
-            if ($responseDouble != null) {
-                $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
+            //Запуск вилки
+            if ($responseBonus != null
+                && $responseDoubleArr != null
+                && isset($responseBonus["dispatching_order_uid"])
+                && isset($responseDoubleArr["dispatching_order_uid"])
+            ) {
+                $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
                 $doubleOrder = new DoubleOrder();
                 $doubleOrder->responseBonusStr = json_encode($responseBonus);
-                $doubleOrder->responseDoubleStr = json_encode($responseDouble);
+                $doubleOrder->responseDoubleStr = json_encode($responseDoubleArr);
                 $doubleOrder->authorizationBonus = $authorizationBonus;
                 $doubleOrder->authorizationDouble = $authorizationDouble;
                 $doubleOrder->connectAPI = $connectAPI;
@@ -2924,6 +2956,7 @@ class AndroidTestOSMController extends Controller
                 $identificationId,
                 $apiVersion
             );
+            $responseFinal = $response;
             $responseBonusArr = json_decode($response, true);
             $responseBonusArr["url"] = $url;
             Log::debug("responseBonusArr: 3333333333 ", $responseBonusArr);
@@ -2943,7 +2976,7 @@ class AndroidTestOSMController extends Controller
 
                 $responseDoubleArr = json_decode($responseDouble, true);
                 Log::debug("responseDoubleArr: 3333333333 ", $responseDoubleArr);
-
+                $responseFinal = $responseDouble;
                 //Сообщение что нет обоих заказаов безнального и дубля
                 if ($responseBonusArr != null
                     && isset($responseBonusArr["Message"])
@@ -2958,20 +2991,24 @@ class AndroidTestOSMController extends Controller
                     (new DailyTaskController)->sentTaskMessage($message);
                     return response($response_error, 200)
                         ->header('Content-Type', 'json');
-                } else {
+                }
+                if ($responseBonusArr == null
+                    || isset($responseBonusArr["Message"])
+                    && $responseDoubleArr != null
+                    && !isset($responseDoubleArr["Message"])
+                ) {
                     $responseFinal = $responseDouble;
 
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartDoubleStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " . $responseDoubleArr["dispatching_order_uid"]);
                     StartDoubleStatusPaymentReview::dispatch($responseDoubleArr["dispatching_order_uid"]);
-
-                    if (!isset($responseDoubleArr["Message"])) {
-                        $responseDoubleArr["url"] = $url;
-                        $responseDoubleArr["parameter"] = $parameter;
-                    } else {
-                        $responseDoubleArr = null;
-                    }
+                }
+                if (!isset($responseDoubleArr["Message"])) {
+                    $responseDoubleArr["url"] = $url;
+                    $responseDoubleArr["parameter"] = $parameter;
+                } else {
+                    $responseDoubleArr = null;
                 }
             }
         }
@@ -3008,9 +3045,13 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
+                if ($responseBonusArr != null) {
+                    Log::debug("responseBonusArr", $responseBonusArr);
+                }
+                if ($responseDoubleArr != null) {
+                    Log::debug("responseDoubleArr", $responseDoubleArr);
+                }
 
-                Log::debug("responseBonusArr", $responseBonusArr);
-                Log::debug("responseDoubleArr", $responseDoubleArr)
                 ;
                 //Запуск вилки
                 if ($responseBonusArr != null
