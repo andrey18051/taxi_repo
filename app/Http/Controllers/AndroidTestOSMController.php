@@ -2934,7 +2934,6 @@ class AndroidTestOSMController extends Controller
         Log::debug("response_arr: 11111111 ", $parameter);
 
         $responseDoubleArr = null;
-        $responseFinal = null;
         $responseBonusArr = null;
 
         if ($payment_type == 0) {
@@ -2976,7 +2975,7 @@ class AndroidTestOSMController extends Controller
 
                 $responseDoubleArr = json_decode($responseDouble, true);
                 Log::debug("responseDoubleArr: 3333333333 ", $responseDoubleArr);
-                $responseFinal = $responseDouble;
+
                 //Сообщение что нет обоих заказаов безнального и дубля
                 if ($responseBonusArr != null
                     && isset($responseBonusArr["Message"])
@@ -3649,6 +3648,8 @@ class AndroidTestOSMController extends Controller
             } else {
                 $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
             }
+        } else {
+            $resp_answer = "Замовлення не вдалося скасувати.";
         }
 
 
