@@ -759,6 +759,624 @@ class AndroidTestOSMController extends Controller
 
     }
 
+    public function costSearchTime(
+        $from,
+        $from_number,
+        $to,
+        $to_number,
+        $tariff,
+        $phone,
+        $user,
+        $time,
+        $date,
+        $services,
+        $city,
+        $application
+    ) {
+
+        $connectAPI = self::connectAPIAppOrder($city, $application);
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "ErrorMessage";
+
+            return $response_error;
+        }
+        if ($tariff == " ") {
+            $tariff = null;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+
+
+        $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+        $authorization = $authorizationChoiceArr["authorization"];
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+        $params['user_phone'] = $phone;
+
+        $params['client_sub_card'] = null;
+        $params['required_time'] = null; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        $params['wagon'] = 0;
+        $params['minibus'] = 0;
+        $params['premium'] = 0;
+        $params['route_address_entrance_from'] = null;
+
+        $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
+        $params['comment'] = " "; //Комментарий к заказу
+        $params['add_cost'] = 0; //Добавленная стоимость
+        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+        $params['route_undefined'] = false; //По городу: True, False
+        $taxiColumnId = config('app.taxiColumnId');
+
+        switch ($city) {
+            case "Kyiv City":
+                $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
+                break;
+            case "Dnipropetrovsk Oblast":
+                $combos_from = DniproCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+                break;
+            case "Odessa":
+                $combos_from = OdessaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+                break;
+            case "Zaporizhzhia":
+                $combos_from = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+                break;
+            case "Cherkasy Oblast":
+                $combos_from = CherkasyCombo::select(['name'])->where('name', 'like', $from . '%')->first();
+                break;
+            case "OdessaTest":
+                $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
+                break;
+        }
+        Log::debug("combos_from $combos_from");
+        if ($from == $to) {
+            $route_undefined = true;
+            $combos_to = $combos_from;
+        } else {
+            $route_undefined = false;
+
+            switch ($city) {
+                case "Kyiv City":
+                    $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case "Dnipropetrovsk Oblast":
+                    $combos_to = DniproCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case "Odessa":
+                    $combos_to = OdessaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case "Zaporizhzhia":
+                    $combos_to = ZaporizhzhiaCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case "Cherkasy Oblast":
+                    $combos_to = CherkasyCombo::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+                case "OdessaTest":
+                    $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+                    break;
+            }
+
+        }
+        Log::debug("combos_to $combos_to");
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
+
+        if ($combos_from == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Не вірна адреса";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $from = $combos_from->toArray()['name'];
+        }
+        if ($combos_to == null) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "Не вірна адреса";
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        } else {
+            $to = $combos_to->toArray()['name'];
+        }
+
+
+        if ($from_number !== " ") {
+            $routFrom = ['name' => $from, 'number' => $from_number];
+        } else {
+            $routFrom = ['name' => $from];
+        }
+        Log::debug("routFrom", $routFrom);
+        if ($to_number !== " ") {
+            $routTo = ['name' => $to, 'number' => $to_number];
+        } else {
+            $routTo = ['name' => $to];
+        }
+        Log::debug("routTo", $routTo);
+        $LatLngFrom = (new UniversalAndroidFunctionController)->geoDataSearch(
+            $to,
+            $to_number,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application),
+            $connectAPI
+        );
+
+        Log::debug("LatLngFrom", $LatLngFrom);
+        $from_lat = $LatLngFrom["lat"];
+        $from_lng = $LatLngFrom["lng"];
+        $params["startLat"] = $from_lat; //
+        $params["startLan"] = $from_lng; //
+
+        $LatLngTo = (new UniversalAndroidFunctionController)->geoDataSearch(
+            $to,
+            $to_number,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application),
+            $connectAPI
+        );
+
+        Log::debug("LatLngTo", $LatLngTo);
+        $to_lat = $LatLngTo["lat"];
+        $to_lng = $LatLngTo["lng"];
+        $params["to_lat"] = $to_lat; //
+        $params["to_lng"] = $to_lng; //
+        if ($from_lat != 0 && $from_lng != 0) {
+            $routFrom = ['name' => $from, 'number' => $from_number, 'lat' => $from_lat, 'lng' => $from_lng];
+        }
+
+        if ($to_lat != 0 && $to_lng != 0) {
+            $routTo = ['name' => $to, 'number' => $to_number, 'lat' => $to_lat, 'lng' => $to_lng];
+        }
+        $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            $routFrom,
+            $routTo,
+        ];
+        Log::debug("rout", $rout);
+        /**
+         * Сохранние расчетов в базе
+         */
+        $params['from'] = $from;
+        $params['from_number'] = $from_number;
+        $params['to'] = $to;
+        $params['to_number'] = $to_number;
+
+        $required_time = null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+//        (new UniversalAndroidFunctionController)->saveCost($params);
+
+        $url = $connectAPI . '/api/weborders/cost';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+        $parameter = [
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => "", //Комментарий к заказу
+            'add_cost' => 0,
+            'wagon' => 0, //Универсал: True, False
+            'minibus' => 0, //Микроавтобус: True, False
+            'premium' => 0, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $tariff, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ];
+        Log::debug("costSearch", $parameter);
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+        );
+        Log::debug("costSearch" . $response->body());
+        $response_arr = json_decode($response, true);
+        Log::debug("response_arr: ", $response_arr);
+        switch ($application) {
+            case "PAS1":
+                $city_count = City_PAS1::where('name', $city)->count();
+                break;
+            case "PAS2":
+                $city_count = City_PAS2::where('name', $city)->count();
+                break;
+            //case "PAS4":
+            default:
+                $city_count = City_PAS4::where('name', $city)->count();
+                break;
+        }
+        if (isset($response_arr["Message"]) && $city_count > 1) {
+            $connectAPI = str_replace('http://', '', $connectAPI);
+            switch ($application) {
+                case "PAS1":
+                    $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                    break;
+                case "PAS2":
+                    $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                    break;
+                //case "PAS4":
+                default:
+                    $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                    break;
+            }
+            $cityServer->online = "false";
+            $cityServer->save();
+            (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+
+            while (self::connectAPIAppOrder($city, $application) != 400) {
+                $connectAPI = self::connectAPIAppOrder($city, $application);
+                $url = $connectAPI . '/api/weborders/tariffs/cost';
+                Log::debug(" _____________________________");
+                Log::debug(" connectAPI while $userArr[2]");
+                Log::debug(" connectAPI while $city ");
+                Log::debug(" connectAPI while $connectAPI ");
+                Log::debug(" connectAPI while $url ");
+                Log::debug(" ______________________________");
+
+                $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+
+                if ($payment_type == 0) {
+                    $authorization = $authorizationChoiceArr["authorization"];
+                    Log::debug("authorization $authorization");
+                } else {
+                    $authorization = $authorizationChoiceArr["authorizationBonus"];
+                    Log::debug("authorizationBonus $authorization");
+                }
+                $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                    $url,
+                    $parameter,
+                    $authorization,
+                    self::identificationId($application),
+                    (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                );
+                $response_arr = json_decode($response, true);
+                Log::debug("response_arr: ", $response_arr);
+                if (!isset($response_arr[0]['error'])) {
+                    return response($response, 200)
+                        ->header('Content-Type', 'json');
+                } elseif ($city_count > 1) {
+                    $connectAPI = str_replace('http://', '', $connectAPI);
+                    switch ($application) {
+                        case "PAS1":
+                            $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                            break;
+                        case "PAS2":
+                            $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                            break;
+                        //case "PAS4":
+                        default:
+                            $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                            break;
+                    }
+                    $cityServer->online = "false";
+                    $cityServer->save();
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                } else {
+                    $connectAPI = str_replace('http://', '', $connectAPI);
+                    switch ($application) {
+                        case "PAS1":
+                            $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                            break;
+                        case "PAS2":
+                            $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                            break;
+                        //case "PAS4":
+                        default:
+                            $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                            break;
+                    }
+                    (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+            if (self::connectAPIAppOrder($city, $application) == 400) {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "ErrorMessage";
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        } else {
+            Log::debug("response Message 33333333");
+
+            if ($response->status() == 200) {
+                return response($response, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $message = "Сбой в приложение $application, сервер $connectAPI: " . $response_arr;
+                (new UniversalAndroidFunctionController)->sentErrorMessage($message);
+
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "ErrorMessage";
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        }
+
+        switch ($application) {
+            case "PAS1":
+                $city_count = City_PAS1::where('name', $city)->count();
+                break;
+            case "PAS2":
+                $city_count = City_PAS2::where('name', $city)->count();
+                break;
+            //case "PAS4":
+            default:
+                $city_count = City_PAS4::where('name', $city)->count();
+                break;
+        }
+        Log::debug("city_count: " . $city_count);
+
+        if ($response == null) {
+            if ($city_count > 1) {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+
+                $cityServer->online = "false";
+                $cityServer->save();
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                while (self::connectAPIAppOrder($city, $application) != 400) {
+                    $connectAPI = self::connectAPIAppOrder($city, $application);
+                    $url = $connectAPI . '/api/weborders/cost';
+                    Log::debug(" _____________________________");
+                    Log::debug(" connectAPI while $userArr[2]");
+                    Log::debug(" connectAPI while $city ");
+                    Log::debug(" connectAPI while $connectAPI ");
+                    Log::debug(" connectAPI while $url ");
+                    Log::debug(" ______________________________");
+
+                    $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+                    Log::debug("payment_type (while) $payment_type");
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    );
+                    $response_arr = json_decode($response, true);
+                    Log::debug("response_arr: ", $response_arr);
+                    if (isset($response_arr["order_cost"])) {
+                        return response($response, 200)
+                            ->header('Content-Type', 'json');
+                    } elseif ($city_count > 1) {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                        $response_error["order_cost"] = 0;
+                        $response_error["Message"] = "ErrorMessage";
+
+                        return response($response_error, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                }
+                if (self::connectAPIAppOrder($city, $application) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+
+            } else {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+
+
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "ErrorMessage";
+                Log::debug("response_error", $response_error);
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        } else {
+            $response_arr = json_decode($response, true);
+            Log::debug("response_arr: ", $response_arr);
+
+            if (isset($response_arr["Message"]) && $city_count > 1) {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+
+                $cityServer->online = "false";
+                $cityServer->save();
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                while (self::connectAPIAppOrder($city, $application) != 400) {
+                    $connectAPI = self::connectAPIAppOrder($city, $application);
+                    $url = $connectAPI . '/api/weborders/cost';
+                    Log::debug(" _____________________________");
+                    Log::debug(" connectAPI while $userArr[2]");
+                    Log::debug(" connectAPI while $city ");
+                    Log::debug(" connectAPI while $connectAPI ");
+                    Log::debug(" connectAPI while $url ");
+                    Log::debug(" ______________________________");
+
+                    $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+                    Log::debug("payment_type (while) $payment_type");
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    );
+                    $response_arr = json_decode($response, true);
+                    Log::debug("response_arr: ", $response_arr);
+                    if (isset($response_arr["order_cost"])) {
+                        return response($response, 200)
+                            ->header('Content-Type', 'json');
+                    } elseif ($city_count > 1) {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                        $response_error["order_cost"] = 0;
+                        $response_error["Message"] = "ErrorMessage";
+
+                        return response($response_error, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                }
+                if (self::connectAPIAppOrder($city, $application) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+
+            } else {
+                Log::debug("response Message 33333333");
+
+                if ($response->status() == 200) {
+                    return response($response, 200)
+                        ->header('Content-Type', 'json');
+                } else {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+        }
+
+    }
+
     /**
      * @throws \Exception
      */
@@ -1635,6 +2253,486 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
+    public function costSearchMarkersTime(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $user,
+        $time,
+        $date,
+        $services,
+        $city,
+        $application
+    ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
+
+        $connectAPI = self::connectAPIAppOrder($city, $application);
+        Log::debug("1 connectAPI $connectAPI");
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "ErrorMessage";
+
+            return $response_error;
+        }
+
+        if ($tariff == " ") {
+            $tariff = null;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+        } else {
+            $params['email'] = "no email";
+        }
+
+        $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+        $params['user_phone'] = $phone;
+
+        $params['client_sub_card'] = null;
+        $params['required_time'] = null; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        $params['wagon'] = 0;
+        $params['minibus'] = 0;
+        $params['premium'] = 0;
+        $params['route_address_entrance_from'] = null;
+
+        $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
+        $params['comment'] = " "; //Комментарий к заказу
+        $params['add_cost'] = 0; //Добавленная стоимость
+        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+
+        $params['route_undefined'] = false; //По городу: True, False
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        if ($originLatitude == $toLatitude) {
+            $route_undefined = true;
+            $params['to'] = 'по місту';
+        } else {
+            $route_undefined = false;
+
+            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
+
+            $params['routetonumber'] = $osmAddress;
+            $to = $osmAddress;
+            $params['to'] = $osmAddress;
+            $params['to_number'] = " ";
+
+        }
+        $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
+            ['name' => "name", 'lat' => $toLatitude, 'lng' => $toLongitude]
+        ];
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
+
+        $route_undefined = false;
+        $required_time = null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $params['reservation'] = $reservation;
+
+        $params["required_time"] = $required_time;
+
+        $url = $connectAPI . '/api/weborders/cost';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+        $parameter = [
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']),
+            'user_phone' => $phone, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => "", //Комментарий к заказу
+            'add_cost' => 0,
+            'wagon' => 0, //Универсал: True, False
+            'minibus' => 0, //Микроавтобус: True, False
+            'premium' => 0, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $tariff, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ];
+        Log::debug("parameter ", $parameter);
+        Log::debug("payment_type  $payment_type");
+        if ($payment_type == 0) {
+            $authorization = $authorizationChoiceArr["authorization"];
+            Log::debug("authorization $authorization");
+        } else {
+            $authorization = $authorizationChoiceArr["authorizationBonus"];
+            Log::debug("authorizationBonus $authorization");
+        }
+        Log::debug("____________________________________");
+        Log::debug("authorization  $authorization");
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+        );
+
+        switch ($application) {
+            case "PAS1":
+                $city_count = City_PAS1::where('name', $city)->count();
+                break;
+            case "PAS2":
+                $city_count = City_PAS2::where('name', $city)->count();
+                break;
+            //case "PAS4":
+            default:
+                $city_count = City_PAS4::where('name', $city)->count();
+                break;
+        }
+        Log::debug("city_count: " . $city_count);
+
+        if ($response == null) {
+            if ($city_count > 1) {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+
+                $cityServer->online = "false";
+                $cityServer->save();
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                while (self::connectAPIAppOrder($city, $application) != 400) {
+                    $connectAPI = self::connectAPIAppOrder($city, $application);
+                    $url = $connectAPI . '/api/weborders/cost';
+                    Log::debug(" _____________________________");
+                    Log::debug(" connectAPI while $userArr[2]");
+                    Log::debug(" connectAPI while $city ");
+                    Log::debug(" connectAPI while $connectAPI ");
+                    Log::debug(" connectAPI while $url ");
+                    Log::debug(" ______________________________");
+
+                    $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+                    Log::debug("payment_type (while) $payment_type");
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    );
+                    $response_arr = json_decode($response, true);
+                    Log::debug("response_arr: ", $response_arr);
+                    if (isset($response_arr["order_cost"])) {
+                        $response_arr = json_decode($response, true);
+
+                        $response_ok["from_lat"] = $originLatitude;
+                        $response_ok["from_lng"] = $originLongitude;
+
+                        if ($route_undefined == false) {
+                            $response_ok["lat"] = $toLatitude;
+                            $response_ok["lng"] = $toLongitude;
+                        } else {
+                            $response_ok["lat"] = 0;
+                            $response_ok["lng"] = 0;
+                        }
+
+                        $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                        $response_ok["order_cost"] = $response_arr["order_cost"];
+
+                        $response_ok["currency"] = $response_arr["currency"];
+
+                        if ($originLatitude != $toLatitude) {
+                            $response_ok["routeto"] = $params["to"];
+                            $response_ok["to_number"] = $params["to_number"];
+                        } else {
+                            $response_ok["routeto"] = $toLatitude;
+                            $response_ok["to_number"] = " ";
+                        }
+                        $response_ok["routefrom"] = $originLatitude;
+                        $response_ok["routefromnumber"] = " ";
+
+                        return response($response_ok, 200)
+                            ->header('Content-Type', 'json');
+                    } elseif ($city_count > 1) {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                        $response_error["order_cost"] = 0;
+                        $response_error["Message"] = "ErrorMessage";
+
+                        return response($response_error, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                }
+                if (self::connectAPIAppOrder($city, $application) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+
+            } else {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "ErrorMessage";
+                Log::debug("response_error", $response_error);
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        } else {
+            $response_arr = json_decode($response, true);
+            Log::debug("response_arr: ", $response_arr);
+
+            if (isset($response_arr["Message"]) && $city_count > 1) {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+
+                $cityServer->online = "false";
+                $cityServer->save();
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                while (self::connectAPIAppOrder($city, $application) != 400) {
+                    $connectAPI = self::connectAPIAppOrder($city, $application);
+                    $url = $connectAPI . '/api/weborders/cost';
+                    Log::debug(" _____________________________");
+                    Log::debug(" connectAPI while $userArr[2]");
+                    Log::debug(" connectAPI while $city ");
+                    Log::debug(" connectAPI while $connectAPI ");
+                    Log::debug(" connectAPI while $url ");
+                    Log::debug(" ______________________________");
+
+                    $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+                    Log::debug("payment_type (while) $payment_type");
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    );
+                    $response_arr = json_decode($response, true);
+                    Log::debug("response_arr: ", $response_arr);
+                    if (isset($response_arr["order_cost"])) {
+                        $response_arr = json_decode($response, true);
+
+                        $response_ok["from_lat"] = $originLatitude;
+                        $response_ok["from_lng"] = $originLongitude;
+
+                        if ($route_undefined == false) {
+                            $response_ok["lat"] = $toLatitude;
+                            $response_ok["lng"] = $toLongitude;
+                        } else {
+                            $response_ok["lat"] = 0;
+                            $response_ok["lng"] = 0;
+                        }
+
+                        $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                        $response_ok["order_cost"] = $response_arr["order_cost"];
+
+                        $response_ok["currency"] = $response_arr["currency"];
+
+                        if ($originLatitude != $toLatitude) {
+                            $response_ok["routeto"] = $params["to"];
+                            $response_ok["to_number"] = $params["to_number"];
+                        } else {
+                            $response_ok["routeto"] = $toLatitude;
+                            $response_ok["to_number"] = " ";
+                        }
+                        $response_ok["routefrom"] = $originLatitude;
+                        $response_ok["routefromnumber"] = " ";
+
+                        return response($response_ok, 200)
+                            ->header('Content-Type', 'json');
+                    } elseif ($city_count > 1) {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                        $response_error["order_cost"] = 0;
+                        $response_error["Message"] = "ErrorMessage";
+
+                        return response($response_error, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                }
+                if (self::connectAPIAppOrder($city, $application) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+
+            } else {
+                Log::debug("response Message 33333333");
+
+                if ($response->status() == 200) {
+                    $response_arr = json_decode($response, true);
+
+                    $response_ok["from_lat"] = $originLatitude;
+                    $response_ok["from_lng"] = $originLongitude;
+
+                    if ($route_undefined == false) {
+                        $response_ok["lat"] = $toLatitude;
+                        $response_ok["lng"] = $toLongitude;
+                    } else {
+                        $response_ok["lat"] = 0;
+                        $response_ok["lng"] = 0;
+                    }
+
+                    $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                    $response_ok["order_cost"] = $response_arr["order_cost"];
+                    $response_ok["currency"] = $response_arr["currency"];
+
+                    if ($originLatitude != $toLatitude) {
+                        $response_ok["routeto"] = $params["to"];
+                        $response_ok["to_number"] = $params["to_number"];
+                    } else {
+                        $response_ok["routeto"] = $toLatitude;
+                        $response_ok["to_number"] = " ";
+                    }
+                    $response_ok["routefrom"] = $originLatitude;
+                    $response_ok["routefromnumber"] = " ";
+
+                    return response($response_ok, 200)
+                        ->header('Content-Type', 'json');
+                } else {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+        }
+    }
+    /**
+     * @throws \Exception
+     */
     public function costSearchMarkersLocal(
         $originLatitude,
         $originLongitude,
@@ -2427,7 +3525,344 @@ class AndroidTestOSMController extends Controller
             }
         }
     }
+    public function costSearchMarkersLocalTariffsTime(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $user,
+        $time,
+        $date,
+        $services,
+        $city,
+        $application
+    ) {
+        if ($city == "foreign countries") {
+            $city = "Kyiv City";
+        }
 
+        $connectAPI = self::connectAPIAppOrder($city, $application);
+        Log::debug("1 connectAPI $connectAPI");
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "ErrorMessage";
+
+            return $response_error;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        if ($originLatitude == $toLatitude) {
+            $route_undefined = true;
+        } else {
+            $route_undefined = false;
+
+        }
+        $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
+            ['name' => "name", 'lat' => $toLatitude, 'lng' => $toLongitude]
+        ];
+
+        $url = $connectAPI . '/api/weborders/tariffs/cost';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+
+        $required_time = null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        };
+
+        $calculated_tariff_names = [
+            "Базовый",
+            "Эконом-класс",
+            "Бизнес-класс",
+            "Премиум-класс",
+            "Универсал",
+            "Микроавтобус",
+        ];
+
+        $parameter = [
+            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'calculated_tariff_names' => $calculated_tariff_names,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation,
+            'route_address_entrance_from' => null,
+            'comment' => "", //Комментарий к заказу
+            'add_cost' => 0,
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+            'route_undefined' => $route_undefined, //По городу: True, False
+        ];
+        Log::debug("parameter ", $parameter);
+        if ($payment_type == 0) {
+            $authorization = $authorizationChoiceArr["authorization"];
+        } else {
+            $authorization = $authorizationChoiceArr["authorizationBonus"];
+        }
+
+        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            self::identificationId($application),
+            (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+        );
+        switch ($application) {
+            case "PAS1":
+                $city_count = City_PAS1::where('name', $city)->count();
+                break;
+            case "PAS2":
+                $city_count = City_PAS2::where('name', $city)->count();
+                break;
+            //case "PAS4":
+            default:
+                $city_count = City_PAS4::where('name', $city)->count();
+                break;
+        }
+        Log::debug("city_count: " . $city_count);
+
+        if ($response != null) {
+            $response_arr = json_decode($response, true);
+            Log::debug("response_arr: ", $response_arr);
+
+            if (isset($response_arr["Message"]) && $city_count > 1) {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+                $cityServer->online = "false";
+                $cityServer->save();
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                while (self::connectAPIAppOrder($city, $application) != 400) {
+                    $connectAPI = self::connectAPIAppOrder($city, $application);
+                    $url = $connectAPI . '/api/weborders/tariffs/cost';
+                    Log::debug(" _____________________________");
+                    Log::debug(" connectAPI while $userArr[2]");
+                    Log::debug(" connectAPI while $city ");
+                    Log::debug(" connectAPI while $connectAPI ");
+                    Log::debug(" connectAPI while $url ");
+                    Log::debug(" ______________________________");
+
+                    $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    );
+                    $response_arr = json_decode($response, true);
+                    Log::debug("response_arr: ", $response_arr);
+                    if (!isset($response_arr[0]['error'])) {
+                        return response($response, 200)
+                            ->header('Content-Type', 'json');
+                    } elseif ($city_count > 1) {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+
+                        $response_error["order_cost"] = 0;
+                        $response_error["Message"] = "ErrorMessage";
+
+                        return response($response_error, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                }
+                if (self::connectAPIAppOrder($city, $application) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            } else {
+                Log::debug("response Message 33333333");
+
+                if ($response->status() == 200) {
+                    return response($response, 200)
+                        ->header('Content-Type', 'json');
+                } else {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+        } else {
+            if ($city_count > 1) {
+                $connectAPI = str_replace('http://', '', $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                        break;
+                    case "PAS2":
+                        $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS4":
+                    default:
+                        $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                }
+                $cityServer->online = "false";
+                $cityServer->save();
+                (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                while (self::connectAPIAppOrder($city, $application) != 400) {
+                    $connectAPI = self::connectAPIAppOrder($city, $application);
+                    $url = $connectAPI . '/api/weborders/tariffs/cost';
+                    Log::debug(" _____________________________");
+                    Log::debug(" connectAPI while $userArr[2]");
+                    Log::debug(" connectAPI while $city ");
+                    Log::debug(" connectAPI while $connectAPI ");
+                    Log::debug(" connectAPI while $url ");
+                    Log::debug(" ______________________________");
+
+                    $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+
+                    if ($payment_type == 0) {
+                        $authorization = $authorizationChoiceArr["authorization"];
+                        Log::debug("authorization $authorization");
+                    } else {
+                        $authorization = $authorizationChoiceArr["authorizationBonus"];
+                        Log::debug("authorizationBonus $authorization");
+                    }
+                    $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                        $url,
+                        $parameter,
+                        $authorization,
+                        self::identificationId($application),
+                        (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    );
+                    $response_arr = json_decode($response, true);
+                    Log::debug("response_arr: ", $response_arr);
+                    if (!isset($response_arr[0]['error'])) {
+                        return response($response, 200)
+                            ->header('Content-Type', 'json');
+                    } elseif ($city_count > 1) {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        $cityServer->online = "false";
+                        $cityServer->save();
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+                    } else {
+                        $connectAPI = str_replace('http://', '', $connectAPI);
+                        switch ($application) {
+                            case "PAS1":
+                                $cityServer = City_PAS1::where('address', $connectAPI)->first();
+                                break;
+                            case "PAS2":
+                                $cityServer = City_PAS2::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS4":
+                            default:
+                                $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                        }
+                        (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
+
+                        $response_error["order_cost"] = 0;
+                        $response_error["Message"] = "ErrorMessage";
+
+                        return response($response_error, 200)
+                            ->header('Content-Type', 'json');
+                    }
+                }
+                if (self::connectAPIAppOrder($city, $application) == 400) {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            } else {
+                Log::debug("response Message 33333333");
+
+                if ($response->status() == 200) {
+                    return response($response, 200)
+                        ->header('Content-Type', 'json');
+                } else {
+                    $response_error["order_cost"] = 0;
+                    $response_error["Message"] = "ErrorMessage";
+
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+            }
+        }
+    }
     /**
      * @throws \Exception
      */
@@ -3635,7 +5070,7 @@ class AndroidTestOSMController extends Controller
                 $hold = true;
             }
 
-            $orderweb->closeReason = "1";
+//            $orderweb->closeReason = "1";
             $orderweb->save();
             self::sentCancelInfo($orderweb);
             Log::debug("webordersCancelDouble response $resp_answer");
