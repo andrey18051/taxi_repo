@@ -129,6 +129,9 @@ Route::get('/promo', function () {
 Route::get('/version_combo', [WebOrderController::class, 'version_combo'])
     ->name('version_combo')->middleware('role:superadministrator');
 
+Route::get('/getStreetNames', [WebOrderController::class, 'getStreetNames'])
+    ->name('getStreetNames')->middleware('role:superadministrator');
+
 
 /**
  * Погода

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\VersionKyivJob;
 use App\Mail\Admin;
 use App\Mail\Check;
 use App\Mail\Driver;
@@ -3148,7 +3149,7 @@ class WebOrderController extends Controller
     /**
      * Контроль версии улиц и объектов
      */
-    public function version_combo()
+    public function version_combo_exec()
     {
         $base = env('DB_DATABASE');
         $marker_update = false;
@@ -3175,6 +3176,7 @@ class WebOrderController extends Controller
          */
 
         $url = $connectAPI . '/api/geodata/streets';
+
         $json_str = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
@@ -3184,7 +3186,10 @@ class WebOrderController extends Controller
         ]);
 
         $json_arr = json_decode($json_str, true);
+        Log::info("VersionKyivJob streets", $json_arr);
+
         $url_ob = $connectAPI . '/api/geodata/objects';
+        Log::info("VersionKyivJob objects" . $url);
         $response_ob = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
@@ -3192,7 +3197,7 @@ class WebOrderController extends Controller
         ])->get($url_ob);
 
         $json_arr_ob = json_decode($response_ob, true);
-
+        Log::info("VersionKyivJob objects", $json_arr_ob);
         /**
          * Проверка версии геоданных и обновление или создание базы адресов
          * $json_arr['version_date'] - текущая версия улиц в базе
@@ -3201,15 +3206,15 @@ class WebOrderController extends Controller
          * config('app.objectVersionDate') - дата версии в конфиге
          */
 
-        $svd = Config::where('id', '1')->first();
-        if ($svd) {
-            if ($json_arr['version_date'] !==  $svd->streetVersionDate || $json_arr_ob['version_date'] !== $svd->objectVersionDate) {
-                $marker_update = true;
-            }
-        } else {
-            $marker_update = true;
-        }
-
+//        $svd = Config::where('id', '1')->first();
+//        if ($svd) {
+//            if ($json_arr['version_date'] !==  $svd->streetVersionDate || $json_arr_ob['version_date'] !== $svd->objectVersionDate) {
+//                $marker_update = true;
+//            }
+//        } else {
+//            $marker_update = true;
+//        }
+        $marker_update = true;
         //Проверка версии геоданных и обновление или создание базы адресов
 
         if ($marker_update || Combo::all()->count() === 0) {
@@ -3217,8 +3222,8 @@ class WebOrderController extends Controller
             $url = $connectAPI . '/api/tariffs';
             $response = Http::withHeaders([
                 "Authorization" => self::autorization(),
-            "X-WO-API-APP-ID" => self::identificationId(),
-            "X-API-VERSION" => self::apiVersion()
+                "X-WO-API-APP-ID" => self::identificationId(),
+                "X-API-VERSION" => self::apiVersion()
             ])->get($url);
 
             $response_arr = json_decode($response, true);
@@ -3274,12 +3279,36 @@ class WebOrderController extends Controller
             $svd->streetVersionDate = $json_arr['version_date'];
             $svd->objectVersionDate = $json_arr_ob['version_date'];
             $svd->save();
-
-            return redirect()->route('home-admin')->with('success', "База $base обновлена.");
-        } else {
-            return redirect()->route('home-admin')->with('success', "База $base актуальна.");
         }
     }
+
+    public function version_combo()
+    {
+        VersionKyivJob::dispatch();
+        return redirect()->route('home-admin')->with('success', "База обновляется.");
+    }
+
+    public function getStreetNames()
+    {
+        // Получаем все значения поля name из таблицы
+        $streetNames = DB::table('combos')
+            ->pluck('name')
+            ->toArray();
+
+        // Разбиваем массив на части по 5000 значений
+        $chunks = array_chunk($streetNames, 5000);
+        $streets ="";
+        // Перебираем каждый chunk и выводим его значения в нужном формате
+        foreach ($chunks as $chunk) {
+            $formattedNames = implode('", "', $chunk);
+            $formattedNames = '"' . $formattedNames . '"\\n';
+            $streets .= $formattedNames . PHP_EOL . "*****";
+        }
+
+        return $streets;
+    }
+
+
 
     /**
      * Проверка адресов
@@ -3309,6 +3338,7 @@ class WebOrderController extends Controller
          */
 
         $url = $connectAPI . '/api/geodata/streets';
+        Log::info("VersionKyivJob streets" . $url);
         $json_str = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
@@ -3318,6 +3348,7 @@ class WebOrderController extends Controller
         $json_arr = json_decode($json_str, true);
 
         $url_ob = $connectAPI . '/api/geodata/objects';
+        Log::info("VersionKyivJob objects" . $url);
         $response_ob = Http::withHeaders([
             "Authorization" => self::autorization(),
             "X-WO-API-APP-ID" => self::identificationId(),
