@@ -283,6 +283,7 @@ class UIDController extends Controller
                             'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $value["auto"],
+                            'required_time' => date('d.m.Y H:i:s', strtotime($value["required_time"])),
                             'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                         ];
                     } else {
@@ -300,6 +301,7 @@ class UIDController extends Controller
                                 'web_cost' => $value["web_cost"],
                                 'closeReason' => $value["closeReason"],
                                 'auto' => $value["auto"],
+                                'required_time' => date('d.m.Y H:i:s', strtotime($value["required_time"])),
                                 'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                             ];
                         }
@@ -380,6 +382,7 @@ class UIDController extends Controller
                         'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $value["auto"],
+                        'required_time' => date('d.m.Y H:i:s', strtotime($value["required_time"])),
                         'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
                         'pay_method' => $value["pay_system"],
                         'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),

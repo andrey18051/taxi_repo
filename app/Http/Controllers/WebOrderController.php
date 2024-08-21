@@ -3288,25 +3288,25 @@ class WebOrderController extends Controller
         return redirect()->route('home-admin')->with('success', "База обновляется.");
     }
 
-    public function getStreetNames()
-    {
-        // Получаем все значения поля name из таблицы
-        $streetNames = DB::table('combos')
-            ->pluck('name')
-            ->toArray();
-
-        // Разбиваем массив на части по 5000 значений
-        $chunks = array_chunk($streetNames, 5000);
-        $streets ="";
-        // Перебираем каждый chunk и выводим его значения в нужном формате
-        foreach ($chunks as $chunk) {
-            $formattedNames = implode('", "', $chunk);
-            $formattedNames = '"' . $formattedNames . '"\\n';
-            $streets .= $formattedNames . PHP_EOL . "*****";
-        }
-
-        return $streets;
-    }
+//    public function getStreetNames()
+//    {
+//        // Получаем все значения поля name из таблицы
+//        $streetNames = DB::table('combos')
+//            ->pluck('name')
+//            ->toArray();
+//
+//        // Разбиваем массив на части по 5000 значений
+//        $chunks = array_chunk($streetNames, 5000);
+//        $streets ="";
+//        // Перебираем каждый chunk и выводим его значения в нужном формате
+//        foreach ($chunks as $chunk) {
+//            $formattedNames = implode('", "', $chunk);
+//            $formattedNames = '"' . $formattedNames . '"\\n';
+//            $streets .= $formattedNames . PHP_EOL . "*****";
+//        }
+//
+//        return $streets;
+//    }
 
 
 

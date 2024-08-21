@@ -1749,6 +1749,7 @@ class AndroidTestOSMController extends Controller
             $response_ok["routefromnumber"] = $from_number;
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
+            $response_ok["required_time"] = $required_time;
 
             //Запуск вилки
             if ($responseBonus != null
@@ -4134,6 +4135,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $to;
                 $response_ok["to_number"] = $params['to_number'];
+                $response_ok["required_time"] = $required_time;
 
                 if ($responseDouble != null) {
                     $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
@@ -4479,6 +4481,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
+                $response_ok["required_time"] = $required_time;
                 if ($responseBonusArr != null) {
                     Log::debug("responseBonusArr", $responseBonusArr);
                 }
