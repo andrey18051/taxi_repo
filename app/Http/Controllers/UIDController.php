@@ -419,6 +419,99 @@ class UIDController extends Controller
 //        Log::debug("UIDStatusShowEmail response", $response);
         return $response;
     }
+    public function UIDStatusShowEmailCancelApp($email, $city, $app)
+    {
+        $serverArray = self::getServerArray($city, $app);
+        if ($serverArray != null) {
+            $order = Orderweb:: where("email", $email)
+                ->where("closeReason", "!=", null)
+                ->where("closeReason", "-1")
+                ->where("comment", "!=", null)
+                ->whereIn("server", $serverArray)
+                ->orderBy("created_at", "desc")
+                ->get();
+//dd($order);
+            $response = null;
+            Log::debug("UIDStatusShowEmailCancelApp order", $order->toArray());
+            if (!$order->isEmpty()) {
+                self::UIDStatusReview($order);
+                $orderHistory = Orderweb::where("email", $email)
+                    ->where("closeReason", "-1")
+                    ->whereIn("server", $serverArray)
+                    ->where("startLat", "!=", null)
+                    ->where("startLan", "!=", null)
+                    ->where("to_lat", "!=", null)
+                    ->where("to_lng", "!=", null)
+                    ->where("comment", "!=", null)
+                    ->orderBy("created_at", "desc")
+                    ->get();
+                if ($orderHistory) {
+                    $i = 0;
+                    $orderUpdate = $orderHistory->toArray();
+                    Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderUpdate);
+                    date_default_timezone_set('Europe/Kiev');
+
+                    foreach ($orderUpdate as $value) {
+                        $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+
+                        if ($uid_history) {
+                            $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
+                            Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+                        } else {
+                            $dispatchingOrderUidDouble = " ";
+                        }
+
+                        $response[] = [
+                            'uid' => $value["dispatching_order_uid"],
+                            'routefrom' => $value["routefrom"],
+                            'routefromnumber' => $value["routefromnumber"],
+                            'startLat' => $value["startLat"],
+                            'startLan' => $value["startLan"],
+                            'routeto' => $value["routeto"],
+                            'routetonumber' => $value["routetonumber"],
+                            'to_lat' => $value["to_lat"],
+                            'to_lng' => $value["to_lng"],
+                            'web_cost' => $value["web_cost"],
+                            'closeReason' => $value["closeReason"],
+                            'auto' => $value["auto"],
+                            'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
+                            'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
+                            'pay_method' => $value["pay_system"],
+                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                        ];
+
+                        $i++;
+                    }
+                } else {
+                    $response = null;
+                    $response[] = [
+                        'routefrom' => "*",
+                        'routefromnumber' => "*",
+                        'routeto' => "*",
+                        'routetonumber' => "*",
+                        'web_cost' => "*",
+                        'closeReason' => "*",
+                        'auto' => "*",
+                        'created_at' => "*",
+                    ];
+                }
+            } else {
+                $response = null;
+                $response[] = [
+                    'routefrom' => "*",
+                    'routefromnumber' => "*",
+                    'routeto' => "*",
+                    'routetonumber' => "*",
+                    'web_cost' => "*",
+                    'closeReason' => "*",
+                    'auto' => "*",
+                    'created_at' => "*",
+                ];
+            }
+//        Log::debug("UIDStatusShowEmail response", $response);
+            return $response;
+        }
+    }
 
     /**
      * @throws \Exception

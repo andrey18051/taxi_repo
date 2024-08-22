@@ -1202,6 +1202,9 @@ Route::get('/android/UIDStatusShowEmailCityApp/{email}/{city}/{app}', [UIDContro
 Route::get('/android/UIDStatusShowEmailCancel/{email}', [UIDController::class, 'UIDStatusShowEmailCancel'])
     ->name('UIDStatusShowEmailCancel');
 
+Route::get('/android/UIDStatusShowEmailCancelApp/{email}/{city}/{app}', [UIDController::class, 'UIDStatusShowEmailCancelApp'])
+    ->name('UIDStatusShowEmailCancelApp');
+
 Route::get('/closeReasonData/all', [UIDController::class, 'UIDStatusShowAdmin'])
     ->name('UIDStatusShowAdmin');
 
