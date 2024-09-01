@@ -422,15 +422,26 @@ class UIDController extends Controller
     public function UIDStatusShowEmailCancelApp($email, $city, $app)
     {
         $serverArray = self::getServerArray($city, $app);
+        switch ($app) {
+            case "PAS1":
+                $application = "taxi_easy_ua_pas1";
+                break;
+            case "PAS2":
+                $application = "taxi_easy_ua_pas2";
+                break;
+            //case "PAS4":
+            default:
+                $application = "taxi_easy_ua_pas4";
+        }
         if ($serverArray != null) {
             $order = Orderweb:: where("email", $email)
                 ->where("closeReason", "!=", null)
                 ->where("closeReason", "-1")
-                ->where("comment", "!=", null)
+                ->where("comment", $application)
                 ->whereIn("server", $serverArray)
                 ->orderBy("created_at", "desc")
                 ->get();
-//dd($order);
+
             $response = null;
             Log::debug("UIDStatusShowEmailCancelApp order", $order->toArray());
             if (!$order->isEmpty()) {
@@ -442,7 +453,7 @@ class UIDController extends Controller
                     ->where("startLan", "!=", null)
                     ->where("to_lat", "!=", null)
                     ->where("to_lng", "!=", null)
-                    ->where("comment", "!=", null)
+                    ->where("comment", $application)
                     ->orderBy("created_at", "desc")
                     ->get();
                 if ($orderHistory) {

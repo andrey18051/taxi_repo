@@ -61,6 +61,16 @@ class FirebaseServiceProvider extends ServiceProvider
                 'app4' => $firebase4,
             ];
         });
+
+        $this->app->singleton('firebase.firestore', function ($app) {
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+
+            $firebase = (new Factory)
+                ->withServiceAccount($serviceAccountPath)
+                ->createFirestore();
+
+            return $firebase;
+        });
     }
 
     /**

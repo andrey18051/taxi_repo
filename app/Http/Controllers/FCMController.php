@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Orderweb;
 use App\Models\UserTokenFmsS;
+use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Factory;
+use Google\Cloud\Firestore\FirestoreClient;
 
 class FCMController extends Controller
 {
@@ -72,6 +76,82 @@ class FCMController extends Controller
 
         return response()->json(['message' => 'User token not found'], 404);
     }
+
+
+
+    public function readDocumentFromFirestore()
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document('pEePGRVPNNU6IeJexWRwBpohu9q2');
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                Log::info("Name: " . $data['name']);
+                Log::info("Email: " . $data['email']);
+                return $data['name'];
+            } else {
+                Log::info("Document does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
+
+
+    public function writeDocumentToFirestore($uid)
+    {
+        // Найти запись в базе данных по $orderId
+        Log::info("Order with ID {$uid} ");
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        // Получаем все атрибуты модели в виде массива
+        $data = $order->toArray();
+
+        // Можно добавить или изменить некоторые поля, если нужно
+        $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
+        // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
+
+        $documentId = $order->id;
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders');
+            $document = $collection->document($documentId);
+
+            // Запишите данные в документ
+            $document->set($data);
+
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
+
 }
 
 
