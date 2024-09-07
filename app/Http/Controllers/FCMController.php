@@ -194,6 +194,75 @@ class FCMController extends Controller
         }
     }
 
+    public function readDriverInfoFromFirestore($uid)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders_taking');
+            $document = $collection->document($uid);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                Log::info("driver_uid: " . $data['driver_uid']);
+
+                $collectionDriver = $firestore->collection('users');
+                $documentDriver = $collectionDriver->document($data['driver_uid']);
+                $snapshotDriver = $documentDriver->snapshot();
+                if ($snapshotDriver->exists()) {
+                    $dataDriver = $snapshotDriver->data();
+//                    $name = $dataDriver["name"];
+//                    $color = $dataDriver["color"];
+//                    $model = $dataDriver["model"];
+//                    $phoneNumber = $dataDriver["phoneNumber"];
+                    Log::info("DataDriver readDriverInfoFromFirestore:", $dataDriver);
+                    return $dataDriver;
+                } else {
+                    Log::info("Document does not exist!");
+                    return "Document does not exist!";
+                }
+
+            } else {
+                Log::info("Document does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
+
+    public function deleteOrderTakingDocumentFromFirestore($uid)
+    {
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders_taking');
+            $document = $collection->document($uid);
+
+            // Удалите документ
+            $document->delete();
+
+            Log::info("Document successfully deleted!");
+            return "Document successfully deleted!";
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
+        }
+    }
 }
 
 

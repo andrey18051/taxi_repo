@@ -16,6 +16,7 @@ use App\Models\ComboTest;
 use App\Models\Config;
 use App\Models\DniproCombo;
 use App\Models\DoubleOrder;
+use App\Models\DriverMemoryOrder;
 use App\Models\OdessaCombo;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
@@ -34,7 +35,7 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
-    private static function repeatCancel(
+    public static function repeatCancel(
         $url,
         $authorization,
         $application,
@@ -4385,6 +4386,15 @@ class AndroidTestOSMController extends Controller
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 22222222 ", $responseArr);
             $responseFinal = $response;
+
+            (new DriverMemoryOrderController)->store(
+                $responseArr['dispatching_order_uid'],
+                json_encode($parameter),
+                $authorization,
+                $url,
+                $identificationId,
+                $apiVersion
+            );
         } else {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
@@ -4807,6 +4817,127 @@ class AndroidTestOSMController extends Controller
         $subject = "Отмена заказа";
 
         $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
+
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+        }
+        Log::debug("sentCancelInfo  $messageAdmin");
+    }
+    public function sentCarTakingInfo($orderweb)
+    {
+
+        $user_full_name = $orderweb->user_full_name;
+        $user_phone = $orderweb->user_phone;
+        $email = $orderweb->email;
+        $routefrom = $orderweb->routefrom;
+        $routeto = $orderweb->routeto;
+        $web_cost = $orderweb->web_cost;
+
+        $storedData = $orderweb->auto;
+        $dataDriver = json_decode($storedData, true);
+        $name = $dataDriver["name"];
+        $color = $dataDriver["color"];
+        $brand = $dataDriver["brand"];
+        $model = $dataDriver["model"];
+        $number = $dataDriver["number"];
+        $phoneNumber = $dataDriver["phoneNumber"];
+
+        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+        $server = $orderweb->server;
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+        }
+
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+
+        $dateTime = new DateTime($orderweb->updated_at);
+
+
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $updated_at = $formattedTime;
+        Log::debug("updated_at " .$updated_at);
+
+        $subject = "Найдена авто";
+
+        $messageAdmin = "$subject. Клиент $user_full_name (телефон $user_phone, email $email)
+         Получил авто $number (водитель $name, цвет $color  $brand $model)
+         на  заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн.
+         Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas.
+         Время $updated_at";
+
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+        }
+        Log::debug("sentCancelInfo  $messageAdmin");
+    }
+
+    public function sentCarRestoreOrder($orderweb)
+    {
+
+        $user_full_name = $orderweb->user_full_name;
+        $user_phone = $orderweb->user_phone;
+        $email = $orderweb->email;
+        $routefrom = $orderweb->routefrom;
+        $routeto = $orderweb->routeto;
+        $web_cost = $orderweb->web_cost;
+
+        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+        $server = $orderweb->server;
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+        }
+
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+
+        $dateTime = new DateTime($orderweb->updated_at);
+
+
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $updated_at = $formattedTime;
+        Log::debug("updated_at " .$updated_at);
+
+        $subject = "Восстановлен заказ после отказа водителя";
+
+        $messageAdmin = "$subject. Клиент $user_full_name (телефон $user_phone, email $email)
+         заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн.
+         Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas.
+         Время $updated_at";
 
         $alarmMessage = new TelegramController();
 
