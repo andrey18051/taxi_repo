@@ -125,7 +125,15 @@ class FCMController extends Controller
         // Получаем все атрибуты модели в виде массива
         $data = $order->toArray();
 
-        // Можно добавить или изменить некоторые поля, если нужно
+        // Проверка и замена 'no_name' на 'Не указано' в user_full_name
+        if (isset($data['user_full_name']) && str_contains($data['user_full_name'], 'no_name')) {
+            $data['user_full_name'] = 'Не указано';
+        } else {
+            // Удаление текста внутри скобок и самих скобок, если нет 'no_name'
+            if (isset($data['user_full_name'])) {
+                $data['user_full_name'] = preg_replace('/\s*\[.*?\]/', '', $data['user_full_name']);
+            }
+        }
         $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
         // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
 
@@ -149,6 +157,40 @@ class FCMController extends Controller
         } catch (\Exception $e) {
             Log::error("Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
+        }
+    }
+
+    public function deleteDocumentFromFirestore($uid)
+    {
+        // Найти запись в базе данных по $uid
+        Log::info("Attempting to delete order with ID {$uid}");
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        $documentId = $order->id;
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders');
+            $document = $collection->document($documentId);
+
+            // Удалите документ
+            $document->delete();
+
+            Log::info("Document successfully deleted!");
+            return "Document successfully deleted!";
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
         }
     }
 

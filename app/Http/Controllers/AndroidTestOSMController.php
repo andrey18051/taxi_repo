@@ -4933,6 +4933,8 @@ class AndroidTestOSMController extends Controller
         }
         $resp_answer = "";
 
+        (new FCMController)->deleteDocumentFromFirestore($uid);
+
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         if ($orderweb) {
             $connectAPI = $orderweb->server;

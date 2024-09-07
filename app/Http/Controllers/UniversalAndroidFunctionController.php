@@ -3355,7 +3355,10 @@ class UniversalAndroidFunctionController extends Controller
         $user->user_phone = $params["user_phone"];
         $user->save();
 
-        (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
+        if ($params["payment_type"] != 1 && !$params["route_undefined"]) {
+            (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
+        }
+
 
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
