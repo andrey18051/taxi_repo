@@ -252,10 +252,8 @@ class DriverController extends Controller
     {
 
         (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid);
-
-        $orderweb = self::createNewOrder($uid);
-
-        (new AndroidTestOSMController)->sentCarRestoreOrder($orderweb);
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        self::createNewOrder($uid);
     }
 
     /**
@@ -295,42 +293,62 @@ class DriverController extends Controller
                     Log::debug(" orderNewCreat responseArr: ", $responseArr);
                     $orderNew = $responseArr["dispatching_order_uid"];
                     Log::debug(" orderNewCreat: " . $url . $orderNew);
-                    $params = [
-                        "user_full_name" => $order->user_full_name,//Полное имя пользователя
-                        "user_phone" => $order->user_phone,//Телефон пользователя
-                        "email" => $order->email,//Телефон пользователя
-                        "required_time" => $order->required_time, //Время подачи предварительного заказа
-                        "reservation" => $order->reservation, //Обязательный. Признак предварительного заказа: True, False
-                        "comment" => $order->comment,  //Комментарий к заказу
-                        "add_cost" => $order->add_cost, //Добавленная стоимость
-                        "wagon" => $order->wagon, //Универсал: True, False
-                        "minibus" => $order->minibus, //Микроавтобус: True, False
-                        "premium" => $order->premium, //Машина премиум-класса: True, False
-                        "flexible_tariff_name" => $order->flexible_tariff_name, //Гибкий тариф
-                        "route_undefined" => $order->route_undefined, //По городу: True, False
-                        "from" => $order->routefrom, //Обязательный. Улица откуда.
-                        "from_number" => $order->routefromnumber, //Обязательный. Дом откуда.
-                        "startLat" => $order->startLat, //
-                        "startLan" => $order->startLan, //
-                        "to" => $order->routeto, //Обязательный. Улица куда.
-                        "to_number" => $order->routetonumber, //Обязательный. Дом куда.
-                        "to_lat" => $order->to_lat, //
-                        "to_lng" => $order->to_lng, //
-                        "taxiColumnId" => $order->taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-                        "payment_type" => $order->payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                        "bonus_status" => $order->bonus_status,
-                        "pay_system" => $order->pay_system, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-                        "order_cost" => $order->web_cost,
-                        "dispatching_order_uid" => $orderNew,
-                        "closeReason" => $order->closeReason,
-                        "closeReasonI" => $order->closeReasonI,
-                        "server" => $order->server
-                    ];
 
-                    (new UniversalAndroidFunctionController)->saveOrder($params, $identificationId);
+                    $order_old_uid = $order->dispatching_order_uid;
+                    $order_new_uid = $orderNew;
+
+                    (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+
+                    //Тело запроса привязываем к новом адресу
+                    $orderMemory->dispatching_order_uid = $order_new_uid;
+                    $orderMemory->save();
+
+                    $order->dispatching_order_uid = $order_new_uid;
+                    $order->auto = "";
+                    $order->closeReason = "-1";
+                    $order->closeReasonI = "0";
+                    $order->save();
 
 
-                    return $orderNew;
+                    (new FCMController)->writeDocumentToFirestore($order_new_uid);
+                    (new AndroidTestOSMController)->sentCarRestoreOrder($order);
+//                    $params = [
+//                        "user_full_name" => $order->user_full_name,//Полное имя пользователя
+//                        "user_phone" => $order->user_phone,//Телефон пользователя
+//                        "email" => $order->email,//Телефон пользователя
+//                        "required_time" => $order->required_time, //Время подачи предварительного заказа
+//                        "reservation" => $order->reservation, //Обязательный. Признак предварительного заказа: True, False
+//                        "comment" => $order->comment,  //Комментарий к заказу
+//                        "add_cost" => $order->add_cost, //Добавленная стоимость
+//                        "wagon" => $order->wagon, //Универсал: True, False
+//                        "minibus" => $order->minibus, //Микроавтобус: True, False
+//                        "premium" => $order->premium, //Машина премиум-класса: True, False
+//                        "flexible_tariff_name" => $order->flexible_tariff_name, //Гибкий тариф
+//                        "route_undefined" => $order->route_undefined, //По городу: True, False
+//                        "from" => $order->routefrom, //Обязательный. Улица откуда.
+//                        "from_number" => $order->routefromnumber, //Обязательный. Дом откуда.
+//                        "startLat" => $order->startLat, //
+//                        "startLan" => $order->startLan, //
+//                        "to" => $order->routeto, //Обязательный. Улица куда.
+//                        "to_number" => $order->routetonumber, //Обязательный. Дом куда.
+//                        "to_lat" => $order->to_lat, //
+//                        "to_lng" => $order->to_lng, //
+//                        "taxiColumnId" => $order->taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+//                        "payment_type" => $order->payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+//                        "bonus_status" => $order->bonus_status,
+//                        "pay_system" => $order->pay_system, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+//                        "order_cost" => $order->web_cost,
+//                        "dispatching_order_uid" => $orderNew,
+//                        "closeReason" => $order->closeReason,
+//                        "closeReasonI" => $order->closeReasonI,
+//                        "server" => $order->server
+//                    ];
+
+
+//                    (new UniversalAndroidFunctionController)->saveOrder($params, $identificationId);
+
+
+                    return $order;
                 } else {
                     // Логируем ошибки в случае неудачного запроса
                     Log::error("Request failed with status: " . $response->status());

@@ -241,8 +241,7 @@ class UIDController extends Controller
         $serverArray = self::getServerArray($city, $app);
         if ($serverArray != null) {
             $order = Orderweb:: where("email", $email)
-                ->where("closeReason", "!=", null)
-                ->where("closeReason", "-1")
+                ->whereNotIn('closeReason', ['-1', '101'])
                 ->whereIn("server", $serverArray)
                 ->where("comment", "!=", null)
                 ->orderBy("created_at", "desc")
@@ -254,7 +253,7 @@ class UIDController extends Controller
             }
             $orderHistory = Orderweb::where("email", $email)
 
-                -> where("closeReason", "!=", "-1")
+                ->whereNotIn('closeReason', ['-1', '101'])
                 -> whereIn("server", $serverArray)
                 -> where("startLat", "!=", null)
                 -> where("startLan", "!=", null)
@@ -270,6 +269,20 @@ class UIDController extends Controller
                 date_default_timezone_set('Europe/Kiev');
 
                 foreach ($orderUpdate as $value) {
+                    $storedData = $value["auto"];
+
+                    $dataDriver = json_decode($storedData, true);
+
+                    if ($dataDriver["uid"] != null) {
+                        $name = $dataDriver["name"];
+                        $color = $dataDriver["color"];
+                        $brand = $dataDriver["brand"];
+                        $model = $dataDriver["model"];
+                        $number = $dataDriver["number"];
+                        $auto = "Авто $number водитель $name, цвет $color  $brand $model";
+                    } else {
+                        $auto =  $value["auto"];
+                    }
                     if ($i < 10) {
                         $response[] = [
                             'routefrom' => $value["routefrom"],
@@ -282,7 +295,7 @@ class UIDController extends Controller
                             'to_lng' => $value["to_lng"],
                             'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
-                            'auto' => $value["auto"],
+                            'auto' => $auto,
                             'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
                             'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                         ];
@@ -300,7 +313,7 @@ class UIDController extends Controller
                                 'to_lng' => $value["to_lng"],
                                 'web_cost' => $value["web_cost"],
                                 'closeReason' => $value["closeReason"],
-                                'auto' => $value["auto"],
+                                'auto' => $auto,
                                 'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
                                 'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                             ];
@@ -330,9 +343,7 @@ class UIDController extends Controller
     {
 
         $order = Orderweb:: where("email", $email)
-
-            ->where("closeReason", "!=", null)
-            ->where("closeReason", "-1")
+            ->whereIn('closeReason', ['-1', '101'])
             ->where("server", "!=", null)
             ->where("comment", "!=", null)
             ->orderBy("created_at", "desc")
@@ -343,8 +354,7 @@ class UIDController extends Controller
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
             $orderHistory = Orderweb::where("email", $email)
-
-                -> where("closeReason", "-1")
+                -> whereIn('closeReason', ['-1', '101'])
                 -> where("server", "!=", null)
                 -> where("startLat", "!=", null)
                 -> where("startLan", "!=", null)
@@ -368,6 +378,19 @@ class UIDController extends Controller
                     } else {
                         $dispatchingOrderUidDouble = " ";
                     }
+                    if ($value["closeReason"] == 101) {
+                        $storedData = $value["auto"];
+
+                        $dataDriver = json_decode($storedData, true);
+                        $name = $dataDriver["name"];
+                        $color = $dataDriver["color"];
+                        $brand = $dataDriver["brand"];
+                        $model = $dataDriver["model"];
+                        $number = $dataDriver["number"];
+                        $auto = "Авто $number водитель $name, цвет $color  $brand $model";
+                    } else {
+                        $auto =  $value["auto"];
+                    }
 
                     $response[] = [
                         'uid' => $value["dispatching_order_uid"],
@@ -381,7 +404,7 @@ class UIDController extends Controller
                         'to_lng' => $value["to_lng"],
                         'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
-                        'auto' => $value["auto"],
+                        'auto' => $auto,
                         'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
                         'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
                         'pay_method' => $value["pay_system"],
@@ -435,8 +458,7 @@ class UIDController extends Controller
         }
         if ($serverArray != null) {
             $order = Orderweb:: where("email", $email)
-                ->where("closeReason", "!=", null)
-                ->where("closeReason", "-1")
+                ->whereIn('closeReason', ['-1', '101'])
                 ->where("comment", $application)
                 ->whereIn("server", $serverArray)
                 ->orderBy("created_at", "desc")
@@ -447,7 +469,7 @@ class UIDController extends Controller
             if (!$order->isEmpty()) {
                 self::UIDStatusReview($order);
                 $orderHistory = Orderweb::where("email", $email)
-                    ->where("closeReason", "-1")
+                    ->whereIn('closeReason', ['-1', '101'])
                     ->whereIn("server", $serverArray)
                     ->where("startLat", "!=", null)
                     ->where("startLan", "!=", null)
@@ -464,7 +486,19 @@ class UIDController extends Controller
 
                     foreach ($orderUpdate as $value) {
                         $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+                        if ($value["closeReason"] == 101) {
+                            $storedData = $value["auto"];
 
+                            $dataDriver = json_decode($storedData, true);
+                            $name = $dataDriver["name"];
+                            $color = $dataDriver["color"];
+                            $brand = $dataDriver["brand"];
+                            $model = $dataDriver["model"];
+                            $number = $dataDriver["number"];
+                            $auto = "Авто $number водитель $name, цвет $color  $brand $model";
+                        } else {
+                            $auto =  $value["auto"];
+                        }
                         if ($uid_history) {
                             $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
                             Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
@@ -484,7 +518,7 @@ class UIDController extends Controller
                             'to_lng' => $value["to_lng"],
                             'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
-                            'auto' => $value["auto"],
+                            'auto' => $auto,
                             'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
                             'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
                             'pay_method' => $value["pay_system"],
