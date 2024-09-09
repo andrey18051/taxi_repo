@@ -274,12 +274,12 @@ class UIDController extends Controller
                     $dataDriver = json_decode($storedData, true);
 
                     if ($dataDriver["uid"] != null) {
-                        $name = $dataDriver["name"];
+//                        $name = $dataDriver["name"];
                         $color = $dataDriver["color"];
                         $brand = $dataDriver["brand"];
                         $model = $dataDriver["model"];
                         $number = $dataDriver["number"];
-                        $auto = "Авто $number водитель $name, цвет $color  $brand $model";
+                        $auto = "Авто $number, цвет $color  $brand $model";
                     } else {
                         $auto =  $value["auto"];
                     }
@@ -382,12 +382,12 @@ class UIDController extends Controller
                         $storedData = $value["auto"];
 
                         $dataDriver = json_decode($storedData, true);
-                        $name = $dataDriver["name"];
+//                        $name = $dataDriver["name"];
                         $color = $dataDriver["color"];
                         $brand = $dataDriver["brand"];
                         $model = $dataDriver["model"];
                         $number = $dataDriver["number"];
-                        $auto = "Авто $number водитель $name, цвет $color  $brand $model";
+                        $auto = "Авто $number, цвет $color  $brand $model";
                     } else {
                         $auto =  $value["auto"];
                     }
@@ -490,12 +490,12 @@ class UIDController extends Controller
                             $storedData = $value["auto"];
 
                             $dataDriver = json_decode($storedData, true);
-                            $name = $dataDriver["name"];
+//                            $name = $dataDriver["name"];
                             $color = $dataDriver["color"];
                             $brand = $dataDriver["brand"];
                             $model = $dataDriver["model"];
                             $number = $dataDriver["number"];
-                            $auto = "Авто $number водитель $name, цвет $color  $brand $model";
+                            $auto = "Авто $number, цвет $color  $brand $model";
                         } else {
                             $auto =  $value["auto"];
                         }

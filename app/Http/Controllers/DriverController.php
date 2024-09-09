@@ -244,7 +244,8 @@ class DriverController extends Controller
             $orderweb->auto = json_encode($dataDriver);
             $orderweb->closeReason = "101";
             $orderweb->save();
-            (new AndroidTestOSMController)->sentCarTakingInfo($orderweb);
+
+            (new MessageSentController())->sentCarTakingInfo($orderweb);
         }
     }
 
@@ -311,7 +312,7 @@ class DriverController extends Controller
 
 
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
-                    (new AndroidTestOSMController)->sentCarRestoreOrder($order);
+                    (new MessageSentController())->sentCarRestoreOrder($order);
 //                    $params = [
 //                        "user_full_name" => $order->user_full_name,//Полное имя пользователя
 //                        "user_phone" => $order->user_phone,//Телефон пользователя

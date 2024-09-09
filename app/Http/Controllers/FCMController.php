@@ -255,7 +255,7 @@ class FCMController extends Controller
 
             // Удалите документ
             $document->delete();
-            (new AndroidTestOSMController)->sentDriverUnTakeOrder($uid);
+            (new MessageSentController())->sentDriverUnTakeOrder($uid);
             Log::info("Document successfully deleted!");
             return "Document successfully deleted!";
         } catch (\Exception $e) {
