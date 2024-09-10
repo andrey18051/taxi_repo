@@ -4835,7 +4835,9 @@ class AndroidTestOSMController extends Controller
         }
         $resp_answer = "";
         $uid = (new MemoryOrderChangeController)->show($uid);
+
         (new FCMController)->deleteDocumentFromFirestore($uid);
+        (new FCMController)->deleteDocumentFromFirestoreOrdersTaking($uid);
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         if ($orderweb) {

@@ -194,6 +194,39 @@ class FCMController extends Controller
         }
     }
 
+    public function deleteDocumentFromFirestoreOrdersTaking($uid)
+    {
+        // Найти запись в базе данных по $uid
+        Log::info("Attempting to delete order with ID {$uid}");
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        $documentId = $order->id;
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders_taking');
+            $document = $collection->document($uid);
+
+            // Удалите документ
+            $document->delete();
+
+            Log::info("Document successfully deleted!");
+            return "Document successfully deleted!";
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
+        }
+    }
     public function readDriverInfoFromFirestore($uid)
     {
         try {
