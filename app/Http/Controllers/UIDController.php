@@ -241,7 +241,7 @@ class UIDController extends Controller
         $serverArray = self::getServerArray($city, $app);
         if ($serverArray != null) {
             $order = Orderweb:: where("email", $email)
-                ->whereNotIn('closeReason', ['-1', '101'])
+                ->whereNotIn('closeReason', ['-1', '101', '102'])
                 ->whereIn("server", $serverArray)
                 ->where("comment", "!=", null)
                 ->orderBy("created_at", "desc")
@@ -253,7 +253,7 @@ class UIDController extends Controller
             }
             $orderHistory = Orderweb::where("email", $email)
 
-                ->whereNotIn('closeReason', ['-1', '101'])
+                ->whereNotIn('closeReason', ['-1', '101', '102'])
                 -> whereIn("server", $serverArray)
                 -> where("startLat", "!=", null)
                 -> where("startLan", "!=", null)
@@ -343,7 +343,7 @@ class UIDController extends Controller
     {
 
         $order = Orderweb:: where("email", $email)
-            ->whereIn('closeReason', ['-1', '101'])
+            ->whereIn('closeReason', ['-1', '101', '102'])
             ->where("server", "!=", null)
             ->where("comment", "!=", null)
             ->orderBy("created_at", "desc")
@@ -354,7 +354,7 @@ class UIDController extends Controller
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
             $orderHistory = Orderweb::where("email", $email)
-                -> whereIn('closeReason', ['-1', '101'])
+                -> whereIn('closeReason', ['-1', '101', '102'])
                 -> where("server", "!=", null)
                 -> where("startLat", "!=", null)
                 -> where("startLan", "!=", null)
@@ -378,7 +378,7 @@ class UIDController extends Controller
                     } else {
                         $dispatchingOrderUidDouble = " ";
                     }
-                    if ($value["closeReason"] == 101) {
+                    if ($value["closeReason"] == 101 || $value["closeReason"] == 102) {
                         $storedData = $value["auto"];
 
                         $dataDriver = json_decode($storedData, true);
@@ -458,7 +458,7 @@ class UIDController extends Controller
         }
         if ($serverArray != null) {
             $order = Orderweb:: where("email", $email)
-                ->whereIn('closeReason', ['-1', '101'])
+                ->whereIn('closeReason', ['-1', '101', '102'])
                 ->where("comment", $application)
                 ->whereIn("server", $serverArray)
                 ->orderBy("created_at", "desc")
@@ -469,7 +469,7 @@ class UIDController extends Controller
             if (!$order->isEmpty()) {
                 self::UIDStatusReview($order);
                 $orderHistory = Orderweb::where("email", $email)
-                    ->whereIn('closeReason', ['-1', '101'])
+                    ->whereIn('closeReason', ['-1', '101', '102'])
                     ->whereIn("server", $serverArray)
                     ->where("startLat", "!=", null)
                     ->where("startLan", "!=", null)
@@ -486,7 +486,7 @@ class UIDController extends Controller
 
                     foreach ($orderUpdate as $value) {
                         $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
-                        if ($value["closeReason"] == 101) {
+                        if ($value["closeReason"] == 101 || $value["closeReason"] == 102) {
                             $storedData = $value["auto"];
 
                             $dataDriver = json_decode($storedData, true);

@@ -267,6 +267,81 @@ class MessageSentController extends Controller
     /**
      * @throws \Exception
      */
+    public function sentDriverInStartPoint($uid)
+    {
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        $orderweb->closeReason = "102";
+        $orderweb->save();
+
+
+        $user_full_name = $orderweb->user_full_name;
+        $user_phone = $orderweb->user_phone;
+        $email = $orderweb->email;
+        $routefrom = $orderweb->routefrom;
+        $routeto = $orderweb->routeto;
+        $web_cost = $orderweb->web_cost;
+
+        $storedData = $orderweb->auto;
+        $dataDriver = json_decode($storedData, true);
+//        $name = $dataDriver["name"];
+        $color = $dataDriver["color"];
+        $brand = $dataDriver["brand"];
+        $model = $dataDriver["model"];
+        $number = $dataDriver["number"];
+        $phoneNumber = $dataDriver["phoneNumber"];
+
+
+        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+        $server = $orderweb->server;
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+        }
+
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+
+        $dateTime = new DateTime($orderweb->updated_at);
+
+
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $updated_at = $formattedTime;
+        Log::debug("updated_at " .$updated_at);
+
+        $subject = "Водитель приехал в первую точку.
+        авто $number (цвет $color  $brand $model телефон водителя $phoneNumber)";
+
+        $messageAdmin = "$subject. Клиент $user_full_name (телефон $user_phone, email $email)
+         заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн.
+         Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas.
+         Время $updated_at";
+
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+        }
+        Log::debug("sentCancelInfo  $messageAdmin");
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function sentNoCancelInfo($orderweb)
     {
 

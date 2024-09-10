@@ -5019,7 +5019,7 @@ class AndroidTestOSMController extends Controller
         Log::debug("1 historyUIDStatus uid $uid");
         $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
 
-        if ($orderweb_uid->closeReason == 101) {
+        if ($orderweb_uid->closeReason == 101 || $orderweb_uid->closeReason == 102) {
             $storedData = $orderweb_uid->auto;
 
             $dataDriver = json_decode($storedData, true);
@@ -5036,7 +5036,14 @@ class AndroidTestOSMController extends Controller
             // Обновление полей
             $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
             $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
-            $responseData['execution_status'] = 'CarFound'; // Обновление статуса
+            switch ($orderweb_uid->closeReason) {
+                case "101":
+                    $responseData['execution_status'] = 'CarFound'; // Обновление статуса
+                    break;
+                case "102":
+                    $responseData['execution_status'] = 'CarInStartPoint'; // Обновление статуса
+                    break;
+            }
             return $responseData;
         } else {
             $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();

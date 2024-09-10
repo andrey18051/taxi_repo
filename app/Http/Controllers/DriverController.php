@@ -249,6 +249,15 @@ class DriverController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function driverInStartPoint($uid)
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        (new MessageSentController())->sentDriverInStartPoint($uid);
+    }
+
     public function orderUnTaking($uid)
     {
 
