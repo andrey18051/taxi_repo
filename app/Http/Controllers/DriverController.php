@@ -257,6 +257,19 @@ class DriverController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
         (new MessageSentController())->sentDriverInStartPoint($uid);
     }
+    /**
+     * @throws \Exception
+     */
+    public function driverCloseOrder($uid)
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+
+        $status = "closed";
+
+        (new MessageSentController())->sentDriverCloseOrder($uid);
+        (new FCMController)->deleteDocumentFromFirestoreOrdersTaking($uid);
+        (new FCMController())->writeDocumentToHistoryFirestore($uid, $status);
+    }
 
     public function orderUnTaking($uid)
     {
