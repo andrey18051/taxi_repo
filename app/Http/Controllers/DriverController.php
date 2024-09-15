@@ -173,6 +173,7 @@ class DriverController extends Controller
     {
 
         (new FCMController)->deleteDocumentFromFirestore($uid);
+//
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
@@ -245,6 +246,9 @@ class DriverController extends Controller
             $orderweb->closeReason = "101";
             $orderweb->save();
 
+            $uidDriver = self::uidDriver($uid);
+            (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "hold");
+
             (new MessageSentController())->sentCarTakingInfo($orderweb);
         }
     }
@@ -264,6 +268,10 @@ class DriverController extends Controller
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
 
+        $uidDriver = self::uidDriver($uid);
+        (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
+        (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "delete");
+
         $status = "closed";
 
         (new MessageSentController())->sentDriverCloseOrder($uid);
@@ -274,9 +282,21 @@ class DriverController extends Controller
     public function orderUnTaking($uid)
     {
 
+        $uidDriver = self::uidDriver($uid);
+        (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
+
         (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid);
         $uid = (new MemoryOrderChangeController)->show($uid);
         self::createNewOrder($uid);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function driverCardPayToBalance($uidDriver, $amount)
+    {
+        (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount);
+        (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
     }
 
     /**
@@ -335,41 +355,6 @@ class DriverController extends Controller
 
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
                     (new MessageSentController())->sentCarRestoreOrder($order);
-//                    $params = [
-//                        "user_full_name" => $order->user_full_name,//Полное имя пользователя
-//                        "user_phone" => $order->user_phone,//Телефон пользователя
-//                        "email" => $order->email,//Телефон пользователя
-//                        "required_time" => $order->required_time, //Время подачи предварительного заказа
-//                        "reservation" => $order->reservation, //Обязательный. Признак предварительного заказа: True, False
-//                        "comment" => $order->comment,  //Комментарий к заказу
-//                        "add_cost" => $order->add_cost, //Добавленная стоимость
-//                        "wagon" => $order->wagon, //Универсал: True, False
-//                        "minibus" => $order->minibus, //Микроавтобус: True, False
-//                        "premium" => $order->premium, //Машина премиум-класса: True, False
-//                        "flexible_tariff_name" => $order->flexible_tariff_name, //Гибкий тариф
-//                        "route_undefined" => $order->route_undefined, //По городу: True, False
-//                        "from" => $order->routefrom, //Обязательный. Улица откуда.
-//                        "from_number" => $order->routefromnumber, //Обязательный. Дом откуда.
-//                        "startLat" => $order->startLat, //
-//                        "startLan" => $order->startLan, //
-//                        "to" => $order->routeto, //Обязательный. Улица куда.
-//                        "to_number" => $order->routetonumber, //Обязательный. Дом куда.
-//                        "to_lat" => $order->to_lat, //
-//                        "to_lng" => $order->to_lng, //
-//                        "taxiColumnId" => $order->taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
-//                        "payment_type" => $order->payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-//                        "bonus_status" => $order->bonus_status,
-//                        "pay_system" => $order->pay_system, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-//                        "order_cost" => $order->web_cost,
-//                        "dispatching_order_uid" => $orderNew,
-//                        "closeReason" => $order->closeReason,
-//                        "closeReasonI" => $order->closeReasonI,
-//                        "server" => $order->server
-//                    ];
-
-
-//                    (new UniversalAndroidFunctionController)->saveOrder($params, $identificationId);
-
 
                     return $order;
                 } else {
@@ -385,5 +370,14 @@ class DriverController extends Controller
             }
             sleep(5);
         } while (!$result && time() - $startTime < $maxExecutionTime);
+    }
+
+    public function uidDriver($uid)
+    {
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $storedData = $orderweb->auto;
+
+        $dataDriver = json_decode($storedData, true);
+        return $dataDriver["uid"];
     }
 }

@@ -378,10 +378,13 @@ class UIDController extends Controller
                     } else {
                         $dispatchingOrderUidDouble = " ";
                     }
-                    if ($value["closeReason"] == 101 || $value["closeReason"] == 102) {
+                    $storedData = $value["auto"];
+
+                    $dataDriver = json_decode($storedData, true);
+
+                    if ($dataDriver["uid"] != null) {
                         $storedData = $value["auto"];
 
-                        $dataDriver = json_decode($storedData, true);
 //                        $name = $dataDriver["name"];
                         $color = $dataDriver["color"];
                         $brand = $dataDriver["brand"];
@@ -486,7 +489,11 @@ class UIDController extends Controller
 
                     foreach ($orderUpdate as $value) {
                         $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
-                        if ($value["closeReason"] == 101 || $value["closeReason"] == 102) {
+                        $storedData = $value["auto"];
+
+                        $dataDriver = json_decode($storedData, true);
+
+                        if (isset($dataDriver["uid"]) && $dataDriver["uid"] !== null) {
                             $storedData = $value["auto"];
 
                             $dataDriver = json_decode($storedData, true);

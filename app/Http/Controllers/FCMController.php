@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Orderweb;
 use App\Models\UserTokenFmsS;
+use Carbon\Carbon;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
@@ -360,6 +363,102 @@ class FCMController extends Controller
         }
     }
 
+    public function writeDocumentToBalanceFirestore($uid, $uidDriver, $status)
+    {
+        // Найти запись в базе данных по $orderId
+        Log::info("Order with ID {$uid} ");
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        // Получаем все атрибуты модели в виде массива
+        $data = $order->toArray();
+
+        // Проверка и замена 'no_name' на 'Не указано' в user_full_name
+        if (isset($data['user_full_name']) && str_contains($data['user_full_name'], 'no_name')) {
+            $data['user_full_name'] = 'Не указано';
+        } else {
+            // Удаление текста внутри скобок и самих скобок, если нет 'no_name'
+            if (isset($data['user_full_name'])) {
+                $data['user_full_name'] = preg_replace('/\s*\[.*?\]/', '', $data['user_full_name']);
+            }
+        }
+        Log::info("data", $data);
+
+        $data["driver_uid"] = $uidDriver;
+
+        // Создаем уникальный идентификатор с меткой времени и случайным числом
+        $timestamp = Carbon::now()->format('YmdHis'); // Форматируем текущее время
+        $randomNumber = rand(1000, 9999); // Генерируем случайное число от 1000 до 9999
+        $documentId = "{$data["driver_uid"]}_{$timestamp}_{$randomNumber}";
+
+        $data['status'] = $status;
+        $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('balance');
+            $document = $collection->document($documentId);
+
+            // Запишите данные в документ
+            $document->set($data);
+
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function writeDocumentToBalanceAddFirestore($uidDriver, $amount)
+    {
+        // Создаем уникальный идентификатор с меткой времени и случайным числом
+        $timestamp = Carbon::now()->format('YmdHis'); // Форматируем текущее время
+        $randomNumber = rand(1000, 9999); // Генерируем случайное число от 1000 до 9999
+        $documentId = "{$uidDriver}_{$timestamp}_{$randomNumber}";
+
+
+        $currentDateTime = Carbon::now();
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+        $dateTime = new DateTime($currentDateTime);
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $data['uidDriver'] = $uidDriver;
+        $data['status'] = "payment";
+        $data['amount'] = $amount;
+        $data['created_at'] = $formattedTime; // Преобразуем дату в строку
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('balance');
+            $document = $collection->document($documentId);
+
+            // Запишите данные в документ
+            $document->set($data);
+
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
 }
-
-

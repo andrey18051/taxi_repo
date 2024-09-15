@@ -23,3 +23,11 @@ Route::get('/orderTaking/{uid}', [DriverController::class, 'orderTaking'])->name
 Route::get('/orderUnTaking/{uid}', [DriverController::class, 'orderUnTaking'])->name('orderUnTaking');
 Route::get('/driverInStartPoint/{uid}', [DriverController::class, 'driverInStartPoint'])->name('driverInStartPoint');
 Route::get('/driverCloseOrder/{uid}', [DriverController::class, 'driverCloseOrder'])->name('driverCloseOrder');
+Route::get('/driverCardPayToBalance/{uidDriver}/{amount}', [DriverController::class, 'driverCardPayToBalance'])
+    ->name('driverCardPayToBalance');
+
+Route::get('/writeDocumentToBalanceFirestore/{uid}/{uidDriver}/{status}', [\App\Http\Controllers\FCMController::class, 'writeDocumentToBalanceFirestore'])
+    ->name('writeDocumentToBalanceFirestore');
+
+Route::get('/uidDriver/{uid}', [DriverController::class, 'uidDriver'])
+    ->name('uidDriver');
