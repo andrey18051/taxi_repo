@@ -363,6 +363,9 @@ class FCMController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function writeDocumentToBalanceFirestore($uid, $uidDriver, $status)
     {
         // Найти запись в базе данных по $orderId
@@ -391,13 +394,38 @@ class FCMController extends Controller
         $data["driver_uid"] = $uidDriver;
 
         // Создаем уникальный идентификатор с меткой времени и случайным числом
-        $timestamp = Carbon::now()->format('YmdHis'); // Форматируем текущее время
+        $currentDateTime = Carbon::now();
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+        $dateTime = new DateTime($currentDateTime);
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
         $randomNumber = rand(1000, 9999); // Генерируем случайное число от 1000 до 9999
-        $documentId = "{$data["driver_uid"]}_{$timestamp}_{$randomNumber}";
+        $documentId = "{$data["driver_uid"]}_{$currentDateTime}_{$randomNumber}";
 
         $data['status'] = $status;
-        $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
 
+        $data['commission'] = 1 + $data["web_cost"] *0.01;
+
+
+        $data['created_at'] = $formattedTime;
+
+
+
+        switch ($status) {
+            case "delete":
+            case "hold":
+                $amountToCurrentBalance = (-1) * $data["commission"];
+                break;
+            case "return":
+                $amountToCurrentBalance = (1) * $data["commission"];
+                break;
+            default:
+                $amountToCurrentBalance =  $data["commission"];
+
+        }
+        self::writeDocumentToBalanceCurrentFirestore($uidDriver, $amountToCurrentBalance);
+        $data['current_balance'] = self::readDriverBalanceFromFirestore($uidDriver);
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
@@ -422,7 +450,7 @@ class FCMController extends Controller
     /**
      * @throws \Exception
      */
-    public function writeDocumentToBalanceAddFirestore($uidDriver, $amount)
+    public function writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status)
     {
         // Создаем уникальный идентификатор с меткой времени и случайным числом
         $timestamp = Carbon::now()->format('YmdHis'); // Форматируем текущее время
@@ -437,7 +465,7 @@ class FCMController extends Controller
         $formattedTime = $dateTime->format('d.m.Y H:i:s');
 
         $data['uidDriver'] = $uidDriver;
-        $data['status'] = "payment";
+        $data['status'] = $status;
         $data['amount'] = $amount;
         $data['created_at'] = $formattedTime; // Преобразуем дату в строку
 
@@ -454,6 +482,8 @@ class FCMController extends Controller
             // Запишите данные в документ
             $document->set($data);
 
+            self::writeDocumentToBalanceCurrentFirestore($uidDriver, $amount);
+
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
@@ -461,4 +491,90 @@ class FCMController extends Controller
             return "Error writing document to Firestore.";
         }
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function writeDocumentToBalanceCurrentFirestore($uidDriver, $amount)
+    {
+        $currentDateTime = Carbon::now();
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+        $dateTime = new DateTime($currentDateTime);
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        try {
+            // Получаем экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получаем ссылку на коллекцию и документ (идентификатором документа является $uidDriver)
+            $collection = $firestore->collection('balance_current');
+            $document = $collection->document($uidDriver);
+
+            // Получаем существующий документ
+            $snapshot = $document->snapshot();
+
+            $previousAmount = 0;
+
+            // Если документ существует, получаем предыдущее значение amount
+            if ($snapshot->exists()) {
+                $previousAmount = $snapshot->data()['amount'] ?? 0;
+            }
+
+            // Добавляем новое значение к предыдущему
+            $newAmount = $previousAmount + $amount;
+
+            $data = [
+                'uidDriver' => $uidDriver,
+                'amount' => $newAmount,
+                'created_at' => $formattedTime, // Преобразуем дату в строку
+            ];
+
+            // Записываем или обновляем документ с новым значением
+            $document->set($data);
+
+            Log::info("Document successfully written with updated amount!");
+            return "Document successfully written with updated amount!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
+    public function readDriverBalanceFromFirestore($uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('balance_current');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                $balance = $data['amount'] ?? 0.0;
+
+                // Логирование информации
+                Log::info("Driver UID: " . $uidDriver);
+                Log::info("Balance: " . number_format($balance, 2, '.', ''));
+
+                return $balance;
+            } else {
+                Log::info("Document with UID {$uidDriver} does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading driver balance from Firestore: " . $e->getMessage());
+            return "Error reading driver balance from Firestore.";
+        }
+    }
+
 }

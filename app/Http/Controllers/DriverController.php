@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\OpenStreetMapHelper;
 use App\Mail\Driver;
 use App\Mail\JobDriver;
 use App\Mail\Server;
@@ -18,6 +19,29 @@ use Illuminate\Support\Facades\Mail;
 
 class DriverController extends Controller
 {
+
+    protected $osmHelper;
+
+    public function __construct(OpenStreetMapHelper $osmHelper)
+    {
+        $this->osmHelper = $osmHelper;
+    }
+
+    public function getDistance(
+        $startLat,
+        $startLon,
+        $endLat,
+        $endLon
+    ) {
+        // Получаем координаты из запроса
+
+
+        // Получаем расстояние с помощью сервиса OpenStreetMapHelper
+        return $this->osmHelper->getRouteDistance($startLat, $startLon, $endLat, $endLon);
+    }
+
+
+
     public function index(): int
     {
         return 200;
@@ -233,6 +257,7 @@ class DriverController extends Controller
                 AndroidTestOSMController::repeatCancel(
                     $url,
                     $authorization,
+                    $authorization,
                     $application,
                     $city,
                     $connectAPI,
@@ -293,9 +318,11 @@ class DriverController extends Controller
     /**
      * @throws \Exception
      */
-    public function driverCardPayToBalance($uidDriver, $amount)
+    public function driverCardPayToBalance($uidDriver, $status)
     {
-        (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount);
+        $amount = 1500.00;
+
+        (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
         (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
     }
 
