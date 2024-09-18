@@ -464,11 +464,12 @@ class FCMController extends Controller
         $dateTime->setTimezone($kievTimeZone);
         $formattedTime = $dateTime->format('d.m.Y H:i:s');
 
-        $data['uidDriver'] = $uidDriver;
+        $data['driver_uid'] = $uidDriver;
         $data['status'] = $status;
         $data['amount'] = $amount;
         $data['created_at'] = $formattedTime; // Преобразуем дату в строку
-
+        self::writeDocumentToBalanceCurrentFirestore($uidDriver, $amount);
+        $data['current_balance'] = self::readDriverBalanceFromFirestore($uidDriver);
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
@@ -481,8 +482,6 @@ class FCMController extends Controller
 
             // Запишите данные в документ
             $document->set($data);
-
-            self::writeDocumentToBalanceCurrentFirestore($uidDriver, $amount);
 
             Log::info("Document successfully written!");
             return "Document successfully written!";
@@ -527,7 +526,7 @@ class FCMController extends Controller
             $newAmount = $previousAmount + $amount;
 
             $data = [
-                'uidDriver' => $uidDriver,
+                'driver_uid' => $uidDriver,
                 'amount' => $newAmount,
                 'created_at' => $formattedTime, // Преобразуем дату в строку
             ];

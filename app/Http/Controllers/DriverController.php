@@ -295,6 +295,7 @@ class DriverController extends Controller
 
         $uidDriver = self::uidDriver($uid);
         (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
+        sleep(1);
         (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "delete");
 
         $status = "closed";
@@ -318,11 +319,10 @@ class DriverController extends Controller
     /**
      * @throws \Exception
      */
-    public function driverCardPayToBalance($uidDriver, $status)
+    public function driverCardPayToBalance($uidDriver, $status, $amount)
     {
-        $amount = 1500.00;
-
         (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
+
         (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
     }
 
