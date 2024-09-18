@@ -575,5 +575,93 @@ class FCMController extends Controller
             return "Error reading driver balance from Firestore.";
         }
     }
+    public function readUserInfoFromFirestore($uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                Log::info("Name: " . $data['name']);
+                Log::info("Email: " . $data['email']);
+                return $data;
+            } else {
+                Log::info("Document does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
+
+    public function findUserByEmail($email)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию
+            $collection = $firestore->collection('users');
+
+            // Выполните запрос для поиска по полю email
+            $query = $collection->where('email', '=', $email);
+            $documents = $query->documents();
+
+            if ($documents->isEmpty()) {
+                Log::info("No user found with email: " . $email);
+                return "No user found with this email.";
+            } else {
+                // Поскольку email должен быть уникальным, ожидаем только один документ
+                $document = $documents->rows()[0];
+                $data = $document->data();
+                Log::info("User found: " . json_encode($data));
+                return $data;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error finding document from Firestore: " . $e->getMessage());
+            return "Error finding document from Firestore.";
+        }
+    }
+
+    public function saveCardDataToFirestore($uidDriver, $cardData)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию
+            $collection = $firestore->collection('cards');
+
+            // Создайте уникальный документ и сохраните данные
+            $documentReference = $collection->add([
+                'uidDriver' => $uidDriver,
+                'cardData' => $cardData,
+                'created_at' => new \DateTime() // Добавьте дату создания, если нужно
+            ]);
+
+            Log::info("Card data saved successfully with Document ID: " . $documentReference->id());
+        } catch (\Exception $e) {
+            Log::error("Error saving card data to Firestore: " . $e->getMessage());
+        }
+    }
+
+
+
 
 }

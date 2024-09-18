@@ -15,6 +15,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DateTime;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\RedirectResponse;
@@ -328,6 +329,71 @@ class WfpController extends Controller
         $city = "OdessaTest";
         $merchant = City_PAS4::where("name", $city)->first();
         $secretKey = $merchant->wfp_merchantSecretKey;
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function serviceUrl_VOD(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $userData = (new FCMController)->findUserByEmail($data['email']);
+        if (is_array($userData) && $userData['recToken'] != "") {
+            $uidDriver = $userData["uid"];
+
+            $status = "payment_card";
+            $amount = $data["amount"];
+
+            (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
+            (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
+
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+
+            $cardData = [
+                'cardType' => $cardType,
+                'bankName' => $bankName,
+                'maskedCard' => $data['cardPan'],
+                'recToken' => $data['recToken'],
+                'merchant' => $data['merchantAccount'],
+                'pay_system' => 'wfp'
+            ];
+
+// Сохраняем данные в Firestore
+            (new FCMController)->saveCardDataToFirestore($uidDriver, $cardData);
+        }
+
+
+        $currentUtcTime = new DateTime('now', new DateTimeZone('UTC'));
+        $currentUtcTime->setTimezone(new DateTimeZone('Europe/Kiev'));
+        $formattedDateTime = $currentUtcTime->format('Y-m-d H:i:s');
+        $time = strtotime($formattedDateTime);
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+
+        $secretKey = config("app.merchantSecretKey");
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
 
@@ -1538,4 +1604,91 @@ class WfpController extends Controller
             return 'Unknown'; // Можно заменить на другое значение или бросить исключение
         }
     }
+
+    public function createInvoiceVod(
+        $uidDriver,
+        $amount,
+        $language
+    ): Response {
+
+        $driverData  = (new FCMController)->readUserInfoFromFirestore($uidDriver);
+
+        if ($driverData !== null) {
+            $clientName = $driverData['name'] ?? 'Unknown';
+            $clientEmail = $driverData['email'] ?? 'Unknown';
+            $clientPhone = $driverData['phoneNumber'] ?? 'Unknown';
+            $clientNumber = $driverData['driverNumber'] ?? 'Unknown';
+        } else {
+            // Обработка случая, когда данные не были получены
+            Log::error("Failed to retrieve driver data.");
+            $clientName = 'Unknown';
+            $clientEmail = 'Unknown';
+            $clientPhone = 'Unknown';
+            $clientNumber = 'Unknown';
+        }
+
+        $productName = "Поповнення балансу драйвера $clientName (позывной $clientNumber, телефон $clientPhone, email $clientEmail) по іншії допоміжній діяльності у сфері транспорту";
+
+        $orderReference = "VOD-" . time() . '-' . rand(1000, 9999);
+
+        $merchantAccount = config("app.merchantAccount");
+        $secretKey = config("app.merchantSecretKey");
+        $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/VOD";
+
+        // Получаем текущее время в UTC
+        $currentUtcTime = new DateTime('now', new DateTimeZone('UTC'));
+
+// Устанавливаем временную зону Киева (UTC+3)
+        $currentUtcTime->setTimezone(new DateTimeZone('Europe/Kiev'));
+
+// Форматируем дату и время
+        $formattedDateTime = $currentUtcTime->format('Y-m-d H:i:s');
+
+// Преобразуем в метку времени
+        $orderDate = strtotime($formattedDateTime);
+
+        $params_order = [
+            "merchantAccount" => $merchantAccount,
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1]
+        ];
+
+        $params = [
+            "transactionType" => "CREATE_INVOICE",
+            "merchantAccount" => $merchantAccount,
+            "merchantAuthType" => "SimpleSignature",
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "merchantSignature" => self::generateHmacMd5Signature($params_order, $secretKey, "createInvoice"),
+            "apiVersion" => 1,
+            "language" => $language,
+//            "returnUrl" => "https://m.easy-order-taxi.site/wfp/returnUrl",
+            "serviceUrl" => $serviceUrl,
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "orderTimeout" => 86400,
+            "merchantTransactionType" => "AUTH",
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1],
+//            "paymentSystems" => "card;privat24;googlePay;applePay",
+            "paymentSystems" => "card;privat24;",
+            "clientEmail" => $clientEmail,
+            "clientPhone" => $clientPhone,
+            "notifyMethod" => "bot"
+        ];
+
+// Відправлення POST-запиту
+        $response = Http::post('https://api.wayforpay.com/api', $params);
+        Log::debug("CREATE_INVOICE", ['response' => $response->body()]);
+        return $response;
+    }
+
 }

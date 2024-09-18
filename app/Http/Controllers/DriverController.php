@@ -316,15 +316,34 @@ class DriverController extends Controller
         self::createNewOrder($uid);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function driverCardPayToBalance($uidDriver, $status, $amount)
+    public function driverCardPayToBalance($uidDriver, $amount, $language)
     {
-        (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
+        try {
+            $response = (new WfpController)->createInvoiceVod($uidDriver, $amount, $language);
 
-        (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
+            // Предполагается, что метод createInvoiceVod возвращает объект с необходимыми данными
+            if ($response->successful()) {
+                $responseData = $response->json(); // Преобразование ответа в массив
+                return [
+                    'reasonCode' => $responseData['reasonCode'] ?? null,
+                    'invoiceUrl' => $responseData['invoiceUrl'] ?? null
+                ];
+            } else {
+                Log::error("Error creating invoice: " . $response->body());
+                return [
+                    'reasonCode' => null,
+                    'invoiceUrl' => null
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error("Exception in driverCardPayToBalance: " . $e->getMessage());
+            return [
+                'reasonCode' => null,
+                'invoiceUrl' => null
+            ];
+        }
     }
+
 
     /**
      * Show the form for creating a new resource.
