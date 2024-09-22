@@ -352,14 +352,12 @@ class WfpController extends Controller
         Log::debug($data['recToken']);
 
         $userData = (new FCMController)->findUserByEmail($data['email']);
-        if (is_array($userData) && $userData['recToken'] != "") {
+        if (is_array($userData)  && isset($data['recToken']) && $data['recToken'] != null) {
             $uidDriver = $userData["uid"];
 
             $status = "payment_card";
             $amount = $data["amount"];
 
-            (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
-            (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
 
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
@@ -378,7 +376,7 @@ class WfpController extends Controller
             ];
 
 // Сохраняем данные в Firestore
-            (new FCMController)->saveCardDataToFirestore($uidDriver, $cardData);
+            (new FCMController)->saveCardDataToFirestore($uidDriver, $cardData, $status, $amount);
         }
 
 
@@ -1674,7 +1672,7 @@ class WfpController extends Controller
             "amount" => $amount,
             "currency" => "UAH",
             "orderTimeout" => 86400,
-            "merchantTransactionType" => "AUTH",
+            "merchantTransactionType" => "SALE",
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
@@ -1690,5 +1688,88 @@ class WfpController extends Controller
         Log::debug("CREATE_INVOICE", ['response' => $response->body()]);
         return $response;
     }
+    public function chargeVOD(
+        $uidDriver,
+        $amount,
+        $recToken
+    ): Response {
+        $driverData  = (new FCMController)->readUserInfoFromFirestore($uidDriver);
 
+        if ($driverData !== null) {
+            $clientName = $driverData['name'] ?? 'Unknown';
+            $clientEmail = $driverData['email'] ?? 'Unknown';
+            $clientPhone = $driverData['phoneNumber'] ?? 'Unknown';
+            $clientNumber = $driverData['driverNumber'] ?? 'Unknown';
+        } else {
+            // Обработка случая, когда данные не были получены
+            Log::error("Failed to retrieve driver data.");
+            $clientName = 'Unknown';
+            $clientEmail = 'Unknown';
+            $clientPhone = 'Unknown';
+            $clientNumber = 'Unknown';
+        }
+
+        $productName = "Поповнення балансу драйвера $clientName (позывной $clientNumber, телефон $clientPhone, email $clientEmail) по іншії допоміжній діяльності у сфері транспорту";
+
+        $orderReference = "VOD-" . time() . '-' . rand(1000, 9999);
+
+        $merchantAccount = config("app.merchantAccount");
+        $secretKey = config("app.merchantSecretKey");
+        $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/VOD";
+
+        // Получаем текущее время в UTC
+        $currentUtcTime = new DateTime('now', new DateTimeZone('UTC'));
+
+// Устанавливаем временную зону Киева (UTC+3)
+        $currentUtcTime->setTimezone(new DateTimeZone('Europe/Kiev'));
+
+// Форматируем дату и время
+        $formattedDateTime = $currentUtcTime->format('Y-m-d H:i:s');
+
+// Преобразуем в метку времени
+        $orderDate = strtotime($formattedDateTime);
+
+        $params_order = [
+            "merchantAccount" => $merchantAccount,
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1]
+        ];
+
+        $params = [
+            "transactionType" => "CHARGE",
+            "merchantAccount" => $merchantAccount,
+            "merchantAuthType" => "SimpleSignature",
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "merchantTransactionType" => "SALE",
+//            "merchantTransactionSecureType" => "AUTO",
+            "merchantTransactionSecureType" => "NON3DS",
+            "merchantSignature" => self::generateHmacMd5Signature($params_order, $secretKey, "charge"),
+            "apiVersion" => 1,
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "recToken" => $recToken,
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1],
+            "clientFirstName" => $clientName,
+            "clientLastName" => " ",
+            "clientEmail" => $clientEmail,
+            "clientPhone" => $clientPhone,
+            "clientCountry" => "UKR",
+            "notifyMethod" => "bot"
+        ];
+
+// Відправлення POST-запиту
+        $response = Http::post('https://api.wayforpay.com/api ', $params);
+        Log::debug("purchase: ", ['response' => $response->body()]);
+        return $response;
+    }
 }

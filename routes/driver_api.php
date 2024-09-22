@@ -21,11 +21,15 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/orderTaking/{uid}', [DriverController::class, 'orderTaking'])->name('orderTaking');
-Route::get('/orderUnTaking/{uid}', [DriverController::class, 'orderUnTaking'])->name('orderUnTaking');
-Route::get('/driverInStartPoint/{uid}', [DriverController::class, 'driverInStartPoint'])->name('driverInStartPoint');
-Route::get('/driverCloseOrder/{uid}', [DriverController::class, 'driverCloseOrder'])->name('driverCloseOrder');
+Route::get('/orderUnTaking/{uid}/{uidDriver}', [DriverController::class, 'orderUnTaking'])->name('orderUnTaking');
+Route::get('/driverInStartPoint/{uid}/{uidDriver}', [DriverController::class, 'driverInStartPoint'])
+    ->name('driverInStartPoint');
+Route::get('/driverCloseOrder/{uid}/{uidDriver}', [DriverController::class, 'driverCloseOrder'])
+    ->name('driverCloseOrder');
 Route::get('/driverCardPayToBalance/{uidDriver}/{amount}/{language}', [DriverController::class, 'driverCardPayToBalance'])
     ->name('driverCardPayToBalance');
+Route::get('/driverCardPayByTokenToBalance/{uidDriver}/{amount}/{recToken}', [DriverController::class, 'driverCardPayByTokenToBalance'])
+    ->name('driverCardPayByTokenToBalance');
 
 Route::get('/writeDocumentToBalanceFirestore/{uid}/{uidDriver}/{status}', [FCMController::class, 'writeDocumentToBalanceFirestore'])
     ->name('writeDocumentToBalanceFirestore');
@@ -38,3 +42,6 @@ Route::get('/readUserInfoFromFirestore/{uid}', [FCMController::class, 'readUserI
 
 Route::get('/findUserByEmail/{email}', [FCMController::class, 'findUserByEmail'])
     ->name('findUserByEmail');
+
+Route::get('/deleteDocumentsByDriverUid/{uidDriver}', [FCMController::class, 'deleteDocumentsByDriverUid'])
+    ->name('deleteDocumentsByDriverUid');

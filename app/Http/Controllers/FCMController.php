@@ -303,6 +303,9 @@ class FCMController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function writeDocumentToHistoryFirestore($uid, $status)
     {
         // Найти запись в базе данных по $orderId
@@ -337,6 +340,14 @@ class FCMController extends Controller
 
         $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
         // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
+// Преобразуем дату в объект Carbon
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+
+        $dateTime = new DateTime($order->updated_at);
+        $dateTime->setTimezone($kievTimeZone);
+
+// Получаем оригинальный формат без изменений
+        $data['updated_at'] = $dateTime->format("Y-m-d\TH:i:s.u\Z");; // Выдает в формате ISO 8601
 
         $data['status'] = $status;
 
@@ -637,7 +648,7 @@ class FCMController extends Controller
         }
     }
 
-    public function saveCardDataToFirestore($uidDriver, $cardData)
+    public function saveCardDataToFirestore($uidDriver, $cardData, $status, $amount)
     {
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
@@ -648,20 +659,179 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию
             $collection = $firestore->collection('cards');
 
-            // Создайте уникальный документ и сохраните данные
-            $documentReference = $collection->add([
-                'uidDriver' => $uidDriver,
-                'cardData' => $cardData,
-                'created_at' => new \DateTime() // Добавьте дату создания, если нужно
-            ]);
+            // Получение значений полей
+            $recToken = $cardData['recToken'];
+            $maskedCard = $cardData['maskedCard'];
 
-            Log::info("Card data saved successfully with Document ID: " . $documentReference->id());
+            // Проверка на наличие карты с таким же recToken внутри cardData
+            $existingRecTokenDocs = $collection->where('cardData.recToken', '=', $recToken)->documents();
+
+            if (!$existingRecTokenDocs->isEmpty()) {
+                // Если запись с таким recToken уже существует, не добавляем новую
+                Log::info("Card data not saved because a record with recToken already exists.");
+                return;
+            }
+
+            // Проверка на наличие карты с такой же маскированной картой (maskedCard) внутри cardData
+            $existingMaskedCardDocs = $collection->where('cardData.maskedCard', '=', $maskedCard)->documents();
+
+            if (!$existingMaskedCardDocs->isEmpty()) {
+                // Если карта с такой же маской уже существует, обновляем recToken
+                foreach ($existingMaskedCardDocs as $doc) {
+                    $docReference = $doc->reference();
+                    $docReference->update([
+                        ['path' => 'cardData.recToken', 'value' => $recToken],
+                        ['path' => 'updated_at', 'value' => new \DateTime()] // Обновляем дату изменения
+                    ]);
+
+                    Log::info("Card recToken updated successfully for maskedCard: " . $maskedCard);
+                }
+
+                (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
+                (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
+            } else {
+                // Если карта с такой маской не найдена, добавляем новую запись
+                $documentReference = $collection->add([
+                    'uidDriver' => $uidDriver,
+                    'cardData' => $cardData,
+                    'created_at' => new \DateTime(), // Добавляем дату создания
+                    'updated_at' => new \DateTime()  // Добавляем дату изменения
+                ]);
+
+                (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
+                (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
+
+                Log::info("Card data saved successfully with Document ID: " . $documentReference->id());
+            }
+
         } catch (\Exception $e) {
             Log::error("Error saving card data to Firestore: " . $e->getMessage());
         }
     }
 
+    public function deleteDocumentsByDriverUid($uidDriver)
+    {
+        try {
+            // Получаем экземпляр клиента Firestore
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
 
+            // Получаем ссылку на коллекцию
+            $collection = $firestore->collection('balance');
 
+            // Выполняем запрос для получения всех документов, где driver_uid равен $uidDriver
+            $documents = $collection->where('driver_uid', '=', $uidDriver)->documents();
+
+            // Проверяем, есть ли документы для удаления
+            if ($documents->isEmpty()) {
+                Log::info("No documents found for uidDriver: {$uidDriver}");
+                return "No documents found for uidDriver: {$uidDriver}";
+            }
+
+            // Удаляем каждый найденный документ
+            foreach ($documents as $document) {
+                $document->reference()->delete();
+            }
+
+            Log::info("All documents for uidDriver: {$uidDriver} have been successfully deleted.");
+            return "All documents for uidDriver: {$uidDriver} have been successfully deleted.";
+        } catch (\Exception $e) {
+            Log::error("Error deleting documents for uidDriver: " . $e->getMessage());
+            return "Error deleting documents for uidDriver.";
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function waitForReturnAndSendDelete($uid, $uidDriver)
+    {
+        if (!self::isHoldCompleted($uid, $uidDriver)) {
+            self::writeDocumentToBalanceFirestore($uid, $uidDriver, "delete");
+            return "Delete request sent after return completion.";
+        } else {
+            $maxWaitTime = 30; // Максимальное время ожидания (например, 30 секунд)
+            $interval = 1; // Интервал между проверками (1 секунда)
+            self::writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
+            for ($i = 0; $i < $maxWaitTime; $i++) {
+                if (self::isReturnRequestCompleted($uid, $uidDriver)) {
+                    Log::info("Return request completed for UID {$uidDriver}. Sending delete request...");
+                    self::writeDocumentToBalanceFirestore($uid, $uidDriver, "delete");
+                    return "Delete request sent after return completion.";
+                } else {
+                    Log::info("Return request not yet completed for UID {$uidDriver}. Retrying in {$interval} seconds...");
+                    sleep($interval);
+                }
+            }
+
+            Log::info("Return request did not complete within {$maxWaitTime} seconds for UID {$uidDriver}. No delete request sent.");
+            (new MessageSentController())->sentDriverNoDelCommission($uid);
+
+            return "Return request did not complete in time. No delete request sent.";
+        }
+    }
+
+    public function isReturnRequestCompleted($uid, $uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Фильтрация по полям driver_uid и status == 'return'
+            $collection = $firestore->collection('balance');
+            $query = $collection->where('driver_uid', '=', $uidDriver)
+                ->where('status', '=', 'return')
+                ->where('dispatching_order_uid', '=', $uid);
+
+            $documents = $query->documents();
+
+            // Проверяем, завершен ли запрос с типом "return"
+            if (!$documents->isEmpty()) {
+                Log::info("Return request completed for UID {$uidDriver}");
+                return true;
+            } else {
+                Log::info("Return request not completed for UID {$uidDriver}");
+                return false;
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Error checking return request: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function isHoldCompleted($uid, $uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Фильтрация по полям driver_uid и status == 'return'
+            $collection = $firestore->collection('balance');
+            $query = $collection->where('driver_uid', '=', $uidDriver)
+                ->where('status', '=', 'hold')
+                ->where('dispatching_order_uid', '=', $uid);
+
+            $documents = $query->documents();
+
+            // Проверяем, завершен ли запрос с типом "return"
+            if (!$documents->isEmpty()) {
+                Log::info("Return request completed for UID {$uidDriver}");
+                return true;
+            } else {
+                Log::info("Return request not completed for UID {$uidDriver}");
+                return false;
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Error checking return request: " . $e->getMessage());
+            return false;
+        }
+    }
 
 }

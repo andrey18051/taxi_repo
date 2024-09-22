@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Kreait\Firebase\Factory;
 
 class DriverController extends Controller
 {
@@ -195,51 +196,47 @@ class DriverController extends Controller
 
     public function orderTaking($uid)
     {
-
         (new FCMController)->deleteDocumentFromFirestore($uid);
-//
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-
-        switch ($orderweb->server) {
-            case 'http://31.43.107.151:7303':
-                $city = "OdessaTest";
-                break;
-            case 'http://167.235.113.231:7307':
-            case 'http://167.235.113.231:7306':
-            case 'http://134.249.181.173:7208':
-            case 'http://91.205.17.153:7208':
-                $city = "Kyiv City";
-                break;
-            case 'http://142.132.213.111:8071':
-            case 'http://167.235.113.231:7308':
-                $city = "Dnipropetrovsk Oblast";
-                break;
-            case 'http://142.132.213.111:8072':
-                $city = "Odessa";
-                break;
-            case 'http://142.132.213.111:8073':
-                $city = "Zaporizhzhia";
-                break;
-            case 'http://134.249.181.173:7201':
-            case 'http://91.205.17.153:7201':
-                $city = "Cherkasy Oblast";
-                break;
-        }
-
-        switch ($orderweb->comment) {
-            case 'taxi_easy_ua_pas1':
-                $application = "PAS1";
-                break;
-            case 'taxi_easy_ua_pas2':
-                $application = "PAS2";
-                break;
-//            'taxi_easy_ua_pas4':
-            default:
-                $application = "PAS4";
-        }
-
         if ($orderweb) {
+            switch ($orderweb->server) {
+                case 'http://31.43.107.151:7303':
+                    $city = "OdessaTest";
+                    break;
+                case 'http://167.235.113.231:7307':
+                case 'http://167.235.113.231:7306':
+                case 'http://134.249.181.173:7208':
+                case 'http://91.205.17.153:7208':
+                    $city = "Kyiv City";
+                    break;
+                case 'http://142.132.213.111:8071':
+                case 'http://167.235.113.231:7308':
+                    $city = "Dnipropetrovsk Oblast";
+                    break;
+                case 'http://142.132.213.111:8072':
+                    $city = "Odessa";
+                    break;
+                case 'http://142.132.213.111:8073':
+                    $city = "Zaporizhzhia";
+                    break;
+                case 'http://134.249.181.173:7201':
+                case 'http://91.205.17.153:7201':
+                    $city = "Cherkasy Oblast";
+                    break;
+            }
+
+            switch ($orderweb->comment) {
+                case 'taxi_easy_ua_pas1':
+                    $application = "PAS1";
+                    break;
+                case 'taxi_easy_ua_pas2':
+                    $application = "PAS2";
+                    break;
+                default:
+                    $application = "PAS4";
+            }
+
             $connectAPI = $orderweb->server;
 
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
@@ -275,45 +272,76 @@ class DriverController extends Controller
             (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "hold");
 
             (new MessageSentController())->sentCarTakingInfo($orderweb);
+            $status = "orderTaking";
+            // Вернуть JSON с сообщением об успехе
+            return response()->json([
+                'status' => $status,
+                'message' => 'orderTaking successfully'
+            ], 200);
+        } else {
+            $status = "orderTaking";
+            // Вернуть JSON с сообщением об успехе
+            return response()->json([
+                'status' => $status,
+                'message' => "$uid  UnSuccessfully find"
+            ], 200);
         }
     }
 
     /**
      * @throws \Exception
      */
-    public function driverInStartPoint($uid)
+    public function driverInStartPoint($uid, $uidDriver)
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
-        (new MessageSentController())->sentDriverInStartPoint($uid);
+        (new MessageSentController())->sentDriverInStartPoint($uid, $uidDriver);
+
+        $status = "driverInStartPoint";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverInStartPoint successfully'
+        ], 200);
     }
     /**
      * @throws \Exception
      */
-    public function driverCloseOrder($uid)
+    public function driverCloseOrder($uid, $uidDriver)
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
 
-        $uidDriver = self::uidDriver($uid);
-        (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
-        sleep(1);
-        (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "delete");
+        (new FCMController)->waitForReturnAndSendDelete($uid, $uidDriver);
+
 
         $status = "closed";
 
         (new MessageSentController())->sentDriverCloseOrder($uid);
         (new FCMController)->deleteDocumentFromFirestoreOrdersTaking($uid);
         (new FCMController())->writeDocumentToHistoryFirestore($uid, $status);
+
+        $status = "driverCloseOrder";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverCloseOrder successfully'
+        ], 200);
     }
 
-    public function orderUnTaking($uid)
+    public function orderUnTaking($uid, $uidDriver)
     {
 
-        $uidDriver = self::uidDriver($uid);
         (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
 
         (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid);
         $uid = (new MemoryOrderChangeController)->show($uid);
         self::createNewOrder($uid);
+
+        $status = "orderUnTaking";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'orderUnTaking successfully'
+        ], 200);
     }
 
     public function driverCardPayToBalance($uidDriver, $amount, $language)
@@ -340,6 +368,38 @@ class DriverController extends Controller
             return [
                 'reasonCode' => null,
                 'invoiceUrl' => null
+            ];
+        }
+    }
+    public function driverCardPayByTokenToBalance($uidDriver, $amount, $recToken)
+    {
+        try {
+            $response = (new WfpController)->chargeVOD($uidDriver, $amount, $recToken);
+
+            // Предполагается, что метод createInvoiceVod возвращает объект с необходимыми данными
+            if ($response->successful()) {
+                $responseData = $response->json(); // Преобразование ответа в массив
+                if ($responseData['transactionStatus'] == "Approved") {
+                    $status = "payment_card";
+                    (new FCMController)->writeDocumentToBalanceAddFirestore($uidDriver, $amount, $status);
+                    (new MessageSentController())->sentDriverPayToBalance($uidDriver, $amount);
+                }
+                return [
+                    'reasonCode' => $responseData['reasonCode'] ?? null,
+                    'transactionStatus' => $responseData['transactionStatus'] ?? null
+                ];
+            } else {
+                Log::error("Error driverCardPayByTokenToBalance: " . $response->body());
+                return [
+                    'reasonCode' => null,
+                    'transactionStatus' => null
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error("Exception in driverCardPayByTokenToBalance: " . $e->getMessage());
+            return [
+                'reasonCode' => null,
+                'transactionStatus' => null
             ];
         }
     }
@@ -426,4 +486,8 @@ class DriverController extends Controller
         $dataDriver = json_decode($storedData, true);
         return $dataDriver["uid"];
     }
+
+
+
+
 }
