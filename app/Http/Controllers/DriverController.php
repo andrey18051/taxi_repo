@@ -410,6 +410,27 @@ class DriverController extends Controller
         }
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function driverCurrentSectorLocationStoreFirestore(
+        $uidDriver,
+        $latitude,
+        $longitude
+    ) {
+
+        (new FCMController)->writeDocumentCurrentSectorLocationFirestore(
+            $uidDriver,
+            $latitude,
+            $longitude
+        );
+
+        $status = "Смена сектора";
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverCurrentSectorLocationStoreFirestore successfully'
+        ], 200);
+    }
 
     /**
      * Show the form for creating a new resource.

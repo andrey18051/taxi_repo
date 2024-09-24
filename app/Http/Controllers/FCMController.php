@@ -505,6 +505,49 @@ class FCMController extends Controller
     /**
      * @throws \Exception
      */
+    public function writeDocumentCurrentSectorLocationFirestore(
+        $uidDriver,
+        $latitude,
+        $longitude
+    ) {
+
+        $documentId = $uidDriver;
+
+        $currentDateTime = Carbon::now();
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+        $dateTime = new DateTime($currentDateTime);
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $data['driver_uid'] = $uidDriver;
+        $data['$latitude'] = $latitude;
+        $data['longitude'] = $longitude;
+        $data['created_at'] = $formattedTime; // Преобразуем дату в строку
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('sector');
+            $document = $collection->document($documentId);
+
+            // Запишите данные в документ
+            $document->set($data);
+
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function writeDocumentToBalanceCurrentFirestore($uidDriver, $amount)
     {
         $currentDateTime = Carbon::now();
@@ -757,6 +800,7 @@ class FCMController extends Controller
             for ($i = 0; $i < $maxWaitTime; $i++) {
                 if (self::isReturnRequestCompleted($uid, $uidDriver)) {
                     Log::info("Return request completed for UID {$uidDriver}. Sending delete request...");
+                    sleep($interval);
                     self::writeDocumentToBalanceFirestore($uid, $uidDriver, "delete");
                     return "Delete request sent after return completion.";
                 } else {

@@ -45,3 +45,6 @@ Route::get('/findUserByEmail/{email}', [FCMController::class, 'findUserByEmail']
 
 Route::get('/deleteDocumentsByDriverUid/{uidDriver}', [FCMController::class, 'deleteDocumentsByDriverUid'])
     ->name('deleteDocumentsByDriverUid');
+
+Route::get('/driverCurrentSectorLocationStoreFirestore/{uidDriver}/{latitude}/{longitude}', [DriverController::class, 'driverCurrentSectorLocationStoreFirestore'])
+    ->name('driverCurrentSectorLocationStoreFirestore');
