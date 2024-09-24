@@ -327,10 +327,16 @@ class DriverController extends Controller
         ], 200);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function orderUnTaking($uid, $uidDriver)
     {
+        if ((new FCMController)->isHoldCompleted($uid, $uidDriver)) {
+            Log::info("Return request completed for UID {$uidDriver}. Sending return request...");
+            (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
+        }
 
-        (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "return");
 
         (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid);
         $uid = (new MemoryOrderChangeController)->show($uid);
