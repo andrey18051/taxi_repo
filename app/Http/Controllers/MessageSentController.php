@@ -711,7 +711,7 @@ class MessageSentController extends Controller
                         $color = $dataCar['color'] ?? 'Unknown';
                         $model = $dataCar['model'] ?? 'Unknown';
                         $number = $dataCar['number'] ?? 'Unknown';
-                        $type = $dataCar['color'] ?? 'Unknown';
+                        $type = $dataCar['type'] ?? 'Unknown';
                         $year = $dataCar['year'] ?? 'Unknown';
 
                         $subject = "Водитель
