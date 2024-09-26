@@ -26,6 +26,13 @@ Route::get('/driverInStartPoint/{uid}/{uidDriver}', [DriverController::class, 'd
     ->name('driverInStartPoint');
 Route::get('/driverCloseOrder/{uid}/{uidDriver}', [DriverController::class, 'driverCloseOrder'])
     ->name('driverCloseOrder');
+
+Route::get('/driverUpdateInfo/{uidDriver}', [DriverController::class, 'driverUpdateInfo'])
+    ->name('driverUpdateInfo');
+
+Route::get('/driverUpdateCarInfo/{uidDriver}/{carId}', [DriverController::class, 'driverUpdateCarInfo'])
+    ->name('driverUpdateCarInfo');
+
 Route::get('/driverCardPayToBalance/{uidDriver}/{amount}/{language}', [DriverController::class, 'driverCardPayToBalance'])
     ->name('driverCardPayToBalance');
 Route::get('/driverCardPayByTokenToBalance/{uidDriver}/{amount}/{recToken}', [DriverController::class, 'driverCardPayByTokenToBalance'])

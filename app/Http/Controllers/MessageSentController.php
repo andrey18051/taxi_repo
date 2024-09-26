@@ -607,5 +607,147 @@ class MessageSentController extends Controller
         }
 
     }
+    /**
+     * @throws \Exception
+     */
+    public function sentDriverUpdateAccount($uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
 
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $dataDriver = $snapshot->data();
+
+                if (is_array($dataDriver)) {
+                    $name = $dataDriver['name'] ?? 'Unknown';
+                    $phoneNumber = $dataDriver['phoneNumber'] ?? 'Unknown';
+
+
+                    $currentDateTime = Carbon::now();
+                    $kievTimeZone = new DateTimeZone('Europe/Kiev');
+                    $dateTime = new DateTime($currentDateTime);
+                    $dateTime->setTimezone($kievTimeZone);
+                    $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+                    $subject = "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения.
+                     Проверьте:
+                     ФИО $name
+                     телефон $phoneNumber
+                     Время обновления $formattedTime
+                     ";
+
+                    $messageAdmin = "$subject. Время $formattedTime";
+
+                    $alarmMessage = new TelegramController();
+
+                    try {
+                        $alarmMessage->sendAlarmMessage($messageAdmin);
+                        $alarmMessage->sendMeMessage($messageAdmin);
+                    } catch (Exception $e) {
+                        Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+                    }
+                    Log::debug("sentCancelInfo  $messageAdmin");
+                }
+            } else {
+                Log::info("Document does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
+
+    public function sentDriverUpdateCar($uidDriver, $carId)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $dataDriver = $snapshot->data();
+
+                if (is_array($dataDriver)) {
+                    $name = $dataDriver['name'] ?? 'Unknown';
+                    $phoneNumber = $dataDriver['phoneNumber'] ?? 'Unknown';
+
+
+                    $currentDateTime = Carbon::now();
+                    $kievTimeZone = new DateTimeZone('Europe/Kiev');
+                    $dateTime = new DateTime($currentDateTime);
+                    $dateTime->setTimezone($kievTimeZone);
+                    $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+
+                    $collectionCar = $firestore->collection('cars');
+                    $documentCar = $collectionCar->document($carId);
+                    $snapshotCar = $documentCar->snapshot();
+                    if ($snapshotCar->exists()) {
+                        // Получите данные из документа
+                        $dataCar = $snapshotCar->data();
+
+                        $brand = $dataCar['brand'] ?? 'Unknown';
+                        $color = $dataCar['color'] ?? 'Unknown';
+                        $model = $dataCar['model'] ?? 'Unknown';
+                        $number = $dataCar['number'] ?? 'Unknown';
+                        $type = $dataCar['color'] ?? 'Unknown';
+                        $year = $dataCar['year'] ?? 'Unknown';
+
+                        $subject = "Водитель
+                        ФИО $name
+                        телефон $phoneNumber
+                        google_id: $uidDriver отправил данные авто и ожидает подтверждения
+                        ____________________
+                        Проверьте данные авто:
+                        Марка  $brand
+                        модель $model
+                        тип кузова $type
+                        цвет $color
+                        номер $number
+                        год $year
+                        Время обновления $formattedTime";
+
+                        $messageAdmin = "$subject";
+
+                        $alarmMessage = new TelegramController();
+
+                        try {
+                            $alarmMessage->sendAlarmMessage($messageAdmin);
+                            $alarmMessage->sendMeMessage($messageAdmin);
+                        } catch (Exception $e) {
+                            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+                        }
+                        Log::debug("sentCancelInfo  $messageAdmin");
+                    }
+                }
+            } else {
+                Log::info("Document does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
 }

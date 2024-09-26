@@ -82,7 +82,7 @@ class FCMController extends Controller
 
 
 
-    public function readDocumentFromFirestore()
+    public function readDocumentFromUsersFirestore($uidDriver)
     {
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
@@ -92,7 +92,7 @@ class FCMController extends Controller
 
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('users');
-            $document = $collection->document('pEePGRVPNNU6IeJexWRwBpohu9q2');
+            $document = $collection->document($uidDriver);
 
             // Получите снимок документа
             $snapshot = $document->snapshot();

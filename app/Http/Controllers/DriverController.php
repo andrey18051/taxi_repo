@@ -330,6 +330,36 @@ class DriverController extends Controller
     /**
      * @throws \Exception
      */
+    public function driverUpdateInfo($uidDriver)
+    {
+        (new MessageSentController())->sentDriverUpdateAccount($uidDriver);
+
+        $status = "driverUpdateInfo";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverUpdateInfo successfully'
+        ], 200);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function driverUpdateCarInfo($uidDriver, $carId)
+    {
+        (new MessageSentController())->sentDriverUpdateCar($uidDriver, $carId);
+
+        $status = "driverUpdateInfo";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverUpdateCarInfo successfully'
+        ], 200);
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function orderUnTaking($uid, $uidDriver)
     {
         if ((new FCMController)->isHoldCompleted($uid, $uidDriver)) {

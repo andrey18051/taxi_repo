@@ -1415,5 +1415,5 @@ Route::get('/android_token_local/store/{email}/{app}/{token}/{local}/', [UserTok
 Route::get('/android_token/sendMessage/{body}/{app}/{user_id}/', [UserTokenFmsController::class,'sendMessage']);
 Route::get('/fcm/sendNotification/{body}/{app}/{user_id}/', [FCMController::class,'sendNotification']);
 Route::get('/fcm/getUserByEmail/{email}/{app}/', [FCMController::class,'getTokenByEmail']);
-Route::get('/fcm/readDocumentFromFirestore/', [FCMController::class,'readDocumentFromFirestore']);
+Route::get('/fcm/readDocumentFromUsersFirestore/{$uidDriver}', [FCMController::class,'readDocumentFromUsersFirestore']);
 Route::get('/fcm/writeDocumentToFirestore/{uid}', [FCMController::class,'writeDocumentToFirestore']);
