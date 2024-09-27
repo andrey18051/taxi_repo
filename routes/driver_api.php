@@ -33,6 +33,12 @@ Route::get('/driverUpdateInfo/{uidDriver}', [DriverController::class, 'driverUpd
 Route::get('/driverUpdateCarInfo/{uidDriver}/{carId}', [DriverController::class, 'driverUpdateCarInfo'])
     ->name('driverUpdateCarInfo');
 
+Route::get('/verifyDriverUpdateInfo/{uidDriver}', [DriverController::class, 'verifyDriverUpdateInfo'])
+    ->name('verifyDriverUpdateInfo');
+
+Route::get('/verifyDriverUpdateCarInfo/{carId}', [DriverController::class, 'verifyDriverUpdateCarInfo'])
+    ->name('driverUpdateCarInfo');
+
 Route::get('/driverCardPayToBalance/{uidDriver}/{amount}/{language}', [DriverController::class, 'driverCardPayToBalance'])
     ->name('driverCardPayToBalance');
 Route::get('/driverCardPayByTokenToBalance/{uidDriver}/{amount}/{recToken}', [DriverController::class, 'driverCardPayByTokenToBalance'])

@@ -283,10 +283,10 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $web_cost = $orderweb->web_cost;
-
-        $dataDriver = FCMController::readUserInfoFromFirestore($uidDriver);
-//        $dataDriver = json_decode($storedData, true);
-//        $name = $dataDriver["name"];
+        $storedData = $orderweb->auto;
+//        $dataDriver = FCMController::readUserInfoFromFirestore($uidDriver);
+        $dataDriver = json_decode($storedData, true);
+        $name = $dataDriver["name"];
         $color = $dataDriver["color"];
         $brand = $dataDriver["brand"];
         $model = $dataDriver["model"];
@@ -641,11 +641,11 @@ class MessageSentController extends Controller
                     $formattedTime = $dateTime->format('d.m.Y H:i:s');
 
                     $subject = "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения.
-                     Проверьте:
-                     ФИО $name
-                     телефон $phoneNumber
-                     Время обновления $formattedTime
-                     ";
+Проверьте:
+ФИО $name
+телефон $phoneNumber
+Время обновления $formattedTime
+Подтвердить данные https://m.easy-order-taxi.site/driver/verifyDriverUpdateInfo/$uidDriver";
 
                     $messageAdmin = "$subject. Время $formattedTime";
 
@@ -715,18 +715,18 @@ class MessageSentController extends Controller
                         $year = $dataCar['year'] ?? 'Unknown';
 
                         $subject = "Водитель
-                        ФИО $name
-                        телефон $phoneNumber
-                        google_id: $uidDriver отправил данные авто и ожидает подтверждения
-                        ____________________
-                        Проверьте данные авто:
-                        Марка  $brand
-                        модель $model
-                        тип кузова $type
-                        цвет $color
-                        номер $number
-                        год $year
-                        Время обновления $formattedTime";
+ФИО $name
+телефон $phoneNumber
+google_id: $uidDriver отправил данные авто и ожидает подтверждения
+Проверьте данные авто:
+Марка  $brand
+модель $model
+тип кузова $type
+цвет $color
+номер $number
+год $year
+Время обновления $formattedTime
+Подтвердить данные https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$carId";
 
                         $messageAdmin = "$subject";
 

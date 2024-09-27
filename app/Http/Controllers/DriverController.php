@@ -196,6 +196,8 @@ class DriverController extends Controller
 
     public function orderTaking($uid)
     {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::info("orderTaking" . $uid);
         (new FCMController)->deleteDocumentFromFirestore($uid);
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
@@ -356,6 +358,35 @@ class DriverController extends Controller
             'message' => 'driverUpdateCarInfo successfully'
         ], 200);
     }
+
+    public function verifyDriverUpdateInfo($uidDriver)
+    {
+        (new FCMController())->writeDocumentToVerifyUserFirestore($uidDriver);
+
+        $status = "verifyDriverUpdateInfo";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'Данные водителя подтверждены'
+        ], 200);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function verifyDriverUpdateCarInfo($carId)
+    {
+        (new FCMController())->writeDocumentToVerifyCarFirestore($carId);
+
+        $status = "verifyDriverUpdateCarInfo";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'Данные автомобиля подтверждены'
+        ], 200);
+    }
+
 
     /**
      * @throws \Exception

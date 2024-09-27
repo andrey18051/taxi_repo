@@ -230,6 +230,100 @@ class FCMController extends Controller
             return "Error deleting document from Firestore.";
         }
     }
+
+    public function writeDocumentToVerifyUserFirestore($uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                $data['verified'] = true;
+                // Запишите данные в документ
+                $document->set($data);
+
+                Log::info("Document writeDocumentToVerifyUserFirestore  successfully written!");
+                return "Document successfully written!";
+            } else {
+                Log::error("Error writeDocumentToVerifyUserFirestore writing document to Firestore: ");
+                return "Error writeDocumentToVerifyUserFirestore  document to Firestore.";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writeDocumentToVerifyCarFirestore writing document to Firestore.";
+        }
+    }
+
+    public function writeDocumentToVerifyCarFirestore($carId)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+
+            // Логируем путь к файлу с учетными данными
+            Log::info("Путь к файлу учетных данных Firebase: " . $serviceAccountPath);
+
+            if (!file_exists($serviceAccountPath)) {
+                Log::error("Файл учетных данных Firebase не найден: " . $serviceAccountPath);
+                return "Файл учетных данных Firebase не найден.";
+            }
+
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+
+            if (!$firebase) {
+                Log::error("Не удалось создать экземпляр Firebase.");
+                return "Не удалось создать экземпляр Firebase.";
+            }
+
+            $firestore = $firebase->createFirestore()->database();
+
+            // Логируем информацию о попытке доступа к документу
+            Log::info("Попытка доступа к документу с carId: " . $carId);
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('cars');
+            $document = $collection->document($carId);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                $data['verified'] = true;
+
+                // Логируем данные, которые будут записаны в документ
+                Log::info("Данные для записи в Firestore: " . json_encode($data));
+
+                // Запишите данные в документ
+                $document->set($data);
+
+                Log::info("Документ успешно записан в Firestore!");
+                return "Документ успешно записан!";
+            } else {
+                Log::error("Ошибка: документ с carId не существует.");
+                return "Ошибка: документ не существует.";
+            }
+        } catch (\Exception $e) {
+            // Логируем сообщение об ошибке и стек вызовов для отладки
+            Log::error("Ошибка при записи документа в Firestore: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return "Ошибка при записи документа в Firestore.";
+        }
+    }
+
+
     public function readDriverInfoFromFirestore($uid)
     {
         try {
@@ -255,16 +349,48 @@ class FCMController extends Controller
                 $snapshotDriver = $documentDriver->snapshot();
                 if ($snapshotDriver->exists()) {
                     $dataDriver = $snapshotDriver->data();
-//                    $name = $dataDriver["name"];
-//                    $color = $dataDriver["color"];
-//                    $model = $dataDriver["model"];
-//                    $phoneNumber = $dataDriver["phoneNumber"];
+
+                    // Получаем доступ к коллекции 'cars'
+                    $collectionCar = $firestore->collection('cars');
+
+                    // Выполняем запрос, чтобы найти документ, где activeCar равно true и driverNumber совпадает с $data['driver_uid']
+                    $query = $collectionCar
+                        ->where('activeCar', '==', true)
+                        ->where('driverNumber', '==', $data['driver_uid']);
+
+                    // Получаем результаты запроса
+                    $documents = $query->documents();
+
+                    // Проверяем, были ли найдены документы
+                    if ($documents->isEmpty()) {
+                        echo "Нет активных автомобилей для водителя с UID: " . $data['driver_uid'];
+                    } else {
+                        // Получаем первый документ (поскольку ожидаем только один)
+                        $document = $documents->rows()[0]; // Получаем первый документ
+
+                        // Получаем данные автомобиля
+                        $dataCar = $document->data();
+
+                        // Присваиваем данные автомобиля в массив $dataDriver
+                        $dataDriver["brand"] = $dataCar['brand'];
+                        $dataDriver["model"] = $dataCar['model'];
+                        $dataDriver["number"] = $dataCar['number'];
+                        $dataDriver["color"] = $dataCar['color'];
+
+
+                        // Логируем информацию об автомобиле
+                        Log::info("Active Car Info:", $dataCar);
+                    }
+
+                    // Логируем информацию о водителе
                     Log::info("DataDriver readDriverInfoFromFirestore:", $dataDriver);
                     return $dataDriver;
                 } else {
                     Log::info("Document does not exist!");
                     return "Document does not exist!";
                 }
+
+
 
             } else {
                 Log::info("Document does not exist!");
@@ -647,9 +773,56 @@ class FCMController extends Controller
             if ($snapshot->exists()) {
                 // Получите данные из документа
                 $data = $snapshot->data();
-                Log::info("Name: " . $data['name']);
-                Log::info("Email: " . $data['email']);
-                return $data;
+                Log::info("driver_uid: " . $data['driver_uid']);
+
+                $collectionDriver = $firestore->collection('users');
+                $documentDriver = $collectionDriver->document($data['driver_uid']);
+                $snapshotDriver = $documentDriver->snapshot();
+                if ($snapshotDriver->exists()) {
+                    $dataDriver = $snapshotDriver->data();
+
+                    // Получаем доступ к коллекции 'cars'
+                    $collectionCar = $firestore->collection('cars');
+
+                    // Выполняем запрос, чтобы найти документ, где activeCar равно true и driverNumber совпадает с $data['driver_uid']
+                    $query = $collectionCar
+                        ->where('activeCar', '==', true)
+                        ->where('driverNumber', '==', $data['driver_uid']);
+
+                    // Получаем результаты запроса
+                    $documents = $query->documents();
+
+                    // Проверяем, были ли найдены документы
+                    if ($documents->isEmpty()) {
+                        echo "Нет активных автомобилей для водителя с UID: " . $data['driver_uid'];
+                    } else {
+                        // Получаем первый документ (поскольку ожидаем только один)
+                        $document = $documents->rows()[0]; // Получаем первый документ
+
+                        // Получаем данные автомобиля
+                        $dataCar = $document->data();
+
+                        // Присваиваем данные автомобиля в массив $dataDriver
+                        $dataDriver["brand"] = $dataCar['brand'];
+                        $dataDriver["model"] = $dataCar['model'];
+                        $dataDriver["number"] = $dataCar['number'];
+                        $dataDriver["color"] = $dataCar['color'];
+
+
+                        // Логируем информацию об автомобиле
+                        Log::info("Active Car Info:", $dataCar);
+                    }
+
+                    // Логируем информацию о водителе
+                    Log::info("DataDriver readDriverInfoFromFirestore:", $dataDriver);
+                    return $dataDriver;
+                } else {
+                    Log::info("Document does not exist!");
+                    return "Document does not exist!";
+                }
+
+
+
             } else {
                 Log::info("Document does not exist!");
                 return "Document does not exist!";
