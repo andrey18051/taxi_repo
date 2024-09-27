@@ -576,6 +576,13 @@ class DriverController extends Controller
     }
 
 
-
+    public function mapboxAccessToken()
+    {
+        $status = "mapboxAccessToken";
+        return response()->json([
+            'status' => $status,
+            'message' => config('app.keyMapbox')
+        ], 200);
+    }
 
 }

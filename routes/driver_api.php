@@ -44,6 +44,9 @@ Route::get('/driverCardPayToBalance/{uidDriver}/{amount}/{language}', [DriverCon
 Route::get('/driverCardPayByTokenToBalance/{uidDriver}/{amount}/{recToken}', [DriverController::class, 'driverCardPayByTokenToBalance'])
     ->name('driverCardPayByTokenToBalance');
 
+Route::get('/mapboxAccessToken', [DriverController::class, 'mapboxAccessToken'])
+    ->name('mapboxAccessToken');
+
 Route::get('/writeDocumentToBalanceFirestore/{uid}/{uidDriver}/{status}', [FCMController::class, 'writeDocumentToBalanceFirestore'])
     ->name('writeDocumentToBalanceFirestore');
 
