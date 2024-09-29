@@ -4838,6 +4838,7 @@ class AndroidTestOSMController extends Controller
 
         (new FCMController)->deleteDocumentFromFirestore($uid);
         (new FCMController)->deleteDocumentFromFirestoreOrdersTaking($uid);
+        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
         (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();

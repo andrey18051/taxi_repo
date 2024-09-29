@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\OpenStreetMapHelper;
+use App\Jobs\DeleteOrderPersonal;
 use App\Models\Orderweb;
 use App\Models\UserTokenFmsS;
 use Carbon\Carbon;
@@ -125,6 +127,56 @@ class FCMController extends Controller
             return "Order not found.";
         }
 
+        $nearestDriver = self::findDriverInSectorFromFirestore(
+            $order->startLat,
+            $order->startLan // Исправлено на startLon
+        );
+
+        $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
+        if ($nearestDriver['driver_uid'] !== null && !$verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
+            self::writeDocumentToOrdersPersonalDriverToFirestore($order, $nearestDriver['driver_uid']);
+        } else {
+            // Получаем все атрибуты модели в виде массива
+            $data = $order->toArray();
+
+            // Проверка и замена 'no_name' на 'Не указано' в user_full_name
+            if (isset($data['user_full_name']) && str_contains($data['user_full_name'], 'no_name')) {
+                $data['user_full_name'] = 'Не указано';
+            } else {
+                // Удаление текста внутри скобок и самих скобок, если нет 'no_name'
+                if (isset($data['user_full_name'])) {
+                    $data['user_full_name'] = preg_replace('/\s*\[.*?\]/', '', $data['user_full_name']);
+                }
+            }
+            $data['created_at'] = self::currentKievDateTime(); // Преобразуем дату в строку
+            // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
+
+            $documentId = $order->id;
+
+            try {
+                // Получите экземпляр клиента Firestore из сервис-провайдера
+                $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+                $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+                $firestore = $firebase->createFirestore()->database();
+
+                // Получите ссылку на коллекцию и документ
+                $collection = $firestore->collection('orders');
+                $document = $collection->document($documentId);
+
+                // Запишите данные в документ
+                $document->set($data);
+
+                Log::info("Document successfully written!");
+                return "Document successfully written!";
+            } catch (\Exception $e) {
+                Log::error("Error writing document to Firestore: " . $e->getMessage());
+                return "Error writing document to Firestore.";
+            }
+        }
+    }
+
+    public function writeDocumentToOrdersPersonalDriverToFirestore($order, $driver_uid)
+    {
         // Получаем все атрибуты модели в виде массива
         $data = $order->toArray();
 
@@ -137,8 +189,13 @@ class FCMController extends Controller
                 $data['user_full_name'] = preg_replace('/\s*\[.*?\]/', '', $data['user_full_name']);
             }
         }
-        $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
+        $data['created_at'] = self::currentKievDateTime();// Преобразуем дату в строку
+
+        DeleteOrderPersonal::dispatch($data['created_at'], $order, $driver_uid);
+
         // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
+
+        $data['driver_uid'] = $driver_uid;
 
         $documentId = $order->id;
 
@@ -149,7 +206,7 @@ class FCMController extends Controller
             $firestore = $firebase->createFirestore()->database();
 
             // Получите ссылку на коллекцию и документ
-            $collection = $firestore->collection('orders');
+            $collection = $firestore->collection('orders_personal');
             $document = $collection->document($documentId);
 
             // Запишите данные в документ
@@ -184,6 +241,46 @@ class FCMController extends Controller
 
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders');
+            $document = $collection->document($documentId);
+
+            // Удалите документ
+            $document->delete();
+
+            $collection_personal = $firestore->collection('orders_personal');
+            $document_personal = $collection_personal->document($documentId);
+
+            // Удалите документ
+            $document_personal->delete();
+            Log::info("Document successfully deleted!");
+            return "Document successfully deleted!";
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
+        }
+    }
+
+    public function deleteDocumentFromSectorFirestore($uid)
+    {
+        // Найти запись в базе данных по $uid
+        Log::info("Attempting to deleteDocumentFromSectorFirestore order with ID {$uid}");
+
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        $documentId = $order->id;
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders_personal');
             $document = $collection->document($documentId);
 
             // Удалите документ
@@ -464,7 +561,7 @@ class FCMController extends Controller
             $data["driver_uid"] = "";
         }
 
-        $data['created_at'] = $order->created_at->toDateTimeString(); // Преобразуем дату в строку
+        $data['created_at'] = self::currentKievDateTime(); // Преобразуем дату в строку
         // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
 // Преобразуем дату в объект Carbon
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -531,22 +628,18 @@ class FCMController extends Controller
         $data["driver_uid"] = $uidDriver;
 
         // Создаем уникальный идентификатор с меткой времени и случайным числом
-        $currentDateTime = Carbon::now();
-        $kievTimeZone = new DateTimeZone('Europe/Kiev');
-        $dateTime = new DateTime($currentDateTime);
-        $dateTime->setTimezone($kievTimeZone);
-        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
 
         $randomNumber = rand(1000, 9999); // Генерируем случайное число от 1000 до 9999
-        $documentId = "{$data["driver_uid"]}_{$currentDateTime}_{$randomNumber}";
+
 
         $data['status'] = $status;
 
         $data['commission'] = 1 + $data["web_cost"] *0.01;
 
 
-        $data['created_at'] = $formattedTime;
-
+        $data['created_at'] = self::currentKievDateTime();
+        $documentId = "{$data["driver_uid"]}_{$data['created_at']}_{$randomNumber}";
 
 
         switch ($status) {
@@ -594,17 +687,10 @@ class FCMController extends Controller
         $randomNumber = rand(1000, 9999); // Генерируем случайное число от 1000 до 9999
         $documentId = "{$uidDriver}_{$timestamp}_{$randomNumber}";
 
-
-        $currentDateTime = Carbon::now();
-        $kievTimeZone = new DateTimeZone('Europe/Kiev');
-        $dateTime = new DateTime($currentDateTime);
-        $dateTime->setTimezone($kievTimeZone);
-        $formattedTime = $dateTime->format('d.m.Y H:i:s');
-
         $data['driver_uid'] = $uidDriver;
         $data['status'] = $status;
         $data['amount'] = $amount;
-        $data['created_at'] = $formattedTime; // Преобразуем дату в строку
+        $data['created_at'] = self::currentKievDateTime(); // Преобразуем дату в строку
         self::writeDocumentToBalanceCurrentFirestore($uidDriver, $amount);
         $data['current_balance'] = self::readDriverBalanceFromFirestore($uidDriver);
         try {
@@ -628,6 +714,28 @@ class FCMController extends Controller
         }
     }
 
+
+    function currentKievDateTime()
+    {
+        $currentDateTime = Carbon::now();
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+        $dateTime = new DateTime($currentDateTime);
+        $dateTime->setTimezone($kievTimeZone);
+        return $dateTime->format('d.m.Y H:i:s');
+    }
+
+    function secondsDifference($time1)
+    {
+
+        $time2 = self::currentKievDateTime();
+
+// Преобразуем строки в объекты Carbon
+        $carbonTime1 = Carbon::createFromFormat('d.m.Y H:i:s', $time1, 'Europe/Kiev');
+        $carbonTime2 = Carbon::createFromFormat('d.m.Y H:i:s', $time2, 'Europe/Kiev');
+
+// Вычисляем разницу во времени в секундах
+        return $carbonTime1->diffInSeconds($carbonTime2);
+    }
     /**
      * @throws \Exception
      */
@@ -638,17 +746,13 @@ class FCMController extends Controller
     ) {
 
         $documentId = $uidDriver;
+        Log::info("writeDocumentCurrentSectorLocationFirestore! $documentId");
 
-        $currentDateTime = Carbon::now();
-        $kievTimeZone = new DateTimeZone('Europe/Kiev');
-        $dateTime = new DateTime($currentDateTime);
-        $dateTime->setTimezone($kievTimeZone);
-        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
 
         $data['driver_uid'] = $uidDriver;
-        $data['$latitude'] = $latitude;
+        $data['latitude'] = $latitude;
         $data['longitude'] = $longitude;
-        $data['created_at'] = $formattedTime; // Преобразуем дату в строку
 
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
@@ -659,7 +763,7 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('sector');
             $document = $collection->document($documentId);
-
+            $data['created_at'] = self::currentKievDateTime();
             // Запишите данные в документ
             $document->set($data);
 
@@ -830,6 +934,63 @@ class FCMController extends Controller
         } catch (\Exception $e) {
             Log::error("Error reading document from Firestore: " . $e->getMessage());
             return "Error reading document from Firestore.";
+        }
+    }
+
+    /**
+     * Найти ближайшего водителя в секторе из Firestore.
+     *
+     * @param float $latitude Широта точки
+     * @param float $longitude Долгота точки
+     * @return array|null Данные ближайшего водителя или null, если не найден
+     */
+    public function findDriverInSectorFromFirestore(float $latitude, float $longitude): ?array
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию
+            $collection = $firestore->collection('sector');
+
+            // Инициализируем переменные для ближайшего водителя
+            $nearestDriver = null;
+            $nearestDistance = PHP_FLOAT_MAX;
+
+            // Перебираем документы в коллекции
+            $snapshot = $collection->documents();
+            foreach ($snapshot as $document) {
+                // Получаем данные документа
+                $data = $document->data();
+
+                // Вычисляем расстояние до водителя
+                $driverLatitude = (float)$data['latitude'];
+                $driverLongitude = (float)$data['longitude'];
+
+                // Используем OpenStreetMapHelper для вычисления расстояния
+                $osrmHelper = new OpenStreetMapHelper();
+                $distance = $osrmHelper->getRouteDistance(
+                    $driverLatitude,
+                    $driverLongitude,
+                    $latitude,
+                    $longitude,
+                );
+
+                // Если расстояние меньше 3 км и ближе предыдущего, обновляем ближайшего водителя
+                if ($distance !== null && $distance < 3000 && $distance < $nearestDistance) {
+                    $nearestDriver = $data;
+                    $nearestDistance = $distance;
+                }
+            }
+
+            // Возвращаем данные ближайшего водителя или null, если не найден
+            return $nearestDriver;
+        } catch (\Exception $e) {
+            // Обработка ошибок
+            Log::error('Error fetching driver from Firestore: ' . $e->getMessage());
+            return null;
         }
     }
 
@@ -1047,6 +1208,98 @@ class FCMController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Error checking return request: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function autoDeleteOrderPersonal($created_at, $order, $driver_uid)
+    {
+        if (self::secondsDifference($created_at) >=20) {
+            $documentId = $order->id;
+            $data = $order->toArray();
+            try {
+                // Получите экземпляр клиента Firestore из сервис-провайдера
+                $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+                $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+                $firestore = $firebase->createFirestore()->database();
+
+                // Удаление из личных заказов
+                $collection = $firestore->collection('orders_personal');
+                $document = $collection->document($documentId);
+
+                $document->delete();
+
+                // Запись в эфир
+
+                $collection = $firestore->collection('orders');
+                $document = $collection->document($documentId);
+                $document->set($data);
+
+                // Запись в отказные
+
+                $collection = $firestore->collection('orders_refusal');
+                $document = $collection->document($documentId);
+                $data["driver_uid"] = $driver_uid;
+                $document->set($data);
+
+                // Запись в историю
+
+                $collection = $firestore->collection('orders_history');
+                $document = $collection->document($documentId);
+                $data["status"] = "refusal";
+                $document->set($data);
+
+                Log::info("Document successfully written!");
+                return "Document successfully written!";
+            } catch (\Exception $e) {
+                Log::error("Error writing document to Firestore: " . $e->getMessage());
+                return "Error writing document to Firestore.";
+            }
+        }
+
+    }
+
+    public function verifyRefusal($orderId, $driver_uid)
+    {
+        try {
+            // Получаем путь к учетным данным Firebase из переменных окружения
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            if (!$serviceAccountPath) {
+                Log::error('Firebase credentials not set in environment.');
+                return false;
+            }
+
+            // Инициализация клиента Firestore через Firebase SDK
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Поиск в коллекции 'orders_refusal'
+            $collection = $firestore->collection('orders_refusal');
+            $document = $collection->document($orderId);
+
+            // Получение снимка (snapshot) документа по orderId
+            $snapshot = $document->snapshot();
+
+            // Проверка на существование документа
+            if ($snapshot->exists()) {
+                $data = $snapshot->data();
+
+                // Проверка, что UID водителя совпадает с тем, что в документе
+                if ($data['driver_uid'] === $driver_uid) {
+                    Log::info("Document with orderId {$orderId} successfully verified for driver_uid {$driver_uid}.");
+                    return true;
+                } else {
+                    Log::info("Document with orderId {$orderId} found, but driver_uid does not match.");
+                    return false;
+                }
+            } else {
+                Log::info("Document with orderId {$orderId} does not exist.");
+                return false;
+            }
+
+        } catch (\Exception $e) {
+            // Логирование ошибки
+            Log::error("Error in verifyRefusal method for orderId {$orderId}: " . $e->getMessage());
             return false;
         }
     }

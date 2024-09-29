@@ -20,28 +20,11 @@ use Kreait\Firebase\Factory;
 
 class DriverController extends Controller
 {
-
     protected $osmHelper;
 
-    public function __construct(OpenStreetMapHelper $osmHelper)
-    {
+    public function __construct(OpenStreetMapHelper $osmHelper) {
         $this->osmHelper = $osmHelper;
     }
-
-    public function getDistance(
-        $startLat,
-        $startLon,
-        $endLat,
-        $endLon
-    ) {
-        // Получаем координаты из запроса
-
-
-        // Получаем расстояние с помощью сервиса OpenStreetMapHelper
-        return $this->osmHelper->getRouteDistance($startLat, $startLon, $endLat, $endLon);
-    }
-
-
 
     public function index(): int
     {
@@ -479,7 +462,7 @@ class DriverController extends Controller
         $latitude,
         $longitude
     ) {
-
+        Log::info("driverCurrentSectorLocationStoreFirestore! $uidDriver");
         (new FCMController)->writeDocumentCurrentSectorLocationFirestore(
             $uidDriver,
             $latitude,
@@ -492,6 +475,18 @@ class DriverController extends Controller
             'message' => 'driverCurrentSectorLocationStoreFirestore successfully'
         ], 200);
     }
+//
+//    public function findDriverInSectorFromFirestore(
+//        $latitude,
+//        $longitude
+//    ) {
+//
+//        $nearestDriver = (new FCMController)->findDriverInSectorFromFirestore(
+//            $latitude,
+//            $longitude
+//        );
+//        return  $nearestDriver['driver_uid'];
+//    }
 
     /**
      * Show the form for creating a new resource.

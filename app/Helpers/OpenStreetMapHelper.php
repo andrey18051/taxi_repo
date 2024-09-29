@@ -5,6 +5,7 @@ namespace App\Helpers;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Log;
 
 class OpenStreetMapHelper
 {
@@ -14,7 +15,7 @@ class OpenStreetMapHelper
     {
         $this->client = new Client([
             'base_uri' => 'https://router.project-osrm.org/',
-            'timeout'  => 10.0,
+            'timeout'  => 5.0,
         ]);
     }
 
@@ -33,7 +34,8 @@ class OpenStreetMapHelper
             $response = $this->client->get("route/v1/driving/{$startLon},{$startLat};{$endLon},{$endLat}", [
                 'query' => [
                     'overview' => 'false',
-                ]
+                ],
+                'timeout' => 5.0,
             ]);
 
             $data = json_decode($response->getBody()->getContents(), true);
@@ -43,11 +45,16 @@ class OpenStreetMapHelper
                 return $data['routes'][0]['distance'];
             }
 
-            return null;
+            // Если OSRM не смог рассчитать маршрут за 5 секунд, пробуем через MapBox
+            $mapBoxHelper = new MapBoxHelper();
+            return $mapBoxHelper->getRouteDistance($startLat, $startLon, $endLat, $endLon);
         } catch (RequestException $e) {
             // Логируем ошибку, если произошел сбой
-            \Log::error("Error fetching route from OSRM: " . $e->getMessage());
-            return null;
+            Log::error("Error fetching route from OSRM: " . $e->getMessage());
+
+            // Пробуем через MapBox
+            $mapBoxHelper = new MapBoxHelper();
+            return $mapBoxHelper->getRouteDistance($startLat, $startLon, $endLat, $endLon);
         }
     }
 }
