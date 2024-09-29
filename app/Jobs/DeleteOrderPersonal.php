@@ -24,11 +24,9 @@ class DeleteOrderPersonal implements ShouldQueue
      * @return void
      */
     public function __construct(
-        $created_at,
         $order,
         $driver_uid
     ) {
-        $this->created_at = $created_at;
         $this->order= $order;
         $this->driver_uid = $driver_uid;
     }
@@ -40,28 +38,20 @@ class DeleteOrderPersonal implements ShouldQueue
      */
     public function handle()
     {
+
         Log::info("DeleteOrderPersonal
-            $this->created_at,
             $this->order,
             $this->driver_uid");
 
-
-        do {
-            $time2 = (new FCMController())->currentKievDateTime();
-            $carbonTime1 = Carbon::createFromFormat('d.m.Y H:i:s', $this->created_at, 'Europe/Kiev');
-            $carbonTime2 = Carbon::createFromFormat('d.m.Y H:i:s', $time2, 'Europe/Kiev');
-
-            sleep(1);
-        } while ($carbonTime1->diffInSeconds($carbonTime2)<20);
+        sleep(20);
 
         //Запускаем через 20 секунд
-
-        if (!(new FCMController())->verifyRefusal($this->order->id, $this->driver_uid)) {
-            (new FCMController())->autoDeleteOrderPersonal(
-                $this->created_at,
-                $this->order,
-                $this->driver_uid
-            );
-        }
+        (new FCMController())->autoDeleteOrderPersonal(
+            $this->order,
+            $this->driver_uid
+        );
+//        if (!(new FCMController())->verifyRefusal($this->order->id, $this->driver_uid)) {
+//
+//        }
     }
 }

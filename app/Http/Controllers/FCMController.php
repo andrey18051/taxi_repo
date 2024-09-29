@@ -15,6 +15,7 @@ use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Factory;
 use Google\Cloud\Firestore\FirestoreClient;
 
+
 class FCMController extends Controller
 {
     public function getUserByEmail($email, $app)
@@ -133,6 +134,7 @@ class FCMController extends Controller
         );
 
         $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
+        Log::info("writeDocumentToFirestore verifyRefusal $verifyRefusal");
         if ($nearestDriver['driver_uid'] !== null && !$verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
             self::writeDocumentToOrdersPersonalDriverToFirestore($order, $nearestDriver['driver_uid']);
         } else {
@@ -191,9 +193,7 @@ class FCMController extends Controller
         }
         $data['created_at'] = self::currentKievDateTime();// Преобразуем дату в строку
 
-        DeleteOrderPersonal::dispatch($data['created_at'], $order, $driver_uid);
-
-        // Пример: если нужно добавить другие поля или изменить их формат, можно сделать это здесь
+        DeleteOrderPersonal::dispatch($order, $driver_uid)->onQueue('high');
 
         $data['driver_uid'] = $driver_uid;
 
@@ -511,9 +511,33 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders_taking');
             $document = $collection->document($uid);
+            $snapshot = $document->snapshot();
+
+            // Получите данные из документа
+            $data = $snapshot->data();
+            $driver_uid = $data['driver_uid'];
+
 
             // Удалите документ
             $document->delete();
+
+            // Поиск в коллекции 'orders_refusal'
+
+            $collection = $firestore->collection('orders_refusal');
+            $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+            $documentId = $order->id;
+
+            $document = $collection->document($documentId);
+            $data["driver_uid"] = $driver_uid;
+            $document->set($data);
+
+            $collection = $firestore->collection('orders_history');
+            $document = $collection->document($documentId);
+            $data["status"] = "refusal";
+            $data["updated_at"] = self::currentKievDateTime();
+            $document->set($data);
+
             (new MessageSentController())->sentDriverUnTakeOrder($uid);
 
 
@@ -569,9 +593,6 @@ class FCMController extends Controller
         $dateTime = new DateTime($order->updated_at);
         $dateTime->setTimezone($kievTimeZone);
 
-// Получаем оригинальный формат без изменений
-        $data['updated_at'] = $dateTime->format("Y-m-d\TH:i:s.u\Z");; // Выдает в формате ISO 8601
-
         $data['status'] = $status;
 
         $documentId = $order->id;
@@ -585,7 +606,7 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders_history');
             $document = $collection->document($documentId);
-
+            $data["updated_at"] = self::currentKievDateTime();
             // Запишите данные в документ
             $document->set($data);
 
@@ -946,6 +967,7 @@ class FCMController extends Controller
      */
     public function findDriverInSectorFromFirestore(float $latitude, float $longitude): ?array
     {
+        Log::info("findDriverInSectorFromFirestore");
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
@@ -1212,55 +1234,55 @@ class FCMController extends Controller
         }
     }
 
-    public function autoDeleteOrderPersonal($created_at, $order, $driver_uid)
+    public function autoDeleteOrderPersonal($order, $driver_uid)
     {
-        if (self::secondsDifference($created_at) >=20) {
-            $documentId = $order->id;
-            $data = $order->toArray();
-            try {
-                // Получите экземпляр клиента Firestore из сервис-провайдера
-                $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
-                $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
-                $firestore = $firebase->createFirestore()->database();
+        $documentId = $order->id;
+        $data = $order->toArray();
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
 
-                // Удаление из личных заказов
-                $collection = $firestore->collection('orders_personal');
-                $document = $collection->document($documentId);
+            // Удаление из личных заказов
+            $collection = $firestore->collection('orders_personal');
+            $document = $collection->document($documentId);
 
-                $document->delete();
+            $document->delete();
 
-                // Запись в эфир
+            // Запись в эфир
 
-                $collection = $firestore->collection('orders');
-                $document = $collection->document($documentId);
-                $document->set($data);
+            $collection = $firestore->collection('orders');
+            $document = $collection->document($documentId);
+            $document->set($data);
 
-                // Запись в отказные
+            // Запись в отказные
 
-                $collection = $firestore->collection('orders_refusal');
-                $document = $collection->document($documentId);
-                $data["driver_uid"] = $driver_uid;
-                $document->set($data);
+            $collection = $firestore->collection('orders_refusal');
+            $document = $collection->document($documentId);
+            $data["driver_uid"] = $driver_uid;
+            $document->set($data);
 
-                // Запись в историю
+            // Запись в историю
 
-                $collection = $firestore->collection('orders_history');
-                $document = $collection->document($documentId);
-                $data["status"] = "refusal";
-                $document->set($data);
+            $collection = $firestore->collection('orders_history');
+            $document = $collection->document($documentId);
+            $data["updated_at"] = self::currentKievDateTime();
+            $data["status"] = "refusal";
+            $document->set($data);
 
-                Log::info("Document successfully written!");
-                return "Document successfully written!";
-            } catch (\Exception $e) {
-                Log::error("Error writing document to Firestore: " . $e->getMessage());
-                return "Error writing document to Firestore.";
-            }
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
         }
-
     }
 
     public function verifyRefusal($orderId, $driver_uid)
     {
+        Log::info("verifyRefusal orderId $orderId");
+        Log::info("verifyRefusal driver_uid $driver_uid");
         try {
             // Получаем путь к учетным данным Firebase из переменных окружения
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
