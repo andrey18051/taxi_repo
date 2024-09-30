@@ -177,7 +177,7 @@ class DriverController extends Controller
         return $response->status();
     }
 
-    public function orderTaking($uid)
+    public function orderTaking($uid, $uidDriver)
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("orderTaking" . $uid);
@@ -247,13 +247,12 @@ class DriverController extends Controller
                 );
             }
 
-            $dataDriver = (new FCMController)->readDriverInfoFromFirestore($uid);
+            $dataDriver = (new FCMController)->readDriverInfoFromFirestore($uidDriver);
 
             $orderweb->auto = json_encode($dataDriver);
             $orderweb->closeReason = "101";
             $orderweb->save();
 
-            $uidDriver = self::uidDriver($uid);
             (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "hold");
 
             (new MessageSentController())->sentCarTakingInfo($orderweb);
@@ -391,6 +390,17 @@ class DriverController extends Controller
         return response()->json([
             'status' => $status,
             'message' => 'orderUnTaking successfully'
+        ], 200);
+    }
+    public function orderUnTakingPersonal($uid, $uidDriver)
+    {
+        (new FCMController)->deleteOrderPersonalDocumentFromFirestore($uid, $uidDriver);
+
+        $status = "orderUnTakingPersonal";
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'orderUnTakingPersonal successfully'
         ], 200);
     }
 

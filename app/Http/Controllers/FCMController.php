@@ -421,77 +421,57 @@ class FCMController extends Controller
     }
 
 
-    public function readDriverInfoFromFirestore($uid)
+    public function readDriverInfoFromFirestore($uidDriver)
     {
+
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
+            $collectionDriver = $firestore->collection('users');
 
-            // Получите ссылку на коллекцию и документ
-            $collection = $firestore->collection('orders_taking');
-            $document = $collection->document($uid);
+            $documentDriver = $collectionDriver->document($uidDriver);
+            $snapshotDriver = $documentDriver->snapshot();
+            if ($snapshotDriver->exists()) {
+                $dataDriver = $snapshotDriver->data();
 
-            // Получите снимок документа
-            $snapshot = $document->snapshot();
+                // Получаем доступ к коллекции 'cars'
+                $collectionCar = $firestore->collection('cars');
 
-            if ($snapshot->exists()) {
-                // Получите данные из документа
-                $data = $snapshot->data();
-                Log::info("driver_uid: " . $data['driver_uid']);
+                // Выполняем запрос, чтобы найти документ, где activeCar равно true и driverNumber совпадает с $data['driver_uid']
+                $query = $collectionCar
+                    ->where('activeCar', '==', true)
+                    ->where('driverNumber', '==', $uidDriver);
 
-                $collectionDriver = $firestore->collection('users');
-                $documentDriver = $collectionDriver->document($data['driver_uid']);
-                $snapshotDriver = $documentDriver->snapshot();
-                if ($snapshotDriver->exists()) {
-                    $dataDriver = $snapshotDriver->data();
+                // Получаем результаты запроса
+                $documents = $query->documents();
 
-                    // Получаем доступ к коллекции 'cars'
-                    $collectionCar = $firestore->collection('cars');
-
-                    // Выполняем запрос, чтобы найти документ, где activeCar равно true и driverNumber совпадает с $data['driver_uid']
-                    $query = $collectionCar
-                        ->where('activeCar', '==', true)
-                        ->where('driverNumber', '==', $data['driver_uid']);
-
-                    // Получаем результаты запроса
-                    $documents = $query->documents();
-
-                    // Проверяем, были ли найдены документы
-                    if ($documents->isEmpty()) {
-                        echo "Нет активных автомобилей для водителя с UID: " . $data['driver_uid'];
-                    } else {
-                        // Получаем первый документ (поскольку ожидаем только один)
-                        $document = $documents->rows()[0]; // Получаем первый документ
-
-                        // Получаем данные автомобиля
-                        $dataCar = $document->data();
-
-                        // Присваиваем данные автомобиля в массив $dataDriver
-                        $dataDriver["brand"] = $dataCar['brand'];
-                        $dataDriver["model"] = $dataCar['model'];
-                        $dataDriver["number"] = $dataCar['number'];
-                        $dataDriver["color"] = $dataCar['color'];
-
-
-                        // Логируем информацию об автомобиле
-                        Log::info("Active Car Info:", $dataCar);
-                    }
-
-                    // Логируем информацию о водителе
-                    Log::info("DataDriver readDriverInfoFromFirestore:", $dataDriver);
-                    return $dataDriver;
+                // Проверяем, были ли найдены документы
+                if ($documents->isEmpty()) {
+                    echo "Нет активных автомобилей для водителя с UID: " . $uidDriver;
                 } else {
-                    Log::info("Document does not exist!");
-                    return "Document does not exist!";
+                    // Получаем первый документ (поскольку ожидаем только один)
+                    $document = $documents->rows()[0]; // Получаем первый документ
+
+                    // Получаем данные автомобиля
+                    $dataCar = $document->data();
+
+                    // Присваиваем данные автомобиля в массив $dataDriver
+                    $dataDriver["brand"] = $dataCar['brand'];
+                    $dataDriver["model"] = $dataCar['model'];
+                    $dataDriver["number"] = $dataCar['number'];
+                    $dataDriver["color"] = $dataCar['color'];
+                    // Логируем информацию об автомобиле
+                    Log::info("Active Car Info:", $dataCar);
                 }
-
-
-
+                // Логируем информацию о водителе
+                Log::info("DataDriver readDriverInfoFromFirestore:", $dataDriver);
+                return $dataDriver;
             } else {
                 Log::info("Document does not exist!");
                 return "Document does not exist!";
+
             }
         } catch (\Exception $e) {
             Log::error("Error reading document from Firestore: " . $e->getMessage());
@@ -501,7 +481,14 @@ class FCMController extends Controller
 
     public function deleteOrderTakingDocumentFromFirestore($uid)
     {
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        $documentId = $order->id;
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
@@ -511,32 +498,8 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders_taking');
             $document = $collection->document($uid);
-            $snapshot = $document->snapshot();
-
-            // Получите данные из документа
-            $data = $snapshot->data();
-            $driver_uid = $data['driver_uid'];
-
-
             // Удалите документ
             $document->delete();
-
-            // Поиск в коллекции 'orders_refusal'
-
-            $collection = $firestore->collection('orders_refusal');
-            $order = Orderweb::where('dispatching_order_uid', $uid)->first();
-
-            $documentId = $order->id;
-
-            $document = $collection->document($documentId);
-            $data["driver_uid"] = $driver_uid;
-            $document->set($data);
-
-            $collection = $firestore->collection('orders_history');
-            $document = $collection->document($documentId);
-            $data["status"] = "refusal";
-            $data["updated_at"] = self::currentKievDateTime();
-            $document->set($data);
 
             (new MessageSentController())->sentDriverUnTakeOrder($uid);
 
@@ -549,6 +512,64 @@ class FCMController extends Controller
             return "Error deleting document from Firestore.";
         }
     }
+
+    public function deleteOrderPersonalDocumentFromFirestore($uid, $driver_uid)
+    {
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $documentId = $order->id;
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            $collection = $firestore->collection('orders_personal');
+            $document = $collection->document($documentId);
+            $snapshot = $document->snapshot();
+
+            // Получите данные из документа
+            $data = $snapshot->data();
+
+            if (!is_null($data)) {
+                // Удаление документа
+                $document->delete();
+
+                // Перемещение данных в другую коллекцию
+                $collection = $firestore->collection('orders');
+                $document = $collection->document($documentId);
+                $document->set($data);
+
+                // Обновление данных в коллекции 'orders_refusal'
+                $collection = $firestore->collection('orders_refusal');
+
+
+                $document = $collection->document($documentId);
+                $data["driver_uid"] = $driver_uid;
+                $document->set($data);
+
+                // Обновление истории заказов
+                $collection = $firestore->collection('orders_history');
+                $document = $collection->document($documentId);
+                $data["status"] = "refusal";
+                $data["updated_at"] = self::currentKievDateTime();
+                $document->set($data);
+
+                // Отправка уведомления водителю
+                (new MessageSentController())->sentDriverUnTakeOrder($uid);
+
+                Log::info("Document successfully deleted!");
+                return "Document successfully deleted!";
+            } else {
+                Log::error("Document with UID $uid has no data or doesn't exist.");
+                return "Document not found or has no data.";
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
+        }
+    }
+
 
     /**
      * @throws \Exception
