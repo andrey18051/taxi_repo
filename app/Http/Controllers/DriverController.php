@@ -22,6 +22,7 @@ class DriverController extends Controller
 {
     protected $osmHelper;
 
+
     public function __construct(OpenStreetMapHelper $osmHelper) {
         $this->osmHelper = $osmHelper;
     }
@@ -394,6 +395,7 @@ class DriverController extends Controller
     }
     public function orderUnTakingPersonal($uid, $uidDriver)
     {
+        $uid = (new MemoryOrderChangeController)->show($uid);
         (new FCMController)->deleteOrderPersonalDocumentFromFirestore($uid, $uidDriver);
 
         $status = "orderUnTakingPersonal";

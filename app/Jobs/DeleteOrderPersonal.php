@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\FCMController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use Carbon\Carbon;
@@ -15,19 +16,21 @@ use Illuminate\Support\Facades\Log;
 class DeleteOrderPersonal implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $created_at;
-    protected $order;
+
+
     protected $driver_uid;
+    protected $dispatching_order_uid;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
     public function __construct(
-        $order,
+        $dispatching_order_uid,
         $driver_uid
     ) {
-        $this->order= $order;
+        $this->dispatching_order_uid = $dispatching_order_uid;
         $this->driver_uid = $driver_uid;
     }
 
@@ -40,14 +43,14 @@ class DeleteOrderPersonal implements ShouldQueue
     {
 
         Log::info("DeleteOrderPersonal
-            $this->order,
+            $this->dispatching_order_uid,
             $this->driver_uid");
 
         sleep(20);
 
         //Запускаем через 20 секунд
-        (new FCMController())->autoDeleteOrderPersonal(
-            $this->order,
+        (new FCMController)->deleteOrderPersonalDocumentFromFirestore(
+            $this->dispatching_order_uid,
             $this->driver_uid
         );
 //        if (!(new FCMController())->verifyRefusal($this->order->id, $this->driver_uid)) {

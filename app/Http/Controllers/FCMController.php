@@ -193,7 +193,7 @@ class FCMController extends Controller
         }
         $data['created_at'] = self::currentKievDateTime();// Преобразуем дату в строку
 
-        DeleteOrderPersonal::dispatch($order, $driver_uid)->onQueue('high');
+        DeleteOrderPersonal::dispatch($order->dispatching_order_uid, $driver_uid);
 
         $data['driver_uid'] = $driver_uid;
 
@@ -498,15 +498,35 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders_taking');
             $document = $collection->document($uid);
+            $snapshot = $document->snapshot();
+            $data = $snapshot->data();
             // Удалите документ
             $document->delete();
+            if (!is_null($data)) {
+                // Удаление документа
+                $document->delete();
 
-            (new MessageSentController())->sentDriverUnTakeOrder($uid);
+//                // Перемещение данных в другую коллекцию
+//                $collection = $firestore->collection('orders');
+//                $document = $collection->document($documentId);
+//                $document->set($data);
+//
+//
+//                $order->auto = "";
+//                $order->closeReason = "-1";
+//                $order->closeReasonI = "0";
+//                $order->save();
 
+                // Отправка уведомления водителю
+                (new MessageSentController())->sentDriverUnTakeOrder($uid);
 
+                Log::info("Document successfully deleted!");
+                return "Document successfully deleted!";
+            } else {
+                Log::error("Document with UID $uid has no data or doesn't exist.");
+                return "Document not found or has no data.";
+            }
 
-            Log::info("Document successfully deleted!");
-            return "Document successfully deleted!";
         } catch (\Exception $e) {
             Log::error("Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
