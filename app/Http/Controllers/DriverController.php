@@ -382,7 +382,7 @@ class DriverController extends Controller
         }
 
 
-        (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid);
+        (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid, $uidDriver);
         $uid = (new MemoryOrderChangeController)->show($uid);
         self::createNewOrder($uid);
 
@@ -432,6 +432,28 @@ class DriverController extends Controller
                 'invoiceUrl' => null
             ];
         }
+    }
+
+    public function driverCardPayDownBalance($uidDriver, $amount, $comment, $selectedTypeCode)
+    {
+        (new FCMController())->driverCardPayDownBalance($uidDriver, $amount, $comment, $selectedTypeCode);
+
+
+        $status = "Вывод с баланса";
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverCardPayDownBalance successfully'
+        ], 200);
+    }
+
+    public function driverDownBalanceAdmin()
+    {
+
+        $status = "Вывод с баланса";
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverCardPayDownBalance successfully'
+        ], 200);
     }
     public function driverCardPayByTokenToBalance($uidDriver, $amount, $recToken)
     {

@@ -4,16 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
 use App\Jobs\DeleteOrderPersonal;
+use App\Mail\Admin;
+use App\Mail\DriverInfo;
+use App\Mail\InfoEmail;
 use App\Models\Orderweb;
 use App\Models\UserTokenFmsS;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Factory;
 use Google\Cloud\Firestore\FirestoreClient;
+use SebastianBergmann\Diff\Exception;
 
 
 class FCMController extends Controller
@@ -132,6 +137,8 @@ class FCMController extends Controller
             $order->startLat,
             $order->startLan // Исправлено на startLon
         );
+        $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
+        $order->save();
 
         $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
         Log::info("writeDocumentToFirestore verifyRefusal $verifyRefusal");
@@ -479,7 +486,7 @@ class FCMController extends Controller
         }
     }
 
-    public function deleteOrderTakingDocumentFromFirestore($uid)
+    public function deleteOrderTakingDocumentFromFirestore($uid, $driver_uid)
     {
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
@@ -517,6 +524,12 @@ class FCMController extends Controller
 //                $order->closeReasonI = "0";
 //                $order->save();
 
+                // Обновление данных в коллекции 'orders_refusal'
+                $collection = $firestore->collection('orders_refusal');
+
+                $document = $collection->document($documentId);
+                $data["driver_uid"] = $driver_uid;
+                $document->set($data);
                 // Отправка уведомления водителю
                 (new MessageSentController())->sentDriverUnTakeOrder($uid);
 
@@ -1367,4 +1380,133 @@ class FCMController extends Controller
         }
     }
 
+    public function driverCardPayDownBalance($uidDriver, $amount, $comment, $selectedTypeCode)
+    {
+        try {
+            $currentDateTime = Carbon::now();
+            $kievTimeZone = new DateTimeZone('Europe/Kiev');
+            $dateTime = new DateTime($currentDateTime);
+            $dateTime->setTimezone($kievTimeZone);
+            $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            $collection = $firestore->collection('balance_current');
+            $document_balance_current = $collection->document($uidDriver);
+
+            // Получаем существующий документ
+            $snapshot_balance_current = $document_balance_current->snapshot();
+
+            $previousAmount = 0;
+
+            // Если документ существует, получаем предыдущее значение amount
+            if ($snapshot_balance_current->exists()) {
+                $previousAmount = $snapshot_balance_current->data()['amount'] ?? 0;
+            }
+
+            // Добавляем новое значение к предыдущему
+            $newAmount = $previousAmount - $amount;
+
+            $dataBalance = [
+                'driver_uid' => $uidDriver,
+                'amount' => $newAmount,
+                'created_at' => $formattedTime,
+            ];
+
+            // Записываем или обновляем документ с новым значением
+            $document_balance_current->set($dataBalance);
+
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $dataDriver = $snapshot->data();
+
+                $name = $dataDriver['name'] ?? 'Unknown';
+                $phoneNumber = $dataDriver['phoneNumber'] ?? 'Unknown';
+                $driverNumber = $dataDriver['driverNumber'] ?? 'Unknown';
+                $email = $dataDriver['email'] ?? 'Unknown';
+
+
+
+                $randomNumber = rand(1000000, 9999999); // Генерируем случайное число от 1000 до 9999
+                $documentId = "R_{$driverNumber}_{$randomNumber}";
+
+
+                $collection = $firestore->collection('balance');
+                $document = $collection->document($documentId);
+                $data['status'] = "holdDown";
+                $data['amount'] = (float)$amount;  // Записываем как число
+                $data['commission'] = (float)$amount;  // Записываем как число
+                $data['id'] = $documentId;
+                $data['selectedTypeCode'] = $selectedTypeCode;
+                $data['created_at'] = $formattedTime;
+                $data['current_balance'] = $newAmount;
+                $data['driver_uid'] = $uidDriver;
+
+                // Запишите данные в документ
+                $document->set($data);
+
+
+
+
+
+
+$subject = "Водитель
+ФИО $name
+телефон $phoneNumber
+позывной $driverNumber
+google_id: $uidDriver ожидает возврата средств:
+Сумма  $amount
+Способ возврата $selectedTypeCode
+Комментарии $comment
+
+Время заявки $formattedTime
+Ссылка для возврата средтсв https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/";
+
+                $messageAdmin = "$subject";
+
+                $alarmMessage = new TelegramController();
+
+                try {
+                    $alarmMessage->sendAlarmMessage($messageAdmin);
+                    $alarmMessage->sendMeMessage($messageAdmin);
+                } catch (Exception $e) {
+                    Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+                }
+                Log::debug("sentCancelInfo  $messageAdmin");
+            }
+
+            $subject = 'Заявка на возврат средств';
+
+            $paramsAdmin = [
+                'email' => $email,
+                'subject' => $subject,
+                'message' => $messageAdmin,
+            ];
+
+            Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
+
+            Mail::to('cartaxi4@gmail.com')->send(new DriverInfo($paramsAdmin));
+
+
+
+
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
 }
