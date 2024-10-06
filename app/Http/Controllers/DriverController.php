@@ -446,15 +446,7 @@ class DriverController extends Controller
         ], 200);
     }
 
-    public function driverDownBalanceAdmin()
-    {
 
-        $status = "Вывод с баланса";
-        return response()->json([
-            'status' => $status,
-            'message' => 'driverCardPayDownBalance successfully'
-        ], 200);
-    }
     public function driverCardPayByTokenToBalance($uidDriver, $amount, $recToken)
     {
         try {

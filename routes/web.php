@@ -1417,3 +1417,21 @@ Route::get('/fcm/sendNotification/{body}/{app}/{user_id}/', [FCMController::clas
 Route::get('/fcm/getUserByEmail/{email}/{app}/', [FCMController::class,'getTokenByEmail']);
 Route::get('/fcm/readDocumentFromUsersFirestore/{$uidDriver}', [FCMController::class,'readDocumentFromUsersFirestore']);
 Route::get('/fcm/writeDocumentToFirestore/{uid}', [FCMController::class,'writeDocumentToFirestore']);
+
+/*
+ * Возврат денег с баланса
+ */
+Route::middleware(['web'])->group(function () {
+    Route::post('/return-amount-save', [FCMController::class, 'returnAmountSave'])
+        ->name('return-amount-save');
+});
+Route::get('/driver-amount', function () {
+    return view('driver.driver_amount', ['params' => request()->all()]);
+})->name('driverDownBalanceAdmin');
+
+Route::get('/driver-amount-finish', function () {
+    return view('driver.driver_amount_finish', ['params' => request()->all()]);
+})->name('driverDownBalanceAdminfinish');
+
+//Route::get('/return-amount-save', [FCMController::class, 'returnAmountSave'])
+//    ->name('return-amount-save');

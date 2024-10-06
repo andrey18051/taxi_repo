@@ -12,6 +12,7 @@ use App\Models\UserTokenFmsS;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -1455,13 +1456,10 @@ class FCMController extends Controller
                 $data['created_at'] = $formattedTime;
                 $data['current_balance'] = $newAmount;
                 $data['driver_uid'] = $uidDriver;
+                $data['complete'] = false;
 
                 // Запишите данные в документ
                 $document->set($data);
-
-
-
-
 
 
 $subject = "Водитель
@@ -1472,11 +1470,9 @@ google_id: $uidDriver ожидает возврата средств:
 Сумма  $amount
 Способ возврата $selectedTypeCode
 Комментарии $comment
+Время заявки $formattedTime";
 
-Время заявки $formattedTime
-Ссылка для возврата средтсв https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/";
-
-                $messageAdmin = "$subject";
+                $messageAdmin = $subject;
 
                 $alarmMessage = new TelegramController();
 
@@ -1490,11 +1486,14 @@ google_id: $uidDriver ожидает возврата средств:
             }
 
             $subject = 'Заявка на возврат средств';
-
+//            https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/R_105226_5138963/pEePGRVPNNU6IeJexWRwBpohu9q2
+            $url = "https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/$documentId/$uidDriver";
             $paramsAdmin = [
                 'email' => $email,
                 'subject' => $subject,
                 'message' => $messageAdmin,
+                'url' => $url,
+
             ];
 
             Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
@@ -1508,5 +1507,300 @@ google_id: $uidDriver ожидает возврата средств:
             Log::error("Error reading document from Firestore: " . $e->getMessage());
             return "Error reading document from Firestore.";
         }
+    }
+
+    public function driverDownBalanceAdmin($documentId, $uidDriver)
+    {
+        try {
+            $currentDateTime = Carbon::now();
+            $kievTimeZone = new DateTimeZone('Europe/Kiev');
+            $dateTime = new DateTime($currentDateTime);
+            $dateTime->setTimezone($kievTimeZone);
+            $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document_users = $collection->document($uidDriver);
+            $snapshot_users = $document_users->snapshot();
+            $data_users = $snapshot_users->data();
+
+            $name = $data_users['name'] ?? 'Unknown';
+            $phoneNumber = $data_users['phoneNumber'] ?? 'Unknown';
+            $driverNumber = $data_users['driverNumber'] ?? 'Unknown';
+            $driver_uid = $data_users['uid'] ?? 'Unknown';
+            $email = $data_users['email'] ?? 'Unknown';
+
+
+
+            $collection = $firestore->collection('balance_current');
+            $document_balance_current = $collection->document($uidDriver);
+            $snapshot_balance_current = $document_balance_current->snapshot();
+            $dataDriver_balance_current = $snapshot_balance_current->data();
+            $balance_current = $dataDriver_balance_current['amount'] ?? 'Unknown';
+
+            $collection = $firestore->collection('balance');
+            $document_balance = $collection->document($documentId);
+            $snapshot_balance = $document_balance->snapshot();
+            $dataDriver_balance = $snapshot_balance->data();
+            $amount_to_return = $dataDriver_balance['amount'] ?? 'Unknown';
+            $order_to_return = $documentId;
+            $selectedTypeCode = $dataDriver_balance['selectedTypeCode'] ?? 'Unknown';
+            $order_to_return_date = $dataDriver_balance['created_at'] ?? 'Unknown';
+
+            $params= [
+                'name' => $name,
+                'phoneNumber' => $phoneNumber,
+                'driverNumber' => $driverNumber,
+                'driver_uid' => $driver_uid,
+                'email' => $email,
+                'balance_current' => $balance_current,
+                'amount_to_return' => $amount_to_return,
+                'order_to_return' => $order_to_return,
+                'selectedTypeCode' => $selectedTypeCode,
+                'order_to_return_date' => $order_to_return_date,
+
+            ];
+
+
+            return redirect()->route('driverDownBalanceAdmin', $params);
+//            return view('driver.driver_amount', ['params' => $params]);
+//            return response()->json($params, 200);
+
+
+        } catch (\Exception $e) {
+            Log::error("driverDownBalanceAdmin Error reading document from Firestore: " . $e->getMessage());
+            return "driverDownBalanceAdmin Error reading document from Firestore.";
+        }
+    }
+
+    public function returnAmountSave(Request $request)
+    {
+        Log::info('Запрос на возврат суммы получен.', [
+            'request_data' => $request->all() // Логируем все данные запроса
+        ]);
+
+
+
+        $name = $request->name;
+        $phoneNumber = $request->phoneNumber;
+        $driverNumber = $request->driverNumber;
+        $driver_uid = $request->driver_uid;
+        $email = $request->email;
+        $balance_current = $request->balance_current;
+        $amount_to_return = $request->amount_to_return;
+        $amount_to_return_admin = $request->amount_to_return_admin;
+        $order_to_return = $request->order_to_return;
+        $selectedTypeCode = $request->selectedTypeCode;
+        $order_to_return_date = $request->order_to_return_date;
+
+        if ($request->code_verify == "123456") {
+            try {
+
+                // Получите экземпляр клиента Firestore из сервис-провайдера
+                $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+                $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+                $firestore = $firebase->createFirestore()->database();
+
+
+//Запись о воврате холда заявки на баланс
+                $formattedTime = self::currentTime();
+
+                $collection = $firestore->collection('balance_current');
+                $document_balance_current = $collection->document($driver_uid);
+                $snapshot_balance_current = $document_balance_current->snapshot();
+                $newAmount = $snapshot_balance_current->data()['amount'] ?? 0;
+
+                $newAmount = $newAmount + $amount_to_return;
+                $dataBalance = [
+                    'driver_uid' => $driver_uid,
+                    'amount' => $newAmount,
+                    'created_at' => $formattedTime,
+                ];
+
+                // Записываем или обновляем баланс с новым значением
+                $document_balance_current->set($dataBalance);
+
+                $randomNumber = rand(1000000, 9999999); // Генерируем случайное число от 1000 до 9999
+                $documentId = "R_{$driverNumber}_{$formattedTime}_{$randomNumber}";
+
+                $collection = $firestore->collection('balance');
+                $document = $collection->document($documentId);
+                $data['status'] = "holdDownReturnToBalance";
+                $data['amount'] = (float)$amount_to_return;  // Записываем как число
+                $data['commission'] = (float)$amount_to_return;  // Записываем как число
+                $data['id'] = $request->input('order_to_return');
+                $data['selectedTypeCode'] = $selectedTypeCode;
+                $data['created_at'] = $formattedTime;
+                $data['current_balance'] = $newAmount;
+                $data['driver_uid'] = $driver_uid;
+                $data['complete'] = true;
+
+                // Запишите данные в документ
+                $document->set($data);
+//Запись о списании с баланса
+                sleep(1);
+                $collection = $firestore->collection('balance_current');
+                $document_balance_current = $collection->document($driver_uid);
+                $snapshot_balance_current = $document_balance_current->snapshot();
+                $newAmount = $snapshot_balance_current->data()['amount'] ?? 0;
+                $newAmount = $newAmount - $amount_to_return_admin;
+
+                $dataBalance = [
+                    'driver_uid' => $driver_uid,
+                    'amount' => $newAmount,
+                    'created_at' => $formattedTime,
+                ];
+
+                // Записываем или обновляем баланс с новым значением
+                $document_balance_current->set($dataBalance);
+
+                $randomNumber = rand(1000000, 9999999); // Генерируем случайное число от 1000 до 9999
+                $formattedTime = self::currentTime();
+                $documentId = "R_{$driverNumber}_{$formattedTime}_{$randomNumber}";
+                $collection = $firestore->collection('balance');
+                $document = $collection->document($documentId);
+
+                $data['status'] = "holdDownComplete";
+                $data['amount'] = (float)$amount_to_return_admin;  // Записываем как число
+                $data['commission'] = (float)$amount_to_return_admin;  // Записываем как число
+                $data['id'] = $request->input('order_to_return');
+                $data['selectedTypeCode'] = $selectedTypeCode;
+                $data['created_at'] = $formattedTime;
+                $data['current_balance'] = $newAmount;
+                $data['driver_uid'] = $driver_uid;
+                $data['complete'] = true;
+
+                // Запишите данные в документ
+                $document->set($data);
+
+      //Записываем результат для ответа
+
+                // Получите ссылку на коллекцию и документ
+                $collection = $firestore->collection('users');
+                $document_users = $collection->document($driver_uid);
+                $snapshot_users = $document_users->snapshot();
+                $data_users = $snapshot_users->data();
+
+                $name = $data_users['name'] ?? 'Unknown';
+                $phoneNumber = $data_users['phoneNumber'] ?? 'Unknown';
+                $driverNumber = $data_users['driverNumber'] ?? 'Unknown';
+                $email = $data_users['email'] ?? 'Unknown';
+
+
+                $collection = $firestore->collection('balance_current');
+                $document_balance_current = $collection->document($driver_uid);
+                $snapshot_balance_current = $document_balance_current->snapshot();
+                $dataDriver_balance_current = $snapshot_balance_current->data();
+                $balance_current = $dataDriver_balance_current['amount'] ?? 'Unknown';
+
+                $collection = $firestore->collection('balance');
+                $document_balance = $collection->document($documentId);
+                $snapshot_balance = $document_balance->snapshot();
+                $dataDriver_balance = $snapshot_balance->data();
+                $amount_to_return = $dataDriver_balance['amount'] ?? 'Unknown';
+                $order_to_return = $documentId;
+                $selectedTypeCode = $dataDriver_balance['selectedTypeCode'] ?? 'Unknown';
+                $order_to_return_date = $dataDriver_balance['created_at'] ?? 'Unknown';
+
+                $params= [
+                    'name' => $name,
+                    'phoneNumber' => $phoneNumber,
+                    'driverNumber' => $driverNumber,
+                    'email' => $email,
+                    'balance_current' => $balance_current,
+                    'amount_to_return' => $amount_to_return,
+                    'order_to_return' => $order_to_return,
+                    'selectedTypeCode' => $selectedTypeCode,
+                    'order_to_return_date' => $order_to_return_date,
+                ];
+//                dd($params);
+
+                return redirect()->route('driverDownBalanceAdminfinish', $params);
+
+
+            } catch (\Exception $e) {
+                Log::error("1111 driverDownBalanceAdmin Error reading document from Firestore: " . $e->getMessage());
+                return "111 driverDownBalanceAdmin Error reading document from Firestore.";
+            }
+        } else {
+            try {
+
+                // Получите экземпляр клиента Firestore из сервис-провайдера
+                $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+                $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+                $firestore = $firebase->createFirestore()->database();
+
+                // Получите ссылку на коллекцию и документ
+                $collection = $firestore->collection('users');
+                $document_users = $collection->document($driver_uid);
+                $snapshot_users = $document_users->snapshot();
+                $data_users = $snapshot_users->data();
+
+                $name = $data_users['name'] ?? 'Unknown';
+                $phoneNumber = $data_users['phoneNumber'] ?? 'Unknown';
+                $driverNumber = $data_users['driverNumber'] ?? 'Unknown';
+                $email = $data_users['email'] ?? 'Unknown';
+
+
+
+                $collection = $firestore->collection('balance_current');
+                $document_balance_current = $collection->document($driver_uid);
+                $snapshot_balance_current = $document_balance_current->snapshot();
+                $dataDriver_balance_current = $snapshot_balance_current->data();
+                $balance_current = $dataDriver_balance_current['amount'] ?? 'Unknown';
+
+                $documentId = $order_to_return;
+                $collection = $firestore->collection('balance');
+                $document_balance = $collection->document($documentId);
+                $snapshot_balance = $document_balance->snapshot();
+                $dataDriver_balance = $snapshot_balance->data();
+                $amount_to_return = $dataDriver_balance['amount'] ?? 'Unknown';
+
+                $selectedTypeCode = $dataDriver_balance['selectedTypeCode'] ?? 'Unknown';
+                $order_to_return_date = $dataDriver_balance['created_at'] ?? 'Unknown';
+
+                $params= [
+                    'name' => $name,
+                    'phoneNumber' => $phoneNumber,
+                    'driverNumber' => $driverNumber,
+                    'email' => $email,
+                    'balance_current' => $balance_current,
+                    'amount_to_return' => $amount_to_return,
+                    'order_to_return' => $order_to_return,
+                    'selectedTypeCode' => $selectedTypeCode,
+                    'order_to_return_date' => $order_to_return_date,
+
+                ];
+
+
+//            return redirect()->route('driverDownBalanceAdmin', $params);
+                return redirect()->route('driverDownBalanceAdmin', $params)->with("error", "Ошибка кода проверки. Попробуйте еще");
+//                return view('admin.driver_amount', ['params' => $params])->with("error", "Ошибка кода проверки. Попробуйте еще");
+//            return response()->json($params, 200);
+
+
+            } catch (\Exception $e) {
+                Log::error("driverDownBalanceAdmin Error reading document from Firestore: " . $e->getMessage());
+                return "driverDownBalanceAdmin Error reading document from Firestore.";
+            }
+
+
+        }
+
+    }
+
+    private function currentTime ()
+    {
+        $currentDateTime = Carbon::now();
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+        $dateTime = new DateTime($currentDateTime);
+        $dateTime->setTimezone($kievTimeZone);
+        return $dateTime->format('d.m.Y H:i:s');
     }
 }

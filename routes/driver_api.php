@@ -47,8 +47,13 @@ Route::get('/driverCardPayToBalance/{uidDriver}/{amount}/{language}', [DriverCon
 Route::get('/driverCardPayDownBalance/{uidDriver}/{amount}/{comment}/{selectedTypeCode}', [DriverController::class, 'driverCardPayDownBalance'])
     ->name('driverCardPayDownBalance');
 
+Route::get('/driverDownBalanceAdmin/{uidDriver}/{documentId}', [FCMController::class, 'driverDownBalanceAdmin'])
+    ->name('driverDownBalanceAdmin');
+
 Route::get('/driver/driverDownBalanceAdmin/', [DriverController::class, 'driverDownBalanceAdmin'])
     ->name('driverDownBalanceAdmin');
+
+
 
 Route::get('/driverCardPayByTokenToBalance/{uidDriver}/{amount}/{recToken}', [DriverController::class, 'driverCardPayByTokenToBalance'])
     ->name('driverCardPayByTokenToBalance');
