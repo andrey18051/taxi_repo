@@ -1470,7 +1470,8 @@ google_id: $uidDriver ожидает возврата средств:
 Сумма  $amount
 Способ возврата $selectedTypeCode
 Комментарии $comment
-Время заявки $formattedTime";
+Время заявки $formattedTime
+Ссылка для подтверждения https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/$documentId/$uidDriver";
 
                 $messageAdmin = $subject;
 
@@ -1567,8 +1568,12 @@ google_id: $uidDriver ожидает возврата средств:
 
             ];
 
+            if ($dataDriver_balance['complete'] == true) {
+                return redirect()->route('driverDownBalanceAdminfinish', $params);
+            } else {
+                return redirect()->route('driverDownBalanceAdmin', $params);
+            }
 
-            return redirect()->route('driverDownBalanceAdmin', $params);
 //            return view('driver.driver_amount', ['params' => $params]);
 //            return response()->json($params, 200);
 
@@ -1631,14 +1636,23 @@ google_id: $uidDriver ожидает возврата средств:
 
                 $collection = $firestore->collection('balance');
                 $document = $collection->document($documentId);
-                $data['status'] = "holdDownReturnToBalance";
                 $data['amount'] = (float)$amount_to_return;  // Записываем как число
                 $data['commission'] = (float)$amount_to_return;  // Записываем как число
-                $data['id'] = $request->input('order_to_return');
-                $data['selectedTypeCode'] = $selectedTypeCode;
-                $data['created_at'] = $formattedTime;
+                $data['current_balance'] = $newAmount;
+                $data['status'] = "holdDownReturnToBalance";
                 $data['current_balance'] = $newAmount;
                 $data['driver_uid'] = $driver_uid;
+                $data['complete'] = true;
+                $data['created_at'] = $formattedTime;
+                $data['id'] = $order_to_return;
+                $data['selectedTypeCode'] = $selectedTypeCode;
+                // Запишите данные в документ
+                $document->set($data);
+
+//запись о выполнении заявки
+                $document = $collection->document($order_to_return);
+                $snapshot = $document->snapshot();
+                $data = $snapshot->data();
                 $data['complete'] = true;
 
                 // Запишите данные в документ
@@ -1730,7 +1744,6 @@ google_id: $uidDriver ожидает возврата средств:
             }
         } else {
             try {
-
                 // Получите экземпляр клиента Firestore из сервис-провайдера
                 $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
                 $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
@@ -1769,6 +1782,7 @@ google_id: $uidDriver ожидает возврата средств:
                     'name' => $name,
                     'phoneNumber' => $phoneNumber,
                     'driverNumber' => $driverNumber,
+                    'driver_uid' => $driver_uid,
                     'email' => $email,
                     'balance_current' => $balance_current,
                     'amount_to_return' => $amount_to_return,
@@ -1780,7 +1794,7 @@ google_id: $uidDriver ожидает возврата средств:
 
 
 //            return redirect()->route('driverDownBalanceAdmin', $params);
-                return redirect()->route('driverDownBalanceAdmin', $params)->with("error", "Ошибка кода проверки. Попробуйте еще");
+                return redirect()->route('driverDownBalanceAdmin', $params)->with('error', "Ошибка кода проверки. Попробуйте еще");
 //                return view('admin.driver_amount', ['params' => $params])->with("error", "Ошибка кода проверки. Попробуйте еще");
 //            return response()->json($params, 200);
 

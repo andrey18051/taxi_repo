@@ -25,7 +25,7 @@
                                 <strong>Телефон:</strong> {{ $params['phoneNumber'] }} <br>
                                 <strong>Email:</strong> {{ $params['email'] }} <br>
                                 <strong>Позывной:</strong> {{ $params['driverNumber'] }} <br>
-                                <strong>Гугл аккаунт:</strong> {{ $params['driver_uid'] }} <br>
+{{--                                <strong>Гугл аккаунт:</strong> {{ $params['driver_uid'] }} <br>--}}
                             </div>
                             <div class="col-6">
                                 <h1><strong>Текущий баланс:</strong> {{ $params['balance_current'] }} </h1><br>
@@ -61,6 +61,7 @@
                             <input type="hidden" name="order_to_return" value="{{ $params['order_to_return'] }}">
                             <input type="hidden" name="selectedTypeCode" value="{{ $params['selectedTypeCode'] }}">
                             <input type="hidden" name="order_to_return_date" value="{{ $params['order_to_return_date'] }}">
+                            <input type="hidden" name="amount_to_return" value="{{ $params['amount_to_return'] }}">
 
                             <div class="container">
                                 <div class="row justify-content-center">
