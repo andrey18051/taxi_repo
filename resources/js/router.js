@@ -24,6 +24,7 @@ import PartnerEmail from "./views/partners/PartnerEmail";
 import NewPartnerEmail from "./views/partners/NewPartnerEmail";
 import PartnerGroup from "./views/partners/PartnerGroup";
 import WfpHome from "./views/wfp/WfpHome";
+import DriverBalanceAdd from "./views/driver/AddBalance";
 
 const  routes = [
     {
@@ -33,6 +34,10 @@ const  routes = [
     {
         path: "/admin/users",
         component: Users
+    },
+    {
+        path: "/admin/new_balance",
+        component: DriverBalanceAdd
     },
     {
         path: "/admin/user_messages",

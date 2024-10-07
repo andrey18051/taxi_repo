@@ -54,6 +54,7 @@
                             <li><router-link to="/admin/fondy">Fondy</router-link></li>
                             <li><router-link to="/admin/bonus">Bonuses types</router-link></li>
                             <li><router-link to="/admin/city">Cities</router-link></li>
+                            <li><router-link to="/admin/new_balance">Баланс  водителя</router-link></li>
                             <li><a href="{{ asset('/') }}">Taxi</a>
                             <li><a href="{{ asset('/home') }}">Report</a>
                         </ul>
@@ -101,7 +102,9 @@
             @include ('layouts.messages')
             @yield('content')
         </main>
+
     </div>
+
     <script>
         // Add this script to handle automatic collapse
         document.addEventListener("DOMContentLoaded", function () {

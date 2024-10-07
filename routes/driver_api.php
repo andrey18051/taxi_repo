@@ -64,6 +64,9 @@ Route::get('/mapboxAccessToken', [DriverController::class, 'mapboxAccessToken'])
 Route::get('/writeDocumentToBalanceFirestore/{uid}/{uidDriver}/{status}', [FCMController::class, 'writeDocumentToBalanceFirestore'])
     ->name('writeDocumentToBalanceFirestore');
 
+Route::get('/addAmountToBalanceCurrent/{uid}/{uidDriver}', [FCMController::class, 'addAmountToBalanceCurrent'])
+    ->name('addAmountToBalanceCurrent');
+
 Route::get('/uidDriver/{uid}', [DriverController::class, 'uidDriver'])
     ->name('uidDriver');
 

@@ -1803,10 +1803,84 @@ google_id: $uidDriver ожидает возврата средств:
                 Log::error("driverDownBalanceAdmin Error reading document from Firestore: " . $e->getMessage());
                 return "driverDownBalanceAdmin Error reading document from Firestore.";
             }
-
-
         }
+    }
 
+
+    public function addAmountToBalanceCurrent($uidDriver, $amount)
+    {
+
+        $formattedTime = self::currentKievDateTime();
+
+        try {
+            // Получаем экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получаем ссылку на коллекцию и документ (идентификатором документа является $uidDriver)
+            $collection = $firestore->collection('balance_current');
+            $document = $collection->document($uidDriver);
+
+            // Получаем существующий документ
+            $snapshot = $document->snapshot();
+
+            $previousAmount = 0;
+
+            // Если документ существует, получаем предыдущее значение amount
+            if ($snapshot->exists()) {
+                $previousAmount = $snapshot->data()['amount'] ?? 0;
+            }
+
+            // Добавляем новое значение к предыдущему
+            $newAmount = $previousAmount + $amount;
+
+            $data = [
+                'driver_uid' => $uidDriver,
+                'amount' => $newAmount,
+                'created_at' => $formattedTime,
+            ];
+
+            // Записываем или обновляем документ с новым значением
+            $document->set($data);
+
+
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data_driver = $snapshot->data();
+                $driverNumber = $data_driver['driverNumber'];
+            }
+
+
+            $randomNumber = rand(1000000, 9999999); // Генерируем случайное число от 1000 до 9999
+            $formattedTime = self::currentTime();
+            $documentId = "A_{$driverNumber}_{$formattedTime}_{$randomNumber}";
+            $collection = $firestore->collection('balance');
+            $document = $collection->document($documentId);
+
+            $data['status'] = "holdDownComplete";
+            $data['amount'] = (float)$amount;  // Записываем как число
+            $data['id'] = $documentId;
+            $data['status'] = "payment_nal";
+            $data['created_at'] = $formattedTime;
+            $data['current_balance'] = $newAmount;
+            $data['driver_uid'] = $uidDriver;
+            $data['complete'] = true;
+
+            $document->set($data);
+
+            Log::info("Document successfully written with updated amount!");
+            return "Document successfully written with updated amount!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
     }
 
     private function currentTime ()
