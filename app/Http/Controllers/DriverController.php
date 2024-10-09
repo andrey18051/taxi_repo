@@ -32,6 +32,11 @@ class DriverController extends Controller
         return 200;
     }
 
+    public function driverAll()
+    {
+        return  (new FCMController)->driverAll();
+    }
+
     public function auto(
         string $city,
         string $first_name,

@@ -16,6 +16,7 @@ use App\Http\Controllers\CityPas1Controller;
 use App\Http\Controllers\CityPas2Controller;
 use App\Http\Controllers\CityPas4Controller;
 use App\Http\Controllers\Confirmation;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FCMController;
 use App\Http\Controllers\FondyController;
@@ -1418,7 +1419,7 @@ Route::get('/fcm/getUserByEmail/{email}/{app}/', [FCMController::class,'getToken
 Route::get('/fcm/readDocumentFromUsersFirestore/{$uidDriver}', [FCMController::class,'readDocumentFromUsersFirestore']);
 Route::get('/fcm/writeDocumentToFirestore/{uid}', [FCMController::class,'writeDocumentToFirestore']);
 
-/*
+/**
  * Возврат денег с баланса
  */
 Route::middleware(['web'])->group(function () {
@@ -1433,5 +1434,9 @@ Route::get('/driver-amount-finish', function () {
     return view('driver.driver_amount_finish', ['params' => request()->all()]);
 })->name('driverDownBalanceAdminfinish');
 
-//Route::get('/return-amount-save', [FCMController::class, 'returnAmountSave'])
-//    ->name('return-amount-save');
+/**
+ * Пополнение баланса
+ */
+Route::get('/driverAll', [DriverController::class, 'driverAll'])->name('driverAll');
+Route::get('/addToBalanceDriver/{selectedEmails}/amount', [DriverController::class, 'addToBalanceDriver'])
+    ->name('addToBalanceDriver');

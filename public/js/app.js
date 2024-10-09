@@ -6589,40 +6589,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "DriverBalanceAdd",
@@ -6647,19 +6613,19 @@ __webpack_require__.r(__webpack_exports__);
           value: "",
           keys: ["email"]
         },
-        user_phone: {
+        phoneNumber: {
           value: "",
-          keys: ["user_phone"]
+          keys: ["phoneNumber"]
+        },
+        driverNumber: {
+          value: "",
+          keys: ["driverNumber"]
         }
       },
-      sent: '',
-      city: '',
       selectedUser: '',
       // Новое свойство для хранения выбранного пользователя
-      newMessage: '',
-      // Новое свойство для хранения нового сообщения
-      selectedEmails: [],
-      selectedApp: ''
+      amount: '' // Новое свойство для хранения выбранного пользователя
+
     };
   },
   mounted: function mounted() {
@@ -6669,7 +6635,7 @@ __webpack_require__.r(__webpack_exports__);
     getUsers: function getUsers() {
       var _this = this;
 
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/all').then(function (res) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/driverAll').then(function (res) {
         _this.users = res.data;
         _this.loading = false;
       });
@@ -6687,19 +6653,15 @@ __webpack_require__.r(__webpack_exports__);
         this.selectedEmails = this.selectedEmails.filter(function (item) {
           return item !== email;
         });
-      } // this.selectedEmails.forEach(selectedEmail => {
-      //     window.alert("Selected Email: " + selectedEmail);
-      // });
-
+      }
     },
-    sendMessage: function sendMessage() {
-      if (!this.city || !this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-        window.alert('Пожалуйста, проверьте выбор приложения, города  и ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
+    addToBalance: function addToBalance() {
+      if (!this.selectedEmails || this.selectedEmails.length === 0) {
+        window.alert('Пожалуйста убедитесь, что выбран хотя бы один водитель.');
         return;
       }
 
-      var encodedNewMessage = encodeURIComponent(this.newMessage);
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/newMessage/".concat(this.selectedEmails.join(','), "/").concat(encodedNewMessage, "/").concat(this.selectedApp, "/").concat(this.city)).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/addToBalanceDriver/".concat(this.selectedEmails.join(','), "/").concat(this.amount)).then(function (response) {
         // Проверяем успешность операции
         if (response.status === 200) {
           window.alert("Данные успешно обновлены");
@@ -6714,40 +6676,7 @@ __webpack_require__.r(__webpack_exports__);
       // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
       // Очистите поля после успешной отправки, если это необходимо.
 
-      this.selectedApp = '';
-      this.newMessage = '';
       this.selectedEmails = []; // Очистить массив выбранных email после отправки
-    },
-    sendMessageFcm: function sendMessageFcm() {
-      if (!this.city || !this.selectedApp || !this.newMessage || !this.selectedEmails || this.selectedEmails.length === 0) {
-        window.alert('Пожалуйста, проверьте выбор приложения, города  и ввод сообщения, а также убедитесь, что выбран хотя бы один email.');
-        return;
-      }
-
-      var encodedNewMessage = encodeURIComponent(this.newMessage);
-      var url = "/newMessageFcm/".concat(this.selectedEmails.join(','), "/").concat(encodedNewMessage, "/").concat(this.selectedApp);
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get(url).then(function (response) {
-        // Проверяем успешность операции
-        if (response.status === 200) {
-          window.alert("Данные успешно обновлены");
-          window.location.reload();
-        } else {
-          window.alert("Произошла ошибка при обновлении данных url " + url + " " + response.status);
-        }
-      })["catch"](function (error) {
-        console.error(error);
-        window.alert("Произошла ошибка при обновлении данныхurl " + url + " " + error);
-      }); // Здесь вы можете использовать this.selectedUser и this.newMessage
-      // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
-      // Очистите поля после успешной отправки, если это необходимо.
-
-      this.selectedApp = '';
-      this.newMessage = '';
-      this.selectedEmails = []; // Очистить массив выбранных email после отправки
-    },
-    newMessageButton: function newMessageButton() {
-      // Переход по адресу "/admin/new_message"
-      this.$router.push('/admin/user_messages');
     }
   }
 });
@@ -40593,35 +40522,6 @@ var render = function () {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.filter.id.value,
-                              expression: "filter.id.value",
-                            },
-                          ],
-                          staticClass: "form-input input-sm",
-                          staticStyle: { width: "30px" },
-                          attrs: { placeholder: "Select by id" },
-                          domProps: { value: _vm.filter.id.value },
-                          on: {
-                            input: function ($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.filter.id,
-                                "value",
-                                $event.target.value
-                              )
-                            },
-                          },
-                        }),
-                      ]),
-                      _vm._v(" "),
-                      _c("td", [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
                               value: _vm.filter.name.value,
                               expression: "filter.name.value",
                             },
@@ -40680,21 +40580,50 @@ var render = function () {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.filter.user_phone.value,
-                              expression: "filter.user_phone.value",
+                              value: _vm.filter.phoneNumber.value,
+                              expression: "filter.phoneNumber.value",
                             },
                           ],
                           staticClass: "form-input input-lg",
                           staticStyle: { width: "200px" },
                           attrs: { placeholder: "Select by user_phone" },
-                          domProps: { value: _vm.filter.user_phone.value },
+                          domProps: { value: _vm.filter.phoneNumber.value },
                           on: {
                             input: function ($event) {
                               if ($event.target.composing) {
                                 return
                               }
                               _vm.$set(
-                                _vm.filter.user_phone,
+                                _vm.filter.phoneNumber,
+                                "value",
+                                $event.target.value
+                              )
+                            },
+                          },
+                        }),
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.filter.driverNumber.value,
+                              expression: "filter.driverNumber.value",
+                            },
+                          ],
+                          staticClass: "form-input input-lg",
+                          staticStyle: { width: "200px" },
+                          attrs: { placeholder: "Select by driverNumber" },
+                          domProps: { value: _vm.filter.driverNumber.value },
+                          on: {
+                            input: function ($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.filter.driverNumber,
                                 "value",
                                 $event.target.value
                               )
@@ -40711,8 +40640,6 @@ var render = function () {
                         "tr",
                         { key: row.id, staticStyle: { width: "30px" } },
                         [
-                          _c("td", [_vm._v(_vm._s(row.id))]),
-                          _vm._v(" "),
                           _c("td", [
                             _c("input", {
                               directives: [
@@ -40771,15 +40698,15 @@ var render = function () {
                                 {
                                   name: "model",
                                   rawName: "v-model.text",
-                                  value: row.user_phone,
-                                  expression: "row.user_phone",
+                                  value: row.phoneNumber,
+                                  expression: "row.phoneNumber",
                                   modifiers: { text: true },
                                 },
                               ],
                               staticClass: "form-control",
                               staticStyle: { width: "200px" },
-                              attrs: { id: "user_phone", readonly: "" },
-                              domProps: { value: row.user_phone },
+                              attrs: { id: "phoneNumber", readonly: "" },
+                              domProps: { value: row.phoneNumber },
                               on: {
                                 input: function ($event) {
                                   if ($event.target.composing) {
@@ -40787,7 +40714,37 @@ var render = function () {
                                   }
                                   _vm.$set(
                                     row,
-                                    "user_phone",
+                                    "phoneNumber",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model.text",
+                                  value: row.driverNumber,
+                                  expression: "row.driverNumber",
+                                  modifiers: { text: true },
+                                },
+                              ],
+                              staticClass: "form-control",
+                              staticStyle: { width: "200px" },
+                              attrs: { id: "driverNumber", readonly: "" },
+                              domProps: { value: row.driverNumber },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    row,
+                                    "driverNumber",
                                     $event.target.value
                                   )
                                 },
@@ -40869,12 +40826,6 @@ var render = function () {
             [
               _c(
                 "v-th",
-                { staticStyle: { width: "30px" }, attrs: { sortKey: "id" } },
-                [_vm._v("#")]
-              ),
-              _vm._v(" "),
-              _c(
-                "v-th",
                 { staticStyle: { width: "200px" }, attrs: { sortKey: "name" } },
                 [_vm._v("Name")]
               ),
@@ -40895,6 +40846,15 @@ var render = function () {
                   attrs: { sortKey: "user_phone" },
                 },
                 [_vm._v("Phone")]
+              ),
+              _vm._v(" "),
+              _c(
+                "v-th",
+                {
+                  staticStyle: { width: "200px" },
+                  attrs: { sortKey: "driverNumber" },
+                },
+                [_vm._v("driverNumber")]
               ),
             ],
             1
@@ -40920,142 +40880,28 @@ var render = function () {
       _vm._v(" "),
       _c("div", { staticClass: "card offset-4 col-4" }, [
         _c("div", { staticClass: "card-body" }, [
-          _c("div", [
-            _c("label", { attrs: { for: "userSearch" } }, [
-              _vm._v("Выберите приложение:"),
-            ]),
-            _vm._v(" "),
-            _c(
-              "select",
-              {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.selectedApp,
-                    expression: "selectedApp",
-                  },
-                ],
-                staticClass: "form-control",
-                attrs: { id: "userSearch" },
-                on: {
-                  change: function ($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function (o) {
-                        return o.selected
-                      })
-                      .map(function (o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.selectedApp = $event.target.multiple
-                      ? $$selectedVal
-                      : $$selectedVal[0]
-                  },
-                },
-              },
-              [
-                _c("option", { attrs: { value: "ALL PASS" } }, [
-                  _vm._v("Все приложения"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "PAS1" } }, [_vm._v("ПАС 1")]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "PAS2" } }, [_vm._v("ПАС 2")]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "PAS4" } }, [_vm._v("ПАС 4")]),
-              ]
-            ),
+          _c("label", { attrs: { for: "amount" } }, [
+            _vm._v("Введите сумму пополнения баланса:"),
           ]),
           _vm._v(" "),
-          _c("div", [
-            _c("label", { attrs: { for: "city" } }, [
-              _vm._v("Выберите город:"),
-            ]),
-            _vm._v(" "),
-            _c(
-              "select",
-              {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.city,
-                    expression: "city",
-                  },
-                ],
-                staticClass: "form-control",
-                attrs: { id: "city" },
-                on: {
-                  change: function ($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function (o) {
-                        return o.selected
-                      })
-                      .map(function (o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.city = $event.target.multiple
-                      ? $$selectedVal
-                      : $$selectedVal[0]
-                  },
-                },
-              },
-              [
-                _c("option", { attrs: { value: "ALL CITY" } }, [
-                  _vm._v("Все города"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "Kyiv City" } }, [
-                  _vm._v(" Киев"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "Dnipropetrovsk Oblast" } }, [
-                  _vm._v("Днепр"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "Odessa" } }, [
-                  _vm._v("Одесса"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "Zaporizhzhia" } }, [
-                  _vm._v("Запорожье"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "Cherkasy Oblast" } }, [
-                  _vm._v("Черкассы"),
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "foreign countries" } }, [
-                  _vm._v("Другое"),
-                ]),
-              ]
-            ),
-          ]),
-          _vm._v(" "),
-          _c("label", { attrs: { for: "newMessage" } }, [
-            _vm._v("Введите новое сообщение:"),
-          ]),
-          _vm._v(" "),
-          _c("textarea", {
+          _c("input", {
             directives: [
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.newMessage,
-                expression: "newMessage",
+                value: _vm.amount,
+                expression: "amount",
               },
             ],
             staticClass: "form-control",
-            attrs: { id: "newMessage", rows: "3" },
-            domProps: { value: _vm.newMessage },
+            attrs: { id: "amount", value: "" },
+            domProps: { value: _vm.amount },
             on: {
               input: function ($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.newMessage = $event.target.value
+                _vm.amount = $event.target.value
               },
             },
           }),
@@ -41066,18 +40912,9 @@ var render = function () {
             "button",
             {
               staticClass: "btn btn-outline-success",
-              on: { click: _vm.sendMessage },
+              on: { click: _vm.addToBalance },
             },
-            [_vm._v("Сохранить сообщение")]
-          ),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              staticClass: "btn btn-outline-success",
-              on: { click: _vm.sendMessageFcm },
-            },
-            [_vm._v("Отправить сообщение")]
+            [_vm._v("Пополнить")]
           ),
         ]),
       ]),

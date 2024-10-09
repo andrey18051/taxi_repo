@@ -1155,6 +1155,47 @@ class FCMController extends Controller
         }
     }
 
+    public function driverAll()
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию
+            $collection = $firestore->collection('users');
+
+            // Получаем все документы из коллекции
+            $documents = $collection->documents();
+
+            // Проверка на наличие пользователей
+            if ($documents->isEmpty()) {
+                Log::info("No users found.");
+                return "No users found.";
+            } else {
+                // Инициализируем массив для хранения всех пользователей
+                $users = [];
+
+                // Перебираем все документы и извлекаем их данные
+                foreach ($documents as $document) {
+                    $data = $document->data();
+                    Log::info("User found: " . json_encode($data));
+
+                    // Добавляем данные пользователя в массив
+                    $users[] = $data;
+                }
+
+                // Возвращаем массив с данными всех пользователей
+                return $users;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error retrieving users from Firestore: " . $e->getMessage());
+            return "Error retrieving users from Firestore.";
+        }
+    }
+
+
     public function saveCardDataToFirestore($uidDriver, $cardData, $status, $amount)
     {
         try {
