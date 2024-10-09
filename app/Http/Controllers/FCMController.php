@@ -1484,24 +1484,24 @@ google_id: $uidDriver ожидает возврата средств:
                     Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
                 }
                 Log::debug("sentCancelInfo  $messageAdmin");
-            }
-
-            $subject = 'Заявка на возврат средств';
-//            https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/R_105226_5138963/pEePGRVPNNU6IeJexWRwBpohu9q2
-            $url = "https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/$documentId/$uidDriver";
-            $paramsAdmin = [
-                'email' => $email,
-                'subject' => $subject,
-                'message' => $messageAdmin,
-                'url' => $url,
-
-            ];
-
-            Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
-
-            Mail::to('cartaxi4@gmail.com')->send(new DriverInfo($paramsAdmin));
 
 
+                $subject_email = "Заявка на возврат средств  (позывной $driverNumber)";
+    //            https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/R_105226_5138963/pEePGRVPNNU6IeJexWRwBpohu9q2
+                $url = "https://m.easy-order-taxi.site/driver/driverDownBalanceAdmin/$documentId/$uidDriver";
+                $paramsAdmin = [
+                    'email' => $email,
+                    'subject' => $subject_email,
+                    'message' => $messageAdmin,
+                    'url' => $url,
+
+                ];
+
+                Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
+
+                Mail::to('cartaxi4@gmail.com')->send(new DriverInfo($paramsAdmin));
+
+        }
 
 
         } catch (\Exception $e) {
