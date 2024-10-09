@@ -135,11 +135,27 @@ class FCMController extends Controller
         }
 
         $nearestDriver = self::findDriverInSectorFromFirestore(
-            $order->startLat,
-            $order->startLan // Исправлено на startLon
+            (float) $order->startLat,
+            (float) $order->startLan // Исправлено на startLon
         );
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
         $order->save();
+
+
+        $osrmHelper = new OpenStreetMapHelper();
+        $routeDistance = round(
+            $osrmHelper->getRouteDistance(
+                (float) $order->startLat,
+                (float) $order->startLan,
+                (float) $order->to_lat,
+                (float) $order->to_lng
+            ) / 1000,
+            2 // Округляем до 2 знаков после запятой
+        );
+
+        $order->rout_distance = $routeDistance;
+        $order->save();
+
 
         $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
         Log::info("writeDocumentToFirestore verifyRefusal $verifyRefusal");
@@ -1022,15 +1038,24 @@ class FCMController extends Controller
      */
     public function findDriverInSectorFromFirestore(float $latitude, float $longitude): ?array
     {
-        Log::info("findDriverInSectorFromFirestore");
+        Log::info("findDriverInSectorFromFirestore: Starting search for driver in sector.", [
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+        ]);
+
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            Log::info("findDriverInSectorFromFirestore: Firebase credentials loaded.", [
+                'serviceAccountPath' => $serviceAccountPath,
+            ]);
+
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
             // Получите ссылку на коллекцию
             $collection = $firestore->collection('sector');
+            Log::info("findDriverInSectorFromFirestore: Connected to Firestore sector collection.");
 
             // Инициализируем переменные для ближайшего водителя
             $nearestDriver = null;
@@ -1038,9 +1063,17 @@ class FCMController extends Controller
 
             // Перебираем документы в коллекции
             $snapshot = $collection->documents();
+            Log::info("findDriverInSectorFromFirestore: Fetched sector collection documents.", [
+                'documents_count' => $snapshot->size(),
+            ]);
+
             foreach ($snapshot as $document) {
                 // Получаем данные документа
                 $data = $document->data();
+                Log::info("findDriverInSectorFromFirestore: Processing document.", [
+                    'document_id' => $document->id(),
+                    'driver_data' => $data,
+                ]);
 
                 // Вычисляем расстояние до водителя
                 $driverLatitude = (float)$data['latitude'];
@@ -1048,21 +1081,40 @@ class FCMController extends Controller
 
                 // Используем OpenStreetMapHelper для вычисления расстояния
                 $osrmHelper = new OpenStreetMapHelper();
-                $distance = $osrmHelper->getRouteDistance(
-                    $driverLatitude,
-                    $driverLongitude,
-                    $latitude,
-                    $longitude,
-                );
+                if ($driverLatitude != 0 && $driverLongitude !=0) {
+                    $distance = $osrmHelper->getRouteDistance(
+                        $driverLatitude,
+                        $driverLongitude,
+                        $latitude,
+                        $longitude,
+                    );
+                    Log::info("findDriverInSectorFromFirestore: Calculated distance to driver.", [
+                        'driver_id' => $document->id(),
+                        'distance' => $distance,
+                    ]);
 
-                // Если расстояние меньше 3 км и ближе предыдущего, обновляем ближайшего водителя
-                if ($distance !== null && $distance < 3000 && $distance < $nearestDistance) {
-                    $nearestDriver = $data;
-                    $nearestDistance = $distance;
+                    // Если расстояние меньше 3 км и ближе предыдущего, обновляем ближайшего водителя
+                    if ($distance !== null && $distance < 3000 && $distance < $nearestDistance) {
+                        $nearestDriver = $data;
+                        $nearestDistance = $distance;
+                        Log::info("findDriverInSectorFromFirestore: Found closer driver.", [
+                            'driver_id' => $document->id(),
+                            'new_nearest_distance' => $nearestDistance,
+                        ]);
+                    }
                 }
             }
 
             // Возвращаем данные ближайшего водителя или null, если не найден
+            if ($nearestDriver) {
+                Log::info("findDriverInSectorFromFirestore: Nearest driver found.", [
+                    'nearest_driver' => $nearestDriver,
+                    'nearest_distance' => $nearestDistance,
+                ]);
+            } else {
+                Log::info("findDriverInSectorFromFirestore: No driver found within 3km range.");
+            }
+
             return $nearestDriver;
         } catch (\Exception $e) {
             // Обработка ошибок
@@ -1070,6 +1122,7 @@ class FCMController extends Controller
             return null;
         }
     }
+
 
     public function findUserByEmail($email)
     {

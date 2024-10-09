@@ -33,8 +33,6 @@ class StartNewProcessExecution implements ShouldQueue
      */
     public function handle()
     {
-        Log::channel('single')->debug("StartNewProcessExecution job started for order ID: {$this->orderId}");
-
         try {
             (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
             Log::channel('single')->debug("StartNewProcessExecution job finished successfully for order ID: {$this->orderId}");

@@ -34,8 +34,6 @@ class StartDoubleStatusPaymentReview implements ShouldQueue
      */
     public function handle()
     {
-        Log::channel('single')
-            ->debug("StartDoubleStatusPaymentReview job started for order ID: {$this->orderId}");
 
         try {
             (new UniversalAndroidFunctionController)->cancelOnlyDoubleUid($this->orderId);

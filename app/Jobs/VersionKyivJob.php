@@ -32,7 +32,6 @@ class VersionKyivJob implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("VersionKyivJob");
         (new WebOrderController())->version_combo_exec();
     }
 }

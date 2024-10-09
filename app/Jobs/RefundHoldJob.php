@@ -34,7 +34,7 @@ class RefundHoldJob implements ShouldQueue
      */
     public function handle()
     {
-        Log::channel('single')->debug("RefundHoldJob {$this->orderReference}");
+
         (new WfpController)->refundJob($this->params, $this->orderReference);
     }
 }

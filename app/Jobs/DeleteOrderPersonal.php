@@ -42,10 +42,6 @@ class DeleteOrderPersonal implements ShouldQueue
     public function handle()
     {
 
-        Log::info("DeleteOrderPersonal
-            $this->dispatching_order_uid,
-            $this->driver_uid");
-
         sleep(20);
 
         //Запускаем через 20 секунд

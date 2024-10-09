@@ -38,9 +38,7 @@ class StartOrderReview implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("orderReview $this->bonusOrder,
-            $this->doubleOrder,
-            $this->bonusOrderHold");
+
         (new UniversalAndroidFunctionController)->orderReview(
             $this->bonusOrder,
             $this->doubleOrder,
