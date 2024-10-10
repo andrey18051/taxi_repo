@@ -1438,5 +1438,5 @@ Route::get('/driver-amount-finish', function () {
  * Пополнение баланса
  */
 Route::get('/driverAll', [DriverController::class, 'driverAll'])->name('driverAll');
-Route::get('/addToBalanceDriver/{selectedEmails}/amount', [DriverController::class, 'addToBalanceDriver'])
+Route::get('/addToBalanceDriver/{selectedUidDriver}/{amount}', [DriverController::class, 'addToBalanceDriver'])
     ->name('addToBalanceDriver');

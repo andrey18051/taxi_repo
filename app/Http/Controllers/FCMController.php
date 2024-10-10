@@ -805,6 +805,42 @@ class FCMController extends Controller
             return "Error writing document to Firestore.";
         }
     }
+    /**
+     * @throws \Exception
+     */
+    public function writeDocumentToBalanceCaschAddFirestore($uidDriver, $amount, $status)
+    {
+        // Создаем уникальный идентификатор с меткой времени и случайным числом
+        $timestamp = Carbon::now()->format('YmdHis'); // Форматируем текущее время
+        $randomNumber = rand(1000, 9999); // Генерируем случайное число от 1000 до 9999
+        $documentId = "{$uidDriver}_{$timestamp}_{$randomNumber}";
+
+        $data['driver_uid'] = $uidDriver;
+        $data['status'] = $status;
+        $data['amount'] = $amount;
+        $data['created_at'] = self::currentKievDateTime(); // Преобразуем дату в строку
+        self::writeDocumentToBalanceCurrentFirestore($uidDriver, $amount);
+        $data['current_balance'] = self::readDriverBalanceFromFirestore($uidDriver);
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('balance');
+            $document = $collection->document($documentId);
+
+            // Запишите данные в документ
+            $document->set($data);
+
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
 
 
     function currentKievDateTime()
@@ -1182,7 +1218,13 @@ class FCMController extends Controller
                     $data = $document->data();
                     Log::info("User found: " . json_encode($data));
 
+                    $collection = $firestore->collection('balance_current');
+                    $document_balance_current = $collection->document($data['uid']);
                     // Добавляем данные пользователя в массив
+
+                    $snapshot_balance_current = $document_balance_current->snapshot();
+                    $previousAmount = $snapshot_balance_current->data()['amount'] ?? 0;
+                    $data["balance_current"] = $previousAmount;
                     $users[] = $data;
                 }
 
@@ -1958,7 +2000,6 @@ google_id: $uidDriver ожидает возврата средств:
             $collection = $firestore->collection('balance');
             $document = $collection->document($documentId);
 
-            $data['status'] = "holdDownComplete";
             $data['amount'] = (float)$amount;  // Записываем как число
             $data['id'] = $documentId;
             $data['status'] = "payment_nal";
@@ -1966,6 +2007,7 @@ google_id: $uidDriver ожидает возврата средств:
             $data['current_balance'] = $newAmount;
             $data['driver_uid'] = $uidDriver;
             $data['complete'] = true;
+            $data['selectedTypeCode'] = "";
 
             $document->set($data);
 

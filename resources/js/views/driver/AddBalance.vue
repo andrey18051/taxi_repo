@@ -5,9 +5,7 @@
             <h1 class="display-5">Водители</h1>
             <p class="lead">Пополнение баланса</p>
         </div>
-        <button class="btn btn-outline-primary" @click="newMessageButton()" style="margin-left: 5px">
-            Список сообщений
-        </button>
+
         <v-table
             :data="users"
             :filters="filter"
@@ -18,17 +16,19 @@
             @totalPagesChanged="totalPages = $event"
         >
             <thead slot="head">
-            <v-th sortKey="name" style="width: 200px">Name</v-th>
+            <v-th sortKey="name" style="width: 200px">ФИО</v-th>
             <v-th sortKey="email"style="width: 300px">Email</v-th>
-            <v-th sortKey="user_phone"style="width: 200px">Phone</v-th>
-            <v-th sortKey="driverNumber"style="width: 200px">driverNumber</v-th>
+            <v-th sortKey="user_phone"style="width: 200px">Телефон</v-th>
+            <v-th sortKey="driverNumber"style="width: 200px">Позывной</v-th>
+            <v-th sortKey="balance_current"style="width: 200px">Баланс</v-th>
             </thead>
             <tbody slot="body" slot-scope="{displayData}">
             <tr>
-                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.name.value" placeholder="Select by name"></td>
-                <td><input class="form-input input-lg" style="width: 300px" v-model="filter.email.value"  placeholder="Select by email"></td>
-                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.phoneNumber.value"  placeholder="Select by user_phone"></td>
-                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.driverNumber.value"  placeholder="Select by driverNumber"></td>
+                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.name.value" placeholder="Поиск по имени"></td>
+                <td><input class="form-input input-lg" style="width: 300px" v-model="filter.email.value"  placeholder="Поиск по email"></td>
+                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.phoneNumber.value"  placeholder="Поиск по номеру телефона"></td>
+                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.driverNumber.value"  placeholder="Поиск по позывному"></td>
+                <td><input class="form-input input-lg" style="width: 200px" v-model="filter.balance_current.value"  placeholder="Поиск по балансу"></td>
 
                 <td style="width: 100px"></td>
             </tr>
@@ -38,6 +38,8 @@
                 <td><input id="email" class="form-control" style="width: 300px" v-model.text="row.email" readonly ></td>
                 <td><input id="phoneNumber" class="form-control" style="width: 200px" v-model.text="row.phoneNumber" readonly></td>
                 <td><input id="driverNumber" class="form-control" style="width: 200px" v-model.text="row.driverNumber" readonly></td>
+                <td><input id="balance_current" class="form-control" style="width: 200px" v-model.text="row.balance_current" readonly></td>
+                <td><input id="uid" type="hidden" v-model.text="row.uid" readonly></td>
                 <td>
                     <input type="checkbox" id="sent_message_info" style="width: 30px" v-model="row.sent" @change="handleCheckboxChange(row)">
                 </td>
@@ -63,6 +65,7 @@
 
     </div>
 
+
 </template>
 
 <script>
@@ -81,10 +84,12 @@ export default {
                 id: { value: "", keys: ["id"] },
                 name: { value: "", keys: ["name"] },
                 email: { value: "", keys: ["email"] },
+                uid: { value: "", keys: ["uid"] },
                 phoneNumber: { value: "", keys: ["phoneNumber"] },
-                driverNumber: { value: "", keys: ["driverNumber"] }
+                driverNumber: { value: "", keys: ["driverNumber"] },
+                balance_current: { value: "", keys: ["balance_current"] }
             },
-            selectedUser: '', // Новое свойство для хранения выбранного пользователя
+            selectedUidDriver: [], // Новое свойство для хранения выбранного пользователя
             amount: '', // Новое свойство для хранения выбранного пользователя
         };
     },
@@ -104,47 +109,55 @@ export default {
                     }
                 )
         },
+        logSelectedDrivers() {
+            console.log("Selected drivers:", this.selectedUidDriver);
+        },
 
         handleCheckboxChange(row) {
-            const email = row.email;
+            const uid = row.uid;
 
             if (row.sent) {
-                // Если галочка установлена, добавляем email в массив
-                if (!this.selectedEmails.includes(email)) {
-                    this.selectedEmails.push(email);
+                // Если галочка установлена, добавляем uid в массив
+                if (!this.selectedUidDriver.includes(uid)) {
+                    this.selectedUidDriver.push(uid);
                 }
             } else {
-                // Если галочка снята, удаляем email из массива
-                this.selectedEmails = this.selectedEmails.filter(item => item !== email);
+                // Если галочка снята, удаляем uid из массива
+                this.selectedUidDriver = this.selectedUidDriver.filter(item => item !== uid);
             }
+
+            console.log("Selected UIDs:", this.selectedUidDriver); // Лог для проверки
         },
 
         addToBalance() {
-            if (!this.selectedEmails || this.selectedEmails.length === 0) {
+            if (!this.selectedUidDriver || this.selectedUidDriver.length === 0) {
                 window.alert('Пожалуйста убедитесь, что выбран хотя бы один водитель.');
                 return;
             }
+            console.log("Selected drivers:", this.selectedUidDriver);  // Лог для проверки
+            console.log("Amount:", this.amount);  // Лог для проверки
+            console.log(`/addToBalanceDriver/${this.selectedUidDriver.join(',')}/${this.amount}`);  // Лог для проверки
 
 
-            axios.get(`/addToBalanceDriver/${this.selectedEmails.join(',')}/${this.amount}`)
+            axios.get(`/addToBalanceDriver/${this.selectedUidDriver.join(',')}/${this.amount}`)
                 .then(response => {
                     // Проверяем успешность операции
                     if (response.status === 200) {
                         window.alert("Данные успешно обновлены");
                         window.location.reload();
                     } else {
-                        window.alert("Произошла ошибка при обновлении данных " + response.status);
+                        window.alert("Произошла ошибка при обновлении данных " + `/addToBalanceDriver/${this.selectedUidDriver.join(',')}/${this.amount}` + response.status);
                     }
                 })
                 .catch(error => {
                     console.error(error);
-                    window.alert("Произошла ошибка при обновлении данных" + error);
+                    window.alert("Произошла ошибка при обновлении данных" + `/addToBalanceDriver/${this.selectedUidDriver.join(',')}/${this.amount}`+ error);
                 });
 
             // Здесь вы можете использовать this.selectedUser и this.newMessage
             // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
             // Очистите поля после успешной отправки, если это необходимо.
-            this.selectedEmails = []; // Очистить массив выбранных email после отправки
+            this.selectedUidDriver = []; // Очистить массив выбранных email после отправки
         },
     }
 }

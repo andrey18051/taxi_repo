@@ -6589,6 +6589,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "DriverBalanceAdd",
@@ -6613,6 +6616,10 @@ __webpack_require__.r(__webpack_exports__);
           value: "",
           keys: ["email"]
         },
+        uid: {
+          value: "",
+          keys: ["uid"]
+        },
         phoneNumber: {
           value: "",
           keys: ["phoneNumber"]
@@ -6620,9 +6627,13 @@ __webpack_require__.r(__webpack_exports__);
         driverNumber: {
           value: "",
           keys: ["driverNumber"]
+        },
+        balance_current: {
+          value: "",
+          keys: ["balance_current"]
         }
       },
-      selectedUser: '',
+      selectedUidDriver: [],
       // Новое свойство для хранения выбранного пользователя
       amount: '' // Новое свойство для хранения выбранного пользователя
 
@@ -6640,43 +6651,56 @@ __webpack_require__.r(__webpack_exports__);
         _this.loading = false;
       });
     },
+    logSelectedDrivers: function logSelectedDrivers() {
+      console.log("Selected drivers:", this.selectedUidDriver);
+    },
     handleCheckboxChange: function handleCheckboxChange(row) {
-      var email = row.email;
+      var uid = row.uid;
 
       if (row.sent) {
-        // Если галочка установлена, добавляем email в массив
-        if (!this.selectedEmails.includes(email)) {
-          this.selectedEmails.push(email);
+        // Если галочка установлена, добавляем uid в массив
+        if (!this.selectedUidDriver.includes(uid)) {
+          this.selectedUidDriver.push(uid);
         }
       } else {
-        // Если галочка снята, удаляем email из массива
-        this.selectedEmails = this.selectedEmails.filter(function (item) {
-          return item !== email;
+        // Если галочка снята, удаляем uid из массива
+        this.selectedUidDriver = this.selectedUidDriver.filter(function (item) {
+          return item !== uid;
         });
       }
+
+      console.log("Selected UIDs:", this.selectedUidDriver); // Лог для проверки
     },
     addToBalance: function addToBalance() {
-      if (!this.selectedEmails || this.selectedEmails.length === 0) {
+      var _this2 = this;
+
+      if (!this.selectedUidDriver || this.selectedUidDriver.length === 0) {
         window.alert('Пожалуйста убедитесь, что выбран хотя бы один водитель.');
         return;
       }
 
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/addToBalanceDriver/".concat(this.selectedEmails.join(','), "/").concat(this.amount)).then(function (response) {
+      console.log("Selected drivers:", this.selectedUidDriver); // Лог для проверки
+
+      console.log("Amount:", this.amount); // Лог для проверки
+
+      console.log("/addToBalanceDriver/".concat(this.selectedUidDriver.join(','), "/").concat(this.amount)); // Лог для проверки
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/addToBalanceDriver/".concat(this.selectedUidDriver.join(','), "/").concat(this.amount)).then(function (response) {
         // Проверяем успешность операции
         if (response.status === 200) {
           window.alert("Данные успешно обновлены");
           window.location.reload();
         } else {
-          window.alert("Произошла ошибка при обновлении данных " + response.status);
+          window.alert("Произошла ошибка при обновлении данных " + "/addToBalanceDriver/".concat(_this2.selectedUidDriver.join(','), "/").concat(_this2.amount) + response.status);
         }
       })["catch"](function (error) {
         console.error(error);
-        window.alert("Произошла ошибка при обновлении данных" + error);
+        window.alert("Произошла ошибка при обновлении данных" + "/addToBalanceDriver/".concat(_this2.selectedUidDriver.join(','), "/").concat(_this2.amount) + error);
       }); // Здесь вы можете использовать this.selectedUser и this.newMessage
       // для отправки сообщения, например, с использованием вашего бэкенда или других API-методов.
       // Очистите поля после успешной отправки, если это необходимо.
 
-      this.selectedEmails = []; // Очистить массив выбранных email после отправки
+      this.selectedUidDriver = []; // Очистить массив выбранных email после отправки
     }
   }
 });
@@ -40471,20 +40495,6 @@ var render = function () {
       _vm._m(0),
       _vm._v(" "),
       _c(
-        "button",
-        {
-          staticClass: "btn btn-outline-primary",
-          staticStyle: { "margin-left": "5px" },
-          on: {
-            click: function ($event) {
-              return _vm.newMessageButton()
-            },
-          },
-        },
-        [_vm._v("\n        Список сообщений\n    ")]
-      ),
-      _vm._v(" "),
-      _c(
         "v-table",
         {
           staticClass: "my-2 table table-striped",
@@ -40528,7 +40538,7 @@ var render = function () {
                           ],
                           staticClass: "form-input input-lg",
                           staticStyle: { width: "200px" },
-                          attrs: { placeholder: "Select by name" },
+                          attrs: { placeholder: "Поиск по имени" },
                           domProps: { value: _vm.filter.name.value },
                           on: {
                             input: function ($event) {
@@ -40557,7 +40567,7 @@ var render = function () {
                           ],
                           staticClass: "form-input input-lg",
                           staticStyle: { width: "300px" },
-                          attrs: { placeholder: "Select by email" },
+                          attrs: { placeholder: "Поиск по email" },
                           domProps: { value: _vm.filter.email.value },
                           on: {
                             input: function ($event) {
@@ -40586,7 +40596,7 @@ var render = function () {
                           ],
                           staticClass: "form-input input-lg",
                           staticStyle: { width: "200px" },
-                          attrs: { placeholder: "Select by user_phone" },
+                          attrs: { placeholder: "Поиск по номеру телефона" },
                           domProps: { value: _vm.filter.phoneNumber.value },
                           on: {
                             input: function ($event) {
@@ -40615,7 +40625,7 @@ var render = function () {
                           ],
                           staticClass: "form-input input-lg",
                           staticStyle: { width: "200px" },
-                          attrs: { placeholder: "Select by driverNumber" },
+                          attrs: { placeholder: "Поиск по позывному" },
                           domProps: { value: _vm.filter.driverNumber.value },
                           on: {
                             input: function ($event) {
@@ -40624,6 +40634,35 @@ var render = function () {
                               }
                               _vm.$set(
                                 _vm.filter.driverNumber,
+                                "value",
+                                $event.target.value
+                              )
+                            },
+                          },
+                        }),
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.filter.balance_current.value,
+                              expression: "filter.balance_current.value",
+                            },
+                          ],
+                          staticClass: "form-input input-lg",
+                          staticStyle: { width: "200px" },
+                          attrs: { placeholder: "Поиск по балансу" },
+                          domProps: { value: _vm.filter.balance_current.value },
+                          on: {
+                            input: function ($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.filter.balance_current,
                                 "value",
                                 $event.target.value
                               )
@@ -40757,6 +40796,64 @@ var render = function () {
                               directives: [
                                 {
                                   name: "model",
+                                  rawName: "v-model.text",
+                                  value: row.balance_current,
+                                  expression: "row.balance_current",
+                                  modifiers: { text: true },
+                                },
+                              ],
+                              staticClass: "form-control",
+                              staticStyle: { width: "200px" },
+                              attrs: { id: "balance_current", readonly: "" },
+                              domProps: { value: row.balance_current },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    row,
+                                    "balance_current",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model.text",
+                                  value: row.uid,
+                                  expression: "row.uid",
+                                  modifiers: { text: true },
+                                },
+                              ],
+                              attrs: {
+                                id: "uid",
+                                type: "hidden",
+                                readonly: "",
+                              },
+                              domProps: { value: row.uid },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(row, "uid", $event.target.value)
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
                                   rawName: "v-model",
                                   value: row.sent,
                                   expression: "row.sent",
@@ -40827,7 +40924,7 @@ var render = function () {
               _c(
                 "v-th",
                 { staticStyle: { width: "200px" }, attrs: { sortKey: "name" } },
-                [_vm._v("Name")]
+                [_vm._v("ФИО")]
               ),
               _vm._v(" "),
               _c(
@@ -40845,7 +40942,7 @@ var render = function () {
                   staticStyle: { width: "200px" },
                   attrs: { sortKey: "user_phone" },
                 },
-                [_vm._v("Phone")]
+                [_vm._v("Телефон")]
               ),
               _vm._v(" "),
               _c(
@@ -40854,7 +40951,16 @@ var render = function () {
                   staticStyle: { width: "200px" },
                   attrs: { sortKey: "driverNumber" },
                 },
-                [_vm._v("driverNumber")]
+                [_vm._v("Позывной")]
+              ),
+              _vm._v(" "),
+              _c(
+                "v-th",
+                {
+                  staticStyle: { width: "200px" },
+                  attrs: { sortKey: "balance_current" },
+                },
+                [_vm._v("Баланс")]
               ),
             ],
             1

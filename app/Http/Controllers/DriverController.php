@@ -451,6 +451,22 @@ class DriverController extends Controller
         ], 200);
     }
 
+    public function addToBalanceDriver($selectedUidDriver_array, $amount)
+    {
+
+        $uidArray = explode(',', $selectedUidDriver_array);
+
+        foreach ($uidArray as $value) {
+            (new FCMController)->addAmountToBalanceCurrent($value, $amount);
+        }
+
+        $status = "Пополнение наличными баланса";
+        return response()->json([
+            'status' => $status,
+            'message' => 'addToBalanceDriver successfully'
+        ], 200);
+    }
+
 
     public function driverCardPayByTokenToBalance($uidDriver, $amount, $recToken)
     {
