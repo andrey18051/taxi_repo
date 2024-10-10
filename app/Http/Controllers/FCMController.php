@@ -1579,8 +1579,9 @@ class FCMController extends Controller
 
 
                 $randomNumber = rand(1000000, 9999999); // Генерируем случайное число от 1000 до 9999
-                $documentId = "R_{$driverNumber}_{$randomNumber}";
 
+                $currentTimeInMilliseconds = round(microtime(true) * 1000);
+                $documentId = "R_{$dataDriver['driverNumber']}_{$randomNumber}_{$currentTimeInMilliseconds}";
 
                 $collection = $firestore->collection('balance');
                 $document = $collection->document($documentId);
@@ -1717,6 +1718,174 @@ google_id: $uidDriver ожидает возврата средств:
         } catch (\Exception $e) {
             Log::error("driverDownBalanceAdmin Error reading document from Firestore: " . $e->getMessage());
             return "driverDownBalanceAdmin Error reading document from Firestore.";
+        }
+    }
+
+
+    public function driverDeleteOrder($id)
+    {
+        try {
+
+            $formattedTime = self::currentKievDateTime();
+
+
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('balance');
+            $document = $collection->document($id);
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+
+                $uidDriver = $data['driver_uid'] ?? 'Unknown';
+                $orderId = $id ?? 'Unknown';
+                $amount = $data['amount'];
+                $selectedTypeCode = $data['selectedTypeCode'];
+
+                $collection = $firestore->collection('users');
+                $document_users = $collection->document($uidDriver);
+                $snapshot_users = $document_users->snapshot();
+                $data_users = $snapshot_users->data();
+
+                $name = $data_users['name'] ?? 'Unknown';
+                $phoneNumber = $data_users['phoneNumber'] ?? 'Unknown';
+                $driverNumber = $data_users['driverNumber'] ?? 'Unknown';
+                $driver_uid = $data_users['uid'] ?? 'Unknown';
+                $email = $data_users['email'] ?? 'Unknown';
+
+                $subject = "Водитель
+ФИО $name
+телефон $phoneNumber
+позывной $driverNumber
+google_id: $uidDriver ожидает отмены заявки на возврат средств:
+Номер заявки $orderId
+Сумма  $amount
+Способ возврата $selectedTypeCode
+Время заявки $formattedTime
+Ссылка для подтверждения https://m.easy-order-taxi.site/driver/driverAdminDeleteOrder/$orderId";
+
+                $messageAdmin = $subject;
+
+                $alarmMessage = new TelegramController();
+
+//                try {
+//                    $alarmMessage->sendAlarmMessage($messageAdmin);
+//                    $alarmMessage->sendMeMessage($messageAdmin);
+//                } catch (Exception $e) {
+//                    Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+//                }
+//                Log::debug("sentCancelInfo  $messageAdmin");
+
+
+                $subject_email = "Заявка на отмену вывода средств  (позывной $driverNumber)";
+                $url = "https://m.easy-order-taxi.site/driver/driverAdminDeleteOrder/$orderId";
+                $paramsAdmin = [
+                    'email' => $email,
+                    'subject' => $subject_email,
+                    'message' => $messageAdmin,
+                    'url' => $url,
+
+                ];
+
+                Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
+
+                Mail::to('cartaxi4@gmail.com')->send(new DriverInfo($paramsAdmin));
+
+            }
+
+
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
+
+    public function driverDeleteOrderAdmin($orderId)
+    {
+        try {
+
+            $formattedTime = self::currentKievDateTime();
+
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получаем старый документ
+            $collection = $firestore->collection('balance');
+            $document_balance = $collection->document($orderId);
+            $snapshot_balance = $document_balance->snapshot();
+            $updateData = [
+                'complete' => true // Или false, в зависимости от вашего требования
+            ];
+
+            try {
+                // Выполняем обновление документа
+                $document_balance->set($updateData, ['merge' => true]);
+            } catch (Exception $e) {
+            }
+            // Извлекаем данные из старого документа
+            $dataDriver_balance = $snapshot_balance->data();
+            $driver_uid = $dataDriver_balance['driver_uid'] ?? 0;
+            $amount_to_return = $dataDriver_balance['amount'] ?? 0;
+
+            // Получаем текущий баланс
+            $collection_current = $firestore->collection('balance_current');
+            $document_balance_current = $collection_current->document($driver_uid);
+            $snapshot_balance_current = $document_balance_current->snapshot();
+            $newAmount = $snapshot_balance_current->data()['amount'] ?? 0;
+            $selectedTypeCode = $snapshot_balance_current->data()['selectedTypeCode'] ?? 0;
+
+            $formattedTime = self::currentKievDateTime();
+            // Обновляем сумму
+            $newAmount += $amount_to_return;
+            $dataBalance = [
+                'driver_uid' => $driver_uid,
+                'amount' => $newAmount,
+                'created_at' => $formattedTime,
+            ];
+
+
+            $document_balance_current->set($dataBalance);
+
+            // Данные для новой записи с неизменёнными полями
+            $data = [
+                'driver_uid' => $driver_uid,
+                'amount' => $amount_to_return,
+                'commission' => $amount_to_return,
+                'created_at' => $formattedTime,
+                'status' => 'holdDownReturnToBalance', // Сохраняем неизменённые поля
+                'id' => $orderId,
+                'current_balance' => $newAmount,
+                'selectedTypeCode' => $selectedTypeCode,
+                'complete' => true // Устанавливаем нужное значение
+            ];
+
+            // Создаём новый документ в коллекции balance
+            $randomNumber = rand(1000000, 9999999); // Генерируем случайное число от 1000 до 9999
+            // Получение текущего времени в миллисекундах
+            $currentTimeInMilliseconds = round(microtime(true) * 1000);
+
+
+            $collection_driver = $firestore->collection('users');
+            $document_driver = $collection_driver->document($driver_uid);
+            $snapshot = $document_driver->snapshot();
+            $dataDriver = $snapshot->data();
+
+            $documentId = "R_{$dataDriver['driverNumber']}_{$randomNumber}_{$currentTimeInMilliseconds}";
+
+            $document = $collection->document($documentId);
+            $document->set($data);
+
+            return "Заявка водителя на отмену возврата средств выполнена " ; // Возвращаем ID нового документа
+        } catch (Exception $e) {
+            return "Ошибка: " . $e->getMessage();
         }
     }
 

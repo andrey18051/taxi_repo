@@ -47,8 +47,14 @@ Route::get('/driverCardPayToBalance/{uidDriver}/{amount}/{language}', [DriverCon
 Route::get('/driverCardPayDownBalance/{uidDriver}/{amount}/{comment}/{selectedTypeCode}', [DriverController::class, 'driverCardPayDownBalance'])
     ->name('driverCardPayDownBalance');
 
+Route::get('/driverDeleteOrder/{id}', [DriverController::class, 'driverDeleteOrder'])
+    ->name('driverDeleteOrder');
+
 Route::get('/driverDownBalanceAdmin/{uidDriver}/{documentId}', [FCMController::class, 'driverDownBalanceAdmin'])
     ->name('driverDownBalanceAdmin');
+
+Route::get('/driverAdminDeleteOrder/{orderId}', [FCMController::class, 'driverDeleteOrderAdmin'])
+    ->name('driverAdminDeleteOrder');
 
 Route::get('/driver/driverDownBalanceAdmin/', [DriverController::class, 'driverDownBalanceAdmin'])
     ->name('driverDownBalanceAdmin');

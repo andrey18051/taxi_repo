@@ -451,6 +451,18 @@ class DriverController extends Controller
         ], 200);
     }
 
+    public function driverDeleteOrder($id)
+    {
+        (new FCMController())->driverDeleteOrder($id);
+
+
+        $status = "Вывод с баланса";
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverCardPayDownBalance successfully'
+        ], 200);
+    }
+
     public function addToBalanceDriver($selectedUidDriver_array, $amount)
     {
 
