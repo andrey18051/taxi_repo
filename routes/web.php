@@ -1440,3 +1440,4 @@ Route::get('/driver-amount-finish', function () {
 Route::get('/driverAll', [DriverController::class, 'driverAll'])->name('driverAll');
 Route::get('/addToBalanceDriver/{selectedUidDriver}/{amount}', [DriverController::class, 'addToBalanceDriver'])
     ->name('addToBalanceDriver');
+Route::get('/reportBalanceDriver', [ReportController::class, 'reportBalanceDriver'])->name('reportBalanceDriver');

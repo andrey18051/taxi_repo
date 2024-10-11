@@ -123,7 +123,36 @@ class FCMController extends Controller
         }
     }
 
+    public function readFullUsersFirestore($uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
 
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                Log::info("Name: " . $data['name']);
+                Log::info("Email: " . $data['email']);
+                return $data;
+            } else {
+                Log::info("Document does not exist!");
+                return "Document does not exist!";
+            }
+        } catch (\Exception $e) {
+            Log::error("Error reading document from Firestore: " . $e->getMessage());
+            return "Error reading document from Firestore.";
+        }
+    }
     public function writeDocumentToFirestore($uid)
     {
         // Найти запись в базе данных по $orderId
@@ -1237,6 +1266,40 @@ class FCMController extends Controller
             return "Error retrieving users from Firestore.";
         }
     }
+    public function driverAllBalanceRecord()
+    {
+        try {
+            // Получаем экземпляр клиента Firestore
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получаем ссылку на коллекцию
+            $collection = $firestore->collection('balance');
+
+            // Получаем все документы из коллекции
+            $documents = $collection->documents();
+
+            // Массив для хранения всех записей
+            $balanceRecords = [];
+
+            // Перебор всех документов
+            foreach ($documents as $document) {
+                if ($document->exists()) {
+                    // Добавляем данные документа в массив
+                    $balanceRecords[] = $document->data();
+                }
+            }
+
+            // Возвращаем записи в виде массива
+            return $balanceRecords;
+
+        } catch (\Exception $e) {
+            Log::error("Error retrieving users from Firestore: " . $e->getMessage());
+            return []; // Возвращаем пустой массив в случае ошибки
+        }
+    }
+
 
 
     public function saveCardDataToFirestore($uidDriver, $cardData, $status, $amount)

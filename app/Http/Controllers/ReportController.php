@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\DriverInfo;
+use App\Mail\DriverReportsInfo;
 use App\Models\BonusBalance;
 use App\Models\BonusBalancePas1;
 use App\Models\BonusBalancePas2;
@@ -13,6 +15,7 @@ use App\Models\Order;
 use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -1087,4 +1090,295 @@ class ReportController extends Controller
         $reportIP->save($reportIP_path);
         return response()->download($reportIP_path);
     }
+
+
+    public function reportBalanceDriver()
+    {
+        // Получаем данные водителей и их баланс
+        $dataDriverArray = (new FCMController)->driverAll();
+        $balanceRecords = (new FCMController)->driverAllBalanceRecord();
+
+        // Группировка записей баланса по driver_uid
+        $groupedBalanceRecords = [];
+        foreach ($balanceRecords as $balanceRecord) {
+            $driverUid = $balanceRecord['driver_uid'];
+            if (!isset($groupedBalanceRecords[$driverUid])) {
+                $groupedBalanceRecords[$driverUid] = [];
+            }
+            $groupedBalanceRecords[$driverUid][] = $balanceRecord;
+        }
+
+        // Создаем новую таблицу
+        $spreadsheet = new Spreadsheet();
+
+        foreach ($dataDriverArray as $index => $driver) {
+            // Получаем полные данные о водителе
+            $driverData = (new FCMController)->readFullUsersFirestore($driver['uid']);
+            $driverUid = $driver['uid'];
+
+            if (isset($driverData['driverNumber']) && isset($groupedBalanceRecords[$driverUid])) {
+                // Сортировка записей баланса по убыванию даты
+                usort($groupedBalanceRecords[$driverUid], function ($a, $b) {
+                    return strtotime($b['created_at']) - strtotime($a['created_at']);
+                });
+
+                // Создаем новую вкладку для каждого водителя
+                if ($index === 0) {
+                    $sheet = $spreadsheet->getActiveSheet();
+                    $sheet->setTitle($driverData['driverNumber']); // первая вкладка
+                } else {
+                    $sheet = $spreadsheet->createSheet();
+                    $sheet->setTitle($driverData['driverNumber']); // остальные вкладки
+                }
+
+                // Добавляем данные водителя в верхней части каждой вкладки
+                $sheet->setCellValue('A1', 'Позывной');
+                $sheet->setCellValue('B1', $driverData['driverNumber'] ?? '');
+
+                $sheet->setCellValue('A2', 'UID Гугл');
+                $sheet->setCellValue('B2', $driverData['uid'] ?? '');
+
+                $sheet->setCellValue('A3', 'Телефон');
+                $sheet->setCellValue('B3', $driverData['phoneNumber'] ?? '');
+
+                $sheet->setCellValue('A4', 'ФИО');
+                $sheet->setCellValue('B4', $driverData['name'] ?? '');
+
+                $sheet->setCellValue('A5', 'Аккаунт проверен');
+                $sheet->setCellValue('B5', $driverData['verified'] ? 'Да' : 'Нет');
+
+                $sheet->setCellValue('A6', 'Email');
+                $sheet->setCellValue('B6', $driverData['email'] ?? '');
+
+
+                // Автоматическая подгонка размера колонок под длину содержимого
+                foreach (range('A', 'H') as $columnID) {
+                    $sheet->getColumnDimension($columnID)->setAutoSize(true);
+                }
+
+                // Установка заголовков для таблицы балансов
+                $sheet->setCellValue('A9', 'Дата');
+                $sheet->setCellValue('B9', 'Тип операции');
+                $sheet->setCellValue('C9', 'Заказ');
+                $sheet->setCellValue('D9', 'Сумма');
+                $sheet->setCellValue('E9', 'Комиссия');
+                $sheet->setCellValue('F9', 'Текущий баланс');
+                $sheet->setCellValue('G9', 'Статус');
+                $sheet->setCellValue('H9', 'Админ');
+
+                // Применение стилей к заголовкам
+
+                $sheet->getStyle('A9:H9')->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '808080'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_TOP,
+                        'wrapText' => true,
+                    ],
+                ]);
+
+                $sheet->getStyle('A9:H9')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('7FFFD4');
+
+
+                // Заполнение данными о балансе для каждого водителя (в порядке убывания даты)
+                $row = 10; // Начальная строка для данных о балансе
+                foreach ($groupedBalanceRecords[$driverUid] as $balance) {
+                    $sheet->setCellValue('A' . $row, $balance['created_at'] ?? '');
+                    if (isset($balance['selectedTypeCode'])) {
+                        if ($balance['selectedTypeCode'] != 0) {
+                            $selectedTypeCode = $balance['selectedTypeCode'];
+                        } else {
+                            $selectedTypeCode = '';
+                        }
+                    } else {
+                        $selectedTypeCode = '';
+                    };
+                    // Проверяем наличие маршрута и формируем текст для selectedTypeCode
+                    if (isset($balance['routefrom'], $balance['routeto'])) {
+                        $selectedTypeCode = "Маршрут от " . $balance['routefrom'] . " до " . $balance['routeto'];
+                    }
+
+// Записываем значение в ячейку
+                    $sheet->setCellValue('B' . $row, $selectedTypeCode);
+
+
+                    $sheet->setCellValue('C' . $row, $balance['web_cost'] ?? '');
+                    $sheet->setCellValue('D' . $row, $balance['amount'] ?? '');
+
+// Проверка на равенство amount и commission
+                    if (isset($balance['commission'], $balance['amount'])) {
+                        $commission = ''; // Не выводим комиссию, если она равна сумме
+                    } elseif (isset($balance['commission'])) {
+                        $commission = $balance['commission'];
+                    } else {
+                        $commission = ''; // На случай, если комиссия не задана
+                    }
+
+                    $sheet->setCellValue('E' . $row, $commission);
+
+
+                    $sheet->setCellValue('F' . $row, $balance['current_balance'] ?? '');
+                    $status ='';
+                    switch ($balance['status']) {
+                        case "payment_nal":
+                            $status = 'Пополнение админом';
+                            break;
+                        case "holdDownReturnToBalance":
+                            $status = 'Отмена холда по заявке на вывод с баланса';
+                            break;
+                        case "holdDownComplete":
+                            $status = 'Выполнение заявки на вывод с баланса';
+                            break;
+                        case "holdDown":
+                            $status = 'Холд по заявке на вывод с баланса';
+                            break;
+                        case "hold":
+                            $status = 'Холд при взятии заказа';
+                            break;
+                        case "return":
+                            $status = 'Возврат холда при отказе от взятого заказа';
+                            break;
+                        case "delete":
+                            $status = 'Списание комиссии за взятый заказ';
+                            break;
+                    }
+                    $sheet->setCellValue('G' . $row, $status ?? '');
+                    $sheet->setCellValue('H' . $row, $balance['admin_name'] ?? '');
+                    $sheet->getStyle('A' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                            'wrapText' => true,
+                        ],
+                    ]);
+
+                    $sheet->getStyle('B' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::HORIZONTAL_LEFT,
+                            'wrapText' => true,
+                        ],
+                    ]);
+                    $sheet->getStyle('C' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::HORIZONTAL_RIGHT,
+                            'wrapText' => true,
+                        ],
+                    ]);
+                    $sheet->getStyle('D' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::HORIZONTAL_RIGHT,
+                            'wrapText' => true,
+                        ],
+                    ]);
+                    $sheet->getStyle('E' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::HORIZONTAL_RIGHT,
+                            'wrapText' => true,
+                        ],
+                    ]);
+
+                    $sheet->getStyle('F' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::HORIZONTAL_LEFT,
+                            'wrapText' => true,
+                        ],
+                    ]);
+
+                    $sheet->getStyle('G' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                            'wrapText' => true,
+                        ],
+                    ]);
+                    $sheet->getStyle('H' . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '808080'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                            'wrapText' => true,
+                        ],
+                    ]);
+                    $row++;
+                }
+            }
+        }
+
+        // Сохранение файла
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'drivers_balance_report.xlsx';
+        $path = storage_path('app/public/reports/' . $fileName); // Указывает путь к папке storage/app/
+        $writer->save($path); // Сохраните файл в storage/app/
+
+        $formatTime = (new FCMController)->currentKievDateTime();
+        $subject_email =  "Отчет по балансу водителей на " .  $formatTime;
+
+
+        $paramsAdmin = [
+            'subject' => $subject_email,
+        ];
+
+
+        Mail::to('taxi.easy.ua@gmail.com')->send(new DriverReportsInfo($paramsAdmin));
+
+        Mail::to('cartaxi4@gmail.com')->send(new DriverReportsInfo($paramsAdmin));
+
+        // Удаление файла после отправки
+        if (file_exists($path)) {
+            unlink($path); // Удаляем файл
+        }
+        return "Успех";
+    }
+
+
+
 }

@@ -5,7 +5,9 @@
             <h1 class="display-5">Водители</h1>
             <p class="lead">Пополнение баланса</p>
         </div>
-
+        <button class="btn btn-outline-primary" @click="newReportsButton()" style="margin-left: 5px">
+             Получить отчет на почту
+        </button>
         <v-table
             :data="users"
             :filters="filter"
@@ -159,6 +161,23 @@ export default {
             // Очистите поля после успешной отправки, если это необходимо.
             this.selectedUidDriver = []; // Очистить массив выбранных email после отправки
         },
+        newReportsButton() {
+            axios.get(`/reportBalanceDriver`)
+                .then(response => {
+                    // Проверяем успешность операции
+                    if (response.status === 200) {
+                        window.alert("Данные успешно отправлены");
+                        window.location.reload();
+                    } else {
+                        window.alert("Произошла ошибка при отправке данных " + response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    window.alert("Произошла ошибка при отправке данных" + error);
+                });
+
+        }
     }
 }
 </script>

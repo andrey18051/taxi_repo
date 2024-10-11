@@ -6592,6 +6592,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "DriverBalanceAdd",
@@ -6701,6 +6703,20 @@ __webpack_require__.r(__webpack_exports__);
       // Очистите поля после успешной отправки, если это необходимо.
 
       this.selectedUidDriver = []; // Очистить массив выбранных email после отправки
+    },
+    newReportsButton: function newReportsButton() {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/reportBalanceDriver").then(function (response) {
+        // Проверяем успешность операции
+        if (response.status === 200) {
+          window.alert("Данные успешно отправлены");
+          window.location.reload();
+        } else {
+          window.alert("Произошла ошибка при отправке данных " + response.status);
+        }
+      })["catch"](function (error) {
+        console.error(error);
+        window.alert("Произошла ошибка при отправке данных" + error);
+      });
     }
   }
 });
@@ -40493,6 +40509,20 @@ var render = function () {
     { staticClass: "container", staticStyle: { "overflow-x": "auto" } },
     [
       _vm._m(0),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.newReportsButton()
+            },
+          },
+        },
+        [_vm._v("\n         Получить отчет на почту\n    ")]
+      ),
       _vm._v(" "),
       _c(
         "v-table",
