@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -2168,6 +2169,12 @@ google_id: $uidDriver ожидает отмены заявки на возвра
             $documentId = "A_{$driverNumber}_{$formattedTime}_{$randomNumber}";
             $collection = $firestore->collection('balance');
             $document = $collection->document($documentId);
+
+            $admin = Auth::user();
+
+            $data['admin_name'] = $admin->name;
+            $data['admin_email'] =  $admin->email;
+
 
             $data['amount'] = (float)$amount;  // Записываем как число
             $data['id'] = $documentId;
