@@ -29,7 +29,7 @@ class AddRouteDistanceCollumnToOrderwebsTable extends Migration
     public function down()
     {
         Schema::table('orderwebs', function (Blueprint $table) {
-            $table->dropColumn('city');
+            $table->dropColumn('rout_distance');
         });
     }
 }

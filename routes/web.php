@@ -22,6 +22,7 @@ use App\Http\Controllers\FCMController;
 use App\Http\Controllers\FondyController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\HelpInfoController;
 use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
@@ -79,6 +80,15 @@ use Stevebauman\Location\Facades\Location;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+/**
+ * Api check
+ */
+
+Route::get('/api/check', function () {
+    return response()->json(['status' => 'OK'], 200);
+});
+
 /**
  * Generation text for news
  */
@@ -1441,3 +1451,14 @@ Route::get('/driverAll', [DriverController::class, 'driverAll'])->name('driverAl
 Route::get('/addToBalanceDriver/{selectedUidDriver}/{amount}', [DriverController::class, 'addToBalanceDriver'])
     ->name('addToBalanceDriver');
 Route::get('/reportBalanceDriver', [ReportController::class, 'reportBalanceDriver'])->name('reportBalanceDriver');
+
+/**
+ * Справка для ВОД
+ */
+Route::get('help-info/create', [HelpInfoController::class, 'create'])->name('help_info.create');
+Route::post('help-info/store', [HelpInfoController::class, 'store'])->name('help_info.store');
+Route::resource('help_info', HelpInfoController::class);
+// Маршрут для отображения списка всех записей
+Route::get('/help-info', [HelpInfoController::class, 'index'])->name('help_info.index');
+Route::get('/help-info/{id}/edit', [HelpInfoController::class, 'edit'])->name('help_info.edit');
+Route::get('help-infos', [HelpInfoController::class, 'helpInfos']);

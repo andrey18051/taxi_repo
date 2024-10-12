@@ -8,6 +8,9 @@
         <button class="btn btn-outline-primary" @click="newReportsButton()" style="margin-left: 5px">
              Получить отчет на почту
         </button>
+        <button class="btn btn-outline-primary"  @click="createInfoPage()" style="margin-left: 5px">
+             Инфостраницы
+        </button>
         <v-table
             :data="users"
             :filters="filter"
@@ -177,7 +180,23 @@ export default {
                     window.alert("Произошла ошибка при отправке данных" + error);
                 });
 
+        },
+        createInfoPage() {
+            axios.get(`/help-info`)
+                .then(response => {
+                    // Проверяем успешность операции
+                    if (response.status === 200) {
+                        window.location.href = "/help-info"; // Переход на страницу создания информации
+                    } else {
+                        window.alert("Произошла ошибка при отправке данных " + response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    window.alert("Произошла ошибка при отправке данных: " + error);
+                });
         }
+
     }
 }
 </script>

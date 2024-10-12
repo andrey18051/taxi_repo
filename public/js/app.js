@@ -6594,6 +6594,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "DriverBalanceAdd",
@@ -6716,6 +6719,19 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {
         console.error(error);
         window.alert("Произошла ошибка при отправке данных" + error);
+      });
+    },
+    createInfoPage: function createInfoPage() {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get("/help-info").then(function (response) {
+        // Проверяем успешность операции
+        if (response.status === 200) {
+          window.location.href = "/help-info"; // Переход на страницу создания информации
+        } else {
+          window.alert("Произошла ошибка при отправке данных " + response.status);
+        }
+      })["catch"](function (error) {
+        console.error(error);
+        window.alert("Произошла ошибка при отправке данных: " + error);
       });
     }
   }
@@ -40522,6 +40538,20 @@ var render = function () {
           },
         },
         [_vm._v("\n         Получить отчет на почту\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.createInfoPage()
+            },
+          },
+        },
+        [_vm._v("\n         Инфостраницы\n    ")]
       ),
       _vm._v(" "),
       _c(
