@@ -4,11 +4,11 @@
     <div class="container">
         <h1 class="mb-4">Список информации</h1>
 
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+{{--        @if (session('success'))--}}
+{{--            <div class="alert alert-success">--}}
+{{--                {{ session('success') }}--}}
+{{--            </div>--}}
+{{--        @endif--}}
 
         <table class="table">
             <thead>

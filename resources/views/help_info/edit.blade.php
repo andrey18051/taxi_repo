@@ -1,16 +1,14 @@
-{{-- resources/views/help_info/edit.blade.php --}}
-
 @extends('layouts.admin')
 
 @section('content')
     <div class="container">
         <h1 class="mb-4">Изменить информацию для страницы {{ $helpInfo->page_number }}</h1>
 
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+{{--        @if (session('success'))--}}
+{{--            <div class="alert alert-success">--}}
+{{--                {{ session('success') }}--}}
+{{--            </div>--}}
+{{--        @endif--}}
 
         <form action="{{ route('help_info.update', $helpInfo->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
