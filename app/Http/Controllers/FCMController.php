@@ -382,6 +382,32 @@ class FCMController extends Controller
         }
     }
 
+    public function ordersTakingStatus($uid, $status)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders_taking');
+            $document = $collection->document($uid);
+
+// Используем set() с параметром merge, чтобы обновить/создать документ
+            $document->set([
+                'status' => $status
+            ], ['merge' => true]);
+
+            Log::info("Document successfully deleted!");
+            return "Document successfully deleted!";
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
+        }
+    }
+
+
     public function writeDocumentToVerifyUserFirestore($uidDriver)
     {
         try {

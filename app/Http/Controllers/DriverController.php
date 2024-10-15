@@ -263,6 +263,7 @@ class DriverController extends Controller
 
             (new MessageSentController())->sentCarTakingInfo($orderweb);
             $status = "orderTaking";
+            (new FCMController)->ordersTakingStatus($uid, $status);
             // Вернуть JSON с сообщением об успехе
             return response()->json([
                 'status' => $status,
@@ -287,6 +288,25 @@ class DriverController extends Controller
         (new MessageSentController())->sentDriverInStartPoint($uid, $uidDriver);
 
         $status = "driverInStartPoint";
+        (new FCMController)->ordersTakingStatus($uid, $status);
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'driverInStartPoint successfully'
+        ], 200);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function driverInRout($uid, $uidDriver)
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+
+        (new MessageSentController())->sentDriverInRout($uid, $uidDriver);
+
+        $status = "driverInRout";
+        (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,
@@ -310,6 +330,7 @@ class DriverController extends Controller
         (new FCMController())->writeDocumentToHistoryFirestore($uid, $status);
 
         $status = "driverCloseOrder";
+
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,
