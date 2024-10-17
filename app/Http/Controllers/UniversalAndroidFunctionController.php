@@ -3894,12 +3894,26 @@ class UniversalAndroidFunctionController extends Controller
 
     public function getCardTokenApp(
         $application,
-        $city,
+        $cityApp,
         $email,
         $pay_system
     ): \Illuminate\Http\JsonResponse {
         $user = User::where('email', $email)->first();
 //        dd($application);
+
+        $city = "Kyiv City";
+//        switch ($cityApp) {
+//            case "PAS1":
+//                 $city = "";
+//                break;
+//            case "PAS2":
+//                $merchantInfo = City_PAS2::where("name", $city)->first();
+//                break;
+//            default:
+//                $merchantInfo = City_PAS4::where("name", $city)->first();
+//        }
+
+
         switch ($application) {
             case "PAS1":
                 $merchantInfo = City_PAS1::where("name", $city)->first();
@@ -4160,7 +4174,104 @@ class UniversalAndroidFunctionController extends Controller
                 'lan_min' => 33.8000,  // Минимальная долгота для области
                 'lan_max' => 35.5000,  // Максимальная долгота для области
             ],
+            'city_lviv' => [
+                'lat_min' => 48.9000,
+                'lat_max' => 50.6000,
+                'lan_min' => 22.0000,
+                'lan_max' => 25.5000,
+            ],
+            'city_ivano_frankivsk' => [
+                'lat_min' => 47.5000,
+                'lat_max' => 49.2000,
+                'lan_min' => 23.8000,
+                'lan_max' => 25.6000,
+            ],
+            'city_vinnytsia' => [
+                'lat_min' => 48.2000,
+                'lat_max' => 49.9000,
+                'lan_min' => 27.3000,
+                'lan_max' => 29.4000,
+            ],
+            'city_poltava' => [
+                'lat_min' => 48.5000,
+                'lat_max' => 50.6000,
+                'lan_min' => 32.4000,
+                'lan_max' => 35.0000,
+            ],
+            'city_sumy' => [
+                'lat_min' => 50.1000,
+                'lat_max' => 52.3000,
+                'lan_min' => 33.0000,
+                'lan_max' => 35.3000,
+            ],
+            'city_kharkiv' => [
+                'lat_min' => 48.9000,
+                'lat_max' => 50.6000,
+                'lan_min' => 35.0000,
+                'lan_max' => 37.3000,
+            ],
+            'city_chernihiv' => [
+                'lat_min' => 50.4000,
+                'lat_max' => 52.5000,
+                'lan_min' => 30.4000,
+                'lan_max' => 33.2000,
+            ],
+            'city_rivne' => [
+                'lat_min' => 49.6000,
+                'lat_max' => 51.0000,
+                'lan_min' => 25.5000,
+                'lan_max' => 27.4000,
+            ],
+            'city_volyn' => [
+                'lat_min' => 50.5000,
+                'lat_max' => 51.7000,
+                'lan_min' => 23.3000,
+                'lan_max' => 25.8000,
+            ],
+            'city_ternopil' => [
+                'lat_min' => 48.8000,
+                'lat_max' => 50.2000,
+                'lan_min' => 24.0000,
+                'lan_max' => 26.2000,
+            ],
+            'city_khmelnytskyi' => [
+                'lat_min' => 48.8000,
+                'lat_max' => 50.3000,
+                'lan_min' => 25.9000,
+                'lan_max' => 28.0000,
+            ],
+            'city_zakarpattya' => [
+                'lat_min' => 47.5000,
+                'lat_max' => 49.0000,
+                'lan_min' => 22.1000,
+                'lan_max' => 24.4000,
+            ],
+            'city_zhytomyr' => [
+                'lat_min' => 49.7000,
+                'lat_max' => 51.5000,
+                'lan_min' => 27.6000,
+                'lan_max' => 29.4000,
+            ],
+            'city_kropyvnytskyi' => [
+                'lat_min' => 47.2000,
+                'lat_max' => 49.0000,
+                'lan_min' => 30.4000,
+                'lan_max' => 33.0000,
+            ],
+            'city_mykolaiv' => [
+                'lat_min' => 46.0000,
+                'lat_max' => 48.1000,
+                'lan_min' => 30.0000,
+                'lan_max' => 32.5000,
+            ],
+            'city_chernivtsi' => [
+                'lat_min' => 47.9000,
+                'lat_max' => 48.8000,
+                'lan_min' => 25.6000,
+                'lan_max' => 27.3000,
+            ]
         ];
+
 
 
         foreach ($cities as $city => $coords) {

@@ -1803,8 +1803,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -2272,9 +2289,27 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
+
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
         Log::debug("1 connectAPI $connectAPI");
@@ -2751,8 +2786,25 @@ class AndroidTestOSMController extends Controller
         $application,
         $local
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -3215,8 +3267,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -3542,8 +3611,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -3887,8 +3973,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
         $connectAPI = self::connectAPIAppOrder($city, $application);
 
@@ -4208,8 +4311,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
 
         $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -4830,8 +4950,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
         $resp_answer = "";
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -4903,8 +5040,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
         Log::debug("**********************************************************");
         Log::debug("webordersCancelDouble uid $uid");
@@ -5013,8 +5167,25 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        if ($city == "foreign countries") {
-            $city = "Kyiv City";
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
         }
         //Поиск смены номеров заказов
         Log::debug("0 historyUIDStatus uid $uid");
