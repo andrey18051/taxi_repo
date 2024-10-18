@@ -1712,6 +1712,8 @@ class AndroidTestOSMController extends Controller
             $params['server'] = $connectAPI;
 
             $params['closeReason'] = "-1";
+            $params['comment_info'] = $comment;
+            $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
             $params['payment_type'] = $payment_type;
             $params['pay_system'] = $userArr[2];
             if ($params['pay_system'] == "bonus_payment") {
@@ -4218,6 +4220,8 @@ class AndroidTestOSMController extends Controller
 //                    self::identificationId($application)
 //                );
                 $params['closeReason'] = "-1";
+                $params['comment_info'] = $comment;
+                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
                 $params['payment_type'] = $payment_type;
                 $params['pay_system'] = $userArr[2];
                 if ($params['pay_system'] == "bonus_payment") {
@@ -4508,15 +4512,17 @@ class AndroidTestOSMController extends Controller
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 22222222 ", $responseArr);
             $responseFinal = $response;
+             if(isset( $responseArr['dispatching_order_uid'])) {
+                 (new DriverMemoryOrderController)->store(
+                     $responseArr['dispatching_order_uid'],
+                     json_encode($parameter),
+                     $authorization,
+                     $url,
+                     $identificationId,
+                     $apiVersion
+                 );
+             }
 
-            (new DriverMemoryOrderController)->store(
-                $responseArr['dispatching_order_uid'],
-                json_encode($parameter),
-                $authorization,
-                $url,
-                $identificationId,
-                $apiVersion
-            );
         } else {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
@@ -4590,6 +4596,8 @@ class AndroidTestOSMController extends Controller
                 $params['server'] = $connectAPI;
 
                 $params['closeReason'] = "-1";
+                $params['comment_info'] = $comment;
+                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
                 $params['payment_type'] = $payment_type;
                 $params['pay_system'] = $userArr[2];
                 if ($params['pay_system'] == "bonus_payment") {
