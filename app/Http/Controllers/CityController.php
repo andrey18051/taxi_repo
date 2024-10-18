@@ -343,8 +343,31 @@ class CityController extends Controller
             'fondy_key_storage' => ""
         ];
     }
-    public function maxPayValueApp($city, $app): array
+    public function maxPayValueApp($cityApp, $app): array
     {
+
+        switch ($cityApp) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
+        }
+
+
         switch ($app) {
             case "PAS1":
                 $city = City_PAS1::where('name', $city)->first()->toArray();
