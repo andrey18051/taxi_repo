@@ -166,7 +166,7 @@ class FCMController extends Controller
 
         $nearestDriver = self::findDriverInSectorFromFirestore(
             (float) $order->startLat,
-            (float) $order->startLan // Исправлено на startLon
+            (float) $order->startLan
         );
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
         $order->save();
@@ -854,6 +854,64 @@ class FCMController extends Controller
             // Запишите данные в документ
             $document->set($data);
 
+            Log::info("Document successfully written!");
+            return "Document successfully written!";
+        } catch (\Exception $e) {
+            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            return "Error writing document to Firestore.";
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function calculateTimeToStart($orderweb, $uidDriver)
+    {
+
+        $currentDateTime = Carbon::now(); // Получаем текущее время
+        $kievTimeZone = new DateTimeZone('Europe/Kiev'); // Создаем объект временной зоны для Киева
+        $dateTime = new DateTime($currentDateTime->format('Y-m-d H:i:s')); // Создаем объект DateTime
+        $dateTime->setTimezone($kievTimeZone); // Устанавливаем временную зону на Киев
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('sector');
+            $document = $collection->document($uidDriver);
+            $snapshot = $document->snapshot();
+            $data = $snapshot->data();
+            $driver_latitude = $data['latitude'];
+            $driver_longitude = $data['longitude'];
+
+            $start_point_latitude = $orderweb->startLat;
+            $start_point_longitude = $orderweb->startLan;
+
+            $osrmHelper = new OpenStreetMapHelper();
+            $driverDistance = round(
+                $osrmHelper->getRouteDistance(
+                    (float) $driver_latitude,
+                    (float) $driver_longitude,
+                    (float) $start_point_latitude,
+                    (float) $start_point_longitude
+                ) / 1000,
+                2 // Округляем до 2 знаков после запятой
+            );
+            Log::info("driverDistance" . $driverDistance);
+            // Скорость водителя (50 км/ч)
+            $speed = 50;
+            // Расчет времени в минутах
+            $minutesToAdd = ($driverDistance / $speed) * 60; // Время в минутах
+
+            // Устанавливаем время прибытия
+            $dateTime->modify("+{$minutesToAdd} minutes");
+            $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
+            $orderweb->save();
+
+            Log::info("orderweb->time_to_start_point" . $orderweb->time_to_start_point);
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {

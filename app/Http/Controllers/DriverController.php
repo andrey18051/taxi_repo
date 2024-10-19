@@ -259,6 +259,8 @@ class DriverController extends Controller
             $orderweb->closeReason = "101";
             $orderweb->save();
 
+            (new FCMController)->calculateTimeToStart($orderweb, $uidDriver);
+
             (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "hold");
 
             (new MessageSentController())->sentCarTakingInfo($orderweb);

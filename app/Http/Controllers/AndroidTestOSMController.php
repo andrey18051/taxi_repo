@@ -5213,12 +5213,13 @@ class AndroidTestOSMController extends Controller
             $number = $dataDriver["number"];
             $phoneNumber = $dataDriver["phoneNumber"];
 
-            $auto = "Авто $number, цвет $color  $brand $model. ";
+            $auto = "$number, цвет $color  $brand $model. ";
 
 
             // Обновление полей
             $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
             $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
+            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point; // Замените на ваш существующий $phoneNumber
             switch ($orderweb_uid->closeReason) {
                 case "101":
                     $responseData['execution_status'] = 'CarFound'; // Обновление статуса
