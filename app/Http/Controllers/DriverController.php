@@ -183,6 +183,9 @@ class DriverController extends Controller
         return $response->status();
     }
 
+    /**
+     * @throws \Exception
+     */
     public function orderTaking($uid, $uidDriver)
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -257,9 +260,10 @@ class DriverController extends Controller
 
             $orderweb->auto = json_encode($dataDriver);
             $orderweb->closeReason = "101";
+            $orderweb->time_to_start_point = "";
             $orderweb->save();
 
-            (new FCMController)->calculateTimeToStart($orderweb, $uidDriver);
+            (new FCMController)->calculateTimeToStart($uid);
 
             (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "hold");
 

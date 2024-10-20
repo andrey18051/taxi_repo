@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\OpenStreetMapHelper;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\BlackList;
@@ -19,10 +20,12 @@ use App\Models\Uid_history;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use DateTimeZone;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Kreait\Firebase\Factory;
 use SebastianBergmann\Diff\Exception;
 use function Symfony\Component\Translation\t;
 
@@ -4285,5 +4288,47 @@ class UniversalAndroidFunctionController extends Controller
 
         return "all"; // Если город не найден
     }
+    /**
+     * @throws \Exception
+     */
+    public function calculateTimeToStart($orderweb, $response_arr)
+    {
 
+        $currentDateTime = Carbon::now(); // Получаем текущее время
+        $kievTimeZone = new DateTimeZone('Europe/Kiev'); // Создаем объект временной зоны для Киева
+        $dateTime = new DateTime($currentDateTime->format('Y-m-d H:i:s')); // Создаем объект DateTime
+        $dateTime->setTimezone($kievTimeZone); // Устанавливаем временную зону на Киев
+
+        $driver_latitude = $response_arr['lat'];
+        $driver_longitude = $response_arr['lng'];
+
+        $start_point_latitude = $orderweb->startLat;
+        $start_point_longitude = $orderweb->startLan;
+
+        $osrmHelper = new OpenStreetMapHelper();
+        $driverDistance = round(
+            $osrmHelper->getRouteDistance(
+                (float) $driver_latitude,
+                (float) $driver_longitude,
+                (float) $start_point_latitude,
+                (float) $start_point_longitude
+            ) / 1000,
+            2 // Округляем до 2 знаков после запятой
+        );
+        Log::info("driverDistance" . $driverDistance);
+        // Скорость водителя (60 км/ч)
+        $speed = 60;
+        // Расчет времени в минутах
+        $minutesToAdd = round(($driverDistance / $speed) * 60, 0); // Время в минутах
+        if ($minutesToAdd < 1) {
+            $minutesToAdd = 1;
+        }
+        // Устанавливаем время прибытия
+        $dateTime->modify("+{$minutesToAdd} minutes");
+        $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
+        $orderweb->save();
+
+        Log::info("orderweb->time_to_start_point" . $orderweb->time_to_start_point);
+        Log::info("Document successfully written!");
+    }
 }

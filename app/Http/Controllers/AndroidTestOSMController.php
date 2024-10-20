@@ -5429,6 +5429,72 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
+    public function driverCarPosition(
+        $uid,
+        $city,
+        $application
+    ) {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
+        }
+        //Поиск смены номеров заказов
+        Log::debug("0 drivercarposition uid $uid");
+        $uid = (new MemoryOrderChangeController)->show($uid);
+
+        Log::debug("1 drivercarposition uid $uid");
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        $connectAPI = $orderweb->server;
+        sleep(5);
+        $authorization = (new UniversalAndroidFunctionController)
+            ->authorizationApp($city, $connectAPI, $application);
+        $url = $connectAPI . '/api/weborders/drivercarposition/' . $orderweb->dispatching_order_uid;
+        try {
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                    ->apiVersionApp($city, $connectAPI, $application)
+            ])->get($url);
+
+            // Логируем тело ответа
+            Log::debug(" 2 drivercarposition getRequestHTTP: " . $response->body());
+
+            // Проверяем успешность ответа
+            if ($response->successful()) {
+                // Обрабатываем успешный ответ
+                $response_arr = json_decode($response, true);
+                if ($response_arr['lat'] !=0) {
+                    (new UniversalAndroidFunctionController)->calculateTimeToStart($orderweb, $response_arr);
+                }
+
+            }
+        } catch (\Exception $e) {
+            // Обработка исключений
+            Log::error("5 drivercarposition Exception caught: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function onlineAPI(string $city): string
     {
 

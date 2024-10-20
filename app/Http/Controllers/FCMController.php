@@ -865,9 +865,10 @@ class FCMController extends Controller
     /**
      * @throws \Exception
      */
-    public function calculateTimeToStart($orderweb, $uidDriver)
+    public function calculateTimeToStart($uid)
     {
-
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         $currentDateTime = Carbon::now(); // Получаем текущее время
         $kievTimeZone = new DateTimeZone('Europe/Kiev'); // Создаем объект временной зоны для Киева
         $dateTime = new DateTime($currentDateTime->format('Y-m-d H:i:s')); // Создаем объект DateTime
@@ -878,6 +879,15 @@ class FCMController extends Controller
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
+
+            $collection = $firestore->collection('orders_taking');
+            $document = $collection->document($uid);
+            $snapshot = $document->snapshot();
+            $data = $snapshot->data();
+            Log::info("Snapshot data: " . json_encode($data));
+
+            $uidDriver = $data['driver_uid'];
+            Log::info("uidDriver " . $uidDriver);
 
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('sector');
@@ -900,12 +910,16 @@ class FCMController extends Controller
                 ) / 1000,
                 2 // Округляем до 2 знаков после запятой
             );
-            Log::info("driverDistance" . $driverDistance);
-            // Скорость водителя (50 км/ч)
-            $speed = 50;
+            Log::info("driverDistance " . $driverDistance);
+            // Скорость водителя (60 км/ч)
+            $speed = 60;
             // Расчет времени в минутах
-            $minutesToAdd = ($driverDistance / $speed) * 60; // Время в минутах
+            $minutesToAdd = round(($driverDistance / $speed) * 60, 0); // Время в минутах
 
+            if ($minutesToAdd < 1) {
+                $minutesToAdd = 1;
+            }
+            Log::info("minutesToAdd " . $minutesToAdd);
             // Устанавливаем время прибытия
             $dateTime->modify("+{$minutesToAdd} minutes");
             $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
@@ -913,10 +927,10 @@ class FCMController extends Controller
 
             Log::info("orderweb->time_to_start_point" . $orderweb->time_to_start_point);
             Log::info("Document successfully written!");
-            return "Document successfully written!";
+            return "calculateTimeToStart Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
-            return "Error writing document to Firestore.";
+            Log::error("calculateTimeToStart Error writing document to Firestore: " . $e->getMessage());
+            return "calculateTimeToStart Error writing document to Firestore.";
         }
     }
     /**

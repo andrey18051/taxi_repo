@@ -3,6 +3,7 @@
 use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\FCMController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\VisicomController;
@@ -143,6 +144,12 @@ Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{ci
 
 Route::get('/android/historyUIDStatus/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
+
+Route::get('/android/drivercarposition/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'driverCarPosition'])
+    ->name('drivercarposition');
+
+Route::get('/android/calculateTimeToStart/{uid}', [FCMController::class, 'calculateTimeToStart'])
+    ->name('calculateTimeToStart');
 
 
 /**
