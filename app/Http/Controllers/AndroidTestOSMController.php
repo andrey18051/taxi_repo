@@ -4982,7 +4982,7 @@ class AndroidTestOSMController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
 
         (new FCMController)->deleteDocumentFromFirestore($uid);
-        (new FCMController)->deleteDocumentFromFirestoreOrdersTaking($uid);
+        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
         (new FCMController)->deleteDocumentFromSectorFirestore($uid);
         (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 

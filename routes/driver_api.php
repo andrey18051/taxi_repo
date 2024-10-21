@@ -27,6 +27,9 @@ Route::get('/driverInRout/{uid}/{uidDriver}', [DriverController::class, 'driverI
 Route::get('/driverInStartPoint/{uid}/{uidDriver}', [DriverController::class, 'driverInStartPoint'])
     ->name('driverInStartPoint');
 
+Route::get('/toStartPointOffline/{uid}/{minutesToAdd}', [DriverController::class, 'toStartPointOffline'])
+    ->name('toStartPointOffline');
+
 Route::get('/driverInStartPoint/{uid}/{uidDriver}', [DriverController::class, 'driverInStartPoint'])
     ->name('driverInStartPoint');
 Route::get('/driverCloseOrder/{uid}/{uidDriver}', [DriverController::class, 'driverCloseOrder'])

@@ -305,6 +305,23 @@ class DriverController extends Controller
     /**
      * @throws \Exception
      */
+    public function toStartPointOffline($uid, $minutesToAdd)
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        (new FCMController())->calculateTimeToStartOffline($uid, $minutesToAdd);
+
+        $status = "toStartPointOffline";
+        (new FCMController)->ordersTakingStatus($uid, $status);
+        // Вернуть JSON с сообщением об успехе
+        return response()->json([
+            'status' => $status,
+            'message' => 'toStartPointOffline successfully'
+        ], 200);
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function driverInRout($uid, $uidDriver)
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -325,9 +342,6 @@ class DriverController extends Controller
     public function driverCloseOrder($uid, $uidDriver)
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
-
-        (new FCMController)->waitForReturnAndSendDelete($uid, $uidDriver);
-
 
         $status = "closed";
 

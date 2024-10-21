@@ -348,6 +348,56 @@ class FCMController extends Controller
         }
     }
 
+    public function deleteDocumentFromFirestoreOrdersTakingCancel($uid)
+    {
+        // Найти запись в базе данных по $uid
+        Log::info("Attempting to delete order with ID {$uid}");
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::info("Order with ID {$uid} not found.");
+            return "Order not found.";
+        }
+
+        $documentId = $order->id;
+
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('orders_taking');
+            $document = $collection->document($uid);
+            $snapshot = $document->snapshot();
+            if ($snapshot->exists()) {
+                // Получаем данные документа
+                $data = $snapshot->data();
+                if (isset($data['driver_uid'])) {
+                    $uidDriver = $data['driver_uid'];
+                    Log::info("driver_uid: " . $uidDriver);
+                } else {
+                    Log::warning("Поле 'driver_uid' не найдено в документе.");
+                }
+            } else {
+                Log::warning("Документ с uid: " . $uid . " не найден.");
+            }
+            // Удалите документ
+            $document->delete();
+
+            $status = "return";
+
+            self::writeDocumentToBalanceFirestore($uid, $uidDriver, $status);
+
+            Log::info("Document successfully deleted!");
+            return "Document successfully deleted!";
+        } catch (\Exception $e) {
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            return "Error deleting document from Firestore.";
+        }
+    }
+
     public function deleteDocumentFromFirestoreOrdersTaking($uid)
     {
         // Найти запись в базе данных по $uid
@@ -370,9 +420,23 @@ class FCMController extends Controller
             // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders_taking');
             $document = $collection->document($uid);
-
+            $snapshot = $document->snapshot();
+            if ($snapshot->exists()) {
+                // Получаем данные документа
+                $data = $snapshot->data();
+                if (isset($data['driver_uid'])) {
+                    $uidDriver = $data['driver_uid'];
+                    (new FCMController)->waitForReturnAndSendDelete($uid, $uidDriver);
+                    Log::info("driver_uid: " . $uidDriver);
+                } else {
+                    Log::warning("Поле 'driver_uid' не найдено в документе.");
+                }
+            } else {
+                Log::warning("Документ с uid: " . $uid . " не найден.");
+            }
             // Удалите документ
             $document->delete();
+
 
             Log::info("Document successfully deleted!");
             return "Document successfully deleted!";
@@ -896,34 +960,36 @@ class FCMController extends Controller
             $data = $snapshot->data();
             $driver_latitude = $data['latitude'];
             $driver_longitude = $data['longitude'];
+            Log::info("sector " . $driver_latitude);
+            Log::info("sector " . $driver_longitude);
+            if ($driver_latitude != null) {
+                $start_point_latitude = $orderweb->startLat;
+                $start_point_longitude = $orderweb->startLan;
 
-            $start_point_latitude = $orderweb->startLat;
-            $start_point_longitude = $orderweb->startLan;
+                $osrmHelper = new OpenStreetMapHelper();
+                $driverDistance = round(
+                    $osrmHelper->getRouteDistance(
+                        (float) $driver_latitude,
+                        (float) $driver_longitude,
+                        (float) $start_point_latitude,
+                        (float) $start_point_longitude
+                    ) / 1000,
+                    2 // Округляем до 2 знаков после запятой
+                );
+                Log::info("driverDistance " . $driverDistance);
+                // Скорость водителя (60 км/ч)
+                $speed = 60;
+                // Расчет времени в минутах
+                $minutesToAdd = round(($driverDistance / $speed) * 60, 0); // Время в минутах
 
-            $osrmHelper = new OpenStreetMapHelper();
-            $driverDistance = round(
-                $osrmHelper->getRouteDistance(
-                    (float) $driver_latitude,
-                    (float) $driver_longitude,
-                    (float) $start_point_latitude,
-                    (float) $start_point_longitude
-                ) / 1000,
-                2 // Округляем до 2 знаков после запятой
-            );
-            Log::info("driverDistance " . $driverDistance);
-            // Скорость водителя (60 км/ч)
-            $speed = 60;
-            // Расчет времени в минутах
-            $minutesToAdd = round(($driverDistance / $speed) * 60, 0); // Время в минутах
-
-            if ($minutesToAdd < 1) {
-                $minutesToAdd = 1;
+                if ($minutesToAdd < 1) {
+                    $minutesToAdd = 1;
+                }
+                Log::info("minutesToAdd " . $minutesToAdd);
+                $dateTime->modify("+{$minutesToAdd} minutes");
+                $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
+                $orderweb->save();
             }
-            Log::info("minutesToAdd " . $minutesToAdd);
-            // Устанавливаем время прибытия
-            $dateTime->modify("+{$minutesToAdd} minutes");
-            $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
-            $orderweb->save();
 
             Log::info("orderweb->time_to_start_point" . $orderweb->time_to_start_point);
             Log::info("Document successfully written!");
@@ -932,6 +998,27 @@ class FCMController extends Controller
             Log::error("calculateTimeToStart Error writing document to Firestore: " . $e->getMessage());
             return "calculateTimeToStart Error writing document to Firestore.";
         }
+    }
+
+    public function calculateTimeToStartOffline($uid, $minutesToAdd)
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $currentDateTime = Carbon::now(); // Получаем текущее время
+        $kievTimeZone = new DateTimeZone('Europe/Kiev'); // Создаем объект временной зоны для Киева
+        $dateTime = new DateTime($currentDateTime->format('Y-m-d H:i:s')); // Создаем объект DateTime
+        $dateTime->setTimezone($kievTimeZone); // Устанавливаем временную зону на Киев
+
+        Log::info("minutesToAdd " . $minutesToAdd);
+        // Устанавливаем время прибытия
+        $dateTime->modify("+{$minutesToAdd} minutes");
+        $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
+
+        $orderweb->save();
+
+        Log::info("orderweb->time_to_start_point" . $orderweb->time_to_start_point);
+        Log::info("Document successfully written!");
+        return "calculateTimeToStart Document successfully written!";
     }
     /**
      * @throws \Exception
