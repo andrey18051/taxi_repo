@@ -362,9 +362,12 @@ class CityController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
+            default:
+                $city = $cityApp;
         }
 
 

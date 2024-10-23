@@ -445,8 +445,34 @@ class UIDController extends Controller
 //        Log::debug("UIDStatusShowEmail response", $response);
         return $response;
     }
-    public function UIDStatusShowEmailCancelApp($email, $city, $app)
+    public function UIDStatusShowEmailCancelApp($email, $cityApp, $app)
     {
+        switch ($cityApp) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
+            default:
+                $city = $cityApp;
+        }
+
+
+
         $serverArray = self::getServerArray($city, $app);
         switch ($app) {
             case "PAS1":
@@ -460,9 +486,82 @@ class UIDController extends Controller
                 $application = "taxi_easy_ua_pas4";
         }
         if ($serverArray != null) {
+
+            switch ($cityApp) {
+                case "Kyiv City":
+                    $city = "city_kiev";
+                    break;
+                case "Cherkasy Oblast":
+                    $city = "city_cherkassy";
+                    break;
+                case "Odessa":
+                case "OdessaTest":
+                    $city = "city_odessa";
+                    break;
+                case "Zaporizhzhia":
+                    $city = "city_zaporizhzhia";
+                    break;
+                case "Dnipropetrovsk Oblast":
+                    $city = "city_dnipro";
+                    break;
+                case "Lviv":
+                    $city = "city_lviv";
+                    break;
+                case "Ivano_frankivsk":
+                    $city = "city_ivano_frankivsk";
+                    break;
+                case "Vinnytsia":
+                    $city = "city_vinnytsia";
+                    break;
+                case "Poltava":
+                    $city = "city_poltava";
+                    break;
+                case "Sumy":
+                    $city = "city_sumy";
+                    break;
+                case "Kharkiv":
+                    $city = "city_kharkiv";
+                    break;
+                case "Chernihiv":
+                    $city = "city_chernihiv";
+                    break;
+                case "Rivne":
+                    $city = "city_rivne";
+                    break;
+                case "Ternopil":
+                    $city = "city_ternopil";
+                    break;
+                case "Khmelnytskyi":
+                    $city = "city_khmelnytskyi";
+                    break;
+                case "Zakarpattya":
+                    $city = "city_zakarpattya";
+                    break;
+                case "Zhytomyr":
+                    $city = "city_zhytomyr";
+                    break;
+                case "Kropyvnytskyi":
+                    $city = "city_kropyvnytskyi";
+                    break;
+                case "Mykolaiv":
+                    $city = "city_mykolaiv";
+                    break;
+                case "Сhernivtsi":
+                    $city = "city_chernivtsi";
+                    break;
+                case "Lutsk":
+                    $city = "city_lutsk";
+                    break;
+                default:
+                    $city = "all";
+            }
+
+
+
             $order = Orderweb:: where("email", $email)
                 ->whereIn('closeReason', ['-1', '101', '102'])
                 ->where("comment", $application)
+                ->where("city", $city)
                 ->whereIn("server", $serverArray)
                 ->orderBy("created_at", "desc")
                 ->get();
@@ -474,6 +573,7 @@ class UIDController extends Controller
                 $orderHistory = Orderweb::where("email", $email)
                     ->whereIn('closeReason', ['-1', '101', '102'])
                     ->whereIn("server", $serverArray)
+                    ->where("city", $city)
                     ->where("startLat", "!=", null)
                     ->where("startLan", "!=", null)
                     ->where("to_lat", "!=", null)

@@ -4227,12 +4227,6 @@ class UniversalAndroidFunctionController extends Controller
                 'lan_min' => 25.5000,
                 'lan_max' => 27.4000,
             ],
-            'city_volyn' => [
-                'lat_min' => 50.5000,
-                'lat_max' => 51.7000,
-                'lan_min' => 23.3000,
-                'lan_max' => 25.8000,
-            ],
             'city_ternopil' => [
                 'lat_min' => 48.8000,
                 'lat_max' => 50.2000,
@@ -4274,7 +4268,13 @@ class UniversalAndroidFunctionController extends Controller
                 'lat_max' => 48.8000,
                 'lan_min' => 25.6000,
                 'lan_max' => 27.3000,
-            ]
+            ],
+            'city_lutsk' => [
+                'lat_min' => 50.5900,  // Минимальная широта для области
+                'lat_max' => 51.8000,  // Максимальная широта для области
+                'lan_min' => 23.5000,  // Минимальная долгота для области
+                'lan_max' => 26.9000,  // Максимальная долгота для области
+            ],
         ];
 
 

@@ -1821,6 +1821,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -2307,6 +2308,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -2804,6 +2806,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -3285,6 +3288,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -3629,6 +3633,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -3991,6 +3996,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -4331,6 +4337,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -4974,6 +4981,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -5064,6 +5072,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -5191,6 +5200,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
@@ -5450,6 +5460,7 @@ class AndroidTestOSMController extends Controller
             case "Kropyvnytskyi":
             case "Mykolaiv":
             case "Сhernivtsi":
+            case "Lutsk":
             case "foreign countries":
                 $city = "OdessaTest";
                 break;
