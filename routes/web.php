@@ -1462,3 +1462,8 @@ Route::resource('help_info', HelpInfoController::class);
 Route::get('/help-info', [HelpInfoController::class, 'index'])->name('help_info.index');
 Route::get('/help-info/{id}/edit', [HelpInfoController::class, 'edit'])->name('help_info.edit');
 Route::get('help-infos', [HelpInfoController::class, 'helpInfos']);
+/**
+ * startAddCostUpdate
+ */
+Route::get('/android/startAddCostUpdate/{uid}', [UniversalAndroidFunctionController::class, 'startAddCostUpdate'])
+    ->name('startAddCostUpdate');

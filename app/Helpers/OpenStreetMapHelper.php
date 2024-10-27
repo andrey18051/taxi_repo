@@ -50,7 +50,7 @@ class OpenStreetMapHelper
             return $mapBoxHelper->getRouteDistance($startLat, $startLon, $endLat, $endLon);
         } catch (RequestException $e) {
             // Логируем ошибку, если произошел сбой
-            Log::error("Error fetching route from OSRM: " . $e->getMessage());
+            Log::error("11 Error fetching route from OSRM: " . $e->getMessage());
 
             // Пробуем через MapBox
             $mapBoxHelper = new MapBoxHelper();

@@ -177,3 +177,4 @@ Route::get('/android/permissions/{email}', [UniversalAndroidFunctionController::
  */
 Route::get('/android/sentErrorMessage/{email}', [UniversalAndroidFunctionController::class, 'sentErrorMessage'])
     ->name('sentErrorMessage');
+

@@ -1708,6 +1708,7 @@ class AndroidTestOSMController extends Controller
         if ($responseFinal->status() == 200) {
             $response_arr = json_decode($responseFinal, true);
             $params["order_cost"] = $response_arr["order_cost"];
+            $params["add_cost"] = $add_cost;
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
 
@@ -1755,7 +1756,9 @@ class AndroidTestOSMController extends Controller
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
             $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
-
+            $response_ok["flexible_tariff_name"] = $tariff;
+            $response_ok["comment_info"] = $comment;
+            $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
 
             //Запуск вилки
             if ($responseBonus != null
@@ -4216,6 +4219,7 @@ class AndroidTestOSMController extends Controller
             $response_arr = json_decode($response, true);
             if ($response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
+                $params["add_cost"] = $add_cost;
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
 //                sleep(5);
@@ -4253,6 +4257,9 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routeto"] = $to;
                 $response_ok["to_number"] = $params['to_number'];
                 $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["flexible_tariff_name"] = $tariff;
+                $response_ok["comment_info"] = $comment;
+                $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
 
                 if ($responseDouble != null) {
                     $response_ok["dispatching_order_uid_Double"] = $responseDouble["dispatching_order_uid"];
@@ -4599,6 +4606,7 @@ class AndroidTestOSMController extends Controller
             $response_arr = json_decode($responseFinal, true);
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
+                $params["add_cost"] = $add_cost;
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
 
@@ -4630,6 +4638,9 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
                 $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["flexible_tariff_name"] = $tariff;
+                $response_ok["comment_info"] = $comment;
+                $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
                 if ($responseBonusArr != null) {
                     Log::debug("responseBonusArr", $responseBonusArr);
                 }
@@ -4965,6 +4976,7 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
@@ -5035,9 +5047,9 @@ class AndroidTestOSMController extends Controller
                     $resp_answer = $resp_answer . "Статус поїздки дізнайтесь у диспетчера.";
             }
 //        dd($resp_answer);
-
-            $orderweb->closeReason = "1";
-            $orderweb->save();
+//
+//            $orderweb->closeReason = "1";
+//            $orderweb->save();
             (new MessageSentController)->sentCancelInfo($orderweb);
         }
 

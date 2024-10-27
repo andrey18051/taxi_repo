@@ -24,7 +24,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
         switch ($orderweb->comment) {
@@ -79,7 +80,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -148,7 +150,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
 
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
@@ -195,6 +198,65 @@ class MessageSentController extends Controller
         }
         Log::debug("sentCancelInfo  $messageAdmin");
     }
+    /**
+     * @throws \Exception
+     */
+    public function sentCarRestoreOrderAfterAddCost($orderweb)
+    {
+
+        $user_full_name = $orderweb->user_full_name;
+        $user_phone = $orderweb->user_phone;
+        $email = $orderweb->email;
+        $routefrom = $orderweb->routefrom;
+        $routeto = $orderweb->routeto;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
+
+        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+        $server = $orderweb->server;
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+        }
+
+        $kievTimeZone = new DateTimeZone('Europe/Kiev');
+
+        $dateTime = new DateTime($orderweb->updated_at);
+
+
+        $dateTime->setTimezone($kievTimeZone);
+        $formattedTime = $dateTime->format('d.m.Y H:i:s');
+
+        $updated_at = $formattedTime;
+        Log::debug("updated_at " .$updated_at);
+
+        $subject = "Восстановлен заказ после добавления стоимости  клиентом ";
+
+        $messageAdmin = "$subject. Клиент $user_full_name (телефон $user_phone, email $email)
+         заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн.
+         Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas.
+         Время $updated_at";
+
+        $alarmMessage = new TelegramController();
+
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (Exception $e) {
+            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
+        }
+        Log::debug("sentCancelInfo  $messageAdmin");
+    }
 
     /**
      * @throws \Exception
@@ -207,7 +269,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -282,7 +345,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
         $storedData = $orderweb->auto;
 //        $dataDriver = FCMController::readUserInfoFromFirestore($uidDriver);
         $dataDriver = json_decode($storedData, true);
@@ -357,7 +421,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
         $storedData = $orderweb->auto;
 
         $dataDriver = json_decode($storedData, true);
@@ -432,7 +497,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -505,7 +571,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -579,7 +646,8 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $web_cost = $orderweb->web_cost;
+        $add_cost = $orderweb->add_cost;
+        $web_cost = $orderweb->web_cost +  $add_cost;
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
         switch ($orderweb->comment) {

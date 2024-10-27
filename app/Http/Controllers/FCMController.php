@@ -308,7 +308,7 @@ class FCMController extends Controller
             Log::info("Document successfully deleted!");
             return "Document successfully deleted!";
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("11 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
@@ -343,7 +343,7 @@ class FCMController extends Controller
             Log::info("Document successfully deleted!");
             return "Document successfully deleted!";
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("22 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
@@ -377,23 +377,24 @@ class FCMController extends Controller
                 if (isset($data['driver_uid'])) {
                     $uidDriver = $data['driver_uid'];
                     Log::info("driver_uid: " . $uidDriver);
+                    // Удалите документ
+                    $document->delete();
+
+                    $status = "return";
+
+                    self::writeDocumentToBalanceFirestore($uid, $uidDriver, $status);
+
+                    Log::info("Document successfully deleted!");
+                    return "Document successfully deleted!";
                 } else {
                     Log::warning("Поле 'driver_uid' не найдено в документе.");
                 }
             } else {
                 Log::warning("Документ с uid: " . $uid . " не найден.");
             }
-            // Удалите документ
-            $document->delete();
 
-            $status = "return";
-
-            self::writeDocumentToBalanceFirestore($uid, $uidDriver, $status);
-
-            Log::info("Document successfully deleted!");
-            return "Document successfully deleted!";
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("33 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
@@ -441,7 +442,7 @@ class FCMController extends Controller
             Log::info("Document successfully deleted!");
             return "Document successfully deleted!";
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("44 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
@@ -466,7 +467,7 @@ class FCMController extends Controller
             Log::info("Document successfully deleted!");
             return "Document successfully deleted!";
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("55 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
@@ -678,7 +679,7 @@ class FCMController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("66 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
@@ -735,7 +736,7 @@ class FCMController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error("Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("77 Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
