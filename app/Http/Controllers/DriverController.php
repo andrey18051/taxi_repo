@@ -195,7 +195,7 @@ class DriverController extends Controller
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         if ($orderweb) {
             switch ($orderweb->server) {
-                case 'http://31.43.107.151:7303':
+                case 'http://188.190.245.102':
                     $city = "OdessaTest";
                     break;
                 case 'http://167.235.113.231:7307':

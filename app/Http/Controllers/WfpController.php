@@ -1076,7 +1076,7 @@ class WfpController extends Controller
                 $identificationId = config('app.version-PAS4');
         }
         switch ($orderweb->server) {
-            case "http://31.43.107.151:7303":
+            case "http://188.190.245.102":
                 $city = "OdessaTest";
                 break;
             case "http://167.235.113.231:7307":
@@ -1155,7 +1155,7 @@ class WfpController extends Controller
                 $application = "PAS4";
         }
         switch ($order->server) {
-            case "http://31.43.107.151:7303":
+            case "http://188.190.245.102":
                 $city = "OdessaTest";
                 break;
             case "http://167.235.113.231:7307":
@@ -1240,7 +1240,7 @@ class WfpController extends Controller
                 $application = "PAS4";
         }
         switch ($order->server) {
-            case "http://31.43.107.151:7303":
+            case "http://188.190.245.102":
                 $city = "OdessaTest";
                 break;
             case "http://167.235.113.231:7307":
@@ -1566,7 +1566,7 @@ class WfpController extends Controller
                 $application = "PAS4";
         }
         switch ($orderweb->server) {
-            case "http://31.43.107.151:7303":
+            case "http://188.190.245.102":
                 $city = "OdessaTest";
                 break;
             case "http://167.235.113.231:7307":

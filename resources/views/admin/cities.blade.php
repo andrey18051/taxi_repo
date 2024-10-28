@@ -41,7 +41,7 @@
                                                     />
                                                 </div>
                                                 <div class="col-3">
-                                                    <input type="text" id="address" name="address" autocomplete="off" class="form-control" placeholder="31.43.107.151:7303"/>
+                                                    <input type="text" id="address" name="address" autocomplete="off" class="form-control" placeholder="188.190.245.102"/>
                                                 </div>
                                                 <div class="col-3">
                                                     <input type="text" id="login" name="login" autocomplete="off" class="form-control" placeholder="login"
