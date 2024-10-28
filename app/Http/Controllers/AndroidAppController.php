@@ -2692,7 +2692,7 @@ class AndroidAppController extends Controller
                         $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestTwo", $connectAPI, $application);
                         break;
                     case "Kyiv City":
-                        $connectAPI = "http://188.190.245.102";
+                        $connectAPI = "http://188.190.245.102:7303 ";
                         $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestOne", $connectAPI, $application);
                         $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestTwo", $connectAPI, $application);
                     case "Dnipropetrovsk Oblast":

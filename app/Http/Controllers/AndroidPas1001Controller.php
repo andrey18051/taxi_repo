@@ -263,7 +263,7 @@ class AndroidPas1001Controller extends Controller
             $route_undefined = true;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102':
+                case 'http://188.190.245.102:7303 ':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
@@ -279,7 +279,7 @@ class AndroidPas1001Controller extends Controller
             $route_undefined = false;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102':
+                case 'http://188.190.245.102:7303 ':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
@@ -488,7 +488,7 @@ class AndroidPas1001Controller extends Controller
             $route_undefined = false;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102':
+                case 'http://188.190.245.102:7303 ':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
@@ -709,7 +709,7 @@ class AndroidPas1001Controller extends Controller
         } else {
             $route_undefined = false;
             switch ($connectAPI) {
-                case 'http://188.190.245.102':
+                case 'http://188.190.245.102:7303 ':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
@@ -1767,7 +1767,7 @@ class AndroidPas1001Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                  $combos = ComboTest::where('name', 'like', $name . '%')->first();
             } else {
                  $combos = Combo::where('name', 'like', $name . '%')->first();

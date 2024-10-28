@@ -49,7 +49,7 @@ class Android154Controller extends Controller
 
     public function startIP()
     {
-        if (self::connectAPI() == 'http://188.190.245.102') {
+        if (self::connectAPI() == 'http://188.190.245.102:7303 ') {
             IPController::getIP('/android/PAS2/startPage');
         } else {
             IPController::getIP('/android/PAS1/startPage');
@@ -65,7 +65,7 @@ class Android154Controller extends Controller
 //         */
 //
 ////        IPController::getIP('/android/PAS2');
-////        $connectAPI = 'http://188.190.245.102';
+////        $connectAPI = 'http://188.190.245.102:7303 ';
 ////        $server0 = $connectAPI;
 ////        $server1 = $connectAPI;
 ////        $server2 = $connectAPI;
@@ -255,7 +255,7 @@ class Android154Controller extends Controller
 
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
             } else {
                 $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
@@ -263,7 +263,7 @@ class Android154Controller extends Controller
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                 $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
             } else {
@@ -285,7 +285,7 @@ class Android154Controller extends Controller
         self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -385,7 +385,7 @@ class Android154Controller extends Controller
 
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
             } else {
                 $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
@@ -393,7 +393,7 @@ class Android154Controller extends Controller
             $combos_to = $combos_from;
         } else {
             $route_undefined = false;
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                 $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
             } else {
@@ -407,7 +407,7 @@ class Android154Controller extends Controller
 
         $add_cost = 0;
         $url = $connectAPI . '/api/weborders';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -566,7 +566,7 @@ class Android154Controller extends Controller
 
         } else {
             $route_undefined = false;
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
@@ -592,7 +592,7 @@ class Android154Controller extends Controller
         self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -744,7 +744,7 @@ class Android154Controller extends Controller
 
         } else {
             $route_undefined = false;
-            if (self::connectAPI() == 'http://188.190.245.102') {
+            if (self::connectAPI() == 'http://188.190.245.102:7303 ') {
                 $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
             } else {
                 $combos_to = Combo::select(['name'])->where('name', 'like', $to . '%')->first();
@@ -765,7 +765,7 @@ class Android154Controller extends Controller
         $add_cost = 0;
 
         $url = $connectAPI . '/api/weborders';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -974,7 +974,7 @@ class Android154Controller extends Controller
         self::saveCoast($params);
 
         $url = $connectAPI . '/api/weborders/cost';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -1191,7 +1191,7 @@ class Android154Controller extends Controller
         $params['routefrom'] = $from;
 
         $url = $connectAPI . '/api/weborders';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -1400,7 +1400,7 @@ class Android154Controller extends Controller
 
 
         $url = $connectAPI . '/api/geodata/search';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");
@@ -1547,7 +1547,7 @@ class Android154Controller extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos = ComboTest::where('name', 'like', $name . '%')->first();
             } else {
                 $combos = Combo::where('name', 'like', $name . '%')->first();
@@ -1644,7 +1644,7 @@ class Android154Controller extends Controller
         $password = hash('SHA512', config('app.password'));
 
         switch ($connectAPI) {
-            case 'http://188.190.245.102':
+            case 'http://188.190.245.102:7303 ':
                 $username = '0936734488';
                 $password = hash('SHA512', '22223344');
                 break;
@@ -1666,7 +1666,7 @@ class Android154Controller extends Controller
 //    'taxi2012Url_3' => 'http://91.205.17.153:7208' ,
 
         $url = $connectAPI . '/api/weborders/';
-        if ($connectAPI == 'http://188.190.245.102') {
+        if ($connectAPI == 'http://188.190.245.102:7303 ') {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
         } else {
             $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS1");

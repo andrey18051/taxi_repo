@@ -11,7 +11,7 @@ class ServerController extends Controller
 
     /**
      * URL API taxi
-     * Одесса http://188.190.245.102
+     * Одесса http://188.190.245.102:7303
      * Киев http://167.235.113.231:7306
      * Киев http://134.249.181.173:7208
      * Киев http://91.205.17.153:7208
@@ -24,7 +24,7 @@ class ServerController extends Controller
     '91.205.17.153',
     ];
     public const SERVERS_CONNECT = [
-        '188.190.245.102',
+        '188.190.245.102:7303 ',
         '167.235.113.231:7306',
         '134.249.181.173:7208',
         '91.205.17.153:7208',

@@ -59,7 +59,7 @@ class AndroidController extends Controller
 //         */
 //
 ////        IPController::getIP('/android/PAS2');
-////        $connectAPI = 'http://188.190.245.102';
+////        $connectAPI = 'http://188.190.245.102:7303 ';
 ////        $server0 = $connectAPI;
 ////        $server1 = $connectAPI;
 ////        $server2 = $connectAPI;
@@ -490,7 +490,7 @@ class AndroidController extends Controller
 //    public function sendCode($phone)
 //    {
 //
-//        $connectAPI = 'http://188.190.245.102';
+//        $connectAPI = 'http://188.190.245.102:7303 ';
 //        $url = $connectAPI . '/api/approvedPhones/sendConfirmCode';
 //        $response = Http::post($url, [
 //            'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона, на который будет отправлен код подтверждения.
@@ -1114,7 +1114,7 @@ class AndroidController extends Controller
     public function approvedPhones($phone, $confirm_code)
     {
 
-        $connectAPI = 'http://188.190.245.102';
+        $connectAPI = 'http://188.190.245.102:7303 ';
         $url = $connectAPI . '/api/approvedPhones/';
         $response = Http::post($url, [
             'phone' => substr($phone, 3), //Обязательный. Номер мобильного телефона
@@ -1160,7 +1160,7 @@ class AndroidController extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         } else {
-            if ($connectAPI == 'http://188.190.245.102') {
+            if ($connectAPI == 'http://188.190.245.102:7303 ') {
                 $combos = ComboTest::where('name', 'like', $name . '%')->first();
             } else {
                 $combos = Combo::where('name', 'like', $name . '%')->first();

@@ -15,7 +15,7 @@ class ComboTestController extends Controller
         $username = '0936734488';
         $password = hash('SHA512', '22223344');
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
-        $connectAPI = 'http://188.190.245.102';
+        $connectAPI = 'http://188.190.245.102:7303 ';
 
         /**
          * Проверка даты геоданных в АПИ
