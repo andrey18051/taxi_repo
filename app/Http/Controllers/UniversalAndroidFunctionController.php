@@ -4351,7 +4351,7 @@ class UniversalAndroidFunctionController extends Controller
      *
      * @throws \Exception
      */
-    public function startAddCostUpdate($uid)
+    public function startAddCostUpdate($uid, $typeAdd)
     {
         Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
 
@@ -4471,73 +4471,66 @@ class UniversalAndroidFunctionController extends Controller
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
 
-        $parameter['add_cost'] = $order->add_cost + 20; // Увеличиваем значение add_cost на 20
+
+        $parameter['add_cost'] = $order->add_cost + $typeAdd; // Увеличиваем значение add_cost на $typeAdd
 
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
-        $maxExecutionTime = 60;
-        $startTime = time();
+        try {
+            Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter));
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])->post($url, $parameter);
 
-        do {
-            try {
-                Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter));
-                $response = Http::withHeaders([
-                    "Authorization" => $authorization,
-                    "X-WO-API-APP-ID" => $identificationId,
-                    "X-API-VERSION" => $apiVersion
-                ])->post($url, $parameter);
+            if ($response->successful() && $response->status() == 200) {
+                Log::info("Успешный ответ API с кодом 200");
 
-                if ($response->successful() && $response->status() == 200) {
-                    Log::info("Успешный ответ API с кодом 200");
+                $responseArr = $response->json();
+                Log::debug("Ответ от API: " . json_encode($responseArr));
 
-                    $responseArr = $response->json();
-                    Log::debug("Ответ от API: " . json_encode($responseArr));
+                $orderNew = $responseArr["dispatching_order_uid"];
+                Log::debug("Создан новый заказ с UID: " . $orderNew);
 
-                    $orderNew = $responseArr["dispatching_order_uid"];
-                    Log::debug("Создан новый заказ с UID: " . $orderNew);
+                $order_old_uid = $order->dispatching_order_uid;
+                $order_new_uid = $orderNew;
 
-                    $order_old_uid = $order->dispatching_order_uid;
-                    $order_new_uid = $orderNew;
+                (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
 
-                    (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+                $orderMemory->dispatching_order_uid = $order_new_uid;
+                $orderMemory->save();
 
-                    $orderMemory->dispatching_order_uid = $order_new_uid;
-                    $orderMemory->save();
+                $order->dispatching_order_uid = $order_new_uid;
+                $order->auto = "";
+                $order->add_cost = $parameter['add_cost'];
+                $order->closeReason = "-1";
+                $order->closeReasonI = "0";
+                $order->save();
 
-                    $order->dispatching_order_uid = $order_new_uid;
-                    $order->auto = "";
-                    $order->add_cost = $parameter['add_cost'];
-                    $order->closeReason = "-1";
-                    $order->closeReasonI = "0";
-                    $order->save();
+                Log::info("Обновлен order с новым UID: " . $order_new_uid);
 
-                    Log::info("Обновлен order с новым UID: " . $order_new_uid);
-
+                if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
-                    Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
-
-                    (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
-                    Log::info("Сообщение о восстановлении машины отправлено.");
-
-                    return response()->json([
-                        "costNew" => $order->web_cost +$order->add_cost
-                    ], 200);
-                } else {
-                    Log::error("Неудачный запрос: статус " . $response->status());
-                    Log::error("Ответ от API: " . $response->body());
-
                 }
-            } catch (\Exception $e) {
-                Log::error("Поймано исключение: " . $e->getMessage());
 
+                Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
+
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
+                Log::info("Сообщение о восстановлении машины отправлено.");
+
+                return response()->json([
+                    "costNew" => $order->web_cost +$order->add_cost
+                ], 200);
+            } else {
+                Log::error("Неудачный запрос: статус " . $response->status());
+                Log::error("Ответ от API: " . $response->body());
             }
-            sleep(5);
-        } while (!$result && time() - $startTime < $maxExecutionTime);
-        Log::info("Завершение метода startAddCostUpdate.");
-        return response()->json([
-            "costNew" => $order->web_cost +$order->add_cost
-        ], 200);
+        } catch (\Exception $e) {
+            Log::error("Поймано исключение: " . $e->getMessage());
+
+        }
     }
 
 }
