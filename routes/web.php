@@ -1465,5 +1465,5 @@ Route::get('help-infos', [HelpInfoController::class, 'helpInfos']);
 /**
  * startAddCostUpdate
  */
-Route::get('/android/startAddCostUpdate/{uid}', [UniversalAndroidFunctionController::class, 'startAddCostUpdate'])
+Route::get('/android/startAddCostUpdate/{uid}/{typeAdd}', [UniversalAndroidFunctionController::class, 'startAddCostUpdate'])
     ->name('startAddCostUpdate');
