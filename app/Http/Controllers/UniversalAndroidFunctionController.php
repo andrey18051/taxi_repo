@@ -3363,10 +3363,18 @@ class UniversalAndroidFunctionController extends Controller
         $order->save();
 
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
-        $user = User::where("email", $params["email"])->first();
-        $user->user_phone = $params["user_phone"];
+        if (isset($params['user_phone'], $params['email'], $params['comment_info'])
+            && strpos($params['comment_info'], 'цифра номера') === false
+        ) {
+            $user = User::where("email", $params["email"])->first();
 
-        $user->save();
+            if ($user) { // Проверка, что пользователь найден
+                $user->user_phone = $params["user_phone"];
+                $user->save();
+            }
+        }
+
+
 
         if ($params["payment_type"] != 1 && !$params["route_undefined"]) {
             (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
