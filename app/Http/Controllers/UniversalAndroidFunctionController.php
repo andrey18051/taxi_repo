@@ -3353,12 +3353,19 @@ class UniversalAndroidFunctionController extends Controller
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
         $order->closeReason = $params['closeReason'];
         $order->closeReasonI = 1;
+        $order->city = (new UniversalAndroidFunctionController)->findCity(
+            (float) $params["startLat"],
+            (float) $params["startLan"]
+        );
+
         $order->server = $params['server'];
 
         $order->save();
 
+        $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
         $user = User::where("email", $params["email"])->first();
         $user->user_phone = $params["user_phone"];
+
         $user->save();
 
         if ($params["payment_type"] != 1 && !$params["route_undefined"]) {

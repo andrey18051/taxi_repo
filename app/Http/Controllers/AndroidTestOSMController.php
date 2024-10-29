@@ -5039,6 +5039,8 @@ class AndroidTestOSMController extends Controller
                     break;
                 case '1':
                     $resp_answer = $resp_answer . "Замовлення скасоване.";
+                    $orderweb->closeReason = "1";
+                    $orderweb->save();
                     break;
                 case '2':
                     $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
@@ -5048,8 +5050,7 @@ class AndroidTestOSMController extends Controller
             }
 //        dd($resp_answer);
 //
-//            $orderweb->closeReason = "1";
-//            $orderweb->save();
+
             (new MessageSentController)->sentCancelInfo($orderweb);
         }
 

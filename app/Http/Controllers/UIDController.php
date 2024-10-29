@@ -115,7 +115,7 @@ class UIDController extends Controller
                     'routefromnumber' => $value["routefromnumber"],
                     'routeto' => $value["routeto"],
                     'routetonumber' => $value["routetonumber"],
-                    'web_cost' => $value["web_cost"] + $value["add_cost"],
+                    'web_cost' => $value["web_cost"],
                     'closeReason' => $value["closeReason"],
                     'created_at' => $value["created_at"],
                 ];
@@ -170,7 +170,7 @@ class UIDController extends Controller
                         'routetonumber' => $value["routetonumber"],
                         'to_lat' => $value["to_lat"],
                         'to_lng' => $value["to_lng"],
-                        'web_cost' => $value["web_cost"] + $value["add_cost"],
+                        'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $value["auto"],
                         'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
@@ -187,7 +187,7 @@ class UIDController extends Controller
                             'routetonumber' => $value["routetonumber"],
                             'to_lat' => $value["to_lat"],
                             'to_lng' => $value["to_lng"],
-                            'web_cost' => $value["web_cost"] + $value["add_cost"],
+                            'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $value["auto"],
                             'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
@@ -293,7 +293,7 @@ class UIDController extends Controller
                             'routetonumber' => $value["routetonumber"],
                             'to_lat' => $value["to_lat"],
                             'to_lng' => $value["to_lng"],
-                            'web_cost' => $value["web_cost"] + $value["add_cost"],
+                            'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $auto,
                             'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
@@ -311,7 +311,7 @@ class UIDController extends Controller
                                 'routetonumber' => $value["routetonumber"],
                                 'to_lat' => $value["to_lat"],
                                 'to_lng' => $value["to_lng"],
-                                'web_cost' => $value["web_cost"] + $value["add_cost"],
+                                'web_cost' => $value["web_cost"],
                                 'closeReason' => $value["closeReason"],
                                 'auto' => $auto,
                                 'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
@@ -405,7 +405,7 @@ class UIDController extends Controller
                         'routetonumber' => $value["routetonumber"],
                         'to_lat' => $value["to_lat"],
                         'to_lng' => $value["to_lng"],
-                        'web_cost' => $value["web_cost"] + $value["add_cost"],
+                        'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $auto,
                         'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
@@ -485,8 +485,8 @@ class UIDController extends Controller
             default:
                 $application = "taxi_easy_ua_pas4";
         }
-        if ($serverArray != null) {
 
+        if ($serverArray != null) {
             switch ($cityApp) {
                 case "Kyiv City":
                     $city = "city_kiev";
@@ -557,7 +557,7 @@ class UIDController extends Controller
             }
 
 
-
+            Log::debug("UIDStatusShowEmailCancelApp order serverArray ", $serverArray);
             $order = Orderweb:: where("email", $email)
                 ->whereIn('closeReason', ['-1', '101', '102'])
                 ->where("comment", $application)
@@ -567,6 +567,11 @@ class UIDController extends Controller
                 ->get();
 
             $response = null;
+            Log::debug("UIDStatusShowEmailCancelApp order comment " . $application);
+            Log::debug("UIDStatusShowEmailCancelApp order city " . $city);
+
+            Log::debug("UIDStatusShowEmailCancelApp order comment " . $application);
+
             Log::debug("UIDStatusShowEmailCancelApp order", $order->toArray());
             if (!$order->isEmpty()) {
                 self::UIDStatusReview($order);
@@ -623,7 +628,7 @@ class UIDController extends Controller
                             'routetonumber' => $value["routetonumber"],
                             'to_lat' => $value["to_lat"],
                             'to_lng' => $value["to_lng"],
-                            'web_cost' => $value["web_cost"] + $value["add_cost"],
+                            'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $auto,
                             'flexible_tariff_name' => $value["flexible_tariff_name"],
@@ -733,7 +738,7 @@ class UIDController extends Controller
                         'routetonumber' => $value["routetonumber"],
                         'to_lat' => $value["to_lat"],
                         'to_lng' => $value["to_lng"],
-                        'web_cost' => $value["web_cost"] + $value["add_cost"],
+                        'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $value["auto"],
                         'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
@@ -750,7 +755,7 @@ class UIDController extends Controller
                             'routetonumber' => $value["routetonumber"],
                             'to_lat' => $value["to_lat"],
                             'to_lng' => $value["to_lng"],
-                            'web_cost' => $value["web_cost"] + $value["add_cost"],
+                            'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $value["auto"],
                             'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
