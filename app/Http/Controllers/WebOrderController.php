@@ -106,15 +106,18 @@ class WebOrderController extends Controller
         $password = hash('SHA512', config('app.password'));
         $authorization = 'Basic ' . base64_encode($username . ':' . $password);
 
+
+
         try {
             $url = config('app.taxi2012Url_1') . '/api/clients/profile';
             Http::timeout(2)->withHeaders([
-    "Authorization" => self::autorization(),
+                "Authorization" => self::autorization(),
                 "X-WO-API-APP-ID" => self::identificationId(),
                 "X-API-VERSION" => self::apiVersion()
             ])->get($url);
             return config('app.taxi2012Url_1');
         } catch (Exception $e) {
+            Log::error("Failed to fetch profile from taxi2012Url_1: " . $e->getMessage());
             try {
                 $url = config('app.taxi2012Url_2') . '/api/clients/profile';
                 Http::timeout(2)->withHeaders([
@@ -124,6 +127,7 @@ class WebOrderController extends Controller
                 ])->get($url);
                 return config('app.taxi2012Url_2');
             } catch (Exception $e) {
+                Log::error("Failed to fetch profile from taxi2012Url_2: " . $e->getMessage());
                 try {
                     $url = config('app.taxi2012Url_3') . '/api/clients/profile';
                     Http::timeout(2)->withHeaders([
@@ -133,10 +137,12 @@ class WebOrderController extends Controller
                     ])->get($url);
                     return config('app.taxi2012Url_3');
                 } catch (Exception $e) {
+                    Log::error("Failed to fetch profile from taxi2012Url_3: " . $e->getMessage());
                     return '400';
                 }
             }
         }
+
     }
 
 
