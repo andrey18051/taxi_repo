@@ -13,6 +13,7 @@ use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\DoubleOrder;
 use App\Models\DriverMemoryOrder;
+use App\Models\DriverPosition;
 use App\Models\ExecStatusHistory;
 use App\Models\ExecutionStatus;
 use App\Models\Order;
@@ -4547,5 +4548,66 @@ class UniversalAndroidFunctionController extends Controller
 
         }
     }
+    /**
+     * Найти ближайшего водителя в секторе из Firestore.
+     *
+     * @param float $latitude Широта точки
+     * @param float $longitude Долгота точки
+     * @return array|null Данные ближайшего водителя или null, если не найден
+     */
+    public function findDriverInSector(float $latitude, float $longitude): ?array
+    {
+        Log::info("findDriverInSector: Starting search for driver in sector.", [
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+        ]);
+        $nearestDriver = null;
+        $nearestDistance = PHP_FLOAT_MAX;
+        $driverPositions = DriverPosition::all();
+        if ($driverPositions != null) {
+            $driverPositionsArr = $driverPositions->toArray();
 
+            foreach ($driverPositionsArr as $value) {
+                // Вычисляем расстояние до водителя
+                $driverLatitude = (float)$value['latitude'];
+                $driverLongitude = (float)$value['longitude'];
+
+                // Используем OpenStreetMapHelper для вычисления расстояния
+                $osrmHelper = new OpenStreetMapHelper();
+                if ($driverLatitude != 0 && $driverLongitude !=0) {
+                    $distance = $osrmHelper->getRouteDistance(
+                        $driverLatitude,
+                        $driverLongitude,
+                        $latitude,
+                        $longitude,
+                    );
+                    Log::info("findDriverInSector: Calculated distance to driver.", [
+                        'driver_id' => $value['driver_uid'],
+                        'distance' => $distance,
+                    ]);
+
+                    // Если расстояние меньше 3 км и ближе предыдущего, обновляем ближайшего водителя
+                    if ($distance !== null && $distance < 3000 && $distance < $nearestDistance) {
+                        $nearestDriver = $value;
+                        $nearestDistance = $distance;
+                        Log::info("findDriverInSector: Found closer driver.", [
+                            'driver_id' => $value['driver_uid'],
+                            'new_nearest_distance' => $nearestDistance,
+                        ]);
+                    }
+                }
+            }
+        }
+        // Возвращаем данные ближайшего водителя или null, если не найден
+        if ($nearestDriver) {
+            Log::info("findDriverInSector: Nearest driver found.", [
+                'nearest_driver' => $nearestDriver,
+                'nearest_distance' => $nearestDistance,
+            ]);
+        } else {
+            Log::info("findDriverInSector: No driver found within 3km range.");
+        }
+
+        return $nearestDriver;
+    }
 }

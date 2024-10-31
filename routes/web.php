@@ -17,6 +17,7 @@ use App\Http\Controllers\CityPas2Controller;
 use App\Http\Controllers\CityPas4Controller;
 use App\Http\Controllers\Confirmation;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\DriverPositionController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FCMController;
 use App\Http\Controllers\FondyController;
@@ -1467,3 +1468,9 @@ Route::get('help-infos', [HelpInfoController::class, 'helpInfos']);
  */
 Route::get('/android/startAddCostUpdate/{uid}/{typeAdd}', [UniversalAndroidFunctionController::class, 'startAddCostUpdate'])
     ->name('startAddCostUpdate');
+
+/**
+ * Обновление позиции водителя
+ */
+Route::get('/upsertDriverPosition/{driverUid}/{latitude}/{longitude}', [DriverPositionController::class, 'upsertDriverPosition'])
+    ->name('upsertDriverPosition');

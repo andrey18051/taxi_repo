@@ -164,7 +164,7 @@ class FCMController extends Controller
             return "Order not found.";
         }
 
-        $nearestDriver = self::findDriverInSectorFromFirestore(
+        $nearestDriver = (new UniversalAndroidFunctionController)->findDriverInSector(
             (float) $order->startLat,
             (float) $order->startLan
         );
@@ -848,7 +848,7 @@ class FCMController extends Controller
 
         $data['status'] = $status;
 
-        $data['commission'] = 1 + $data["web_cost"] *0.01;
+        $data['commission'] = 1 + ($data["web_cost"] + $data["add_cost"]) *0.01;
 
 
         $data['created_at'] = self::currentKievDateTime();

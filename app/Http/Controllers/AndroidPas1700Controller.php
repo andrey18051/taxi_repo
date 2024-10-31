@@ -34,7 +34,7 @@ class AndroidPas1700Controller extends Controller
         $response_error["resp_result"] = 200;
 
         switch (self::connectAPI()) {
-            case 'http://188.190.245.102:7303 ':
+            case 'http://188.190.245.102:7303':
                 $response_error["message"] = config('app.version-PAS2');
                 break;
             case 'http://167.235.113.231:7307':
@@ -51,7 +51,7 @@ class AndroidPas1700Controller extends Controller
     public function identificationId()
     {
         switch (self::connectAPI()) {
-            case 'http://188.190.245.102:7303 ':
+            case 'http://188.190.245.102:7303':
                 $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
                 break;
             case 'http://167.235.113.231:7307':
@@ -89,7 +89,7 @@ class AndroidPas1700Controller extends Controller
     public function startIP()
     {
         switch (self::connectAPI()) {
-            case 'http://188.190.245.102:7303 ':
+            case 'http://188.190.245.102:7303':
                 IPController::getIP('/android/PAS2/startPage');
                 break;
             case 'http://167.235.113.231:7307':
@@ -152,7 +152,7 @@ class AndroidPas1700Controller extends Controller
 
         if ($from == $to) {
             $route_undefined = true;
-            if ($connectAPI == 'http://188.190.245.102:7303 ') {
+            if ($connectAPI == 'http://188.190.245.102:7303') {
                 $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
             } else {
                 $combos_from = Combo::select(['name'])->where('name', 'like', $from . '%')->first();
@@ -162,7 +162,7 @@ class AndroidPas1700Controller extends Controller
             $route_undefined = false;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102:7303 ':
+                case 'http://188.190.245.102:7303':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
@@ -328,7 +328,7 @@ class AndroidPas1700Controller extends Controller
             $route_undefined = true;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102:7303 ':
+                case 'http://188.190.245.102:7303':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
@@ -344,7 +344,7 @@ class AndroidPas1700Controller extends Controller
             $route_undefined = false;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102:7303 ':
+                case 'http://188.190.245.102:7303':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
@@ -551,7 +551,7 @@ class AndroidPas1700Controller extends Controller
             $route_undefined = false;
 
             switch ($connectAPI) {
-                case 'http://188.190.245.102:7303 ':
+                case 'http://188.190.245.102:7303':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
@@ -770,7 +770,7 @@ class AndroidPas1700Controller extends Controller
         } else {
             $route_undefined = false;
             switch ($connectAPI) {
-                case 'http://188.190.245.102:7303 ':
+                case 'http://188.190.245.102:7303':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
@@ -1826,7 +1826,7 @@ class AndroidPas1700Controller extends Controller
         } else {
 
             switch (self::connectAPI()) {
-                case 'http://188.190.245.102:7303 ':
+                case 'http://188.190.245.102:7303':
                     $combos = ComboTest::where('name', 'like', $name . '%')->first();
                     break;
                 case 'http://167.235.113.231:7307':
