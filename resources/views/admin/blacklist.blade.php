@@ -56,17 +56,14 @@
                 </div>
                 <div class="card offset-2 col-5">
                     <div class="card-body">
-                        <form action="{{ route('deleteFromBlacklist') }}">
+                        <form action="{{ route('deleteFromBlacklist') }}" method="POST">
                             @csrf
                             <div class="row">
-                                <label for="$flexible_tariff_name" class="form-label">Delete</label>
-                                <select class="form-select" id="email" name="email" >
-
-                                    @for ($i = 0; $i < count($blackArray); $i++)
-                                        <option>{{$blackArray[$i]}}</option>
-
-                                    @endfor
-
+                                <label for="email" class="form-label">Delete</label>
+                                <select class="form-select" id="email" name="email">
+                                    @foreach ($blackArray as $email)
+                                        <option value="{{ $email }}">{{ $email }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <!-- Submit button -->
@@ -75,10 +72,10 @@
                                     Удалить
                                 </button>
                             </div>
-
                         </form>
                     </div>
                 </div>
+
             </div>
         </div>
 </div>

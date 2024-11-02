@@ -23,6 +23,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -3594,39 +3595,31 @@ class UniversalAndroidFunctionController extends Controller
 
     public function verifyBlackListUser($email, $androidDom)
     {
-        IPController::getIP("/android/$androidDom/startPage");
-        $user =  User::where('email', $email)->first();
+        // Логируем начало проверки черного списка
+        \Log::info("Проверка черного списка для email: $email", ['androidDom' => $androidDom]);
+
+        (new IPController)->getIP("/android/$androidDom/startPage");
 
         $response_error["order_cost"] = 0;
-        if ($user == null) {
-            switch ($androidDom) {
-                case "PAS1":
-                    $response_error["Message"] = config("app.version-PAS1");
-                    break;
-                case "PAS2":
-                    $response_error["Message"] = config("app.version-PAS2");
-                    break;
-                case "PAS3":
-                    $response_error["Message"] = config("app.version-PAS3");
-                    break;
-                case "PAS4":
-                    $response_error["Message"] = config("app.version-PAS4");
-                    break;
-                case "PAS5":
-                    $response_error["Message"] = config("app.version-PAS5");
-                    break;
-            }
 
+        // Проверяем наличие email в черном списке
+        $blackList = BlackList::where('email', $email)->first();
+        if ($blackList == null) {
+            $response_error["Message"] = "Не в черном списке";
+
+            // Логируем, что email не найден в черном списке
+            \Log::info("Email $email не найден в черном списке.");
         } else {
-            if ($user->black_list == "1") {
-                $response_error["Message"] = "В черном списке";
-            } else {
-                $response_error["Message"] = "Не черном списке";
-            }
+            $response_error["Message"] = "В черном списке";
+
+            // Логируем, что email найден в черном списке
+            \Log::warning("Email $email найден в черном списке.");
         }
+
         return response($response_error, 200)
             ->header('Content-Type', 'json');
     }
+
 
     public function geoDataSearch(
         $to,

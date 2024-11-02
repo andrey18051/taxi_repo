@@ -1086,7 +1086,10 @@ Route::get('/about/{service}', function (string $service) {
 Route::get('/blacklist', [BlackListController::class,'index'])->name('index-black');
 
 Route::get('/blacklist/addToBlacklist', [BlackListController::class,'addToBlacklist'])->name('addToBlacklist');
-Route::get('/blacklist/deleteFromBlacklist', [BlackListController::class,'deleteFromBlacklist'])->name('deleteFromBlacklist');
+Route::post('/blacklist/deleteFromBlacklist', [BlackListController::class,'deleteFromBlacklist'])->name('deleteFromBlacklist');
+
+Route::get('/blacklist/addAndroidToBlacklist/{email}', [BlackListController::class,'addAndroidToBlacklist'])->name('addAndroidToBlacklist');
+Route::get('/blacklist/deleteAndroidFromBlacklist/{email}', [BlackListController::class,'deleteAndroidFromBlacklist'])->name('deleteAndroidFromBlacklist');
 
 /**
   * Ip address

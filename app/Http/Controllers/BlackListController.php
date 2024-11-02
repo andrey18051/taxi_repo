@@ -7,6 +7,7 @@ use App\Models\BlackList;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BlackListController extends Controller
 {
@@ -48,8 +49,32 @@ class BlackListController extends Controller
 
     public function deleteFromBlacklist(Request $req)
     {
-        BlackList::where('email', $req->email)->delete();
-        return redirect()->route('index-black');
+        Log::info("deleteFromBlacklist function called with email: " . $req->email);
 
+        // Attempting to delete the email from the blacklist
+        $deletedRows = BlackList::where('email', $req->email)->delete();
+
+        if ($deletedRows > 0) {
+            Log::info("Successfully deleted email from blacklist: " . $req->email);
+        } else {
+            Log::warning("No entry found for email in blacklist: " . $req->email);
+        }
+
+        Log::info("Redirecting to the blacklist index page.");
+        return redirect()->route('index-black');
+    }
+
+    public function addAndroidToBlacklist($email)
+    {
+        $blackList = BlackList::where('email', $email)->first();
+        if ($blackList == null) {
+            $blackList = new BlackList();
+            $blackList->email = $email;
+            $blackList->save();
+        }
+    }
+    public function deleteAndroidFromBlacklist($email)
+    {
+        BlackList::where('email', $email)->delete();
     }
 }
