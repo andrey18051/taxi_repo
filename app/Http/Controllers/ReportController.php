@@ -695,7 +695,7 @@ class ReportController extends Controller
      */
     public function bonusReport(Request $request)
     {
-        $user = User::where('email', $request->email)->get();
+        $user = User::where('email', $request->email)->first();
 
 //        dd($bonusRecords->toArray());
 
@@ -703,7 +703,7 @@ class ReportController extends Controller
         $spreadsheet->getActiveSheet()->setTitle('Бонусы');
         $sheet = $spreadsheet->getActiveSheet();
 
-        $bonusRecords = BonusBalance::where('users_id', $user->toArray()[0]['id'])->get();
+        $bonusRecords = BonusBalance::where('users_id', $user->id)->get();
         if ($bonusRecords != null) {
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -715,8 +715,8 @@ class ReportController extends Controller
             $sheet->getColumnDimension('H')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список движения бонусов');
-            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
-            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+            $sheet->setCellValue('C1', 'клиента ' . $user->name) ;
+            $sheet->setCellValue('D1', $user->email);
 
             $sheet->setCellValue('A2', 'N п/п');
             $sheet->setCellValue('B2', 'UID');
@@ -799,7 +799,7 @@ class ReportController extends Controller
         // Переключаемся на PAS 1
         $spreadsheet->setActiveSheetIndexByName('PAS 1');
         $sheet = $spreadsheet->getActiveSheet();
-        $bonusRecords = BonusBalancePas1::where('users_id', $user->toArray()[0]['id'])->get();
+        $bonusRecords = BonusBalancePas1::where('users_id', $user->id)->get();
         if ($bonusRecords != null) {
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -811,8 +811,8 @@ class ReportController extends Controller
             $sheet->getColumnDimension('H')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список движения бонусов');
-            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
-            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+            $sheet->setCellValue('C1', 'клиента ' . $user->name) ;
+            $sheet->setCellValue('D1', $user->email);
 
             $sheet->setCellValue('A2', 'N п/п');
             $sheet->setCellValue('B2', 'UID');
@@ -896,7 +896,7 @@ class ReportController extends Controller
         // Переключаемся на PAS 2
         $spreadsheet->setActiveSheetIndexByName('PAS 2');
         $sheet = $spreadsheet->getActiveSheet();
-        $bonusRecords = BonusBalancePas2::where('users_id', $user->toArray()[0]['id'])->get();
+        $bonusRecords = BonusBalancePas2::where('users_id', $user->id)->get();
         if ($bonusRecords != null) {
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -908,8 +908,8 @@ class ReportController extends Controller
             $sheet->getColumnDimension('H')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список движения бонусов');
-            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
-            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+            $sheet->setCellValue('C1', 'клиента ' . $user->name) ;
+            $sheet->setCellValue('D1', $user->email);
 
             $sheet->setCellValue('A2', 'N п/п');
             $sheet->setCellValue('B2', 'UID');
@@ -994,7 +994,7 @@ class ReportController extends Controller
         $spreadsheet->setActiveSheetIndexByName('PAS 4');
         $sheet = $spreadsheet->getActiveSheet();
 
-        $bonusRecords = BonusBalancePas4::where('users_id', $user->toArray()[0]['id'])->get();
+        $bonusRecords = BonusBalancePas4::where('users_id', $user->id)->get();
         if ($bonusRecords != null) {
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -1006,8 +1006,8 @@ class ReportController extends Controller
             $sheet->getColumnDimension('H')->setAutoSize(true);
 
             $sheet->setCellValue('B1', 'Это список движения бонусов');
-            $sheet->setCellValue('C1', 'клиента ' . $user->toArray()[0]['name']) ;
-            $sheet->setCellValue('D1', $user->toArray()[0]['email']);
+            $sheet->setCellValue('C1', 'клиента ' . $user->name) ;
+            $sheet->setCellValue('D1', $user->email);
 
             $sheet->setCellValue('A2', 'N п/п');
             $sheet->setCellValue('B2', 'UID');

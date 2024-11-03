@@ -1085,7 +1085,7 @@ Route::get('/about/{service}', function (string $service) {
 
 Route::get('/blacklist', [BlackListController::class,'index'])->name('index-black');
 
-Route::get('/blacklist/addToBlacklist', [BlackListController::class,'addToBlacklist'])->name('addToBlacklist');
+Route::post('/blacklist/addToBlacklist', [BlackListController::class,'addToBlacklist'])->name('addToBlacklist');
 Route::post('/blacklist/deleteFromBlacklist', [BlackListController::class,'deleteFromBlacklist'])->name('deleteFromBlacklist');
 
 Route::get('/blacklist/addAndroidToBlacklist/{email}', [BlackListController::class,'addAndroidToBlacklist'])->name('addAndroidToBlacklist');
@@ -1268,7 +1268,7 @@ Route::get('/bonusBalance/historyUID/{id}', [BonusBalanceController::class, 'his
 Route::get('/bonusBalance/historyUIDunBlocked/{uid}', [BonusBalanceController::class, 'historyUIDunBlocked'])
     ->name('historyUIDunBlocked');
 
-Route::get('/bonusBalance/bonusReport/', [ReportController::class, 'bonusReport'])
+Route::post('/bonusBalance/bonusReport/', [ReportController::class, 'bonusReport'])
     ->name('bonusReport');
 
 Route::get('/bonusBalance/balanceReviewDaily/', [BonusBalanceController::class, 'balanceReviewDaily'])
@@ -1477,3 +1477,12 @@ Route::get('/android/startAddCostUpdate/{uid}/{typeAdd}', [UniversalAndroidFunct
  */
 Route::get('/upsertDriverPosition/{driverUid}/{latitude}/{longitude}', [DriverPositionController::class, 'upsertDriverPosition'])
     ->name('upsertDriverPosition');
+
+/**
+ * orderCardWfpReviewTask
+ */
+Route::get('/orderCardWfpReviewTask', [\App\Http\Controllers\DailyTaskController::class, 'orderCardWfpReviewTask'])
+    ->name('orderCardWfpReviewTask');
+
+Route::get('/orderBonusReviewTask', [\App\Http\Controllers\DailyTaskController::class, 'orderBonusReviewTask'])
+    ->name('orderBonusReviewTask');

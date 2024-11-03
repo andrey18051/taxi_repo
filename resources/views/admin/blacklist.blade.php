@@ -31,7 +31,7 @@
             <div class="row">
                 <div class="card col-5">
                     <div class="card-body">
-                        <form action="{{ route('addToBlacklist') }}">
+                        <form action="{{ route('addToBlacklist') }}" method="POST">
                             @csrf
                             <div class="row">
                                 <label for="$flexible_tariff_name" class="form-label">Add</label>

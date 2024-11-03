@@ -106,7 +106,7 @@ class DailyTaskController extends Controller
 
             foreach ($orderwebs->toArray() as $value) {
                 $uid = $value['dispatching_order_uid'];
-
+//                $uid = (new MemoryOrderChangeController)->show($uid);
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
                 if ($uid_history != null) {
                     Log::info("uid_history $uid_history");

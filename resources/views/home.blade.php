@@ -182,7 +182,7 @@
             </form>
         </div>
         <div class="col-md-6">
-            <form action="{{route('bonusReport')}}" id="form">
+            <form action="{{route('bonusReport')}}" method="POST" id="form">
                 @csrf
                 <div class="row card">
                     <div class="card-body">

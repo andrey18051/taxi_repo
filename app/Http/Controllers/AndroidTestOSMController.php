@@ -1599,7 +1599,7 @@ class AndroidTestOSMController extends Controller
                 || $userArr[2] == 'mono_payment'
                 || $userArr[2] == 'wfp_payment'
             ) {
-                $comment .= ". Может быть продление маршрута.";
+                $comment .= "(Может быть продление маршрута)";
                 $route_undefined = false;
             }
         }
@@ -4142,7 +4142,7 @@ class AndroidTestOSMController extends Controller
                 || $userArr[2] == 'mono_payment'
                 || $userArr[2] == 'wfp_payment'
             ) {
-                $comment .= ". Может быть продление маршрута.";
+                $comment .= "(Может быть продление маршрута)";
                 $route_undefined = false;
             }
         }
@@ -4474,7 +4474,7 @@ class AndroidTestOSMController extends Controller
                 || $userArr[2] == 'mono_payment'
                 || $userArr[2] == 'wfp_payment'
             ) {
-                $comment .= ". Может быть продление маршрута.";
+                $comment .= "(Может быть продление маршрута)";
                 $route_undefined = false;
             }
         }
