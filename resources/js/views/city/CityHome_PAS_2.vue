@@ -33,7 +33,8 @@
                 <v-th sortKey="address">address</v-th>
                 <v-th sortKey="login">login</v-th>
                 <v-th sortKey="password">password</v-th>
-                <v-th sortKey="password">online</v-th>
+                <v-th sortKey="online">online</v-th>
+                <v-th sortKey="black_list">black_list</v-th>
                 </thead>
                 <tbody slot="body" slot-scope="{displayData}">
                 <tr>
@@ -45,6 +46,7 @@
                     <td> <input class="form-input input-lg" style="width: 150px" v-model="filters.login.value"  placeholder="Select by login"></td>
                     <td> <input class="form-input input-lg" style="width: 150px" v-model="filters.password.value"  placeholder="Select by password"></td>
                     <td> <input class="form-input input-lg" style="width: 120px" v-model="filters.online.value"  placeholder="Select by online"></td>
+                    <td> <input class="form-input input-lg" style="width: 120px" v-model="filters.black_list.value"  placeholder="Select by black_list"></td>
                     <td></td>
                 </tr>
                 <tr v-for="row in displayData" :key="row.id">
@@ -62,11 +64,17 @@
                             <option value="false">no_online</option>
                         </select>
                     </td>
+                    <td>
+                        <select id="black_list" class="form-control" style="width: 120px" v-model="row.black_list" required>
+                            <option value="cards only">cards only</option>
+                            <option value="cash">cash</option>
+                        </select>
+                    </td>
 
 
                     <td>
                         <div class="btn-group" role="group">
-                            <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password, row.online, row.card_max_pay, row.bonus_max_pay)" style="margin-left: 5px">
+                            <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password, row.online, row.card_max_pay, row.bonus_max_pay, row.black_list)" style="margin-left: 5px">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                     <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                                 </svg>
@@ -112,6 +120,7 @@ export default {
             online: { value: "", keys: ["online"] },
             card_max_pay: { value: "", keys: ["card_max_pay"] },
             bonus_max_pay: { value: "", keys: ["bonus_max_pay"] },
+            black_list: { value: "", keys: ["black_list"] },
         }
     }),
     mounted() {
@@ -138,8 +147,8 @@ export default {
                     window.alert("Данные обновлены");
                 });
         },
-        editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay) {
-            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay)
+        editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
+            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list)
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();

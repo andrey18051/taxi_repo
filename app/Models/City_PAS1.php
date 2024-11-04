@@ -38,4 +38,8 @@ class City_PAS1 extends Model
      * @var mixed|string
      */
     private $wfp_merchantSecretKey;
+    /**
+     * @var mixed|string
+     */
+    private $black_list;
 }

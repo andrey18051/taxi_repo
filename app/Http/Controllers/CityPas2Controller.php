@@ -38,7 +38,8 @@ class CityPas2Controller extends Controller
         $password,
         $online,
         $card_max_pay,
-        $bonus_max_pay
+        $bonus_max_pay,
+        $black_list
     ) {
         $city = City_PAS2::find($id);
 
@@ -54,6 +55,7 @@ class CityPas2Controller extends Controller
         $city->online = $online;
         $city->card_max_pay = $card_max_pay;
         $city->bonus_max_pay = $bonus_max_pay;
+        $city->black_list = $black_list;
         $city->save();
 
         return response()->json($city);

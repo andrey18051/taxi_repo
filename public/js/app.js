@@ -5828,6 +5828,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityHomePas1",
@@ -5870,6 +5877,10 @@ __webpack_require__.r(__webpack_exports__);
         bonus_max_pay: {
           value: "",
           keys: ["bonus_max_pay"]
+        },
+        black_list: {
+          value: "",
+          keys: ["black_list"]
         }
       }
     };
@@ -5900,8 +5911,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas1/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay).then(function (ret) {
+    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas2/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -6040,6 +6051,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityHomePas2",
@@ -6082,6 +6101,10 @@ __webpack_require__.r(__webpack_exports__);
         bonus_max_pay: {
           value: "",
           keys: ["bonus_max_pay"]
+        },
+        black_list: {
+          value: "",
+          keys: ["black_list"]
         }
       }
     };
@@ -6112,8 +6135,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas2/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay).then(function (ret) {
+    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas2/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -6252,6 +6275,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityHomePas4",
@@ -6294,6 +6324,10 @@ __webpack_require__.r(__webpack_exports__);
         bonus_max_pay: {
           value: "",
           keys: ["bonus_max_pay"]
+        },
+        black_list: {
+          value: "",
+          keys: ["black_list"]
         }
       }
     };
@@ -6324,8 +6358,8 @@ __webpack_require__.r(__webpack_exports__);
         window.alert("Данные обновлены");
       });
     },
-    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas4/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay).then(function (ret) {
+    editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas2/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -37975,6 +38009,35 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.black_list.value,
+                                  expression: "filters.black_list.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "120px" },
+                              attrs: { placeholder: "Select by black_list" },
+                              domProps: { value: _vm.filters.black_list.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.black_list,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
                           _c("td"),
                         ]),
                         _vm._v(" "),
@@ -38209,6 +38272,59 @@ var render = function () {
                             _vm._v(" "),
                             _c("td", [
                               _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.black_list,
+                                      expression: "row.black_list",
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "120px" },
+                                  attrs: { id: "black_list", required: "" },
+                                  on: {
+                                    change: function ($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call(
+                                          $event.target.options,
+                                          function (o) {
+                                            return o.selected
+                                          }
+                                        )
+                                        .map(function (o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        row,
+                                        "black_list",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    },
+                                  },
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    { attrs: { value: "cards only" } },
+                                    [_vm._v("cards only")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("option", { attrs: { value: "cash" } }, [
+                                    _vm._v("cash"),
+                                  ]),
+                                ]
+                              ),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c(
                                 "div",
                                 {
                                   staticClass: "btn-group",
@@ -38230,7 +38346,8 @@ var render = function () {
                                             row.password,
                                             row.online,
                                             row.card_max_pay,
-                                            row.bonus_max_pay
+                                            row.bonus_max_pay,
+                                            row.black_list
                                           )
                                         },
                                       },
@@ -38341,8 +38458,12 @@ var render = function () {
                     _vm._v("password"),
                   ]),
                   _vm._v(" "),
-                  _c("v-th", { attrs: { sortKey: "password" } }, [
+                  _c("v-th", { attrs: { sortKey: "online" } }, [
                     _vm._v("online"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "black_list" } }, [
+                    _vm._v("black_list"),
                   ]),
                 ],
                 1
@@ -38734,6 +38855,35 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.black_list.value,
+                                  expression: "filters.black_list.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "120px" },
+                              attrs: { placeholder: "Select by black_list" },
+                              domProps: { value: _vm.filters.black_list.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.black_list,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
                           _c("td"),
                         ]),
                         _vm._v(" "),
@@ -38968,6 +39118,59 @@ var render = function () {
                             _vm._v(" "),
                             _c("td", [
                               _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.black_list,
+                                      expression: "row.black_list",
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "120px" },
+                                  attrs: { id: "black_list", required: "" },
+                                  on: {
+                                    change: function ($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call(
+                                          $event.target.options,
+                                          function (o) {
+                                            return o.selected
+                                          }
+                                        )
+                                        .map(function (o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        row,
+                                        "black_list",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    },
+                                  },
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    { attrs: { value: "cards only" } },
+                                    [_vm._v("cards only")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("option", { attrs: { value: "cash" } }, [
+                                    _vm._v("cash"),
+                                  ]),
+                                ]
+                              ),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c(
                                 "div",
                                 {
                                   staticClass: "btn-group",
@@ -38989,7 +39192,8 @@ var render = function () {
                                             row.password,
                                             row.online,
                                             row.card_max_pay,
-                                            row.bonus_max_pay
+                                            row.bonus_max_pay,
+                                            row.black_list
                                           )
                                         },
                                       },
@@ -39100,8 +39304,12 @@ var render = function () {
                     _vm._v("password"),
                   ]),
                   _vm._v(" "),
-                  _c("v-th", { attrs: { sortKey: "password" } }, [
+                  _c("v-th", { attrs: { sortKey: "online" } }, [
                     _vm._v("online"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "black_list" } }, [
+                    _vm._v("black_list"),
                   ]),
                 ],
                 1
@@ -39493,6 +39701,35 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.black_list.value,
+                                  expression: "filters.black_list.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "120px" },
+                              attrs: { placeholder: "Select by black_list" },
+                              domProps: { value: _vm.filters.black_list.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.black_list,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
                           _c("td"),
                         ]),
                         _vm._v(" "),
@@ -39727,6 +39964,59 @@ var render = function () {
                             _vm._v(" "),
                             _c("td", [
                               _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.black_list,
+                                      expression: "row.black_list",
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "120px" },
+                                  attrs: { id: "black_list", required: "" },
+                                  on: {
+                                    change: function ($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call(
+                                          $event.target.options,
+                                          function (o) {
+                                            return o.selected
+                                          }
+                                        )
+                                        .map(function (o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        row,
+                                        "black_list",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    },
+                                  },
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    { attrs: { value: "cards only" } },
+                                    [_vm._v("cards only")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("option", { attrs: { value: "cash" } }, [
+                                    _vm._v("cash"),
+                                  ]),
+                                ]
+                              ),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c(
                                 "div",
                                 {
                                   staticClass: "btn-group",
@@ -39748,7 +40038,8 @@ var render = function () {
                                             row.password,
                                             row.online,
                                             row.card_max_pay,
-                                            row.bonus_max_pay
+                                            row.bonus_max_pay,
+                                            row.black_list
                                           )
                                         },
                                       },
@@ -39859,8 +40150,12 @@ var render = function () {
                     _vm._v("password"),
                   ]),
                   _vm._v(" "),
-                  _c("v-th", { attrs: { sortKey: "password" } }, [
+                  _c("v-th", { attrs: { sortKey: "online" } }, [
                     _vm._v("online"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "black_list" } }, [
+                    _vm._v("black_list"),
                   ]),
                 ],
                 1

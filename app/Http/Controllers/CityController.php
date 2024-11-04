@@ -385,7 +385,8 @@ class CityController extends Controller
         }
         return [
             'card_max_pay' => $city["card_max_pay"],
-            'bonus_max_pay' => $city["bonus_max_pay"]
+            'bonus_max_pay' => $city["bonus_max_pay"],
+            'black_list' => $city["black_list"]
         ];
     }
     public function merchantFondyApp($city, $app): array
