@@ -33,6 +33,96 @@ use SebastianBergmann\Diff\Exception;
 
 class AndroidTestOSMController extends Controller
 {
+    /**
+     * @throws \Exception
+     */
+    private static function searchOrderToDelete(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $email,
+        $start,
+        $finish,
+        $payment_type,
+        $city,
+        $application
+    ) {
+        $uid = "";
+        $uid_Double = "";
+
+        Log::info("Запуск searchOrderToDelete", [
+            'originLatitude' => $originLatitude,
+            'originLongitude' => $originLongitude,
+            'toLatitude' => $toLatitude,
+            'toLongitude' => $toLongitude,
+            'email' => $email,
+            'start' => $start,
+            'finish' => $finish,
+            'payment_type' => $payment_type,
+            'city' => $city,
+            'application' => $application,
+        ]);
+
+        $order = Orderweb::where("email", $email)
+            ->whereIn('closeReason', ['-1', '101', '102'])
+            ->where("startLat", "==", $originLatitude)
+            ->where("startLan", "==", $originLongitude)
+            ->where("to_lat", "==", $toLatitude)
+            ->where("to_lng", "==", $toLongitude)
+            ->first();
+
+        Log::info("Результат первого поиска Orderweb", ['order' => $order]);
+
+        if (!$order) {
+            // Если запись не найдена, проверяем только routefrom и routeto
+            $order = Orderweb::where("email", $email)
+                ->whereIn('closeReason', ['-1', '101', '102'])
+                ->where("routefrom", "==", $start)
+                ->where("routeto", "==", $finish)
+                ->first();
+
+            Log::info("Результат второго поиска Orderweb (по routefrom и routeto)", ['order' => $order]);
+        }
+
+        if ($order) {
+            $uid = $order->dispatching_order_uid;
+            Log::info("UID заказа найден", ['uid' => $uid]);
+
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+            Log::info("Результат поиска в Uid_history", ['uid_history' => $uid_history]);
+
+            if ($uid_history) {
+                $uid_Double = $uid_history->uid_doubleOrder;
+                Log::info("UID Double найден", ['uid_Double' => $uid_Double]);
+            }
+        }
+
+        if ($uid_Double == "" && $uid != "") {
+            Log::info("Вызов webordersCancel", ['uid' => $uid, 'city' => $city, 'application' => $application]);
+            (new AndroidTestOSMController)->webordersCancel(
+                $uid,
+                $city,
+                $application
+            );
+        } elseif ($uid_Double != "") {
+            Log::info("Вызов webordersCancelDouble", [
+                'uid' => $uid,
+                'uid_Double' => $uid_Double,
+                'payment_type' => $payment_type,
+                'city' => $city,
+                'application' => $application
+            ]);
+            (new AndroidTestOSMController)->webordersCancelDouble(
+                $uid,
+                $uid_Double,
+                $payment_type,
+                $city,
+                $application
+            );
+        }
+    }
+
 
     /**
      * @throws \Exception
@@ -4330,6 +4420,8 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+
+
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
@@ -4407,6 +4499,21 @@ class AndroidTestOSMController extends Controller
 
 
         $taxiColumnId = config('app.taxiColumnId');
+
+        $email = $params['email'];
+        self::searchOrderToDelete(
+            $originLatitude,
+            $originLongitude,
+            $toLatitude,
+            $toLongitude,
+            $email,
+            $start,
+            $finish,
+            $payment_type,
+            $city,
+            $application
+        );
+
 
         /**
          * Откуда

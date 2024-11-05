@@ -41,16 +41,21 @@ class DeleteOrderPersonal implements ShouldQueue
      */
     public function handle()
     {
+        Log::info("DeleteOrderPersonal job started for order UID: {$this->dispatching_order_uid} and driver UID: {$this->driver_uid}");
 
+        // Подождем 20 секунд
         sleep(20);
 
-        //Запускаем через 20 секунд
-        (new FCMController)->deleteOrderPersonalDocumentFromFirestore(
-            $this->dispatching_order_uid,
-            $this->driver_uid
-        );
-//        if (!(new FCMController())->verifyRefusal($this->order->id, $this->driver_uid)) {
-//
-//        }
+        // Запускаем метод
+        try {
+            (new FCMController)->deleteOrderPersonalDocumentFromFirestore(
+                $this->dispatching_order_uid,
+                $this->driver_uid
+            );
+            Log::info("Successfully called deleteOrderPersonalDocumentFromFirestore.");
+        } catch (\Exception $e) {
+            Log::error("Error executing deleteOrderPersonalDocumentFromFirestore: " . $e->getMessage());
+        }
     }
+
 }

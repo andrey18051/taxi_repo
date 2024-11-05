@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/orderTaking/{uid}/{uidDriver}', [DriverController::class, 'orderTaking'])->name('orderTaking');
 Route::get('/orderUnTaking/{uid}/{uidDriver}', [DriverController::class, 'orderUnTaking'])->name('orderUnTaking');
+Route::get('/orderUnTakingPersonal/{uid}/{uidDriver}', [DriverController::class, 'orderUnTakingPersonal'])->name('orderUnTakingPersonal');
 Route::get('/driverInRout/{uid}/{uidDriver}', [DriverController::class, 'driverInRout'])->name('driverInRout');
 
 Route::get('/driverInStartPoint/{uid}/{uidDriver}', [DriverController::class, 'driverInStartPoint'])

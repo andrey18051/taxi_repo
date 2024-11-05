@@ -225,7 +225,7 @@ class FCMController extends Controller
                 Log::info("Document successfully written!");
                 return "Document successfully written!";
             } catch (\Exception $e) {
-                Log::error("Error writing document to Firestore: " . $e->getMessage());
+                Log::error("1 Error writing document to Firestore: " . $e->getMessage());
                 return "Error writing document to Firestore.";
             }
         }
@@ -256,6 +256,10 @@ class FCMController extends Controller
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            Log::info("Путь к Firebase учетным данным: " . $serviceAccountPath);
+
+            $serviceAccountPath = '/var/www/html/public_html/storage/app/public/driver_taxi/t-taxi-4197b-firebase-adminsdk-40c5j-f58a9cf1de.json';
+            Log::info("2 Путь к Firebase учетным данным: " . $serviceAccountPath);
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
@@ -269,7 +273,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("2 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -502,7 +506,7 @@ class FCMController extends Controller
                 return "Error writeDocumentToVerifyUserFirestore  document to Firestore.";
             }
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("3 Error writing document to Firestore: " . $e->getMessage());
             return "Error writeDocumentToVerifyCarFirestore writing document to Firestore.";
         }
     }
@@ -805,7 +809,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("4 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -885,7 +889,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("5 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -922,7 +926,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error(" 6 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -1053,7 +1057,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error(" 7 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -1114,7 +1118,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("8 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -1165,7 +1169,7 @@ class FCMController extends Controller
             Log::info("Document successfully written with updated amount!");
             return "Document successfully written with updated amount!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("9 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -1715,7 +1719,7 @@ class FCMController extends Controller
             Log::info("Document successfully written!");
             return "Document successfully written!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("10 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
@@ -2439,7 +2443,7 @@ google_id: $uidDriver ожидает отмены заявки на возвра
             Log::info("Document successfully written with updated amount!");
             return "Document successfully written with updated amount!";
         } catch (\Exception $e) {
-            Log::error("Error writing document to Firestore: " . $e->getMessage());
+            Log::error("11 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
         }
     }
