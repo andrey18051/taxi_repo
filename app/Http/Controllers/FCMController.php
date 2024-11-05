@@ -690,37 +690,52 @@ class FCMController extends Controller
 
     public function deleteOrderPersonalDocumentFromFirestore($uid, $driver_uid)
     {
+        Log::info("Attempting to delete order with UID: {$uid} and driver UID: {$driver_uid}");
+
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::error("Order not found for dispatching_order_uid: {$uid}");
+            return "Order not found.";
+        }
+
         $documentId = $order->id;
+        Log::info("Found order with ID: {$documentId}");
+
         try {
             // Получите экземпляр клиента Firestore из сервис-провайдера
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            Log::info("Using service account path: {$serviceAccountPath}");
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
+            // Получите ссылку на коллекцию и документ
             $collection = $firestore->collection('orders_personal');
             $document = $collection->document($documentId);
             $snapshot = $document->snapshot();
 
             // Получите данные из документа
             $data = $snapshot->data();
+            Log::info("Data retrieved from document: ", $data);
 
             if (!is_null($data)) {
                 // Удаление документа
                 $document->delete();
+                Log::info("Document with ID {$documentId} successfully deleted from orders_personal.");
 
                 // Перемещение данных в другую коллекцию
                 $collection = $firestore->collection('orders');
                 $document = $collection->document($documentId);
                 $document->set($data);
+                Log::info("Data moved to orders collection for document ID: {$documentId}");
 
                 // Обновление данных в коллекции 'orders_refusal'
                 $collection = $firestore->collection('orders_refusal');
-
-
                 $document = $collection->document($documentId);
                 $data["driver_uid"] = $driver_uid;
                 $document->set($data);
+                Log::info("Data moved to orders_refusal for document ID: {$documentId}");
 
                 // Обновление истории заказов
                 $collection = $firestore->collection('orders_history');
@@ -728,22 +743,24 @@ class FCMController extends Controller
                 $data["status"] = "refusal";
                 $data["updated_at"] = self::currentKievDateTime();
                 $document->set($data);
+                Log::info("Order history updated for document ID: {$documentId}");
 
                 // Отправка уведомления водителю
                 (new MessageSentController())->sentDriverUnTakeOrder($uid);
+                Log::info("Notification sent to driver for order UID: {$uid}");
 
-                Log::info("Document successfully deleted!");
                 return "Document successfully deleted!";
             } else {
-                Log::error("Document with UID $uid has no data or doesn't exist.");
+                Log::error("Document with UID {$uid} has no data or doesn't exist.");
                 return "Document not found or has no data.";
             }
 
         } catch (\Exception $e) {
-            Log::error("77 Error deleting document from Firestore: " . $e->getMessage());
+            Log::error("Error deleting document from Firestore: " . $e->getMessage());
             return "Error deleting document from Firestore.";
         }
     }
+
 
 
     /**

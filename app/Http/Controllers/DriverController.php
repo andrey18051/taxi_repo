@@ -441,7 +441,7 @@ class DriverController extends Controller
     }
     public function orderUnTakingPersonal($uid, $uidDriver)
     {
-        $uid = (new MemoryOrderChangeController)->show($uid);
+//        $uid = (new MemoryOrderChangeController)->show($uid);
         (new FCMController)->deleteOrderPersonalDocumentFromFirestore($uid, $uidDriver);
 
         $status = "orderUnTakingPersonal";

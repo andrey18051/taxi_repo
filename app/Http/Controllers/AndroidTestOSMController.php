@@ -36,7 +36,7 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
-    private static function searchOrderToDelete(
+    public function searchOrderToDelete(
         $originLatitude,
         $originLongitude,
         $toLatitude,
@@ -64,12 +64,13 @@ class AndroidTestOSMController extends Controller
             'application' => $application,
         ]);
 
+        // Поиск заказа по координатам
         $order = Orderweb::where("email", $email)
             ->whereIn('closeReason', ['-1', '101', '102'])
-            ->where("startLat", "==", $originLatitude)
-            ->where("startLan", "==", $originLongitude)
-            ->where("to_lat", "==", $toLatitude)
-            ->where("to_lng", "==", $toLongitude)
+            ->where("startLat", $originLatitude)
+            ->where("startLan", $originLongitude)
+            ->where("to_lat", $toLatitude)
+            ->where("to_lng", $toLongitude)
             ->first();
 
         Log::info("Результат первого поиска Orderweb", ['order' => $order]);
@@ -78,8 +79,8 @@ class AndroidTestOSMController extends Controller
             // Если запись не найдена, проверяем только routefrom и routeto
             $order = Orderweb::where("email", $email)
                 ->whereIn('closeReason', ['-1', '101', '102'])
-                ->where("routefrom", "==", $start)
-                ->where("routeto", "==", $finish)
+                ->where("routefrom", $start)
+                ->where("routeto", $finish)
                 ->first();
 
             Log::info("Результат второго поиска Orderweb (по routefrom и routeto)", ['order' => $order]);
@@ -98,14 +99,14 @@ class AndroidTestOSMController extends Controller
             }
         }
 
-        if ($uid_Double == "" && $uid != "") {
+        if (empty($uid_Double) && !empty($uid)) {
             Log::info("Вызов webordersCancel", ['uid' => $uid, 'city' => $city, 'application' => $application]);
             (new AndroidTestOSMController)->webordersCancel(
                 $uid,
                 $city,
                 $application
             );
-        } elseif ($uid_Double != "") {
+        } elseif (!empty($uid_Double)) {
             Log::info("Вызов webordersCancelDouble", [
                 'uid' => $uid,
                 'uid_Double' => $uid_Double,
@@ -4501,18 +4502,18 @@ class AndroidTestOSMController extends Controller
         $taxiColumnId = config('app.taxiColumnId');
 
         $email = $params['email'];
-        self::searchOrderToDelete(
-            $originLatitude,
-            $originLongitude,
-            $toLatitude,
-            $toLongitude,
-            $email,
-            $start,
-            $finish,
-            $payment_type,
-            $city,
-            $application
-        );
+//        self::searchOrderToDelete(
+//            $originLatitude,
+//            $originLongitude,
+//            $toLatitude,
+//            $toLongitude,
+//            $email,
+//            $start,
+//            $finish,
+//            $payment_type,
+//            $city,
+//            $application
+//        );
 
 
         /**

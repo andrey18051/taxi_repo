@@ -109,6 +109,9 @@ Route::get('/android/orderSearchMarkers/{originLatitude}/{originLongitude}/{toLa
 Route::get('/android/orderSearchMarkersVisicom/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearchMarkersVisicom'])
     ->name('orderSearchMarkers');
 
+Route::get('/android/searchOrderToDelete/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{email}/{start}/{finish}/{payment_type}/{city}/{application}/', [AndroidTestOSMController::class, 'searchOrderToDelete'])
+    ->name('searchOrderToDelete');
+
 Route::get('/android/versionAPI/', [AndroidTestOSMController::class, 'version'])
     ->name('version');
 
