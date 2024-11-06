@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SearchOrderToDeleteJob;
 use App\Jobs\StartDoubleStatusPaymentReview;
 use App\Jobs\StartNewProcessExecution;
 use App\Mail\Check;
@@ -1762,7 +1763,7 @@ class AndroidTestOSMController extends Controller
                 $response_error["order_cost"] = "0";
                 $response_error["Message"] = $responseBonus["Message"];
                 $message = "Ошибка заказа: " . $responseBonus["Message"]
-                    . "Параметры запроса: " . json_encode($parameter);
+                    . "Параметры запроса: " . json_encode($parameter, JSON_UNESCAPED_UNICODE);
                 Log::error("orderSearchMarkersVisicom 111" . $message);
                 (new DailyTaskController)->sentTaskMessage($message);
                 return response($response_error, 200)
@@ -4501,19 +4502,9 @@ class AndroidTestOSMController extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
-        $email = $params['email'];
-//        self::searchOrderToDelete(
-//            $originLatitude,
-//            $originLongitude,
-//            $toLatitude,
-//            $toLongitude,
-//            $email,
-//            $start,
-//            $finish,
-//            $payment_type,
-//            $city,
-//            $application
-//        );
+
+
+
 
 
         /**
@@ -4636,16 +4627,16 @@ class AndroidTestOSMController extends Controller
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 22222222 ", $responseArr);
             $responseFinal = $response;
-             if(isset( $responseArr['dispatching_order_uid'])) {
-                 (new DriverMemoryOrderController)->store(
-                     $responseArr['dispatching_order_uid'],
-                     json_encode($parameter),
-                     $authorization,
-                     $url,
-                     $identificationId,
-                     $apiVersion
-                 );
-             }
+            if (isset($responseArr['dispatching_order_uid'])) {
+                (new DriverMemoryOrderController)->store(
+                    $responseArr['dispatching_order_uid'],
+                    json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                    $authorization,
+                    $url,
+                    $identificationId,
+                    $apiVersion
+                );
+            }
 
         } else {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -4684,8 +4675,23 @@ class AndroidTestOSMController extends Controller
                 ) {
                     $response_error["order_cost"] = "0";
                     $response_error["Message"] = $responseBonusArr["Message"];
+
+                    $response_error["order_cost"] = "0";
+
+                    $message = $response_error["Message"];
+                    $blacklist_phrase = "Вы в черном списке";
+
+                    if (strpos($message, $blacklist_phrase) !== false) {
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                        $response_error["Message"] = $cityArr["black_list"];
+                    } else {
+                        Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                    }
+
+
                     $message = "Ошибка заказа: " . $responseBonusArr["Message"]
-                        . "Параметры запроса: " . json_encode($parameter);
+                        . "Параметры запроса: " . json_encode($parameter, JSON_UNESCAPED_UNICODE);
                     Log::error("orderSearchMarkersVisicom 111" . $message);
                     (new DailyTaskController)->sentTaskMessage($message);
                     return response($response_error, 200)
@@ -4713,6 +4719,22 @@ class AndroidTestOSMController extends Controller
         }
 
         if ($responseFinal->status() == 200) {
+            if (count($userArr) > 3) {
+                $email = $params['email'];
+                SearchOrderToDeleteJob::dispatch(
+                    $originLatitude,
+                    $originLongitude,
+                    $toLatitude,
+                    $toLongitude,
+                    $email,
+                    $start,
+                    $finish,
+                    $payment_type,
+                    $city,
+                    $application
+                );
+            }
+
             $response_arr = json_decode($responseFinal, true);
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
@@ -4817,23 +4839,26 @@ class AndroidTestOSMController extends Controller
 
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
-            }
-            if ($response_arr["order_cost"] == 0) {
+            } else {
                 $response_arr = json_decode($response, true);
 
                 $response_error["order_cost"] = "0";
-                $response_error["Message"] = $response_arr["Message"];
-                return response($response_error, 200)
-                    ->header('Content-Type', 'json');
-            }
-            if ($response_arr["order_cost"] == null) {
-                $response_arr = json_decode($response, true);
 
-                $message = "Сбой в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
+                $message = $response_arr["Message"];
+                $blacklist_phrase = "Вы в черном списке";
+
+                if (strpos($message, $blacklist_phrase) !== false) {
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                    $response_error["Message"] = $cityArr["black_list"];
+                } else {
+                    Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                    $response_error["Message"] = $response_arr["Message"];
+                }
+
+                $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
                 (new DailyTaskController)->sentTaskMessage($message);
 
-                $response_error["order_cost"] = "0";
-                $response_error["Message"] = $response_arr["Message"];
 
                 return response($response_error, 200)
                     ->header('Content-Type', 'json');
@@ -4841,14 +4866,21 @@ class AndroidTestOSMController extends Controller
         } else {
             $response_arr = json_decode($response, true);
 
-            $message = "Сбой в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
-            (new DailyTaskController)->sentTaskMessage($message);
-
             $response_error["order_cost"] = "0";
-            $response_error["Message"] = $response_arr["Message"];
 
-            $message = "Ошибка заказа: " . $response_arr["Message"] . "Параметры запроса: " . json_encode($parameter);
-            Log::error("orderSearchMarkersVisicom 222" . $message);
+            $message = $response_arr["Message"];
+            $blacklist_phrase = "Вы в черном списке";
+
+            if (strpos($message, $blacklist_phrase) !== false) {
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                $response_error["Message"] = $cityArr["black_list"];
+            } else {
+                Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                $response_error["Message"] = $response_arr["Message"];
+            }
+
+            $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr, JSON_UNESCAPED_UNICODE);
             (new DailyTaskController)->sentTaskMessage($message);
 
             return response($response_error, 200)

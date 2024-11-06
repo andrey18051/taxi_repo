@@ -2,10 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\DriverController;
 use App\Http\Controllers\FCMController;
-use App\Http\Controllers\UniversalAndroidFunctionController;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

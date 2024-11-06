@@ -74,7 +74,7 @@ class UniversalAndroidFunctionController extends Controller
 
 // Check if $parameter is an array and convert it to a JSON string if it is
                 if (is_array($parameter)) {
-                    $parameter = json_encode($parameter);
+                    $parameter = json_encode($parameter, JSON_UNESCAPED_UNICODE);
                 }
 
                 // Check if $response->body() is an array and convert it to a JSON string if it is
@@ -84,7 +84,7 @@ class UniversalAndroidFunctionController extends Controller
         } catch (\Exception $e) {
         // Check if $parameter is an array and convert it to a JSON string if it is
             if (is_array($parameter)) {
-                $parameter = json_encode($parameter);
+                $parameter = json_encode($parameter, JSON_UNESCAPED_UNICODE);
             }
 
             self::sendCatchMessage("(catch) Параметр запроса: $parameter / Ответ сервера: " . $e->getMessage());
@@ -4487,7 +4487,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
         try {
-            Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter));
+            Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
             $response = Http::withHeaders([
                 "Authorization" => $authorization,
                 "X-WO-API-APP-ID" => $identificationId,
