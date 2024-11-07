@@ -1588,8 +1588,7 @@ class AndroidTestOSMController extends Controller
                 $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                 break;
         }
-//        $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
-//        $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
+
         if ($from == $to) {
             $route_undefined = true;
             $combos_to = $combos_from;
@@ -1762,8 +1761,20 @@ class AndroidTestOSMController extends Controller
             ) {
                 $response_error["order_cost"] = "0";
                 $response_error["Message"] = $responseBonus["Message"];
+
+                $message = $responseBonus["Message"];
+                $blacklist_phrase = "Вы в черном списке";
+
+                if (strpos($message, $blacklist_phrase) !== false) {
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                    $response_error["Message"] = $cityArr["black_list"];
+                } else {
+                    Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                }
                 $message = "Ошибка заказа: " . $responseBonus["Message"]
                     . "Параметры запроса: " . json_encode($parameter, JSON_UNESCAPED_UNICODE);
+
                 Log::error("orderSearchMarkersVisicom 111" . $message);
                 (new DailyTaskController)->sentTaskMessage($message);
                 return response($response_error, 200)
@@ -1816,35 +1827,23 @@ class AndroidTestOSMController extends Controller
                 $params['bonus_status'] = '';
             }
             Log::debug('Order Parameters:', $params);
-            (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
-            $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
-                $from,
-                $from_number,
-                $authorization,
-                self::identificationId($application),
-                $apiVersion,
-                $connectAPI
-            );
-            $response_ok["from_lat"] = $LatLng["lat"];
-            $response_ok["from_lng"] = $LatLng["lng"];
+            $response_ok["from_lat"] = $params["startLat"];
+            $response_ok["from_lng"] = $params["startLan"];
 
-            $LatLng = (new UniversalAndroidFunctionController)->geoDataSearch(
-                $to,
-                $to_number,
-                $authorization,
-                $identificationId,
-                $apiVersion,
-                $connectAPI
-            );
-            $response_ok["lat"] = $LatLng["lat"];
-            $response_ok["lng"] = $LatLng["lng"];
+            $response_ok["lat"] = $params["to_lat"];
+            $response_ok["lng"] = $params["to_lng"];
+
+
 
             $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
             $response_ok["order_cost"] = $response_arr["order_cost"];
             $response_ok["add_cost"] = $add_cost;
             $response_ok["currency"] = $response_arr["currency"];
             $response_ok["routefrom"] = $from;
+
+            Log::debug("routefrom" . $from);
+
             $response_ok["routefromnumber"] = $from_number;
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
@@ -1852,6 +1851,8 @@ class AndroidTestOSMController extends Controller
             $response_ok["flexible_tariff_name"] = $tariff;
             $response_ok["comment_info"] = $comment;
             $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
+
+            (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
 
             //Запуск вилки
             if ($responseBonus != null
@@ -1872,15 +1873,62 @@ class AndroidTestOSMController extends Controller
 
                 $response_ok["doubleOrder"] = $doubleOrder->id;
                 StartNewProcessExecution::dispatch($doubleOrder->id);
-//                (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+
             }
+
+
+
+            if (count($userArr) > 3) {
+                $email = $params['email'];
+
+                Log::debug("from_lat" . $response_ok["from_lat"]);
+                Log::debug("from_lng" . $response_ok["from_lng"]);
+                Log::debug("lat" . $response_ok["lat"]);
+                Log::debug("lng" . $response_ok["lng"]);
+                Log::debug("email" . $email);
+                Log::debug("from" . $params["from"]);
+                Log::debug("to" . $params["to"]);
+                Log::debug("payment_type" . $payment_type);
+                Log::debug("city" . $city);
+                Log::debug("application" . $application);
+
+                SearchOrderToDeleteJob::dispatch(
+                    $response_ok["from_lat"],
+                    $response_ok["from_lng"],
+                    $response_ok["lat"],
+                    $response_ok["lng"],
+                    $email,
+                    $params["from"],
+                    $params["to"],
+                    $payment_type,
+                    $city,
+                    $application
+                );
+            }
+
             return response($response_ok, 200)
                 ->header('Content-Type', 'json');
         } else {
             $response_arr = json_decode($response, true);
 
-            $response_error["order_cost"] = 0;
+            $response_error["order_cost"] = "0";
             $response_error["Message"] = $response_arr["Message"];
+
+            $message = $response_arr["Message"];
+            $blacklist_phrase = "Вы в черном списке";
+
+            if (strpos($message, $blacklist_phrase) !== false) {
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                $response_error["Message"] = $cityArr["black_list"];
+            } else {
+                Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+            }
+
+            $message = "Ошибка заказа: " . $response_arr["Message"]
+                . "Параметры запроса: " . json_encode($parameter, JSON_UNESCAPED_UNICODE);
+            Log::error("orderSearchMarkersVisicom 111" . $message);
+            (new DailyTaskController)->sentTaskMessage($message);
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
@@ -4502,11 +4550,6 @@ class AndroidTestOSMController extends Controller
 
         $taxiColumnId = config('app.taxiColumnId');
 
-
-
-
-
-
         /**
          * Откуда
          */
@@ -4719,21 +4762,7 @@ class AndroidTestOSMController extends Controller
         }
 
         if ($responseFinal->status() == 200) {
-            if (count($userArr) > 3) {
-                $email = $params['email'];
-                SearchOrderToDeleteJob::dispatch(
-                    $originLatitude,
-                    $originLongitude,
-                    $toLatitude,
-                    $toLongitude,
-                    $email,
-                    $start,
-                    $finish,
-                    $payment_type,
-                    $city,
-                    $application
-                );
-            }
+
 
             $response_arr = json_decode($responseFinal, true);
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
@@ -4836,7 +4865,21 @@ class AndroidTestOSMController extends Controller
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
 
                 }
-
+                if (count($userArr) > 3) {
+                    $email = $params['email'];
+                    SearchOrderToDeleteJob::dispatch(
+                        $originLatitude,
+                        $originLongitude,
+                        $toLatitude,
+                        $toLongitude,
+                        $email,
+                        $start,
+                        $finish,
+                        $payment_type,
+                        $city,
+                        $application
+                    );
+                }
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
             } else {
@@ -5425,13 +5468,13 @@ class AndroidTestOSMController extends Controller
                             if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
                                 || $response_bonus_arr["close_reason"] == -1) {
                                 //Безнал по окончанию вилки выполнен или в работе
-                                $nameFrom = $response_bonus_arr['route_address_from']['name']
-                                    . " " . $response_bonus_arr['route_address_from']['number'];
-                                $nameTo = $response_bonus_arr['route_address_to']['name']
-                                    . " " . $response_bonus_arr['route_address_to']['number'];
-
-                                $orderweb_uid->routefrom = $nameFrom;
-                                $orderweb_uid->routeto = $nameTo;
+//                                $nameFrom = $response_bonus_arr['route_address_from']['name']
+//                                    . " " . $response_bonus_arr['route_address_from']['number'];
+//                                $nameTo = $response_bonus_arr['route_address_to']['name']
+//                                    . " " . $response_bonus_arr['route_address_to']['number'];
+//
+//                                $orderweb_uid->routefrom = $nameFrom;
+//                                $orderweb_uid->routeto = $nameTo;
 
                                 if ($response_bonus_arr["order_car_info"] != null) {
                                     $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
@@ -5459,13 +5502,13 @@ class AndroidTestOSMController extends Controller
                                         // Обрабатываем успешный ответ
                                         $response_arr_double = json_decode($response_double, true);
                                         Log::debug("4 $url: ", $response_arr_double);
-                                        $nameFrom = $response_arr_double['route_address_from']['name']
-                                            . " " . $response_arr_double['route_address_from']['number'];
-                                        $nameTo = $response_arr_double['route_address_to']['name']
-                                            . " " . $response_arr_double['route_address_to']['number'];
-
-                                        $orderweb_uid->routefrom = $nameFrom;
-                                        $orderweb_uid->routeto = $nameTo;
+//                                        $nameFrom = $response_arr_double['route_address_from']['name']
+//                                            . " " . $response_arr_double['route_address_from']['number'];
+//                                        $nameTo = $response_arr_double['route_address_to']['name']
+//                                            . " " . $response_arr_double['route_address_to']['number'];
+//
+//                                        $orderweb_uid->routefrom = $nameFrom;
+//                                        $orderweb_uid->routeto = $nameTo;
 
                                         if ($response_arr_double["order_car_info"] != null) {
                                             $orderweb_uid->auto = $response_arr_double["order_car_info"];
@@ -5506,13 +5549,13 @@ class AndroidTestOSMController extends Controller
                     $response_bonus_arr = json_decode($response_bonus, true);
                     if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
                         || $response_bonus_arr["close_reason"] == -1) {
-                        $nameFrom = $response_bonus_arr['route_address_from']['name']
-                            . " " . $response_bonus_arr['route_address_from']['number'];
-                        $nameTo = $response_bonus_arr['route_address_to']['name']
-                            . " " . $response_bonus_arr['route_address_to']['number'];
-
-                        $orderweb_uid->routefrom = $nameFrom;
-                        $orderweb_uid->routeto = $nameTo;
+//                        $nameFrom = $response_bonus_arr['route_address_from']['name']
+//                            . " " . $response_bonus_arr['route_address_from']['number'];
+//                        $nameTo = $response_bonus_arr['route_address_to']['name']
+//                            . " " . $response_bonus_arr['route_address_to']['number'];
+//
+//                        $orderweb_uid->routefrom = $nameFrom;
+//                        $orderweb_uid->routeto = $nameTo;
 
                         if ($response_bonus_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
@@ -5529,11 +5572,11 @@ class AndroidTestOSMController extends Controller
                         // Обрабатываем успешный ответ
                         $response_double_arr = json_decode($response_double, true);
                         Log::debug("responseArr double: ", $response_double_arr);
-                        $nameFrom = $response_double_arr['route_address_from']['name'] . " " . $response_double_arr['route_address_from']['number'];
-                        $nameTo = $response_double_arr['route_address_to']['name'] . " " . $response_double_arr['route_address_to']['number'];
-
-                        $orderweb_uid->routefrom = $nameFrom;
-                        $orderweb_uid->routeto = $nameTo;
+//                        $nameFrom = $response_double_arr['route_address_from']['name'] . " " . $response_double_arr['route_address_from']['number'];
+//                        $nameTo = $response_double_arr['route_address_to']['name'] . " " . $response_double_arr['route_address_to']['number'];
+//
+//                        $orderweb_uid->routefrom = $nameFrom;
+//                        $orderweb_uid->routeto = $nameTo;
 
                         if ($response_double_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_double_arr["order_car_info"];
@@ -5563,11 +5606,11 @@ class AndroidTestOSMController extends Controller
                         // Обрабатываем успешный ответ
                         $response_arr = json_decode($response, true);
                         Log::debug("$url: ", $response_arr);
-                        $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-                        $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-
-                        $orderweb_uid->routefrom = $nameFrom;
-                        $orderweb_uid->routeto = $nameTo;
+//                        $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+//                        $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+//
+//                        $orderweb_uid->routefrom = $nameFrom;
+//                        $orderweb_uid->routeto = $nameTo;
 
                         if ($response_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_arr["order_car_info"];

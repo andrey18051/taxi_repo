@@ -46,11 +46,11 @@ class UIDController extends Controller
 
                         $order->closeReasonI = 1;
                     }
-                    $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-                    $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-
-                    $order->routefrom = $nameFrom;
-                    $order->routeto = $nameTo;
+//                    $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
+//                    $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
+//
+//                    $order->routefrom = $nameFrom;
+//                    $order->routeto = $nameTo;
 
                     if ($response_arr["order_car_info"] != null) {
                         $order->auto = $response_arr["order_car_info"];

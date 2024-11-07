@@ -52,6 +52,43 @@ class MapBoxHelper
             return null;
         }
     }
+
+    public function getCoordinatesByPlaceName(string $placeName): ?array
+    {
+        try {
+            // Отправляем запрос к Nominatim для получения координат по названию места
+            $response = $this->client->get("https://nominatim.openstreetmap.org/search", [
+                'query' => [
+                    'q' => $placeName,
+                    'format' => 'json',
+                    'addressdetails' => 1,
+                    'limit' => 1, // Получаем только одно совпадение
+                ],
+                'timeout' => 5.0,
+                'headers' => [
+                    'User-Agent' => 'YourAppName/1.0 (your-email@example.com)', // Укажите название вашего приложения и контактный email
+                ],
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            // Проверяем, что координаты были найдены
+            if (!empty($data[0]['lon']) && !empty($data[0]['lat'])) {
+                return [
+                    'longitude' => $data[0]['lon'],
+                    'latitude' => $data[0]['lat'],
+                ];
+            }
+
+            // Если координаты не найдены
+            return null;
+        } catch (RequestException $e) {
+            // Логируем ошибку, если произошел сбой
+            Log::error("Error fetching coordinates from Nominatim: " . $e->getMessage());
+            return null;
+        }
+    }
+
 }
 
 

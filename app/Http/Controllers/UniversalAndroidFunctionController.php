@@ -3703,6 +3703,23 @@ class UniversalAndroidFunctionController extends Controller
             }
         }
 
+        if ($LatLng["lat"] == 0) {
+            $locationService = new OpenStreetMapHelper();
+
+// Название места для поиска
+            $placeName = $to + " " + $to_number;
+
+// Вызов метода для получения координат
+            $coordinates = $locationService->getCoordinatesByPlaceName($placeName);
+
+            if ($coordinates !== null) {
+                $LatLng["lat"] = $coordinates['latitude'];
+                $LatLng["lng"] = $coordinates['longitude'];
+            } else {
+                Log::error("Координаты для {$placeName} не найдены.");
+            }
+
+        }
         return $LatLng;
     }
 
@@ -3749,6 +3766,23 @@ class UniversalAndroidFunctionController extends Controller
         if (isset($response_arr["geo_object"][0]["name"])) {
             $LatLng["lat"] = $response_arr["geo_object"][0]["lat"];
             $LatLng["lng"] = $response_arr["geo_object"][0]["lng"];
+        }
+        if ($LatLng["lat"] == 0) {
+            $locationService = new OpenStreetMapHelper();
+
+// Название места для поиска
+            $placeName = $to;
+
+// Вызов метода для получения координат
+            $coordinates = $locationService->getCoordinatesByPlaceName($placeName);
+
+            if ($coordinates !== null) {
+                $LatLng["lat"] = $coordinates['latitude'];
+                $LatLng["lng"] = $coordinates['longitude'];
+            } else {
+                Log::error("Координаты для {$placeName} не найдены.");
+            }
+
         }
         return $LatLng;
     }
@@ -4171,6 +4205,7 @@ class UniversalAndroidFunctionController extends Controller
     }
     public function findCity($startLat, $startLan)
     {
+        Log::debug("findCity $startLat, $startLan");
         $cities = [
             'city_kiev' => [
                 'lat_min' => 49.8000,  // Минимальная широта для области
