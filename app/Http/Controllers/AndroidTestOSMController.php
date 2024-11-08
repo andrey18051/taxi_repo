@@ -1893,6 +1893,7 @@ class AndroidTestOSMController extends Controller
                 Log::debug("application" . $application);
 
                 SearchOrderToDeleteJob::dispatch(
+//                self::searchOrderToDelete(
                     $response_ok["from_lat"],
                     $response_ok["from_lng"],
                     $response_ok["lat"],
@@ -4762,8 +4763,6 @@ class AndroidTestOSMController extends Controller
         }
 
         if ($responseFinal->status() == 200) {
-
-
             $response_arr = json_decode($responseFinal, true);
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
@@ -4867,7 +4866,8 @@ class AndroidTestOSMController extends Controller
                 }
                 if (count($userArr) > 3) {
                     $email = $params['email'];
-                    SearchOrderToDeleteJob::dispatch(
+//                    SearchOrderToDeleteJob::dispatch(
+                    self::searchOrderToDelete(
                         $originLatitude,
                         $originLongitude,
                         $toLatitude,
