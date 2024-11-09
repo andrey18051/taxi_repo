@@ -680,4 +680,12 @@ class DriverController extends Controller
         ], 200);
     }
 
+    public function verifyRefusal($uid, $driver_uid)
+    {
+        Log::info("Driver verifyRefusal orderId $uid");
+        Log::info("Driver verifyRefusal driver_uid $driver_uid");
+
+// Поиск в таблице 'orders_refusal'
+       return (new OrdersRefusalController)->show($driver_uid, $uid);
+    }
 }

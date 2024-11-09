@@ -188,6 +188,8 @@ class FCMController extends Controller
 
 
         $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
+//        $verifyRefusal = (new DriverController)->verifyRefusal($uid, $nearestDriver['driver_uid']);
+
         Log::info("writeDocumentToFirestore verifyRefusal $verifyRefusal");
         if ($nearestDriver['driver_uid'] !== null && !$verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
             self::writeDocumentToOrdersPersonalDriverToFirestore($order, $nearestDriver['driver_uid']);
@@ -672,6 +674,10 @@ class FCMController extends Controller
                 $document = $collection->document($documentId);
                 $data["driver_uid"] = $driver_uid;
                 $document->set($data);
+
+                // Сохраняем на сервере у себя
+//                (new OrdersRefusalController)->store($driver_uid, $uid);
+
                 // Отправка уведомления водителю
                 (new MessageSentController())->sentDriverUnTakeOrder($uid);
 
@@ -735,6 +741,9 @@ class FCMController extends Controller
                 $document = $collection->document($documentId);
                 $data["driver_uid"] = $driver_uid;
                 $document->set($data);
+
+//                (new OrdersRefusalController)->store($driver_uid, $uid);
+
                 Log::info("Data moved to orders_refusal for document ID: {$documentId}");
 
                 // Обновление истории заказов
@@ -1725,6 +1734,9 @@ class FCMController extends Controller
             $data["driver_uid"] = $driver_uid;
             $document->set($data);
 
+//            $uid = $order->dispatching_order_uid;
+//            (new OrdersRefusalController)->store($driver_uid, $uid);
+
             // Запись в историю
 
             $collection = $firestore->collection('orders_history');
@@ -1757,7 +1769,6 @@ class FCMController extends Controller
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
-            // Поиск в коллекции 'orders_refusal'
             $collection = $firestore->collection('orders_refusal');
             $document = $collection->document($orderId);
 

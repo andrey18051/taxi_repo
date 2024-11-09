@@ -3406,7 +3406,7 @@ class UniversalAndroidFunctionController extends Controller
         $user_phone  = $params["user_phone"];//Телефон пользователя
 
         $email = $params['email'];//Телефон пользователя
-        if (!$params["route_undefined"]) {
+        if ($params["route_undefined"] != "1") {
             $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
