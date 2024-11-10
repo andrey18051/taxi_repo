@@ -187,11 +187,11 @@ class FCMController extends Controller
         $order->save();
 
 
-        $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
-//        $verifyRefusal = (new DriverController)->verifyRefusal($uid, $nearestDriver['driver_uid']);
+//        $verifyRefusal = self::verifyRefusal($order->id, $nearestDriver['driver_uid']);
+        $verifyRefusal = (new UniversalAndroidFunctionController())->verifyRefusal($uid, $nearestDriver['driver_uid']);
 
-        Log::info("writeDocumentToFirestore verifyRefusal $verifyRefusal");
-        if ($nearestDriver['driver_uid'] !== null && !$verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
+        Log::info("DriverController verifyRefusal $verifyRefusal");
+        if ($nearestDriver['driver_uid'] !== null && $verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
             self::writeDocumentToOrdersPersonalDriverToFirestore($order, $nearestDriver['driver_uid']);
         } else {
             // Получаем все атрибуты модели в виде массива
@@ -249,7 +249,8 @@ class FCMController extends Controller
         }
         $data['created_at'] = self::currentKievDateTime();// Преобразуем дату в строку
 
-        DeleteOrderPersonal::dispatch($order->dispatching_order_uid, $driver_uid);
+
+//
 
         $data['driver_uid'] = $driver_uid;
 
@@ -260,8 +261,6 @@ class FCMController extends Controller
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
             Log::info("Путь к Firebase учетным данным: " . $serviceAccountPath);
 
-            $serviceAccountPath = '/var/www/html/public_html/storage/app/public/driver_taxi/t-taxi-4197b-firebase-adminsdk-40c5j-f58a9cf1de.json';
-            Log::info("2 Путь к Firebase учетным данным: " . $serviceAccountPath);
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
@@ -271,6 +270,9 @@ class FCMController extends Controller
 
             // Запишите данные в документ
             $document->set($data);
+
+            sleep(20);
+            (new FCMController)->deleteOrderPersonalDocumentFromFirestore($order->dispatching_order_uid, $driver_uid);
 
             Log::info("Document successfully written!");
             return "Document successfully written!";
@@ -669,14 +671,14 @@ class FCMController extends Controller
 //                $order->save();
 
                 // Обновление данных в коллекции 'orders_refusal'
-                $collection = $firestore->collection('orders_refusal');
-
-                $document = $collection->document($documentId);
-                $data["driver_uid"] = $driver_uid;
-                $document->set($data);
+//                $collection = $firestore->collection('orders_refusal');
+//
+//                $document = $collection->document($documentId);
+//                $data["driver_uid"] = $driver_uid;
+//                $document->set($data);
 
                 // Сохраняем на сервере у себя
-//                (new OrdersRefusalController)->store($driver_uid, $uid);
+                (new OrdersRefusalController)->store($driver_uid, $uid);
 
                 // Отправка уведомления водителю
                 (new MessageSentController())->sentDriverUnTakeOrder($uid);
@@ -696,7 +698,7 @@ class FCMController extends Controller
 
     public function deleteOrderPersonalDocumentFromFirestore($uid, $driver_uid)
     {
-        Log::info("Attempting to delete order with UID: {$uid} and driver UID: {$driver_uid}");
+        Log::info("1111 Attempting to delete order with UID: {$uid} and driver UID: {$driver_uid}");
 
         $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
@@ -723,9 +725,9 @@ class FCMController extends Controller
 
             // Получите данные из документа
             $data = $snapshot->data();
-            Log::info("Data retrieved from document: ", $data);
 
             if (!is_null($data)) {
+                Log::info("Data retrieved from document: ", $data);
                 // Удаление документа
                 $document->delete();
                 Log::info("Document with ID {$documentId} successfully deleted from orders_personal.");
@@ -736,13 +738,7 @@ class FCMController extends Controller
                 $document->set($data);
                 Log::info("Data moved to orders collection for document ID: {$documentId}");
 
-                // Обновление данных в коллекции 'orders_refusal'
-                $collection = $firestore->collection('orders_refusal');
-                $document = $collection->document($documentId);
-                $data["driver_uid"] = $driver_uid;
-                $document->set($data);
-
-//                (new OrdersRefusalController)->store($driver_uid, $uid);
+                OrdersRefusalController::store($driver_uid, $uid);
 
                 Log::info("Data moved to orders_refusal for document ID: {$documentId}");
 
@@ -1729,13 +1725,13 @@ class FCMController extends Controller
 
             // Запись в отказные
 
-            $collection = $firestore->collection('orders_refusal');
-            $document = $collection->document($documentId);
-            $data["driver_uid"] = $driver_uid;
-            $document->set($data);
+//            $collection = $firestore->collection('orders_refusal');
+//            $document = $collection->document($documentId);
+//            $data["driver_uid"] = $driver_uid;
+//            $document->set($data);
 
-//            $uid = $order->dispatching_order_uid;
-//            (new OrdersRefusalController)->store($driver_uid, $uid);
+            $uid = $order->dispatching_order_uid;
+            (new OrdersRefusalController)->store($driver_uid, $uid);
 
             // Запись в историю
 
@@ -1750,52 +1746,6 @@ class FCMController extends Controller
         } catch (\Exception $e) {
             Log::error("10 Error writing document to Firestore: " . $e->getMessage());
             return "Error writing document to Firestore.";
-        }
-    }
-
-    public function verifyRefusal($orderId, $driver_uid)
-    {
-        Log::info("verifyRefusal orderId $orderId");
-        Log::info("verifyRefusal driver_uid $driver_uid");
-        try {
-            // Получаем путь к учетным данным Firebase из переменных окружения
-            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
-            if (!$serviceAccountPath) {
-                Log::error('Firebase credentials not set in environment.');
-                return false;
-            }
-
-            // Инициализация клиента Firestore через Firebase SDK
-            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
-            $firestore = $firebase->createFirestore()->database();
-
-            $collection = $firestore->collection('orders_refusal');
-            $document = $collection->document($orderId);
-
-            // Получение снимка (snapshot) документа по orderId
-            $snapshot = $document->snapshot();
-
-            // Проверка на существование документа
-            if ($snapshot->exists()) {
-                $data = $snapshot->data();
-
-                // Проверка, что UID водителя совпадает с тем, что в документе
-                if ($data['driver_uid'] === $driver_uid) {
-                    Log::info("Document with orderId {$orderId} successfully verified for driver_uid {$driver_uid}.");
-                    return true;
-                } else {
-                    Log::info("Document with orderId {$orderId} found, but driver_uid does not match.");
-                    return false;
-                }
-            } else {
-                Log::info("Document with orderId {$orderId} does not exist.");
-                return false;
-            }
-
-        } catch (\Exception $e) {
-            // Логирование ошибки
-            Log::error("Error in verifyRefusal method for orderId {$orderId}: " . $e->getMessage());
-            return false;
         }
     }
 

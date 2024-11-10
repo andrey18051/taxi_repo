@@ -4638,4 +4638,13 @@ class UniversalAndroidFunctionController extends Controller
 
         return $nearestDriver;
     }
+
+    public function verifyRefusal($uid, $driver_uid)
+    {
+        Log::info("Driver verifyRefusal orderId $uid");
+        Log::info("Driver verifyRefusal driver_uid $driver_uid");
+        $uid = (new MemoryOrderChangeController)->show($uid);
+// Поиск в таблице 'orders_refusal'
+        return (new OrdersRefusalController)->show($driver_uid, $uid);
+    }
 }

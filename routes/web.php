@@ -1486,3 +1486,10 @@ Route::get('/orderCardWfpReviewTask', [\App\Http\Controllers\DailyTaskController
 
 Route::get('/orderBonusReviewTask', [\App\Http\Controllers\DailyTaskController::class, 'orderBonusReviewTask'])
     ->name('orderBonusReviewTask');
+
+/**
+ *
+ */
+
+Route::get('/cleanOrderRefusalTable', [\App\Http\Controllers\OrdersRefusalController::class, 'cleanOrderRefusalTable'])
+    ->name('cleanOrderRefusalTable');
