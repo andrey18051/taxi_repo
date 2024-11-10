@@ -473,7 +473,7 @@ class UIDController extends Controller
 
 
 
-        $serverArray = self::getServerArray($city, $app);
+
         switch ($app) {
             case "PAS1":
                 $application = "taxi_easy_ua_pas1";
@@ -486,7 +486,7 @@ class UIDController extends Controller
                 $application = "taxi_easy_ua_pas4";
         }
 
-        if ($serverArray != null) {
+
             switch ($cityApp) {
                 case "Kyiv City":
                     $city = "city_kiev";
@@ -557,12 +557,11 @@ class UIDController extends Controller
             }
 
 
-            Log::debug("UIDStatusShowEmailCancelApp order serverArray ", $serverArray);
             $order = Orderweb:: where("email", $email)
                 ->whereIn('closeReason', ['-1', '101', '102'])
                 ->where("comment", $application)
                 ->where("city", $city)
-                ->whereIn("server", $serverArray)
+
                 ->orderBy("created_at", "desc")
                 ->get();
 
@@ -577,7 +576,7 @@ class UIDController extends Controller
                 self::UIDStatusReview($order);
                 $orderHistory = Orderweb::where("email", $email)
                     ->whereIn('closeReason', ['-1', '101', '102'])
-                    ->whereIn("server", $serverArray)
+
                     ->where("city", $city)
                     ->where("startLat", "!=", null)
                     ->where("startLan", "!=", null)
@@ -670,7 +669,7 @@ class UIDController extends Controller
             }
 //        Log::debug("UIDStatusShowEmail response", $response);
             return $response;
-        }
+
     }
 
     /**

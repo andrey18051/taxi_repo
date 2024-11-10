@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\OrdersRefusalController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Console\Command;
 
@@ -39,6 +40,10 @@ class DriverBalanceReportTask extends Command
     public function handle()
     {
         (new ReportController)->reportBalanceDriver();
+
+        //Очистка
+        (new OrdersRefusalController())->cleanOrderRefusalTable();
+
         return 0;
     }
 }
