@@ -21,8 +21,8 @@ class DailyTask extends Command
     public function handle()
     {
 
-
-//        (new DailyTaskController)->sentTaskMessage($message);
+        $message = "Запуск задачи проверки холдов";
+        (new DailyTaskController)->sentTaskMessage($message);
         (new DailyTaskController)->orderCardWfpReviewTask();
         (new DailyTaskController)->orderBonusReviewTask();
 

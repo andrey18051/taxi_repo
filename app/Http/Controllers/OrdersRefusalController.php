@@ -86,18 +86,6 @@ class OrdersRefusalController extends Controller
         //
     }
 
-    public function cleanOrderRefusalTable()
-    {
-        $orderRefusals = OrdersRefusal::all();
-        foreach ($orderRefusals as $value) {
-            $order = Orderweb::where("dispatching_order_uid", $value->order_uid)
-                ->whereIn('closeReason', ['-1', '101', '102'])
-                ->first();
 
-            if ($order == null) {
-                OrdersRefusal::where("order_uid", $value->order_uid)->delete();
-            }
-        }
-    }
 
 }

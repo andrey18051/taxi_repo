@@ -191,7 +191,7 @@ class FCMController extends Controller
         $verifyRefusal = (new UniversalAndroidFunctionController())->verifyRefusal($uid, $nearestDriver['driver_uid']);
 
         Log::info("DriverController verifyRefusal $verifyRefusal");
-        if ($nearestDriver['driver_uid'] !== null && $verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
+        if ($nearestDriver['driver_uid'] !== null && !$verifyRefusal) { //проверяем есть ли ближайший водитель и не отказывался ли он от заказа
             self::writeDocumentToOrdersPersonalDriverToFirestore($order, $nearestDriver['driver_uid']);
         } else {
             // Получаем все атрибуты модели в виде массива

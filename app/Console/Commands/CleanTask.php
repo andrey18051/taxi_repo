@@ -2,24 +2,26 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\CleanerTableController;
+use App\Http\Controllers\OrdersRefusalController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Console\Command;
 
-class DriverBalanceReportTask extends Command
+class CleanTask extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'driver-balance-report-task:run';
+    protected $signature = 'clean-task:run';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Отправка отчета по балансу водителей';
+    protected $description = 'Очистка таблиц БД';
 
     /**
      * Create a new command instance.
@@ -38,7 +40,11 @@ class DriverBalanceReportTask extends Command
      */
     public function handle()
     {
-        (new ReportController)->reportBalanceDriver();
+        //Очистка таблиці номеров отказных поездок
+        (new CleanerTableController())->cleanOrderRefusalTable();
+
+        //Очистка таблиці истории безнальных заказов
+        (new CleanerTableController())->cleanUidHistoriesTable();
 
         return 0;
     }
