@@ -986,7 +986,11 @@ class UIDController extends Controller
     {
 
         $city = City::where('address', str_replace('http://', '', $connectApi))->first();
-
+        if (!$city) {
+            // Логирование ошибки для диагностики
+            Log::error("City не найден для адреса: " . $connectApi);
+            return null;
+        }
         $username = $city->login;
         $password = hash('SHA512', $city->password);
 

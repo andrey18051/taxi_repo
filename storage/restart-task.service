@@ -6,9 +6,7 @@ After=network.target
 User=nginx
 Group=nginx
 WorkingDirectory=/var/www/html/public_html/
-Restart=always
-RestartSec=3
-ExecStart=php artisan restart-task:run
+ExecStart=/usr/bin/php /var/www/html/public_html/artisan restart-task:run
 
 [Install]
 WantedBy=multi-user.target
