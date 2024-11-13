@@ -877,12 +877,11 @@ class UIDController extends Controller
             $currentTime = time();
             $uid = $value["dispatching_order_uid"];
             $timeElapsed = $currentTime - strtotime($value["updated_at"]);
-            $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5*60;
+            $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5 * 60;
 
             $closeReason = $value["closeReason"];
             $closeReasonI = $value["closeReasonI"];
-
-            $connectAPI =  $value["server"];
+            $connectAPI = $value["server"];
 
             switch ($value["comment"]) {
                 case "taxi_easy_ua_pas1":
@@ -891,7 +890,6 @@ class UIDController extends Controller
                 case "taxi_easy_ua_pas2":
                     $application = "PAS2";
                     break;
-                    //case "PAS4":
                 default:
                     $application = "PAS4";
             }
@@ -905,12 +903,13 @@ class UIDController extends Controller
                 case "PAS2":
                     $serverInfo = City_PAS2::where('address', $address)->first();
                     break;
-                //case "PAS4":
                 default:
                     $serverInfo = City_PAS4::where('address', $address)->first();
             }
-            Log::debug("UIDStatusReview serverInfo $serverInfo->online");
-            if ($serverInfo->online == "true") {
+
+            // Проверка, найден ли сервер
+            if ($serverInfo && $serverInfo->online == "true") {
+                Log::debug("UIDStatusReview serverInfo online: true");
                 $identificationId = $value["comment"];
                 switch ($closeReason) {
                     case "-1":
@@ -926,27 +925,24 @@ class UIDController extends Controller
                     case "5":
                         switch ($closeReasonI) {
                             case 1:
-                                if ($timeElapsed5 >= 5 * 60) {
-                                    if ($timeElapsed >= 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    };
+                                if ($timeElapsed5 >= 5 * 60 && $timeElapsed >= 60) {
+                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
                                 }
-
                                 break;
                             case 2:
                                 if ($timeElapsed >= 60 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                             case 3:
                                 if ($timeElapsed >= 24 * 60 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                             case 4:
                                 if ($timeElapsed >= 3 * 24 * 60 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                         }
                         break;
@@ -958,29 +954,32 @@ class UIDController extends Controller
                             case "1":
                                 if ($timeElapsed >= 5 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                             case "2":
                                 if ($timeElapsed >= 60 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                             case "3":
                                 if ($timeElapsed >= 24 * 60 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                             case "4":
                                 if ($timeElapsed >= 3 * 24 * 60 * 60) {
                                     UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                };
+                                }
                                 break;
                         }
                         break;
                 }
+            } else {
+                Log::error("UIDStatusReview serverInfo is null or offline for address $address");
             }
         }
     }
+
 
     public function autorization($connectApi)
     {
