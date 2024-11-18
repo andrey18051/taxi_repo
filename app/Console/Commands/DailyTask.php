@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\BonusBalanceController;
 use App\Http\Controllers\DailyTaskController;
+use App\Http\Controllers\UIDController;
 use App\Models\Orderweb;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -21,33 +22,10 @@ class DailyTask extends Command
     public function handle()
     {
 
-        $message = "Запуск задачи проверки холдов";
+        $message = "Запуск задачи проверки холдов и перепроверки статусов заказов в работе";
         (new DailyTaskController)->sentTaskMessage($message);
+        (new UIDController())->UIDStatusReviewDaily();
         (new DailyTaskController)->orderCardWfpReviewTask();
         (new DailyTaskController)->orderBonusReviewTask();
-
-               // Выполняйте вашу логику здесь
-//        $orderwebs = Orderweb::whereNotNull('fondy_order_id')
-//            ->where('fondy_status_pay', 'approved')
-//            ->get();
-//
-//        Log::debug($this->description);
-//
-//        foreach ($orderwebs as $orderweb) {
-//            // Ваш код для обработки каждой записи
-//            (new \App\Http\Controllers\FondyController)->fondyStatusReviewAdmin($orderweb['fondy_order_id']);
-//        }
-//
-//        $orderwebs = Orderweb::whereNotNull('wfp_order_id')
-//            ->where('wfp_status_pay', 'Approved')
-//            ->where('wfp_status_pay', 'WaitingAuthComplete')
-//            ->get();
-//
-//        foreach ($orderwebs as $orderweb) {
-//            // Ваш код для обработки каждой записи
-//            (new \App\Http\Controllers\WfpController())->wfpStatusReviewAdmin($orderweb['wfp_order_id']);
-//        }
-//        (new \App\Http\Controllers\BonusBalanceController)->balanceReviewDaily();
     }
 }
-

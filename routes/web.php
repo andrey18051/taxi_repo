@@ -1226,6 +1226,9 @@ Route::get('/closeReasonData/all', [UIDController::class, 'UIDStatusShowAdmin'])
 Route::get('/UIDStatusReviewAdmin/{dispatching_order_uid}', [UIDController::class, 'UIDStatusReviewAdmin'])
     ->name('UIDStatusShowAdmin');
 
+Route::get('/UIDStatusReviewDaily/', [UIDController::class, 'UIDStatusReviewDaily'])
+    ->name('UIDStatusReviewDaily');
+
 /**
  * Bonuses
  */

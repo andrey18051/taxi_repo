@@ -248,9 +248,9 @@ class UIDController extends Controller
                 ->get();
             Log::debug("UIDStatusShowEmail order", $order->toArray());
             $response = null;
-            if (!$order->isEmpty()) {
-                self::UIDStatusReview($order);
-            }
+//            if (!$order->isEmpty()) {
+//                self::UIDStatusReview($order);
+//            }
             $orderHistory = Orderweb::where("email", $email)
 
                 ->whereNotIn('closeReason', ['-1', '101', '102'])
@@ -447,29 +447,29 @@ class UIDController extends Controller
     }
     public function UIDStatusShowEmailCancelApp($email, $cityApp, $app)
     {
-        switch ($cityApp) {
-            case "Lviv":
-            case "Ivano_frankivsk":
-            case "Vinnytsia":
-            case "Poltava":
-            case "Sumy":
-            case "Kharkiv":
-            case "Chernihiv":
-            case "Rivne":
-            case "Ternopil":
-            case "Khmelnytskyi":
-            case "Zakarpattya":
-            case "Zhytomyr":
-            case "Kropyvnytskyi":
-            case "Mykolaiv":
-            case "Сhernivtsi":
-            case "Lutsk":
-            case "foreign countries":
-                $city = "OdessaTest";
-                break;
-            default:
-                $city = $cityApp;
-        }
+//        switch ($cityApp) {
+//            case "Lviv":
+//            case "Ivano_frankivsk":
+//            case "Vinnytsia":
+//            case "Poltava":
+//            case "Sumy":
+//            case "Kharkiv":
+//            case "Chernihiv":
+//            case "Rivne":
+//            case "Ternopil":
+//            case "Khmelnytskyi":
+//            case "Zakarpattya":
+//            case "Zhytomyr":
+//            case "Kropyvnytskyi":
+//            case "Mykolaiv":
+//            case "Сhernivtsi":
+//            case "Lutsk":
+//            case "foreign countries":
+//                $city = "OdessaTest";
+//                break;
+//            default:
+//                $city = $cityApp;
+//        }
 
 
 
@@ -487,172 +487,159 @@ class UIDController extends Controller
         }
 
 
-            switch ($cityApp) {
-                case "Kyiv City":
-                    $city = "city_kiev";
-                    break;
-                case "Cherkasy Oblast":
-                    $city = "city_cherkassy";
-                    break;
-                case "Odessa":
-                case "OdessaTest":
-                    $city = "city_odessa";
-                    break;
-                case "Zaporizhzhia":
-                    $city = "city_zaporizhzhia";
-                    break;
-                case "Dnipropetrovsk Oblast":
-                    $city = "city_dnipro";
-                    break;
-                case "Lviv":
-                    $city = "city_lviv";
-                    break;
-                case "Ivano_frankivsk":
-                    $city = "city_ivano_frankivsk";
-                    break;
-                case "Vinnytsia":
-                    $city = "city_vinnytsia";
-                    break;
-                case "Poltava":
-                    $city = "city_poltava";
-                    break;
-                case "Sumy":
-                    $city = "city_sumy";
-                    break;
-                case "Kharkiv":
-                    $city = "city_kharkiv";
-                    break;
-                case "Chernihiv":
-                    $city = "city_chernihiv";
-                    break;
-                case "Rivne":
-                    $city = "city_rivne";
-                    break;
-                case "Ternopil":
-                    $city = "city_ternopil";
-                    break;
-                case "Khmelnytskyi":
-                    $city = "city_khmelnytskyi";
-                    break;
-                case "Zakarpattya":
-                    $city = "city_zakarpattya";
-                    break;
-                case "Zhytomyr":
-                    $city = "city_zhytomyr";
-                    break;
-                case "Kropyvnytskyi":
-                    $city = "city_kropyvnytskyi";
-                    break;
-                case "Mykolaiv":
-                    $city = "city_mykolaiv";
-                    break;
-                case "Сhernivtsi":
-                    $city = "city_chernivtsi";
-                    break;
-                case "Lutsk":
-                    $city = "city_lutsk";
-                    break;
-                default:
-                    $city = "all";
-            }
+        switch ($cityApp) {
+            case "Kyiv City":
+                $city = "city_kiev";
+                break;
+            case "Cherkasy Oblast":
+                $city = "city_cherkassy";
+                break;
+            case "Odessa":
+            case "OdessaTest":
+                $city = "city_odessa";
+                break;
+            case "Zaporizhzhia":
+                $city = "city_zaporizhzhia";
+                break;
+            case "Dnipropetrovsk Oblast":
+                $city = "city_dnipro";
+                break;
+            case "Lviv":
+                $city = "city_lviv";
+                break;
+            case "Ivano_frankivsk":
+                $city = "city_ivano_frankivsk";
+                break;
+            case "Vinnytsia":
+                $city = "city_vinnytsia";
+                break;
+            case "Poltava":
+                $city = "city_poltava";
+                break;
+            case "Sumy":
+                $city = "city_sumy";
+                break;
+            case "Kharkiv":
+                $city = "city_kharkiv";
+                break;
+            case "Chernihiv":
+                $city = "city_chernihiv";
+                break;
+            case "Rivne":
+                $city = "city_rivne";
+                break;
+            case "Ternopil":
+                $city = "city_ternopil";
+                break;
+            case "Khmelnytskyi":
+                $city = "city_khmelnytskyi";
+                break;
+            case "Zakarpattya":
+                $city = "city_zakarpattya";
+                break;
+            case "Zhytomyr":
+                $city = "city_zhytomyr";
+                break;
+            case "Kropyvnytskyi":
+                $city = "city_kropyvnytskyi";
+                break;
+            case "Mykolaiv":
+                $city = "city_mykolaiv";
+                break;
+            case "Сhernivtsi":
+                $city = "city_chernivtsi";
+                break;
+            case "Lutsk":
+                $city = "city_lutsk";
+                break;
+            default:
+                $city = "all";
+        }
 
+        $order = Orderweb:: where("email", $email)
+            ->whereIn('closeReason', ['-1', '101', '102'])
+            ->where("comment", $application)
+            ->where("city", $city)
 
-            $order = Orderweb:: where("email", $email)
+            ->orderBy("created_at", "desc")
+            ->get();
+
+        $response = null;
+        Log::debug("UIDStatusShowEmailCancelApp order comment " . $application);
+        Log::debug("UIDStatusShowEmailCancelApp order city " . $city);
+
+        Log::debug("UIDStatusShowEmailCancelApp order comment " . $application);
+
+        Log::debug("UIDStatusShowEmailCancelApp order", $order->toArray());
+
+        if (!$order->isEmpty()) {
+            self::UIDStatusReview($order);
+            $orderHistory = Orderweb::where("email", $email)
                 ->whereIn('closeReason', ['-1', '101', '102'])
-                ->where("comment", $application)
-                ->where("city", $city)
 
+                ->where("city", $city)
+                ->where("startLat", "!=", null)
+                ->where("startLan", "!=", null)
+                ->where("to_lat", "!=", null)
+                ->where("to_lng", "!=", null)
+                ->where("comment", $application)
                 ->orderBy("created_at", "desc")
                 ->get();
+            if ($orderHistory) {
+                $i = 0;
+                $orderUpdate = $orderHistory->toArray();
+                Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderUpdate);
+                date_default_timezone_set('Europe/Kiev');
 
-            $response = null;
-            Log::debug("UIDStatusShowEmailCancelApp order comment " . $application);
-            Log::debug("UIDStatusShowEmailCancelApp order city " . $city);
+                foreach ($orderUpdate as $value) {
+                    $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+                    $storedData = $value["auto"];
 
-            Log::debug("UIDStatusShowEmailCancelApp order comment " . $application);
+                    $dataDriver = json_decode($storedData, true);
 
-            Log::debug("UIDStatusShowEmailCancelApp order", $order->toArray());
-            if (!$order->isEmpty()) {
-                self::UIDStatusReview($order);
-                $orderHistory = Orderweb::where("email", $email)
-                    ->whereIn('closeReason', ['-1', '101', '102'])
-
-                    ->where("city", $city)
-                    ->where("startLat", "!=", null)
-                    ->where("startLan", "!=", null)
-                    ->where("to_lat", "!=", null)
-                    ->where("to_lng", "!=", null)
-                    ->where("comment", $application)
-                    ->orderBy("created_at", "desc")
-                    ->get();
-                if ($orderHistory) {
-                    $i = 0;
-                    $orderUpdate = $orderHistory->toArray();
-                    Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderUpdate);
-                    date_default_timezone_set('Europe/Kiev');
-
-                    foreach ($orderUpdate as $value) {
-                        $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+                    if (isset($dataDriver["uid"]) && $dataDriver["uid"] !== null) {
                         $storedData = $value["auto"];
 
                         $dataDriver = json_decode($storedData, true);
-
-                        if (isset($dataDriver["uid"]) && $dataDriver["uid"] !== null) {
-                            $storedData = $value["auto"];
-
-                            $dataDriver = json_decode($storedData, true);
 //                            $name = $dataDriver["name"];
-                            $color = $dataDriver["color"];
-                            $brand = $dataDriver["brand"];
-                            $model = $dataDriver["model"];
-                            $number = $dataDriver["number"];
-                            $auto = "Авто $number, цвет $color  $brand $model";
-                        } else {
-                            $auto =  $value["auto"];
-                        }
-                        if ($uid_history) {
-                            $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
-                            Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
-                        } else {
-                            $dispatchingOrderUidDouble = " ";
-                        }
-
-                        $response[] = [
-                            'uid' => $value["dispatching_order_uid"],
-                            'routefrom' => $value["routefrom"],
-                            'routefromnumber' => $value["routefromnumber"],
-                            'startLat' => $value["startLat"],
-                            'startLan' => $value["startLan"],
-                            'routeto' => $value["routeto"],
-                            'routetonumber' => $value["routetonumber"],
-                            'to_lat' => $value["to_lat"],
-                            'to_lng' => $value["to_lng"],
-                            'web_cost' => $value["web_cost"] + $value["add_cost"],
-                            'closeReason' => $value["closeReason"],
-                            'auto' => $auto,
-                            'flexible_tariff_name' => $value["flexible_tariff_name"],
-                            'comment_info' => $value["comment_info"],
-                            'extra_charge_codes' => $value["extra_charge_codes"],
-                            'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
-                            'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
-                            'pay_method' => $value["pay_system"],
-                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
-                        ];
-
-                        $i++;
+                        $color = $dataDriver["color"];
+                        $brand = $dataDriver["brand"];
+                        $model = $dataDriver["model"];
+                        $number = $dataDriver["number"];
+                        $auto = "Авто $number, цвет $color  $brand $model";
+                    } else {
+                        $auto =  $value["auto"];
                     }
-                } else {
-                    $response = null;
+                    if ($uid_history) {
+                        $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
+                        Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+                    } else {
+                        $dispatchingOrderUidDouble = " ";
+                    }
+
                     $response[] = [
-                        'routefrom' => "*",
-                        'routefromnumber' => "*",
-                        'routeto' => "*",
-                        'routetonumber' => "*",
-                        'web_cost' => "*",
-                        'closeReason' => "*",
-                        'auto' => "*",
-                        'created_at' => "*",
+                        'uid' => $value["dispatching_order_uid"],
+                        'routefrom' => $value["routefrom"],
+                        'routefromnumber' => $value["routefromnumber"],
+                        'startLat' => $value["startLat"],
+                        'startLan' => $value["startLan"],
+                        'routeto' => $value["routeto"],
+                        'routetonumber' => $value["routetonumber"],
+                        'to_lat' => $value["to_lat"],
+                        'to_lng' => $value["to_lng"],
+                        'web_cost' => $value["web_cost"] + $value["add_cost"],
+                        'closeReason' => $value["closeReason"],
+                        'auto' => $auto,
+                        'flexible_tariff_name' => $value["flexible_tariff_name"],
+                        'comment_info' => $value["comment_info"],
+                        'extra_charge_codes' => $value["extra_charge_codes"],
+                        'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
+                        'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
+                        'pay_method' => $value["pay_system"],
+                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                     ];
+
+                    $i++;
                 }
             } else {
                 $response = null;
@@ -667,9 +654,21 @@ class UIDController extends Controller
                     'created_at' => "*",
                 ];
             }
+        } else {
+            $response = null;
+            $response[] = [
+                'routefrom' => "*",
+                'routefromnumber' => "*",
+                'routeto' => "*",
+                'routetonumber' => "*",
+                'web_cost' => "*",
+                'closeReason' => "*",
+                'auto' => "*",
+                'created_at' => "*",
+            ];
+        }
 //        Log::debug("UIDStatusShowEmail response", $response);
             return $response;
-
     }
 
     /**
@@ -869,6 +868,71 @@ class UIDController extends Controller
          $order->closeReason = self::closeReasonUIDStatusFirst($uid, $connectAPI, $autorization, $identificationId);
          $order->save();
     }
+
+    public function UIDStatusReviewDaily()
+    {
+        Log::info('UIDStatusReviewDaily started.');
+
+        try {
+            // Получение записей для обработки
+            $orderwebs = Orderweb::whereIn('closeReason', ['-1', '101', '102'])
+                ->whereNotNull('server')
+                ->whereNotNull('comment')
+                ->get();
+
+            Log::info("Found {$orderwebs->count()} orders to process.");
+
+            // Сбор всех уникальных UID
+            $dispatchingOrderUids = $orderwebs->pluck('dispatching_order_uid');
+            Log::info("Collected dispatching_order_uids: " . implode(', ', $dispatchingOrderUids->toArray()));
+
+            // Загрузка связанных записей одним запросом
+            $orderData = Orderweb::whereIn('dispatching_order_uid', $dispatchingOrderUids)
+                ->get()
+                ->keyBy('dispatching_order_uid');
+
+            $processedCount = 0;
+            $errorsCount = 0;
+
+            // Обработка каждой записи
+            foreach ($orderwebs as $value) {
+                $order = $orderData->get($value->dispatching_order_uid);
+
+                if ($order) {
+                    $connectAPI = $order->server;
+                    $autorization = self::autorization($connectAPI);
+                    $identificationId = $order->comment;
+
+                    try {
+                        Log::info("Processing order UID: {$value->dispatching_order_uid}");
+
+                        $order->closeReason = self::closeReasonUIDStatusFirst(
+                            $value->dispatching_order_uid,
+                            $connectAPI,
+                            $autorization,
+                            $identificationId
+                        );
+                        $order->save();
+
+                        $processedCount++;
+                        Log::info("Order UID {$value->dispatching_order_uid} successfully updated.");
+                    } catch (\Exception $e) {
+                        $errorsCount++;
+                        Log::error("Error updating order UID {$value->dispatching_order_uid}: {$e->getMessage()}");
+                    }
+                } else {
+                    Log::warning("No matching order found for UID: {$value->dispatching_order_uid}");
+                }
+            }
+
+            Log::info("UIDStatusReviewDaily completed. Processed: {$processedCount}, Errors: {$errorsCount}.");
+
+        } catch (\Exception $e) {
+            Log::critical("UIDStatusReviewDaily failed with error: {$e->getMessage()}");
+        }
+    }
+
+
 
     public function UIDStatusReview($order)
     {
