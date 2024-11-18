@@ -47,8 +47,9 @@ class MemoryOrderChangeController extends Controller
     public function show(string $uid)
     {
         $exit = false;
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        if ($orderweb != null) {
+//        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $order_search = MemoryOrderChange::where("order_old", $uid)->first();
+        if ($order_search == null) {
             return $uid;
         } else {
             do {

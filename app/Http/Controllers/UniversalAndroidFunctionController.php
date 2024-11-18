@@ -4405,6 +4405,7 @@ class UniversalAndroidFunctionController extends Controller
 
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
 
         // Ищем данные из памяти о заказе
@@ -4416,6 +4417,9 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
             return null;
         }
+        $newOrder = $order->replicate();
+        // Сохраняем копию в базе данных
+        $newOrder->save();
 
         $city = $order->city;
         Log::info("Город заказа: " . $city);
@@ -4509,6 +4513,7 @@ class UniversalAndroidFunctionController extends Controller
         // Вызываем отмену заказа в AndroidTestOSMController
         (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
 
+
         $authorization = $orderMemory->authorization;
         $identificationId = $orderMemory->identificationId;
         $apiVersion = $orderMemory->apiVersion;
@@ -4517,6 +4522,7 @@ class UniversalAndroidFunctionController extends Controller
 
 
         $parameter['add_cost'] = $order->add_cost + $typeAdd; // Увеличиваем значение add_cost на $typeAdd
+//        $parameter['order_cost'] = $order->web_cost + $typeAdd; // Увеличиваем значение add_cost на $typeAdd
 
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
@@ -4546,12 +4552,14 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
 
-                $order->dispatching_order_uid = $order_new_uid;
-                $order->auto = "";
-                $order->add_cost = $parameter['add_cost'];
-                $order->closeReason = "-1";
-                $order->closeReasonI = "0";
-                $order->save();
+                $newOrder->dispatching_order_uid = $order_new_uid;
+                $newOrder->auto = "";
+
+                $newOrder->web_cost = $responseArr["order_cost"];
+                $newOrder->add_cost = 0;
+                $newOrder->closeReason = "-1";
+                $newOrder->closeReasonI = "0";
+                $newOrder->save();
 
                 Log::info("Обновлен order с новым UID: " . $order_new_uid);
 
