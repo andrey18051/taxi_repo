@@ -4520,9 +4520,17 @@ class UniversalAndroidFunctionController extends Controller
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
 
+        if ($typeAdd == 20) {
+            if ($order->attempt_20 != null) {
+                $parameter['add_cost'] = $order->add_cost + $typeAdd * ($order->attempt_20 + 1);
+            } else {
+                $parameter['add_cost'] = $order->add_cost + $typeAdd;
+            }
+        }
+        if ($typeAdd == 60) {
+            $parameter['add_cost'] = $order->add_cost + $typeAdd;
+        }
 
-        $parameter['add_cost'] = $order->add_cost + $typeAdd; // Увеличиваем значение add_cost на $typeAdd
-//        $parameter['order_cost'] = $order->web_cost + $typeAdd; // Увеличиваем значение add_cost на $typeAdd
 
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
@@ -4557,6 +4565,10 @@ class UniversalAndroidFunctionController extends Controller
 
                 $newOrder->web_cost = $responseArr["order_cost"];
                 $newOrder->add_cost = 0;
+                if ($typeAdd == 20) {
+                    $newOrder->attempt_20 += 1;
+                }
+
                 $newOrder->closeReason = "-1";
                 $newOrder->closeReasonI = "0";
                 $newOrder->save();
@@ -4569,7 +4581,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
 
-                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
                 Log::info("Сообщение о восстановлении машины отправлено.");
 
                 return response()->json([

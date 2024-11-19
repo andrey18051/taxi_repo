@@ -5185,7 +5185,7 @@ class AndroidTestOSMController extends Controller
                 break;
         }
         $resp_answer = "";
-//        $uid = (new MemoryOrderChangeController)->show($uid);
+        $uid = (new MemoryOrderChangeController)->show($uid);
 
         (new FCMController)->deleteDocumentFromFirestore($uid);
         (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);

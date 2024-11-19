@@ -55,8 +55,9 @@ class MemoryOrderChangeController extends Controller
             do {
                 $order_search = MemoryOrderChange::where("order_old", $uid)->first();
                 $uid = $order_search->order_new;
-                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-                if ($orderweb != null) {
+//                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+                $orderweb = MemoryOrderChange::where("order_old", $uid)->first();
+                if ($orderweb == null) {
                     $exit = true;
                 }
             } while (!$exit);
