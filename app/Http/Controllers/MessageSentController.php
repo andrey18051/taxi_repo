@@ -25,7 +25,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
         switch ($orderweb->comment) {
@@ -81,7 +81,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -151,7 +151,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
 
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
@@ -210,7 +210,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
 
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
@@ -270,7 +270,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -346,7 +346,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
         $storedData = $orderweb->auto;
 //        $dataDriver = FCMController::readUserInfoFromFirestore($uidDriver);
         $dataDriver = json_decode($storedData, true);
@@ -422,7 +422,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
         $storedData = $orderweb->auto;
 
         $dataDriver = json_decode($storedData, true);
@@ -498,7 +498,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -572,7 +572,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
 
         $storedData = $orderweb->auto;
         $dataDriver = json_decode($storedData, true);
@@ -647,7 +647,7 @@ class MessageSentController extends Controller
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
+        $web_cost = $orderweb->web_cost;
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
         switch ($orderweb->comment) {

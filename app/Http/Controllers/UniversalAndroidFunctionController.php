@@ -4511,7 +4511,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::info("Город изменен с {$originalCity} на {$city}");
 
         // Вызываем отмену заказа в AndroidTestOSMController
-        (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+//        (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
 
 
         $authorization = $orderMemory->authorization;
@@ -4544,6 +4544,8 @@ class UniversalAndroidFunctionController extends Controller
             ])->post($url, $parameter);
 
             if ($response->successful() && $response->status() == 200) {
+                // Вызываем отмену заказа в AndroidTestOSMController
+                (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
                 Log::info("Успешный ответ API с кодом 200");
 
                 $responseArr = $response->json();
@@ -4564,7 +4566,7 @@ class UniversalAndroidFunctionController extends Controller
                 $newOrder->auto = "";
 
                 $newOrder->web_cost = $responseArr["order_cost"];
-                $newOrder->add_cost = 0;
+
                 if ($typeAdd == 20) {
                     $newOrder->attempt_20 += 1;
                 }
@@ -4583,6 +4585,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
                 Log::info("Сообщение о восстановлении машины отправлено.");
+
 
                 return response()->json([
                     "costNew" => $order->web_cost +$order->add_cost

@@ -1811,8 +1811,8 @@ class AndroidTestOSMController extends Controller
         if ($responseFinal->status() == 200) {
             $response_arr = json_decode($responseFinal, true);
             $params["order_cost"] = $response_arr["order_cost"];
-            $params["add_cost"] = 0;
-//                $params["add_cost"] = $add_cost;
+//            $params["add_cost"] = 0;
+            $params["add_cost"] = $add_cost;
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
 
@@ -4361,8 +4361,8 @@ class AndroidTestOSMController extends Controller
             $response_arr = json_decode($response, true);
             if ($response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
-                $params["add_cost"] = 0;
-//                $params["add_cost"] = $add_cost;
+//                $params["add_cost"] = 0;
+                $params["add_cost"] = $add_cost;
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
 //                sleep(5);
@@ -4766,8 +4766,8 @@ class AndroidTestOSMController extends Controller
             $response_arr = json_decode($responseFinal, true);
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
                 $params["order_cost"] = $response_arr["order_cost"];
-                $params["add_cost"] = 0;
-//                $params["add_cost"] = $add_cost;
+
+                $params["add_cost"] = $add_cost;
                 $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
                 $params['server'] = $connectAPI;
 
