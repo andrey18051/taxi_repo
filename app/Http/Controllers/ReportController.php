@@ -1355,9 +1355,13 @@ class ReportController extends Controller
         }
 
         // Сохранение файла
+
+
+//        $reportIP_path = Storage::path('public/reports/reportIpUniq.xlsx');
+
         $writer = new Xlsx($spreadsheet);
         $fileName = 'drivers_balance_report.xlsx';
-        $path = storage_path('app/public/reports/' . $fileName); // Указывает путь к папке storage/app/
+        $path = Storage::path('public/reports/' . $fileName); // Указывает путь к папке storage/app/
         $writer->save($path); // Сохраните файл в storage/app/
 
         $formatTime = (new FCMController)->currentKievDateTime();
