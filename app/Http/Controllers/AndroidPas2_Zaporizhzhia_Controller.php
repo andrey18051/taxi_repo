@@ -2003,11 +2003,11 @@ class AndroidPas2_Zaporizhzhia_Controller extends Controller
          * Проверка версии геоданных и обновление или создание базы адресов
          */
 //
-        $svd = Config::where('id', '1')->first();
-
-        if ($json_arr['version_date'] !==  $svd->zaporizhzhia_versionDate) {
+//        $svd = Config::where('id', '1')->first();
+//
+//        if ($json_arr['version_date'] !==  $svd->zaporizhzhia_versionDate) {
             $marker_update = true;
-        }
+//        }
 
 
         //Проверка версии геоданных и обновление или создание базы адресов

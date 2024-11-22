@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
+
 class CityController extends Controller
 {
 //    public function cityAdd(Request $request)
@@ -175,53 +176,90 @@ class CityController extends Controller
     }
 
 
+    public function checkDomain($domain): bool
+    {
+        $domainFull = "http://" . $domain . "/api/version";
+        Log::debug("domainFull $domainFull");
+
+        // Отправляем GET-запрос на указанный домен
+        try {
+            $response = Http::timeout(2)  // Устанавливаем таймаут в 2 секунды
+            ->withoutVerifying()      // Отключаем проверку SSL-сертификата
+            ->get($domainFull);       // Отправляем GET-запрос
+
+            // Если код ответа 200 (успешно)
+            if ($response->successful()) {
+                // Вы можете добавить свою логику, например, сохранить состояние города
+                $city = City::where('address', $domain)->first();
+                if ($city) {
+                    $city->online = 'true';
+                    $city->save();
+                }
+                return true;
+            } else {
+                // В случае ошибки при запросе (например, ошибка 404 или 500)
+                $city = City::where('address', $domain)->first();
+                if ($city) {
+                    $city->online = 'false';
+                    $city->save();
+                }
+                return false;
+            }
+        } catch (\Exception $e) {
+            // В случае исключения (например, таймаут или недоступность сайта)
+            Log::error('Ошибка при подключении к домену: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
     /**
      * @throws \Exception
      */
-    public function checkDomain($domain): bool
-    {
-
-        $domainFull = "http://" . $domain . "/api/version";
-        Log::debug("domainFull $domainFull");
-//        $curlInit = curl_init($domainFull);
-//        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
-//        curl_setopt($curlInit, CURLOPT_HEADER, true);
-//        curl_setopt($curlInit, CURLOPT_NOBODY, true);
-//        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
+//    public function checkDomain($domain): bool
+//    {
 //
+//        $domainFull = "http://" . $domain . "/api/version";
+//        Log::debug("domainFull $domainFull");
+////        $curlInit = curl_init($domainFull);
+////        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
+////        curl_setopt($curlInit, CURLOPT_HEADER, true);
+////        curl_setopt($curlInit, CURLOPT_NOBODY, true);
+////        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
+////
+////        $response = curl_exec($curlInit);
+//
+//        $curlInit = curl_init($domainFull);
+//        curl_setopt_array($curlInit, array(
+//            CURLOPT_CONNECTTIMEOUT => 2,
+//            CURLOPT_RETURNTRANSFER => true,
+//            CURLOPT_SSL_VERIFYPEER => false,
+//            CURLOPT_SSL_VERIFYHOST => false
+//        ));
 //        $response = curl_exec($curlInit);
-
-        $curlInit = curl_init($domainFull);
-        curl_setopt_array($curlInit, array(
-            CURLOPT_CONNECTTIMEOUT => 2,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false
-        ));
-        $response = curl_exec($curlInit);
-//dd($domainFull);
-        $city = City::where('address', $domain)->first();
-        if (curl_errno($curlInit)) {
-
-            return false;
-        } else {
-
-            return true;
-        }
-
-        curl_close($curlInit);
-//        if ($response) {
-//            $city = City::where('address', $domain)->first();
-//            $city->online = "true";
-//            $city->save();
-//            return true;
-//        } else {
-//            $city = City::where('address', $domain)->first();
-//            $city->online = "false";
-//            $city->save();
+////dd($domainFull);
+//        $city = City::where('address', $domain)->first();
+//        if (curl_errno($curlInit)) {
+//
 //            return false;
+//        } else {
+//
+//            return true;
 //        }
-    }
+//
+//        curl_close($curlInit);
+////        if ($response) {
+////            $city = City::where('address', $domain)->first();
+////            $city->online = "true";
+////            $city->save();
+////            return true;
+////        } else {
+////            $city = City::where('address', $domain)->first();
+////            $city->online = "false";
+////            $city->save();
+////            return false;
+////        }
+//    }
 //    public function checkDomain($domain): bool
 //    {
 //

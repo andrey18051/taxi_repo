@@ -15,7 +15,7 @@ class AddTimeToStartPointCollumnToWebordersTable extends Migration
     {
         Schema::table('orderwebs', function (Blueprint $table) {
             $table->after('rout_distance', function ($table) {
-                $table->string('time_to_start_point_')->nullable();
+                $table->string('time_to_start_point')->nullable();
             });
         });
     }
@@ -28,7 +28,7 @@ class AddTimeToStartPointCollumnToWebordersTable extends Migration
     public function down()
     {
         Schema::table('orderwebs', function (Blueprint $table) {
-            $table->dropColumn('time_to_start_point_');
+            $table->dropColumn('time_to_start_point');
         });
     }
 }

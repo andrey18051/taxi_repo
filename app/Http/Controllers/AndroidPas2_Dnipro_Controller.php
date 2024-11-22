@@ -2000,7 +2000,7 @@ class AndroidPas2_Dnipro_Controller extends Controller
             'versionDateGratherThan' => '', //Необязательный. Дата версии гео-данных полученных ранее. Если параметр пропущен — возвращает  последние гео-данные.
         ]);
         $json_arr = json_decode($json_str, true);
-        dd($json_arr);
+//        dd($json_arr);
         $url_ob = $connectAPI . '/api/geodata/objects';
         $response_ob = Http::withHeaders([
             'Authorization' => $authorization,
@@ -2012,11 +2012,11 @@ class AndroidPas2_Dnipro_Controller extends Controller
          * Проверка версии геоданных и обновление или создание базы адресов
          */
 //
-        $svd = Config::where('id', '1')->first();
-
-        if ($json_arr['version_date'] !==  $svd->dnipro_versionDate) {
+//        $svd = Config::where('id', '1')->first();
+//
+//        if ($json_arr['version_date'] !==  $svd->dnipro_versionDate) {
             $marker_update = true;
-        }
+//        }
 
 
         //Проверка версии геоданных и обновление или создание базы адресов
@@ -2040,9 +2040,9 @@ class AndroidPas2_Dnipro_Controller extends Controller
 
             }
 
-            $svd = Config::where('id', '1')->first();
-            $svd->dnipro_versionDate = $json_arr['version_date'];
-            $svd->save();
+//            $svd = Config::where('id', '1')->first();
+//            $svd->dnipro_versionDate = $json_arr['version_date'];
+//            $svd->save();
 
             return redirect()->route('home-admin')->with('success', "База $base обновлена.");
         } else {

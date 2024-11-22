@@ -15,6 +15,7 @@ class CreateUserLocalAppsTable extends Migration
     {
         Schema::create('user_local_apps', function (Blueprint $table) {
             $table->id();
+            $table->string('user_id')->nullable();
             $table->string('local_app_pas_1')->nullable();
             $table->string('local_app_pas_2')->nullable();
             $table->string('local_app_pas_4')->nullable();

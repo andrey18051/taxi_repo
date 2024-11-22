@@ -2849,7 +2849,7 @@ class UniversalAndroidFunctionController extends Controller
                     case "http://142.132.213.111:8072":
                         $city = "Odessa";
                         break;
-                    case "http://3142.132.213.111:8073":
+                    case "http://142.132.213.111:8073":
                         $city = "Zaporizhzhia";
                         break;
                     case "http://134.249.181.173:7201":
@@ -4563,7 +4563,7 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->save();
 
                 $newOrder->dispatching_order_uid = $order_new_uid;
-                $newOrder->auto = "";
+                $newOrder->auto = null;
 
                 $newOrder->web_cost = $responseArr["order_cost"];
 
