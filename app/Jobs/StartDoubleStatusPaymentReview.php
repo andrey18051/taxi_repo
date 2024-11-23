@@ -34,14 +34,12 @@ class StartDoubleStatusPaymentReview implements ShouldQueue
      */
     public function handle()
     {
-
+        Log::debug("StartDoubleStatusPaymentReview");
         try {
             (new UniversalAndroidFunctionController)->cancelOnlyDoubleUid($this->orderId);
-            Log::channel('single')
-                ->debug("StartDoubleStatusPaymentReview job finished successfully for order ID: {$this->orderId}");
+            Log::debug("StartDoubleStatusPaymentReview job finished successfully for order ID: {$this->orderId}");
         } catch (\Exception $e) {
-            Log::channel('single')
-                ->error("StartDoubleStatusPaymentReview job failed for order ID: {$this->orderId} with error: "
+            Log::error("StartDoubleStatusPaymentReview job failed for order ID: {$this->orderId} with error: "
                     . $e->getMessage());
         }
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Jobs\StartDoubleStatusPaymentReview;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\BlackList;
@@ -133,7 +134,7 @@ class UniversalAndroidFunctionController extends Controller
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId): string
     {
-        self::checkAndRestoreDatabaseConnection();
+//        self::checkAndRestoreDatabaseConnection();
         ExecStatusHistory::truncate();
         Log::info("startNewProcessExecutionStatusEmu");
 
@@ -2928,7 +2929,7 @@ class UniversalAndroidFunctionController extends Controller
                 case "http://142.132.213.111:8072":
                     $city = "Odessa";
                     break;
-                case "http://3142.132.213.111:8073":
+                case "http://142.132.213.111:8073":
                     $city = "Zaporizhzhia";
                     break;
                 case "http://134.249.181.173:7201":
@@ -3382,6 +3383,9 @@ class UniversalAndroidFunctionController extends Controller
             (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
         }
 
+//        if ($params["payment_type"] == 1) {
+//            StartDoubleStatusPaymentReview::dispatch($params['dispatching_order_uid']);
+//        }
 
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
