@@ -79,7 +79,7 @@ class UserController extends Controller
         $b_list = 1;
 
         if ($black_list === "false" || $black_list === "0" || $black_list === "null") {
-            $b_list = 0;
+            $b_list = null;
         }
         Log::info("bon_pay  $bon_pay");
         Log::info("c_pay  $c_pay");

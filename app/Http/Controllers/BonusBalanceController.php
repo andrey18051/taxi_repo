@@ -69,6 +69,39 @@ class BonusBalanceController extends Controller
 
         Log::debug("recordsAddApp", $balance_records->toArray());
     }
+    public function bonusAdmin(
+        $users_id,
+        $bonusAdd
+    ) {
+        $bonus_types_size = BonusTypes::find("8")->size;
+        $balance_records_PAS1 = new BonusBalancePas1();
+        $balance_records_PAS2 = new BonusBalancePas2();
+        $balance_records_PAS4 = new BonusBalancePas4();
+
+        $balance_records_PAS1->users_id = $users_id;
+        $balance_records_PAS2->users_id = $users_id;
+        $balance_records_PAS4->users_id = $users_id;
+
+        $balance_records_PAS1->bonus_types_id = "8";
+        $balance_records_PAS2->bonus_types_id = "8";
+        $balance_records_PAS4->bonus_types_id = "8";
+
+        $balance_records_PAS1->bonusAdd = $bonusAdd * $bonus_types_size;
+        $balance_records_PAS2->bonusAdd = $bonusAdd * $bonus_types_size;
+        $balance_records_PAS4->bonusAdd = $bonusAdd * $bonus_types_size;
+
+        $balance_records_PAS1->save();
+        $balance_records_PAS2->save();
+        $balance_records_PAS4->save();
+
+        $user = User::find($users_id);
+
+        $user->bonus_pas_1 += $balance_records_PAS1->bonusAdd ;
+        $user->bonus_pas_2 += $balance_records_PAS2->bonusAdd ;
+        $user->bonus_pas_4 += $balance_records_PAS4->bonusAdd ;
+
+        $user->save();
+    }
     public function recordsDel(
         $orderwebs_id,
         $users_id,
@@ -593,6 +626,7 @@ class BonusBalanceController extends Controller
                 $orderBalanceRecord7 = BonusBalancePas1::where("users_id", $users_id)
                     ->where("bonus_types_id", 7)
                     ->first();
+
                 break;
             case "PAS2":
                 $latestBalanceRecord = BonusBalancePas2::where("users_id", $users_id)
@@ -606,6 +640,7 @@ class BonusBalanceController extends Controller
                 $orderBalanceRecord7 = BonusBalancePas2::where("users_id", $users_id)
                     ->where("bonus_types_id", 7)
                     ->first();
+
                 break;
             default:
                 $latestBalanceRecord = BonusBalancePas4::where("users_id", $users_id)
@@ -619,7 +654,7 @@ class BonusBalanceController extends Controller
                 $orderBalanceRecord7 = BonusBalancePas4::where("users_id", $users_id)
                     ->where("bonus_types_id", 7)
                     ->first();
-        }
+            }
 
 
 

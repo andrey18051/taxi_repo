@@ -1242,6 +1242,7 @@ Route::get('/bonus/bonusUserShow/{email}/{app}', [BonusController::class, 'bonus
 Route::get('/bonus/bonusAdd/{email}/{bonusTypeId}/{bonus}', [BonusController::class, 'bonusAdd'])->name('bonusUserAdd');
 Route::get('/bonus/bonusDel/{email}/{bonusTypeId}/{bonus}', [BonusController::class, 'bonusDel'])->name('bonusUserDel');
 
+Route::get('/bonus/bonusAdmin/{users_id}/{bonus}', [BonusBalanceController::class, 'bonusAdmin'])->name('bonusAdmin');
 /**
  * Balance Bonus
  */
