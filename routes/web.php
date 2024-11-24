@@ -1497,3 +1497,6 @@ Route::get('/orderBonusReviewTask', [\App\Http\Controllers\DailyTaskController::
 
 Route::get('/cleanOrderRefusalTable', [\App\Http\Controllers\OrdersRefusalController::class, 'cleanOrderRefusalTable'])
     ->name('cleanOrderRefusalTable');
+
+Route::get('/startNewProcessExecutionStatusEmu/{id}', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusEmu'])
+    ->name('startNewProcessExecutionStatusEmu');

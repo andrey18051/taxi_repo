@@ -1780,17 +1780,13 @@ class AndroidTestOSMController extends Controller
                 return response($response_error, 200)
                     ->header('Content-Type', 'json');
             }
+
             if ($responseBonus == null
                 || isset($responseBonus["Message"])
                 && $responseDouble != null
                 && !isset($responseDoubleArr["Message"])
             ) {
                 $responseFinal = $responseDouble;
-
-                //60 секунд на оплату водителю на карту
-                Log::debug("StartDoubleStatusPaymentReview " . $responseFinal);
-                Log::debug("dispatching_order_uid " . $responseDoubleArr["dispatching_order_uid"]);
-                StartDoubleStatusPaymentReview::dispatch($responseDoubleArr["dispatching_order_uid"]);
             }
             if (!isset($responseDoubleArr["Message"])) {
                 $responseDoubleArr["url"] = $url;
@@ -1810,8 +1806,9 @@ class AndroidTestOSMController extends Controller
 
         if ($responseFinal->status() == 200) {
             $response_arr = json_decode($responseFinal, true);
+
             $params["order_cost"] = $response_arr["order_cost"];
-//            $params["add_cost"] = 0;
+
             $params["add_cost"] = $add_cost;
             $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
             $params['server'] = $connectAPI;
@@ -1853,6 +1850,13 @@ class AndroidTestOSMController extends Controller
             $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
 
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
+//            if ($responseBonus == null && isset($responseDoubleArr["dispatching_order_uid"])
+//            ) {
+//                //60 секунд на оплату водителю на карту
+//                Log::debug("StartDoubleStatusPaymentReview " . $responseFinal);
+//                Log::debug("dispatching_order_uid " . $responseDoubleArr["dispatching_order_uid"]);
+//                StartDoubleStatusPaymentReview::dispatch($responseDoubleArr["dispatching_order_uid"]);
+//            }
 
             //Запуск вилки
             if ($responseBonus != null
@@ -4655,7 +4659,7 @@ class AndroidTestOSMController extends Controller
         ];
 
 //dd($parameter);
-        Log::debug("response_arr: 11111111 ", $parameter);
+        Log::debug("response_arr: 1111111122 ", $parameter);
 
         $responseDoubleArr = null;
         $responseBonusArr = null;
@@ -4669,7 +4673,7 @@ class AndroidTestOSMController extends Controller
                 $apiVersion
             );
             $responseArr = json_decode($response, true);
-            Log::debug("response_arr: 22222222 ", $responseArr);
+            Log::debug("response_arr: 2222222233 ", $responseArr);
             $responseFinal = $response;
             if (isset($responseArr['dispatching_order_uid'])) {
                 (new DriverMemoryOrderController)->store(
@@ -4693,7 +4697,7 @@ class AndroidTestOSMController extends Controller
             $responseFinal = $response;
             $responseBonusArr = json_decode($response, true);
             $responseBonusArr["url"] = $url;
-            Log::debug("responseBonusArr: 3333333333 ", $responseBonusArr);
+            Log::debug("responseBonusArr: 333333333344 ", $responseBonusArr);
 
             if ($authorizationDouble != null) {
                 $responseBonusArr["parameter"] = $parameter;
@@ -4748,7 +4752,6 @@ class AndroidTestOSMController extends Controller
                     && !isset($responseDoubleArr["Message"])
                 ) {
                     $responseFinal = $responseDouble;
-
                 }
                 if (!isset($responseDoubleArr["Message"])) {
                     $responseDoubleArr["url"] = $url;
@@ -4781,6 +4784,13 @@ class AndroidTestOSMController extends Controller
                 }
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
+//                if ($responseBonus == null && isset($responseDoubleArr["dispatching_order_uid"])
+//                ) {
+//                    //60 секунд на оплату водителю на карту
+//                    Log::debug("StartDoubleStatusPaymentReview " . $responseFinal);
+//                    Log::debug("dispatching_order_uid " . $responseDoubleArr["dispatching_order_uid"]);
+//                    StartDoubleStatusPaymentReview::dispatch($responseDoubleArr["dispatching_order_uid"]);
+//                }
 
                 $response_ok["from_lat"] = $originLatitude;
                 $response_ok["from_lng"] = $originLongitude;
@@ -4857,9 +4867,9 @@ class AndroidTestOSMController extends Controller
                     $response_ok["doubleOrder"] = $doubleOrder->id;
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
-//                    StartNewProcessExecution::dispatch($doubleOrder->id);
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+                    StartNewProcessExecution::dispatch($doubleOrder->id);
+//                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 
 
                 }

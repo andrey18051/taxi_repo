@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Factory;
+use phpDocumentor\Reflection\Types\True_;
 use SebastianBergmann\Diff\Exception;
 use function Symfony\Component\Translation\t;
 
@@ -134,10 +135,12 @@ class UniversalAndroidFunctionController extends Controller
 
     public function startNewProcessExecutionStatusEmu($doubleOrderId): string
     {
+        Log::info("startNewProcessExecutionStatusEmu");
+        $messageAdmin = "startNewProcessExecutionStatus";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
 //        self::checkAndRestoreDatabaseConnection();
         ExecStatusHistory::truncate();
-        Log::info("startNewProcessExecutionStatusEmu");
-
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
 
         $responseBonusStr = $doubleOrderRecord->responseBonusStr;
@@ -175,6 +178,11 @@ class UniversalAndroidFunctionController extends Controller
 
         $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
 
+        $messageAdmin = "uid_history + ";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+//        return "";
+
         if ($uid_history == null) {
             $uid_history = new Uid_history();
             $uid_history->uid_bonusOrder = $bonusOrder;
@@ -200,7 +208,11 @@ class UniversalAndroidFunctionController extends Controller
             $updateTime,
             $uid_history
         );
+        $messageAdmin = "newStatusBonus + $newStatusBonus";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
+
+//        return "";
         $lastStatusBonusTime = $lastTimeUpdate;
         $lastStatusBonus = $newStatusBonus;
 
@@ -216,6 +228,12 @@ class UniversalAndroidFunctionController extends Controller
             $updateTime,
             $uid_history
         );
+
+        $messageAdmin = "newStatusDouble + $newStatusDouble";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+//        return "";
+
         $lastStatusDoubleTime = time();
         $lastStatusDouble = $newStatusDouble;
         switch ($newStatusDouble) {
@@ -2819,7 +2837,12 @@ class UniversalAndroidFunctionController extends Controller
         // Проверка, прошла ли одна минута
         if (($current_time_timestamp - $created_at_timestamp) <= 60) {
             Log::debug("Less than one minute has passed since order creation.");
-            return false;
+            Log::debug("Мерчант.");
+            $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+            if($merchantInfo["merchantAccount"] == "errorMerchantAccount") {
+                Log::debug("Мерчанта нет");
+                return true;
+            }
         } else {
             $orderReference = $order->wfp_order_id;
             Log::debug("canceledOneMinute orderReference $orderReference");
@@ -2865,7 +2888,10 @@ class UniversalAndroidFunctionController extends Controller
 
                 $response = (new WfpController)->checkStatus($application, $city, $orderReference);
                 $data = json_decode($response, true);
-                Log::debug("canceledOneMinute response data", $data);
+                if(isset($data)) {
+                    Log::debug("canceledOneMinute response data", $data);
+                }
+
 
                 if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
                     if ($data['transactionStatus'] == "Approved"
@@ -2895,15 +2921,61 @@ class UniversalAndroidFunctionController extends Controller
      */
     public function cancelOnlyDoubleUid($uid)
     {
-        sleep(61);
-        if (self::canceledOneMinute($uid)) {
-            $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
 
-            if (is_null($order)) {
-                Log::error("cancelOnlyDoubleUid Order not found with UID: $uid");
-                return false;
+
+        if (is_null($order)) {
+            Log::error("cancelOnlyDoubleUid Order not found with UID: $uid");
+            return false;
+        }
+
+        $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+        if($merchantInfo["merchantAccount"] == "errorMerchantAccount") {
+            Log::debug("Мерчанта нет");
+
+            switch ($order->comment) {
+                case "taxi_easy_ua_pas1":
+                    $application = "PAS1";
+                    break;
+                case "taxi_easy_ua_pas2":
+                    $application = "PAS2";
+                    break;
+                default:
+                    $application = "PAS4";
             }
 
+            switch ($order->server) {
+                case "http://167.235.113.231:7307":
+                case "http://167.235.113.231:7306":
+                case "http://134.249.181.173:7208":
+                case "http://91.205.17.153:7208":
+                    $city = "Kyiv City";
+                    break;
+                case "http://142.132.213.111:8071":
+                case "http://167.235.113.231:7308":
+                    $city = "Dnipropetrovsk Oblast";
+                    break;
+                case "http://142.132.213.111:8072":
+                    $city = "Odessa";
+                    break;
+                case "http://142.132.213.111:8073":
+                    $city = "Zaporizhzhia";
+                    break;
+                case "http://134.249.181.173:7201":
+                case "http://91.205.17.153:7201":
+                    $city = "Cherkasy Oblast";
+                    break;
+                default:
+                    $city = "OdessaTest";
+            }
+
+            (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+        }
+
+        sleep(60);
+        $cancelNeed60 =self::canceledOneMinute($uid);
+
+        if ($cancelNeed60) {
             switch ($order->comment) {
                 case "taxi_easy_ua_pas1":
                     $application = "PAS1";

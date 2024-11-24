@@ -494,7 +494,7 @@ class WfpController extends Controller
         $clientEmail,
         $clientPhone,
         $language
-    ): string {
+    ) {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -556,7 +556,7 @@ class WfpController extends Controller
         $application,
         $city,
         $orderReference
-    ): Response {
+    ) {
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -576,45 +576,124 @@ class WfpController extends Controller
                 $secretKey = $merchant->wfp_merchantSecretKey;
                 $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
+        if(isset($merchantAccount) && isset($secretKey)) {
+            $params = [
+                "merchantAccount" => $merchantAccount,
+                "orderReference" => $orderReference,
+            ];
+            $params = [
+                "transactionType" => "CHECK_STATUS",
+                "merchantAccount" => $merchantAccount,
+                "orderReference" => $orderReference,
+                "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "checkStatus"),
+                "apiVersion" => 1,
+            ];
 
-        $params = [
-            "merchantAccount" => $merchantAccount,
-            "orderReference" => $orderReference,
-        ];
+// Відправлення POST-запиту
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            Log::debug(["checkStatus " . 'response' => $response->body()]);
+
+            if (isset($response)) {
+                $data = json_decode($response->body(), true);
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+
+                if ($order) {
+                    $order->wfp_status_pay = $data['transactionStatus'];
+                    $order->save();
+                } else {
+                    Log::error("Order not found for wfp_order_id: $orderReference");
+                }
+            } else {
+                Log::error("No response received from WayforPay API");
+            }
+
+        } else {
+            $messageAdmin = "Нет данных мерчанта для города $city, приложение $application (checkStatus)";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            $response = "error";
+
+        }
+        return $response;
 //dd($params);
 
 //        $merchantAccount = "test_merch_n1";
 //        $secretKey = "flk3409refn54t54t*FNJRET";
 
-        $params = [
-            "transactionType" => "CHECK_STATUS",
-            "merchantAccount" => $merchantAccount,
-            "orderReference" => $orderReference,
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "checkStatus"),
-            "apiVersion" => 1,
-        ];
 
-// Відправлення POST-запиту
-        $response = Http::post('https://api.wayforpay.com/api', $params);
-        Log::debug(["checkStatus " . 'response' => $response->body()]);
+    }
 
-        if (isset($response)) {
-            $data = json_decode($response->body(), true);
-            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+    public function checkMerchantInfo($order) {
 
-            if ($order) {
-                $order->wfp_status_pay = $data['transactionStatus'];
-                $order->save();
-            } else {
-                Log::error("Order not found for wfp_order_id: $orderReference");
-            }
-        } else {
-            Log::error("No response received from WayforPay API");
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
         }
 
+        switch ($order->server) {
+            case "http://167.235.113.231:7307":
+            case "http://167.235.113.231:7306":
+            case "http://134.249.181.173:7208":
+            case "http://91.205.17.153:7208":
+                $city = "Kyiv City";
+                break;
+            case "http://142.132.213.111:8071":
+            case "http://167.235.113.231:7308":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "http://142.132.213.111:8072":
+                $city = "Odessa";
+                break;
+            case "http://142.132.213.111:8073":
+                $city = "Zaporizhzhia";
+                break;
+            case "http://134.249.181.173:7201":
+            case "http://91.205.17.153:7201":
+                $city = "Cherkasy Oblast";
+                break;
+            default:
+                $city = "OdessaTest";
+        }
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                 break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
 
+        }
+
+        if(isset($merchantAccount) && isset($secretKey)) {
+            $response = [
+                "merchantAccount" => $merchantAccount,
+                "secretKey" => $secretKey
+                ];
+        } else {
+            $messageAdmin = "Нет данных мерчанта для города $city, приложение $application (checkMerchantInfo)";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            $response = [
+                "merchantAccount" => "errorMerchantAccount",
+                "secretKey" => "errorMerchantSecretKey"
+            ];;
+        }
         return $response;
     }
+
+
 
     public function refund(
         $application,
@@ -687,6 +766,8 @@ class WfpController extends Controller
     {
         $startTime = time(); // Время начала выполнения скрипта
         $maxDuration = 72 * 60 * 60; // 72 часа в секундах
+        $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+
         while (true) { // Бесконечный цикл
             // Отправка POST-запроса к API
             sleep(60);
@@ -698,6 +779,9 @@ class WfpController extends Controller
             (new DailyTaskController)->sentTaskMessage("Попытка Refunded холда: " . $response);
             // Проверка статуса транзакции
             // || $responseArray['transactionStatus'] == 'Declined'
+            if($responseArray['reasonCode'] == '1115') {
+                break;
+            }
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
 
@@ -1106,24 +1190,37 @@ class WfpController extends Controller
                 $city,
                 $orderReference
             );
-            $data = json_decode($response, true);
-
-            if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-                $transactionStatus = $data['transactionStatus'];
-                if ($transactionStatus != "Approved" ||
-                    $transactionStatus != "WaitingAuthComplete") {
-                    $connectAPI = $orderweb->server;
-                    $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-                    Http::withHeaders([
-                        "Authorization" => $authorization,
-                        "X-WO-API-APP-ID" => $identificationId
-                    ])->put($url);
-                    $url = $connectAPI . '/api/weborders/cancel/' .  $uid_double;
-                    Http::withHeaders([
-                        "Authorization" => $authorization,
-                        "X-WO-API-APP-ID" => $identificationId
-                    ])->put($url);
+            if($response != "error") {
+                $data = json_decode($response, true);
+                if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+                    $transactionStatus = $data['transactionStatus'];
+                    if ($transactionStatus != "Approved" ||
+                        $transactionStatus != "WaitingAuthComplete") {
+                        $connectAPI = $orderweb->server;
+                        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                        Http::withHeaders([
+                            "Authorization" => $authorization,
+                            "X-WO-API-APP-ID" => $identificationId
+                        ])->put($url);
+                        $url = $connectAPI . '/api/weborders/cancel/' .  $uid_double;
+                        Http::withHeaders([
+                            "Authorization" => $authorization,
+                            "X-WO-API-APP-ID" => $identificationId
+                        ])->put($url);
+                    }
                 }
+            } else {
+                $connectAPI = $orderweb->server;
+                $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId
+                ])->put($url);
+                $url = $connectAPI . '/api/weborders/cancel/' .  $uid_double;
+                Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId
+                ])->put($url);
             }
         }
     }
