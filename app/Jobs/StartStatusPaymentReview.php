@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\MessageSentController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -11,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class StartDoubleStatusPaymentReview implements ShouldQueue
+class StartStatusPaymentReview implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -31,16 +32,14 @@ class StartDoubleStatusPaymentReview implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-        Log::debug("StartDoubleStatusPaymentReview");
-        try {
-            (new UniversalAndroidFunctionController)->cancelOnlyDoubleUid($this->orderId);
-            Log::debug("StartDoubleStatusPaymentReview job finished successfully for order ID: {$this->orderId}");
-        } catch (\Exception $e) {
-            Log::error("StartDoubleStatusPaymentReview job failed for order ID: {$this->orderId} with error: "
-                    . $e->getMessage());
-        }
+        Log::debug("StartStatusPaymentReview");
+        $messageAdmin = "Запущено ожидание оплаты для заказа $this->orderId (StartStatusPaymentReview)";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new UniversalAndroidFunctionController)->cancelOnlyCardPayUid($this->orderId);
+
     }
 }

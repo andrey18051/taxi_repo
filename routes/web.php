@@ -1500,3 +1500,6 @@ Route::get('/cleanOrderRefusalTable', [\App\Http\Controllers\OrdersRefusalContro
 
 Route::get('/startNewProcessExecutionStatusEmu/{id}', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusEmu'])
     ->name('startNewProcessExecutionStatusEmu');
+
+Route::get('/cancelOnlyCardPayUid/{id}', [UniversalAndroidFunctionController::class, 'cancelOnlyCardPayUid'])
+    ->name('cancelOnlyCardPayUid');

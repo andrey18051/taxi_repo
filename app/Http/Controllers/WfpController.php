@@ -688,7 +688,7 @@ class WfpController extends Controller
             $response = [
                 "merchantAccount" => "errorMerchantAccount",
                 "secretKey" => "errorMerchantSecretKey"
-            ];;
+            ];
         }
         return $response;
     }
@@ -766,7 +766,7 @@ class WfpController extends Controller
     {
         $startTime = time(); // Время начала выполнения скрипта
         $maxDuration = 72 * 60 * 60; // 72 часа в секундах
-        $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+
 
         while (true) { // Бесконечный цикл
             // Отправка POST-запроса к API
