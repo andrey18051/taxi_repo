@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\ReportController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class DriverBalanceReportTask extends Command
 {
@@ -38,8 +39,9 @@ class DriverBalanceReportTask extends Command
      */
     public function handle()
     {
-        (new ReportController)->reportBalanceDriver();
-
+//        (new ReportController)->reportBalanceDriver();
+// Выполняем GET-запрос по указанному URL
+        $response = Http::get('https://m.easy-order-taxi.site/reportBalanceDriver');
         return 0;
     }
 }

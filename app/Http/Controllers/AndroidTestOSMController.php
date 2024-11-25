@@ -1851,7 +1851,7 @@ class AndroidTestOSMController extends Controller
 
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
             if ($responseBonusArr != null
-                || !isset($responseBonusArr["Message"])
+                && !isset($responseBonusArr["Message"])
                 && $responseDoubleArr != null
                 && isset($responseDoubleArr["Message"])
             ) {
@@ -4789,7 +4789,7 @@ class AndroidTestOSMController extends Controller
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
                 if ($responseBonusArr != null
-                    || !isset($responseBonusArr["Message"])
+                    && !isset($responseBonusArr["Message"])
                     && $responseDoubleArr != null
                     && isset($responseDoubleArr["Message"])
                 ) {
