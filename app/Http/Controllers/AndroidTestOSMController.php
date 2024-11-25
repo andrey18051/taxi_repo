@@ -1850,10 +1850,9 @@ class AndroidTestOSMController extends Controller
             $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
 
             (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
-            if ($responseBonusArr != null
+            if (isset($responseBonusArr)
                 && !isset($responseBonusArr["Message"])
-                && $responseDoubleArr != null
-                && isset($responseDoubleArr["Message"])
+                && $responseDoubleArr == null
             ) {
                 //60 секунд на оплату водителю на карту
                 Log::debug("StartStatusPaymentReview " . $responseFinal);
@@ -4788,10 +4787,13 @@ class AndroidTestOSMController extends Controller
                 }
                 Log::debug('Order Parameters:', $params);
                 (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
-                if ($responseBonusArr != null
+                Log::debug("Перед проверкой условий:");
+                Log::debug("Содержимое \$responseBonusArr: " . json_encode($responseBonusArr));
+                Log::debug("Содержимое \$responseDoubleArr: " . json_encode($responseDoubleArr));
+                Log::debug("Содержимое \$params: " . json_encode($params));
+                if (isset($responseBonusArr)
                     && !isset($responseBonusArr["Message"])
-                    && $responseDoubleArr != null
-                    && isset($responseDoubleArr["Message"])
+                    && $responseDoubleArr == null
                 ) {
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);

@@ -782,6 +782,9 @@ class WfpController extends Controller
             if($responseArray['reasonCode'] == '1115') {
                 break;
             }
+            if($responseArray['reasonCode'] == '1126') {
+                break;
+            }
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
 
