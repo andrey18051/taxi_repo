@@ -803,6 +803,11 @@ class WfpController extends Controller
                     $order->save();
                 }
 
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                if ($order) {
+                    $order->wfp_status_pay = $responseArray['transactionStatus'];
+                    $order->save();
+                }
                 break; // Прерываем цикл, если статус "Refunded"
             } elseif ($responseArray['transactionStatus']) {
                 // Проверяем, прошло ли более 72 часов
