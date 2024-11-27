@@ -3954,7 +3954,12 @@ class UniversalAndroidFunctionController extends Controller
 
     public function orderIdMemory($order_id, $uid, $pay_system)
     {
+        Log::debug("orderIdMemory $uid");
+        Log::debug("orderIdMemory $uid");
+        Log::debug("orderIdMemory $pay_system");
+
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
         switch ($pay_system) {
             case "wfp_payment":
                 $orderweb->wfp_order_id = $order_id;
@@ -3985,6 +3990,10 @@ class UniversalAndroidFunctionController extends Controller
         $wfp_invoice->orderReference = $order_id;
         $wfp_invoice->amount = $amount;
         $wfp_invoice->save();
+
+        Log::debug("wfpInvoice dispatching_order_uid");
+        Log::debug("wfpInvoice $order_id");
+        Log::debug("wfpInvoice $amount");
     }
 
     public function getCardToken($email, $pay_system, $merchantId): \Illuminate\Http\JsonResponse
