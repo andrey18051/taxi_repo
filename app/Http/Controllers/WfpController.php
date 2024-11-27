@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\RefundHoldJob;
+use App\Jobs\RefundSettleCardPayJob;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\Card;
@@ -12,6 +12,7 @@ use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\Orderweb;
 use App\Models\User;
+use App\Models\WfpInvoice;
 use Carbon\Carbon;
 use DateInterval;
 use DateTime;
@@ -29,7 +30,7 @@ class WfpController extends Controller
 {
     private static function orderInfo($orderReference): string
     {
-        $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->first();
+        $orderwebs = WfpInvoice::where("wfp_order_id", $orderReference)->first();
         if ($orderwebs) {
             $params = $orderwebs->toArray();
 
@@ -595,7 +596,7 @@ class WfpController extends Controller
 
             if (isset($response)) {
                 $data = json_decode($response->body(), true);
-                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                $order = WfpInvoice::where("wfp_order_id", $orderReference)->first();
 
                 if ($order) {
                     $order->wfp_status_pay = $data['transactionStatus'];
@@ -693,8 +694,6 @@ class WfpController extends Controller
         return $response;
     }
 
-
-
     public function refund(
         $application,
         $city,
@@ -721,46 +720,56 @@ class WfpController extends Controller
                 $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
 
-        $params = [
-            "merchantAccount" => $merchantAccount,
-            "orderReference" => $orderReference,
-            "amount" => $amount,
-            "currency" => "UAH",
-        ];
+        if($merchantAccount != null) {
+            $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->first();
+            $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
+            if ($wfpInvoices->isNotEmpty()) {
+                foreach ($wfpInvoices as $value) {
+                    $params = [
+                        "merchantAccount" => $merchantAccount,
+                        "orderReference" => $value->orderReference,
+                        "amount" => $amount,
+                        "currency" => "UAH",
+                    ];
 
-        $params = [
-            "transactionType" => "REFUND",
-            "merchantAccount" => $merchantAccount,
-            "orderReference" => $orderReference,
-            "amount" => $amount,
-            "currency" => "UAH",
-            "comment" => "Повернення платежу",
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
-            "apiVersion" => 1
-        ];
+                    $params = [
+                        "transactionType" => "REFUND",
+                        "merchantAccount" => $merchantAccount,
+                        "orderReference" => $value->orderReference,
+                        "amount" => $amount,
+                        "currency" => "UAH",
+                        "comment" => "Повернення платежу",
+                        "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
+                        "apiVersion" => 1
+                    ];
+                    RefundSettleCardPayJob::dispatch($params, $orderReference);
+                }
 
-// Відправлення POST-запиту
-        RefundHoldJob::dispatch($params, $orderReference);
-//        $response_st = self::checkStatus(
-//            $application,
-//            $city,
-//            $orderReference
-//        );
-//        $responseArray = $response_st->json();
-//        Log::info("refund responseArray ", $responseArray);
-//        if ($responseArray['transactionStatus'] == 'WaitingAuthComplete') {
-//            Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
-//
-//            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-//            if ($order) {
-//                $order->wfp_status_pay = $responseArray['transactionStatus'];
-//                $order->save();
-//            }
-//
-//
-//
-//       //     return $response;
-//        }
+
+            } else {
+                $params = [
+                    "merchantAccount" => $merchantAccount,
+                    "orderReference" => $orderReference,
+                    "amount" => $amount,
+                    "currency" => "UAH",
+                ];
+
+                $params = [
+                    "transactionType" => "REFUND",
+                    "merchantAccount" => $merchantAccount,
+                    "orderReference" => $orderReference,
+                    "amount" => $amount,
+                    "currency" => "UAH",
+                    "comment" => "Повернення платежу",
+                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
+                    "apiVersion" => 1
+                ];
+                RefundSettleCardPayJob::dispatch($params, $orderReference);
+            }
+        }
+
+
+
     }
     public function refundJob($params, $orderReference)
     {
@@ -788,7 +797,7 @@ class WfpController extends Controller
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
 
-                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                $order = WfpInvoice::where("wfp_order_id", $orderReference)->first();
                 if ($order) {
                     $order->wfp_status_pay = $responseArray['transactionStatus'];
                     $order->save();
@@ -833,59 +842,51 @@ class WfpController extends Controller
                 $secretKey = $merchant->wfp_merchantSecretKey;
                 $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
         }
+        if($merchantAccount != null) {
+            $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->first();
+            $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
+            if ($wfpInvoices->isNotEmpty()) {
+                foreach ($wfpInvoices as $value) {
+                    $params = [
+                        "merchantAccount" => $merchantAccount,
+                        "orderReference" => $value->orderReference,
+                        "amount" => $amount,
+                        "currency" => "UAH",
+                    ];
 
-        $params = [
-            "merchantAccount" => $merchantAccount,
-            "orderReference" => $orderReference,
-            "amount" => $amount,
-            "currency" => "UAH",
-        ];
-
-        $params = [
-            "transactionType" => "SETTLE",
-            "merchantAccount" => $merchantAccount,
-            "orderReference" => $orderReference,
-            "amount" => $amount,
-            "currency" => "UAH",
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
-            "apiVersion" => 1
-        ];
-
-
-        // Відправлення POST-запиту
-        $startTime = time(); // Время начала выполнения скрипта
-        $maxDuration = 72 * 60 * 60; // 72 часа в секундах
-
-        while (true) { // Бесконечный цикл
-            // Отправка POST-запроса к API
-            sleep(60);
-
-            $response = Http::post('https://api.wayforpay.com/api', $params);
-            Log::debug("SETTLE:", ['response' => $response->body()]);
-            $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
-
-            (new DailyTaskController)->sentTaskMessage("Попытка SETTLE холда: " . $responseArray);
-            // Проверка статуса транзакции
-
-            if ($responseArray['transactionStatus'] == 'Approved' || $responseArray['transactionStatus'] == 'Voided') {
-                Log::debug("SETTLE Статус транзакции: " . $responseArray['transactionStatus']);
-
-                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-                $order->wfp_status_pay = $responseArray['transactionStatus'];
-                $order->save();
-
-                break; // Прерываем цикл, если статус "Approved"
-            } elseif ($responseArray['transactionStatus']) {
-                // Проверяем, прошло ли более 72 часов
-                if (time() - $startTime > $maxDuration) {
-                    Log::debug("SETTLE Превышен лимит времени в 72 часа. Прекращение попыток.");
-                    break;
+                    $params = [
+                        "transactionType" => "SETTLE",
+                        "merchantAccount" => $merchantAccount,
+                        "orderReference" => $value->orderReference,
+                        "amount" => $amount,
+                        "currency" => "UAH",
+                        "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
+                        "apiVersion" => 1
+                    ];
+                    RefundSettleCardPayJob::dispatch($params, $orderReference);
                 }
-                Log::debug("SETTLE Статус транзакции: Declined. Повторная попытка через 15 минут...");
-                sleep(900); // Пауза на 900 секунд (15 минут)
+
+
+            } else {
+                $params = [
+                    "merchantAccount" => $merchantAccount,
+                    "orderReference" => $orderReference,
+                    "amount" => $amount,
+                    "currency" => "UAH",
+                ];
+
+                $params = [
+                    "transactionType" => "SETTLE",
+                    "merchantAccount" => $merchantAccount,
+                    "orderReference" => $orderReference,
+                    "amount" => $amount,
+                    "currency" => "UAH",
+                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
+                    "apiVersion" => 1
+                ];
+                RefundSettleCardPayJob::dispatch($params, $orderReference);
             }
         }
-   //     return $response;
     }
 
 

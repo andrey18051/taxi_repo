@@ -1306,6 +1306,7 @@ Route::get('/android/Universal/startNewProcessExecutionStatusEmu/{doubleOrder}',
 Route::post('/android/Universal/startNewProcessExecutionStatusPost/', [UniversalAndroidFunctionController::class, 'startNewProcessExecutionStatusPost'])
     ->name('startNewProcessExecutionStatusPost');
 Route::get('/android/orderIdMemory/{order_id}/{uid}/{pay_system}', [UniversalAndroidFunctionController::class, 'orderIdMemory'])->name('orderIdMemory');
+Route::get('/android/wfpInvoice/{order_id}/{amount}/{uid}', [UniversalAndroidFunctionController::class, 'wfpInvoice'])->name('wfpInvoice');
 
 
 /**
@@ -1475,6 +1476,9 @@ Route::get('help-infos', [HelpInfoController::class, 'helpInfos']);
  */
 Route::get('/android/startAddCostUpdate/{uid}/{typeAdd}', [UniversalAndroidFunctionController::class, 'startAddCostUpdate'])
     ->name('startAddCostUpdate');
+
+Route::get('/android/startAddCostCardUpdate/{uid}/{uid_Double}/{pay_method}', [UniversalAndroidFunctionController::class, 'startAddCostCardUpdate'])
+    ->name('startAddCostCardUpdate');
 
 /**
  * Обновление позиции водителя

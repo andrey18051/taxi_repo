@@ -4688,7 +4688,8 @@ class AndroidTestOSMController extends Controller
                 );
             }
 
-        } else {
+        }
+        else {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
@@ -4701,6 +4702,16 @@ class AndroidTestOSMController extends Controller
             $responseBonusArr["url"] = $url;
             Log::debug("responseBonusArr: 333333333344 ", $responseBonusArr);
 
+            if (isset($responseBonusArr['dispatching_order_uid'])) {
+                (new DriverMemoryOrderController)->store(
+                    $responseBonusArr['dispatching_order_uid'],
+                    json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                    $authorization,
+                    $url,
+                    $identificationId,
+                    $apiVersion
+                );
+            }
             if ($authorizationDouble != null) {
                 $responseBonusArr["parameter"] = $parameter;
 
@@ -4744,7 +4755,7 @@ class AndroidTestOSMController extends Controller
                     $message = "Ошибка заказа: " . $responseBonusArr["Message"]
                         . "Параметры запроса: " . json_encode($parameter, JSON_UNESCAPED_UNICODE);
                     Log::error("orderSearchMarkersVisicom 111" . $message);
-                    (new DailyTaskController)->sentTaskMessage($message);
+                    (new MessageSentController)->sentMessageAdmin($message);
                     return response($response_error, 200)
                         ->header('Content-Type', 'json');
                 }
@@ -4759,7 +4770,8 @@ class AndroidTestOSMController extends Controller
                     $responseDoubleArr["url"] = $url;
                     $responseDoubleArr["parameter"] = $parameter;
                 } else {
-
+                    $messageAdmin = "orderSearchMarkersVisicom: дубль для  $responseDoubleArr не создался";
+                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
                     $responseDoubleArr = null;
                 }
 
@@ -5845,7 +5857,7 @@ class AndroidTestOSMController extends Controller
         return redirect()->route('home-admin')->with('success', "База $base обновлена.");
     }
 
-    private function authorizationChoiceApp(
+    public function authorizationChoiceApp(
         $payment,
         $city,
         $connectAPI,
@@ -5896,8 +5908,8 @@ class AndroidTestOSMController extends Controller
 
                 switch ($city) {
                     case "OdessaTest":
-                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestOne", $connectAPI, $application);
-                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestTwo", $connectAPI, $application);
+                        $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTest", $connectAPI, $application);
+                        $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestDouble", $connectAPI, $application);
                         break;
                     case "Kyiv City":
                         switch ($connectAPI) {
