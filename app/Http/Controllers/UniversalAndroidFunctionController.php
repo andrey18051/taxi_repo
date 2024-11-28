@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Jobs\StartAddCostCardCreat;
 use App\Jobs\StartNewProcessExecution;
 use App\Jobs\StartStatusPaymentReview;
 use App\Mail\Check;
@@ -2842,6 +2843,8 @@ class UniversalAndroidFunctionController extends Controller
             Log::debug("Мерчант.");
             $merchantInfo = (new WfpController)->checkMerchantInfo($order);
             if($merchantInfo["merchantAccount"] == "errorMerchantAccount") {
+                $order->transactionStatus = "errorMerchantAccount";
+
                 Log::debug("Мерчанта нет");
                 return true;
             }
@@ -2902,9 +2905,11 @@ class UniversalAndroidFunctionController extends Controller
                         return false;
                     } elseif ($data['transactionStatus'] == "Declined") {
                         Log::debug("Transaction status is Declined");
+                        $order->transactionStatus = "Declined";
                         return true;
                     } else {
                         Log::debug("Transaction status is not Approved or WaitingAuthComplete.");
+                        $order->transactionStatus = "Canceled_One_Min";
                         return true;
                     }
                 } else {
@@ -4599,13 +4604,13 @@ class UniversalAndroidFunctionController extends Controller
 
         if ($typeAdd == 20) {
             if ($order->attempt_20 != null) {
-                $parameter['add_cost'] = $order->add_cost + $typeAdd * ($order->attempt_20 + 1);
+                $parameter['add_cost'] = (int) $order->add_cost + (int) $typeAdd * ((int) $order->attempt_20 + 1);
             } else {
-                $parameter['add_cost'] = $order->add_cost + $typeAdd;
+                $parameter['add_cost'] = (int) $order->add_cost + (int)$typeAdd;
             }
         }
         if ($typeAdd == 60) {
-            $parameter['add_cost'] = $order->add_cost + $typeAdd;
+            $parameter['add_cost'] = (int) $order->add_cost + (int)$typeAdd;
         }
 
 
@@ -4645,7 +4650,7 @@ class UniversalAndroidFunctionController extends Controller
                 $newOrder->web_cost = $responseArr["order_cost"];
 
                 if ($typeAdd == 20) {
-                    $newOrder->attempt_20 += 1;
+                    $newOrder->attempt_20 = (int)$newOrder->attempt_20 + 1;
                 }
 
                 $newOrder->closeReason = "-1";
@@ -4682,6 +4687,7 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
+
     /**
      * Show the form for creating a new resource.
      *
@@ -4690,10 +4696,174 @@ class UniversalAndroidFunctionController extends Controller
     public function startAddCostCardUpdate(
         $uid,
         $uid_Double,
-        $pay_method
+        $pay_method,
+        $orderReference
+    ): ?\Illuminate\Http\JsonResponse {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::info("MemoryOrderChangeController возвращает UID: " . $uid);
+
+        // Ищем заказ
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
+
+        // Ищем данные из памяти о заказе
+
+        // Проверяем существование заказа
+        if (!$order) {
+            Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
+            return null;
+        }
+
+        $city = $order->city;
+        Log::info("Город заказа: " . $city);
+
+        // Выбор приложения по комментарию
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+                break;
+        }
+        Log::info("Приложение выбрано: " . $application);
+
+        // Переписываем город для определенных случаев
+        $originalCity = $city;
+        switch ($originalCity) {
+            case "city_kiev":
+                $city = "Kyiv City";
+                break;
+            case "city_cherkassy":
+                $city = "Cherkasy Oblast";
+                break;
+            case "city_odessa":
+                $city = "Odessa";
+                break;
+            case "city_zaporizhzhia":
+                $city = "Zaporizhzhia";
+                break;
+            case "city_dnipro":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "city_lviv":
+                $city = "Lviv";
+                break;
+            case "city_ivano_frankivsk":
+                $city = "Ivano_frankivsk";
+                break;
+            case "city_vinnytsia":
+                $city = "Vinnytsia";
+                break;
+            case "city_poltava":
+                $city = "Poltava";
+                break;
+            case "city_sumy":
+                $city = "Sumy";
+                break;
+            case "city_kharkiv":
+                $city = "Kharkiv";
+                break;
+            case "city_chernihiv":
+                $city = "Chernihiv";
+                break;
+            case "city_rivne":
+                $city = "Rivne";
+                break;
+            case "city_ternopil":
+                $city = "Ternopil";
+                break;
+            case "city_khmelnytskyi":
+                $city = "Khmelnytskyi";
+                break;
+            case "city_zakarpattya":
+                $city = "Zakarpattya";
+                break;
+            case "city_zhytomyr":
+                $city = "Zhytomyr";
+                break;
+            case "city_kropyvnytskyi":
+                $city = "Kropyvnytskyi";
+                break;
+            case "city_mykolaiv":
+                $city = "Mykolaiv";
+                break;
+            case "city_chernivtsi":
+                $city = "Сhernivtsi";
+                break;
+            case "city_lutsk":
+                $city = "Lutsk";
+                break;
+            default:
+                $city = "all";
+        }
+
+        $startTime = time(); // Время начала выполнения скрипта
+        $maxDuration = 60; // 60 секундах
+
+
+        while (true) { // Бесконечный цикл
+            // Отправка POST-запроса к API
+
+            $response = (new WfpController)->checkStatus(
+                $application,
+                $city,
+                $orderReference
+            );
+
+            if ($response != "error") {
+                $data = json_decode($response, true);
+                if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
+                    $transactionStatus = $data['transactionStatus'];
+                    if ($transactionStatus != "Approved" ||
+                        $transactionStatus != "WaitingAuthComplete") {
+                        $messageAdmin = "Доплата по счету $orderReference на сумму 20 $transactionStatus ";
+                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                        StartAddCostCardCreat::dispatch(
+                            $uid,
+                            $uid_Double,
+                            $pay_method,
+                            $orderReference,
+                            $application,
+                            $city,
+                            $transactionStatus
+                        );
+                        return response()->json([
+                            "response" => "200"
+                        ], 200);
+                    }
+                }
+            }
+            sleep(10);
+            if (time() - $startTime > $maxDuration) {
+                Log::debug("refund Превышен лимит времени. Прекращение попыток.");
+                return response()->json([
+                    "response" => "400"
+                ], 200);
+            }
+        }
+    }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @throws \Exception
+     */
+    public function startAddCostCardCreat(
+        $uid,
+        $uid_Double,
+        $pay_method,
+        $orderReference,
+        $transactionStatus
     ): ?\Illuminate\Http\JsonResponse
     {
-        Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
+        Log::info("Метод startAddCostCardCreat вызван с UID: " . $uid);
+        $messageAdmin = "Метод startAddCostCardCreat вызван с UID: " . $uid;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         // Получаем UID из MemoryOrderChangeController
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -4713,9 +4883,8 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
             return null;
         }
-        $newOrder = $order->replicate();
-        // Сохраняем копию в базе данных
-        $newOrder->save();
+
+
 
         $city = $order->city;
         Log::info("Город заказа: " . $city);
@@ -4806,6 +4975,7 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::info("Город изменен с {$originalCity} на {$city}");
 
+
         $connectAPI = (new AndroidTestOSMController)->connectAPIAppOrder($city, $application);
         $authorizationChoiceArr = (new AndroidTestOSMController)->authorizationChoiceApp($pay_method, $city, $connectAPI, $application);
 
@@ -4821,11 +4991,10 @@ class UniversalAndroidFunctionController extends Controller
 
         $typeAdd = 20;
         if ($order->attempt_20 != null) {
-            $parameter['add_cost'] = $order->add_cost + $typeAdd * ($order->attempt_20 + 1);
+            $parameter['add_cost'] = (int)$order->add_cost + $typeAdd * ((int) $order->attempt_20 + 1);
         } else {
-            $parameter['add_cost'] = $order->add_cost + $typeAdd;
+            $parameter['add_cost'] = (int) $order->add_cost + $typeAdd;
         }
-
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -4906,6 +5075,18 @@ class UniversalAndroidFunctionController extends Controller
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
                 Log::info("Успешный ответ API с кодом 200");
+
+                $order->wfp_order_id = null;
+                $order->wfp_status_pay = "AddCost";
+                $order->save();
+
+                $newOrder = $order->replicate();
+                // Сохраняем копию в базе данных
+
+                $newOrder->save();
+
+
+
                 (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,
                     $uid_Double,
@@ -4928,15 +5109,26 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
 
+                $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $order_old_uid)-> get();
+                if($wfpInvoices != null) {
+                    foreach ($wfpInvoices as $value) {
+                        $wfpInvoice = WfpInvoice::where("dispatching_order_uid", $value->dispatching_order_uid)->first();
+                        $wfpInvoice->dispatching_order_uid = $order_new_uid;
+                        $wfpInvoice->save();
+                    }
+                }
+                $wfpInvoice = new WfpInvoice();
+                $wfpInvoice->dispatching_order_uid = $newOrder->dispatching_order_uid;
+                $wfpInvoice->orderReference = $orderReference;
+                $wfpInvoice->amount = "20";
+                $wfpInvoice->transactionStatus = $transactionStatus;
+                $wfpInvoice->save();
+
                 $newOrder->dispatching_order_uid = $order_new_uid;
                 $newOrder->auto = null;
-
+                $newOrder->wfp_order_id = $orderReference;
                 $newOrder->web_cost = $responseArr["order_cost"];
-
-                if ($typeAdd == 20) {
-                    $newOrder->attempt_20 += 1;
-                }
-
+                $newOrder->attempt_20 = (int)$newOrder->attempt_20 + 1;
                 $newOrder->closeReason = "-1";
                 $newOrder->closeReasonI = "0";
                 $newOrder->save();
@@ -4962,9 +5154,6 @@ class UniversalAndroidFunctionController extends Controller
 
                     Log::debug("******************************");
 
-
-
-                    $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
                     $doubleOrder = new DoubleOrder();
                     $doubleOrder->responseBonusStr = json_encode($responseBonusArr);
                     $doubleOrder->responseDoubleStr = json_encode($responseDoubleArr);
@@ -4995,21 +5184,7 @@ class UniversalAndroidFunctionController extends Controller
                     (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                     StartNewProcessExecution::dispatch($doubleOrder->id);
-//                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 
-
-                }
-                if (isset($responseBonusArr)
-                    && !isset($responseBonusArr["Message"])
-                    && $responseDoubleArr == null
-                ) {
-                    //60 секунд на оплату водителю на карту
-                    Log::debug("StartStatusPaymentReview " . $responseFinal);
-                    Log::debug("dispatching_order_uid " .  $order_new_uid);
-
-                    $messageAdmin = "StartStatusPaymentReview (60 секунд на оплату водителю на карту startAddCostCardUpdate): " . json_encode($responseFinal);
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
-                    StartStatusPaymentReview::dispatch ($order_new_uid);
                 }
 
                 (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);

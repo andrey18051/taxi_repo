@@ -602,7 +602,12 @@ class WfpController extends Controller
                     $order->wfp_status_pay = $data['transactionStatus'];
                     $order->save();
                 } else {
-                    Log::error("Order not found for wfp_order_id: $orderReference");
+                    $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                    if ($order) {
+                        $order->wfp_status_pay = $data['transactionStatus'];
+                        $order->save();
+                    }
+
                 }
             } else {
                 Log::error("No response received from WayforPay API");
