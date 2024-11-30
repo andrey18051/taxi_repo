@@ -30,7 +30,7 @@ class WfpController extends Controller
 {
     private static function orderInfo($orderReference): string
     {
-        $orderwebs = WfpInvoice::where("wfp_order_id", $orderReference)->first();
+        $orderwebs = WfpInvoice::where("orderReference", $orderReference)->first();
         if ($orderwebs) {
             $params = $orderwebs->toArray();
 
@@ -422,19 +422,33 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS1";
+                }
+
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS2";
+                }
+
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS4";
+                }
         }
 
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
@@ -501,19 +515,31 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS1";
+                }
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS2";
+                }
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS4";
+                }
         }
 
         $params = [
@@ -594,12 +620,15 @@ class WfpController extends Controller
             $response = Http::post('https://api.wayforpay.com/api', $params);
             Log::debug(["checkStatus " . 'response' => $response->body()]);
 
+            $messageAdmin = "checkStatus " . 'response' . $response->body();
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
             if (isset($response)) {
                 $data = json_decode($response->body(), true);
-                $order = WfpInvoice::where("wfp_order_id", $orderReference)->first();
+                $order = WfpInvoice::where("orderReference", $orderReference)->first();
 
                 if ($order) {
-                    $order->wfp_status_pay = $data['transactionStatus'];
+                    $order->transactionStatus = $data['transactionStatus'];
                     $order->save();
                 } else {
                     $order = Orderweb::where("wfp_order_id", $orderReference)->first();
@@ -733,7 +762,7 @@ class WfpController extends Controller
                     $params = [
                         "merchantAccount" => $merchantAccount,
                         "orderReference" => $value->orderReference,
-                        "amount" => $amount,
+                        "amount" => $value->amount,
                         "currency" => "UAH",
                     ];
 
@@ -741,12 +770,13 @@ class WfpController extends Controller
                         "transactionType" => "REFUND",
                         "merchantAccount" => $merchantAccount,
                         "orderReference" => $value->orderReference,
-                        "amount" => $amount,
+                        "amount" => $value->amount,
                         "currency" => "UAH",
                         "comment" => "Повернення платежу",
                         "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
                         "apiVersion" => 1
                     ];
+
                     RefundSettleCardPayJob::dispatch($params, $orderReference);
                 }
 
@@ -802,9 +832,9 @@ class WfpController extends Controller
             if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
 
-                $order = WfpInvoice::where("wfp_order_id", $orderReference)->first();
+                $order = WfpInvoice::where("orderReference", $responseArray['orderReference'])->first();
                 if ($order) {
-                    $order->wfp_status_pay = $responseArray['transactionStatus'];
+                    $order->transactionStatus = $responseArray['transactionStatus'];
                     $order->save();
                 }
 
@@ -860,7 +890,7 @@ class WfpController extends Controller
                     $params = [
                         "merchantAccount" => $merchantAccount,
                         "orderReference" => $value->orderReference,
-                        "amount" => $amount,
+                        "amount" => $value->amount,
                         "currency" => "UAH",
                     ];
 
@@ -868,7 +898,7 @@ class WfpController extends Controller
                         "transactionType" => "SETTLE",
                         "merchantAccount" => $merchantAccount,
                         "orderReference" => $value->orderReference,
-                        "amount" => $amount,
+                        "amount" => $value->amount,
                         "currency" => "UAH",
                         "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
                         "apiVersion" => 1
@@ -921,19 +951,34 @@ class WfpController extends Controller
                 $merchant = City_PAS1::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS1";
+                }
+
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS2";
+                }
+
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
                 $merchantAccount = $merchant->wfp_merchantAccount;
                 $secretKey = $merchant->wfp_merchantSecretKey;
-                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+                if($city != "OdessaTest") {
+                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+                } else {
+                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS4";
+                }
+
         }
 
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
@@ -1226,15 +1271,27 @@ class WfpController extends Controller
             } else {
                 $connectAPI = $orderweb->server;
                 $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-                Http::withHeaders([
+                $resp = Http::withHeaders([
                     "Authorization" => $authorization,
                     "X-WO-API-APP-ID" => $identificationId
                 ])->put($url);
+                $messageAdmin = "Запрос отмены безналичного заказа  $uid url: $url";
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                $messageAdmin = "Ответ по запросу безналичного заказа  $uid url: " . json_decode($resp, true);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
                 $url = $connectAPI . '/api/weborders/cancel/' .  $uid_double;
-                Http::withHeaders([
+                $resp = Http::withHeaders([
                     "Authorization" => $authorization,
                     "X-WO-API-APP-ID" => $identificationId
                 ])->put($url);
+
+                $messageAdmin = "Запрос отмены наличного дубля заказа $uid_double url: $url";
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                $messageAdmin = "Ответ по запросу отмены дубля заказа  $uid_double url: " . json_decode($resp, true);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
             }
         }
     }
@@ -1340,6 +1397,9 @@ class WfpController extends Controller
         $wfp_order_id = $order->wfp_order_id;
         $connectAPI = $order->server;
 
+        $messageAdmin = "function wfpStatus запущена для  $bonusOrder, $doubleOrder, $bonusOrderHold ";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
                 $application = "PAS1";
@@ -1377,21 +1437,6 @@ class WfpController extends Controller
 
         $orderReference = $wfp_order_id;
 
-//        $response_st = self::checkStatus(
-//            $application,
-//            $city,
-//            $orderReference
-//        );
-//        $responseArray = $response_st->json();
-//        if ($responseArray['transactionStatus'] == 'WaitingAuthComplete') {
-//            Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
-//
-//            $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-//            $order->wfp_status_pay = $responseArray['transactionStatus'];
-//            $order->save();
-
-
-
         $autorization = self::autorization($connectAPI);
         $identificationId = $order->comment;
         $amount = $order->web_cost;
@@ -1415,6 +1460,9 @@ class WfpController extends Controller
             $order_car_info_bonusOrder = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
         }
+        $messageAdmin = "function wfpStatus closeReason_bonusOrder: $closeReason_bonusOrder";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $doubleOrder,
             $connectAPI,
@@ -1433,7 +1481,8 @@ class WfpController extends Controller
             $order_car_info_doubleOrder = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
         }
-
+        $messageAdmin = "function wfpStatus closeReason_doubleOrder: $closeReason_doubleOrder";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrderHold,

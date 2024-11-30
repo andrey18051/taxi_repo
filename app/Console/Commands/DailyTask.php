@@ -22,7 +22,7 @@ class DailyTask extends Command
     public function handle()
     {
 
-        $message = "Запуск задачи проверки холдов и перепроверки статусов заказов в работе";
+        $message = "Запуск задачи проверки холдов и перепроверки статусов заказов в работе на рабочем сервере";
         (new DailyTaskController)->sentTaskMessage($message);
         (new UIDController())->UIDStatusReviewDaily();
         (new DailyTaskController)->orderCardWfpReviewTask();

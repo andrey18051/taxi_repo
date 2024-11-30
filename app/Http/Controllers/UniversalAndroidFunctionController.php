@@ -211,9 +211,6 @@ class UniversalAndroidFunctionController extends Controller
             $updateTime,
             $uid_history
         );
-        $messageAdmin = "newStatusBonus + $newStatusBonus";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
 
 //        return "";
         $lastStatusBonusTime = $lastTimeUpdate;
@@ -232,8 +229,7 @@ class UniversalAndroidFunctionController extends Controller
             $uid_history
         );
 
-        $messageAdmin = "newStatusDouble + $newStatusDouble";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
 
 //        return "";
 
@@ -2683,7 +2679,8 @@ class UniversalAndroidFunctionController extends Controller
         if ($newStatus == "Canceled") {
             $message = "закрыт";
         }
-
+        $messageAdmin = "скfunction newStatus  $orderType: " . $newStatus;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         self::ordersExecStatusHistory(
             $order,
@@ -2909,7 +2906,11 @@ class UniversalAndroidFunctionController extends Controller
                         return true;
                     } else {
                         Log::debug("Transaction status is not Approved or WaitingAuthComplete.");
-                        $order->transactionStatus = "Canceled_One_Min";
+                        if($order->transactionStatus != "Approved"
+                            || $order->transactionStatus != "WaitingAuthComplete") {
+                            $order->transactionStatus = "Canceled_One_Min";
+                        }
+
                         return true;
                     }
                 } else {
@@ -3306,6 +3307,9 @@ class UniversalAndroidFunctionController extends Controller
     {
         Log::info("orderReview $bonusOrder, $doubleOrder, $bonusOrderHold");
         self::checkAndRestoreDatabaseConnection();
+
+        $messageAdmin = "function orderReview запущена для  $bonusOrder, $doubleOrder, $bonusOrderHold ";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
 
@@ -3763,7 +3767,7 @@ class UniversalAndroidFunctionController extends Controller
             $locationService = new OpenStreetMapHelper();
 
 // Название места для поиска
-            $placeName = $to + " " + $to_number;
+            $placeName = $to . " " . $to_number;
 
 // Вызов метода для получения координат
             $coordinates = $locationService->getCoordinatesByPlaceName($placeName);
@@ -4045,28 +4049,28 @@ class UniversalAndroidFunctionController extends Controller
         $user = User::where('email', $email)->first();
 //        dd($application);
 
-        $city = "Kyiv City";
+
 //        switch ($cityApp) {
 //            case "PAS1":
 //                 $city = "";
 //                break;
 //            case "PAS2":
-//                $merchantInfo = City_PAS2::where("name", $city)->first();
+//                $merchantInfo = City_PAS2::where("name", $cityApp)->first();
 //                break;
 //            default:
-//                $merchantInfo = City_PAS4::where("name", $city)->first();
+//                $merchantInfo = City_PAS4::where("name", $cityApp)->first();
 //        }
 
 
         switch ($application) {
             case "PAS1":
-                $merchantInfo = City_PAS1::where("name", $city)->first();
+                $merchantInfo = City_PAS1::where("name", $cityApp)->first();
                 break;
             case "PAS2":
-                $merchantInfo = City_PAS2::where("name", $city)->first();
+                $merchantInfo = City_PAS2::where("name", $cityApp)->first();
                 break;
             default:
-                $merchantInfo = City_PAS4::where("name", $city)->first();
+                $merchantInfo = City_PAS4::where("name", $cityApp)->first();
         }
 //dd( $merchantAccount);
         $response = [];
@@ -4697,7 +4701,8 @@ class UniversalAndroidFunctionController extends Controller
         $uid,
         $uid_Double,
         $pay_method,
-        $orderReference
+        $orderReference,
+        $city
     ): ?\Illuminate\Http\JsonResponse {
         $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("MemoryOrderChangeController возвращает UID: " . $uid);
@@ -4733,74 +4738,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::info("Приложение выбрано: " . $application);
 
         // Переписываем город для определенных случаев
-        $originalCity = $city;
-        switch ($originalCity) {
-            case "city_kiev":
-                $city = "Kyiv City";
-                break;
-            case "city_cherkassy":
-                $city = "Cherkasy Oblast";
-                break;
-            case "city_odessa":
-                $city = "Odessa";
-                break;
-            case "city_zaporizhzhia":
-                $city = "Zaporizhzhia";
-                break;
-            case "city_dnipro":
-                $city = "Dnipropetrovsk Oblast";
-                break;
-            case "city_lviv":
-                $city = "Lviv";
-                break;
-            case "city_ivano_frankivsk":
-                $city = "Ivano_frankivsk";
-                break;
-            case "city_vinnytsia":
-                $city = "Vinnytsia";
-                break;
-            case "city_poltava":
-                $city = "Poltava";
-                break;
-            case "city_sumy":
-                $city = "Sumy";
-                break;
-            case "city_kharkiv":
-                $city = "Kharkiv";
-                break;
-            case "city_chernihiv":
-                $city = "Chernihiv";
-                break;
-            case "city_rivne":
-                $city = "Rivne";
-                break;
-            case "city_ternopil":
-                $city = "Ternopil";
-                break;
-            case "city_khmelnytskyi":
-                $city = "Khmelnytskyi";
-                break;
-            case "city_zakarpattya":
-                $city = "Zakarpattya";
-                break;
-            case "city_zhytomyr":
-                $city = "Zhytomyr";
-                break;
-            case "city_kropyvnytskyi":
-                $city = "Kropyvnytskyi";
-                break;
-            case "city_mykolaiv":
-                $city = "Mykolaiv";
-                break;
-            case "city_chernivtsi":
-                $city = "Сhernivtsi";
-                break;
-            case "city_lutsk":
-                $city = "Lutsk";
-                break;
-            default:
-                $city = "all";
-        }
+
 
         $startTime = time(); // Время начала выполнения скрипта
         $maxDuration = 60; // 60 секундах

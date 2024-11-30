@@ -592,7 +592,8 @@ class UIDController extends Controller
                 date_default_timezone_set('Europe/Kiev');
 
                 foreach ($orderUpdate as $value) {
-                    $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
+                    $uid_history = Uid_history::where("uid_bonusOrderHold", $value['dispatching_order_uid'])->first();
+                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
                     $storedData = $value["auto"];
 
                     $dataDriver = json_decode($storedData, true);
@@ -634,7 +635,7 @@ class UIDController extends Controller
                         'comment_info' => $value["comment_info"],
                         'extra_charge_codes' => $value["extra_charge_codes"],
                         'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
-                        'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
+                        'dispatching_order_uid_Double' => $dispatchingOrderUidDouble,
                         'pay_method' => $value["pay_system"],
                         'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
                     ];
