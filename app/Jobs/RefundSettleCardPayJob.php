@@ -35,6 +35,6 @@ class RefundSettleCardPayJob implements ShouldQueue
     public function handle()
     {
 
-        (new WfpController)->refundJob($this->params, $this->orderReference);
+        (new WfpController)->refundSettleJob($this->params, $this->orderReference);
     }
 }

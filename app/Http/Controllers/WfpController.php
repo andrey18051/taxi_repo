@@ -781,32 +781,33 @@ class WfpController extends Controller
                 }
 
 
-            } else {
-                $params = [
-                    "merchantAccount" => $merchantAccount,
-                    "orderReference" => $orderReference,
-                    "amount" => $amount,
-                    "currency" => "UAH",
-                ];
-
-                $params = [
-                    "transactionType" => "REFUND",
-                    "merchantAccount" => $merchantAccount,
-                    "orderReference" => $orderReference,
-                    "amount" => $amount,
-                    "currency" => "UAH",
-                    "comment" => "Повернення платежу",
-                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
-                    "apiVersion" => 1
-                ];
-                RefundSettleCardPayJob::dispatch($params, $orderReference);
             }
+//            else {
+//                $params = [
+//                    "merchantAccount" => $merchantAccount,
+//                    "orderReference" => $orderReference,
+//                    "amount" => $amount,
+//                    "currency" => "UAH",
+//                ];
+//
+//                $params = [
+//                    "transactionType" => "REFUND",
+//                    "merchantAccount" => $merchantAccount,
+//                    "orderReference" => $orderReference,
+//                    "amount" => $amount,
+//                    "currency" => "UAH",
+//                    "comment" => "Повернення платежу",
+//                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
+//                    "apiVersion" => 1
+//                ];
+//                RefundSettleCardPayJob::dispatch($params, $orderReference);
+//            }
         }
 
 
 
     }
-    public function refundJob($params, $orderReference)
+    public function refundSettleJob($params, $orderReference)
     {
         $startTime = time(); // Время начала выполнения скрипта
         $maxDuration = 72 * 60 * 60; // 72 часа в секундах
@@ -820,7 +821,7 @@ class WfpController extends Controller
             $responseArray = $response->json(); // Предполагаем, что ответ в формате JSON
             Log::debug("refund responseArray", $responseArray);
 
-            (new DailyTaskController)->sentTaskMessage("Попытка Refunded холда: " . $response);
+            (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . $response);
             // Проверка статуса транзакции
             // || $responseArray['transactionStatus'] == 'Declined'
             if($responseArray['reasonCode'] == '1115') {
@@ -829,8 +830,15 @@ class WfpController extends Controller
             if($responseArray['reasonCode'] == '1126') {
                 break;
             }
-            if ($responseArray['transactionStatus'] == 'Refunded' || $responseArray['transactionStatus'] == 'Voided') {
+            if($responseArray['reasonCode'] == '1130') {
+                break;
+            }
+            if (trim(strtolower($responseArray['transactionStatus'])) == 'refunded' ||
+                trim(strtolower($responseArray['transactionStatus'])) == 'voided' ||
+                trim(strtolower($responseArray['transactionStatus'])) == 'approved') {
                 Log::debug("refund Статус транзакции: " . $responseArray['transactionStatus']);
+                $messageAdmin = "refund Статус транзакции: " . $responseArray['transactionStatus'];
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order = WfpInvoice::where("orderReference", $responseArray['orderReference'])->first();
                 if ($order) {
@@ -847,14 +855,14 @@ class WfpController extends Controller
             } elseif ($responseArray['transactionStatus']) {
                 // Проверяем, прошло ли более 72 часов
                 if (time() - $startTime > $maxDuration) {
-                    Log::debug("refund Превышен лимит времени в 72 часа. Прекращение попыток.");
+                    Log::debug("refundSettleJob Превышен лимит времени в 72 часа. Прекращение попыток.");
                     break;
                 }
-                Log::debug("refund Статус транзакции: Declined. Повторная попытка через 15 минут...");
+                Log::debug("refundSettleJob Статус транзакции: Declined. Повторная попытка через 15 минут...");
                 sleep(900); // Пауза на 900 секунд (15 минут)
             }
         }
-        Log::debug("refund CHECK_STATUS:", ['response' => $response->body()]);
+        Log::debug("refundSettleJob CHECK_STATUS:", ['response' => $response->body()]);
     }
 
     public function settle(
@@ -907,25 +915,26 @@ class WfpController extends Controller
                 }
 
 
-            } else {
-                $params = [
-                    "merchantAccount" => $merchantAccount,
-                    "orderReference" => $orderReference,
-                    "amount" => $amount,
-                    "currency" => "UAH",
-                ];
-
-                $params = [
-                    "transactionType" => "SETTLE",
-                    "merchantAccount" => $merchantAccount,
-                    "orderReference" => $orderReference,
-                    "amount" => $amount,
-                    "currency" => "UAH",
-                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
-                    "apiVersion" => 1
-                ];
-                RefundSettleCardPayJob::dispatch($params, $orderReference);
             }
+//            else {
+//                $params = [
+//                    "merchantAccount" => $merchantAccount,
+//                    "orderReference" => $orderReference,
+//                    "amount" => $amount,
+//                    "currency" => "UAH",
+//                ];
+//
+//                $params = [
+//                    "transactionType" => "SETTLE",
+//                    "merchantAccount" => $merchantAccount,
+//                    "orderReference" => $orderReference,
+//                    "amount" => $amount,
+//                    "currency" => "UAH",
+//                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
+//                    "apiVersion" => 1
+//                ];
+//                RefundSettleCardPayJob::dispatch($params, $orderReference);
+//            }
         }
     }
 

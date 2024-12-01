@@ -38,13 +38,7 @@ class StartNewProcessExecution implements ShouldQueue
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
         (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
         Log::debug("StartNewProcessExecution job finished successfully for order ID: {$this->orderId}");
-//        try {
-//
-//        } catch (\Exception $e) {
-//            $messageAdmin = "StartNewProcessExecution job failed for order ID: {$this->orderId} with error: " . $e->getMessage();
-//            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-//            Log::error("StartNewProcessExecution job failed for order ID: {$this->orderId} with error: " . $e->getMessage());
-//        }
+
     }
 }
 

@@ -5306,6 +5306,7 @@ class AndroidTestOSMController extends Controller
                 $city = "OdessaTest";
                 break;
         }
+        $uid = (new MemoryOrderChangeController)->show($uid);
         Log::debug("**********************************************************");
         Log::debug("webordersCancelDouble uid $uid");
         Log::debug("webordersCancelDouble uid_Double  $uid_Double");

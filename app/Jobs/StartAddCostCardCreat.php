@@ -62,7 +62,8 @@ class StartAddCostCardCreat implements ShouldQueue
             $this->uid_Double,
             $this->pay_method,
             $this->orderReference,
-            $this->transactionStatus
+            $this->transactionStatus,
+            $this->city
         );
     }
 }
