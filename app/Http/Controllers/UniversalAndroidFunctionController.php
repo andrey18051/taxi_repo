@@ -3999,6 +3999,7 @@ class UniversalAndroidFunctionController extends Controller
         $amount,
         $uid
     ) {
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $wfp_invoice = new WfpInvoice();
         $wfp_invoice->dispatching_order_uid = $uid;
         $wfp_invoice->orderReference = $order_id;

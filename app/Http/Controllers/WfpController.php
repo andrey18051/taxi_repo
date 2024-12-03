@@ -828,6 +828,17 @@ class WfpController extends Controller
                 break;
             }
             if($responseArray['reasonCode'] == '1126') {
+                $order = WfpInvoice::where("orderReference", $responseArray['orderReference'])->first();
+                if ($order) {
+                    $order->transactionStatus = $responseArray['transactionStatus'];
+                    $order->save();
+                }
+
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                if ($order) {
+                    $order->wfp_status_pay = $responseArray['transactionStatus'];
+                    $order->save();
+                }
                 break;
             }
             if($responseArray['reasonCode'] == '1130') {
