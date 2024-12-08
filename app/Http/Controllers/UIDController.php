@@ -593,7 +593,7 @@ class UIDController extends Controller
 
                 foreach ($orderUpdate as $value) {
                     $uid_history = Uid_history::where("uid_bonusOrderHold", $value['dispatching_order_uid'])->first();
-                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+//                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
                     $storedData = $value["auto"];
 
                     $dataDriver = json_decode($storedData, true);

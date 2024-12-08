@@ -5481,10 +5481,11 @@ class AndroidTestOSMController extends Controller
 
             $connectAPI = $orderweb_uid->server;
             if ($uid_history) {
+                $uid_history->bonus_status = null;
                 //Запрос статуса по ветке
                 if ($uid_history->bonus_status == null) {
                     //Запрос по окончанию вилки статуса безнала
-                    sleep(5);
+
                     $authorization = (new UniversalAndroidFunctionController)
                         ->authorizationApp($city, $connectAPI, $application);
                     $url = $connectAPI . '/api/weborders/' . $uid_history->uid_bonusOrder;
@@ -5497,22 +5498,20 @@ class AndroidTestOSMController extends Controller
                         ])->get($url);
 
                         // Логируем тело ответа
-                        Log::debug(" 2 historyUIDStatus postRequestHTTP: " . $response_bonus->body());
+//                        Log::debug(" 2 historyUIDStatus postRequestHTTP: " . json_decode($response_bonus, true));
+
 
                         // Проверяем успешность ответа
                         if ($response_bonus->successful()) {
                             // Обрабатываем успешный ответ
                             $response_bonus_arr = json_decode($response_bonus, true);
+
+                            $messageAdmin = "Опрос статуса безналичного заказа $uid_history->uid_bonusOrder Ответ:" . print_r($response_bonus_arr, true);
+                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
                             if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
                                 || $response_bonus_arr["close_reason"] == -1) {
                                 //Безнал по окончанию вилки выполнен или в работе
-//                                $nameFrom = $response_bonus_arr['route_address_from']['name']
-//                                    . " " . $response_bonus_arr['route_address_from']['number'];
-//                                $nameTo = $response_bonus_arr['route_address_to']['name']
-//                                    . " " . $response_bonus_arr['route_address_to']['number'];
-//
-//                                $orderweb_uid->routefrom = $nameFrom;
-//                                $orderweb_uid->routeto = $nameTo;
 
                                 if ($response_bonus_arr["order_car_info"] != null) {
                                     $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
@@ -5540,13 +5539,9 @@ class AndroidTestOSMController extends Controller
                                         // Обрабатываем успешный ответ
                                         $response_arr_double = json_decode($response_double, true);
                                         Log::debug("4 $url: ", $response_arr_double);
-//                                        $nameFrom = $response_arr_double['route_address_from']['name']
-//                                            . " " . $response_arr_double['route_address_from']['number'];
-//                                        $nameTo = $response_arr_double['route_address_to']['name']
-//                                            . " " . $response_arr_double['route_address_to']['number'];
-//
-//                                        $orderweb_uid->routefrom = $nameFrom;
-//                                        $orderweb_uid->routeto = $nameTo;
+
+                                        $messageAdmin = "Опрос статуса наличного дублирующего заказ $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
+                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                                         if ($response_arr_double["order_car_info"] != null) {
                                             $orderweb_uid->auto = $response_arr_double["order_car_info"];
@@ -5560,24 +5555,68 @@ class AndroidTestOSMController extends Controller
                                         Log::error("5 historyUIDStatus Request failed with status: "
                                             . $response_double->status());
                                         Log::error("6 historyUIDStatus Response: " . $response_double->body());
-                                        return null;
+                                        $response_arr_double = json_decode($response_double, true);
+                                        $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
+                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                                        return [
+                                            "execution_status" => "failed_status",
+                                            "order_car_info" => null,
+                                            "driver_phone" => null,
+                                        ];
                                     }
                                 } catch (\Exception $e) {
                                     // Обработка исключений
                                     Log::error("7 historyUIDStatus Exception caught: " . $e->getMessage());
-                                    return null;
+
+                                    $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . $e->getMessage();
+                                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                                    return [
+                                        "execution_status" => "failed_status",
+                                        "order_car_info" => null,
+                                        "driver_phone" => null,
+                                    ];
                                 }
                             }
                         } else {
                             // Логируем ошибки в случае неудачного запроса
                             Log::error("11 historyUIDStatus Request failed with status: " . $response_bonus->status());
                             Log::error("12 historyUIDStatus Response: " . $response_bonus->body());
-                            return null;
+                            $response_arr_bonus = json_decode($response_bonus, true);
+                            $messageAdmin = "Ошибка опроса статуса безналичного заказа 11 $uid_history->uid_bonusOrder Ответ:" . print_r($response_arr_bonus, true);
+                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+
+                            return [
+                                "execution_status" => "failed_status",
+                                "order_car_info" => null,
+                                "driver_phone" => null,
+                            ];
                         }
                     } catch (\Exception $e) {
                         // Обработка исключений
-                        Log::error("13 historyUIDStatus Exception caught: " . $e->getMessage());
-                        return null;
+                        Log::error("13 historyUIDStatus Exception caught: " . print_r($e->getMessage(), true));
+
+
+                        $messageAdmin = "Ошибка опроса статуса безналичного заказа 13 $uid_history->uid_bonusOrder Ответ: ";
+
+                        // Проверяем тип сообщения
+                        if (is_array($e->getMessage())) {
+                            $messageAdmin .= print_r($e->getMessage(), true);
+                        } elseif (is_object($e->getMessage())) {
+                            $messageAdmin .= json_encode($e->getMessage());
+                        } else {
+                            $messageAdmin .= (string)$e->getMessage();
+                        }
+                        Log::error("14 historyUIDStatus Exception caught: " . $messageAdmin);
+                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                        return [
+                            "execution_status" => "failed_status",
+                            "order_car_info" => null,
+                            "driver_phone" => null,
+                        ];
                     }
                 } else {
                     $response_bonus = $uid_history->bonus_status;
@@ -5587,13 +5626,7 @@ class AndroidTestOSMController extends Controller
                     $response_bonus_arr = json_decode($response_bonus, true);
                     if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
                         || $response_bonus_arr["close_reason"] == -1) {
-//                        $nameFrom = $response_bonus_arr['route_address_from']['name']
-//                            . " " . $response_bonus_arr['route_address_from']['number'];
-//                        $nameTo = $response_bonus_arr['route_address_to']['name']
-//                            . " " . $response_bonus_arr['route_address_to']['number'];
-//
-//                        $orderweb_uid->routefrom = $nameFrom;
-//                        $orderweb_uid->routeto = $nameTo;
+
 
                         if ($response_bonus_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
@@ -5610,11 +5643,7 @@ class AndroidTestOSMController extends Controller
                         // Обрабатываем успешный ответ
                         $response_double_arr = json_decode($response_double, true);
                         Log::debug("responseArr double: ", $response_double_arr);
-//                        $nameFrom = $response_double_arr['route_address_from']['name'] . " " . $response_double_arr['route_address_from']['number'];
-//                        $nameTo = $response_double_arr['route_address_to']['name'] . " " . $response_double_arr['route_address_to']['number'];
-//
-//                        $orderweb_uid->routefrom = $nameFrom;
-//                        $orderweb_uid->routeto = $nameTo;
+
 
                         if ($response_double_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_double_arr["order_car_info"];
@@ -5644,11 +5673,6 @@ class AndroidTestOSMController extends Controller
                         // Обрабатываем успешный ответ
                         $response_arr = json_decode($response, true);
                         Log::debug("$url: ", $response_arr);
-//                        $nameFrom = $response_arr['route_address_from']['name'] . " " . $response_arr['route_address_from']['number'];
-//                        $nameTo = $response_arr['route_address_to']['name'] . " " . $response_arr['route_address_to']['number'];
-//
-//                        $orderweb_uid->routefrom = $nameFrom;
-//                        $orderweb_uid->routeto = $nameTo;
 
                         if ($response_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_arr["order_car_info"];
@@ -5661,12 +5685,21 @@ class AndroidTestOSMController extends Controller
                         // Логируем ошибки в случае неудачного запроса
                         Log::error("historyUIDStatus Request failed with status: " . $response->status());
                         Log::error("historyUIDStatus Response: " . $response->body());
-                        return null;
+
+                        return [
+                            "execution_status" => "failed_status",
+                            "order_car_info" => null,
+                            "driver_phone" => null,
+                        ];
                     }
                 } catch (\Exception $e) {
                     // Обработка исключений
                     Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
-                    return null;
+                    return [
+                        "execution_status" => "failed_status",
+                        "order_car_info" => null,
+                        "driver_phone" => null,
+                    ];
                 }
 
             }
