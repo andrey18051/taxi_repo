@@ -5516,7 +5516,7 @@ class AndroidTestOSMController extends Controller
                                 if ($response_bonus_arr["order_car_info"] != null) {
                                     $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
                                 }
-
+                                $orderweb_uid->closeReason = $response_bonus_arr["close_reason"];
                                 $orderweb_uid->save();
                                 return $response_bonus;
                             } else {
@@ -5546,7 +5546,7 @@ class AndroidTestOSMController extends Controller
                                         if ($response_arr_double["order_car_info"] != null) {
                                             $orderweb_uid->auto = $response_arr_double["order_car_info"];
                                         }
-
+                                        $orderweb_uid->closeReason = $response_arr_double["close_reason"];
                                         $orderweb_uid->save();
                                         return $response_double;
 
@@ -5631,7 +5631,7 @@ class AndroidTestOSMController extends Controller
                         if ($response_bonus_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
                         }
-
+                        $orderweb_uid->closeReason = $response_bonus_arr["close_reason"];
                         $orderweb_uid->save();
                         return $response_bonus;
                     } else {
@@ -5648,7 +5648,7 @@ class AndroidTestOSMController extends Controller
                         if ($response_double_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_double_arr["order_car_info"];
                         }
-
+                        $orderweb_uid->closeReason = $response_double_arr["close_reason"];
                         $orderweb_uid->save();
                         return $response_double;
                     }
@@ -5677,7 +5677,7 @@ class AndroidTestOSMController extends Controller
                         if ($response_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_arr["order_car_info"];
                         }
-
+                        $orderweb_uid->closeReason = $response_arr["close_reason"];
                         $orderweb_uid->save();
                         return $response;
 
