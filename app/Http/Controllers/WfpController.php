@@ -489,7 +489,8 @@ class WfpController extends Controller
             "productPrice" => [$amount],
             "productCount" => [1],
 //            "paymentSystems" => "card;privat24;googlePay;applePay",
-            "paymentSystems" => "card;privat24;",
+            "paymentSystems" => "card;privat24;googlePay;",
+//            "paymentSystems" => "card;privat24;",
             "clientEmail" => $clientEmail,
             "clientPhone" => $clientPhone,
             "notifyMethod" => "bot"
@@ -805,6 +806,55 @@ class WfpController extends Controller
         }
 
 
+
+    }
+
+
+    public function refundVerifyCards(
+        $application,
+        $city,
+        $orderReference,
+        $amount
+    ) {
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+        }
+
+        if($merchantAccount != null) {
+
+            $params = [
+                "merchantAccount" => $merchantAccount,
+                "orderReference" => $orderReference,
+                "amount" => $amount,
+                "currency" => "UAH",
+            ];
+
+            $params = [
+                "transactionType" => "REFUND",
+                "merchantAccount" => $merchantAccount,
+                "orderReference" => $orderReference,
+                "amount" => $amount,
+                "currency" => "UAH",
+                "comment" => "Повернення платежу",
+                "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
+                "apiVersion" => 1
+            ];
+
+            RefundSettleCardPayJob::dispatch($params, $orderReference);
+        }
 
     }
     public function refundSettleJob($params, $orderReference)
