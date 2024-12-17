@@ -4770,7 +4770,8 @@ class AndroidTestOSMController extends Controller
                     $responseDoubleArr["url"] = $url;
                     $responseDoubleArr["parameter"] = $parameter;
                 } else {
-                    $messageAdmin = "orderSearchMarkersVisicom: дубль для  $responseDoubleArr не создался";
+
+                    $messageAdmin = "orderSearchMarkersVisicom: дубль  не создался";
                     (new MessageSentController)->sentMessageAdmin($messageAdmin);
                     $responseDoubleArr = null;
                 }

@@ -1507,3 +1507,7 @@ Route::get('/startNewProcessExecutionStatusEmu/{id}', [UniversalAndroidFunctionC
 
 Route::get('/cancelOnlyCardPayUid/{id}', [UniversalAndroidFunctionController::class, 'cancelOnlyCardPayUid'])
     ->name('cancelOnlyCardPayUid');
+
+Route::get('/lastAddressUser/{email}/{city}/{app}', [UniversalAndroidFunctionController::class, 'lastAddressUser'])
+    ->name('lastAddressUser');
+
