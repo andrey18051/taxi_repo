@@ -1477,6 +1477,12 @@ Route::get('help-infos', [HelpInfoController::class, 'helpInfos']);
 Route::get('/android/startAddCostUpdate/{uid}/{typeAdd}', [UniversalAndroidFunctionController::class, 'startAddCostUpdate'])
     ->name('startAddCostUpdate');
 
+Route::get('/android/startAddCostWithAddBottomUpdate/{uid}/{addCost}', [UniversalAndroidFunctionController::class, 'startAddCostWithAddBottomUpdate'])
+    ->name('startAddCostWithAddBottomUpdate');
+
+Route::get('/android/startAddCostBottomUpdate/{uid}/{addCost}', [UniversalAndroidFunctionController::class, 'startAddCostBottomUpdate'])
+    ->name('startAddCostBottomUpdate');
+
 Route::get('/android/startAddCostCardUpdate/{uid}/{uid_Double}/{pay_method}/{order_id}/{city}', [UniversalAndroidFunctionController::class, 'startAddCostCardUpdate'])
     ->name('startAddCostCardUpdate');
 

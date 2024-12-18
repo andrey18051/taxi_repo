@@ -156,6 +156,7 @@ class AndroidTestOSMController extends Controller
                 if ($response_uid->successful() && $response_uid->status() == 200) {
                     $response_arr = json_decode($response_uid->body(), true);
                     if ($response_arr['close_reason'] == 1) {
+
                         Log::debug("repeatCancel: close_reason is 1, exiting.");
                         return;
                     } else {
@@ -5352,6 +5353,9 @@ class AndroidTestOSMController extends Controller
                     $connectAPI,
                     $uid
                 );
+            } else {
+                (new DailyTaskController)->orderCardWfpReviewTask();
+                (new DailyTaskController)->orderBonusReviewTask();
             }
             if($uid_Double != " ") {
                   $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
@@ -5376,6 +5380,9 @@ class AndroidTestOSMController extends Controller
                           $connectAPI,
                           $uid_Double
                       );
+                  } else {
+                      (new DailyTaskController)->orderCardWfpReviewTask();
+                      (new DailyTaskController)->orderBonusReviewTask();
                   }
               }
 

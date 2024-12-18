@@ -4696,7 +4696,415 @@ class UniversalAndroidFunctionController extends Controller
             ], 200);
         }
     }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @throws \Exception
+     */
+    public function startAddCostWithAddBottomUpdate($uid, $cost)
+    {
+        Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
+        $typeAdd = 20;
+        $order_first = Orderweb::where("dispatching_order_uid", $uid)->first();
 
+        // Получаем UID из MemoryOrderChangeController
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::info("MemoryOrderChangeController возвращает UID: " . $uid);
+
+        // Ищем заказ
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
+
+        // Ищем данные из памяти о заказе
+        $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
+        Log::debug("Найден orderMemory с UID: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null'));
+
+        // Проверяем существование заказа
+        if (!$order || !$orderMemory) {
+            Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
+            return null;
+        }
+        $newOrder = $order->replicate();
+        // Сохраняем копию в базе данных
+        $newOrder->save();
+
+        $city = $order->city;
+        Log::info("Город заказа: " . $city);
+
+        // Выбор приложения по комментарию
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+                break;
+        }
+        Log::info("Приложение выбрано: " . $application);
+
+        // Переписываем город для определенных случаев
+        $originalCity = $city;
+        switch ($originalCity) {
+            case "city_kiev":
+                $city = "Kyiv City";
+                break;
+            case "city_cherkassy":
+                $city = "Cherkasy Oblast";
+                break;
+            case "city_odessa":
+                $city = "Odessa";
+                break;
+            case "city_zaporizhzhia":
+                $city = "Zaporizhzhia";
+                break;
+            case "city_dnipro":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "city_lviv":
+                $city = "Lviv";
+                break;
+            case "city_ivano_frankivsk":
+                $city = "Ivano_frankivsk";
+                break;
+            case "city_vinnytsia":
+                $city = "Vinnytsia";
+                break;
+            case "city_poltava":
+                $city = "Poltava";
+                break;
+            case "city_sumy":
+                $city = "Sumy";
+                break;
+            case "city_kharkiv":
+                $city = "Kharkiv";
+                break;
+            case "city_chernihiv":
+                $city = "Chernihiv";
+                break;
+            case "city_rivne":
+                $city = "Rivne";
+                break;
+            case "city_ternopil":
+                $city = "Ternopil";
+                break;
+            case "city_khmelnytskyi":
+                $city = "Khmelnytskyi";
+                break;
+            case "city_zakarpattya":
+                $city = "Zakarpattya";
+                break;
+            case "city_zhytomyr":
+                $city = "Zhytomyr";
+                break;
+            case "city_kropyvnytskyi":
+                $city = "Kropyvnytskyi";
+                break;
+            case "city_mykolaiv":
+                $city = "Mykolaiv";
+                break;
+            case "city_chernivtsi":
+                $city = "Сhernivtsi";
+                break;
+            case "city_lutsk":
+                $city = "Lutsk";
+                break;
+            default:
+                $city = "all";
+        }
+
+        Log::info("Город изменен с {$originalCity} на {$city}");
+
+        // Вызываем отмену заказа в AndroidTestOSMController
+//        (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+
+
+        $authorization = $orderMemory->authorization;
+        $identificationId = $orderMemory->identificationId;
+        $apiVersion = $orderMemory->apiVersion;
+        $url = $orderMemory->connectAPI;
+        $parameter = json_decode($orderMemory->response, true);
+
+
+        $parameter['add_cost'] = (int) $cost - (int)  $order_first->web_cost + 20;
+
+
+        Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
+
+        try {
+            Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])->post($url, $parameter);
+
+            if ($response->successful() && $response->status() == 200) {
+                // Вызываем отмену заказа в AndroidTestOSMController
+                (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+                Log::info("Успешный ответ API с кодом 200");
+
+                $responseArr = $response->json();
+                Log::debug("Ответ от API: " . json_encode($responseArr));
+
+                $orderNew = $responseArr["dispatching_order_uid"];
+                Log::debug("Создан новый заказ с UID: " . $orderNew);
+
+                $order_old_uid = $order->dispatching_order_uid;
+                $order_new_uid = $orderNew;
+
+                (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+
+                $orderMemory->dispatching_order_uid = $order_new_uid;
+                $orderMemory->save();
+
+                $newOrder->dispatching_order_uid = $order_new_uid;
+                $newOrder->auto = null;
+
+                $newOrder->web_cost = $responseArr["order_cost"];
+
+                if ($typeAdd == 20) {
+                    $newOrder->attempt_20 = (int)$newOrder->attempt_20 + 1;
+                }
+
+                $newOrder->closeReason = "-1";
+                $newOrder->closeReasonI = "0";
+                $newOrder->save();
+
+                Log::info("Обновлен order с новым UID: " . $order_new_uid);
+
+                if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
+                    (new FCMController)->writeDocumentToFirestore($order_new_uid);
+                }
+
+                Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
+
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
+                Log::info("Сообщение о восстановлении машины отправлено.");
+
+
+                return response()->json([
+                    "response" => "200"
+                ], 200);
+            } else {
+                Log::error("Неудачный запрос: статус " . $response->status());
+                Log::error("Ответ от API: " . $response->body());
+                return response()->json([
+                    "response" => "400"
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            Log::error("Поймано исключение: 212 " . $e->getMessage());
+            return response()->json([
+                "response" => "401"
+            ], 200);
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @throws \Exception
+     */
+    public function startAddCostBottomUpdate($uid, $addCost)
+    {
+        Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
+
+        // Получаем UID из MemoryOrderChangeController
+        $order_first = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::info("MemoryOrderChangeController возвращает UID: " . $uid);
+
+        // Ищем заказ
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
+
+        // Ищем данные из памяти о заказе
+        $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
+        Log::debug("Найден orderMemory с UID: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null'));
+
+        // Проверяем существование заказа
+        if (!$order || !$orderMemory) {
+            Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
+            return null;
+        }
+        $newOrder = $order->replicate();
+        // Сохраняем копию в базе данных
+        $newOrder->save();
+
+        $city = $order->city;
+        Log::info("Город заказа: " . $city);
+
+        // Выбор приложения по комментарию
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+                break;
+        }
+        Log::info("Приложение выбрано: " . $application);
+
+        // Переписываем город для определенных случаев
+        $originalCity = $city;
+        switch ($originalCity) {
+            case "city_kiev":
+                $city = "Kyiv City";
+                break;
+            case "city_cherkassy":
+                $city = "Cherkasy Oblast";
+                break;
+            case "city_odessa":
+                $city = "Odessa";
+                break;
+            case "city_zaporizhzhia":
+                $city = "Zaporizhzhia";
+                break;
+            case "city_dnipro":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "city_lviv":
+                $city = "Lviv";
+                break;
+            case "city_ivano_frankivsk":
+                $city = "Ivano_frankivsk";
+                break;
+            case "city_vinnytsia":
+                $city = "Vinnytsia";
+                break;
+            case "city_poltava":
+                $city = "Poltava";
+                break;
+            case "city_sumy":
+                $city = "Sumy";
+                break;
+            case "city_kharkiv":
+                $city = "Kharkiv";
+                break;
+            case "city_chernihiv":
+                $city = "Chernihiv";
+                break;
+            case "city_rivne":
+                $city = "Rivne";
+                break;
+            case "city_ternopil":
+                $city = "Ternopil";
+                break;
+            case "city_khmelnytskyi":
+                $city = "Khmelnytskyi";
+                break;
+            case "city_zakarpattya":
+                $city = "Zakarpattya";
+                break;
+            case "city_zhytomyr":
+                $city = "Zhytomyr";
+                break;
+            case "city_kropyvnytskyi":
+                $city = "Kropyvnytskyi";
+                break;
+            case "city_mykolaiv":
+                $city = "Mykolaiv";
+                break;
+            case "city_chernivtsi":
+                $city = "Сhernivtsi";
+                break;
+            case "city_lutsk":
+                $city = "Lutsk";
+                break;
+            default:
+                $city = "all";
+        }
+
+        Log::info("Город изменен с {$originalCity} на {$city}");
+
+        // Вызываем отмену заказа в AndroidTestOSMController
+//        (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+
+
+        $authorization = $orderMemory->authorization;
+        $identificationId = $orderMemory->identificationId;
+        $apiVersion = $orderMemory->apiVersion;
+        $url = $orderMemory->connectAPI;
+        $parameter = json_decode($orderMemory->response, true);
+
+        $parameter['add_cost'] = (int) $order->web_cost - (int) $order_first->web_cost + (int) $order->add_cost + (int)$addCost;
+
+        Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
+
+        try {
+            Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])->post($url, $parameter);
+
+            if ($response->successful() && $response->status() == 200) {
+                // Вызываем отмену заказа в AndroidTestOSMController
+                (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+                Log::info("Успешный ответ API с кодом 200");
+
+                $responseArr = $response->json();
+                Log::debug("Ответ от API: " . json_encode($responseArr));
+
+                $orderNew = $responseArr["dispatching_order_uid"];
+                Log::debug("Создан новый заказ с UID: " . $orderNew);
+
+                $order_old_uid = $order->dispatching_order_uid;
+                $order_new_uid = $orderNew;
+
+                (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+
+                $orderMemory->dispatching_order_uid = $order_new_uid;
+                $orderMemory->save();
+
+                $newOrder->dispatching_order_uid = $order_new_uid;
+                $newOrder->auto = null;
+
+                $newOrder->web_cost = $responseArr["order_cost"];
+
+
+                $newOrder->closeReason = "-1";
+                $newOrder->closeReasonI = "0";
+                $newOrder->save();
+
+                Log::info("Обновлен order с новым UID: " . $order_new_uid);
+
+                if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
+                    (new FCMController)->writeDocumentToFirestore($order_new_uid);
+                }
+
+                Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
+
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
+                Log::info("Сообщение о восстановлении машины отправлено.");
+
+
+                return response()->json([
+                    "response" => "200"
+                ], 200);
+            } else {
+                Log::error("Неудачный запрос: статус " . $response->status());
+                Log::error("Ответ от API: " . $response->body());
+                return response()->json([
+                    "response" => "400"
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            Log::error("Поймано исключение: 212 " . $e->getMessage());
+            return response()->json([
+                "response" => "401"
+            ], 200);
+        }
+    }
 
     /**
      * Show the form for creating a new resource.
