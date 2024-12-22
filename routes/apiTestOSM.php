@@ -145,8 +145,16 @@ Route::get('/android/webordersCancel/{uid}/{city}/{application}', [AndroidTestOS
 Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDouble'])
     ->name('webordersCancelDouble');
 
+Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDouble'])
+    ->name('webordersCancelDouble');
+Route::get('/android/webordersCancelDoubleWithotMemory/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDoubleWithotMemory'])
+    ->name('webordersCancelDoubleWithotMemory');
+
 Route::get('/android/historyUIDStatus/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
+
+Route::get('/android/historyUIDStatusWithoutMemory/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatusWithoutMemory'])
+    ->name('historyUIDStatusWithoutMemory');
 
 Route::get('/android/drivercarposition/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'driverCarPosition'])
     ->name('drivercarposition');

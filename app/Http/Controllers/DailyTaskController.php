@@ -142,19 +142,21 @@ class DailyTaskController extends Controller
             $query->where('transactionStatus', 'WaitingAuthComplete')
                 ->orWhere('transactionStatus', 'InProcessing');
         })->get();
+        $messageAdmin = "orderCardWfpReviewTask: " . $orderwebs;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         if (!$orderwebs->isEmpty()) {
             Log::info("orderCardWfpReviewTask WfpInvoice", $orderwebs->toArray());
 
             foreach ($orderwebs->toArray() as $value) {
                 $uid = $value['dispatching_order_uid'];
-//                $uid = (new MemoryOrderChangeController)->show($uid);
+                $uid = (new MemoryOrderChangeController)->show($uid);
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
                 if ($uid_history != null) {
                     Log::info("uid_history $uid_history");
                     $bonusOrder = $uid_history->uid_bonusOrder;
                     $doubleOrder = $uid_history->uid_doubleOrder;
-                    $bonusOrderHold  = $uid_history->uid_bonusOrder;
+                    $bonusOrderHold  = $uid_history->uid_bonusOrderHold;
                     Log::info("uid_history bonusOrder $bonusOrder");
                     Log::info("uid_history doubleOrder $doubleOrder");
                     Log::info("uid_history bonusOrderHold $bonusOrderHold");
@@ -165,13 +167,18 @@ class DailyTaskController extends Controller
                         $bonusOrderHold
                     );
                 } else {
-                    $message = "Оператор проверьте холд по счету WFP: " .  $value['orderReference'] . "для пересмотра";
-                    $order = WfpInvoice::where('orderReference', $value['orderReference'])->first();
-                    $order->transactionStatus = 'Declined';
-                    $order->save();
-
-                    self::sentTaskMessage($message);
-                    Log::info("orderCardWfpReviewTask $message");
+                    (new UniversalAndroidFunctionController)->orderReview(
+                        $uid,
+                        $uid,
+                        $uid
+                    );
+//                    $message = "Оператор проверьте холд по счету WFP: " .  $value['orderReference'] . "для пересмотра";
+//                    $order = WfpInvoice::where('orderReference', $value['orderReference'])->first();
+//
+//                    $order->save();
+//
+//                    self::sentTaskMessage($message);
+//                    Log::info("orderCardWfpReviewTask $message");
                 }
             }
         } else {

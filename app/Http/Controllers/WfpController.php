@@ -756,7 +756,8 @@ class WfpController extends Controller
         }
 
         if($merchantAccount != null) {
-            $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->first();
+            $orderwebs = Orderweb::where("wfp_order_id", $orderReference) ->latest()
+                ->first();
             $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
             if ($wfpInvoices->isNotEmpty()) {
                 foreach ($wfpInvoices as $value) {
@@ -875,7 +876,7 @@ class WfpController extends Controller
             // Проверка статуса транзакции
             // || $responseArray['transactionStatus'] == 'Declined'
             if($responseArray['reasonCode'] == '1115') {
-                break;
+                return null;
             }
             if($responseArray['reasonCode'] == '1126') {
                 $order = WfpInvoice::where("orderReference", $responseArray['orderReference'])->first();
@@ -889,7 +890,7 @@ class WfpController extends Controller
                     $order->wfp_status_pay = $responseArray['transactionStatus'];
                     $order->save();
                 }
-                break;
+                return null;
             }
             if($responseArray['reasonCode'] == '1130') {
                 break;
@@ -912,18 +913,19 @@ class WfpController extends Controller
                     $order->wfp_status_pay = $responseArray['transactionStatus'];
                     $order->save();
                 }
-                break; // Прерываем цикл, если статус "Refunded"
+                return null;
             } elseif ($responseArray['transactionStatus']) {
                 // Проверяем, прошло ли более 72 часов
                 if (time() - $startTime > $maxDuration) {
                     Log::debug("refundSettleJob Превышен лимит времени в 72 часа. Прекращение попыток.");
-                    break;
+                    return null;
                 }
                 Log::debug("refundSettleJob Статус транзакции: Declined. Повторная попытка через 15 минут...");
                 sleep(900); // Пауза на 900 секунд (15 минут)
             }
         }
         Log::debug("refundSettleJob CHECK_STATUS:", ['response' => $response->body()]);
+        return null;
     }
 
     public function settle(

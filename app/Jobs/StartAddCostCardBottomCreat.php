@@ -11,19 +11,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class StartAddCostCardCreat implements ShouldQueue
+class StartAddCostCardBottomCreat implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $uid;
     protected $uid_Double;
     protected $pay_method;
     protected $orderReference;
-    protected $application;
     protected $city;
-    protected $transactionStatus;
+    protected $addCost;
     /**
      * Create a new job instance.
      *
@@ -34,17 +34,15 @@ class StartAddCostCardCreat implements ShouldQueue
         $uid_Double,
         $pay_method,
         $orderReference,
-        $application,
         $city,
-        $transactionStatus
+        $addCost
     ) {
         $this->uid = $uid;
         $this->uid_Double = $uid_Double;
         $this->pay_method = $pay_method;
         $this->orderReference = $orderReference;
-        $this->application = $application;
         $this->city = $city;
-        $this->transactionStatus = $transactionStatus;
+        $this->addCost = $addCost;
     }
 
     /**
@@ -55,24 +53,25 @@ class StartAddCostCardCreat implements ShouldQueue
      */
     public function handle()
     {
-        $messageAdmin = "Запущен процесс создания нового безнального заказа с добавкой +20грн к стоимости заказа $this->uid ";
+        $messageAdmin = "Запущен процесс создания нового безнального заказа с добавкой $this->addCost грн к стоимости заказа $this->uid ";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
-        $result = (new UniversalAndroidFunctionController)->startAddCostCardCreat(
+        $result =(new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
             $this->uid,
             $this->uid_Double,
             $this->pay_method,
             $this->orderReference,
-            $this->transactionStatus,
-            $this->city
+            $this->city,
+            $this->addCost
         );
 
-        if ($result === null) {
-            Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
-            $messageAdmin = "Задача RefundSettleCardPayJob $this->orderReference завершена";
+
+        if ($result != null) {
+            Log::info("Задача $messageAdmin завершена");
+            $messageAdmin = "Задача $messageAdmin завершена";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return;
         }
 
-        Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
+        Log::info("Задача $messageAdmin успешно завершена.");
     }
 }

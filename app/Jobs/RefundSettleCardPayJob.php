@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\MessageSentController;
 use App\Http\Controllers\WfpController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -35,6 +36,15 @@ class RefundSettleCardPayJob implements ShouldQueue
     public function handle()
     {
 
-        (new WfpController)->refundSettleJob($this->params, $this->orderReference);
+        $result = (new WfpController)->refundSettleJob($this->params, $this->orderReference);
+
+        if ($result === null) {
+            Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
+            $messageAdmin = "Задача RefundSettleCardPayJob $this->orderReference завершена";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            return;
+        }
+
+        Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
     }
 }

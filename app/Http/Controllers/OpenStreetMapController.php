@@ -15,7 +15,7 @@ class OpenStreetMapController extends Controller
         $response_arr = json_decode($response, true);
 
         if (empty($response_arr)) {
-            $r = 200;
+            $r = 300;
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                 . $originLongitude
                 . "," . $originLatitude
@@ -42,7 +42,7 @@ class OpenStreetMapController extends Controller
                 }
                 return $address_string;
             } else {
-                $r = 200;
+                $r = 300;
                 $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                     . $originLongitude
                     . "," . $originLatitude
@@ -79,7 +79,7 @@ class OpenStreetMapController extends Controller
         $response_arr = json_decode($response, true);
 
         if (empty($response_arr)) {
-            $r = 200;
+            $r = 300;
             $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                 . $originLongitude
                 . "," . $originLatitude
@@ -102,7 +102,7 @@ class OpenStreetMapController extends Controller
             if ($response_arr["category"] == "building") {
                 return ["result" =>$response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"] .", місто " . $response_arr["address"]["city"]];
             } else {
-                $r = 200;
+                $r = 300;
                 $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
                     . $originLongitude
                     . "," . $originLatitude
@@ -148,7 +148,7 @@ class OpenStreetMapController extends Controller
         }
 
         if (empty($response_arr)) {
-            $r = 200;
+            $r = 300;
             $url = "https://api.visicom.ua/data-api/5.0/$local/geocode.json?categories=adr_address&near="
                 . $originLongitude
                 . "," . $originLatitude
@@ -175,7 +175,7 @@ class OpenStreetMapController extends Controller
                     return ["result" =>$response_arr["address"]["road"] . " $building_text" . $response_arr["address"]["house_number"] .", $city_text"];
                 }
             } else {
-                $r = 200;
+                $r = 300;
                 $url = "https://api.visicom.ua/data-api/5.0/$local/geocode.json?categories=adr_address&near="
                     . $originLongitude
                     . "," . $originLatitude

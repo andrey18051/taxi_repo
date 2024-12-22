@@ -1486,6 +1486,9 @@ Route::get('/android/startAddCostBottomUpdate/{uid}/{addCost}', [UniversalAndroi
 Route::get('/android/startAddCostCardUpdate/{uid}/{uid_Double}/{pay_method}/{order_id}/{city}', [UniversalAndroidFunctionController::class, 'startAddCostCardUpdate'])
     ->name('startAddCostCardUpdate');
 
+Route::get('/android/startAddCostCardBottomUpdate/{uid}/{uid_Double}/{pay_method}/{order_id}/{city}/{addCost}', [UniversalAndroidFunctionController::class, 'startAddCostCardBottomUpdate'])
+    ->name('startAddCostCardBottomUpdate');
+
 /**
  * Обновление позиции водителя
  */

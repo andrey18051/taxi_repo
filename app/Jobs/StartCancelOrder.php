@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\MessageSentController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\WfpController;
@@ -11,10 +12,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class StartAddCostCardCreat implements ShouldQueue
+class StartCancelOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $uid;
@@ -33,18 +33,14 @@ class StartAddCostCardCreat implements ShouldQueue
         $uid,
         $uid_Double,
         $pay_method,
-        $orderReference,
-        $application,
         $city,
-        $transactionStatus
+        $application
     ) {
         $this->uid = $uid;
         $this->uid_Double = $uid_Double;
         $this->pay_method = $pay_method;
-        $this->orderReference = $orderReference;
-        $this->application = $application;
         $this->city = $city;
-        $this->transactionStatus = $transactionStatus;
+        $this->application = $application;
     }
 
     /**
@@ -55,24 +51,24 @@ class StartAddCostCardCreat implements ShouldQueue
      */
     public function handle()
     {
-        $messageAdmin = "Запущен процесс создания нового безнального заказа с добавкой +20грн к стоимости заказа $this->uid ";
+        $messageAdmin = "Запущен процесс удаления заказа $this->uid и $this->uid_Double";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
-        $result = (new UniversalAndroidFunctionController)->startAddCostCardCreat(
+        $result = (new AndroidTestOSMController)->webordersCancelDoubleWithoutReviewHold(
             $this->uid,
             $this->uid_Double,
             $this->pay_method,
-            $this->orderReference,
-            $this->transactionStatus,
-            $this->city
+            $this->city,
+            $this->application,
         );
 
+
         if ($result === null) {
-            Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
-            $messageAdmin = "Задача RefundSettleCardPayJob $this->orderReference завершена";
+            Log::info("Задача StartCancelOrder $this->uid завершена");
+            $messageAdmin = "Задача StartCancelOrder $this->uid завершена";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return;
         }
 
-        Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
+        Log::info("Задача StartCancelOrder $this->uid завершена");
     }
 }

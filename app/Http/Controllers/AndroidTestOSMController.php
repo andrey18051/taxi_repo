@@ -4729,6 +4729,16 @@ class AndroidTestOSMController extends Controller
                 $responseDoubleArr = json_decode($responseDouble, true);
                 Log::debug("responseDoubleArr: 44444444444 ", $responseDoubleArr);
 
+                if (isset($responseDoubleArr['dispatching_order_uid']) && !isset($responseBonusArr['dispatching_order_uid'])) {
+                    (new DriverMemoryOrderController)->store(
+                        $responseDoubleArr['dispatching_order_uid'],
+                        json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                        $authorization,
+                        $url,
+                        $identificationId,
+                        $apiVersion
+                    );
+                }
                 //Сообщение что нет обоих заказаов безнального и дубля
                 if ($responseBonusArr != null
                     && isset($responseBonusArr["Message"])
@@ -4838,9 +4848,9 @@ class AndroidTestOSMController extends Controller
                 }
                 if ($responseDoubleArr != null) {
                     Log::debug("responseDoubleArr", $responseDoubleArr);
-                }
+                };
 
-                ;
+    /////////////////////////////////////////////////////////////            ;
                 //Запуск вилки
                 if ($responseBonusArr != null
                     && $responseDoubleArr != null
@@ -4893,9 +4903,114 @@ class AndroidTestOSMController extends Controller
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
                     StartNewProcessExecution::dispatch($doubleOrder->id);
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
-
-
                 }
+//                else {
+//                    if ($responseBonusArr != null
+//                        && $responseDoubleArr == null
+//                        && isset($responseBonusArr["dispatching_order_uid"])
+//                    ) {
+//                        Log::debug("responseDoubleArr: 44444444 ", $responseDoubleArr);
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//
+//                        Log::debug("******************************");
+//                        Log::debug("DoubleOrder parameters1111: ", [
+//                            'responseBonusStr' => json_encode($responseBonusArr),
+//                            'responseDoubleStr' => json_encode($responseBonusArr),
+//                            'authorizationBonus' => $authorizationBonus,
+//                            'authorizationDouble' => $authorizationDouble,
+//                            'connectAPI' => $connectAPI,
+//                            'identificationId' => $identificationId,
+//                            'apiVersion' => $apiVersion
+//                        ]);
+//
+//                        Log::debug("******************************");
+//
+//
+//
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//                        $doubleOrder = new DoubleOrder();
+//                        $doubleOrder->responseBonusStr = json_encode($responseBonusArr);
+//                        $doubleOrder->responseDoubleStr = json_encode($responseBonusArr);
+//                        $doubleOrder->authorizationBonus = $authorizationBonus;
+//                        $doubleOrder->authorizationDouble = $authorizationBonus;
+//                        $doubleOrder->connectAPI = $connectAPI;
+//                        $doubleOrder->identificationId = $identificationId;
+//                        $doubleOrder->apiVersion = $apiVersion;
+//
+//                        Log::debug("Values set in DoubleOrder:", [
+//                            'responseBonusStr' => $doubleOrder->responseBonusStr,
+//                            'responseDoubleStr' => $doubleOrder->responseDoubleStr,
+//                            'authorizationBonus' => $doubleOrder->authorizationBonus,
+//                            'authorizationDouble' => $doubleOrder->authorizationDouble,
+//                            'connectAPI' => $doubleOrder->connectAPI,
+//                            'identificationId' => $doubleOrder->identificationId,
+//                            'apiVersion' => $doubleOrder->apiVersion,
+//                        ]);
+//
+//                        $doubleOrder->save();
+//
+//                        $response_ok["doubleOrder"] = $doubleOrder->id;
+//                        Log::info("doubleOrder->id" . $doubleOrder->id);
+//                        Log::debug("StartNewProcessExecution 5895");
+//                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
+//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+//                    }
+//                    if ($responseBonusArr == null
+//                        && $responseDoubleArr != null
+//                        && isset($responseDoubleArr["dispatching_order_uid"])
+//                    ) {
+//                        Log::debug("responseDoubleArr: 44444444 ", $responseDoubleArr);
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//
+//                        Log::debug("******************************");
+//                        Log::debug("DoubleOrder parameters1111: ", [
+//                            'responseBonusStr' => json_encode($responseDoubleArr),
+//                            'responseDoubleStr' => json_encode($responseDoubleArr),
+//                            'authorizationBonus' => $authorizationDouble,
+//                            'authorizationDouble' => $authorizationDouble,
+//                            'connectAPI' => $connectAPI,
+//                            'identificationId' => $identificationId,
+//                            'apiVersion' => $apiVersion
+//                        ]);
+//
+//                        Log::debug("******************************");
+//
+//
+//
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//                        $doubleOrder = new DoubleOrder();
+//                        $doubleOrder->responseBonusStr = json_encode($responseDoubleArr);
+//                        $doubleOrder->responseDoubleStr = json_encode($responseDoubleArr);
+//                        $doubleOrder->authorizationBonus = $authorizationDouble;
+//                        $doubleOrder->authorizationDouble = $authorizationDouble;
+//                        $doubleOrder->connectAPI = $connectAPI;
+//                        $doubleOrder->identificationId = $identificationId;
+//                        $doubleOrder->apiVersion = $apiVersion;
+//
+//                        Log::debug("Values set in DoubleOrder:", [
+//                            'responseBonusStr' => $doubleOrder->responseBonusStr,
+//                            'responseDoubleStr' => $doubleOrder->responseDoubleStr,
+//                            'authorizationBonus' => $doubleOrder->authorizationBonus,
+//                            'authorizationDouble' => $doubleOrder->authorizationDouble,
+//                            'connectAPI' => $doubleOrder->connectAPI,
+//                            'identificationId' => $doubleOrder->identificationId,
+//                            'apiVersion' => $doubleOrder->apiVersion,
+//                        ]);
+//
+//                        $doubleOrder->save();
+//
+//                        $response_ok["doubleOrder"] = $doubleOrder->id;
+//                        Log::info("doubleOrder->id" . $doubleOrder->id);
+//                        Log::debug("StartNewProcessExecution 5895");
+//                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
+//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+//                    }
+//                }
+
+
+
                 if (count($userArr) > 3) {
                     $email = $params['email'];
 //                    SearchOrderToDeleteJob::dispatch(
@@ -5239,6 +5354,9 @@ class AndroidTestOSMController extends Controller
             $json_arrWeb = json_decode($response, true);
 
             Log::debug("json_arrWeb_bonus", $json_arrWeb);
+            $messageAdmin = "Отмена заказа $response";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
             if ($json_arrWeb["order_client_cancel_result"] != 1) {
                 self::repeatCancel(
                     $url,
@@ -5421,6 +5539,249 @@ class AndroidTestOSMController extends Controller
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function webordersCancelDoubleWithotMemory(
+        $uid,
+        $uid_Double,
+        $payment_type,
+        $city,
+        $application
+    ) {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
+        }
+//        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::debug("**********************************************************");
+        Log::debug("webordersCancelDouble uid $uid");
+        Log::debug("webordersCancelDouble uid_Double  $uid_Double");
+        Log::debug("webordersCancelDouble payment_type  $payment_type");
+        Log::debug("webordersCancelDouble city  $city");
+
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        if ($orderweb) {
+            $connectAPI = $orderweb->server;
+
+            $authorizationChoiceArr = self::authorizationChoiceApp($payment_type, $city, $connectAPI, $application);
+            $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
+            $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
+
+
+            $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+            Log::debug(" webordersCancelDouble bonus $url");
+            $response_bonus = Http::withHeaders([
+                "Authorization" => $authorizationBonus,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+
+            ])->put($url);
+            $json_arrWeb_bonus = json_decode($response_bonus, true);
+            Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
+            if ($json_arrWeb_bonus["order_client_cancel_result"] != 1) {
+                self::repeatCancel(
+                    $url,
+                    $authorizationBonus,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid
+                );
+            } else {
+                (new DailyTaskController)->orderCardWfpReviewTask();
+                (new DailyTaskController)->orderBonusReviewTask();
+            }
+
+            $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+            Log::debug(" webordersCancelDouble double $url");
+
+            $response_double =Http::withHeaders([
+                "Authorization" => $authorizationDouble,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+                //                "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                //                    ->apiVersionApp($city, $connectAPI, $application)
+            ])->put($url);
+
+
+            $json_arrWeb_double = json_decode($response_double, true);
+            Log::debug("json_arrWeb_double", $json_arrWeb_double);
+            if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
+                self::repeatCancel(
+                    $url,
+                    $authorizationDouble,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid_Double
+                );
+            } else {
+                (new DailyTaskController)->orderCardWfpReviewTask();
+                (new DailyTaskController)->orderBonusReviewTask();
+            }
+
+
+            $resp_answer = "Запит на скасування замовлення надіслано. ";
+
+            $hold = false;
+            if ($json_arrWeb_bonus['order_client_cancel_result'] == 1) {
+                if (!isset($json_arrWeb_double)) {
+                    $hold = true;
+                } else  if ($json_arrWeb_double['order_client_cancel_result'] == 1) {
+                    $hold = true;
+                }
+            }
+
+
+//            $orderweb->closeReason = "1";
+            $orderweb->save();
+            (new MessageSentController)->sentCancelInfo($orderweb);
+            Log::debug("webordersCancelDouble response $resp_answer");
+            Log::debug("**********************************************************");
+
+
+
+//            if ($hold) {
+//                $resp_answer = $resp_answer . "Замовлення скасоване.";
+//            } else {
+//                $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
+//            }
+        } else {
+            $resp_answer = "Замовлення не вдалося скасувати.";
+        }
+
+
+        return [
+            'response' => $resp_answer,
+        ];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function webordersCancelDoubleWithoutReviewHold(
+        $uid,
+        $uid_Double,
+        $payment_type,
+        $city,
+        $application
+    ) {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
+        }
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::debug("**********************************************************");
+        Log::debug("webordersCancelDoubleWithoutReviewHold uid $uid");
+        Log::debug("webordersCancelDoubleWithoutReviewHold uid_Double  $uid_Double");
+        Log::debug("webordersCancelDoubleWithoutReviewHold payment_type  $payment_type");
+        Log::debug("webordersCancelDoubleWithoutReviewHold city  $city");
+
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        if ($orderweb) {
+            $connectAPI = $orderweb->server;
+
+            $authorizationChoiceArr = self::authorizationChoiceApp($payment_type, $city, $connectAPI, $application);
+            $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
+            $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
+
+//            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+//
+//            if ($uid_history) {
+//                $uid = $uid_history->uid_bonusOrder;
+//                $uid_Double = $uid_history->uid_doubleOrder;
+//                $uid_history->cancel = true;
+//                $uid_history->save();
+//
+//                Log::debug("webordersCancelDoubleWithoutReviewHold:", $uid_history->toArray());
+//            }
+
+            $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+            Log::debug(" webordersCancelDoubleWithoutReviewHold bonus $url");
+            $response_bonus = Http::withHeaders([
+                "Authorization" => $authorizationBonus,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+
+            ])->put($url);
+            $json_arrWeb_bonus = json_decode($response_bonus, true);
+            Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
+            if ($json_arrWeb_bonus["order_client_cancel_result"] != 1) {
+                self::repeatCancel(
+                    $url,
+                    $authorizationBonus,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid
+                );
+            }
+            if($uid_Double != " ") {
+                $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+                Log::debug(" webordersCancelDoubleWithoutReviewHold double $url");
+
+                $response_double =Http::withHeaders([
+                    "Authorization" => $authorizationDouble,
+                    "X-WO-API-APP-ID" => self::identificationId($application),
+                ])->put($url);
+
+
+                $json_arrWeb_double = json_decode($response_double, true);
+                Log::debug("webordersCancelDoubleWithoutReviewHold json_arrWeb_double", $json_arrWeb_double);
+                if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
+                    self::repeatCancel(
+                        $url,
+                        $authorizationDouble,
+                        $application,
+                        $city,
+                        $connectAPI,
+                        $uid_Double
+                    );
+                }
+            }
+
+
+            $orderweb->save();
+            (new MessageSentController)->sentCancelInfo($orderweb);
+
+            Log::debug("**********************************************************");
+
+        }
+
+        return  null;
+    }
     /**
      * @throws \Exception
      */
@@ -5713,6 +6074,300 @@ class AndroidTestOSMController extends Controller
             }
         }
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function historyUIDStatusWithoutMemory(
+        $uid,
+        $city,
+        $application
+    ) {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+            case "foreign countries":
+                $city = "OdessaTest";
+                break;
+        }
+        //Поиск смены номеров заказов
+        Log::debug("0 historyUIDStatus uid $uid");
+
+
+        Log::debug("1 historyUIDStatus uid $uid");
+        $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        if ($orderweb_uid->closeReason == 101 || $orderweb_uid->closeReason == 102) {
+            $storedData = $orderweb_uid->auto;
+
+            $dataDriver = json_decode($storedData, true);
+//            $name = $dataDriver["name"];
+            $color = $dataDriver["color"];
+            $brand = $dataDriver["brand"];
+            $model = $dataDriver["model"];
+            $number = $dataDriver["number"];
+            $phoneNumber = $dataDriver["phoneNumber"];
+
+            $auto = "$number, цвет $color  $brand $model. ";
+
+
+            // Обновление полей
+            $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
+            $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
+            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point; // Замените на ваш существующий $phoneNumber
+            switch ($orderweb_uid->closeReason) {
+                case "101":
+                    $responseData['execution_status'] = 'CarFound'; // Обновление статуса
+                    break;
+                case "102":
+                    $responseData['execution_status'] = 'CarInStartPoint'; // Обновление статуса
+                    break;
+            }
+            return $responseData;
+        } else {
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+            $connectAPI = $orderweb_uid->server;
+            if ($uid_history) {
+                $uid_history->bonus_status = null;
+                //Запрос статуса по ветке
+                if ($uid_history->bonus_status == null) {
+                    //Запрос по окончанию вилки статуса безнала
+
+                    $authorization = (new UniversalAndroidFunctionController)
+                        ->authorizationApp($city, $connectAPI, $application);
+                    $url = $connectAPI . '/api/weborders/' . $uid_history->uid_bonusOrder;
+                    try {
+                        $response_bonus = Http::withHeaders([
+                            "Authorization" => $authorization,
+                            "X-WO-API-APP-ID" => self::identificationId($application),
+                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                                ->apiVersionApp($city, $connectAPI, $application)
+                        ])->get($url);
+
+                        // Логируем тело ответа
+//                        Log::debug(" 2 historyUIDStatus postRequestHTTP: " . json_decode($response_bonus, true));
+
+
+                        // Проверяем успешность ответа
+                        if ($response_bonus->successful()) {
+                            // Обрабатываем успешный ответ
+                            $response_bonus_arr = json_decode($response_bonus, true);
+
+                            $messageAdmin = "Опрос статуса безналичного заказа $uid_history->uid_bonusOrder Ответ:" . print_r($response_bonus_arr, true);
+                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                            if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
+                                || $response_bonus_arr["close_reason"] == -1) {
+                                //Безнал по окончанию вилки выполнен или в работе
+
+                                if ($response_bonus_arr["order_car_info"] != null) {
+                                    $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
+                                }
+                                $orderweb_uid->closeReason = $response_bonus_arr["close_reason"];
+                                $orderweb_uid->save();
+                                return $response_bonus;
+                            } else {
+                                //Безнал по окончанию вилки закрыт
+                                //Запрос по окончанию вилки статуса нала
+                                $url = $connectAPI . '/api/weborders/' . $uid_history->uid_doubleOrder;
+                                try {
+                                    $response_double = Http::withHeaders([
+                                        "Authorization" => $authorization,
+                                        "X-WO-API-APP-ID" => self::identificationId($application),
+                                        "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                                            ->apiVersionApp($city, $connectAPI, $application)
+                                    ])->get($url);
+
+                                    // Логируем тело ответа
+                                    Log::debug("3 historyUIDStatus postRequestHTTP: " . $response_double->body());
+
+                                    // Проверяем успешность ответа
+                                    if ($response_double->successful()) {
+                                        // Обрабатываем успешный ответ
+                                        $response_arr_double = json_decode($response_double, true);
+                                        Log::debug("4 $url: ", $response_arr_double);
+
+                                        $messageAdmin = "Опрос статуса наличного дублирующего заказ $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
+                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                                        if ($response_arr_double["order_car_info"] != null) {
+                                            $orderweb_uid->auto = $response_arr_double["order_car_info"];
+                                        }
+                                        $orderweb_uid->closeReason = $response_arr_double["close_reason"];
+                                        $orderweb_uid->save();
+                                        return $response_double;
+
+                                    } else {
+                                        // Логируем ошибки в случае неудачного запроса
+                                        Log::error("5 historyUIDStatus Request failed with status: "
+                                            . $response_double->status());
+                                        Log::error("6 historyUIDStatus Response: " . $response_double->body());
+                                        $response_arr_double = json_decode($response_double, true);
+                                        $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
+                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                                        return [
+                                            "execution_status" => "failed_status",
+                                            "order_car_info" => null,
+                                            "driver_phone" => null,
+                                        ];
+                                    }
+                                } catch (\Exception $e) {
+                                    // Обработка исключений
+                                    Log::error("7 historyUIDStatus Exception caught: " . $e->getMessage());
+
+                                    $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . $e->getMessage();
+                                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                                    return [
+                                        "execution_status" => "failed_status",
+                                        "order_car_info" => null,
+                                        "driver_phone" => null,
+                                    ];
+                                }
+                            }
+                        } else {
+                            // Логируем ошибки в случае неудачного запроса
+                            Log::error("11 historyUIDStatus Request failed with status: " . $response_bonus->status());
+                            Log::error("12 historyUIDStatus Response: " . $response_bonus->body());
+                            $response_arr_bonus = json_decode($response_bonus, true);
+                            $messageAdmin = "Ошибка опроса статуса безналичного заказа 11 $uid_history->uid_bonusOrder Ответ:" . print_r($response_arr_bonus, true);
+                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+
+                            return [
+                                "execution_status" => "failed_status",
+                                "order_car_info" => null,
+                                "driver_phone" => null,
+                            ];
+                        }
+                    } catch (\Exception $e) {
+                        // Обработка исключений
+                        Log::error("13 historyUIDStatus Exception caught: " . print_r($e->getMessage(), true));
+
+
+                        $messageAdmin = "Ошибка опроса статуса безналичного заказа 13 $uid_history->uid_bonusOrder Ответ: ";
+
+                        // Проверяем тип сообщения
+                        if (is_array($e->getMessage())) {
+                            $messageAdmin .= print_r($e->getMessage(), true);
+                        } elseif (is_object($e->getMessage())) {
+                            $messageAdmin .= json_encode($e->getMessage());
+                        } else {
+                            $messageAdmin .= (string)$e->getMessage();
+                        }
+                        Log::error("14 historyUIDStatus Exception caught: " . $messageAdmin);
+                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                        return [
+                            "execution_status" => "failed_status",
+                            "order_car_info" => null,
+                            "driver_phone" => null,
+                        ];
+                    }
+                } else {
+                    $response_bonus = $uid_history->bonus_status;
+                    // Логируем тело ответа
+                    Log::debug("15 historyUIDStatus respons bonus: " . $response_bonus);
+                    // Обрабатываем успешный ответ
+                    $response_bonus_arr = json_decode($response_bonus, true);
+                    if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
+                        || $response_bonus_arr["close_reason"] == -1) {
+
+
+                        if ($response_bonus_arr["order_car_info"] != null) {
+                            $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
+                        }
+                        $orderweb_uid->closeReason = $response_bonus_arr["close_reason"];
+                        $orderweb_uid->save();
+                        return $response_bonus;
+                    } else {
+                        $response_double = $uid_history->double_status;
+
+                        // Логируем тело ответа
+                        Log::debug("historyUIDStatus response double: " . $response_double);
+
+                        // Обрабатываем успешный ответ
+                        $response_double_arr = json_decode($response_double, true);
+                        Log::debug("responseArr double: ", $response_double_arr);
+
+
+                        if ($response_double_arr["order_car_info"] != null) {
+                            $orderweb_uid->auto = $response_double_arr["order_car_info"];
+                        }
+                        $orderweb_uid->closeReason = $response_double_arr["close_reason"];
+                        $orderweb_uid->save();
+                        return $response_double;
+                    }
+                }
+            } else {
+                //Запрос статуса одиночного заказа
+                $authorization = (new UniversalAndroidFunctionController)
+                    ->authorizationApp($city, $connectAPI, $application);
+                $url = $connectAPI . '/api/weborders/' . $uid;
+                try {
+                    $response = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => self::identificationId($application),
+                        "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    ])->get($url);
+
+                    // Логируем тело ответа
+                    Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
+
+                    // Проверяем успешность ответа
+                    if ($response->successful()) {
+                        // Обрабатываем успешный ответ
+                        $response_arr = json_decode($response, true);
+                        Log::debug("$url: ", $response_arr);
+
+                        if ($response_arr["order_car_info"] != null) {
+                            $orderweb_uid->auto = $response_arr["order_car_info"];
+                        }
+                        $orderweb_uid->closeReason = $response_arr["close_reason"];
+                        $orderweb_uid->save();
+                        return $response;
+
+                    } else {
+                        // Логируем ошибки в случае неудачного запроса
+                        Log::error("historyUIDStatus Request failed with status: " . $response->status());
+                        Log::error("historyUIDStatus Response: " . $response->body());
+
+                        return [
+                            "execution_status" => "failed_status",
+                            "order_car_info" => null,
+                            "driver_phone" => null,
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Обработка исключений
+                    Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
+                    return [
+                        "execution_status" => "failed_status",
+                        "order_car_info" => null,
+                        "driver_phone" => null,
+                    ];
+                }
+
+            }
+        }
+    }
+
 
     /**
      * @throws \Exception
