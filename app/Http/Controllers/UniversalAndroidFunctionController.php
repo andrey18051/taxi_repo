@@ -5579,6 +5579,12 @@ class UniversalAndroidFunctionController extends Controller
 
                     $doubleOrder->save();
 
+                    $uid_history = new Uid_history();
+                    $uid_history->uid_bonusOrder = $responseBonusArr["dispatching_order_uid"];
+                    $uid_history->uid_doubleOrder = $responseDoubleArr["dispatching_order_uid"];
+                    $uid_history->uid_bonusOrderHold = $responseBonusArr["dispatching_order_uid"];
+                    $uid_history->cancel = false;
+                    $uid_history->save();
 
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution " . $doubleOrder->id);
@@ -5618,12 +5624,11 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "Метод startAddCostCardBottomCreat вызван с UID  : " . $uid;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        $order_first = Orderweb::where("dispatching_order_uid", $uid)->first();
 //        // Получаем UID из MemoryOrderChangeController
 
         $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("MemoryOrderChangeController startAddCostCardBottomCreat возвращает UID:  " . $uid);
-        $messageAdmin = "MemoryOrderChangeController  startAddCostCardBottomCreatвозвращает UID: " . $uid;
+        $messageAdmin = "MemoryOrderChangeController  startAddCostCardBottomCreat возвращает UID: " . $uid;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
         // Ищем заказ
 
@@ -5633,12 +5638,8 @@ class UniversalAndroidFunctionController extends Controller
 
         if (!$uid_history) {
             $uid_Double = $uid;
-//            $uid = $uid_history->uid_bonusOrder;
-//            $uid_Double = $uid_history->uid_doubleOrder;
-
-//            Log::debug("uid_history startAddCostCardBottomCreat :", $uid_history->toArray());
         } else {
-
+            $uid_Double = $uid_history-> uid_doubleOrder;
         }
 
         Log::debug("Найден order с UID startAddCostCardBottomCreat : " . ($order ? $order->dispatching_order_uid : 'null'));
@@ -5659,8 +5660,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         Log::info("Город заказа  startAddCostCardBottomCreat: " . $city);
-        $messageAdmin = "Город заказа startAddCostCardBottomCreat: " . $city;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Выбор приложения по комментарию
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
@@ -5674,8 +5674,7 @@ class UniversalAndroidFunctionController extends Controller
                 break;
         }
         Log::info("Приложение выбрано startAddCostCardBottomCreat: " . $application);
-        $messageAdmin = "Приложение выбрано startAddCostCardBottomCreat: " . $application;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Выбор приложения по комментарию
 
         $connectAPI = (new AndroidTestOSMController)->connectAPIAppOrder($city, $application);
@@ -5691,8 +5690,8 @@ class UniversalAndroidFunctionController extends Controller
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
 
-        $parameter['add_cost'] = (int) $order->web_cost - (int) $order_first->web_cost + (int) $order->add_cost + (int) $addCost;
-//        $parameter['add_cost'] = (int) $order->add_cost + (int) $addCost;
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
+
 
 
         Log::info("Параметры API запроса startAddCostCardBottomCreat: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
@@ -5774,22 +5773,11 @@ class UniversalAndroidFunctionController extends Controller
             }
 
 
-
-
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
                 Log::info("Успешный ответ API с кодом 200 startAddCostCardBottomCreat");
 
-
-//                StartCancelOrder::dispatch(
-//                    $uid,
-//                    $uid_Double,
-//                    $pay_method,
-//                    $city,
-//                    $application
-//                );
-
-                (new AndroidTestOSMController)->webordersCancelDoubleWithoutReviewHold(
+                (new AndroidTestOSMController)->webordersCancelDoubleWithotMemory(
                     $uid,
                     $uid_Double,
                     $pay_method,
@@ -5798,11 +5786,6 @@ class UniversalAndroidFunctionController extends Controller
                 );
 
                 $newOrder = $order->replicate();
-
-
-
-                // Сохраняем копию в базе данных
-                $newOrder->save();
 
                 $order->wfp_status_pay = "AddCost";
                 $order->save();
@@ -5816,6 +5799,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
+
 
                 (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
 
@@ -5835,9 +5819,9 @@ class UniversalAndroidFunctionController extends Controller
                 $newOrder->auto = null;
                 $newOrder->wfp_order_id = $orderReference;
                 $newOrder->web_cost = $responseArr["order_cost"];
-                $newOrder->attempt_20 = (int)$newOrder->attempt_20 + 1;
                 $newOrder->closeReason = "-1";
                 $newOrder->closeReasonI = "0";
+                $newOrder->attempt_20 += $addCost;
                 $newOrder->save();
 
                 Log::info("Обновлен order с новым UID startAddCostCardBottomCreat: " . $order_new_uid);
@@ -5889,6 +5873,13 @@ class UniversalAndroidFunctionController extends Controller
 
                     $messageAdmin = "StartNewProcessExecution (startAddCostCardBottomCreat): " . json_encode($doubleOrder->toArray());
                     (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                    $uid_history = new Uid_history();
+                    $uid_history->uid_bonusOrder = $responseBonusArr["dispatching_order_uid"];
+                    $uid_history->uid_doubleOrder = $responseDoubleArr["dispatching_order_uid"];
+                    $uid_history->uid_bonusOrderHold = $responseBonusArr["dispatching_order_uid"];
+                    $uid_history->cancel = false;
+                    $uid_history->save();
 
                     StartNewProcessExecution::dispatch($doubleOrder->id);
 
