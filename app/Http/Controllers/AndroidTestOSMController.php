@@ -136,7 +136,7 @@ class AndroidTestOSMController extends Controller
         $city,
         $connectAPI,
         $uid
-    ): void {
+    ) {
         $maxExecutionTime = 3*60*60; // Максимальное время выполнения - 3 часа
         $maxExecutionTime = 2*60; // Максимальное время выполнения - 3 часа
 
@@ -158,7 +158,7 @@ class AndroidTestOSMController extends Controller
                     if ($response_arr['close_reason'] == 1) {
 
                         Log::debug("repeatCancel: close_reason is 1, exiting.");
-                        return;
+                        return "1";
                     } else {
                         Log::debug("repeatCancel: close_reason is not 1, continuing.");
                     }
@@ -175,6 +175,7 @@ class AndroidTestOSMController extends Controller
         } while (time() - $startTime < $maxExecutionTime);
         if (!$result) {
             (new MessageSentController())->sentNoCancelInfo($uid);
+            return null;
         }
     }
 
@@ -5473,8 +5474,7 @@ class AndroidTestOSMController extends Controller
             if ($uid_history) {
                 $uid = $uid_history->uid_bonusOrder;
                 $uid_Double = $uid_history->uid_doubleOrder;
-                $uid_history->cancel = true;
-                $uid_history->save();
+
 
                 Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
             }
@@ -5484,13 +5484,13 @@ class AndroidTestOSMController extends Controller
             $response_bonus = Http::withHeaders([
                 "Authorization" => $authorizationBonus,
                 "X-WO-API-APP-ID" => self::identificationId($application),
-//                "X-API-VERSION" => (new UniversalAndroidFunctionController)
-//                    ->apiVersionApp($city, $connectAPI, $application)
             ])->put($url);
             $json_arrWeb_bonus = json_decode($response_bonus, true);
             Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
+
+
             if ($json_arrWeb_bonus["order_client_cancel_result"] != 1) {
-                self::repeatCancel(
+                $result_bonus_cancel = self::repeatCancel(
                     $url,
                     $authorizationBonus,
                     $application,
@@ -5499,63 +5499,49 @@ class AndroidTestOSMController extends Controller
                     $uid
                 );
             } else {
-                (new DailyTaskController)->orderCardWfpReviewTask();
-                (new DailyTaskController)->orderBonusReviewTask();
+                $result_bonus_cancel = "1";
             }
-            if($uid_Double != " ") {
-                  $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
-                  Log::debug(" webordersCancelDouble double $url");
 
-                  $response_double =Http::withHeaders([
-                      "Authorization" => $authorizationDouble,
-                      "X-WO-API-APP-ID" => self::identificationId($application),
-            //                "X-API-VERSION" => (new UniversalAndroidFunctionController)
-            //                    ->apiVersionApp($city, $connectAPI, $application)
-                  ])->put($url);
+            $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+            Log::debug(" webordersCancelDouble double $url");
 
+            $response_double =Http::withHeaders([
+                "Authorization" => $authorizationDouble,
+                "X-WO-API-APP-ID" => self::identificationId($application),
+            ])->put($url);
+            $json_arrWeb_double = json_decode($response_double, true);
+            Log::debug("json_arrWeb_double", $json_arrWeb_double);
 
-                  $json_arrWeb_double = json_decode($response_double, true);
-                  Log::debug("json_arrWeb_double", $json_arrWeb_double);
-                  if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
-                      self::repeatCancel(
-                          $url,
-                          $authorizationDouble,
-                          $application,
-                          $city,
-                          $connectAPI,
-                          $uid_Double
-                      );
-                  } else {
-                      (new DailyTaskController)->orderCardWfpReviewTask();
-                      (new DailyTaskController)->orderBonusReviewTask();
-                  }
-              }
+            if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
+                $result_double_cancel = self::repeatCancel(
+                    $url,
+                    $authorizationDouble,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid_Double
+                );
+            } else {
+                $result_double_cancel = "1";
+            }
 
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
-            $hold = false;
-            if ($json_arrWeb_bonus['order_client_cancel_result'] == 1) {
-                if (!isset($json_arrWeb_double)) {
-                    $hold = true;
-                } else  if ($json_arrWeb_double['order_client_cancel_result'] == 1) {
-                    $hold = true;
-                }
+
+            if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
+                $orderweb->closeReason = "1";
+                $orderweb->save();
+
+                $uid_history->cancel = true;
+                $uid_history->save();
             }
 
 
-//            $orderweb->closeReason = "1";
-            $orderweb->save();
             (new MessageSentController)->sentCancelInfo($orderweb);
+
             Log::debug("webordersCancelDouble response $resp_answer");
             Log::debug("**********************************************************");
 
-
-
-//            if ($hold) {
-//                $resp_answer = $resp_answer . "Замовлення скасоване.";
-//            } else {
-//                $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
-//            }
         } else {
             $resp_answer = "Замовлення не вдалося скасувати.";
         }
@@ -5612,6 +5598,14 @@ class AndroidTestOSMController extends Controller
             $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
             $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
 
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+            if ($uid_history) {
+                $uid = $uid_history->uid_bonusOrder;
+                $uid_Double = $uid_history->uid_doubleOrder;
+
+                Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
+            }
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
             Log::debug(" webordersCancelDoubleWithotMemory bonus $url");
@@ -5622,8 +5616,9 @@ class AndroidTestOSMController extends Controller
             ])->put($url);
             $json_arrWeb_bonus = json_decode($response_bonus, true);
             Log::debug("webordersCancelDoubleWithotMemory json_arrWeb_bonus", $json_arrWeb_bonus);
+
             if ($json_arrWeb_bonus["order_client_cancel_result"] != 1) {
-                self::repeatCancel(
+                $result_bonus_cancel = self::repeatCancel(
                     $url,
                     $authorizationBonus,
                     $application,
@@ -5631,6 +5626,8 @@ class AndroidTestOSMController extends Controller
                     $connectAPI,
                     $uid
                 );
+            }  else {
+                $result_bonus_cancel = "1";
             }
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
@@ -5640,12 +5637,11 @@ class AndroidTestOSMController extends Controller
                 "Authorization" => $authorizationDouble,
                 "X-WO-API-APP-ID" => self::identificationId($application),
             ])->put($url);
-
-
             $json_arrWeb_double = json_decode($response_double, true);
             Log::debug("webordersCancelDoubleWithotMemory json_arrWeb_double", $json_arrWeb_double);
+
             if ($json_arrWeb_double["order_client_cancel_result"] != 1) {
-                self::repeatCancel(
+                $result_double_cancel = self::repeatCancel(
                     $url,
                     $authorizationDouble,
                     $application,
@@ -5653,19 +5649,20 @@ class AndroidTestOSMController extends Controller
                     $connectAPI,
                     $uid_Double
                 );
+            } else {
+                $result_double_cancel = "1";
             }
 
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
-            if (isset($json_arrWeb_bonus) &&
-                $json_arrWeb_bonus['order_client_cancel_result'] == 1 &&
-                isset($json_arrWeb_double) &&
-                $json_arrWeb_double['order_client_cancel_result'] == 1
-            ) {
+            if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
                 $orderweb->closeReason = "1";
+                $orderweb->save();
+
+                $uid_history->cancel = true;
+                $uid_history->save();
             }
 
-            $orderweb->save();
             (new MessageSentController)->sentCancelInfo($orderweb);
             Log::debug("webordersCancelDoubleWithotMemory response $resp_answer");
             Log::debug("**********************************************************");

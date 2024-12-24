@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\StartNewProcessExecution;
-use App\Jobs\StartOrderReview;
 use App\Models\DoubleOrder;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
@@ -97,53 +96,10 @@ class DailyTaskController extends Controller
      */
     public function orderCardWfpReviewTask()
     {
-//        $orderwebs = Orderweb::where(function ($query) {
-//            $query->where('wfp_status_pay', 'WaitingAuthComplete')
-//                ->orWhere('wfp_status_pay', 'InProcessing');
-//        })->get();
-//
-//        if (!$orderwebs->isEmpty()) {
-//            Log::info("orderCardWfpReviewTask Orderweb", $orderwebs->toArray());
-//
-//            foreach ($orderwebs->toArray() as $value) {
-//                $uid = $value['dispatching_order_uid'];
-////                $uid = (new MemoryOrderChangeController)->show($uid);
-//                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-//                if ($uid_history != null) {
-//                    Log::info("uid_history $uid_history");
-//                    $bonusOrder = $uid_history->uid_bonusOrder;
-//                    $doubleOrder = $uid_history->uid_doubleOrder;
-//                    $bonusOrderHold  = $uid_history->uid_bonusOrder;
-//                    Log::info("uid_history bonusOrder $bonusOrder");
-//                    Log::info("uid_history doubleOrder $doubleOrder");
-//                    Log::info("uid_history bonusOrderHold $bonusOrderHold");
-////                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
-//                    (new UniversalAndroidFunctionController)->orderReview(
-//                        $bonusOrder,
-//                        $doubleOrder,
-//                        $bonusOrderHold
-//                    );
-//                } else {
-//                    $message = "Оператор проверьте холд по счету WFP: " .  $value['wfp_order_id'] . "для пересмотра";
-//                    $order = Orderweb::where('wfp_order_id', $value['wfp_order_id'])->first();
-//                    $order->wfp_status_pay = 'Declined';
-//                    $order->save();
-//
-//                    self::sentTaskMessage($message);
-//                    Log::info("orderCardWfpReviewTask $message");
-//                }
-//            }
-//        } else {
-//            $message = "orderCardWfpReviewTask нет холдов WFP для пересмотра";
-////            self::sentTaskMessage($message);
-//            Log::info("orderCardWfpReviewTask $message");
-//        }
         $orderwebs = WfpInvoice::where(function ($query) {
             $query->where('transactionStatus', 'WaitingAuthComplete')
                 ->orWhere('transactionStatus', 'InProcessing');
         })->get();
-        $messageAdmin = "orderCardWfpReviewTask: " . $orderwebs;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         if (!$orderwebs->isEmpty()) {
             Log::info("orderCardWfpReviewTask WfpInvoice", $orderwebs->toArray());
@@ -160,7 +116,7 @@ class DailyTaskController extends Controller
                     Log::info("uid_history bonusOrder $bonusOrder");
                     Log::info("uid_history doubleOrder $doubleOrder");
                     Log::info("uid_history bonusOrderHold $bonusOrderHold");
-//                    StartOrderReview::dispatch($bonusOrder, $doubleOrder, $bonusOrderHold);
+
                     (new UniversalAndroidFunctionController)->orderReview(
                         $bonusOrder,
                         $doubleOrder,
@@ -172,18 +128,11 @@ class DailyTaskController extends Controller
                         $uid,
                         $uid
                     );
-//                    $message = "Оператор проверьте холд по счету WFP: " .  $value['orderReference'] . "для пересмотра";
-//                    $order = WfpInvoice::where('orderReference', $value['orderReference'])->first();
-//
-//                    $order->save();
-//
-//                    self::sentTaskMessage($message);
-//                    Log::info("orderCardWfpReviewTask $message");
                 }
             }
         } else {
             $message = "orderCardWfpReviewTask нет холдов WFP для пересмотра";
-//            self::sentTaskMessage($message);
+
             Log::info("orderCardWfpReviewTask $message");
         }
     }

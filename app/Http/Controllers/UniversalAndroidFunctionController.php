@@ -146,7 +146,6 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "startNewProcessExecutionStatus";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-//        self::checkAndRestoreDatabaseConnection();
         ExecStatusHistory::truncate();
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
         if (!$doubleOrderRecord) {
@@ -320,6 +319,7 @@ class UniversalAndroidFunctionController extends Controller
                     Log::info("doubleOrderRecord 1 $doubleOrderRecord");
                     $doubleOrderRecord->delete();
 //                    self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+                    $doubleOrderRecord->delete();
                     return null;
                 } else {
                     //Безнал ОБРАБОТКА статуса
@@ -1322,6 +1322,7 @@ class UniversalAndroidFunctionController extends Controller
                         Log::info("doubleOrderRecord 2 $doubleOrderRecord");
                         $doubleOrderRecord->delete();
 //                        self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+                        $doubleOrderRecord->delete();
                         return null;
                     } else {
                         //Нал ОБРАБОТКА статуса
@@ -2601,6 +2602,7 @@ class UniversalAndroidFunctionController extends Controller
                             Log::info("doubleOrderRecord 3 $doubleOrderRecord");
                             $doubleOrderRecord->delete();
 //                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+                            $doubleOrderRecord->delete();
                             return null;
                         }
                     }
@@ -5362,13 +5364,11 @@ class UniversalAndroidFunctionController extends Controller
 
 
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
-        $messageAdmin = "Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null');
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Ищем данные из памяти о заказе
         $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
         Log::debug("Найден orderMemory с UID: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null'));
-        $messageAdmin = "Найден orderMemory с UID: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null');
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Проверяем существование заказа
         if (!$order || !$orderMemory) {
             Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
@@ -5376,8 +5376,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         Log::info("Город заказа: " . $city);
-        $messageAdmin = "Город заказа: " . $city;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Выбор приложения по комментарию
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
@@ -5391,8 +5390,7 @@ class UniversalAndroidFunctionController extends Controller
                 break;
         }
         Log::info("Приложение выбрано: " . $application);
-        $messageAdmin = "Приложение выбрано: " . $application;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Выбор приложения по комментарию
 
         $connectAPI = (new AndroidTestOSMController)->connectAPIAppOrder($city, $application);
@@ -5621,15 +5619,13 @@ class UniversalAndroidFunctionController extends Controller
     ): ?\Illuminate\Http\JsonResponse
     {
         Log::info("Метод startAddCostCardBottomCreat вызван с UID  : " . $uid);
-        $messageAdmin = "Метод startAddCostCardBottomCreat вызван с UID  : " . $uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
 
 //        // Получаем UID из MemoryOrderChangeController
 
         $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("MemoryOrderChangeController startAddCostCardBottomCreat возвращает UID:  " . $uid);
-        $messageAdmin = "MemoryOrderChangeController  startAddCostCardBottomCreat возвращает UID: " . $uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         // Ищем заказ
 
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();

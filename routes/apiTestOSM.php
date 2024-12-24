@@ -145,8 +145,7 @@ Route::get('/android/webordersCancel/{uid}/{city}/{application}', [AndroidTestOS
 Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDouble'])
     ->name('webordersCancelDouble');
 
-Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDouble'])
-    ->name('webordersCancelDouble');
+
 Route::get('/android/webordersCancelDoubleWithotMemory/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidTestOSMController::class, 'webordersCancelDoubleWithotMemory'])
     ->name('webordersCancelDoubleWithotMemory');
 

@@ -38,13 +38,13 @@ class RefundSettleCardPayJob implements ShouldQueue
 
         $result = (new WfpController)->refundSettleJob($this->params, $this->orderReference);
 
-        if ($result === null) {
+        if ($result == null) {
             Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
             $messageAdmin = "Задача RefundSettleCardPayJob $this->orderReference завершена";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return;
         }
-
         Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
+
     }
 }
