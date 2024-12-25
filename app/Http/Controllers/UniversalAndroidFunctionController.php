@@ -149,7 +149,7 @@ class UniversalAndroidFunctionController extends Controller
         ExecStatusHistory::truncate();
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
         if (!$doubleOrderRecord) {
-            return null;
+            return "exit";
         }
 
         $responseBonusStr = $doubleOrderRecord->responseBonusStr;
@@ -279,7 +279,7 @@ class UniversalAndroidFunctionController extends Controller
 //            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
             Log::info("doubleOrderRecord 0 $doubleOrderRecord");
             $doubleOrderRecord->delete();
-            return null;
+            return "exit";
         } else {
             while (time() - $startTime < $maxExecutionTime) {
                 if (time() <= strtotime($orderwebs->required_time)) {
@@ -320,7 +320,7 @@ class UniversalAndroidFunctionController extends Controller
                     $doubleOrderRecord->delete();
 //                    self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                     $doubleOrderRecord->delete();
-                    return null;
+                    return "exit";
                 } else {
                     //Безнал ОБРАБОТКА статуса
                     switch ($newStatusBonus) {
@@ -1323,7 +1323,7 @@ class UniversalAndroidFunctionController extends Controller
                         $doubleOrderRecord->delete();
 //                        self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                         $doubleOrderRecord->delete();
-                        return null;
+                        return "exit";
                     } else {
                         //Нал ОБРАБОТКА статуса
                         switch ($newStatusDouble) {
@@ -2603,7 +2603,7 @@ class UniversalAndroidFunctionController extends Controller
                             $doubleOrderRecord->delete();
 //                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
                             $doubleOrderRecord->delete();
-                            return null;
+                            return "exit";
                         }
                     }
                 }
@@ -2632,7 +2632,7 @@ class UniversalAndroidFunctionController extends Controller
 
 //                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
             }
-            return null;
+            return "exit";
         }
     }
 
@@ -2847,7 +2847,7 @@ class UniversalAndroidFunctionController extends Controller
         $current_time_timestamp = strtotime($current_time);
 
         // Проверка, прошла ли одна минута
-        if (($current_time_timestamp - $created_at_timestamp) <= 60) {
+        if (($current_time_timestamp - $created_at_timestamp) <= 50) {
             Log::debug("Less than one minute has passed since order creation.");
             Log::debug("Мерчант.");
             $merchantInfo = (new WfpController)->checkMerchantInfo($order);
@@ -2857,6 +2857,7 @@ class UniversalAndroidFunctionController extends Controller
                 Log::debug("Мерчанта нет");
                 return true;
             }
+            return false;
         } else {
             $orderReference = $order->wfp_order_id;
             Log::debug("canceledOneMinute orderReference $orderReference");
@@ -2906,32 +2907,35 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("canceledOneMinute response data", $data);
                 }
 
-
                 if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
                     if ($data['transactionStatus'] == "Approved"
                         || $data['transactionStatus'] == "WaitingAuthComplete") {
                         Log::debug("Transaction status is Approved or WaitingAuthComplete.");
                         return false;
-                    } elseif ($data['transactionStatus'] == "Declined") {
-                        Log::debug("Transaction status is Declined");
-                        $order->transactionStatus = "Declined";
-                        return true;
                     } else {
-                        Log::debug("Transaction status is not Approved or WaitingAuthComplete.");
-                        if($order->transactionStatus != "Approved"
-                            || $order->transactionStatus != "WaitingAuthComplete") {
-                            $order->transactionStatus = "Canceled_One_Min";
-                        }
-
                         return true;
                     }
+
+//                    elseif ($data['transactionStatus'] == "Declined") {
+//                        Log::debug("Transaction status is Declined");
+//                        $order->transactionStatus = "Declined";
+//                        return true;
+//                    } else {
+//                        Log::debug("Transaction status is not Approved or WaitingAuthComplete.");
+//                        if($order->transactionStatus != "Approved"
+//                            || $order->transactionStatus != "WaitingAuthComplete") {
+//                            $order->transactionStatus = "Canceled_One_Min";
+//                        }
+//
+//                        return true;
+//                    }
                 } else {
                     Log::debug("Transaction status not found in response.");
-                    return false;
+                    return true;
                 }
             } else {
                 Log::error("OrderReference not found for UID: $uid");
-                return false;
+                return true;
             }
         }
     }

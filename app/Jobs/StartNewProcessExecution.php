@@ -39,7 +39,7 @@ class StartNewProcessExecution implements ShouldQueue
         $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
         Log::debug("StartNewProcessExecution job finished successfully for order ID: {$this->orderId}");
 
-        if ($result === null) {
+        if ($result === "exit") {
             Log::info("Задача $messageAdmin завершена");
             $messageAdmin = "Задача $messageAdmin завершена";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);

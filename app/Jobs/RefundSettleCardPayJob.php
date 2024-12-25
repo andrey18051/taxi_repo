@@ -17,15 +17,17 @@ class RefundSettleCardPayJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $params;
     protected $orderReference;
+    protected $method;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($params, $orderReference)
+    public function __construct($params, $orderReference, $method)
     {
         $this->params = $params;
         $this->orderReference = $orderReference;
+        $this->method = $method;
     }
 
     /**
@@ -36,9 +38,14 @@ class RefundSettleCardPayJob implements ShouldQueue
     public function handle()
     {
 
+        $messageAdmin = "Задача RefundSettleCardPayJob вызвана методом $this->method для счета $this->orderReference .";
+        Log::info($messageAdmin);
+
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
         $result = (new WfpController)->refundSettleJob($this->params, $this->orderReference);
 
-        if ($result == null) {
+        if ($result === "exit") {
             Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");
             $messageAdmin = "Задача RefundSettleCardPayJob $this->orderReference завершена";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
