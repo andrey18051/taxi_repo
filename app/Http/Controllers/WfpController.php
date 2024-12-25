@@ -1776,11 +1776,11 @@ class WfpController extends Controller
         }
 
 
-        self::checkStatus(
-            $application,
-            $city,
-            $orderReference
-        );
+//        self::checkStatus(
+//            $application,
+//            $city,
+//            $orderReference
+//        );
 
         $order->save();
 //        }
