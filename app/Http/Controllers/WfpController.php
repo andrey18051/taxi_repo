@@ -763,47 +763,33 @@ class WfpController extends Controller
             $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
             if ($wfpInvoices->isNotEmpty()) {
                 foreach ($wfpInvoices as $value) {
-                    $params = [
-                        "merchantAccount" => $merchantAccount,
-                        "orderReference" => $value->orderReference,
-                        "amount" => $value->amount,
-                        "currency" => "UAH",
-                    ];
+                    // Проверка статуса текущей транзакции
+                    $transactionStatus = strtolower(trim($value->transactionStatus ?? ''));
+                    if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                        // Параметры для REFUND
+                        $params = [
+                            "transactionType" => "REFUND",
+                            "merchantAccount" => $merchantAccount,
+                            "orderReference" => $value->orderReference,
+                            "amount" => $value->amount,
+                            "currency" => "UAH",
+                            "comment" => "Повернення платежу",
+                            "merchantSignature" => self::generateHmacMd5Signature([
+                                "transactionType" => "REFUND",
+                                "merchantAccount" => $merchantAccount,
+                                "orderReference" => $value->orderReference,
+                                "amount" => $value->amount,
+                                "currency" => "UAH",
+                            ], $secretKey, "refund"),
+                            "apiVersion" => 1,
+                        ];
 
-                    $params = [
-                        "transactionType" => "REFUND",
-                        "merchantAccount" => $merchantAccount,
-                        "orderReference" => $value->orderReference,
-                        "amount" => $value->amount,
-                        "currency" => "UAH",
-                        "comment" => "Повернення платежу",
-                        "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
-                        "apiVersion" => 1
-                    ];
-
-                    RefundSettleCardPayJob::dispatch($params, $orderReference, "refund");
+                        // Диспетчеризация задачи RefundSettleCardPayJob
+                        RefundSettleCardPayJob::dispatch($params, $value->orderReference, "refund");
+                    }
                 }
             }
-//            else {
-//                $params = [
-//                    "merchantAccount" => $merchantAccount,
-//                    "orderReference" => $orderReference,
-//                    "amount" => $amount,
-//                    "currency" => "UAH",
-//                ];
-//
-//                $params = [
-//                    "transactionType" => "REFUND",
-//                    "merchantAccount" => $merchantAccount,
-//                    "orderReference" => $orderReference,
-//                    "amount" => $amount,
-//                    "currency" => "UAH",
-//                    "comment" => "Повернення платежу",
-//                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
-//                    "apiVersion" => 1
-//                ];
-//                RefundSettleCardPayJob::dispatch($params, $orderReference);
-//            }
+
         }
 
 
@@ -930,65 +916,90 @@ class WfpController extends Controller
 
     public function refundSettleJob($params, $orderReference)
     {
-        $startTime = time(); // Время начала выполнения скрипта
-        $maxDuration = 2 * 60; // 2 минуты в секундах
+        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+        Log::debug("refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus");
+        $messageAdmin = "refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus";
 
-        while (true) {
-            try {
-                // Отправка POST-запроса к API
-                $response = Http::post('https://api.wayforpay.com/api', $params);
-                $responseArray = $response->json(); // Проверка на валидный JSON
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-                if (!is_array($responseArray)) {
-                    Log::error("refundSettleJob Некорректный ответ от API", ['response' => $response->body()]);
+        $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+        Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
+        $messageAdmin = "refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}";
 
-                } else {
-                    Log::debug("refundSettleJob Ответ от API", $responseArray);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-                    (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
 
-                    // Проверка статуса транзакции
-//                    $reasonCode = $responseArray['reasonCode'] ?? null;
-                    $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
+        if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+            return "exit";
+        } else {
+            Log::debug("refundSettleJob Транзакция отклонена.");
 
-//                    if ($reasonCode === '1115' || $reasonCode === '1130') {
-//                        return "exit";
-//                    }
-//
-//                    if ($reasonCode === '1126') {
-//                        $this->updateOrderStatus($responseArray, $orderReference);
-//                        return "exit";
-//                    }
 
-                    if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-                        Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
-                        (new MessageSentController)->sentMessageAdmin("refund Статус транзакции: {$transactionStatus}");
+            $startTime = time(); // Время начала выполнения скрипта
+            $maxDuration = 2 * 60; // 2 минуты в секундах
+            $maxAttempts = 12; // Максимум 12 попыток (2 минуты при 10 секундах ожидания)
+            $attempts = 0;
+            while (true) {
 
-                        $this->updateOrderStatus($responseArray, $orderReference);
-                        return "exit";
-                    }
+                try {
+                    // Отправка POST-запроса к API
+                    $response = Http::post('https://api.wayforpay.com/api', $params);
+                    $responseArray = $response->json(); // Проверка на валидный JSON
 
-                    if ($transactionStatus) {
+                    if (!is_array($responseArray)) {
+                        Log::error("refundSettleJob Некорректный ответ от API", ['response' => $response->body()]);
+
+                    } else {
+                        Log::debug("refundSettleJob Ответ от API", $responseArray);
+
+                        (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
+
+                        // Проверка статуса транзакции
+
+                        $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
+
+                        if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                            Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
+                            (new MessageSentController)->sentMessageAdmin("refund Статус транзакции: {$transactionStatus}");
+
+                            $this->updateOrderStatus($responseArray, $orderReference);
+                            return "exit";
+                        } else {
+                            $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+                            $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+                            Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
+
+                            if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                                return "exit";
+                            } else {
+                                Log::debug("refundSettleJob Транзакция отклонена. Повторная попытка через 10 секунд.");
+                            }
+                        }
                         // Проверяем, превышено ли время ожидания
+
                         if (time() - $startTime > $maxDuration) {
                             $this->updateOrderStatus($responseArray, $orderReference);
                             Log::warning("refundSettleJob Превышен лимит времени. Прекращение попыток.");
                             return "exit";
                         }
-                        Log::debug("refundSettleJob Транзакция отклонена. Повторная попытка через 10 секунд.");
                     }
+
+
+                } catch (\Exception $e) {
+                    Log::error("refundSettleJob Ошибка при выполнении запроса", ['message' => $e->getMessage()]);
+                    break;
                 }
-
-
-            } catch (\Exception $e) {
-                Log::error("refundSettleJob Ошибка при выполнении запроса", ['message' => $e->getMessage()]);
-                break;
+                $attempts++;
+                if ($attempts > $maxAttempts) {
+                    Log::warning("refundSettleJob Превышено число попыток. Прекращение цикла.");
+                    break;
+                }
+                sleep(10);
             }
-            sleep(10);
-        }
 
-        Log::debug("refundSettleJob Завершение метода");
-        return "exit";
+            Log::debug("refundSettleJob Завершение метода");
+            return "exit";
+        }
     }
 
     /**
