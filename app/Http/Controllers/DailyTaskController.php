@@ -7,6 +7,7 @@ use App\Models\DoubleOrder;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Models\WfpInvoice;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -96,32 +97,42 @@ class DailyTaskController extends Controller
      */
     public function orderCardWfpReviewTask()
     {
-        $orderwebs = WfpInvoice::where(function ($query) {
-            $query->where('transactionStatus', 'WaitingAuthComplete')
-                ->orWhere('transactionStatus', 'InProcessing');
+        $currentTime = Carbon::now();
+
+// Фильтрация записей
+        $wfpInvoices = WfpInvoice::where(function ($query) {
+            $query->where('transactionStatus', 'WaitingAuthComplete') // Все записи с WaitingAuthComplete
+            ->orWhere(function ($subQuery) { // Только записи с InProcessing, обновленные менее минуты назад
+                $subQuery->where('transactionStatus', 'InProcessing')
+                    ->where('updated_at', '>=', Carbon::now()->subMinute());
+            });
         })->get();
 
-        if (!$orderwebs->isEmpty()) {
-            Log::info("orderCardWfpReviewTask WfpInvoice", $orderwebs->toArray());
-
-            foreach ($orderwebs->toArray() as $value) {
+        if (!$wfpInvoices->isEmpty()) {
+            Log::info("orderCardWfpReviewTask WfpInvoice", $wfpInvoices->toArray());
+            $bonusOrderHold = null;
+            foreach ($wfpInvoices->toArray() as $value) {
                 $uid = $value['dispatching_order_uid'];
                 $uid = (new MemoryOrderChangeController)->show($uid);
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
                 if ($uid_history != null) {
                     Log::info("uid_history $uid_history");
-                    $bonusOrder = $uid_history->uid_bonusOrder;
-                    $doubleOrder = $uid_history->uid_doubleOrder;
-                    $bonusOrderHold  = $uid_history->uid_bonusOrderHold;
-                    Log::info("uid_history bonusOrder $bonusOrder");
-                    Log::info("uid_history doubleOrder $doubleOrder");
-                    Log::info("uid_history bonusOrderHold $bonusOrderHold");
 
-                    (new UniversalAndroidFunctionController)->orderReview(
-                        $bonusOrder,
-                        $doubleOrder,
-                        $bonusOrderHold
-                    );
+                    if($bonusOrderHold  != $uid_history->uid_bonusOrderHold) {
+                        $bonusOrder = $uid_history->uid_bonusOrder;
+                        $doubleOrder = $uid_history->uid_doubleOrder;
+                        $bonusOrderHold  = $uid_history->uid_bonusOrderHold;
+                        Log::info("uid_history bonusOrder $bonusOrder");
+                        Log::info("uid_history doubleOrder $doubleOrder");
+                        Log::info("uid_history bonusOrderHold $bonusOrderHold");
+
+                        (new UniversalAndroidFunctionController)->orderReview(
+                            $bonusOrder,
+                            $doubleOrder,
+                            $bonusOrderHold
+                        );
+                    }
+
                 } else {
                     (new UniversalAndroidFunctionController)->orderReview(
                         $uid,
