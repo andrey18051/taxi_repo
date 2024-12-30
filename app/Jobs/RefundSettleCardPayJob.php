@@ -42,8 +42,12 @@ class RefundSettleCardPayJob implements ShouldQueue
         Log::info($messageAdmin);
 
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-        $result = (new WfpController)->refundSettleJob($this->params, $this->orderReference);
+        if($this->method == "refund" ||  $this->method == "settle") {
+            $result = (new WfpController)->refundSettleJob($this->params, $this->orderReference);
+        }
+        if($this->method == "refundVerifyCards") {
+            $result = (new WfpController)->refundSettle($this->params, $this->orderReference);
+        }
 
         if ($result === "exit") {
             $this->delete(); // Удаляет задачу из очереди

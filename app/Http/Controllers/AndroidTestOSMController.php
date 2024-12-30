@@ -1884,14 +1884,16 @@ class AndroidTestOSMController extends Controller
                 $uid_history->uid_doubleOrder = $responseDoubleArr["dispatching_order_uid"];
                 $uid_history->uid_bonusOrderHold = $responseBonusArr["dispatching_order_uid"];
                 $uid_history->cancel = false;
+                $uid_history->orderId = $doubleOrder->id;
                 $uid_history->save();
+
 
 
                 $response_ok["doubleOrder"] = $doubleOrder->id;
 
 
-
                 StartNewProcessExecution::dispatch($doubleOrder->id);
+
 
             }
 
@@ -4437,9 +4439,10 @@ class AndroidTestOSMController extends Controller
 
                     $uid_history = new Uid_history();
                     $uid_history->uid_bonusOrder = $responseBonusArr["dispatching_order_uid"];
-                    $uid_history->uid_doubleOrder = $responseDoubleArr["dispatching_order_uid"];
+                    $uid_history->uid_doubleOrder = $responseDouble["dispatching_order_uid"];
                     $uid_history->uid_bonusOrderHold = $responseBonusArr["dispatching_order_uid"];
                     $uid_history->cancel = false;
+                    $uid_history->orderId = $doubleOrder->id;
                     $uid_history->save();
 
 
@@ -4923,6 +4926,7 @@ class AndroidTestOSMController extends Controller
                     $uid_history->uid_doubleOrder = $responseDoubleArr["dispatching_order_uid"];
                     $uid_history->uid_bonusOrderHold = $responseBonusArr["dispatching_order_uid"];
                     $uid_history->cancel = false;
+                    $uid_history->orderId = $doubleOrder->id;
                     $uid_history->save();
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
@@ -5880,8 +5884,8 @@ class AndroidTestOSMController extends Controller
                             // Обрабатываем успешный ответ
                             $response_bonus_arr = json_decode($response_bonus, true);
 
-                            $messageAdmin = "Опрос статуса безналичного заказа $uid_history->uid_bonusOrder Ответ:" . print_r($response_bonus_arr, true);
-                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//                            $messageAdmin = "Опрос статуса безналичного заказа $uid_history->uid_bonusOrder Ответ:" . print_r($response_bonus_arr, true);
+//                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                             if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
                                 || $response_bonus_arr["close_reason"] == -1) {
@@ -6173,8 +6177,8 @@ class AndroidTestOSMController extends Controller
                             // Обрабатываем успешный ответ
                             $response_bonus_arr = json_decode($response_bonus, true);
 
-                            $messageAdmin = "Опрос статуса безналичного заказа $uid_history->uid_bonusOrder Ответ:" . print_r($response_bonus_arr, true);
-                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//                            $messageAdmin = "Опрос статуса безналичного заказа $uid_history->uid_bonusOrder Ответ:" . print_r($response_bonus_arr, true);
+//                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                             if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
                                 || $response_bonus_arr["close_reason"] == -1) {
