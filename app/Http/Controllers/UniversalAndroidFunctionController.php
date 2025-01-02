@@ -45,7 +45,7 @@ class UniversalAndroidFunctionController extends Controller
     public function sentErrorMessage($message)
     {
         $alarmMessage = new TelegramController();
-        Log::debug("sentErrorMessage: $message");
+        Log::debug(" $message");
         try {
             $alarmMessage->sendAlarmMessage($message);
             $alarmMessage->sendMeMessage($message);
@@ -201,9 +201,6 @@ class UniversalAndroidFunctionController extends Controller
             $uid_history->uid_bonusOrderHold = $bonusOrder;
             $uid_history->cancel = false;
             $uid_history->save();
-        } else {
-//            $bonusOrder = $uid_history->uid_bonusOrder;
-//            $doubleOrder = $uid_history->uid_doubleOrder;
         }
 
 // Безнал
@@ -237,9 +234,6 @@ class UniversalAndroidFunctionController extends Controller
             $uid_history
         );
 
-
-
-//        return "";
 
         $lastStatusDoubleTime = time();
         $lastStatusDouble = $newStatusDouble;
@@ -319,7 +313,7 @@ class UniversalAndroidFunctionController extends Controller
                     Log::info("doubleOrderRecord 1 $doubleOrderRecord");
                     $doubleOrderRecord->delete();
 //                    self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-                    $doubleOrderRecord->delete();
+
                     return "exit";
                 } else {
                     //Безнал ОБРАБОТКА статуса
@@ -1322,7 +1316,7 @@ class UniversalAndroidFunctionController extends Controller
                         Log::info("doubleOrderRecord 2 $doubleOrderRecord");
                         $doubleOrderRecord->delete();
 //                        self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-                        $doubleOrderRecord->delete();
+
                         return "exit";
                     } else {
                         //Нал ОБРАБОТКА статуса
@@ -2602,7 +2596,7 @@ class UniversalAndroidFunctionController extends Controller
                             Log::info("doubleOrderRecord 3 $doubleOrderRecord");
                             $doubleOrderRecord->delete();
 //                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-                            $doubleOrderRecord->delete();
+
                             return "exit";
                         }
                     }
@@ -2730,74 +2724,35 @@ class UniversalAndroidFunctionController extends Controller
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
         Log::debug("uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false'));
 
-        $order = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
-        $wfp_order_id = $order->wfp_order_id;
+        if ($canceledOneMinute|| $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
 
+            $orderCanceledBonus = self::orderCanceled(
+                $bonusOrder,
+                'bonus',
+                $connectAPI,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
 
-
-        if ($canceledOneMinute|| $uid_history->cancel || $wfp_order_id == null) { //Выход по 1 минуте или нажатию отмены
-
-            $canceled = $canceledOneMinute ? 'true' : 'false';
-
-
-            $responseBonusLast =  $uid_history->bonus_status;
-            $orderCanceledBonus = false;
-            if ($responseBonusLast) {
-                $responseBonusLastArr = json_decode($responseBonusLast, true);
-
-                Log::debug("canceledFinish responseBonusLastArr['close_reason']" .
-                    $responseBonusLastArr['close_reason']);
-
-                if ($responseBonusLastArr['close_reason'] == -1) {
-                    $orderCanceledBonus = self::orderCanceled(
-                        $bonusOrder,
-                        'bonus',
-                        $connectAPI,
-                        $authorizationBonus,
-                        $identificationId,
-                        $apiVersion
-                    );
-                } else {
-                    Log::debug("canceledFinish $orderCanceledBonus");
-                    $orderCanceledBonus = true;
-                }
-                $messageAdmin = "
-                 sentErrorMessage Отмена по 1 минуте $bonusOrder
-                 ++++ dispatching_order_uid $uid_bonusOrderHold
-                 canceledOneMinute: $canceled
-                 uid_history->cancel: $uid_history->cancel
-                 wfp_order_id: $wfp_order_id";
-
-
-                $this->sentErrorMessage($messageAdmin);
-            }
-
-            $responseDoubleLast =  $uid_history->double_status;
-            $orderCanceledDouble = false;
-            if ($responseDoubleLast) {
-                $responseDoubleLastArr = json_decode($responseDoubleLast, true);
-
-                Log::debug("canceledFinish responseDoubleLastArr['close_reason']" .
-                    $responseDoubleLastArr['close_reason']);
-                if ($responseDoubleLastArr['close_reason'] == -1) {
-                    $orderCanceledDouble = self::orderCanceled(
-                        $doubleOrder,
-                        "double",
-                        $connectAPI,
-                        $authorizationDouble,
-                        $identificationId,
-                        $apiVersion
-                    );
-                } else {
-                    $orderCanceledDouble = true;
-                }
-            }
+            $orderCanceledDouble = self::orderCanceled(
+                $doubleOrder,
+                "double",
+                $connectAPI,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion
+            );
 
             if ($orderCanceledBonus && $orderCanceledDouble || $canceledOneMinute  || $uid_history->cancel) {
                 $uid_history->bonus_status = null;
                 $uid_history->double_status = null;
                 $uid_history->save();
+                $messageAdmin = "Отмена по 1 минуте
+                     безнал: $bonusOrder
+                     дубль $doubleOrder";
 
+                $this->sentErrorMessage($messageAdmin);
                 return true;
             } else {
                 return false;
@@ -2816,7 +2771,14 @@ class UniversalAndroidFunctionController extends Controller
                             $uid_history->bonus_status = null;
                             $uid_history->double_status = null;
                             $uid_history->save();
-                            return true;
+
+                            $messageAdmin = "Выход из вилки Отмена по налу
+                                безнал: $bonusOrder
+                                статус б/н: $lastStatusBonus
+                                нал $doubleOrder
+                                статус нал: $lastStatusDouble";
+                                $this->sentErrorMessage($messageAdmin);
+                                return true;
                     }
                     break;
             }
@@ -2833,6 +2795,13 @@ class UniversalAndroidFunctionController extends Controller
                             $uid_history->bonus_status = null;
                             $uid_history->double_status = null;
                             $uid_history->save();
+
+                            $messageAdmin = "Выход из вилки Отмена по безналу
+                                безнал: $bonusOrder
+                                статус б/н: $lastStatusBonus
+                                нал $doubleOrder
+                                статус нал: $lastStatusDouble";
+                            $this->sentErrorMessage($messageAdmin);
                             return true;
                     }
                     break;
@@ -3318,11 +3287,11 @@ class UniversalAndroidFunctionController extends Controller
     {
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         if ($order) {
-            $wfp_order_id = "Номер заказа WFP: "  . $order->wfp_order_id;
+
             $amount = "Сумма $order->web_cost грн";
             $connectAPI = $order->server;
             $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
-            $messageAdmin = "Отмена заказ $uid. Время $localCreatedAt. Сервер $connectAPI. Маршрут $order->routefrom - $order->routeto. Телефон клиента:  $order->user_phone. $wfp_order_id. $amount";
+            $messageAdmin = "Отмена заказ $uid. Время $localCreatedAt. Сервер $connectAPI. Маршрут $order->routefrom - $order->routeto. Телефон клиента:  $order->user_phone. Сумма $amount";
 
             $alarmMessage = new TelegramController();
 
