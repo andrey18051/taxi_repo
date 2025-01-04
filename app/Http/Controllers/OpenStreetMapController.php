@@ -9,61 +9,52 @@ class OpenStreetMapController extends Controller
 {
     public function reverse($originLatitude, $originLongitude): string
     {
+        // Осуществляем запрос к OpenStreetMap (OSM)
         $url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=$originLatitude&lon=$originLongitude";
+        $response = Http::get($url);
+
+        // Проверка на успешность запроса
+        if ($response->successful()) {
+            $response_arr = json_decode($response, true);
+
+            if (!empty($response_arr) && isset($response_arr["address"])) {
+                if ($response_arr["category"] == "building") {
+                    $address_string = $response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"];
+                    if (isset($response_arr["address"]["city"])) {
+                        $address_string .= ", місто " . $response_arr["address"]["city"];
+                    }
+                    return $address_string;
+                }
+            }
+        }
+
+        // Если OSM не вернул нужную информацию, используем Visicom API
+        $r = 300;
+        $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
+            . $originLongitude
+            . "," . $originLatitude
+            . "&r=" . $r . "&l=1&key="
+            . config("app.keyVisicom");
 
         $response = Http::get($url);
-        $response_arr = json_decode($response, true);
 
-        if (empty($response_arr)) {
-            $r = 300;
-            $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-                . $originLongitude
-                . "," . $originLatitude
-                . "&r=" . $r . "&l=1&key="
-                . config("app.keyVisicom");
-
-            $response = Http::get($url);
+        // Проверка на успешность запроса
+        if ($response->successful()) {
             $response_arr_from = json_decode($response, true);
-
-            if ($response_arr_from != null) {
-                return $response_arr_from["properties"]["street_type"]
+            if ($response_arr_from != null && isset($response_arr_from["properties"])) {
+                $address_string = $response_arr_from["properties"]["street_type"]
                     . $response_arr_from["properties"]["street"]
                     . ", буд." . $response_arr_from["properties"]["name"]
                     . ", " . $response_arr_from["properties"]["settlement_type"]
                     . " " . $response_arr_from["properties"]["settlement"];
-            } else {
-                return "Точка на карте";
-            }
-        } else {
-            if ($response_arr["category"] == "building") {
-                $address_string = $response_arr["address"]["road"] . " буд. " . $response_arr["address"]["house_number"];
-                if (isset($response_arr["address"]["city"])) {
-                    $address_string .= ", місто " . $response_arr["address"]["city"];
-                }
                 return $address_string;
-            } else {
-                $r = 300;
-                $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near="
-                    . $originLongitude
-                    . "," . $originLatitude
-                    . "&r=" . $r . "&l=1&key="
-                    . config("app.keyVisicom");
-
-                $response = Http::get($url);
-                $response_arr_from = json_decode($response, true);
-
-                if ($response_arr_from != null) {
-                    return $response_arr_from["properties"]["street_type"]
-                        . $response_arr_from["properties"]["street"]
-                        . ", буд." . $response_arr_from["properties"]["name"]
-                        . ", " . $response_arr_from["properties"]["settlement_type"]
-                        . " " . $response_arr_from["properties"]["settlement"];
-                } else {
-                    return "Точка на карте";
-                }
             }
         }
+
+        // Если и Visicom не вернул адрес, возвращаем стандартное сообщение
+        return "Точка на карте";
     }
+
 
     /**
      * @param $originLatitude
