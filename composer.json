@@ -21,7 +21,8 @@
         "stevebauman/location": "^6.5",
         "irazasyed/telegram-bot-sdk": "^2.0",
       "ext-json": "*",
-      "ext-curl": "*"
+      "ext-curl": "*",
+      "ext-simplexml": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

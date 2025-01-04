@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use GuzzleHttp\Client;
 
 class DailyTaskController extends Controller
 {
@@ -193,5 +194,206 @@ class DailyTaskController extends Controller
             Log::info("orderReviewTask $message");
         }
     }
+
+    public function verifyVersionApiTaskPas1() {
+        $message = "ПАС 1: Запущена задача проверки версии серверов такси";
+        self::sentTaskMessage($message);
+        $client = new Client(); // Guzzle HTTP Client
+        $updatedServers = [];
+
+        // Получение всех адресов из таблицы city_pas_2_s
+        $servers = DB::table('city_pas_1_s')->get(['id', 'address', 'versionApi']);
+
+        foreach ($servers as $server) {
+            try {
+                $url = "http://{$server->address}/api/version";
+
+                // Выполнение запроса к API с заголовком Accept: application/json
+                $response = $client->get($url, [
+                    'headers' => ['Accept' => 'application/json'],
+                    'timeout' => 5, // Таймаут на случай, если сервер не отвечает
+                ]);
+
+                $body = $response->getBody()->getContents();
+//                self::sentTaskMessage("Полученный ответ от {$server->address}: " . $body);
+                // Декодируем JSON-ответ в массив
+                $data = json_decode($body, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE || !isset($data['version'])) {
+                    $message = "Не удалось получить версию из ответа для сервера {$server->address}. Ошибка JSON: " . json_last_error_msg();
+                    self::sentTaskMessage($message);
+                    continue;
+                }
+
+// Извлечение версии
+                $newVersion = $data['version'];
+//                self::sentTaskMessage("Извлеченная версия для {$server->address}: " . $newVersion);
+
+                // Проверка и обновление версии
+                if ($server->versionApi !== $newVersion) {
+                    DB::table('city_pas_1_s')
+                        ->where('id', $server->id)
+                        ->update(['versionApi' => $newVersion]);
+
+                    $updatedServers[] = [
+                        'address' => $server->address,
+                        'oldVersion' => $server->versionApi,
+                        'newVersion' => $newVersion,
+                    ];
+                }
+            } catch (\Exception $e) {
+                $message = "Ошибка при обработке сервера {$server->address}: {$e->getMessage()}";
+                self::sentTaskMessage($message);
+            }
+        }
+
+        // Формирование отчета
+        if (!empty($updatedServers)) {
+            $message = "ПАС 1: Изменены версии для серверов:\n";
+            foreach ($updatedServers as $server) {
+                $message .= "Адрес: {$server['address']}, старая версия: {$server['oldVersion']}, новая версия: {$server['newVersion']}\n";
+            }
+
+            // Отправка отчета
+        } else {
+
+            $message = 'ПАС 1: Все версии актуальны, изменений не требуется.';
+        }
+        self::sentTaskMessage($message);
+    }
+    public function verifyVersionApiTaskPas2() {
+        $message = "ПАС 2: Запущена задача проверки версии серверов такси";
+        self::sentTaskMessage($message);
+        $client = new Client(); // Guzzle HTTP Client
+        $updatedServers = [];
+
+        // Получение всех адресов из таблицы city_pas_2_s
+        $servers = DB::table('city_pas_2_s')->get(['id', 'address', 'versionApi']);
+
+        foreach ($servers as $server) {
+            try {
+                $url = "http://{$server->address}/api/version";
+
+                // Выполнение запроса к API с заголовком Accept: application/json
+                $response = $client->get($url, [
+                    'headers' => ['Accept' => 'application/json'],
+                    'timeout' => 5, // Таймаут на случай, если сервер не отвечает
+                ]);
+
+                $body = $response->getBody()->getContents();
+//                self::sentTaskMessage("Полученный ответ от {$server->address}: " . $body);
+
+                // Декодируем JSON-ответ в массив
+                $data = json_decode($body, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE || !isset($data['version'])) {
+                    $message = "Не удалось получить версию из ответа для сервера {$server->address}. Ошибка JSON: " . json_last_error_msg();
+                    self::sentTaskMessage($message);
+                    continue;
+                }
+
+// Извлечение версии
+                $newVersion = $data['version'];
+//                self::sentTaskMessage("Извлеченная версия для {$server->address}: " . $newVersion);
+
+                // Проверка и обновление версии
+                if ($server->versionApi !== $newVersion) {
+                    DB::table('city_pas_2_s')
+                        ->where('id', $server->id)
+                        ->update(['versionApi' => $newVersion]);
+
+                    $updatedServers[] = [
+                        'address' => $server->address,
+                        'oldVersion' => $server->versionApi,
+                        'newVersion' => $newVersion,
+                    ];
+                }
+            } catch (\Exception $e) {
+                $message = "Ошибка при обработке сервера {$server->address}: {$e->getMessage()}";
+                self::sentTaskMessage($message);
+            }
+        }
+
+        // Формирование отчета
+        if (!empty($updatedServers)) {
+            $message = "ПАС 2: Изменены версии для серверов:\n";
+            foreach ($updatedServers as $server) {
+                $message .= "Адрес: {$server['address']}, старая версия: {$server['oldVersion']}, новая версия: {$server['newVersion']}\n";
+            }
+
+            // Отправка отчета
+        } else {
+
+            $message = 'ПАС 2: Все версии актуальны, изменений не требуется.';
+        }
+        self::sentTaskMessage($message);
+    }  public function verifyVersionApiTaskPas4() {
+        $message = "ПАС 4: Запущена задача проверки версии серверов такси";
+        self::sentTaskMessage($message);
+        $client = new Client(); // Guzzle HTTP Client
+        $updatedServers = [];
+
+        // Получение всех адресов из таблицы city_pas_2_s
+        $servers = DB::table('city_pas_4_s')->get(['id', 'address', 'versionApi']);
+
+        foreach ($servers as $server) {
+            try {
+                $url = "http://{$server->address}/api/version";
+
+                // Выполнение запроса к API с заголовком Accept: application/json
+                $response = $client->get($url, [
+                    'headers' => ['Accept' => 'application/json'],
+                    'timeout' => 5, // Таймаут на случай, если сервер не отвечает
+                ]);
+
+                $body = $response->getBody()->getContents();
+//                self::sentTaskMessage("Полученный ответ от {$server->address}: " . $body);
+
+                // Декодируем JSON-ответ в массив
+                $data = json_decode($body, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE || !isset($data['version'])) {
+                    $message = "Не удалось получить версию из ответа для сервера {$server->address}. Ошибка JSON: " . json_last_error_msg();
+                    self::sentTaskMessage($message);
+                    continue;
+                }
+
+// Извлечение версии
+                $newVersion = $data['version'];
+//                self::sentTaskMessage("Извлеченная версия для {$server->address}: " . $newVersion);
+
+                // Проверка и обновление версии
+                if ($server->versionApi !== $newVersion) {
+                    DB::table('city_pas_4_s')
+                        ->where('id', $server->id)
+                        ->update(['versionApi' => $newVersion]);
+
+                    $updatedServers[] = [
+                        'address' => $server->address,
+                        'oldVersion' => $server->versionApi,
+                        'newVersion' => $newVersion,
+                    ];
+                }
+            } catch (\Exception $e) {
+                $message = "Ошибка при обработке сервера {$server->address}: {$e->getMessage()}";
+                self::sentTaskMessage($message);
+            }
+        }
+
+        // Формирование отчета
+        if (!empty($updatedServers)) {
+            $message = "ПАС 4: Изменены версии для серверов:\n";
+            foreach ($updatedServers as $server) {
+                $message .= "Адрес: {$server['address']}, старая версия: {$server['oldVersion']}, новая версия: {$server['newVersion']}\n";
+            }
+
+            // Отправка отчета
+        } else {
+
+            $message = 'ПАС 4: Все версии актуальны, изменений не требуется.';
+        }
+    self::sentTaskMessage($message);
+}
+
 
 }

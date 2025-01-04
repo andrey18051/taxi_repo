@@ -4687,7 +4687,7 @@ class AndroidTestOSMController extends Controller
 
 //dd($parameter);
         Log::debug("response_arr: 1111111122 ", $parameter);
-        $messageAdmin = "orderSearchMarkersVisicom" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
         $responseDoubleArr = null;
         $responseBonusArr = null;
@@ -4703,7 +4703,7 @@ class AndroidTestOSMController extends Controller
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 2222222233 ", $responseArr);
 
-            $messageAdmin = "orderSearchMarkersVisicom" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $messageAdmin = "версия апи $apiVersion orderSearchMarkersVisicom ответ сервера" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $responseFinal = $response;

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
 
+use App\Helpers\OrderHelper;
+use App\Helpers\TimeHelper;
 use App\Jobs\StartAddCostCardBottomCreat;
 use App\Jobs\StartAddCostCardCreat;
 use App\Jobs\StartCancelOrder;
@@ -61,6 +63,12 @@ class UniversalAndroidFunctionController extends Controller
         $identificationId,
         $apiVersion
     ) {
+        if (self::containsApiWebordersCost($url)) {
+            $secondsToNextHour = TimeHelper::isFifteenSecondsToNextHour();
+            if($secondsToNextHour <= 15) {
+                sleep($secondsToNextHour + 1);
+            };
+        }
         $response = null;
         try {
             $response = Http::withHeaders([
@@ -101,6 +109,12 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         return $response;
+    }
+
+    function containsApiWebordersCost($url): bool
+    {
+        // Проверяем, содержит ли $url подстроку '/api/weborders/cost'
+        return str_contains($url, '/api/weborders/cost');
     }
 
     private function sendCatchMessage($message)
@@ -4624,6 +4638,8 @@ class UniversalAndroidFunctionController extends Controller
         }
 
 
+        $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -4645,6 +4661,8 @@ class UniversalAndroidFunctionController extends Controller
 
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -4821,9 +4839,25 @@ class UniversalAndroidFunctionController extends Controller
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
 
+        $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + 20;
+        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            20,
+            $order
+        );
 
+
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + 20 + $addCostBalance;
+//        $parameter['add_cost'] = (int) $order->attempt_20 + 20 + $addCostBalance;
+
+        $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -4843,10 +4877,15 @@ class UniversalAndroidFunctionController extends Controller
 
                 $responseArr = $response->json();
                 Log::debug("Ответ от API: " . json_encode($responseArr));
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
 
                 $newOrder = $order->replicate();
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -5018,8 +5057,24 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion = $orderMemory->apiVersion;
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
+        $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int)$addCost;
+        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $addCost,
+            $order
+        );
+
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int)$addCost + $addCostBalance;
+//        $parameter['add_cost'] = (int) $order->attempt_20 + (int)$addCost+ $addCostBalance;
+
+        $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -5042,6 +5097,8 @@ class UniversalAndroidFunctionController extends Controller
                 $newOrder = $order->replicate();
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -5380,6 +5437,8 @@ class UniversalAndroidFunctionController extends Controller
 
         $parameter['add_cost'] = (int) $order->web_cost - (int) $order_first->web_cost + (int) $order->add_cost + 20;
 
+        $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -5479,7 +5538,8 @@ class UniversalAndroidFunctionController extends Controller
 
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
-
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
 
@@ -5659,7 +5719,26 @@ class UniversalAndroidFunctionController extends Controller
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
 
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
+        $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $addCost,
+            $order
+        );
+
+
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
+
+//        $parameter['add_cost'] = (int) $order->attempt_20 + (int)$addCost+ $addCostBalance;
+
+        $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
 
 
@@ -5772,6 +5851,8 @@ class UniversalAndroidFunctionController extends Controller
 
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;

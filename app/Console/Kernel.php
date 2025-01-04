@@ -11,6 +11,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\DailyTask::class,
         \App\Console\Commands\RestartTask::class,
+        \App\Console\Commands\VersionApiTask::class,
     ];
     /**
      * Define the application's command schedule.
