@@ -357,7 +357,8 @@ class OpenStreetMapController extends Controller
             . "," . $originLatitude
             . "&r=" . $r . "&l=1&key="
             . config("app.keyVisicom");
-//        $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near=30.51043,50.45358&r=50&l=1&key=". config("app.keyVisicom");
+
+        //        $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near=30.51043,50.45358&r=50&l=1&key=". config("app.keyVisicom");
 
         Log::info("Visicom Request URL: $url");
 
