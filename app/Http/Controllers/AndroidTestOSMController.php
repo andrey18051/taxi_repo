@@ -2599,13 +2599,33 @@ class AndroidTestOSMController extends Controller
         }
         Log::debug("____________________________________");
         Log::debug("authorization  $authorization");
+
+        $identificationId = self::identificationId($application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
+
+        $messageAdmin = "costSearchMarkersTime
+        url $url
+        Authorization $authorization,
+        X-WO-API-APP-ID $identificationId,
+        X-API-VERSION  $apiVersion
+        costSearchMarkersTime параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+
         $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $url,
             $parameter,
             $authorization,
-            self::identificationId($application),
-            (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+            $identificationId,
+            $apiVersion
         );
+        $responseArr = json_decode($response, true);
+        Log::debug("response_arr: 2222222233 ", $responseArr);
+
+        $messageAdmin = "costSearchMarkersTime
+            ответ сервера" .
+            json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         switch ($application) {
             case "PAS1":
@@ -3860,7 +3880,6 @@ class AndroidTestOSMController extends Controller
         ];
 
         $parameter = [
-            'reservation' => false, //Обязательный. Признак предварительного заказа: True, False
             'route' => $rout,
             'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
             'calculated_tariff_names' => $calculated_tariff_names,
@@ -4687,7 +4706,12 @@ class AndroidTestOSMController extends Controller
 
 //dd($parameter);
         Log::debug("response_arr: 1111111122 ", $parameter);
-        $messageAdmin = "orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "
+        url $url
+        Authorization $authorization,
+        X-WO-API-APP-ID $identificationId,
+        X-API-VERSION $apiVersion
+        orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
         $responseDoubleArr = null;
         $responseBonusArr = null;
@@ -4703,7 +4727,9 @@ class AndroidTestOSMController extends Controller
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 2222222233 ", $responseArr);
 
-            $messageAdmin = "версия апи $apiVersion orderSearchMarkersVisicom ответ сервера" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $messageAdmin = "orderSearchMarkersVisicom
+            ответ сервера"
+                . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $responseFinal = $response;

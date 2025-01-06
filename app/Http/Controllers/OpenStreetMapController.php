@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class OpenStreetMapController extends Controller
 {
@@ -382,6 +383,28 @@ class OpenStreetMapController extends Controller
             Log::error("Visicom Error: " . $e->getMessage());
             return ["result" => "Точка на карте"];
         }
+    }
+
+    /**
+     * Проверить запрос к API Visicom.
+     */
+    public function checkVisicomRequest()
+    {
+        $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near=30.51043,50.45358&r=50&l=1&key=" . config("app.keyVisicom");
+
+        $response = Http::get($url);
+
+        if ($response->successful() && $response->json('type') === 'Feature') {
+            $messageAdmin = "Проверка ключа Визикома успешна: " . json_encode($response->json(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        } else {
+            $messageAdmin = "Ошибка проверки ключа Визикома: " . json_encode([
+                    'error' => 'Invalid response from Visicom API',
+                    'details' => $response->json(),
+                    'status' => $response->status(),
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }
+
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
     }
 
 }

@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\CleanerTableController;
-use App\Http\Controllers\OrdersRefusalController;
-use App\Http\Controllers\ReportController;
+use App\Http\Controllers\OpenStreetMapController;
 use Illuminate\Console\Command;
 
 class CleanTask extends Command
@@ -45,6 +44,9 @@ class CleanTask extends Command
 
         //Очистка таблиці истории безнальных заказов
         (new CleanerTableController())->cleanUidHistoriesTable();
+
+        //Проверка версии Visicom
+        (new OpenStreetMapController)->checkVisicomRequest();
 
         return 0;
     }

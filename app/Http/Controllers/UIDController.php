@@ -79,7 +79,7 @@ class UIDController extends Controller
             $response_arr = json_decode($response, true);
             return $response_arr["close_reason"];
         }
-        return "-1";
+//        return "-1";
     }
     public function closeReasonUIDStatusFirstWfp($uid, $connectAPI, $autorization, $identificationId)
     {

@@ -1520,3 +1520,6 @@ Route::get('/cancelOnlyCardPayUid/{id}', [UniversalAndroidFunctionController::cl
 Route::get('/lastAddressUser/{email}/{city}/{app}', [UniversalAndroidFunctionController::class, 'lastAddressUser'])
     ->name('lastAddressUser');
 
+Route::get('/checkVisicomRequest', [OpenStreetMapController::class, 'checkVisicomRequest'])
+    ->name('checkVisicomRequest');
+
