@@ -191,3 +191,9 @@ Route::get('/android/permissions/{email}', [UniversalAndroidFunctionController::
 Route::get('/android/sentErrorMessage/{email}', [UniversalAndroidFunctionController::class, 'sentErrorMessage'])
     ->name('sentErrorMessage');
 
+/**
+ * city strver verify
+ *
+ */
+Route::get('/android/findCityJson/{startLat}/{startLan}', [UniversalAndroidFunctionController::class, 'findCityJson'])
+    ->name('findCityJson');

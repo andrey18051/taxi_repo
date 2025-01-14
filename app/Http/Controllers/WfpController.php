@@ -764,8 +764,10 @@ class WfpController extends Controller
             if ($wfpInvoices->isNotEmpty()) {
                 foreach ($wfpInvoices as $value) {
                     // Проверка статуса текущей транзакции
-                    $transactionStatus = strtolower(trim($value->transactionStatus ?? ''));
-                    if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+//                    $transactionStatus = strtolower(trim($value->transactionStatus ?? ''));
+                    $transactionStatus = $value->transactionStatus;
+                    if ($transactionStatus == 'WaitingAuthComplete') {
+//                    if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
                         // Параметры для REFUND
                         $params = [
                             "transactionType" => "REFUND",

@@ -2620,7 +2620,7 @@ class AndroidTestOSMController extends Controller
             $apiVersion
         );
         $responseArr = json_decode($response, true);
-        Log::debug("response_arr: 2222222233 ", $responseArr);
+
 
         $messageAdmin = "costSearchMarkersTime
             ответ сервера" .
