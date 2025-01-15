@@ -1988,8 +1988,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -2475,8 +2478,10 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -2993,8 +2998,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -3475,8 +3483,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -3820,8 +3831,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -4182,8 +4196,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
         $connectAPI = self::connectAPIAppOrder($city, $application);
@@ -4540,8 +4557,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -5182,8 +5202,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -6026,8 +6049,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
         $resp_answer = "";
@@ -6121,8 +6147,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -6250,8 +6279,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
 
@@ -6375,8 +6407,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -6483,8 +6518,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
         //Поиск смены номеров заказов
@@ -6776,8 +6814,11 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
+
                 $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
         }
         //Поиск смены номеров заказов
@@ -7070,10 +7111,13 @@ class AndroidTestOSMController extends Controller
             case "Mykolaiv":
             case "Сhernivtsi":
             case "Lutsk":
-            case "foreign countries":
                 $city = "OdessaTest";
                 break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
         }
+
         //Поиск смены номеров заказов
         Log::debug("0 drivercarposition uid $uid");
         $uid = (new MemoryOrderChangeController)->show($uid);
