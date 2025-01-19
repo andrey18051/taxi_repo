@@ -2297,11 +2297,23 @@ class AndroidAppController extends Controller
                 'message' => $e,
             ];
 
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-        };
+            try {
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
+            } catch (\Exception $e) {
+                Log::error('Mail send failed: ' . $e->getMessage());
+                // Дополнительные действия для предотвращения сбоя
+            }
 
-        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        };
+        try {
+            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        } catch (\Exception $e) {
+            Log::error('Mail send failed: ' . $e->getMessage());
+            // Дополнительные действия для предотвращения сбоя
+        }
+
     }
 
     /**
@@ -2364,10 +2376,22 @@ class AndroidAppController extends Controller
                 'subject' => $subject,
                 'message' => $e,
             ];
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            try {
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            } catch (\Exception $e) {
+                Log::error('Mail send failed: ' . $e->getMessage());
+                // Дополнительные действия для предотвращения сбоя
+            }
+
         };
-        Mail::to('cartaxi4@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+
+        try {
+            Mail::to('cartaxi4@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+            Mail::to('taxi.easy.ua@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+        } catch (\Exception $e) {
+            Log::error('Mail send failed: ' . $e->getMessage());
+            // Дополнительные действия для предотвращения сбоя
+        }
     }
 
 

@@ -12,6 +12,7 @@ use App\Models\Orderweb;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SebastianBergmann\Diff\Exception;
 
@@ -1323,7 +1324,14 @@ class Android151Controller extends Controller
             'message' => $order,
         ];
 
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        try {
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
+        } catch (\Exception $e) {
+            Log::error('Mail send failed: ' . $e->getMessage());
+            // Дополнительные действия для предотвращения сбоя
+        }
+
         $message = new TelegramController();
         try {
             $message->sendMeMessage($order);
@@ -1334,7 +1342,14 @@ class Android151Controller extends Controller
                 'message' => $e,
             ];
 
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            try {
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+
+            } catch (\Exception $e) {
+                Log::error('Mail send failed: ' . $e->getMessage());
+                // Дополнительные действия для предотвращения сбоя
+            }
+
         };
     }
 

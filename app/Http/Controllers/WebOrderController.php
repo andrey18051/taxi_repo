@@ -2707,9 +2707,22 @@ class WebOrderController extends Controller
 
             if ($user) {
                 Mail::to($user->email)->send(new Check($paramsCheck));
+                try {
+                    Mail::to($user->email)->send(new Check($paramsCheck));
+                } catch (\Exception $e) {
+                    Log::error('Mail send failed: ' . $e->getMessage());
+                    // Дополнительные действия для предотвращения сбоя
+                }
+
             }
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-            Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
+            try {
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
+            } catch (\Exception $e) {
+                Log::error('Mail send failed: ' . $e->getMessage());
+                // Дополнительные действия для предотвращения сбоя
+            }
+
 
             return redirect()->route('home-id-afterorder-uid', $orderweb)->with('success', $order)
                 ->with('tel', "Очікуйте на інформацію від оператора з обробки замовлення. Скасувати або внести зміни можна за номером оператора:")
@@ -2852,9 +2865,17 @@ class WebOrderController extends Controller
                     'message' => $messageAdmin,
                 ];
 
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Admin($paramsAdmin));
 
-                Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
+
+                try {
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Admin($paramsAdmin));
+                    Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
+                } catch (\Exception $e) {
+                    Log::error('Mail send failed: ' . $e->getMessage());
+                    // Дополнительные действия для предотвращения сбоя
+                }
+
+
                 $comment =  "ОПЕРАТОР! Перезвоните новому водителю по имени $user_full_name. Ему нужна работа.
                             Водительский стаж $time_work лет. Анкета отправлена ему на почту";
                 $taxiColumnId = config('app.taxiColumnId');
@@ -2926,7 +2947,15 @@ class WebOrderController extends Controller
                     'message' => $req->message,
                 ];
 
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Feedback($params));
+
+
+                try {
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Feedback($params));
+                } catch (\Exception $e) {
+                    Log::error('Mail send failed: ' . $e->getMessage());
+                    // Дополнительные действия для предотвращения сбоя
+                }
+
                 return redirect()->route('homeCombo')
                     ->with('success',
                     "Повідомлення успішно надіслано адміністратору сайту. Чекайте на відповідь на свій email.");

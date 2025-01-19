@@ -91,11 +91,23 @@ class WfpController extends Controller
                 'message' => $e,
             ];
 
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            try {
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            } catch (\Exception $e) {
+                Log::error('Mail send failed: ' . $e->getMessage());
+                // Дополнительные действия для предотвращения сбоя
+            }
+
         };
 
-        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        try {
+            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsAdmin));
+            Mail::to('cartaxi4@gmail.com')->send(new Check($paramsAdmin));
+        } catch (\Exception $e) {
+            Log::error('Mail send failed: ' . $e->getMessage());
+            // Дополнительные действия для предотвращения сбоя
+        }
+
     }
 
     public function returnUrl()
@@ -1711,11 +1723,23 @@ class WfpController extends Controller
                     'message' => $e,
                 ];
 
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                try {
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                } catch (\Exception $e) {
+                    Log::error('Mail send failed: ' . $e->getMessage());
+                    // Дополнительные действия для предотвращения сбоя
+                }
+
             };
 
-            Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+            try {
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsAdmin));
+                Mail::to('cartaxi4@gmail.com')->send(new Check($paramsAdmin));
+            } catch (\Exception $e) {
+                Log::error('Mail send failed: ' . $e->getMessage());
+                // Дополнительные действия для предотвращения сбоя
+            }
+
         }
 
         if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {

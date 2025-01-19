@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Telegram;
+use App\Jobs\SendTelegramMessageJob;
 use App\Mail\PromoList;
 use App\Models\Config;
 use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Socialite\Facades\Socialite;
 use Exception;
 use App\Models\User;
@@ -158,47 +161,46 @@ class TelegramController extends Controller
         dd($ch->body());
     }
 
-    public function sendAlarmMessage($message): \Illuminate\Http\Client\Response
+    public function sendAlarmMessage($message)
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-        return Http::post(Telegram::url . $bot . '/sendMessage', [
-            'chat_id' => config('app.chat_id_alarm'),
-            'text' => $message,
-            'parse_mode' => 'html'
-        ]);
+        $attempts = 3;
+        $delay = 2; // Delay in seconds between attempts
+
+        // Отправляем в фоновую задачу
+        Queue::push(new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message));
+        return response()->json(['status' => 'Message sent in background'], 200);
     }
 
-    public function sendMeMessage($message): \Illuminate\Http\Client\Response
+    public function sendMeMessage($message)
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-        return Http::post(Telegram::url . $bot . '/sendMessage', [
-            'chat_id' => 120352595,
-            'text' => $message,
-            'parse_mode' => 'html'
-        ]);
+
+        // Отправляем в фоновую задачу
+        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
+        return response()->json(['status' => 'Message sent in background'], 200);
     }
-    public function sendInformMessage($message): \Illuminate\Http\Client\Response
+
+    public function sendInformMessage($message)
     {
-        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg';//@andrey_info_bot
-        return Http::post(Telegram::url . $bot . '/sendMessage', [
-            'chat_id' => 120352595,
-            'text' => $message,
-            'parse_mode' => 'html'
-        ]);
+        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
+
+        // Отправляем в фоновую задачу
+        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
+        return response()->json(['status' => 'Message sent in background'], 200);
     }
 
     public function sendAboutDriverMessage($chat_id, $message)
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-        Http::post(Telegram::url . $bot . '/sendMessage', [
-            'chat_id' => $chat_id,
-            'text' => $message,
-            'parse_mode' => 'html'
-        ]);
-        Http::post(Telegram::url . $bot . '/sendMessage', [
-            'chat_id' => 120352595,
-            'text' => $message,
-            'parse_mode' => 'html'
-        ]);
+
+        // Отправляем в фоновую задачу для каждого чата
+        Queue::push(new SendTelegramMessageJob($bot, $chat_id, $message));
+        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
+
+        return response()->json(['status' => 'Messages sent in background'], 200);
     }
+
+
+
 }
