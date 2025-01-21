@@ -908,4 +908,13 @@ google_id: $uidDriver отправил данные авто и ожидает �
         $alarmMessage->sendMeMessage($messageAdmin);
         Log::debug("sentMessageAdmin  $messageAdmin");
     }
+    public function sentMessageAdminLog($messageAdmin)
+    {
+
+        $alarmMessage = new TelegramController();
+
+        $alarmMessage->sendAlarmMessageLog($messageAdmin);
+        $alarmMessage->sendMeMessageLog($messageAdmin);
+        Log::debug("sentMessageAdmin  $messageAdmin");
+    }
 }

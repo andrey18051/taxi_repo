@@ -2614,7 +2614,7 @@ class AndroidTestOSMController extends Controller
         X-WO-API-APP-ID $identificationId,
         X-API-VERSION  $apiVersion
         costSearchMarkersTime параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
         $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -2630,7 +2630,7 @@ class AndroidTestOSMController extends Controller
         $messageAdmin = "costSearchMarkersTime
             ответ сервера" .
             json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         switch ($application) {
             case "PAS1":
@@ -4732,7 +4732,7 @@ class AndroidTestOSMController extends Controller
         X-WO-API-APP-ID $identificationId,
         X-API-VERSION $apiVersion
         orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $responseDoubleArr = null;
         $responseBonusArr = null;
 
@@ -4750,7 +4750,7 @@ class AndroidTestOSMController extends Controller
             $messageAdmin = "orderSearchMarkersVisicom
             ответ сервера"
                 . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             $responseFinal = $response;
             if (isset($responseArr['dispatching_order_uid'])) {
@@ -5374,7 +5374,7 @@ class AndroidTestOSMController extends Controller
         Log::debug("response_arr: 1111111122 ", $parameter);
 
         $messageAdmin = "orderFullCostFromPas" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $responseDoubleArr = null;
         $responseBonusArr = null;
@@ -5390,7 +5390,7 @@ class AndroidTestOSMController extends Controller
             $responseArr = json_decode($response, true);
             Log::debug("response_arr: 2222222233 ", $responseArr);
             $messageAdmin = "orderFullCostFromPas" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             $responseFinal = $response;
             if (isset($responseArr['dispatching_order_uid'])) {
                 (new DriverMemoryOrderController)->store(
@@ -5497,7 +5497,7 @@ class AndroidTestOSMController extends Controller
                 } else {
 
                     $messageAdmin = "orderSearchMarkersVisicom: дубль  не создался";
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                     $responseDoubleArr = null;
                 }
 
@@ -6080,7 +6080,7 @@ class AndroidTestOSMController extends Controller
 
             Log::debug("json_arrWeb_bonus", $json_arrWeb);
             $messageAdmin = "Отмена заказа $response";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             if ($json_arrWeb["order_client_cancel_result"] != 1) {
                 self::repeatCancel(
@@ -6628,7 +6628,7 @@ class AndroidTestOSMController extends Controller
                                         Log::debug("4 $url: ", $response_arr_double);
 
                                         $messageAdmin = "Опрос статуса наличного дублирующего заказ $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
-                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                                         if ($response_arr_double["order_car_info"] != null) {
                                             $orderweb_uid->auto = $response_arr_double["order_car_info"];
@@ -6644,7 +6644,7 @@ class AndroidTestOSMController extends Controller
                                         Log::error("6 historyUIDStatus Response: " . $response_double->body());
                                         $response_arr_double = json_decode($response_double, true);
                                         $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
-                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                                         return [
                                             "execution_status" => "failed_status",
@@ -6657,7 +6657,7 @@ class AndroidTestOSMController extends Controller
                                     Log::error("7 historyUIDStatus Exception caught: " . $e->getMessage());
 
                                     $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . $e->getMessage();
-                                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                                     return [
                                         "execution_status" => "failed_status",
@@ -6672,7 +6672,7 @@ class AndroidTestOSMController extends Controller
                             Log::error("12 historyUIDStatus Response: " . $response_bonus->body());
                             $response_arr_bonus = json_decode($response_bonus, true);
                             $messageAdmin = "Ошибка опроса статуса безналичного заказа 11 $uid_history->uid_bonusOrder Ответ:" . print_r($response_arr_bonus, true);
-                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
                             return [
@@ -6697,7 +6697,7 @@ class AndroidTestOSMController extends Controller
                             $messageAdmin .= (string)$e->getMessage();
                         }
                         Log::error("14 historyUIDStatus Exception caught: " . $messageAdmin);
-                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                         return [
                             "execution_status" => "failed_status",
@@ -6928,7 +6928,7 @@ class AndroidTestOSMController extends Controller
                                         Log::debug("4 $url: ", $response_arr_double);
 
                                         $messageAdmin = "Опрос статуса наличного дублирующего заказ $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
-                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                                         if ($response_arr_double["order_car_info"] != null) {
                                             $orderweb_uid->auto = $response_arr_double["order_car_info"];
@@ -6944,7 +6944,7 @@ class AndroidTestOSMController extends Controller
                                         Log::error("6 historyUIDStatus Response: " . $response_double->body());
                                         $response_arr_double = json_decode($response_double, true);
                                         $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
-                                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                                         return [
                                             "execution_status" => "failed_status",
@@ -6972,7 +6972,7 @@ class AndroidTestOSMController extends Controller
                             Log::error("12 historyUIDStatus Response: " . $response_bonus->body());
                             $response_arr_bonus = json_decode($response_bonus, true);
                             $messageAdmin = "Ошибка опроса статуса безналичного заказа 11 $uid_history->uid_bonusOrder Ответ:" . print_r($response_arr_bonus, true);
-                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
                             return [
@@ -6997,7 +6997,7 @@ class AndroidTestOSMController extends Controller
                             $messageAdmin .= (string)$e->getMessage();
                         }
                         Log::error("14 historyUIDStatus Exception caught: " . $messageAdmin);
-                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                         return [
                             "execution_status" => "failed_status",
