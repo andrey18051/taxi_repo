@@ -351,6 +351,11 @@ class DriverController extends Controller
 
         $status = "driverCloseOrder";
 
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb->closeReason = "103";
+        $orderweb->time_to_start_point = "";
+        $orderweb->save();
+
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,

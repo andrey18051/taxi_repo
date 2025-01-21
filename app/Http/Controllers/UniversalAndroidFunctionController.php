@@ -48,8 +48,8 @@ class UniversalAndroidFunctionController extends Controller
         $alarmMessage = new TelegramController();
         Log::debug(" $message");
         try {
-            $alarmMessage->sendAlarmMessage($message);
-            $alarmMessage->sendMeMessage($message);
+            $alarmMessage->sendAlarmMessageLog($message);
+            $alarmMessage->sendMeMessageLog($message);
         } catch (Exception $e) {
             Log::error("sentErrorMessage: Ошибка отправки в телеграмм");
         };
@@ -124,8 +124,8 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "Ошибка подключения к серверу $message. IP $client_ip";
         Log::debug("sendCatchMessage $messageAdmin");
         try {
-            $alarmMessage->sendAlarmMessage($messageAdmin);
-            $alarmMessage->sendMeMessage($messageAdmin);
+            $alarmMessage->sendAlarmMessageLog($messageAdmin);
+            $alarmMessage->sendMeMessageLog($messageAdmin);
         } catch (Exception $e) {
             $paramsCheck = [
                 'subject' => 'Ошибка в телеграмм',
@@ -6874,8 +6874,8 @@ class UniversalAndroidFunctionController extends Controller
             . ". Приложение $application. IP $client_ip";
         Log::debug("cityNoOnlineMessage $messageAdmin");
         try {
-            $alarmMessage->sendAlarmMessage($messageAdmin);
-            $alarmMessage->sendMeMessage($messageAdmin);
+            $alarmMessage->sendAlarmMessageLog($messageAdmin);
+            $alarmMessage->sendMeMessageLog($messageAdmin);
         } catch (Exception $e) {
             $paramsCheck = [
                 'subject' => 'Ошибка в телеграмм',

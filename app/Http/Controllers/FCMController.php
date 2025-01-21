@@ -7,6 +7,7 @@ use App\Jobs\DeleteOrderPersonal;
 use App\Mail\Admin;
 use App\Mail\DriverInfo;
 use App\Mail\InfoEmail;
+use App\Models\DriverPosition;
 use App\Models\Orderweb;
 use App\Models\UserTokenFmsS;
 use Carbon\Carbon;
@@ -965,67 +966,138 @@ class FCMController extends Controller
         $dateTime = new DateTime($currentDateTime->format('Y-m-d H:i:s')); // Создаем объект DateTime
         $dateTime->setTimezone($kievTimeZone); // Устанавливаем временную зону на Киев
 
-        try {
-            // Получите экземпляр клиента Firestore из сервис-провайдера
-            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
-            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
-            $firestore = $firebase->createFirestore()->database();
+        $storedData = $orderweb->auto;
 
-            $collection = $firestore->collection('orders_taking');
-            $document = $collection->document($uid);
-            $snapshot = $document->snapshot();
-            $data = $snapshot->data();
-            Log::info("Snapshot data: " . json_encode($data));
+        $dataDriver = json_decode($storedData, true);
 
-            $uidDriver = $data['driver_uid'];
-            Log::info("uidDriver " . $uidDriver);
+        $driver_uid = $dataDriver["uid"];
+        $driverPositions = DriverPosition::where('driver_uid', $driver_uid)->first();
 
-            // Получите ссылку на коллекцию и документ
-            $collection = $firestore->collection('sector');
-            $document = $collection->document($uidDriver);
-            $snapshot = $document->snapshot();
-            $data = $snapshot->data();
-            $driver_latitude = $data['latitude'];
-            $driver_longitude = $data['longitude'];
-            Log::info("sector " . $driver_latitude);
-            Log::info("sector " . $driver_longitude);
-            if ($driver_latitude != null) {
-                $start_point_latitude = $orderweb->startLat;
-                $start_point_longitude = $orderweb->startLan;
+        $driver_latitude = $driverPositions['latitude'];
+        $driver_longitude = $driverPositions['longitude'];
+        Log::info("Driver location: lat=$driver_latitude, lon=$driver_longitude");
 
-                $osrmHelper = new OpenStreetMapHelper();
-                $driverDistance = round(
-                    $osrmHelper->getRouteDistance(
-                        (float) $driver_latitude,
-                        (float) $driver_longitude,
-                        (float) $start_point_latitude,
-                        (float) $start_point_longitude
-                    ) / 1000,
-                    2 // Округляем до 2 знаков после запятой
-                );
-                Log::info("driverDistance " . $driverDistance);
-                // Скорость водителя (60 км/ч)
-                $speed = 60;
-                // Расчет времени в минутах
-                $minutesToAdd = round(($driverDistance / $speed) * 60, 0); // Время в минутах
+        if ($driver_latitude !== null && $driver_longitude !== null) {
+            $start_point_latitude = $orderweb->startLat;
+            $start_point_longitude = $orderweb->startLan;
 
-                if ($minutesToAdd < 1) {
-                    $minutesToAdd = 1;
-                }
-                Log::info("minutesToAdd " . $minutesToAdd);
-                $dateTime->modify("+{$minutesToAdd} minutes");
-                $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s'); // Сохраняем время в нужном формате
-                $orderweb->save();
-            }
+            $osrmHelper = new OpenStreetMapHelper();
+            $driverDistance = round(
+                $osrmHelper->getRouteDistance(
+                    (float)$driver_latitude,
+                    (float)$driver_longitude,
+                    (float)$start_point_latitude,
+                    (float)$start_point_longitude
+                ) / 1000,
+                2 // Округляем до 2 знаков после запятой
+            );
 
-            Log::info("orderweb->time_to_start_point" . $orderweb->time_to_start_point);
+            Log::info("driverDistance: " . $driverDistance);
+
+            // Скорость водителя (60 км/ч)
+            $speed = 60;
+            // Расчет времени в минутах
+            $minutesToAdd = max(1, round(($driverDistance / $speed) * 60, 0));
+
+            Log::info("minutesToAdd: " . $minutesToAdd);
+            $dateTime->modify("+{$minutesToAdd} minutes");
+
+            $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s');
+            $orderweb->save();
+
+            Log::info("Updated time_to_start_point: " . $orderweb->time_to_start_point);
             Log::info("Document successfully written!");
-            return "calculateTimeToStart Document successfully written!";
-        } catch (\Exception $e) {
-            Log::error("calculateTimeToStart Error writing document to Firestore: " . $e->getMessage());
-            return "calculateTimeToStart Error writing document to Firestore.";
         }
+
+        return "calculateTimeToStart Document successfully written!";
+
+
+//        try {
+//            // Получаем путь к сервисному аккаунту Firebase из .env
+//            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+//            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+//            $firestore = $firebase->createFirestore()->database();
+//
+//            // Получаем документ из коллекции 'orders_taking'
+//            $collection = $firestore->collection('orders_taking');
+//            $document = $collection->document($uid);
+//            $snapshot = $document->snapshot();
+//
+//            if (!$snapshot->exists()) {
+//                Log::error("Firestore document 'orders_taking/$uid' does not exist.");
+//                return "Document not found in Firestore.";
+//            }
+//
+//            $data = $snapshot->data();
+//            Log::info("Snapshot data: " . json_encode($data));
+//
+//            // Проверяем наличие driver_uid в документе
+//            if (!isset($data['driver_uid']) || empty($data['driver_uid'])) {
+//                Log::error("Missing or empty driver_uid in Firestore document.");
+//                return "Driver UID is missing or empty.";
+//            }
+//
+//            $uidDriver = $data['driver_uid'];
+//            Log::info("uidDriver: " . $uidDriver);
+//
+//            // Получаем документ из коллекции 'sector'
+//            $sectorDoc = $firestore->collection('sector')->document($uidDriver);
+//            $sectorSnapshot = $sectorDoc->snapshot();
+//
+//            if (!$sectorSnapshot->exists()) {
+//                Log::error("Firestore document 'sector/$uidDriver' does not exist.");
+//                return "Sector document not found.";
+//            }
+//
+//            $sectorData = $sectorSnapshot->data();
+//            if (!isset($sectorData['latitude'], $sectorData['longitude'])) {
+//                Log::error("Missing latitude or longitude in sector document.");
+//                return "Sector document is missing location data.";
+//            }
+//
+//            $driver_latitude = $sectorData['latitude'];
+//            $driver_longitude = $sectorData['longitude'];
+//            Log::info("Driver location: lat=$driver_latitude, lon=$driver_longitude");
+//
+//            if ($driver_latitude !== null && $driver_longitude !== null) {
+//                $start_point_latitude = $orderweb->startLat;
+//                $start_point_longitude = $orderweb->startLan;
+//
+//                $osrmHelper = new OpenStreetMapHelper();
+//                $driverDistance = round(
+//                    $osrmHelper->getRouteDistance(
+//                        (float)$driver_latitude,
+//                        (float)$driver_longitude,
+//                        (float)$start_point_latitude,
+//                        (float)$start_point_longitude
+//                    ) / 1000,
+//                    2 // Округляем до 2 знаков после запятой
+//                );
+//
+//                Log::info("driverDistance: " . $driverDistance);
+//
+//                // Скорость водителя (60 км/ч)
+//                $speed = 60;
+//                // Расчет времени в минутах
+//                $minutesToAdd = max(1, round(($driverDistance / $speed) * 60, 0));
+//
+//                Log::info("minutesToAdd: " . $minutesToAdd);
+//                $dateTime->modify("+{$minutesToAdd} minutes");
+//
+//                $orderweb->time_to_start_point = $dateTime->format('Y-m-d H:i:s');
+//                $orderweb->save();
+//
+//                Log::info("Updated time_to_start_point: " . $orderweb->time_to_start_point);
+//                Log::info("Document successfully written!");
+//            }
+//
+//            return "calculateTimeToStart Document successfully written!";
+//        } catch (\Exception $e) {
+//            Log::error("calculateTimeToStart Error: " . $e->getMessage());
+//            return "Error writing document to Firestore.";
+//        }
     }
+
 
     public function calculateTimeToStartOffline($uid, $minutesToAdd)
     {

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Check;
 use App\Models\Orderweb;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Factory;
 use SebastianBergmann\Diff\Exception;
 
@@ -797,6 +799,8 @@ class MessageSentController extends Controller
                     try {
                         $alarmMessage->sendAlarmMessage($messageAdmin);
                         $alarmMessage->sendMeMessage($messageAdmin);
+                        Mail::to('cartaxi4@gmail.com')->send(new Check($messageAdmin));
+
                     } catch (Exception $e) {
                         Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
                     }
@@ -878,6 +882,7 @@ google_id: $uidDriver отправил данные авто и ожидает �
                         try {
                             $alarmMessage->sendAlarmMessage($messageAdmin);
                             $alarmMessage->sendMeMessage($messageAdmin);
+                            Mail::to('cartaxi4@gmail.com')->send(new Check($messageAdmin));
                         } catch (Exception $e) {
                             Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
                         }
