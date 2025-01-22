@@ -634,7 +634,7 @@ class WfpController extends Controller
             Log::debug(["checkStatus " . 'response' => $response->body()]);
 
             $messageAdmin = "checkStatus " . 'response' . $response->body();
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             if (isset($response)) {
                 $data = json_decode($response->body(), true);

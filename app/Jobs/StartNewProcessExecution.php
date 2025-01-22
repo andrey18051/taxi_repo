@@ -46,24 +46,24 @@ class StartNewProcessExecution implements ShouldQueue
 
 
             // Отправляем сообщение администратору
-        $messageAdmin = "+++ Запущена вилка для заказа $this->orderId Job ID: {$this->jobId} started for order ID: {$this->orderId}";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        $messageAdmin = "!!!+++ Запущена вилка для заказа $this->orderId Job ID: {$this->jobId} started for order ID: {$this->orderId}";
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         // Запускаем процесс
 //        $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
         $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
 
         if ($result === "exit") {
-            Log::info("Задача завершена. Job ID: {$this->jobId}");
+
             $messageAdmin = "Задача завершена для заказа $this->orderId (Job ID: {$this->jobId})";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             try {
                 sleep(5);
                 $doubleOrderRecord = DoubleOrder::find($this->orderId);
                 if ($doubleOrderRecord) {
                     $doubleOrderRecord->delete();
                     $messageAdmin = "Вилка $this->orderId (Job ID: {$this->jobId}) удалена";
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                 }
             } catch (\Exception $e) {
                 // Handle the exception (log it, rethrow it, etc.)
@@ -78,7 +78,7 @@ class StartNewProcessExecution implements ShouldQueue
             if ($doubleOrderRecord) {
                 $doubleOrderRecord->delete();
                 $messageAdmin = "Вилка $this->orderId (Job ID: {$this->jobId}) удалена";
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             }
         } catch (\Exception $e) {
             // Handle the exception (log it, rethrow it, etc.)

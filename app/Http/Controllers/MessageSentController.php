@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Check;
+use App\Mail\CheckVod;
+use App\Mail\Server;
 use App\Models\Orderweb;
 use Carbon\Carbon;
 use DateTime;
@@ -799,7 +801,16 @@ class MessageSentController extends Controller
                     try {
                         $alarmMessage->sendAlarmMessage($messageAdmin);
                         $alarmMessage->sendMeMessage($messageAdmin);
-                        Mail::to('cartaxi4@gmail.com')->send(new Check($messageAdmin));
+
+                        $paramsCheck = [
+                            'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
+                            'message' => $messageAdmin,
+                            'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$uidDriver",
+
+                        ];
+
+                        Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
+                        Mail::to('taxi.easy.ua@gmail.com')->send(new CheckVod($paramsCheck));
 
                     } catch (Exception $e) {
                         Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
@@ -882,7 +893,15 @@ google_id: $uidDriver отправил данные авто и ожидает �
                         try {
                             $alarmMessage->sendAlarmMessage($messageAdmin);
                             $alarmMessage->sendMeMessage($messageAdmin);
-                            Mail::to('cartaxi4@gmail.com')->send(new Check($messageAdmin));
+                            $paramsCheck = [
+                                'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
+                                'message' => $messageAdmin,
+                                'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$carId",
+
+                            ];
+
+                            Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
+                            Mail::to('taxi.easy.ua@gmail.com')->send(new CheckVod($paramsCheck));
                         } catch (Exception $e) {
                             Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
                         }
