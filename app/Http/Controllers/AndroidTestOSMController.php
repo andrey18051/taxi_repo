@@ -6627,8 +6627,8 @@ class AndroidTestOSMController extends Controller
                                         $response_arr_double = json_decode($response_double, true);
                                         Log::debug("4 $url: ", $response_arr_double);
 
-                                        $messageAdmin = "Опрос статуса наличного дублирующего заказ $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
-                                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//                                        $messageAdmin = "Опрос статуса наличного дублирующего заказ $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
+//                                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                                         if ($response_arr_double["order_car_info"] != null) {
                                             $orderweb_uid->auto = $response_arr_double["order_car_info"];
