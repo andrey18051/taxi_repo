@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BrandsAuto;
 use App\Models\Services;
 use Illuminate\Http\Request;
 use yii\helpers\Json;
@@ -69,6 +70,31 @@ class ServicesController extends Controller
         return  response($services, 200)
             ->header('Content-Type', 'json');
     }
+    public function brandsAllAndroid()
+    {
+        $brands = BrandsAuto::all()->toArray();
+        $i = 0;
+        foreach ($brands as $value) {
+            $servicesArr[$i++] = $value['name'];
+        }
+        return  response($brands, 200)
+            ->header('Content-Type', 'json');
+    }
+    public function brandAdd($newBrand)
+    {
+        // Check if the brand already exists
+        $brands = BrandsAuto::where('name', $newBrand)->first();
 
+        if ($brands == null) {
+            // If the brand doesn't exist, create a new one
+            $brand = new BrandsAuto();
+            $brand->name = $newBrand;
+            $brand->save(); // Add parentheses to the save method
+        }
+
+        // Return a successful response with the brand name
+        return response($newBrand, 200)
+            ->header('Content-Type', 'application/json'); // Corrected header type
+    }
 
 }

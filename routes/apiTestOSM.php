@@ -35,6 +35,7 @@ Route::get('/driverAuto/approvedPhones/{phone}/{code}', [DriverController::class
 Route::get('/servicesAdd/{name}/{email}', [ServicesController::class, 'servicesAdd'])->name('servicesAdd');
 Route::get('/servicesAll', [ServicesController::class, 'servicesAll'])->name('servicesAll');
 Route::get('/servicesAll/Android', [ServicesController::class, 'servicesAllAndroid'])->name('servicesAllAndroid');
+Route::get('/brandsAll/Android', [ServicesController::class, 'brandsAllAndroid'])->name('servicesAllAndroid');
 
 /**
  * Android Taxi

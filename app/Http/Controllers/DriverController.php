@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Mail\Check;
 use App\Mail\Driver;
 use App\Mail\JobDriver;
 use App\Mail\Server;
 use App\Models\Autos;
+use App\Models\BrandsAuto;
 use App\Models\DriverHistory;
 use App\Models\DriverMemoryOrder;
 use App\Models\Drivers;
 use App\Models\Orderweb;
 use App\Models\Services;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -51,6 +54,8 @@ class DriverController extends Controller
         string $number,
         $services
     ) {
+        self::brandAdd($brand);
+
         $driver = new Drivers();
         $driver->city = $city;
         $driver->first_name = $first_name;
@@ -114,8 +119,14 @@ class DriverController extends Controller
 
         $telegramMessage->sendAboutDriverMessage("1379298637", $messageAboutDriver);
 //        $telegramMessage->sendAboutDriverMessage("120352595", $messageAboutDriver);
-        Mail::to("taxi.easy.ua@gmail.com")->send(new JobDriver($params));
-        Mail::to("takci2012@gmail.com")->send(new JobDriver($params));
+        try {
+            Mail::to("taxi.easy.ua@gmail.com")->send(new JobDriver($params));
+            Mail::to("takci2012@gmail.com")->send(new JobDriver($params));
+        } catch (\Exception $e) {
+            Log::error('Mail send failed: ' . $e->getMessage());
+            // Дополнительные действия для предотвращения сбоя
+        }
+
 //***
 
 //        $services = Services::all()->toArray();
@@ -157,7 +168,22 @@ class DriverController extends Controller
 //            }
 //        }
     }
+    public function brandAdd($newBrand)
+    {
+        // Check if the brand already exists
+        $brands = BrandsAuto::where('name', $newBrand)->first();
 
+        if ($brands == null) {
+            // If the brand doesn't exist, create a new one
+            $brand = new BrandsAuto();
+            $brand->name = $newBrand;
+            $brand->save(); // Add parentheses to the save method
+        }
+
+        // Return a successful response with the brand name
+        return response($newBrand, 200)
+            ->header('Content-Type', 'application/json'); // Corrected header type
+    }
     public function sendCode($phone): int
     {
         $connectAPI = WebOrderController::connectApi();
