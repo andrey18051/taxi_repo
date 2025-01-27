@@ -214,7 +214,7 @@ class UniversalAndroidFunctionController extends Controller
     public function startNewProcessExecutionStatusJob($doubleOrderId, $jobId): ?string
     {
 
-        $messageAdmin = "!!!+++!!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
+        $messageAdmin = "!!! 10009 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         ExecStatusHistory::truncate();
@@ -269,7 +269,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
 // Безнал
-        sleep($updateTime);
+
         $newStatusBonus =  self::newStatus(
             $authorizationBonus,
             $identificationId,
@@ -284,7 +284,11 @@ class UniversalAndroidFunctionController extends Controller
 
 //        return "";
         $lastStatusBonusTime = $lastTimeUpdate;
-        $lastStatusBonus = $newStatusBonus;
+
+        if($newStatusBonus != null) {
+            $lastStatusBonus = $newStatusBonus;
+        }
+
 
 //Нал
         $newStatusDouble = self::newStatus(
@@ -301,7 +305,10 @@ class UniversalAndroidFunctionController extends Controller
 
 
         $lastStatusDoubleTime = time();
-        $lastStatusDouble = $newStatusDouble;
+        if($newStatusDouble != null) {
+            $lastStatusDouble = $newStatusDouble;
+        }
+
         switch ($newStatusDouble) {
             case "SearchesForCar":
             case "WaitingCarSearch":
@@ -330,9 +337,9 @@ class UniversalAndroidFunctionController extends Controller
             $doubleOrder,
             $authorizationDouble
         );
-        $messageAdmin = "lastStatusBonus0: $lastStatusBonus
-            lastStatusDouble0:  $lastStatusDouble
-            canceledFinish:0 $canceledAll";
+        $messageAdmin = "lastStatusBonus0: $lastStatusBonus " .
+            "lastStatusDouble0:  $lastStatusDouble " .
+            "canceledFinish:0 $canceledAll";
 
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
@@ -349,13 +356,11 @@ class UniversalAndroidFunctionController extends Controller
                 }
                 $bonusOrder = $uid_history->uid_bonusOrder;
 
-                $messageAdmin = "bonusOrder  1: $bonusOrder lastStatusBonus 1: $lastStatusBonus";
-                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
                 $doubleOrder = $uid_history->uid_doubleOrder;
 
-
-                $messageAdmin = "doubleOrder  1: $doubleOrder doubleOrder  1: $doubleOrder";
+                $messageAdmin =
+                    "bonusOrder  1: $bonusOrder  lastStatusBonus: $lastStatusBonus " .
+                     "doubleOrder 1: $doubleOrder lastStatusDouble: $lastStatusDouble";
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $canceledAll = self::canceledFinish(
@@ -386,6 +391,11 @@ class UniversalAndroidFunctionController extends Controller
                     return "exit";
                 } else {
                     //Безнал ОБРАБОТКА статуса
+                    $messageAdmin =
+                        " Безнал ОБРАБОТКА статуса " .
+                         "bonusOrder  *: $bonusOrder   newStatusBonus: $newStatusBonus " .
+                         "doubleOrder *: $doubleOrder  newStatusDouble: $newStatusDouble";
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                     switch ($newStatusBonus) {
                         case "SearchesForCar":
                         case "WaitingCarSearch":
@@ -394,7 +404,7 @@ class UniversalAndroidFunctionController extends Controller
                                 case "WaitingCarSearch":
                                     //Опрос безнала
                                     $lastTimeUpdate = $lastStatusBonusTime;
-//                                    $updateTime = $updateTime;
+
                                     $newStatusBonus = self::newStatus(
                                         $authorizationBonus,
                                         $identificationId,
@@ -1059,7 +1069,14 @@ class UniversalAndroidFunctionController extends Controller
                                 case "CarFound":
                                 case "Running":
                                     //Опрос нала
-                                    $lastTimeUpdate = $lastStatusDoubleTime;
+                                $lastTimeUpdate = $lastStatusDoubleTime;
+                                $messageAdmin =
+                                    " Опрос нала вход " .
+                                         "bonusOrder  *111: $bonusOrder   newStatusBonus: $newStatusBonus " .
+                                         "doubleOrder *111: $doubleOrder  newStatusDouble: $newStatusDouble " .
+                                         "updateTime $updateTime " ;
+                                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
 //                                    $updateTime = $updateTime;
                                     $newStatusDouble = self::newStatus(
                                         $authorizationDouble,
@@ -1072,6 +1089,12 @@ class UniversalAndroidFunctionController extends Controller
                                         $updateTime,
                                         $uid_history
                                     );
+                                    $messageAdmin =
+                                        " Опрос нала выход " .
+                                             "bonusOrder  *222: $bonusOrder   newStatusBonus: $newStatusBonus " .
+                                             "doubleOrder *222: $doubleOrder  newStatusDouble: $newStatusDouble";
+                                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
                                     $lastStatusDoubleTime = time();
                                     if ($no_required_time) {
                                         switch ($newStatusDouble) {
@@ -1333,43 +1356,17 @@ class UniversalAndroidFunctionController extends Controller
                             }
                             break;
                     }
-                    $lastStatusBonus = $newStatusBonus;
-
-
-                    $messageAdmin = "Безнал после обработки new Status: $lastStatusBonus";
-                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                    if($newStatusBonus != null) {
+                        $lastStatusBonus = $newStatusBonus;
+                    }
 
                     $bonusOrder = $uid_history->uid_bonusOrder;
-//                    $lastStatusBonus = self::newStatus(
-//                        $authorizationBonus,
-//                        $identificationId,
-//                        $apiVersion,
-//                        $responseBonus["url"],
-//                        $bonusOrder,
-//                        "bonus",
-//                        $lastTimeUpdate,
-//                        $updateTime,
-//                        $uid_history
-//                    );
-                    $messageAdmin = "bonusOrder  2: $bonusOrder
-                     lastStatusBonus 2: $lastStatusBonus";
 
-                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                     $doubleOrder = $uid_history->uid_doubleOrder;
-//                    $lastStatusDouble = self::newStatus(
-//                        $authorizationDouble,
-//                        $identificationId,
-//                        $apiVersion,
-//                        $responseDouble["url"],
-//                        $doubleOrder,
-//                        "double",
-//                        $lastTimeUpdate,
-//                        $updateTime,
-//                        $uid_history
-//                    );
 
-                    $messageAdmin = "doubleOrder  2: $doubleOrder
-                    lastStatusDouble 2: $lastStatusDouble";
+                    $messageAdmin =
+                        "bonusOrder  2: $bonusOrder   lastStatusBonus: $lastStatusBonus " .
+                         "doubleOrder 2: $doubleOrder  lastStatusDouble: $lastStatusDouble";
 
                     (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
@@ -1388,10 +1385,10 @@ class UniversalAndroidFunctionController extends Controller
 
                     if ($canceledAll) {
 
-                        $messageAdmin = "canceled while
-                        lastStatusBonus2:  $lastStatusBonus
-                        lastStatusDouble2:  $lastStatusDouble
-                        doubleOrderRecord 2 $doubleOrderRecord";
+                        $messageAdmin = "canceled while " .
+                        "lastStatusBonus2:  $lastStatusBonus" .
+                        "lastStatusDouble2:  $lastStatusDouble" .
+                        "doubleOrderRecord 2 $doubleOrderRecord";
 
                         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
@@ -1401,6 +1398,13 @@ class UniversalAndroidFunctionController extends Controller
                         return "exit";
                     } else {
                         //Нал ОБРАБОТКА статуса
+
+                        $messageAdmin =
+                            " Нал ОБРАБОТКА статуса " .
+                         "bonusOrder  *: $bonusOrder   newStatusBonus: $newStatusBonus " .
+                         "doubleOrder *: $doubleOrder  newStatusDouble: $newStatusDouble";
+                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
                         switch ($newStatusDouble) {
                             case "SearchesForCar":
                                 switch ($newStatusBonus) {
@@ -2625,43 +2629,15 @@ class UniversalAndroidFunctionController extends Controller
                                 }
                                 break;
                         }
-                        $lastStatusDouble = $newStatusDouble;
-                        $messageAdmin = "Нал после обработки new Status:  $lastStatusDouble";
-                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                        if($newStatusDouble != null) {
+                            $lastStatusDouble = $newStatusDouble;
+                        }
 
                         $bonusOrder = $uid_history->uid_bonusOrder;
-//                        $lastStatusBonus = self::newStatus(
-//                            $authorizationBonus,
-//                            $identificationId,
-//                            $apiVersion,
-//                            $responseBonus["url"],
-//                            $bonusOrder,
-//                            "bonus",
-//                            $lastTimeUpdate,
-//                            $updateTime,
-//                            $uid_history
-//                        );
-                        $messageAdmin = "bonusOrder  3: $bonusOrder
-                         lastStatusBonus 3: $lastStatusBonus";
 
-                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-                        $doubleOrder = $uid_history->uid_doubleOrder;
-//                        $lastStatusDouble = self::newStatus(
-//                            $authorizationDouble,
-//                            $identificationId,
-//                            $apiVersion,
-//                            $responseDouble["url"],
-//                            $doubleOrder,
-//                            "double",
-//                            $lastTimeUpdate,
-//                            $updateTime,
-//                            $uid_history
-//                        );
-
-
-
-                        $messageAdmin = "doubleOrder  3: $doubleOrder
-                         lastStatusDouble 3: $lastStatusDouble";
+                        $messageAdmin =
+                            "bonusOrder  3: $bonusOrder  lastStatusBonus: $lastStatusBonus " .
+                             "doubleOrder 3: $doubleOrder lastStatusDouble: $lastStatusDouble";
 
                         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
@@ -2728,2494 +2704,6 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
-//    public function startNewProcessExecutionStatusJob($doubleOrderId, $jobId): ?string
-//    {
-//        Log::info("startNewProcessExecutionStatusEmu");
-//        $messageAdmin = "startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
-//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-//
-//        ExecStatusHistory::truncate();
-//        $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
-//        if (!$doubleOrderRecord) {
-//            return "exit";
-//        }
-//
-//        $responseBonusStr = $doubleOrderRecord->responseBonusStr;
-//        $responseDoubleStr = $doubleOrderRecord->responseDoubleStr;
-//        $authorizationBonus = $doubleOrderRecord->authorizationBonus;
-//        $authorizationDouble = $doubleOrderRecord->authorizationDouble;
-//        $connectAPI = $doubleOrderRecord->connectAPI;
-//        $identificationId = $doubleOrderRecord->identificationId;
-//        $apiVersion = $doubleOrderRecord->apiVersion;
-//
-////        $doubleOrderRecord->delete();
-//
-//
-//        $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
-////          $maxExecutionTime = 4 * 60 * 60; // Максимальное время выполнения - 4 часа
-////        $maxExecutionTime = 10*60; // Максимальное время выполнения - 3 суток
-//        $startTime = time();
-//
-//
-//        $responseBonus = json_decode($responseBonusStr, true);
-//        $bonusOrder = $responseBonus['dispatching_order_uid'];
-//        $bonusOrderHold = $bonusOrder;
-//        //Увеличеваем максимальное время для отстроченного заказа
-//        $orderwebs = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
-//        if ($orderwebs->required_time != null) {
-//            $maxExecutionTime +=  strtotime($orderwebs->required_time);
-//        }
-//
-//        $lastTimeUpdate = time();
-//
-//        $updateTime = 5;
-//
-//        $responseDouble = json_decode($responseDoubleStr, true);
-//        $doubleOrder = $responseDouble['dispatching_order_uid'];
-//
-//        $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
-//
-//        if ($uid_history == null) {
-//            $uid_history = new Uid_history();
-//            $uid_history->uid_bonusOrder = $bonusOrder;
-//            $uid_history->uid_doubleOrder = $doubleOrder;
-//            $uid_history->uid_bonusOrderHold = $bonusOrder;
-//            $uid_history->cancel = false;
-//        } else {
-//
-//            $uid_history->jobId = $jobId;
-//        }
-//        $uid_history->save();
-//        $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
-//        $messageAdmin = "uid_history: " . print_r($uid_history->toArray(), true);
-//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-//
-//// Безнал
-//        sleep($updateTime);
-//        $newStatusBonus =  self::newStatus(
-//            $authorizationBonus,
-//            $identificationId,
-//            $apiVersion,
-//            $responseBonus["url"],
-//            $bonusOrder,
-//            "bonus",
-//            $lastTimeUpdate,
-//            $updateTime,
-//            $uid_history
-//        );
-//
-////        return "";
-//        $lastStatusBonusTime = $lastTimeUpdate;
-//        $lastStatusBonus = $newStatusBonus;
-//
-////Нал
-//        $newStatusDouble = self::newStatus(
-//            $authorizationDouble,
-//            $identificationId,
-//            $apiVersion,
-//            $responseDouble["url"],
-//            $doubleOrder,
-//            "double",
-//            $lastTimeUpdate,
-//            $updateTime,
-//            $uid_history
-//        );
-//
-//
-//        $lastStatusDoubleTime = time();
-//        $lastStatusDouble = $newStatusDouble;
-//        switch ($newStatusDouble) {
-//            case "SearchesForCar":
-//            case "WaitingCarSearch":
-//                $updateTime = 5;
-//                break;
-//            default:
-//                switch ($newStatusBonus) {
-//                    case "SearchesForCar":
-//                    case "WaitingCarSearch":
-//                        $updateTime = 5;
-//                        break;
-//                    default:
-//                        $updateTime = 30;
-//                }
-//        }
-//
-//        $canceledAll = self::canceledFinish(
-//            $lastStatusBonus,
-//            $lastStatusDouble,
-//            $bonusOrderHold,
-//            $bonusOrder,
-//            $connectAPI,
-//            $authorizationBonus,
-//            $identificationId,
-//            $apiVersion,
-//            $doubleOrder,
-//            $authorizationDouble
-//        );
-//        Log::debug("lastStatusBonus0: " . $lastStatusBonus);
-//        Log::debug("lastStatusDouble0: " . $lastStatusDouble);
-//        Log::debug("canceledFinish:0 " . $canceledAll);
-//
-//        if ($canceledAll) {
-////            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-//            Log::info("doubleOrderRecord 0 $doubleOrderRecord");
-//            $doubleOrderRecord->delete();
-//            return "exit";
-//        } else {
-//            while (time() - $startTime < $maxExecutionTime) {
-//                if (time() <= strtotime($orderwebs->required_time)) {
-//                    $updateTime = 60;
-//                    $no_required_time = false;
-//                } else {
-//                    $no_required_time = true;
-//                }
-//                $bonusOrder = $uid_history->uid_bonusOrder;
-//
-//                Log::debug("bonusOrder  1: $bonusOrder");
-//                Log::debug("lastStatusBonus 1: $lastStatusBonus");
-//
-//                $doubleOrder = $uid_history->uid_doubleOrder;
-//
-//
-//                Log::debug("doubleOrder  1: $doubleOrder");
-//                Log::debug("lastStatusDouble 1: $lastStatusDouble");
-//                $canceledAll = self::canceledFinish(
-//                    $lastStatusBonus,
-//                    $lastStatusDouble,
-//                    $bonusOrderHold,
-//                    $bonusOrder,
-//                    $connectAPI,
-//                    $authorizationBonus,
-//                    $identificationId,
-//                    $apiVersion,
-//                    $doubleOrder,
-//                    $authorizationDouble
-//                );
-//
-//                if ($canceledAll) {
-//                    Log::debug("canceled while 1 **********************************************");
-//                    Log::debug("lastStatusBonus1: " . $lastStatusBonus);
-//                    Log::debug("lastStatusDouble1: " . $lastStatusDouble);
-////                    $uid_history->delete();
-//                    Log::info("doubleOrderRecord 1 $doubleOrderRecord");
-//                    $doubleOrderRecord->delete();
-////                    self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-//
-//                    return "exit";
-//                } else {
-//                    //Безнал ОБРАБОТКА статуса
-//                    switch ($newStatusBonus) {
-//                        case "SearchesForCar":
-//                        case "WaitingCarSearch":
-//                            switch ($newStatusDouble) {
-//                                case "SearchesForCar":
-//                                case "WaitingCarSearch":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//
-//                                    break;
-//                                case "CarFound":
-//                                case "Running":
-//                                    //Отмена безнала
-//                                    self::orderCanceled(
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $connectAPI,
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion
-//                                    );
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = 5;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//
-//                                    break;
-//                                case "CostCalculation":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//
-//
-//                                    //Восстановление нала
-//                                    $doubleOrder = self::orderNewCreat(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble['url'],
-//                                        $responseDouble['parameter']
-//                                    );
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = 5;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                            }
-//                            break;
-//                        case "CarFound":
-//                            switch ($newStatusDouble) {
-//                                case "SearchesForCar":
-//                                case "WaitingCarSearch":
-//                                case "CarFound":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    //Отмена нала
-//                                    self::orderCanceled(
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $connectAPI,
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion
-//                                    );
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = 5;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                                case "Running":
-//                                    //Отмена безнала
-//                                    self::orderCanceled(
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $connectAPI,
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion
-//                                    );
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = 5;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                                case "CostCalculation":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                            }
-//                            break;
-//                        case "Running":
-//                            switch ($newStatusDouble) {
-//                                case "SearchesForCar":
-//                                case "WaitingCarSearch":
-//                                case "CarFound":
-//                                case "Running":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    //Отмена нала
-//                                    self::orderCanceled(
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $connectAPI,
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion
-//                                    );
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = 5;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                                case "CostCalculation":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                            }
-//                            break;
-//                        case "Canceled":
-//                            switch ($newStatusDouble) {
-//                                case "SearchesForCar":
-//                                    switch ($lastStatusBonus) {
-//                                        case "CarFound":
-//                                        case "Running":
-//                                        case "Canceled":
-//                                        case "Executed":
-//                                        case "CostCalculation":
-//                                            //Восстановление безнала
-//                                            $bonusOrder = self::orderNewCreat(
-//                                                $authorizationBonus,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseBonus['url'],
-//                                                $responseBonus['parameter']
-//                                            );
-//                                            //Опрос безнала
-//                                            $lastTimeUpdate = $lastStatusBonusTime;
-////                                            $updateTime = 5;
-//                                            $newStatusBonus = self::newStatus(
-//                                                $authorizationBonus,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseBonus["url"],
-//                                                $bonusOrder,
-//                                                "bonus",
-//                                                $lastTimeUpdate,
-//                                                $updateTime,
-//                                                $uid_history
-//                                            );
-//                                            $lastStatusBonusTime = time();
-//                                            if ($no_required_time) {
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        switch ($newStatusDouble) {
-//                                                            case "SearchesForCar":
-//                                                            case "WaitingCarSearch":
-//                                                                $updateTime = 5;
-//                                                                break;
-//                                                            default:
-//                                                                $updateTime = 30;
-//                                                        }
-//                                                }
-//                                            }
-//                                            //Опрос нала
-//                                            $lastTimeUpdate = $lastStatusDoubleTime;
-////                                            $updateTime = $updateTime;
-//                                            $newStatusDouble = self::newStatus(
-//                                                $authorizationDouble,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseDouble["url"],
-//                                                $doubleOrder,
-//                                                "double",
-//                                                $lastTimeUpdate,
-//                                                $updateTime,
-//                                                $uid_history
-//                                            );
-//                                            $lastStatusDoubleTime = time();
-//                                            if ($no_required_time) {
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        switch ($newStatusBonus) {
-//                                                            case "SearchesForCar":
-//                                                            case "WaitingCarSearch":
-//                                                                $updateTime = 5;
-//                                                                break;
-//                                                            default:
-//                                                                $updateTime = 30;
-//                                                        }
-//                                                }
-//                                            }
-//                                    }
-//                                    break;
-//                                case "WaitingCarSearch":
-//                                    switch ($lastStatusBonus) {
-//                                        case "SearchesForCar":
-//                                        case "WaitingCarSearch":
-//                                            //Опрос нала
-//                                            $lastTimeUpdate = $lastStatusDoubleTime;
-////                                            $updateTime = $updateTime;
-//                                            $newStatusDouble = self::newStatus(
-//                                                $authorizationDouble,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseDouble["url"],
-//                                                $doubleOrder,
-//                                                "double",
-//                                                $lastTimeUpdate,
-//                                                $updateTime,
-//                                                $uid_history
-//                                            );
-//                                            $lastStatusDoubleTime = time();
-//                                            if ($no_required_time) {
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        switch ($newStatusBonus) {
-//                                                            case "SearchesForCar":
-//                                                            case "WaitingCarSearch":
-//                                                                $updateTime = 5;
-//                                                                break;
-//                                                            default:
-//                                                                $updateTime = 30;
-//                                                        }
-//                                                }
-//                                            }
-//                                            break;
-//                                        case "CarFound":
-//                                        case "Running":
-//                                        case "Canceled":
-//                                        case "Executed":
-//                                        case "CostCalculation":
-//                                            //Восстановление безнала
-//                                            $bonusOrder = self::orderNewCreat(
-//                                                $authorizationBonus,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseBonus['url'],
-//                                                $responseBonus['parameter']
-//                                            );
-//                                            //Опрос безнала
-//                                            $lastTimeUpdate = $lastStatusBonusTime;
-////                                            $updateTime = 5;
-//                                            $newStatusBonus = self::newStatus(
-//                                                $authorizationBonus,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseBonus["url"],
-//                                                $bonusOrder,
-//                                                "bonus",
-//                                                $lastTimeUpdate,
-//                                                $updateTime,
-//                                                $uid_history
-//                                            );
-//                                            $lastStatusBonusTime = time();
-//                                            if ($no_required_time) {
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        switch ($newStatusDouble) {
-//                                                            case "SearchesForCar":
-//                                                            case "WaitingCarSearch":
-//                                                                $updateTime = 5;
-//                                                                break;
-//                                                            default:
-//                                                                $updateTime = 30;
-//                                                        }
-//                                                }
-//                                            }
-//
-//                                            //Опрос нала
-//                                            $lastTimeUpdate = $lastStatusDoubleTime;
-////                                            $updateTime = $updateTime;
-//                                            $newStatusDouble = self::newStatus(
-//                                                $authorizationDouble,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseDouble["url"],
-//                                                $doubleOrder,
-//                                                "double",
-//                                                $lastTimeUpdate,
-//                                                $updateTime,
-//                                                $uid_history
-//                                            );
-//                                            $lastStatusDoubleTime = time();
-//                                            if ($no_required_time) {
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        switch ($newStatusBonus) {
-//                                                            case "SearchesForCar":
-//                                                            case "WaitingCarSearch":
-//                                                                $updateTime = 5;
-//                                                                break;
-//                                                            default:
-//                                                                $updateTime = 30;
-//                                                        }
-//                                                }
-//                                            }
-//                                            break;
-//                                    }
-//                                    break;
-//                                case "CarFound":
-//                                case "Running":
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                                case "CostCalculation":
-//                                    break;
-//                            }
-//                            break;
-//                        case "Executed":
-//                            switch ($newStatusDouble) {
-//                                case "SearchesForCar":
-//                                case "WaitingCarSearch":
-//                                case "CarFound":
-//                                case "Running":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    //Отмена нала
-//                                    self::orderCanceled(
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $connectAPI,
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion
-//                                    );
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = 5;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//
-//                                    break;
-//                                case "CostCalculation":
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    break;
-//                            }
-//                            break;
-//                        case "CostCalculation":
-//                            switch ($newStatusDouble) {
-//                                case "SearchesForCar":
-//                                case "WaitingCarSearch":
-//                                    //Восстановление безнала
-//                                    $bonusOrder = self::orderNewCreat(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus['url'],
-//                                        $responseBonus['parameter']
-//                                    );
-//                                    //Опрос безнала
-//                                    $lastTimeUpdate = $lastStatusBonusTime;
-////                                    $updateTime = 5;
-//                                    $newStatusBonus = self::newStatus(
-//                                        $authorizationBonus,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseBonus["url"],
-//                                        $bonusOrder,
-//                                        "bonus",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusBonusTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusBonus) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//                                    //Опрос нала
-//                                    $lastTimeUpdate = $lastStatusDoubleTime;
-////                                    $updateTime = $updateTime;
-//                                    $newStatusDouble = self::newStatus(
-//                                        $authorizationDouble,
-//                                        $identificationId,
-//                                        $apiVersion,
-//                                        $responseDouble["url"],
-//                                        $doubleOrder,
-//                                        "double",
-//                                        $lastTimeUpdate,
-//                                        $updateTime,
-//                                        $uid_history
-//                                    );
-//                                    $lastStatusDoubleTime = time();
-//                                    if ($no_required_time) {
-//                                        switch ($newStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                $updateTime = 5;
-//                                                break;
-//                                            default:
-//                                                switch ($newStatusBonus) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        $updateTime = 30;
-//                                                }
-//                                        }
-//                                    }
-//
-//                                    break;
-//                                case "CarFound":
-//                                case "Running":
-//                                case "CostCalculation":
-//                                    switch ($lastStatusBonus) {
-//                                        case "SearchesForCar":
-//                                            //Опрос нала
-//                                            $lastTimeUpdate = $lastStatusDoubleTime;
-////                                            $updateTime = $updateTime;
-//                                            $newStatusDouble = self::newStatus(
-//                                                $authorizationDouble,
-//                                                $identificationId,
-//                                                $apiVersion,
-//                                                $responseDouble["url"],
-//                                                $doubleOrder,
-//                                                "double",
-//                                                $lastTimeUpdate,
-//                                                $updateTime,
-//                                                $uid_history
-//                                            );
-//                                            $lastStatusDoubleTime = time();
-//                                            if ($no_required_time) {
-//                                                switch ($newStatusDouble) {
-//                                                    case "SearchesForCar":
-//                                                    case "WaitingCarSearch":
-//                                                        $updateTime = 5;
-//                                                        break;
-//                                                    default:
-//                                                        switch ($newStatusBonus) {
-//                                                            case "SearchesForCar":
-//                                                            case "WaitingCarSearch":
-//                                                                $updateTime = 5;
-//                                                                break;
-//                                                            default:
-//                                                                $updateTime = 30;
-//                                                        }
-//                                                }
-//                                            }
-//                                            break;
-//                                    }
-//                                    break;
-//                            }
-//                            break;
-//                    }
-//                    $lastStatusBonus = $newStatusBonus;
-//                    Log::debug(" Безнал после обработки new Status: " . $lastStatusBonus);
-//                    $bonusOrder = $uid_history->uid_bonusOrder;
-////                    $lastStatusBonus = self::newStatus(
-////                        $authorizationBonus,
-////                        $identificationId,
-////                        $apiVersion,
-////                        $responseBonus["url"],
-////                        $bonusOrder,
-////                        "bonus",
-////                        $lastTimeUpdate,
-////                        $updateTime,
-////                        $uid_history
-////                    );
-//                    Log::debug("bonusOrder  2: $bonusOrder");
-//                    Log::debug("lastStatusBonus 2: $lastStatusBonus");
-//
-//                    $doubleOrder = $uid_history->uid_doubleOrder;
-////                    $lastStatusDouble = self::newStatus(
-////                        $authorizationDouble,
-////                        $identificationId,
-////                        $apiVersion,
-////                        $responseDouble["url"],
-////                        $doubleOrder,
-////                        "double",
-////                        $lastTimeUpdate,
-////                        $updateTime,
-////                        $uid_history
-////                    );
-//
-//                    Log::debug("doubleOrder  2: $doubleOrder");
-//                    Log::debug("lastStatusDouble 2: $lastStatusDouble");
-//                    $canceledAll = self::canceledFinish(
-//                        $lastStatusBonus,
-//                        $lastStatusDouble,
-//                        $bonusOrderHold,
-//                        $bonusOrder,
-//                        $connectAPI,
-//                        $authorizationBonus,
-//                        $identificationId,
-//                        $apiVersion,
-//                        $doubleOrder,
-//                        $authorizationDouble
-//                    );
-//
-//                    if ($canceledAll) {
-//                        Log::debug("canceled while ");
-//                        Log::debug("lastStatusBonus2: " . $lastStatusBonus);
-//                        Log::debug("lastStatusDouble2: " . $lastStatusDouble);
-//                        Log::info("doubleOrderRecord 2 $doubleOrderRecord");
-//                        $doubleOrderRecord->delete();
-////                        self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-//
-//                        return "exit";
-//                    } else {
-//                        //Нал ОБРАБОТКА статуса
-//                        switch ($newStatusDouble) {
-//                            case "SearchesForCar":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                    case "WaitingCarSearch":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CarFound":
-//                                    case "Running":
-//                                        //Отмена нла
-//                                        self::orderCanceled(
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $connectAPI,
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = 5;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//
-//                                        //Восстановление безнала
-//                                        $bonusOrder = self::orderNewCreat(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus['url'],
-//                                            $responseBonus['parameter']
-//                                        );
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = 5;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                }
-//                                break;
-//                            case "WaitingCarSearch":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                    case "WaitingCarSearch":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CarFound":
-//                                    case "Running":
-//                                        //Отмена нала
-//                                        self::orderCanceled(
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $connectAPI,
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = 5;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Восстановление безнала
-//                                        $bonusOrder = self::orderNewCreat(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus['url'],
-//                                            $responseBonus['parameter']
-//                                        );
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = 5;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                }
-//                                break;
-//                            case "CarFound":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                    case "WaitingCarSearch":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Отмена безнала
-//                                        self::orderCanceled(
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $connectAPI,
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = 5;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CarFound":
-//                                    case "Running":
-//                                        //Отмена безнала
-//                                        self::orderCanceled(
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $connectAPI,
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = 5;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                }
-//                                break;
-//                            case "Running":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                    case "WaitingCarSearch":
-//                                    case "CarFound":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Отмена Bonus
-//                                        self::orderCanceled(
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $connectAPI,
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = 5;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "Running":
-//                                        //Отмена нала
-//                                        self::orderCanceled(
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $connectAPI,
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = 5;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                }
-//                                break;
-//                            case "Canceled":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                        switch ($lastStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                //Отмена Bonus
-//                                                self::orderCanceled(
-//                                                    $bonusOrder,
-//                                                    "bonus",
-//                                                    $connectAPI,
-//                                                    $authorizationBonus,
-//                                                    $identificationId,
-//                                                    $apiVersion
-//                                                );
-//                                                //Опрос безнала
-//                                                $lastTimeUpdate = $lastStatusBonusTime;
-////                                                $updateTime = 5;
-//                                                $newStatusBonus = self::newStatus(
-//                                                    $authorizationBonus,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseBonus["url"],
-//                                                    $bonusOrder,
-//                                                    "bonus",
-//                                                    $lastTimeUpdate,
-//                                                    $updateTime,
-//                                                    $uid_history
-//                                                );
-//                                                $lastStatusBonusTime = time();
-//                                                if ($no_required_time) {
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            switch ($newStatusDouble) {
-//                                                                case "SearchesForCar":
-//                                                                case "WaitingCarSearch":
-//                                                                    $updateTime = 5;
-//                                                                    break;
-//                                                                default:
-//                                                                    $updateTime = 30;
-//                                                            }
-//                                                    }
-//                                                }
-//                                                break;
-//                                            case "CarFound":
-//                                            case "Running":
-//                                            case "Canceled":
-//                                            case "Executed":
-//                                            case "CostCalculation":
-//                                                //Восстановление нала
-////                                        if ($doubleCancel) {
-//                                                $doubleOrder = self::orderNewCreat(
-//                                                    $authorizationDouble,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseDouble['url'],
-//                                                    $responseDouble['parameter']
-//                                                );
-//                                                //Опрос нала
-//                                                $lastTimeUpdate = $lastStatusDoubleTime;
-////                                                $updateTime = $updateTime;
-//                                                $newStatusDouble = self::newStatus(
-//                                                    $authorizationDouble,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseDouble["url"],
-//                                                    $doubleOrder,
-//                                                    "double",
-//                                                    $lastTimeUpdate,
-//                                                    $updateTime,
-//                                                    $uid_history
-//                                                );
-//                                                $lastStatusDoubleTime = time();
-//                                                if ($no_required_time) {
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            switch ($newStatusBonus) {
-//                                                                case "SearchesForCar":
-//                                                                case "WaitingCarSearch":
-//                                                                    $updateTime = 5;
-//                                                                    break;
-//                                                                default:
-//                                                                    $updateTime = 30;
-//                                                            }
-//                                                    }
-//                                                }
-//                                                //Опрос безнала
-//                                                $lastTimeUpdate = $lastStatusBonusTime;
-////                                                $updateTime = $updateTime;
-//                                                $newStatusBonus = self::newStatus(
-//                                                    $authorizationBonus,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseBonus["url"],
-//                                                    $bonusOrder,
-//                                                    "bonus",
-//                                                    $lastTimeUpdate,
-//                                                    $updateTime,
-//                                                    $uid_history
-//                                                );
-//                                                $lastStatusBonusTime = time();
-//                                                if ($no_required_time) {
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            switch ($newStatusDouble) {
-//                                                                case "SearchesForCar":
-//                                                                case "WaitingCarSearch":
-//                                                                    $updateTime = 5;
-//                                                                    break;
-//                                                                default:
-//                                                                    $updateTime = 30;
-//                                                            }
-//                                                    }
-//                                                }
-//                                                break;
-//                                        }
-//                                        break;
-//                                    case "WaitingCarSearch":
-//                                        switch ($lastStatusDouble) {
-//                                            case "SearchesForCar":
-//                                            case "WaitingCarSearch":
-//                                                //Отмена Bonus
-//                                                self::orderCanceled(
-//                                                    $bonusOrder,
-//                                                    "bonus",
-//                                                    $connectAPI,
-//                                                    $authorizationBonus,
-//                                                    $identificationId,
-//                                                    $apiVersion
-//                                                );
-//                                                //Опрос безнала
-//                                                $lastTimeUpdate = $lastStatusBonusTime;
-////                                                $updateTime = 5;
-//                                                $newStatusBonus = self::newStatus(
-//                                                    $authorizationBonus,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseBonus["url"],
-//                                                    $bonusOrder,
-//                                                    "bonus",
-//                                                    $lastTimeUpdate,
-//                                                    $updateTime,
-//                                                    $uid_history
-//                                                );
-//                                                $lastStatusBonusTime = time();
-//                                                if ($no_required_time) {
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            switch ($newStatusDouble) {
-//                                                                case "SearchesForCar":
-//                                                                case "WaitingCarSearch":
-//                                                                    $updateTime = 5;
-//                                                                    break;
-//                                                                default:
-//                                                                    $updateTime = 30;
-//                                                            }
-//                                                    }
-//                                                }
-//                                                break;
-//                                            case "CarFound":
-//                                            case "Running":
-//                                            case "Canceled":
-//                                            case "Executed":
-//                                            case "CostCalculation":
-//                                                //Восстановление нала
-//                                                $doubleOrder = self::orderNewCreat(
-//                                                    $authorizationDouble,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseDouble['url'],
-//                                                    $responseDouble['parameter']
-//                                                );
-//                                                //Опрос нала
-//                                                $lastTimeUpdate = $lastStatusDoubleTime;
-////                                                $updateTime = $updateTime;
-//                                                $newStatusDouble = self::newStatus(
-//                                                    $authorizationDouble,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseDouble["url"],
-//                                                    $doubleOrder,
-//                                                    "double",
-//                                                    $lastTimeUpdate,
-//                                                    $updateTime,
-//                                                    $uid_history
-//                                                );
-//                                                $lastStatusDoubleTime = time();
-//                                                if ($no_required_time) {
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            switch ($newStatusBonus) {
-//                                                                case "SearchesForCar":
-//                                                                case "WaitingCarSearch":
-//                                                                    $updateTime = 5;
-//                                                                    break;
-//                                                                default:
-//                                                                    $updateTime = 30;
-//                                                            }
-//                                                    }
-//                                                }
-//                                                //Опрос безнала
-//                                                $lastTimeUpdate = $lastStatusBonusTime;
-////                                                $updateTime = $updateTime;
-//                                                $newStatusBonus = self::newStatus(
-//                                                    $authorizationBonus,
-//                                                    $identificationId,
-//                                                    $apiVersion,
-//                                                    $responseBonus["url"],
-//                                                    $bonusOrder,
-//                                                    "bonus",
-//                                                    $lastTimeUpdate,
-//                                                    $updateTime,
-//                                                    $uid_history
-//                                                );
-//                                                $lastStatusBonusTime = time();
-//                                                if ($no_required_time) {
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            switch ($newStatusDouble) {
-//                                                                case "SearchesForCar":
-//                                                                case "WaitingCarSearch":
-//                                                                    $updateTime = 5;
-//                                                                    break;
-//                                                                default:
-//                                                                    $updateTime = 30;
-//                                                            }
-//                                                    }
-//                                                }
-//                                                break;
-//                                        }
-//                                        break;
-//                                    case "CarFound":
-//                                    case "Running":
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        break;
-//                                }
-//                                break;
-//                            case "Executed":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                    case "WaitingCarSearch":
-//                                    case "CarFound":
-//                                    case "Running":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Отмена безнала
-//                                        self::orderCanceled(
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $connectAPI,
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion
-//                                        );
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = 5;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                }
-//                                break;
-//                            case "CostCalculation":
-//                                switch ($newStatusBonus) {
-//                                    case "SearchesForCar":
-//                                    case "WaitingCarSearch":
-//                                        //Восстановление нала
-////                                if ($doubleCancel) {
-//                                        $doubleOrder = self::orderNewCreat(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble['url'],
-//                                            $responseDouble['parameter']
-//                                        );
-//                                        //Опрос нала
-//                                        $lastTimeUpdate = $lastStatusDoubleTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusDouble = self::newStatus(
-//                                            $authorizationDouble,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseDouble["url"],
-//                                            $doubleOrder,
-//                                            "double",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusDoubleTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusDouble) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusBonus) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CarFound":
-//                                    case "Running":
-//                                        //Опрос безнала
-//                                        $lastTimeUpdate = $lastStatusBonusTime;
-////                                        $updateTime = $updateTime;
-//                                        $newStatusBonus = self::newStatus(
-//                                            $authorizationBonus,
-//                                            $identificationId,
-//                                            $apiVersion,
-//                                            $responseBonus["url"],
-//                                            $bonusOrder,
-//                                            "bonus",
-//                                            $lastTimeUpdate,
-//                                            $updateTime,
-//                                            $uid_history
-//                                        );
-//                                        $lastStatusBonusTime = time();
-//                                        if ($no_required_time) {
-//                                            switch ($newStatusBonus) {
-//                                                case "SearchesForCar":
-//                                                case "WaitingCarSearch":
-//                                                    $updateTime = 5;
-//                                                    break;
-//                                                default:
-//                                                    switch ($newStatusDouble) {
-//                                                        case "SearchesForCar":
-//                                                        case "WaitingCarSearch":
-//                                                            $updateTime = 5;
-//                                                            break;
-//                                                        default:
-//                                                            $updateTime = 30;
-//                                                    }
-//                                            }
-//                                        }
-//                                        break;
-//                                    case "CostCalculation":
-//                                        break;
-//                                }
-//                                break;
-//                        }
-//                        $lastStatusDouble = $newStatusDouble;
-//                        Log::debug(" Нал после обработки new Status: " . $lastStatusDouble);
-//                        $bonusOrder = $uid_history->uid_bonusOrder;
-////                        $lastStatusBonus = self::newStatus(
-////                            $authorizationBonus,
-////                            $identificationId,
-////                            $apiVersion,
-////                            $responseBonus["url"],
-////                            $bonusOrder,
-////                            "bonus",
-////                            $lastTimeUpdate,
-////                            $updateTime,
-////                            $uid_history
-////                        );
-//                        Log::debug("bonusOrder  3: $bonusOrder");
-//                        Log::debug("lastStatusBonus 3: $lastStatusBonus");
-//
-//                        $doubleOrder = $uid_history->uid_doubleOrder;
-////                        $lastStatusDouble = self::newStatus(
-////                            $authorizationDouble,
-////                            $identificationId,
-////                            $apiVersion,
-////                            $responseDouble["url"],
-////                            $doubleOrder,
-////                            "double",
-////                            $lastTimeUpdate,
-////                            $updateTime,
-////                            $uid_history
-////                        );
-//
-//                        Log::debug("doubleOrder  3: $doubleOrder");
-//                        Log::debug("lastStatusDouble 3: $lastStatusDouble");
-//                        $canceledAll = self::canceledFinish(
-//                            $lastStatusBonus,
-//                            $lastStatusDouble,
-//                            $bonusOrderHold,
-//                            $bonusOrder,
-//                            $connectAPI,
-//                            $authorizationBonus,
-//                            $identificationId,
-//                            $apiVersion,
-//                            $doubleOrder,
-//                            $authorizationDouble
-//                        );
-//
-//                        if ($canceledAll) {
-//                            Log::debug("canceled while ");
-//                            Log::debug("lastStatusBonus3: " . $lastStatusBonus);
-//                            Log::debug("lastStatusDouble3: " . $lastStatusDouble);
-//                            Log::info("doubleOrderRecord 3 $doubleOrderRecord");
-//                            $doubleOrderRecord->delete();
-////                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-//
-//                            return "exit";
-//                        }
-//                    }
-//                }
-//            }
-//            if (time() - $startTime >= $maxExecutionTime) {
-//                self::orderCanceled(
-//                    $bonusOrder,
-//                    'bonus',
-//                    $connectAPI,
-//                    $authorizationBonus,
-//                    $identificationId,
-//                    $apiVersion
-//                );
-//
-//                self::orderCanceled(
-//                    $doubleOrder,
-//                    "double",
-//                    $connectAPI,
-//                    $authorizationDouble,
-//                    $identificationId,
-//                    $apiVersion
-//                );
-////                $uid_history->delete();
-//                Log::info("doubleOrderRecord orderCanceled $doubleOrderRecord");
-//                $doubleOrderRecord->delete();
-//
-////                self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-//            }
-//            return "exit";
-//        }
-//    }
 
     public function newStatus(
         $authorization,
@@ -5229,63 +2717,52 @@ class UniversalAndroidFunctionController extends Controller
         $uid_history
     ) {
 
-        $time_sleep = time() -  $lastTimeUpdate;
 
+        $messageAdmin = "function newStatus вход updateTime: $updateTime";
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-        if ($time_sleep < $updateTime) {
-            sleep($updateTime - $time_sleep);
-        }
         $newStatusArr = self::getExecutionStatus(
             $authorization,
             $identificationId,
             $apiVersion,
             $url,
-            $order
+            $order,
+            $updateTime
         );
-        $newStatus = $newStatusArr["execution_status"];
+         if ($newStatusArr["execution_status"] != null) {
+             $newStatus = $newStatusArr["execution_status"];
+             $messageAdmin = "function newStatus выход $orderType: " . $newStatus;
 
-        $messageAdmin = "function newStatus $orderType: $newStatus
-        $orderType close_reason: " . $newStatusArr["close_reason"];
+             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+             if ($newStatus == "Canceled") {
+                 if ($newStatusArr["close_reason"] == "-1") {
+                     $newStatus = "CarFound";
+                 }
+             }
 
-        if ($newStatus == "Canceled") {
-            if ($newStatusArr["close_reason"] == "-1") {
-                $newStatus = "CarFound";
-            }
-        }
 
-        $messageAdmin = "function newStatus  после $orderType: " . $newStatus;
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+             switch ($orderType) {
+                 case "bonus":
+                     $uid_history->uid_bonusOrder = $order;
+                     $uid_history->bonus_status = json_encode($newStatusArr);
+                     break;
+                 case "double":
+                     $uid_history->uid_doubleOrder = $order;
+                     $uid_history->double_status = json_encode($newStatusArr);
+                     break;
+             }
+             $uid_history->save();
 
-        switch ($orderType) {
-            case "bonus":
-                $uid_history->uid_bonusOrder = $order;
-                $uid_history->bonus_status = json_encode($newStatusArr);
-                break;
-            case "double":
-                $uid_history->uid_doubleOrder = $order;
-                $uid_history->double_status = json_encode($newStatusArr);
-                break;
-        }
-        $uid_history->save();
-//        Log::debug("uid_history: $uid_history");
+             return $newStatus;
+         } else {
 
-//        $message = "в работе";
-//        if ($newStatus == "Canceled") {
-//            $message = "закрыт";
-//        }
-        $messageAdmin = "!!!! newStatus  $orderType: " . $newStatus;
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+             $messageAdmin = "function newStatus выход $orderType newStatus null: " ;
+             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+             return null;
+         }
 
-//        self::ordersExecStatusHistory(
-//            $order,
-//            $orderType,
-//            $newStatus,
-//            $message
-//        );
-//        Log::debug("function newStatus $orderType: " . $newStatus);
-        return $newStatus;
+
     }
 
     /**
@@ -5315,12 +2792,14 @@ class UniversalAndroidFunctionController extends Controller
 
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
 
-        $messageAdmin = "uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false');
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//        $messageAdmin = "uid_history canceledOneMinute : " . ($canceledOneMinute ? 'true' : 'false');
+//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-        if ($canceledOneMinute|| $uid_history->cancel) { //Выход по 1 минуте или нажатию отмены
+        $messageAdmin = "Canceled uid_history->cancel $uid_history->cancel";
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        if ($canceledOneMinute|| $uid_history->cancel == "1") { //Выход по 1 минуте или нажатию отмены
             if ($lastStatusBonus !== "Canceled") {
-                $orderCanceledBonus = self::orderCanceled(
+                $orderCanceledBonus = self::orderCanceledReturn(
                     $bonusOrder,
                     'bonus',
                     $connectAPI,
@@ -5333,7 +2812,7 @@ class UniversalAndroidFunctionController extends Controller
             }
             if ($lastStatusDouble !== "Canceled") {
 
-                $orderCanceledDouble = self::orderCanceled(
+                $orderCanceledDouble = self::orderCanceledReturn(
                     $doubleOrder,
                     "double",
                     $connectAPI,
@@ -5423,8 +2902,8 @@ class UniversalAndroidFunctionController extends Controller
 
         // Заданное время
         $created_at = $order->created_at;
-        $messageAdmin = "canceledOneMinute created_at $created_at";
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//        $messageAdmin = "canceledOneMinute created_at $created_at";
+//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         // Текущие дата и время
         $current_time = date('Y-m-d H:i:s');
 
@@ -5435,8 +2914,8 @@ class UniversalAndroidFunctionController extends Controller
         // Проверка, прошла ли одна минута
         if (($current_time_timestamp - $created_at_timestamp) <= 50) {
 
-            $messageAdmin = "Less than one minute has passed since order creation.";
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//            $messageAdmin = "Less than one minute has passed since order creation.";
+//            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             $merchantInfo = (new WfpController)->checkMerchantInfo($order);
             if($merchantInfo["merchantAccount"] == "errorMerchantAccount") {
@@ -5455,8 +2934,8 @@ class UniversalAndroidFunctionController extends Controller
             if($orderReference != null) {
 
 
-                $messageAdmin = "canceledOneMinute orderReference $orderReference";
-                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//                $messageAdmin = "canceledOneMinute orderReference $orderReference";
+//                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $invoice = WfpInvoice::where("orderReference", $orderReference) ->first();
                 if ($invoice->transactionStatus == null || $invoice->transactionStatus != "WaitingAuthComplete") {
@@ -5552,8 +3031,28 @@ class UniversalAndroidFunctionController extends Controller
         $authorization,
         $identificationId,
         $apiVersion
+    )
+    {
+        self::webordersCancel(
+            $order,
+            $orderType,
+            $connectAPI,
+            $authorization,
+            $identificationId,
+            $apiVersion
+        );
+    }
+
+
+    public function orderCanceledReturn(
+        $order,
+        $orderType,
+        $connectAPI,
+        $authorization,
+        $identificationId,
+        $apiVersion
     ): bool {
-        return self::webordersCancel(
+        return self::webordersCancelReturn(
             $order,
             $orderType,
             $connectAPI,
@@ -5608,28 +3107,109 @@ class UniversalAndroidFunctionController extends Controller
         } while (!$result && time() - $startTime < $maxExecutionTime);
     }
 
+//    public function getExecutionStatus(
+//        $authorization,
+//        $identificationId,
+//        $apiVersion,
+//        $url,
+//        $dispatching_order_uid
+//    ) {
+//        // Здесь реализуйте код для получения статуса execution_status по UID
+//        // Верните фактический статус для последующей проверки
+//
+//        $url = $url . "/" . $dispatching_order_uid;
+//
+//        $response = Http::withHeaders([
+//            "Authorization" => $authorization,
+//            "X-WO-API-APP-ID" => $identificationId,
+//            "X-API-VERSION" => $apiVersion
+//        ])->get($url);
+//        $responseArr = json_decode($response, true);
+////        Log::debug("$url" . "execution_status: " . $responseArr["execution_status"] . " close_reason: " . $responseArr["close_reason"]);
+//
+//        return $responseArr;
+//    }
+
     public function getExecutionStatus(
         $authorization,
         $identificationId,
         $apiVersion,
         $url,
-        $dispatching_order_uid
+        $dispatching_order_uid,
+        $updateTime
     ) {
-        // Здесь реализуйте код для получения статуса execution_status по UID
-        // Верните фактический статус для последующей проверки
-
+        $messageAdmin = "getExecutionStatus";
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $url = $url . "/" . $dispatching_order_uid;
 
-        $response = Http::withHeaders([
-            "Authorization" => $authorization,
-            "X-WO-API-APP-ID" => $identificationId,
-            "X-API-VERSION" => $apiVersion
-        ])->get($url);
-        $responseArr = json_decode($response, true);
-        Log::debug("$url" . "execution_status: " . $responseArr["execution_status"] . " close_reason: " . $responseArr["close_reason"]);
+        $messageAdmin = "getExecutionStatus dispatching_order_uid" . $dispatching_order_uid . " url " . $url;
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-        return $responseArr;
+        sleep((int) $updateTime);
+
+        try {
+            // Устанавливаем таймаут на запрос (например, 20 секунд)
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])
+                ->timeout(10) // Таймаут на запрос (в секундах)
+                ->retry(3, $updateTime) // Задержка перед повтором в случае ошибки
+                ->get($url);
+
+            $messageAdmin = "getExecutionStatus response: status" . $response->status() . " Ответ: " . $response->body();
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            if ($response->failed()) {
+                $messageAdmin = "Ошибка при получении статуса execution_status URL: $url Статус: " . $response->status() . "\nОтвет: " . $response->body();
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                return [
+                    'success' => false,
+                    'message' => 'API request failed',
+                    'status_code' => $response->status()
+                ];
+            }
+
+            $responseArr = json_decode($response, true);
+
+            if (!isset($responseArr["execution_status"])) {
+                $messageAdmin = "execution_status отсутствует в ответе URL: $url Ответ: " . json_encode($responseArr);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                return [
+                    'success' => false,
+                    'message' => 'execution_status not found in response'
+                ];
+            }
+
+            $messageAdmin = "Успешное получение execution_status URL: $url execution_status: " . print_r($responseArr["execution_status"], true) . " close_reason: " . ($responseArr["close_reason"] ?? 'null');
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            return $responseArr;
+        } catch (Illuminate\Http\Client\ConnectionException $e) {
+            // Логирование ошибки в случае таймаута
+            $messageAdmin = "Таймаут при запросе getExecutionStatus Ошибка: " . $e->getMessage() . " URL: " . $url;
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            return [
+                'success' => false,
+                'message' => 'Server did not respond within 20 seconds'
+            ];
+        } catch (Exception $e) {
+            // Логирование всех остальных ошибок
+            $messageAdmin = "Исключение в getExecutionStatus Ошибка: " . $e->getMessage() . " URL: " . $url;
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            return [
+                'success' => false,
+                'message' => 'An error occurred while fetching execution status'
+            ];
+        }
     }
+
+
+
+
+
+
     public function getExecutionStatusEmu($orderType)
     {
         $array = ExecutionStatus::all()->toArray();
@@ -5658,6 +3238,150 @@ class UniversalAndroidFunctionController extends Controller
      * Запрос отмены заказа
      */
     public function webordersCancel(
+        $uid,
+        $orderType,
+        $connectAPI,
+        $authorization,
+        $identificationId,
+        $apiVersion
+    )  {
+
+        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+        $startTime = time(); // Начальное время
+
+        $maxExecutionTime = 3 * 60; // Время жизни отмены
+
+        try {
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])->put($url);
+
+            // Логируем тело ответа
+            Log::debug("webordersCancel postRequestHTTP: " . $response->body());
+
+            // Проверяем успешность ответа
+            if ($response->successful()) {
+                $responseArr = json_decode($response->body(), true);
+
+                // Обрабатываем успешный ответ
+                Log::debug("webordersCancel Request successful.");
+                if ($responseArr['order_client_cancel_result'] == 1) {
+                    Log::debug("webordersCancel: order_client_cancel_result is 1, exiting.");
+                    self::messageAboutTrueCanceled($uid);
+                } else {
+                    do {
+                        Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
+                        // Проверка статуса после отмены
+                        sleep(5);
+                        $urlCheck = $connectAPI . '/api/weborders/' . $uid;
+                        try {
+                            $response_uid = Http::withHeaders([
+                                "Authorization" => $authorization,
+                                "X-WO-API-APP-ID" => $identificationId,
+                            ])->get($urlCheck);
+
+                            if ($response_uid->successful() && $response_uid->status() == 200) {
+                                $response_arr = json_decode($response_uid->body(), true);
+                                if ($response_arr['close_reason'] == 1) {
+                                    Log::debug("webordersCancel: close_reason is 1, exiting.");
+                                    break;
+                                } else {
+                                    Log::debug("webordersCancel: close_reason is not 1, continuing.");
+                                }
+                            } else {
+                                // Логируем ошибки в случае неудачного запроса
+                                Log::error("webordersCancel Request failed with status: " . $response_uid->status());
+                                Log::error("webordersCancel Response: " . $response_uid->body());
+                            }
+                        } catch (\Exception $e) {
+                            // Обработка исключений
+                            Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                        }
+                        sleep(5);
+                    } while (time() - $startTime < $maxExecutionTime);
+                    // Если мы вышли из цикла из-за превышения времени
+                    self::messageAboutFalseCanceled($uid);
+                }
+            } else {
+                // Логируем ошибки в случае неудачного запроса
+                Log::error("webordersCancel Request failed with status: " . $response->status());
+                Log::error("webordersCancel Response: " . $response->body());
+                do {
+                    Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
+                    // Проверка статуса после отмены
+                    sleep(5);
+                    $urlCheck = $connectAPI . '/api/weborders/' . $uid;
+                    try {
+                        $response_uid = Http::withHeaders([
+                            "Authorization" => $authorization,
+                            "X-WO-API-APP-ID" => $identificationId,
+                        ])->get($urlCheck);
+
+                        if ($response_uid->successful() && $response_uid->status() == 200) {
+                            $response_arr = json_decode($response_uid->body(), true);
+                            if ($response_arr['close_reason'] == 1) {
+                                Log::debug("webordersCancel: close_reason is 1, exiting.");
+                                break;
+                            } else {
+                                Log::debug("webordersCancel: close_reason is not 1, continuing.");
+                            }
+                        } else {
+                            // Логируем ошибки в случае неудачного запроса
+                            Log::error("webordersCancel Request failed with status: " . $response_uid->status());
+                            Log::error("webordersCancel Response: " . $response_uid->body());
+                        }
+                    } catch (\Exception $e) {
+                        // Обработка исключений
+                        Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                    }
+                    sleep(5);
+                } while (time() - $startTime < $maxExecutionTime);
+                // Если мы вышли из цикла из-за превышения времени
+                self::messageAboutFalseCanceled($uid);
+            }
+        } catch (\Exception $e) {
+            // Обработка исключений
+            Log::error("webordersCancel Exception caught: " . $e->getMessage());
+            do {
+                Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
+                // Проверка статуса после отмены
+                sleep(5);
+                $urlCheck = $connectAPI . '/api/weborders/' . $uid;
+                try {
+                    $response_uid = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId,
+                    ])->get($urlCheck);
+
+                    if ($response_uid->successful() && $response_uid->status() == 200) {
+                        $response_arr = json_decode($response_uid->body(), true);
+                        if ($response_arr['close_reason'] == 1) {
+                            Log::debug("webordersCancel: close_reason is 1, exiting.");
+                            break;
+                        } else {
+                            Log::debug("webordersCancel: close_reason is not 1, continuing.");
+                        }
+                    } else {
+                        // Логируем ошибки в случае неудачного запроса
+                        Log::error("webordersCancel Request failed with status: " . $response_uid->status());
+                        Log::error("webordersCancel Response: " . $response_uid->body());
+                    }
+                } catch (\Exception $e) {
+                    // Обработка исключений
+                    Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                }
+                sleep(5);
+            } while (time() - $startTime < $maxExecutionTime);
+            // Если мы вышли из цикла из-за превышения времени
+            self::messageAboutFalseCanceled($uid);
+
+        }
+    } /**
+     * Запрос отмены заказа
+     */
+    public function webordersCancelReturn(
         $uid,
         $orderType,
         $connectAPI,

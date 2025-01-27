@@ -2608,12 +2608,12 @@ class AndroidTestOSMController extends Controller
         $identificationId = self::identificationId($application);
         $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
 
-        $messageAdmin = "costSearchMarkersTime
-        url $url
-        Authorization $authorization,
-        X-WO-API-APP-ID $identificationId,
-        X-API-VERSION  $apiVersion
-        costSearchMarkersTime параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "111 costSearchMarkersTime " .
+        "url $url " .
+        "Authorization $authorization," .
+        "X-WO-API-APP-ID $identificationId," .
+        "X-API-VERSION  $apiVersion" .
+        "costSearchMarkersTime параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
@@ -2627,9 +2627,7 @@ class AndroidTestOSMController extends Controller
         $responseArr = json_decode($response, true);
 
 
-        $messageAdmin = "costSearchMarkersTime
-            ответ сервера" .
-            json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "costSearchMarkersTime  ответ сервера" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         switch ($application) {

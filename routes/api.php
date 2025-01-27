@@ -6,6 +6,7 @@ use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\RateLimiter;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +82,15 @@ Route::get('/android/checkDomain/{domain}', [AndroidController::class, 'checkDom
 Route::get('/android/addUser/{name}/{email}', [AndroidController::class, 'addUser'])->name('checkDomain');
 Route::get('/android/verifyBlackListUser/{email}', [AndroidController::class, 'verifyBlackListUser'])->name('verifyBlackListUser');
 
+Route::get('/test-rate-limit', function (Request $request) {
+    $key = 'request_limit:' . $request->ip();
 
+    if (RateLimiter::tooManyAttempts($key, 5)) {
+        return response('Too Many Requests', 429);
+    }
+
+    RateLimiter::hit($key);
+    return response('Request allowed.');
+});
 
 

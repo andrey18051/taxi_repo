@@ -194,11 +194,12 @@ class TelegramController extends Controller
 
     public function sendMeMessageLog($message)
     {
-        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
 
-        // Отправляем в фоновую задачу
-        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
-        return response()->json(['status' => 'Message sent in background'], 200);
+//        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
+//        $bot = '8014868428:AAGhoxe4QJ6umD3XC3gMKo24eAze3uOjoxY'; //@andrey_log_bot
+//        // Отправляем в фоновую задачу
+//        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
+//        return response()->json(['status' => 'Message sent in background'], 200);
     }
 
     public function sendInformMessage($message)

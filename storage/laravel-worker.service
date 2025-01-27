@@ -8,7 +8,7 @@ Group=nginx
 WorkingDirectory=/var/www/html/public_html/
 Restart=always
 RestartSec=3
-ExecStart=php artisan queue:work --sleep=3 --tries=3 --timeout=90
+ExecStart=php artisan queue:work --sleep=3 --tries=3
 
 [Install]
 WantedBy=multi-user.target
