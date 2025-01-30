@@ -145,14 +145,17 @@ class WfpController extends Controller
                 $card->user_id = $user->id;
             }
 
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+
             $card->pay_system = 'wfp';
             $card->masked_card = $data['cardPan'];
             $card->card_type = $cardType;
             $card->bank_name = $bankName;
-            $card->rectoken = $data['recToken'];
+            $card->rectoken = $rectoken;
             $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
             $card->save();
+            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -191,25 +194,26 @@ class WfpController extends Controller
                 $bankName = " ";
             }
 
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
             $card = Card::where('pay_system', 'wfp')
                 ->where('user_id', $user->id)
-                ->where('rectoken', $data['recToken'])
-                ->where('merchant', $data['merchantAccount'])
+                ->where('masked_card', $data['cardPan'])
                 ->first();
 
             if (!$card) {
                 $card = new Card();
                 $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
             }
 
-            $card->pay_system = 'wfp';
-            $card->masked_card = $data['cardPan'];
-            $card->card_type = $cardType;
-            $card->bank_name = $bankName;
-            $card->rectoken = $data['recToken'];
-            $card->merchant = $data['merchantAccount'];
-//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
-            $card->save();
+            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -251,25 +255,28 @@ class WfpController extends Controller
                 $bankName = " ";
             }
 
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
             $card = Card::where('pay_system', 'wfp')
                 ->where('user_id', $user->id)
-                ->where('rectoken', $data['recToken'])
-                ->where('merchant', $data['merchantAccount'])
+                ->where('masked_card', $data['cardPan'])
                 ->first();
 
             if (!$card) {
                 $card = new Card();
                 $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
             }
 
-            $card->pay_system = 'wfp';
-            $card->masked_card = $data['cardPan'];
-            $card->card_type = $cardType;
-            $card->bank_name = $bankName;
-            $card->rectoken = $data['recToken'];
-            $card->merchant = $data['merchantAccount'];
-//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
-            $card->save();
+
+
+            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -310,26 +317,25 @@ class WfpController extends Controller
             } else {
                 $bankName = " ";
             }
-
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
             $card = Card::where('pay_system', 'wfp')
                 ->where('user_id', $user->id)
-                ->where('rectoken', $data['recToken'])
-                ->where('merchant', $data['merchantAccount'])
+                ->where('masked_card', $data['cardPan'])
                 ->first();
 
             if (!$card) {
                 $card = new Card();
                 $card->user_id = $user->id;
-            }
-
-            $card->pay_system = 'wfp';
-            $card->masked_card = $data['cardPan'];
-            $card->card_type = $cardType;
-            $card->bank_name = $bankName;
-            $card->rectoken = $data['recToken'];
-            $card->merchant = $data['merchantAccount'];
+                $card->pay_system = 'wfp';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
-            $card->save();
+                $card->save();
+            }
+            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -378,15 +384,23 @@ class WfpController extends Controller
             } else {
                 $bankName = " ";
             }
+            $user = User::where('email', $data['email'])->first();
 
-            $cardData = [
-                'cardType' => $cardType,
-                'bankName' => $bankName,
-                'maskedCard' => $data['cardPan'],
-                'recToken' => $data['recToken'],
-                'merchant' => $data['merchantAccount'],
-                'pay_system' => 'wfp'
-            ];
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+            if (!$card) {
+                $cardData = [
+                    'cardType' => $cardType,
+                    'bankName' => $bankName,
+                    'maskedCard' => $data['cardPan'],
+                    'recToken' => $rectoken,
+                    'merchant' => $data['merchantAccount'],
+                    'pay_system' => 'wfp'
+                ];
+            }
 
 // Сохраняем данные в Firestore
             (new FCMController)->saveCardDataToFirestore($uidDriver, $cardData, $status, $amount);
@@ -1102,12 +1116,7 @@ class WfpController extends Controller
         $clientPhone,
         $recToken
     ) {
-//        dd($application . " " .
-//            $city . " " .
-//            $orderReference . " " .
-//            $amount . " " .
-//            $productName . " " .
-//            $recToken . " " );
+
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
@@ -1271,6 +1280,91 @@ class WfpController extends Controller
 // Відправлення POST-запиту
         $response = Http::post('https://api.wayforpay.com/api ', $params);
         Log::debug("purchase: ", ['response' => $response->body()]);
+        return $response;
+    }
+
+    public function chargeActiveToken(
+        $application,
+        $city,
+        $orderReference,
+        $amount,
+        $productName,
+        $clientEmail,
+        $clientPhone
+    ) {
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+        }
+
+
+        $recToken = (new CardsController)->getActiveCard($clientEmail, $city, $application)['rectoken'];
+
+        $recToken = (new CardsController)-> decryptToken($recToken);
+
+        $orderDate =  strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "merchantAccount" => $merchantAccount,
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1]
+        ];
+
+
+        $params = [
+            "transactionType" => "CHARGE",
+            "merchantAccount" => $merchantAccount,
+            "merchantAuthType" => "SimpleSignature",
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "merchantTransactionType" => "AUTH",
+//            "merchantTransactionSecureType" => "AUTO",
+            "merchantTransactionSecureType" => "NON3DS",
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "charge"),
+            "apiVersion" => 1,
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "recToken" => $recToken,
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1],
+            "clientFirstName" => "Bulba",
+            "clientLastName" => "Taras",
+            "clientEmail" => $clientEmail,
+            "clientPhone" => $clientPhone,
+            "clientCountry" => "UKR",
+            "notifyMethod" => "bot"
+        ];
+
+// Відправлення POST-запиту
+        $response = Http::post('https://api.wayforpay.com/api ', $params);
+        Log::debug("purchase: ", ['response' => $response->body()]);
+
+        self::checkStatus(
+            $application,
+            $city,
+            $orderReference
+        );
+
         return $response;
     }
 

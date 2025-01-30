@@ -3690,6 +3690,8 @@ class UniversalAndroidFunctionController extends Controller
 
         $order->save();
 
+        $order_id = $order->id;
+
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
         if (isset($params['user_phone'], $params['email'], $params['comment_info'])
             && strpos($params['comment_info'], 'цифра номера') === false
@@ -3784,7 +3786,7 @@ class UniversalAndroidFunctionController extends Controller
             Log::error('Mail send failed: ' . $e->getMessage());
             // Дополнительные действия для предотвращения сбоя
         }
-
+        return $order_id;
     }
     public function addUser($name, $email)
     {
@@ -4274,6 +4276,47 @@ class UniversalAndroidFunctionController extends Controller
         $orderweb->pay_system = $pay_system;
         $orderweb->save();
     }
+
+
+    public function orderIdMemoryToken($orderReference, $order_id, $pay_system)
+    {
+        Log::debug("orderIdMemory: orderReference = $orderReference");
+        Log::debug("orderIdMemory: order_id = $order_id");
+        Log::debug("orderIdMemory: pay_system = $pay_system");
+
+        $orderweb = Orderweb::find($order_id);
+
+        if (!$orderweb) {
+            Log::error("orderIdMemoryToken: Orderweb not found for order_id = $order_id");
+            return;
+        }
+
+        $uid = $orderweb->dispatching_order_uid ?? null;
+
+        switch ($pay_system) {
+            case "wfp_payment":
+                $orderweb->wfp_order_id = $orderReference;
+                if ($uid !== null) {
+                    self::wfpInvoice($orderReference, $orderweb->web_cost, $uid);
+                } else {
+                    Log::warning("orderIdMemoryToken: dispatching_order_uid is null for order_id = $order_id");
+                }
+                break;
+
+            case "fondy_payment":
+                $orderweb->fondy_order_id = $orderReference;
+                break;
+
+            case "mono_payment":
+                $orderweb->mono_order_id = $orderReference; // Исправил на orderReference
+                break;
+        }
+
+        $orderweb->pay_system = $pay_system;
+        $orderweb->save();
+    }
+
+
 
     public function wfpInvoice(
         $order_id,

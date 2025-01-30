@@ -11,11 +11,16 @@
 |
 */
 
+use App\Http\Controllers\CardsController;
+use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\WfpController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/createInvoice/{application}/{city}/{orderReference}/{amount}/{language}/{productName}/{clientEmail}/{clientPhone}', [WfpController::class, 'createInvoice'])->name('createInvoice');
 Route::get('/charge/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/{recToken}', [WfpController::class, 'charge'])->name('charge');
+
+Route::get('/chargeActiveToken/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/', [WfpController::class, 'chargeActiveToken'])->name('chargeActiveToken');
+
 Route::get('/refund/{application}/{city}/{orderReference}/{amount}', [WfpController::class, 'refund'])->name('refund');
 Route::get('/refundVerifyCards/{application}/{city}/{orderReference}/{amount}', [WfpController::class, 'refundVerifyCards'])->name('refundVerifyCards');
 Route::get('/settle/{application}/{city}/{orderReference}/{amount}', [WfpController::class, 'settle'])->name('settle');
@@ -29,3 +34,12 @@ Route::post('/serviceUrl/PAS2', [WfpController::class, 'serviceUrl_PAS2'])->name
 Route::post('/serviceUrl/PAS4', [WfpController::class, 'serviceUrl_PAS4'])->name('serviceUrl_PAS4');
 Route::post('/serviceUrl/VOD', [WfpController::class, 'serviceUrl_VOD'])->name('serviceUrl_VOD');
 Route::post('/serviceUrl/verify', [WfpController::class, 'serviceUrlVerify'])->name('serviceUrl');
+
+/**
+ * Cards active section
+ */
+
+//Route::get('/getActiveCard/{email}/{city}/{application}', [CardsController::class, 'getActiveCard'])->name('getActiveCard');
+Route::get('/setActiveCard/{email}/{id}/{city}/{application}', [CardsController::class, 'setActiveCard'])->name('setActiveCard');
+Route::get('/getCardTokenIdApp/{application}/{city}/{email}/{pay_system}', [CardsController::class, 'getCardTokenIdApp']);
+Route::get('/deleteCardToken/{id}', [CardsController::class, 'deleteCardToken']);
