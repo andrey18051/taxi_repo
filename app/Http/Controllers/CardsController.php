@@ -83,6 +83,31 @@ class CardsController extends Controller
         }
         return ["result" => "ok"];
     }
+
+
+    public function setActiveFirstCard($email, $id )
+    {
+        $activeCard = Card::where("id", $id)->first();
+        if($activeCard) {
+            $activeCard->active = true;
+            $activeCard->save();
+            $merchantAccount = $activeCard->merchant;
+
+            $user = User::where("email", $email)->first();
+            $userCards = Card::where("user_id", $user->id)
+                ->where('merchant', $merchantAccount)
+                ->get();
+
+            foreach ($userCards as $value) {
+                if($value->id != $id) {
+                    $value->active = false;
+                    $value->save();
+                }
+            }
+        }
+        return ["result" => "ok"];
+    }
+
     public function getCardTokenIdApp(
         $application,
         $cityApp,

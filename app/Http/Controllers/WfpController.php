@@ -155,7 +155,7 @@ class WfpController extends Controller
             $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
             $card->save();
-            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
+            (new CardsController)->setActiveFirstCard($data['email'], $card->id);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -211,9 +211,9 @@ class WfpController extends Controller
                 $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
                 $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
             }
 
-            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -272,11 +272,11 @@ class WfpController extends Controller
                 $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
                 $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
             }
 
 
 
-            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));
@@ -334,8 +334,8 @@ class WfpController extends Controller
                 $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
                 $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
             }
-            (new CardsController)->setActiveCard($data['email'], $card->id,  $data['merchantAccount']);
         }
 
         $time = strtotime(date('Y-m-d H:i:s'));

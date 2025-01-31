@@ -59,8 +59,8 @@ Route::get('/android/costSearchTime/{from}/{from_number}/{to}/{to_number}/{tarif
     ->name('costSearchTime');
 Route::get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearch'])
     ->name('orderSearch');
-Route::get('/android/orderSearch/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearch'])
-    ->name('orderSearch');
+Route::get('/android/orderSearchWfpInvoice/{from}/{from_number}/{to}/{to_number}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{wfpInvoice}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'orderSearchWfpInvoice'])
+    ->name('orderSearchWfpInvoice');
 
 Route::get('/android/costSearchGeo/{originLatitude}/{originLongitude}/{to}/{to_number}/{tarif}/{phone}/{user}/{services}', [AndroidTestOSMController::class, 'costSearchGeo'])
     ->name('costSearchGeo');
