@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
 use App\Mail\Check;
 use App\Mail\Server;
@@ -645,7 +646,7 @@ class WfpController extends Controller
 
 // Відправлення POST-запиту
             $response = Http::post('https://api.wayforpay.com/api', $params);
-            Log::debug(["checkStatus " . 'response' => $response->body()]);
+
 
             $messageAdmin = "checkStatus " . 'response' . $response->body();
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
@@ -653,12 +654,15 @@ class WfpController extends Controller
             if (isset($response)) {
                 $data = json_decode($response->body(), true);
                 $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
-
+                if($data['transactionStatus'] != "WaitingAuthComplete") {
+                    CheckStatusJob::dispatch($application, $city, $orderReference);
+                }
                 if ($invoice) {
                     $invoice->transactionStatus = $data['transactionStatus'];
                     $invoice->reason = $data['reason'];
                     $invoice->reasonCode = $data['reasonCode'];
                     $invoice->save();
+
                 } else {
                     $order = Orderweb::where("wfp_order_id", $orderReference)->first();
                     if ($order) {
@@ -685,6 +689,107 @@ class WfpController extends Controller
 
 
     }
+
+    public function checkStatusJob($application, $city, $orderReference)
+    {
+        $messageAdmin = "Запущен checkStatusJob $orderReference";
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+
+        }
+
+        if (!$merchant) {
+            $messageAdmin = "Нет данных мерчанта для города $city, приложение $application (checkStatus)";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            return "error";
+        }
+
+        $merchantAccount = $merchant->wfp_merchantAccount;
+        $secretKey = $merchant->wfp_merchantSecretKey;
+
+        $params = [
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+        ];
+
+        $params["transactionType"] = "CHECK_STATUS";
+        $params["merchantSignature"] = self::generateHmacMd5Signature($params, $secretKey, "checkStatus");
+        $params["apiVersion"] = 1;
+
+        if( $params['amount'] == "1") {
+            $maxAttempts = 18; // 3 минуты / 10 секунд = 18 попыток
+        } else {
+            $maxAttempts = 6; // 1 минуты / 10 секунд = 6 попыток
+        }
+
+        $attempt = 0;
+
+        do {
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            Log::debug((string)["checkStatus attempt $attempt response" => $response->body()]);
+
+            $data = json_decode($response->body(), true);
+
+            if (!$data || !isset($data['transactionStatus'])) {
+                Log::error("Ошибка получения ответа от WayforPay API на попытке $attempt");
+            } else {
+                $transactionStatus = $data['transactionStatus'];
+                if ($transactionStatus === "WaitingAuthComplete") {
+                    // Обновляем данные в базе
+                    $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+                    if ($invoice) {
+                        $invoice->transactionStatus = $transactionStatus;
+                        $invoice->reason = $data['reason'] ?? null;
+                        $invoice->reasonCode = $data['reasonCode'] ?? null;
+                        $invoice->save();
+                    } else {
+                        if($data['amount'] == "1") {
+                            $params = [
+                                "transactionType" => "REFUND",
+                                "merchantAccount" => $merchantAccount,
+                                "orderReference" => $orderReference,
+                                "amount" => "1",
+                                "currency" => "UAH",
+                                "comment" => "Повернення платежу",
+                                "merchantSignature" => self::generateHmacMd5Signature([
+                                    "transactionType" => "REFUND",
+                                    "merchantAccount" => $merchantAccount,
+                                    "orderReference" => $orderReference,
+                                    "amount" => "1",
+                                    "currency" => "UAH",
+                                ], $secretKey, "refund"),
+                                "apiVersion" => 1,
+                            ];
+                            self:: refundSettleOneUAH($params);
+                        }
+
+                    }
+
+                    // Если получили нужный статус — выходим из цикла
+
+                    return $response;
+                }
+            }
+
+            // Ждём 10 секунд перед следующей попыткой
+            sleep(10);
+            $attempt++;
+        } while ($attempt < $maxAttempts);
+
+        Log::error("Тайм-аут: статус WaitingAuthComplete не получен за 3 минуты");
+        return "timeout";
+    }
+
 
     public function checkMerchantInfo($order) {
 
@@ -823,6 +928,71 @@ class WfpController extends Controller
 
 
     }
+    public function refundOneHrn(
+        $application,
+        $city,
+        $orderReference
+    ) {
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                $secretKey = $merchant->wfp_merchantSecretKey;
+                $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+        }
+
+        if($merchantAccount != null) {
+            $orderwebs = Orderweb::where("wfp_order_id", $orderReference) ->latest()
+                ->first();
+            $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
+            if ($wfpInvoices->isNotEmpty()) {
+                foreach ($wfpInvoices as $value) {
+                    // Проверка статуса текущей транзакции
+//                    $transactionStatus = strtolower(trim($value->transactionStatus ?? ''));
+                    $transactionStatus = $value->transactionStatus;
+                    if ($transactionStatus == 'WaitingAuthComplete') {
+//                    if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                        // Параметры для REFUND
+                        $params = [
+                            "transactionType" => "REFUND",
+                            "merchantAccount" => $merchantAccount,
+                            "orderReference" => $value->orderReference,
+                            "amount" => $value->amount,
+                            "currency" => "UAH",
+                            "comment" => "Повернення платежу",
+                            "merchantSignature" => self::generateHmacMd5Signature([
+                                "transactionType" => "REFUND",
+                                "merchantAccount" => $merchantAccount,
+                                "orderReference" => $value->orderReference,
+                                "amount" => $value->amount,
+                                "currency" => "UAH",
+                            ], $secretKey, "refund"),
+                            "apiVersion" => 1,
+                        ];
+
+                        // Диспетчеризация задачи RefundSettleCardPayJob
+                        RefundSettleCardPayJob::dispatch($params, $value->orderReference, "refund");
+                    }
+                }
+            }
+
+        }
+
+
+
+    }
 
 
     public function refundVerifyCards(
@@ -888,7 +1058,7 @@ class WfpController extends Controller
             } else {
                 Log::debug("refundSettleJob Ответ от API", $responseArray);
 
-                (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
+                (new DailyTaskController)->sentTaskMessage("Проверка холда: " . json_encode($responseArray));
 
                 // Проверка статуса транзакции
 
@@ -925,7 +1095,7 @@ class WfpController extends Controller
         Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
         $messageAdmin = "refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}";
 
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
         if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
@@ -994,6 +1164,58 @@ class WfpController extends Controller
         }
     }
 
+    public function refundSettleOneUAH($params)
+    {
+
+        $messageAdmin = "Запущен refundSettleOneUAH ";
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        $startTime = time(); // Время начала выполнения скрипта
+        $maxDuration = 2 * 60; // 2 минуты в секундах
+        $maxAttempts = 12; // Максимум 12 попыток (2 минуты при 10 секундах ожидания)
+        $attempts = 0;
+        while (true) {
+            // Отправка POST-запроса к API
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            $responseArray = $response->json(); // Проверка на валидный JSON
+
+            if (!is_array($responseArray)) {
+                Log::error("refundSettleJob Некорректный ответ от API", ['response' => $response->body()]);
+                $messageAdmin = "refundSettleJob Некорректный ответ от API ";
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            } else {
+                Log::debug("refundSettleJob Ответ от API", $responseArray);
+
+                (new DailyTaskController)->sentTaskMessage("Возврат за привязку карты: " . json_encode($responseArray));
+                $messageAdmin = "refundSettleJob Возврат за привязку карты: " . json_encode($responseArray) ;
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                // Проверка статуса транзакции
+
+                $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
+
+                if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                    return "exit";
+                }
+                // Проверяем, превышено ли время ожидания
+
+                if (time() - $startTime > $maxDuration) {
+                    Log::warning("refundSettleJob Превышен лимит времени. Прекращение попыток.");
+                    return "exit";
+                }
+            }
+
+            $attempts++;
+            if ($attempts > $maxAttempts) {
+                Log::warning("refundSettleJob Превышено число попыток. Прекращение цикла.");
+                return "exit";
+            }
+            sleep(10);
+        }
+
+        Log::debug("refundSettleOneUAH Завершение метода");
+        return "exit";
+
+
+    }
     /**
      * Обновляет статус заказа в базах данных.
      *
