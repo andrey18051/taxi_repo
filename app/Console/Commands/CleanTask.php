@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\CleanerTableController;
 use App\Http\Controllers\OpenStreetMapController;
+use App\Http\Controllers\WfpController;
 use Illuminate\Console\Command;
 
 class CleanTask extends Command
@@ -47,7 +48,7 @@ class CleanTask extends Command
 
         //Проверка версии Visicom
         (new OpenStreetMapController)->checkVisicomRequest();
-
+        (new WfpController())->transactionListJob();
         return 0;
     }
 }

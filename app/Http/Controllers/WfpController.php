@@ -12,6 +12,7 @@ use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\Orderweb;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\WfpInvoice;
 use Carbon\Carbon;
@@ -1616,6 +1617,13 @@ class WfpController extends Controller
                     $params['time']
                 ]);
                 break;
+            case "TRANSACTION_LIST":
+                $signatureString = implode(';', [
+                    $params['merchantAccount'],
+                    $params['dateBegin'],
+                    $params['dateEnd']
+                ]);
+                break;
             case "verify":
                 $signatureString = implode(';', [
                     $params['merchantAccount'],
@@ -2423,4 +2431,186 @@ class WfpController extends Controller
         Log::debug("purchase: ", ['response' => $response->body()]);
         return $response;
     }
+
+    public function transactionList($merchant) {
+
+        $currentDate = Carbon::now()->startOfDay();
+        $currentDate = $currentDate->copy()->subDay();
+
+
+        $nextDate = $currentDate->copy()->addDay();
+
+        $dateBegin = $currentDate->timestamp;
+        $dateEnd  = $nextDate->timestamp;
+
+        switch ($merchant) {
+            case "taxi":
+                $merchantAccount = config("app.merchantAccount");
+                $secretKey = config("app.merchantSecretKey");
+                break;
+            case "my":
+                $merchantAccount =  config("app.merchantAccountMy");
+                $secretKey = config("app.merchantSecretKeyMy");
+                break;
+
+        }
+
+        $params = [
+            "transactionType" => "TRANSACTION_LIST",
+            "merchantAccount" => $merchantAccount,
+            "apiVersion" => 1,
+            "dateBegin" => $dateBegin,
+            "dateEnd" => $dateEnd,
+        ];
+
+        $merchantSignature =  self::generateHmacMd5Signature($params, $secretKey, "TRANSACTION_LIST");
+
+        $params = [
+            "apiVersion" => 1,
+            "transactionType" => "TRANSACTION_LIST",
+            "merchantAccount" => $merchantAccount,
+            "merchantSignature" => $merchantSignature,
+            "dateBegin" => $dateBegin,
+            "dateEnd" => $dateEnd,
+        ];
+
+        $response = Http::post('https://api.wayforpay.com/api', $params);
+        $responseArray = $response->json();
+
+        foreach ($response['transactionList'] as $transactionData) {
+            Transaction::updateOrCreate(
+                ['order_reference' => $transactionData['orderReference'],
+                    'transaction_status' => $transactionData['transactionStatus'],
+                ],  // Уникальные ключи для поиска
+                [
+                    'merchantAccount' => $merchantAccount,
+                    'transaction_type' => $transactionData['transactionType'],
+                    'amount' => $transactionData['amount'],
+                    'currency' => $transactionData['currency'],
+                    'base_amount' => $transactionData['baseAmount'],
+                    'base_currency' => $transactionData['baseCurrency'],
+                    'transaction_status' => $transactionData['transactionStatus'],
+                    'created_date' => Carbon::createFromTimestamp($transactionData['createdDate']),
+                    'processing_date' => $transactionData['processingDate'] ? Carbon::createFromTimestamp($transactionData['processingDate']) : null,
+                    'reason_code' => $transactionData['reasonCode'],
+                    'reason' => $transactionData['reason'],
+                    'settlement_date' => $transactionData['settlementDate'] ? Carbon::createFromTimestamp($transactionData['settlementDate']) : null,
+                    'email' => $transactionData['email'],
+                    'phone' => $transactionData['phone'],
+                    'payment_system' => $transactionData['paymentSystem'],
+                    'card_pan' => $transactionData['cardPan'],
+                    'card_type' => $transactionData['cardType'],
+                    'issuer_bank_country' => $transactionData['issuerBankCountry'],
+                    'issuer_bank_name' => $transactionData['issuerBankName'],
+                    'fee' => $transactionData['fee'],
+                ]
+            );
+        }
+        return $responseArray;
+    }
+
+    public function transactionListJob() {
+        self::transactionList("taxi");
+        self::transactionList("my");
+        self::findOrdersWithoutVoidedAmountOne();
+        self::findOrdersWithoutVoided();
+    }
+
+
+    public function findOrdersWithoutVoided()
+    {
+        // Получаем все уникальные order_reference с transaction_status "WaitingAuthComplete" или "Pending",
+        // у которых нет пары с transaction_status "Voided"
+        $orders = Transaction::select('merchantAccount', 'order_reference', 'amount')
+            ->where(function ($query) {
+                $query->where('transaction_status', 'WaitingAuthComplete')
+                    ->orWhere('transaction_status', 'Pending');
+            })
+            ->whereNotIn('order_reference', function ($query) {
+                $query->select('order_reference')
+                    ->from('transactions')
+                    ->where('transaction_status', 'Voided');
+            })
+            ->get();
+
+
+        // Проверяем, если коллекция пуста
+        if ($orders->isEmpty()) {
+            $messageAdmin = "Результат проверки платежей за последние сутки: нет подвисших холдов";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            return response()->json(["result" => "нет подвисших холдов"]);
+        }
+
+        // Логируем информацию о найденных заказах
+        $messageAdmin = "Результат проверки платежей за последние сутки: нужно проверить: " . json_encode($orders);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        // Возвращаем результат
+        return response()->json($orders);
+    }
+
+    public function findOrdersWithoutVoidedAmountOne()
+    {
+        // Получаем все уникальные order_reference с transaction_status "WaitingAuthComplete",
+        // у которых нет пары с transaction_status "Voided"
+        $orders = Transaction::select('merchantAccount', 'order_reference', 'amount')
+            ->where('transaction_status', 'WaitingAuthComplete')
+            ->where('amount', 1)  // Условие для amount == 1
+            ->whereNotIn('order_reference', function($query) {
+                $query->select('order_reference')
+                    ->from('transactions')
+                    ->where('transaction_status', 'Voided');
+            })
+            ->get();
+
+        $orders->each(function($order) {
+            // Вызываем ваш метод возврата, передавая необходимые данные
+            $this->processRefund($order);
+        });
+
+        // Выводим результат
+        // Проверяем, если коллекция пуста
+        if ($orders->isEmpty()) {
+            return response()->json(["result" => "нет подвисших холдов"]);
+        }
+
+        // Возвращаем результат
+        return response()->json($orders);
+
+    }
+    public function processRefund($order) {
+
+         switch ($order["merchantAccount"]) {
+             case "taxi":
+                 $merchantAccount = config("app.merchantAccount");
+                 $secretKey = config("app.merchantSecretKey");
+                 break;
+             case "my":
+                 $merchantAccount =  config("app.merchantAccountMy");
+                 $secretKey = config("app.merchantSecretKeyMy");
+                 break;
+
+         }
+         $params = [
+             "transactionType" => "REFUND",
+             "merchantAccount" => $merchantAccount,
+             "orderReference" => $order["orderReference"],
+             "amount" => 1,
+             "currency" => "UAH",
+             "comment" => "Повернення платежу",
+             "merchantSignature" => self::generateHmacMd5Signature([
+                 "transactionType" => "REFUND",
+                 "merchantAccount" => $merchantAccount,
+                 "orderReference" => $order["orderReference"],
+                 "amount" => 1,
+                 "currency" => "UAH",
+             ], $secretKey, "refund"),
+             "apiVersion" => 1,
+         ];
+
+        // Диспетчеризация задачи RefundSettleCardPayJob
+        RefundSettleCardPayJob::dispatch($params, $order["orderReference"], "refund");
+    }
+
+
 }

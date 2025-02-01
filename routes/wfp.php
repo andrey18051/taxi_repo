@@ -34,6 +34,8 @@ Route::post('/serviceUrl/PAS2', [WfpController::class, 'serviceUrl_PAS2'])->name
 Route::post('/serviceUrl/PAS4', [WfpController::class, 'serviceUrl_PAS4'])->name('serviceUrl_PAS4');
 Route::post('/serviceUrl/VOD', [WfpController::class, 'serviceUrl_VOD'])->name('serviceUrl_VOD');
 Route::post('/serviceUrl/verify', [WfpController::class, 'serviceUrlVerify'])->name('serviceUrl');
+Route::get('/transactionList/{merchant}', [WfpController::class, 'transactionList'])->name('transactionList');
+Route::get('/transactionListJob/', [WfpController::class, 'transactionListJob'])->name('transactionListJob');
 
 /**
  * Cards active section

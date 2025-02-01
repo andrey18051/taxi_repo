@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Http\Controllers\BonusBalanceController;
 use App\Http\Controllers\DailyTaskController;
 use App\Http\Controllers\UIDController;
+use App\Http\Controllers\WfpController;
 use App\Models\Orderweb;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -27,5 +28,6 @@ class DailyTask extends Command
         (new UIDController())->UIDStatusReviewDaily();
         (new DailyTaskController)->orderCardWfpReviewTask();
         (new DailyTaskController)->orderBonusReviewTask();
+
     }
 }
