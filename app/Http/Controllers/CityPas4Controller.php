@@ -103,73 +103,51 @@ class CityPas4Controller extends Controller
      */
     public function cityOnline($city)
     {
-
         $serverArr = self::cityAll($city);
-//dd($serverArr);
+
         foreach ($serverArr as $value) {
             $timeFive = self::hasPassedFiveMinutes($value['updated_at']);
             $checking = self::checkDomain($value["address"]);
             $online = $value["online"];
 
             $city = City_PAS4::where('address', $value["address"])->first();
-//            dd($value["address"]);
-//            dd( $timeFive);
-            if ($online == "false") {
-                if ($timeFive == true) {
-                    if ($checking == true) {
-                        $city->online = "true";
-                        $city->save();
-                        return "http://" . $value["address"];
-                    } else {
-//                        $city->online = "true";
-//                        $city->save();
-                        $city->online = "false";
-                        $city->save();
-                        $alarmMessage = new TelegramController();
-                        $client_ip = $_SERVER['REMOTE_ADDR'];
-                        $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $serverFalse->address
-                            . ". IP $client_ip";
 
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                            $alarmMessage->sendMeMessage($messageAdmin);
-                        } catch (Exception $e) {
-                            $paramsCheck = [
-                                'subject' => 'Ошибка в телеграмм',
-                                'message' => $e,
-                            ];
-                            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                        };
-                    }
-                }
+            if ($online === "false" && $timeFive && $checking) {
+                $city->online = "true";
+                $city->save();
+                return "http://" . $value["address"];
             }
-            if ($online == "true") {
-                if ($checking == true) {
-                    return "http://" . $value["address"];
-                } else {
-                    $city->online = "false";
-                    $city->save();
-                    $alarmMessage = new TelegramController();
-                    $client_ip = $_SERVER['REMOTE_ADDR'];
-                    $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $serverFalse->address
-                        . ". IP $client_ip";
-                    try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-                        $alarmMessage->sendMeMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        $paramsCheck = [
-                            'subject' => 'Ошибка в телеграмм',
-                            'message' => $e,
-                        ];
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                    };
+
+            if (($online === "true" && !$checking) || ($online === "false" && $timeFive && !$checking)) {
+                $city->online = "false";
+                $city->save();
+
+                $alarmMessage = new TelegramController();
+                $client_ip = $_SERVER['REMOTE_ADDR'];
+                $messageAdmin = "Нет подключения к серверу города {$city->name->name} http://{$value['address']}. IP $client_ip";
+
+                Log::debug($messageAdmin);
+
+                try {
+                    $alarmMessage->sendAlarmMessage($messageAdmin);
+                    $alarmMessage->sendMeMessage($messageAdmin);
+                } catch (Exception $e) {
+                    $paramsCheck = [
+                        'subject' => 'Ошибка в телеграмм',
+                        'message' => $e->getMessage(),
+                    ];
+                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
                 }
             }
 
-
+            if ($online === "true" && $checking) {
+                return "http://" . $value["address"];
+            }
         }
+
         return 400;
     }
+
 
 
 

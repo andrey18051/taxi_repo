@@ -49,6 +49,7 @@ class RefundSettleCardPayJob implements ShouldQueue
             $result = (new WfpController)->refundSettle($this->params, $this->orderReference);
         }
 
+
         if ($result === "exit") {
             $this->delete(); // Удаляет задачу из очереди
             Log::info("Задача RefundSettleCardPayJob $this->orderReference завершена");

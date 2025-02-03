@@ -1087,6 +1087,7 @@ class WfpController extends Controller
     public function refundSettleJob($params, $orderReference)
     {
         $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+
         Log::debug("refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus");
         $messageAdmin = "refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus";
 
@@ -2434,8 +2435,7 @@ class WfpController extends Controller
 
     public function transactionList($merchant) {
 
-        $currentDate = Carbon::now()->startOfDay();
-        $currentDate = $currentDate->copy()->subDay();
+        $currentDate = Carbon::now()->subDay();
 
 
         $nextDate = $currentDate->copy()->addDay();
@@ -2497,7 +2497,7 @@ class WfpController extends Controller
                     'settlement_date' => $transactionData['settlementDate'] ? Carbon::createFromTimestamp($transactionData['settlementDate']) : null,
                     'email' => $transactionData['email'],
                     'phone' => $transactionData['phone'],
-                    'payment_system' => $transactionData['paymentSystem'],
+                    'payment_system' => $transactionData['paymentSystem'] ?? 'unknown',
                     'card_pan' => $transactionData['cardPan'],
                     'card_type' => $transactionData['cardType'],
                     'issuer_bank_country' => $transactionData['issuerBankCountry'],
@@ -2538,6 +2538,9 @@ class WfpController extends Controller
         if ($orders->isEmpty()) {
             $messageAdmin = "Результат проверки платежей за последние сутки: нет подвисших холдов";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            Transaction::truncate();
+
             return response()->json(["result" => "нет подвисших холдов"]);
         }
 
@@ -2582,26 +2585,22 @@ class WfpController extends Controller
 
          switch ($order["merchantAccount"]) {
              case "taxi":
-                 $merchantAccount = config("app.merchantAccount");
                  $secretKey = config("app.merchantSecretKey");
                  break;
-             case "my":
-                 $merchantAccount =  config("app.merchantAccountMy");
+             default:
                  $secretKey = config("app.merchantSecretKeyMy");
-                 break;
-
          }
          $params = [
              "transactionType" => "REFUND",
-             "merchantAccount" => $merchantAccount,
-             "orderReference" => $order["orderReference"],
+             "merchantAccount" =>$order['merchantAccount'],
+             "orderReference" => $order["order_reference"],
              "amount" => 1,
              "currency" => "UAH",
              "comment" => "Повернення платежу",
              "merchantSignature" => self::generateHmacMd5Signature([
                  "transactionType" => "REFUND",
-                 "merchantAccount" => $merchantAccount,
-                 "orderReference" => $order["orderReference"],
+                 "merchantAccount" => $order['merchantAccount'],
+                 "orderReference" => $order["order_reference"],
                  "amount" => 1,
                  "currency" => "UAH",
              ], $secretKey, "refund"),
@@ -2609,7 +2608,7 @@ class WfpController extends Controller
          ];
 
         // Диспетчеризация задачи RefundSettleCardPayJob
-        RefundSettleCardPayJob::dispatch($params, $order["orderReference"], "refund");
+        RefundSettleCardPayJob::dispatch($params, $order["order_reference"], "refundVerifyCards");
     }
 
 
