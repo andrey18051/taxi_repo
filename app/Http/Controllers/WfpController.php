@@ -199,6 +199,7 @@ class WfpController extends Controller
             $rectoken = (new CardsController)->encryptToken($data['recToken']);
             $card = Card::where('pay_system', 'wfp')
                 ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
                 ->where('masked_card', $data['cardPan'])
                 ->first();
 
@@ -260,6 +261,7 @@ class WfpController extends Controller
             $rectoken = (new CardsController)->encryptToken($data['recToken']);
             $card = Card::where('pay_system', 'wfp')
                 ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
                 ->where('masked_card', $data['cardPan'])
                 ->first();
 
@@ -322,6 +324,7 @@ class WfpController extends Controller
             $rectoken = (new CardsController)->encryptToken($data['recToken']);
             $card = Card::where('pay_system', 'wfp')
                 ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
                 ->where('masked_card', $data['cardPan'])
                 ->first();
 
