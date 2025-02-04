@@ -84,6 +84,44 @@ class CardsController extends Controller
         return ["result" => "ok"];
     }
 
+    public function setActiveCardApp($email, $id, $city, $application)
+    {
+
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+                $merchantAccount = $merchant->wfp_merchantAccount;
+        }
+
+
+        $activeCard = Card::where("id", $id)->first();
+        if($activeCard) {
+            $activeCard->active = true;
+            $activeCard->save();
+
+            $user = User::where("email", $email)->first();
+            $userCards = Card::where("user_id", $user->id)
+                ->where('merchant', $merchantAccount)
+                ->where('app', $application)
+                ->get();
+
+            foreach ($userCards as $value) {
+                if($value->id != $id) {
+                    $value->active = false;
+                    $value->save();
+                }
+            }
+        }
+        return ["result" => "ok"];
+    }
 
     public function setActiveFirstCard($email, $id )
     {
@@ -108,6 +146,29 @@ class CardsController extends Controller
         return ["result" => "ok"];
     }
 
+    public function setActiveFirstCardApp($email, $id, $app )
+    {
+        $activeCard = Card::where("id", $id)->first();
+        if($activeCard) {
+            $activeCard->active = true;
+            $activeCard->save();
+            $merchantAccount = $activeCard->merchant;
+
+            $user = User::where("email", $email)->first();
+            $userCards = Card::where("user_id", $user->id)
+                ->where('merchant', $merchantAccount)
+                ->where('app', $app)
+                ->get();
+
+            foreach ($userCards as $value) {
+                if($value->id != $id) {
+                    $value->active = false;
+                    $value->save();
+                }
+            }
+        }
+        return ["result" => "ok"];
+    }
     public function getCardTokenIdApp(
         $application,
         $cityApp,

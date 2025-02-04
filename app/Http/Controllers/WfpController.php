@@ -279,7 +279,7 @@ class WfpController extends Controller
                 $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
                 $card->save();
-                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+                (new CardsController)->setActiveFirstCardApp($data['email'], $card->id, 'PAS1');
             }
 
         }
@@ -408,7 +408,7 @@ class WfpController extends Controller
                 $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
                 $card->save();
-                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+                (new CardsController)->setActiveFirstCardApp($data['email'], $card->id, 'PAS2');
             }
 
 
@@ -532,7 +532,7 @@ class WfpController extends Controller
                 $card->merchant = $data['merchantAccount'];
 //                $card->rectoken_lifetime = $data['rectoken_lifetime'];
                 $card->save();
-                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+                (new CardsController)->setActiveFirstCardApp($data['email'], $card->id, 'PAS4');
             }
         }
 

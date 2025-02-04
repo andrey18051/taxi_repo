@@ -49,6 +49,6 @@ Route::get('/transactionListJob/', [WfpController::class, 'transactionListJob'])
  */
 
 //Route::get('/getActiveCard/{email}/{city}/{application}', [CardsController::class, 'getActiveCard'])->name('getActiveCard');
-Route::get('/setActiveCard/{email}/{id}/{city}/{application}', [CardsController::class, 'setActiveCard'])->name('setActiveCard');
+Route::get('/setActiveCard/{email}/{id}/{city}/{application}', [CardsController::class, 'setActiveCardApp'])->name('setActiveCardApp');
 Route::get('/getCardTokenIdApp/{application}/{city}/{email}/{pay_system}', [CardsController::class, 'getCardTokenIdApp']);
 Route::get('/deleteCardToken/{id}', [CardsController::class, 'deleteCardToken']);
