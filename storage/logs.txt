@@ -1,0 +1,331 @@
+2025-02-03 11:57:03,942 CRIT Supervisor running as root (no user in config file)
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/cron.conf" during parsing
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/dnsmasq.conf" during parsing
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/nginx.conf" during parsing
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/php-fpm.conf" during parsing
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/postfix.conf" during parsing
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/ssh.conf" during parsing
+2025-02-03 11:57:03,942 INFO Included extra file "/opt/docker/etc/supervisor.d/syslog.conf" during parsing
+2025-02-03 11:57:03,971 INFO RPC interface 'supervisor' initialized
+2025-02-03 11:57:03,971 INFO supervisord started with pid 1
+2025-02-03 11:57:04,977 INFO spawned: 'syslogd' with pid 46
+2025-02-03 11:57:04,979 INFO spawned: 'nginxd' with pid 47
+2025-02-03 11:57:04,981 INFO spawned: 'php-fpmd' with pid 48
+2025-02-03 11:57:04,983 INFO spawned: 'crond' with pid 49
+-> Executing /opt/docker/bin/service.d/nginx.d//10-init.sh
+2025-02-03 11:57:05,016 INFO success: nginxd entered RUNNING state, process has stayed up for > than 0 seconds (startsecs)
+2025-02-03 11:57:05,016 INFO success: php-fpmd entered RUNNING state, process has stayed up for > than 0 seconds (startsecs)
+2025-02-03 11:57:05,016 INFO success: crond entered RUNNING state, process has stayed up for > than 0 seconds (startsecs)
+-> Executing /opt/docker/bin/service.d/php-fpm.d//10-init.sh
+Setting php-fpm user to application
+-> Executing /opt/docker/bin/service.d/cron.d//10-init.sh
+-> Executing /opt/docker/bin/service.d/syslog-ng.d//10-init.sh
+[SYSLOG] syslog-ng[46]: syslog-ng starting up; version='3.13.2'
+2025-02-03 11:57:06,704 INFO success: syslogd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:57:22 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 194.498 6144 82.26%
+127.0.0.1 - - [03/Feb/2025:11:57:22 +0000] "GET / HTTP/1.0" 200 30262 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /css/site.css HTTP/1.0" 200 1898 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /assets/8d097b7a/yii.js HTTP/1.0" 200 20934 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /assets/456c493e/jquery.js HTTP/1.0" 200 287630 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /assets/aaed2aa1/css/bootstrap.css HTTP/1.0" 200 145933 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /assets/aaed2aa1/js/bootstrap.js HTTP/1.0" 200 75484 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:57:23 +0000 "GET /index.php?tag=67a0af22d8214" 200 /usr/share/nginx/html/office/frontend/web/index.php 57.121 4096 52.52%
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /debug/default/toolbar?tag=67a0af22d8214 HTTP/1.0" 200 7798 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:57:23 +0000] "GET /favicon.ico HTTP/1.0" 200 318 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:57:56 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 15.742 2048 127.05%
+127.0.0.1 - - [03/Feb/2025:11:57:56 +0000] "GET / HTTP/1.0" 200 28719 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:57:56 +0000 "GET /index.php?tag=67a0af4498461" 200 /usr/share/nginx/html/office/frontend/web/index.php 13.540 2048 73.86%
+127.0.0.1 - - [03/Feb/2025:11:57:56 +0000] "GET /debug/default/toolbar?tag=67a0af4498461 HTTP/1.0" 200 7328 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:03 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 22.135 2048 90.35%
+127.0.0.1 - - [03/Feb/2025:11:58:03 +0000] "GET /site/login HTTP/1.0" 200 31084 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:03 +0000 "GET /index.php?tag=67a0af4b4401c" 200 /usr/share/nginx/html/office/frontend/web/index.php 13.034 4096 153.44%
+127.0.0.1 - - [03/Feb/2025:11:58:03 +0000] "GET /debug/default/toolbar?tag=67a0af4b4401c HTTP/1.0" 200 7328 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:03 +0000] "GET /assets/8d097b7a/yii.validation.js HTTP/1.0" 200 16405 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:03 +0000] "GET /assets/8d097b7a/yii.activeForm.js HTTP/1.0" 200 36611 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:18 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 547.916 2048 98.56%
+127.0.0.1 - - [03/Feb/2025:11:58:19 +0000] "POST /site/login HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:19 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 50.123 4096 59.85%
+127.0.0.1 - - [03/Feb/2025:11:58:19 +0000] "GET / HTTP/1.0" 200 29453 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:19 +0000 "GET /index.php?tag=67a0af5b11741" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.210 2048 98.96%
+127.0.0.1 - - [03/Feb/2025:11:58:19 +0000] "GET /debug/default/toolbar?tag=67a0af5b11741 HTTP/1.0" 200 7796 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:20 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 101.118 16384 79.12%
+127.0.0.1 - - [03/Feb/2025:11:58:20 +0000] "GET /declaration HTTP/1.0" 200 45308 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /assets/2ef88638/css/bootstrap-datepicker3.css HTTP/1.0" 200 22864 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /assets/ad5955f1/css/bootstrap-daterangepicker.css HTTP/1.0" 200 624 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /assets/8d097b7a/yii.gridView.js HTTP/1.0" 200 9507 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /assets/2ef88638/js/bootstrap-datepicker.js HTTP/1.0" 200 57553 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /assets/c2bde389/bootstrap-datepicker.ru.min.js HTTP/1.0" 200 731 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:21 +0000 "GET /index.php?tag=67a0af5ccb2ee" 200 /usr/share/nginx/html/office/frontend/web/index.php 25.525 2048 78.35%
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /debug/default/toolbar?tag=67a0af5ccb2ee HTTP/1.0" 200 8042 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:11:58:21 +0000] "GET /assets/aaed2aa1/fonts/glyphicons-halflings-regular.woff2 HTTP/1.0" 200 18028 "https://korzhov-office.kharkiv.ua/assets/aaed2aa1/css/bootstrap.css" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:22 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 24.734 2048 121.29%
+127.0.0.1 - - [03/Feb/2025:11:58:22 +0000] "GET /declaration/upload HTTP/1.0" 200 30030 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:22 +0000 "GET /index.php?tag=67a0af5e5cf3a" 200 /usr/share/nginx/html/office/frontend/web/index.php 18.654 2048 107.22%
+127.0.0.1 - - [03/Feb/2025:11:58:22 +0000] "GET /debug/default/toolbar?tag=67a0af5e5cf3a HTTP/1.0" 200 8038 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:27 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 112.499 4096 80.00%
+127.0.0.1 - - [03/Feb/2025:11:58:27 +0000] "POST /declaration/upload HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:27 +0000 "GET /index.php?id=38" 200 /usr/share/nginx/html/office/frontend/web/index.php 30.502 4096 65.57%
+127.0.0.1 - - [03/Feb/2025:11:58:27 +0000] "GET /declaration/view?id=38 HTTP/1.0" 200 29613 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:27 +0000 "GET /index.php?tag=67a0af634a3d1" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.765 2048 96.32%
+127.0.0.1 - - [03/Feb/2025:11:58:27 +0000] "GET /debug/default/toolbar?tag=67a0af634a3d1 HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/declaration/view?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:29 +0000 "GET /index.php?id=38" 200 /usr/share/nginx/html/office/frontend/web/index.php 41.170 4096 72.87%
+127.0.0.1 - - [03/Feb/2025:11:58:29 +0000] "GET /declaration/cabinet?id=38 HTTP/1.0" 200 30898 "https://korzhov-office.kharkiv.ua/declaration/view?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:29 +0000 "GET /index.php?tag=67a0af6518490" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.223 2048 104.04%
+127.0.0.1 - - [03/Feb/2025:11:58:29 +0000] "GET /debug/default/toolbar?tag=67a0af6518490 HTTP/1.0" 200 8042 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:33 +0000 "POST /index.php?id=38" 302 /usr/share/nginx/html/office/frontend/web/index.php 24.015 2048 83.28%
+127.0.0.1 - - [03/Feb/2025:11:58:33 +0000] "POST /declaration/cabinet?id=38 HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:33 +0000 "GET /index.php?id=38" 200 /usr/share/nginx/html/office/frontend/web/index.php 32.389 4096 92.62%
+127.0.0.1 - - [03/Feb/2025:11:58:33 +0000] "GET /declaration/view?id=38 HTTP/1.0" 200 29574 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:33 +0000 "GET /index.php?tag=67a0af696860a" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.444 2048 102.86%
+127.0.0.1 - - [03/Feb/2025:11:58:33 +0000] "GET /debug/default/toolbar?tag=67a0af696860a HTTP/1.0" 200 8036 "https://korzhov-office.kharkiv.ua/declaration/view?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:34 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 52.349 14336 76.41%
+127.0.0.1 - - [03/Feb/2025:11:58:34 +0000] "GET /declaration HTTP/1.0" 200 45308 "https://korzhov-office.kharkiv.ua/declaration/view?id=38" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:34 +0000 "GET /index.php?tag=67a0af6ac021e" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.389 2048 103.15%
+127.0.0.1 - - [03/Feb/2025:11:58:34 +0000] "GET /debug/default/toolbar?tag=67a0af6ac021e HTTP/1.0" 200 8040 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:35 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 23.764 2048 84.16%
+127.0.0.1 - - [03/Feb/2025:11:58:35 +0000] "GET /declaration/upload HTTP/1.0" 200 30030 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:35 +0000 "GET /index.php?tag=67a0af6bd5bcd" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.120 2048 104.60%
+127.0.0.1 - - [03/Feb/2025:11:58:35 +0000] "GET /debug/default/toolbar?tag=67a0af6bd5bcd HTTP/1.0" 200 8038 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:40 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 82.834 4096 72.43%
+127.0.0.1 - - [03/Feb/2025:11:58:40 +0000] "POST /declaration/upload HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:40 +0000 "GET /index.php?id=39" 200 /usr/share/nginx/html/office/frontend/web/index.php 28.468 4096 70.25%
+127.0.0.1 - - [03/Feb/2025:11:58:40 +0000] "GET /declaration/view?id=39 HTTP/1.0" 200 29609 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:40 +0000 "GET /index.php?tag=67a0af70b993b" 200 /usr/share/nginx/html/office/frontend/web/index.php 21.092 2048 47.41%
+127.0.0.1 - - [03/Feb/2025:11:58:40 +0000] "GET /debug/default/toolbar?tag=67a0af70b993b HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/declaration/view?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:42 +0000 "GET /index.php?id=39" 200 /usr/share/nginx/html/office/frontend/web/index.php 34.653 4096 57.72%
+127.0.0.1 - - [03/Feb/2025:11:58:42 +0000] "GET /declaration/cabinet?id=39 HTTP/1.0" 200 30898 "https://korzhov-office.kharkiv.ua/declaration/view?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:42 +0000 "GET /index.php?tag=67a0af72c3e51" 200 /usr/share/nginx/html/office/frontend/web/index.php 22.691 2048 88.14%
+127.0.0.1 - - [03/Feb/2025:11:58:42 +0000] "GET /debug/default/toolbar?tag=67a0af72c3e51 HTTP/1.0" 200 8042 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:46 +0000 "POST /index.php?id=39" 302 /usr/share/nginx/html/office/frontend/web/index.php 21.374 2048 93.57%
+127.0.0.1 - - [03/Feb/2025:11:58:46 +0000] "POST /declaration/cabinet?id=39 HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:46 +0000 "GET /index.php?id=39" 200 /usr/share/nginx/html/office/frontend/web/index.php 27.014 4096 74.04%
+127.0.0.1 - - [03/Feb/2025:11:58:46 +0000] "GET /declaration/view?id=39 HTTP/1.0" 200 29570 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:46 +0000 "GET /index.php?tag=67a0af76562a6" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.945 2048 95.49%
+127.0.0.1 - - [03/Feb/2025:11:58:46 +0000] "GET /debug/default/toolbar?tag=67a0af76562a6 HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/declaration/view?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:47 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 53.622 14336 55.95%
+127.0.0.1 - - [03/Feb/2025:11:58:47 +0000] "GET /declaration HTTP/1.0" 200 45382 "https://korzhov-office.kharkiv.ua/declaration/view?id=39" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:47 +0000 "GET /index.php?tag=67a0af7775185" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.943 2048 50.14%
+127.0.0.1 - - [03/Feb/2025:11:58:47 +0000] "GET /debug/default/toolbar?tag=67a0af7775185 HTTP/1.0" 200 8040 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:48 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 28.605 2048 69.92%
+127.0.0.1 - - [03/Feb/2025:11:58:48 +0000] "GET /declaration/create HTTP/1.0" 200 38077 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:48 +0000 "GET /index.php?tag=67a0af7891bdd" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.187 2048 52.12%
+127.0.0.1 - - [03/Feb/2025:11:58:48 +0000] "GET /debug/default/toolbar?tag=67a0af7891bdd HTTP/1.0" 200 8039 "https://korzhov-office.kharkiv.ua/declaration/create" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:50 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 21.912 2048 91.27%
+127.0.0.1 - - [03/Feb/2025:11:58:50 +0000] "POST /declaration/create HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/create" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:50 +0000 "GET /index.php?id=40" 200 /usr/share/nginx/html/office/frontend/web/index.php 25.434 2048 78.63%
+127.0.0.1 - - [03/Feb/2025:11:58:50 +0000] "GET /declaration/view?id=40 HTTP/1.0" 200 29577 "https://korzhov-office.kharkiv.ua/declaration/create" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:50 +0000 "GET /index.php?tag=67a0af7a7307e" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.117 2048 104.62%
+127.0.0.1 - - [03/Feb/2025:11:58:50 +0000] "GET /debug/default/toolbar?tag=67a0af7a7307e HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/declaration/view?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:51 +0000 "GET /index.php?id=40" 200 /usr/share/nginx/html/office/frontend/web/index.php 33.851 4096 88.62%
+127.0.0.1 - - [03/Feb/2025:11:58:51 +0000] "GET /declaration/cabinet?id=40 HTTP/1.0" 200 30898 "https://korzhov-office.kharkiv.ua/declaration/view?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:52 +0000 "GET /index.php?tag=67a0af7be4d1c" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.197 2048 52.09%
+127.0.0.1 - - [03/Feb/2025:11:58:52 +0000] "GET /debug/default/toolbar?tag=67a0af7be4d1c HTTP/1.0" 200 8042 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:58 +0000 "POST /index.php?id=40" 302 /usr/share/nginx/html/office/frontend/web/index.php 21.818 2048 91.67%
+127.0.0.1 - - [03/Feb/2025:11:58:58 +0000] "POST /declaration/cabinet?id=40 HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:58 +0000 "GET /index.php?id=40" 200 /usr/share/nginx/html/office/frontend/web/index.php 27.350 2048 73.13%
+127.0.0.1 - - [03/Feb/2025:11:58:58 +0000] "GET /declaration/view?id=40 HTTP/1.0" 200 29577 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:58:58 +0000 "GET /index.php?tag=67a0af827b770" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.432 2048 97.89%
+127.0.0.1 - - [03/Feb/2025:11:58:58 +0000] "GET /debug/default/toolbar?tag=67a0af827b770 HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/declaration/view?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:59:00 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 78.776 14336 63.47%
+127.0.0.1 - - [03/Feb/2025:11:59:00 +0000] "GET /cabinet HTTP/1.0" 200 48389 "https://korzhov-office.kharkiv.ua/declaration/view?id=40" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:59:00 +0000 "GET /index.php?tag=67a0af843d81e" 200 /usr/share/nginx/html/office/frontend/web/index.php 22.412 2048 89.24%
+127.0.0.1 - - [03/Feb/2025:11:59:00 +0000] "GET /debug/default/toolbar?tag=67a0af843d81e HTTP/1.0" 200 8033 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:59:04 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 1345.826 2048 5.94%
+127.0.0.1 - - [03/Feb/2025:11:59:05 +0000] "POST /site/logout HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:59:05 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 13.123 2048 152.40%
+127.0.0.1 - - [03/Feb/2025:11:59:05 +0000] "GET / HTTP/1.0" 200 28719 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:11:59:05 +0000 "GET /index.php?tag=67a0af89a9913" 200 /usr/share/nginx/html/office/frontend/web/index.php 13.976 2048 143.10%
+127.0.0.1 - - [03/Feb/2025:11:59:05 +0000] "GET /debug/default/toolbar?tag=67a0af89a9913 HTTP/1.0" 200 7328 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:01:17 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 90.191 14336 66.53%
+127.0.0.1 - - [03/Feb/2025:12:01:17 +0000] "GET /cabinet HTTP/1.0" 200 49860 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:01:17 +0000 "GET /index.php?tag=67a0b00d30a36" 200 /usr/share/nginx/html/office/frontend/web/index.php 24.505 4096 81.62%
+127.0.0.1 - - [03/Feb/2025:12:01:17 +0000] "GET /debug/default/toolbar?tag=67a0b00d30a36 HTTP/1.0" 200 8033 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:03:53 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 39.072 2048 102.38%
+127.0.0.1 - - [03/Feb/2025:12:03:53 +0000] "GET /client HTTP/1.0" 200 40706 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:03:53 +0000 "GET /index.php?tag=67a0b0a97efa1" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.902 2048 95.68%
+127.0.0.1 - - [03/Feb/2025:12:03:53 +0000] "GET /debug/default/toolbar?tag=67a0b0a97efa1 HTTP/1.0" 200 8026 "https://korzhov-office.kharkiv.ua/client" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:04:01 +0000 "GET /index.php?ClientSearch%5Bid%5D=&ClientSearch%5Bcod_EGRPOU%5D=&ClientSearch%5Bclient%5D=%D0%9A%D0%BE%D1%81&ClientSearch%5Bdogovor%5D=&ClientSearch%5Bdate_begin%5D=&ClientSearch%5Bdate_finish%5D=" 200 /usr/share/nginx/html/office/frontend/web/index.php 43.363 2048 92.24%
+127.0.0.1 - - [03/Feb/2025:12:04:01 +0000] "GET /client?ClientSearch%5Bid%5D=&ClientSearch%5Bcod_EGRPOU%5D=&ClientSearch%5Bclient%5D=%D0%9A%D0%BE%D1%81&ClientSearch%5Bdogovor%5D=&ClientSearch%5Bdate_begin%5D=&ClientSearch%5Bdate_finish%5D= HTTP/1.0" 200 33554 "https://korzhov-office.kharkiv.ua/client" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:04:01 +0000 "GET /index.php?tag=67a0b0b15eaf5" 200 /usr/share/nginx/html/office/frontend/web/index.php 25.799 2048 77.52%
+127.0.0.1 - - [03/Feb/2025:12:04:01 +0000] "GET /debug/default/toolbar?tag=67a0b0b15eaf5 HTTP/1.0" 200 8026 "https://korzhov-office.kharkiv.ua/client?ClientSearch%5Bid%5D=&ClientSearch%5Bcod_EGRPOU%5D=&ClientSearch%5Bclient%5D=%D0%9A%D0%BE%D1%81&ClientSearch%5Bdogovor%5D=&ClientSearch%5Bdate_begin%5D=&ClientSearch%5Bdate_finish%5D=" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:04:04 +0000 "GET /index.php?id=379" 200 /usr/share/nginx/html/office/frontend/web/index.php 81.124 2048 86.29%
+127.0.0.1 - - [03/Feb/2025:12:04:04 +0000] "GET /client/view?id=379 HTTP/1.0" 200 29479 "https://korzhov-office.kharkiv.ua/client?ClientSearch%5Bid%5D=&ClientSearch%5Bcod_EGRPOU%5D=&ClientSearch%5Bclient%5D=%D0%9A%D0%BE%D1%81&ClientSearch%5Bdogovor%5D=&ClientSearch%5Bdate_begin%5D=&ClientSearch%5Bdate_finish%5D=" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:04:04 +0000 "GET /index.php?tag=67a0b0b42ae0a" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.011 2048 99.95%
+127.0.0.1 - - [03/Feb/2025:12:04:04 +0000] "GET /debug/default/toolbar?tag=67a0b0b42ae0a HTTP/1.0" 200 8024 "https://korzhov-office.kharkiv.ua/client/view?id=379" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:04:06 +0000 "GET /index.php?file=files%2Fugoda_long.docx" 200 /usr/share/nginx/html/office/frontend/web/index.php 38.864 2048 77.19%
+127.0.0.1 - - [03/Feb/2025:12:04:06 +0000] "GET /client/export?file=files%2Fugoda_long.docx HTTP/1.0" 200 9095 "https://korzhov-office.kharkiv.ua/client/view?id=379" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:05:31 +0000 "GET /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 12.175 2048 82.14%
+127.0.0.1 - - [03/Feb/2025:12:05:31 +0000] "GET /homezatraty HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/homezatraty/view?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:05:32 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 15.653 2048 191.66%
+127.0.0.1 - - [03/Feb/2025:12:05:32 +0000] "GET /site/login HTTP/1.0" 200 31084 "https://korzhov-office.kharkiv.ua/homezatraty/view?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:05:33 +0000 "GET /index.php?tag=67a0b10c19aef" 200 /usr/share/nginx/html/office/frontend/web/index.php 12.984 4096 154.04%
+127.0.0.1 - - [03/Feb/2025:12:05:34 +0000] "GET /debug/default/toolbar?tag=67a0b10c19aef HTTP/1.0" 200 7328 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[SYSLOG] CRON[72]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[SYSLOG] CRON[115]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:01 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.175 2048 52.15%
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /site/login HTTP/1.0" 200 31084 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /assets/8d097b7a/yii.validation.js HTTP/1.0" 200 16405 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /css/site.css HTTP/1.0" 200 1898 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /assets/aaed2aa1/js/bootstrap.js HTTP/1.0" 200 75484 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /assets/8d097b7a/yii.activeForm.js HTTP/1.0" 200 36611 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /assets/456c493e/jquery.js HTTP/1.0" 200 287630 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /assets/aaed2aa1/css/bootstrap.css HTTP/1.0" 200 145933 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /assets/8d097b7a/yii.js HTTP/1.0" 200 20934 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:01 +0000 "GET /index.php?tag=67a0b615097bc" 200 /usr/share/nginx/html/office/frontend/web/index.php 21.753 4096 91.94%
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /debug/default/toolbar?tag=67a0b615097bc HTTP/1.0" 200 7328 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:01 +0000] "GET /favicon.ico HTTP/1.0" 200 318 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:13 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 546.539 2048 100.63%
+127.0.0.1 - - [03/Feb/2025:12:27:13 +0000] "POST /site/login HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:13 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 30.071 4096 66.51%
+127.0.0.1 - - [03/Feb/2025:12:27:13 +0000] "GET / HTTP/1.0" 200 29449 "https://korzhov-office.kharkiv.ua/site/login" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:14 +0000 "GET /index.php?tag=67a0b621cc923" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.359 2048 98.24%
+127.0.0.1 - - [03/Feb/2025:12:27:14 +0000] "GET /debug/default/toolbar?tag=67a0b621cc923 HTTP/1.0" 200 7794 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:21 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 35.221 2048 56.78%
+127.0.0.1 - - [03/Feb/2025:12:27:21 +0000] "GET /declaration HTTP/1.0" 200 37271 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:21 +0000] "GET /assets/2ef88638/css/bootstrap-datepicker3.css HTTP/1.0" 200 22864 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:21 +0000] "GET /assets/2ef88638/js/bootstrap-datepicker.js HTTP/1.0" 200 57553 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:21 +0000] "GET /assets/8d097b7a/yii.gridView.js HTTP/1.0" 200 9507 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:21 +0000] "GET /assets/ad5955f1/css/bootstrap-daterangepicker.css HTTP/1.0" 200 624 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:21 +0000] "GET /assets/c2bde389/bootstrap-datepicker.ru.min.js HTTP/1.0" 200 731 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:22 +0000 "GET /index.php?tag=67a0b6299e1ee" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.756 2048 96.36%
+127.0.0.1 - - [03/Feb/2025:12:27:22 +0000] "GET /debug/default/toolbar?tag=67a0b6299e1ee HTTP/1.0" 200 8037 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:12:27:22 +0000] "GET /assets/aaed2aa1/fonts/glyphicons-halflings-regular.woff2 HTTP/1.0" 200 18028 "https://korzhov-office.kharkiv.ua/assets/aaed2aa1/css/bootstrap.css" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:30 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 43.711 2048 91.51%
+127.0.0.1 - - [03/Feb/2025:12:27:30 +0000] "GET /cabinet HTTP/1.0" 200 39116 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:30 +0000 "GET /index.php?tag=67a0b6322207c" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.665 2048 96.78%
+127.0.0.1 - - [03/Feb/2025:12:27:30 +0000] "GET /debug/default/toolbar?tag=67a0b6322207c HTTP/1.0" 200 8032 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:34 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 33.262 2048 90.19%
+127.0.0.1 - - [03/Feb/2025:12:27:34 +0000] "GET /declaration HTTP/1.0" 200 37271 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:34 +0000 "GET /index.php?tag=67a0b6363aeed" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.190 2048 99.06%
+127.0.0.1 - - [03/Feb/2025:12:27:34 +0000] "GET /debug/default/toolbar?tag=67a0b6363aeed HTTP/1.0" 200 8037 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:35 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 24.286 2048 123.53%
+127.0.0.1 - - [03/Feb/2025:12:27:35 +0000] "GET /declaration/upload HTTP/1.0" 200 30026 "https://korzhov-office.kharkiv.ua/declaration" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:27:35 +0000 "GET /index.php?tag=67a0b63764a86" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.257 2048 98.73%
+127.0.0.1 - - [03/Feb/2025:12:27:35 +0000] "GET /debug/default/toolbar?tag=67a0b63764a86 HTTP/1.0" 200 8038 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:50 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 123.557 8192 72.84%
+127.0.0.1 - - [03/Feb/2025:12:38:51 +0000] "POST /declaration/upload HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:51 +0000 "GET /index.php?id=41" 200 /usr/share/nginx/html/office/frontend/web/index.php 31.229 4096 96.06%
+127.0.0.1 - - [03/Feb/2025:12:38:51 +0000] "GET /declaration/view?id=41 HTTP/1.0" 200 29601 "https://korzhov-office.kharkiv.ua/declaration/upload" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:51 +0000 "GET /index.php?tag=67a0b8db2d957" 200 /usr/share/nginx/html/office/frontend/web/index.php 35.322 2048 84.93%
+127.0.0.1 - - [03/Feb/2025:12:38:51 +0000] "GET /debug/default/toolbar?tag=67a0b8db2d957 HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/declaration/view?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:52 +0000 "GET /index.php?id=41" 200 /usr/share/nginx/html/office/frontend/web/index.php 34.645 4096 86.59%
+127.0.0.1 - - [03/Feb/2025:12:38:52 +0000] "GET /declaration/cabinet?id=41 HTTP/1.0" 200 30894 "https://korzhov-office.kharkiv.ua/declaration/view?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:52 +0000 "GET /index.php?tag=67a0b8dc3e38e" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.911 2048 47.82%
+127.0.0.1 - - [03/Feb/2025:12:38:52 +0000] "GET /debug/default/toolbar?tag=67a0b8dc3e38e HTTP/1.0" 200 8042 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:58 +0000 "POST /index.php?id=41" 302 /usr/share/nginx/html/office/frontend/web/index.php 22.812 2048 87.67%
+127.0.0.1 - - [03/Feb/2025:12:38:58 +0000] "POST /declaration/cabinet?id=41 HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:58 +0000 "GET /index.php?id=41" 200 /usr/share/nginx/html/office/frontend/web/index.php 31.326 4096 95.77%
+127.0.0.1 - - [03/Feb/2025:12:38:58 +0000] "GET /declaration/view?id=41 HTTP/1.0" 200 29562 "https://korzhov-office.kharkiv.ua/declaration/cabinet?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:38:58 +0000 "GET /index.php?tag=67a0b8e269a91" 200 /usr/share/nginx/html/office/frontend/web/index.php 22.562 2048 88.64%
+127.0.0.1 - - [03/Feb/2025:12:38:58 +0000] "GET /debug/default/toolbar?tag=67a0b8e269a91 HTTP/1.0" 200 8036 "https://korzhov-office.kharkiv.ua/declaration/view?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:39:00 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 92.385 4096 43.30%
+127.0.0.1 - - [03/Feb/2025:12:39:00 +0000] "GET /cabinet HTTP/1.0" 200 40091 "https://korzhov-office.kharkiv.ua/declaration/view?id=41" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:39:00 +0000 "GET /index.php?tag=67a0b8e4a5a6c" 200 /usr/share/nginx/html/office/frontend/web/index.php 20.916 2048 47.81%
+127.0.0.1 - - [03/Feb/2025:12:39:00 +0000] "GET /debug/default/toolbar?tag=67a0b8e4a5a6c HTTP/1.0" 200 8032 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[SYSLOG] CRON[119]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:39:07 +0000 "POST /index.php" 302 /usr/share/nginx/html/office/frontend/web/index.php 1004.891 2048 5.97%
+127.0.0.1 - - [03/Feb/2025:12:39:08 +0000] "POST /site/logout HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:39:08 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 13.180 2048 75.87%
+127.0.0.1 - - [03/Feb/2025:12:39:08 +0000] "GET / HTTP/1.0" 200 28719 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:12:39:09 +0000 "GET /index.php?tag=67a0b8ecee172" 200 /usr/share/nginx/html/office/frontend/web/index.php 14.223 2048 70.31%
+127.0.0.1 - - [03/Feb/2025:12:39:09 +0000] "GET /debug/default/toolbar?tag=67a0b8ecee172 HTTP/1.0" 200 7328 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+157.245.77.56 - - [03/Feb/2025:12:53:34 +0000] "GET / HTTP/1.1" 400 280 "-" "HTTP Banner Detection (https://security.ipip.net)"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:02:41 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 28.672 2048 104.63%
+127.0.0.1 - - [03/Feb/2025:13:02:41 +0000] "GET / HTTP/1.0" 200 30262 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:02:42 +0000 "GET /index.php?tag=67a0be71dee20" 200 /usr/share/nginx/html/office/frontend/web/index.php 22.535 4096 88.75%
+127.0.0.1 - - [03/Feb/2025:13:02:42 +0000] "GET /debug/default/toolbar?tag=67a0be71dee20 HTTP/1.0" 200 7794 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:02:57 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 87.315 14336 80.17%
+127.0.0.1 - - [03/Feb/2025:13:02:57 +0000] "GET /cabinet HTTP/1.0" 200 49851 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:02:57 +0000 "GET /index.php?tag=67a0be819bae0" 200 /usr/share/nginx/html/office/frontend/web/index.php 33.389 6144 59.90%
+127.0.0.1 - - [03/Feb/2025:13:02:57 +0000] "GET /debug/default/toolbar?tag=67a0be819bae0 HTTP/1.0" 200 8033 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:04:39 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 13.467 2048 148.51%
+157.245.77.56 - - [03/Feb/2025:13:04:39 +0000] "GET / HTTP/1.1" 200 2798 "-" "HTTP Banner Detection (https://security.ipip.net)"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:06:24 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 65.043 2048 61.50%
+127.0.0.1 - - [03/Feb/2025:13:06:24 +0000] "GET /homezatraty HTTP/1.0" 200 41979 "https://korzhov-office.kharkiv.ua/cabinet" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:06:24 +0000 "GET /index.php?tag=67a0bf5056802" 200 /usr/share/nginx/html/office/frontend/web/index.php 23.493 2048 85.13%
+127.0.0.1 - - [03/Feb/2025:13:06:24 +0000] "GET /debug/default/toolbar?tag=67a0bf5056802 HTTP/1.0" 200 8040 "https://korzhov-office.kharkiv.ua/homezatraty" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:24 +0000 "GET /index.php?id=13" 200 /usr/share/nginx/html/office/frontend/web/index.php 28.723 2048 104.45%
+127.0.0.1 - - [03/Feb/2025:13:07:24 +0000] "GET /homezatraty/update?id=13 HTTP/1.0" 200 33695 "https://korzhov-office.kharkiv.ua/homezatraty" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:24 +0000 "GET /index.php?tag=67a0bf8c7ae2c" 200 /usr/share/nginx/html/office/frontend/web/index.php 18.841 2048 53.08%
+127.0.0.1 - - [03/Feb/2025:13:07:24 +0000] "GET /debug/default/toolbar?tag=67a0bf8c7ae2c HTTP/1.0" 200 8039 "https://korzhov-office.kharkiv.ua/homezatraty/update?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:27 +0000 "POST /index.php?id=13" 302 /usr/share/nginx/html/office/frontend/web/index.php 20.995 2048 95.26%
+127.0.0.1 - - [03/Feb/2025:13:07:27 +0000] "POST /homezatraty/update?id=13 HTTP/1.0" 302 0 "https://korzhov-office.kharkiv.ua/homezatraty/update?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:28 +0000 "GET /index.php?id=13" 200 /usr/share/nginx/html/office/frontend/web/index.php 26.312 2048 114.02%
+127.0.0.1 - - [03/Feb/2025:13:07:28 +0000] "GET /homezatraty/view?id=13 HTTP/1.0" 200 29319 "https://korzhov-office.kharkiv.ua/homezatraty/update?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:28 +0000 "GET /index.php?tag=67a0bf900b2ef" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.409 2048 103.04%
+127.0.0.1 - - [03/Feb/2025:13:07:28 +0000] "GET /debug/default/toolbar?tag=67a0bf900b2ef HTTP/1.0" 200 8034 "https://korzhov-office.kharkiv.ua/homezatraty/view?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:34 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 29.998 2048 66.67%
+127.0.0.1 - - [03/Feb/2025:13:07:34 +0000] "GET / HTTP/1.0" 200 30262 "https://korzhov-office.kharkiv.ua/homezatraty/view?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:07:34 +0000 "GET /index.php?tag=67a0bf969e393" 200 /usr/share/nginx/html/office/frontend/web/index.php 18.964 2048 105.46%
+127.0.0.1 - - [03/Feb/2025:13:07:34 +0000] "GET /debug/default/toolbar?tag=67a0bf969e393 HTTP/1.0" 200 7794 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[SYSLOG] CRON[164]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[SYSLOG] CRON[207]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:18:30 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 28.138 2048 106.62%
+127.0.0.1 - - [03/Feb/2025:13:18:30 +0000] "GET / HTTP/1.0" 200 30262 "https://korzhov-office.kharkiv.ua/homezatraty/view?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:18:31 +0000 "GET /index.php?tag=67a0c226cb33b" 200 /usr/share/nginx/html/office/frontend/web/index.php 22.294 2048 89.71%
+127.0.0.1 - - [03/Feb/2025:13:18:31 +0000] "GET /debug/default/toolbar?tag=67a0c226cb33b HTTP/1.0" 200 7794 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:24:22 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 15.651 2048 63.89%
+127.0.0.1 - - [03/Feb/2025:13:24:22 +0000] "GET / HTTP/1.0" 200 28719 "-" "Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/120.0"
+[SYSLOG] CRON[211]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:15 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 19.532 2048 102.40%
+127.0.0.1 - - [03/Feb/2025:13:50:15 +0000] "GET / HTTP/1.0" 200 28719 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Safari/605.1.15 Epiphany/605.1.15"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:35 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 27.547 2048 72.60%
+127.0.0.1 - - [03/Feb/2025:13:50:35 +0000] "GET /assets/aaed2aa1/js/bootstrap.js/latest/meta-data/iam/security-credentials/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (Windows; U; Win98; en-US; rv:1.4) Gecko Netscape/7.1 (ax)"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:35 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 39.776 2048 50.28%
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:35 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 19.127 2048 52.28%
+127.0.0.1 - - [03/Feb/2025:13:50:35 +0000] "GET /assets/456c493e/jquery.js/latest/meta-data/iam/security-credentials/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/525.10  (KHTML, like Gecko) Version/3.0.4 Mobile Safari/523.12.2"
+127.0.0.1 - - [03/Feb/2025:13:50:35 +0000] "GET /assets/8d097b7a/yii.js/latest/meta-data/iam/security-credentials/ HTTP/1.0" 404 27928 "-" "Xenu Link Sleuth/1.3.8"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:48 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 25.172 2048 39.73%
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:48 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 34.590 2048 86.73%
+127.0.0.1 - - [03/Feb/2025:13:50:48 +0000] "GET /assets/aaed2aa1/js/bootstrap.js/latest/meta-data/instance-id/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (iPad; CPU OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1"
+127.0.0.1 - - [03/Feb/2025:13:50:48 +0000] "GET /assets/456c493e/jquery.js/latest/meta-data/instance-id/ HTTP/1.0" 404 27928 "-" "P3P Validator"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:50:48 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 15.815 2048 126.46%
+127.0.0.1 - - [03/Feb/2025:13:50:48 +0000] "GET /assets/8d097b7a/yii.js/latest/meta-data/instance-id/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (iPod; U; CPU iPhone OS 3_1_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Mobile/7C145"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:01 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 19.590 2048 102.09%
+127.0.0.1 - - [03/Feb/2025:13:51:01 +0000] "GET /assets/456c493e/jquery.js/latest/meta-data/public-ipv4/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (X11; FreeBSD amd64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:01 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 17.400 2048 57.47%
+127.0.0.1 - - [03/Feb/2025:13:51:01 +0000] "GET /assets/aaed2aa1/js/bootstrap.js/latest/meta-data/public-ipv4/ HTTP/1.0" 404 27928 "-" "Lynx/2.8.5rel.1 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/0.8.12"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:01 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 15.658 2048 63.87%
+127.0.0.1 - - [03/Feb/2025:13:51:01 +0000] "GET /assets/8d097b7a/yii.js/latest/meta-data/public-ipv4/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.111 Mobile Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:13 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 22.644 2048 88.32%
+127.0.0.1 - - [03/Feb/2025:13:51:13 +0000] "GET /assets/8d097b7a/yii.js/latest/meta-data/placement/availability-zone/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:13 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 18.079 2048 165.94%
+127.0.0.1 - - [03/Feb/2025:13:51:13 +0000] "GET /assets/aaed2aa1/js/bootstrap.js/latest/meta-data/placement/availability-zone/ HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (X11; Linux i686 on x86_64; rv:2.0.1) Gecko/20100101 Firefox/4.0.1"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:13 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 17.600 2048 56.82%
+127.0.0.1 - - [03/Feb/2025:13:51:13 +0000] "GET /assets/456c493e/jquery.js/latest/meta-data/placement/availability-zone/ HTTP/1.0" 404 27928 "-" "Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; fr) Presto/2.9.168 Version/11.52"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:27 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 18.504 2048 108.08%
+127.0.0.1 - - [03/Feb/2025:13:51:27 +0000] "GET /assets/456c493e/jquery.js/computeMetadata/v1/instance/service-accounts/default/token HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (Windows Phone 8.1; ARM; Trident/7.0; Touch; rv:11.0; IEMobile/11.0; NOKIA; Lumia 530) like Gecko"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:27 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 15.491 2048 129.11%
+127.0.0.1 - - [03/Feb/2025:13:51:27 +0000] "GET /assets/aaed2aa1/js/bootstrap.js/computeMetadata/v1/instance/service-accounts/default/token HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5362a Safari/604.1"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:27 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 15.837 2048 63.14%
+127.0.0.1 - - [03/Feb/2025:13:51:27 +0000] "GET /assets/8d097b7a/yii.js/computeMetadata/v1/instance/service-accounts/default/token HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0; Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 920)"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:39 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 23.839 2048 125.84%
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:39 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 46.290 2048 86.41%
+127.0.0.1 - - [03/Feb/2025:13:51:39 +0000] "GET /assets/8d097b7a/yii.js/metadata/identity/oauth2/token HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (Linux; Android 9; LM-V405) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.111 Mobile Safari/537.36"
+127.0.0.1 - - [03/Feb/2025:13:51:39 +0000] "GET /assets/456c493e/jquery.js/metadata/identity/oauth2/token HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (Linux; Android 9; SM-G950F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.111 Mobile Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:13:51:39 +0000 "GET /index.php" 404 /usr/share/nginx/html/office/frontend/web/index.php 19.265 2048 51.91%
+127.0.0.1 - - [03/Feb/2025:13:51:39 +0000] "GET /assets/aaed2aa1/js/bootstrap.js/metadata/identity/oauth2/token HTTP/1.0" 404 27928 "-" "Mozilla/5.0 (X11; U; NetBSD amd64; en-US; rv:1.9.2.15) Gecko/20110308 Namoroka/3.6.15"
+[SYSLOG] CRON[254]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:14:12:21 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 17.355 2048 57.62%
+206.168.34.50 - - [03/Feb/2025:14:12:21 +0000] "GET / HTTP/1.1" 200 1283 "-" "Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)"
+206.168.34.50 - - [03/Feb/2025:14:12:31 +0000] "GET /favicon.ico HTTP/1.1" 200 318 "-" "Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)"
+206.168.34.50 - - [03/Feb/2025:14:12:40 +0000] "PRI * HTTP/2.0" 400 182 "-" "-"
+[SYSLOG] CRON[297]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+[SYSLOG] CRON[300]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:15:00:15 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 34.572 2048 86.78%
+127.0.0.1 - - [03/Feb/2025:15:00:15 +0000] "GET / HTTP/1.0" 200 30262 "https://korzhov-office.kharkiv.ua/homezatraty/view?id=13" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:15:00:16 +0000 "GET /index.php?tag=67a0d9ffda9eb" 200 /usr/share/nginx/html/office/frontend/web/index.php 25.310 4096 79.02%
+127.0.0.1 - - [03/Feb/2025:15:00:16 +0000] "GET /debug/default/toolbar?tag=67a0d9ffda9eb HTTP/1.0" 200 7794 "https://korzhov-office.kharkiv.ua/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+172.202.251.202 - - [03/Feb/2025:15:03:55 +0000] "MGLNDD_91.219.60.148_9443" 400 182 "-" "-"
+[SYSLOG] CRON[345]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:15:10:02 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/frontend/web/index.php 17.199 2048 174.43%
+127.0.0.1 - - [03/Feb/2025:15:10:02 +0000] "GET / HTTP/1.0" 200 28719 "-" "Mozilla/5.0 (compatible; NetcraftSurveyAgent/1.0; +info@netcraft.com)"
+[SYSLOG] CRON[387]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+[SYSLOG] CRON[392]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[SYSLOG] CRON[436]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+[SYSLOG] CRON[479]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:16:22:20 +0000 "GET /index.php" 302 /usr/share/nginx/html/office/backend/web/index.php 24.292 2048 82.33%
+45.156.128.130 - - [03/Feb/2025:16:22:20 +0000] "GET / HTTP/1.1" 302 5 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
+[php-fpm:access] 127.0.0.1 -  03/Feb/2025:16:22:20 +0000 "GET /index.php" 200 /usr/share/nginx/html/office/backend/web/index.php 44.367 2048 67.62%
+45.156.128.130 - - [03/Feb/2025:16:22:20 +0000] "GET /site/login HTTP/1.1" 200 1375 "https://91.219.60.148:9443/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
+[SYSLOG] CRON[483]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)

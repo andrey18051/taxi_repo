@@ -240,6 +240,71 @@ class WfpController extends Controller
             "signature" =>  $signature
         ];
     }
+
+    public function serviceUrl_PAS1_app(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
+                ->where('app', "PAS1")
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->app = 'PAS1';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+            }
+
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS1::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+//        $secretKey = "7aca3657f12fca79d876dcb50e2d84d71f544516";
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
     public function serviceUrl_PAS2(Request $request)
     {
         Log::debug("serviceUrl " . $request);
@@ -269,6 +334,73 @@ class WfpController extends Controller
                 $card = new Card();
                 $card->user_id = $user->id;
                 $card->pay_system = 'wfp';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+            }
+
+
+
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS2::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+//        $secretKey = "7aca3657f12fca79d876dcb50e2d84d71f544516";
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+
+    public function serviceUrl_PAS2_app(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
+                ->where('app', "PAS2")
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->app = 'PAS2';
                 $card->masked_card = $data['cardPan'];
                 $card->card_type = $cardType;
                 $card->bank_name = $bankName;
@@ -363,7 +495,67 @@ class WfpController extends Controller
             "signature" =>  $signature
         ];
     }
+    public function serviceUrl_PAS4_app(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
 
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
+                ->where('app', "PAS4")
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->app = 'PAS4';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+            }
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS4::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
     /**
      * @throws \Exception
      */
@@ -409,6 +601,78 @@ class WfpController extends Controller
 
 // Сохраняем данные в Firestore
             (new FCMController)->saveCardDataToFirestore($uidDriver, $cardData, $status, $amount);
+        }
+
+
+        $currentUtcTime = new DateTime('now', new DateTimeZone('UTC'));
+        $currentUtcTime->setTimezone(new DateTimeZone('Europe/Kiev'));
+        $formattedDateTime = $currentUtcTime->format('Y-m-d H:i:s');
+        $time = strtotime($formattedDateTime);
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+
+        $secretKey = config("app.merchantSecretKey");
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+
+    public function serviceUrl_VOD_app(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $userData = (new FCMController)->findUserByEmail($data['email']);
+        if (is_array($userData)  && isset($data['recToken']) && $data['recToken'] != null) {
+            $uidDriver = $userData["uid"];
+
+            $status = "payment_card";
+            $amount = $data["amount"];
+
+
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+            $user = User::where('email', $data['email'])->first();
+
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
+                ->where('app', "VOD")
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+            if (!$card) {
+                $cardData = [
+                    'cardType' => $cardType,
+                    'bankName' => $bankName,
+                    'app' => 'VOD',
+                    'maskedCard' => $data['cardPan'],
+                    'recToken' => $rectoken,
+                    'merchant' => $data['merchantAccount'],
+                    'pay_system' => 'wfp'
+                ];
+                // Сохраняем данные в Firestore
+                (new FCMController)->saveCardDataToFirestore($uidDriver, $cardData, $status, $amount);
+            }
+
+
         }
 
 

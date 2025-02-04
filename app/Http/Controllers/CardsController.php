@@ -133,6 +133,7 @@ class CardsController extends Controller
             $merchantAccount = $merchant["wfp_merchantAccount"];
             $cards = Card::where('pay_system', $pay_system)
                 ->where('user_id', $user->id)
+                ->where('app', $application)
                 ->where('merchant', $merchantAccount)
                 ->get();
             if ($cards != null) {
