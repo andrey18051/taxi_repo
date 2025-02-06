@@ -1802,61 +1802,63 @@ class WfpController extends Controller
 
 
         $recToken = (new CardsController)->getActiveCard($clientEmail, $city, $application)['rectoken'];
+        if ($recToken != null) {
+            $recToken = (new CardsController)-> decryptToken($recToken);
 
-        $recToken = (new CardsController)-> decryptToken($recToken);
+            $orderDate =  strtotime(date('Y-m-d H:i:s'));
 
-        $orderDate =  strtotime(date('Y-m-d H:i:s'));
-
-        $params = [
-            "merchantAccount" => $merchantAccount,
-            "merchantDomainName" => "m.easy-order-taxi.site",
-            "orderReference" => $orderReference,
-            "orderDate" => $orderDate,
-            "amount" => $amount,
-            "currency" => "UAH",
-            "productName" => [$productName],
-            "productPrice" => [$amount],
-            "productCount" => [1]
-        ];
+            $params = [
+                "merchantAccount" => $merchantAccount,
+                "merchantDomainName" => "m.easy-order-taxi.site",
+                "orderReference" => $orderReference,
+                "orderDate" => $orderDate,
+                "amount" => $amount,
+                "currency" => "UAH",
+                "productName" => [$productName],
+                "productPrice" => [$amount],
+                "productCount" => [1]
+            ];
 
 
-        $params = [
-            "transactionType" => "CHARGE",
-            "merchantAccount" => $merchantAccount,
-            "merchantAuthType" => "SimpleSignature",
-            "merchantDomainName" => "m.easy-order-taxi.site",
-            "merchantTransactionType" => "AUTH",
+            $params = [
+                "transactionType" => "CHARGE",
+                "merchantAccount" => $merchantAccount,
+                "merchantAuthType" => "SimpleSignature",
+                "merchantDomainName" => "m.easy-order-taxi.site",
+                "merchantTransactionType" => "AUTH",
 //            "merchantTransactionSecureType" => "AUTO",
-            "merchantTransactionSecureType" => "NON3DS",
-            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "charge"),
-            "apiVersion" => 1,
-            "orderReference" => $orderReference,
-            "orderDate" => $orderDate,
-            "amount" => $amount,
-            "currency" => "UAH",
-            "recToken" => $recToken,
-            "productName" => [$productName],
-            "productPrice" => [$amount],
-            "productCount" => [1],
-            "clientFirstName" => "Bulba",
-            "clientLastName" => "Taras",
-            "clientEmail" => $clientEmail,
-            "clientPhone" => $clientPhone,
-            "clientCountry" => "UKR",
-            "notifyMethod" => "bot"
-        ];
+                "merchantTransactionSecureType" => "NON3DS",
+                "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "charge"),
+                "apiVersion" => 1,
+                "orderReference" => $orderReference,
+                "orderDate" => $orderDate,
+                "amount" => $amount,
+                "currency" => "UAH",
+                "recToken" => $recToken,
+                "productName" => [$productName],
+                "productPrice" => [$amount],
+                "productCount" => [1],
+                "clientFirstName" => "Bulba",
+                "clientLastName" => "Taras",
+                "clientEmail" => $clientEmail,
+                "clientPhone" => $clientPhone,
+                "clientCountry" => "UKR",
+                "notifyMethod" => "bot"
+            ];
 
 // Відправлення POST-запиту
-        $response = Http::post('https://api.wayforpay.com/api ', $params);
-        Log::debug("purchase: ", ['response' => $response->body()]);
+            $response = Http::post('https://api.wayforpay.com/api ', $params);
+            Log::debug("purchase: ", ['response' => $response->body()]);
 
-        self::checkStatus(
-            $application,
-            $city,
-            $orderReference
-        );
+            self::checkStatus(
+                $application,
+                $city,
+                $orderReference
+            );
 
-        return $response;
+            return $response;
+        }
+
     }
 
     private function generateHmacMd5Signature($params, $secretKey, $type)

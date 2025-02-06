@@ -44,7 +44,7 @@ class CleanTask extends Command
         (new CleanerTableController())->cleanOrderRefusalTable();
 
         //Очистка таблиці истории безнальных заказов
-        (new CleanerTableController())->cleanUidHistoriesTable();
+//        (new CleanerTableController())->cleanUidHistoriesTable();
 
         //Проверка версии Visicom
         (new OpenStreetMapController)->checkVisicomRequest();

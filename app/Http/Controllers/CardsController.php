@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class CardsController extends Controller
 {
-    public function getActiveCard($email, $city, $application): array
+    public function getActiveCard($email, $city, $application): ?array
     {
 
         switch ($application) {
@@ -36,12 +36,14 @@ class CardsController extends Controller
             $activeCard = Card::
                 where("user_id", $user->id)->
                 where('merchant', $merchantAccount)->
+                where('app', $application)->
                 where("active", true) -> first();
-
+            $messageAdmin = "getActiveCard" . $activeCard;
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             if($activeCard) {
                 return ["rectoken" => $activeCard->rectoken];
             } else {
-                return ["rectoken" => null];
+                return  null;
             }
         }
     }
@@ -122,6 +124,31 @@ class CardsController extends Controller
         }
         return ["result" => "ok"];
     }
+
+    public function setActiveCardAfterDelete(
+        $merchant,
+        $user_id,
+        $id,
+        $application
+    ) {
+        $userCards = Card::where("user_id", $user_id)
+            ->where('merchant', $merchant)
+            ->where('app', $application)
+            ->get();
+
+        foreach ($userCards as $value) {
+            $value->active = true;
+            $value->save();
+            $id = $value->id;
+
+            if($value->id != $id) {
+                $value->active = false;
+                $value->save();
+            }
+        }
+        return ["result" => "ok"];
+    }
+
 
     public function setActiveFirstCard($email, $id )
     {
@@ -234,34 +261,35 @@ class CardsController extends Controller
         if (!$card) {
             return ["result" => "error", "message" => "Card not found"];
         }
-        $merchantAccount = $card->merchant;
 
         $user_id = $card->user_id; // Сохраняем ID пользователя
-        $active = $card->active;  // Сохраняем статус "active"
-        $card->delete();          // Удаляем карту
+        $application = $card->app;
 
-        // Если удаляемая карта была активной, назначаем новую активную карту
-        if ($active) {
-            // Ищем другую карту пользователя
-            $userCards = Card::where("user_id", $user_id)
-                ->where('merchant', $merchantAccount)
-                ->get();
+        $userCards = Card::where("user_id", $user_id)->get();
+        foreach ($userCards as $value) {
+            if (
+                $value->masked_card == $card->masked_card &&
+                $value->app == $card->app
+            ) {
+                $active = $value->active;
+                $merchant = $value->merchant;
 
-            // Если у пользователя остались карты, делаем первую из них активной
-            if ($userCards->isNotEmpty()) {
-                $firstCard = $userCards->first();
-                $firstCard->active = true;
-                $firstCard->save();
-
-                // Делаем остальные карты неактивными
-                foreach ($userCards as $value) {
-                    if ($value->id != $firstCard->id) {
-                        $value->active = false;
-                        $value->save();
-                    }
+                $value->delete(); // Удаляем карту
+                if($active)
+                {
+                    // Если удаляемая карта была активной, назначаем новую активную карту
+                    self::setActiveCardAfterDelete(
+                        $merchant,
+                        $user_id,
+                        $id,
+                        $application
+                    );
                 }
+
             }
         }
+
+
 
         return ["result" => "ok"];
     }

@@ -2833,7 +2833,7 @@ class UniversalAndroidFunctionController extends Controller
                      безнал: $bonusOrder
                      дубль $doubleOrder";
 
-                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
                 return true;
             } else {
                 return false;
@@ -2858,7 +2858,7 @@ class UniversalAndroidFunctionController extends Controller
                                 статус б/н: $lastStatusBonus
                                 нал $doubleOrder
                                 статус нал: $lastStatusDouble";
-                                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                                (new MessageSentController)->sentMessageAdmin($messageAdmin);
                                 return true;
                     }
                     break;
@@ -2882,7 +2882,7 @@ class UniversalAndroidFunctionController extends Controller
                                 статус б/н: $lastStatusBonus
                                 нал $doubleOrder
                                 статус нал: $lastStatusDouble";
-                                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                                (new MessageSentController)->sentMessageAdmin($messageAdmin);
                             return true;
                     }
                     break;
@@ -3206,7 +3206,68 @@ class UniversalAndroidFunctionController extends Controller
     }
 
 
+    public function getStatus(
+        $header,
+        $url
+    ) {
+        $updateTime = 5;
+        $messageAdmin = "getStatus "  . " url " . $url;
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
+
+        try {
+            // Устанавливаем таймаут на запрос (например, 20 секунд)
+            $response = Http::withHeaders($header)
+                ->timeout($updateTime) // Таймаут на запрос (в секундах)
+                ->retry(3, $updateTime) // Задержка перед повтором в случае ошибки
+                ->get($url);
+
+            $messageAdmin = "getStatus response: status" . $response->status() . " Ответ: " . $response->body();
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            if ($response->failed()) {
+                $messageAdmin = "Ошибка при получении статуса execution_status URL: $url Статус: " . $response->status() . "\nОтвет: " . $response->body();
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                return [
+                    'success' => false,
+                    'message' => 'API request failed',
+                    'status_code' => $response->status()
+                ];
+            }
+
+            $responseArr = json_decode($response, true);
+
+            if (!isset($responseArr["execution_status"])) {
+                $messageAdmin = "execution_status отсутствует в ответе URL: $url Ответ: " . json_encode($responseArr);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                return [
+                    'success' => false,
+                    'message' => 'execution_status not found in response'
+                ];
+            }
+
+            $messageAdmin = "Успешное получение execution_status URL: $url execution_status: " . print_r($responseArr["execution_status"], true) . " close_reason: " . ($responseArr["close_reason"] ?? 'null');
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            return $responseArr;
+        } catch (Illuminate\Http\Client\ConnectionException $e) {
+            // Логирование ошибки в случае таймаута
+            $messageAdmin = "Таймаут при запросе getExecutionStatus Ошибка: " . $e->getMessage() . " URL: " . $url;
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            return [
+                'success' => false,
+                'message' => 'Server did not respond within 20 seconds'
+            ];
+        } catch (Exception $e) {
+            // Логирование всех остальных ошибок
+            $messageAdmin = "Исключение в getExecutionStatus Ошибка: " . $e->getMessage() . " URL: " . $url;
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            return [
+                'success' => false,
+                'message' => 'An error occurred while fetching execution status'
+            ];
+        }
+    }
 
 
 
@@ -3246,105 +3307,66 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     )  {
 
-        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
         $startTime = time(); // Начальное время
 
-        $maxExecutionTime = 3 * 60; // Время жизни отмены
+        $maxExecutionTime = 2 * 60; // Время жизни отмены
 
         try {
-            $response = Http::withHeaders([
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => $identificationId,
-                "X-API-VERSION" => $apiVersion
-            ])->put($url);
 
-            // Логируем тело ответа
-            Log::debug("webordersCancel postRequestHTTP: " . $response->body());
+            do {
+                $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId,
+                    "X-API-VERSION" => $apiVersion
+                ])->put($url);
 
-            // Проверяем успешность ответа
-            if ($response->successful()) {
-                $responseArr = json_decode($response->body(), true);
+                // Логируем тело ответа
+                Log::debug("webordersCancel postRequestHTTP: " . $response->body());
 
-                // Обрабатываем успешный ответ
-                Log::debug("webordersCancel Request successful.");
-                if ($responseArr['order_client_cancel_result'] == 1) {
-                    Log::debug("webordersCancel: order_client_cancel_result is 1, exiting.");
-                    self::messageAboutTrueCanceled($uid);
-                } else {
-                    do {
-                        Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
-                        // Проверка статуса после отмены
-                        sleep(5);
-                        $urlCheck = $connectAPI . '/api/weborders/' . $uid;
-                        try {
-                            $response_uid = Http::withHeaders([
-                                "Authorization" => $authorization,
-                                "X-WO-API-APP-ID" => $identificationId,
-                            ])->get($urlCheck);
+                 // Проверка статуса после отмены
+                sleep(5);
+                $urlCheck = $connectAPI . '/api/weborders/' . $uid;
+                try {
+                    $response_uid = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId,
+                    ])->get($urlCheck);
 
-                            if ($response_uid->successful() && $response_uid->status() == 200) {
-                                $response_arr = json_decode($response_uid->body(), true);
-                                if ($response_arr['close_reason'] == 1) {
-                                    Log::debug("webordersCancel: close_reason is 1, exiting.");
-                                    break;
-                                } else {
-                                    Log::debug("webordersCancel: close_reason is not 1, continuing.");
-                                }
-                            } else {
-                                // Логируем ошибки в случае неудачного запроса
-                                Log::error("webordersCancel Request failed with status: " . $response_uid->status());
-                                Log::error("webordersCancel Response: " . $response_uid->body());
-                            }
-                        } catch (\Exception $e) {
-                            // Обработка исключений
-                            Log::error("webordersCancel Exception caught: " . $e->getMessage());
-                        }
-                        sleep(5);
-                    } while (time() - $startTime < $maxExecutionTime);
-                    // Если мы вышли из цикла из-за превышения времени
-                    self::messageAboutFalseCanceled($uid);
-                }
-            } else {
-                // Логируем ошибки в случае неудачного запроса
-                Log::error("webordersCancel Request failed with status: " . $response->status());
-                Log::error("webordersCancel Response: " . $response->body());
-                do {
-                    Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
-                    // Проверка статуса после отмены
-                    sleep(5);
-                    $urlCheck = $connectAPI . '/api/weborders/' . $uid;
-                    try {
-                        $response_uid = Http::withHeaders([
-                            "Authorization" => $authorization,
-                            "X-WO-API-APP-ID" => $identificationId,
-                        ])->get($urlCheck);
-
-                        if ($response_uid->successful() && $response_uid->status() == 200) {
-                            $response_arr = json_decode($response_uid->body(), true);
-                            if ($response_arr['close_reason'] == 1) {
-                                Log::debug("webordersCancel: close_reason is 1, exiting.");
-                                break;
-                            } else {
-                                Log::debug("webordersCancel: close_reason is not 1, continuing.");
-                            }
+                    if ($response_uid->successful() && $response_uid->status() == 200) {
+                        $response_arr = json_decode($response_uid->body(), true);
+                        if ($response_arr['close_reason'] == 1) {
+                            Log::debug("webordersCancel: close_reason is 1, exiting.");
+                            break;
                         } else {
-                            // Логируем ошибки в случае неудачного запроса
-                            Log::error("webordersCancel Request failed with status: " . $response_uid->status());
-                            Log::error("webordersCancel Response: " . $response_uid->body());
+                            Log::debug("webordersCancel: close_reason is not 1, continuing.");
                         }
-                    } catch (\Exception $e) {
-                        // Обработка исключений
-                        Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                    } else {
+                        // Логируем ошибки в случае неудачного запроса
+                        Log::error("webordersCancel Request failed with status: " . $response_uid->status());
+                        Log::error("webordersCancel Response: " . $response_uid->body());
                     }
-                    sleep(5);
-                } while (time() - $startTime < $maxExecutionTime);
-                // Если мы вышли из цикла из-за превышения времени
-                self::messageAboutFalseCanceled($uid);
-            }
+                } catch (\Exception $e) {
+                    // Обработка исключений
+                    Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                }
+                sleep(5);
+            } while (time() - $startTime < $maxExecutionTime);
+            self::messageAboutFalseCanceled($uid);
         } catch (\Exception $e) {
             // Обработка исключений
             Log::error("webordersCancel Exception caught: " . $e->getMessage());
             do {
+                $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId,
+                    "X-API-VERSION" => $apiVersion
+                ])->put($url);
+
+                // Логируем тело ответа
+                Log::debug("webordersCancel postRequestHTTP: " . $response->body());
+
                 Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
                 // Проверка статуса после отмены
                 sleep(5);
@@ -3376,7 +3398,6 @@ class UniversalAndroidFunctionController extends Controller
             } while (time() - $startTime < $maxExecutionTime);
             // Если мы вышли из цикла из-за превышения времени
             self::messageAboutFalseCanceled($uid);
-
         }
     } /**
      * Запрос отмены заказа
@@ -3390,104 +3411,78 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion
     ): bool {
 
-        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+
         $startTime = time(); // Начальное время
 
-        $maxExecutionTime = 3 * 60; // Время жизни отмены
+        $maxExecutionTime = 2 * 60; // Время жизни отмены
 
         try {
-            $response = Http::withHeaders([
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => $identificationId,
-                "X-API-VERSION" => $apiVersion
-            ])->put($url);
 
-            // Логируем тело ответа
-            Log::debug("webordersCancel postRequestHTTP: " . $response->body());
+            do {
+                $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                $response = Http::withHeaders([
+                    "Authorization" => $authorization,
+                    "X-WO-API-APP-ID" => $identificationId,
+                    "X-API-VERSION" => $apiVersion
+                ])->put($url);
 
-            // Проверяем успешность ответа
-            if ($response->successful()) {
-                $responseArr = json_decode($response->body(), true);
+                // Логируем тело ответа
+                Log::debug("webordersCancel postRequestHTTP: " . $response->body());
 
-                // Обрабатываем успешный ответ
-                Log::debug("webordersCancel Request successful.");
-                if ($responseArr['order_client_cancel_result'] == 1) {
-                    Log::debug("webordersCancel: order_client_cancel_result is 1, exiting.");
-                    self::messageAboutTrueCanceled($uid);
-                    return true;
+                // Проверяем успешность ответа
+                if ($response->successful()) {
+                    // Обрабатываем успешный ответ
+                    Log::debug("webordersCancel Request successful.");
                 } else {
-                    do {
-                        Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
-                        // Проверка статуса после отмены
-                        sleep(5);
-                        $urlCheck = $connectAPI . '/api/weborders/' . $uid;
-                        try {
-                            $response_uid = Http::withHeaders([
-                                "Authorization" => $authorization,
-                                "X-WO-API-APP-ID" => $identificationId,
-                            ])->get($urlCheck);
-
-                            if ($response_uid->successful() && $response_uid->status() == 200) {
-                                $response_arr = json_decode($response_uid->body(), true);
-                                if ($response_arr['close_reason'] == 1) {
-                                    Log::debug("webordersCancel: close_reason is 1, exiting.");
-                                    return true;
-                                } else {
-                                    Log::debug("webordersCancel: close_reason is not 1, continuing.");
-                                }
-                            } else {
-                                // Логируем ошибки в случае неудачного запроса
-                                Log::error("webordersCancel Request failed with status: " . $response_uid->status());
-                                Log::error("webordersCancel Response: " . $response_uid->body());
-                            }
-                        } catch (\Exception $e) {
-                            // Обработка исключений
-                            Log::error("webordersCancel Exception caught: " . $e->getMessage());
-                        }
-                        sleep(5);
-                    } while (time() - $startTime < $maxExecutionTime);
+                    // Логируем ошибки в случае неудачного запроса
+                    Log::error("webordersCancel Request failed with status: " . $response->status());
+                    Log::error("webordersCancel Response: " . $response->body());
                     // Если мы вышли из цикла из-за превышения времени
-                    self::messageAboutFalseCanceled($uid);
-                    return false;
                 }
-            } else {
-                // Логируем ошибки в случае неудачного запроса
-                Log::error("webordersCancel Request failed with status: " . $response->status());
-                Log::error("webordersCancel Response: " . $response->body());
-                do {
-                    Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
-                    // Проверка статуса после отмены
-                    sleep(5);
-                    $urlCheck = $connectAPI . '/api/weborders/' . $uid;
-                    try {
-                        $response_uid = Http::withHeaders([
-                            "Authorization" => $authorization,
-                            "X-WO-API-APP-ID" => $identificationId,
-                        ])->get($urlCheck);
 
-                        if ($response_uid->successful() && $response_uid->status() == 200) {
-                            $response_arr = json_decode($response_uid->body(), true);
-                            if ($response_arr['close_reason'] == 1) {
-                                Log::debug("webordersCancel: close_reason is 1, exiting.");
-                                return true;
-                            } else {
-                                Log::debug("webordersCancel: close_reason is not 1, continuing.");
-                            }
+
+
+                Log::debug("webordersCancel: order_client_cancel_result is not 1, checking further.");
+                // Проверка статуса после отмены
+                sleep(5);
+                $urlCheck = $connectAPI . '/api/weborders/' . $uid;
+                try {
+                    $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                    $response = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId,
+                        "X-API-VERSION" => $apiVersion
+                    ])->put($url);
+
+                    // Логируем тело ответа
+                    Log::debug("webordersCancel postRequestHTTP: " . $response->body());
+
+                    $response_uid = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId,
+                    ])->get($urlCheck);
+
+                    if ($response_uid->successful() && $response_uid->status() == 200) {
+                        $response_arr = json_decode($response_uid->body(), true);
+                        if ($response_arr['close_reason'] == 1) {
+                            Log::debug("webordersCancel: close_reason is 1, exiting.");
+                            return true;
                         } else {
-                            // Логируем ошибки в случае неудачного запроса
-                            Log::error("webordersCancel Request failed with status: " . $response_uid->status());
-                            Log::error("webordersCancel Response: " . $response_uid->body());
+                            Log::debug("webordersCancel: close_reason is not 1, continuing.");
                         }
-                    } catch (\Exception $e) {
-                        // Обработка исключений
-                        Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                    } else {
+                        // Логируем ошибки в случае неудачного запроса
+                        Log::error("webordersCancel Request failed with status: " . $response_uid->status());
+                        Log::error("webordersCancel Response: " . $response_uid->body());
                     }
-                    sleep(5);
-                } while (time() - $startTime < $maxExecutionTime);
-                // Если мы вышли из цикла из-за превышения времени
-                self::messageAboutFalseCanceled($uid);
-                return false;
-            }
+                } catch (\Exception $e) {
+                    // Обработка исключений
+                    Log::error("webordersCancel Exception caught: " . $e->getMessage());
+                }
+                sleep(5);
+            } while (time() - $startTime < $maxExecutionTime);
+            self::messageAboutFalseCanceled($uid);
+            return false;
         } catch (\Exception $e) {
             // Обработка исключений
             Log::error("webordersCancel Exception caught: " . $e->getMessage());
@@ -3497,6 +3492,17 @@ class UniversalAndroidFunctionController extends Controller
                 sleep(5);
                 $urlCheck = $connectAPI . '/api/weborders/' . $uid;
                 try {
+                    $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+                    $response = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => $identificationId,
+                        "X-API-VERSION" => $apiVersion
+                    ])->put($url);
+
+                    // Логируем тело ответа
+                    Log::debug("webordersCancel postRequestHTTP: " . $response->body());
+
+
                     $response_uid = Http::withHeaders([
                         "Authorization" => $authorization,
                         "X-WO-API-APP-ID" => $identificationId,
@@ -6143,7 +6149,7 @@ class UniversalAndroidFunctionController extends Controller
             ], 200);
         }
 
-        Log::info("Город заказа  startAddCostCardBottomCreat: " . $city);
+        Log::info("c startAddCostCardBottomCreat: " . $city);
 
         // Выбор приложения по комментарию
         switch ($order->comment) {
@@ -6175,7 +6181,7 @@ class UniversalAndroidFunctionController extends Controller
         $parameter = json_decode($orderMemory->response, true);
 
         $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
             $url,
@@ -6193,7 +6199,7 @@ class UniversalAndroidFunctionController extends Controller
 //        $parameter['add_cost'] = (int) $order->attempt_20 + (int)$addCost+ $addCostBalance;
 
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
 
