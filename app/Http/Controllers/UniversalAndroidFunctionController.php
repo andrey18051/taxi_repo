@@ -3743,18 +3743,25 @@ class UniversalAndroidFunctionController extends Controller
         $user_phone  = $params["user_phone"];//Телефон пользователя
 
         $email = $params['email'];//Телефон пользователя
+
+        $pay_type = " Оплата наличными. ";
+        if($params["payment_type"] == 1) {
+            $pay_type = " Оплата картой (возможно бонусами).";
+        }
+
+
         if ($params["route_undefined"] != "1") {
             $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
-                ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. $pay_type Номер замовлення: " .
                 $params['dispatching_order_uid'] .
                 ", сервер " . $params['server'];
             ;
         } else {
             $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. Номер замовлення: " .
+                " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. $pay_type Номер замовлення: " .
                 $params['dispatching_order_uid'] .
                 ", сервер " . $params['server'];
         }

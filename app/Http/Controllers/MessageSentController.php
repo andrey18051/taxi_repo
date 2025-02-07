@@ -213,8 +213,9 @@ class MessageSentController extends Controller
         $email = $orderweb->email;
         $routefrom = $orderweb->routefrom;
         $routeto = $orderweb->routeto;
-        $add_cost = $orderweb->add_cost;
+
         $web_cost = $orderweb->web_cost;
+        $pay_system = $orderweb->pay_system;
 
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
@@ -244,10 +245,15 @@ class MessageSentController extends Controller
         $updated_at = $formattedTime;
         Log::debug("updated_at " .$updated_at);
 
+        $pay_type = " Оплата наличными. ";
+        if($pay_system != "nal_payment") {
+            $pay_type = " Оплата картой (возможно бонусами).";
+        }
+
         $subject = "Восстановлен заказ после добавления стоимости  клиентом ";
 
         $messageAdmin = "$subject. Клиент $user_full_name (телефон $user_phone, email $email)
-         заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн.
+         заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. $pay_type
          Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas.
          Время $updated_at";
 
