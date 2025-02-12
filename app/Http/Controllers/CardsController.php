@@ -204,15 +204,42 @@ class CardsController extends Controller
     ): \Illuminate\Http\JsonResponse {
         $user = User::where('email', $email)->first();
 
-        switch ($application) {
-            case "PAS1":
-                $merchantInfo = City_PAS1::where("name", $cityApp)->first();
-                break;
-            case "PAS2":
-                $merchantInfo = City_PAS2::where("name", $cityApp)->first();
+        switch ($cityApp) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+            case "foreign countries":
+                $city = "Kyiv City";
                 break;
             default:
-                $merchantInfo = City_PAS4::where("name", $cityApp)->first();
+                $city = $cityApp;
+        }
+
+
+
+
+        switch ($application) {
+            case "PAS1":
+                $merchantInfo = City_PAS1::where("name", $city)->first();
+                break;
+            case "PAS2":
+                $merchantInfo = City_PAS2::where("name", $city)->first();
+                break;
+            default:
+                $merchantInfo = City_PAS4::where("name", $city)->first();
         }
 
         $response = [];

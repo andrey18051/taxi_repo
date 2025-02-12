@@ -4,6 +4,7 @@ use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\FCMController;
+use App\Http\Controllers\PusherController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Http\Controllers\VisicomController;
@@ -199,8 +200,24 @@ Route::get('/android/sentErrorMessage/{email}', [UniversalAndroidFunctionControl
     ->name('sentErrorMessage');
 
 /**
- * city strver verify
+ * city server verify
  *
  */
 Route::get('/android/findCityJson/{startLat}/{startLan}', [UniversalAndroidFunctionController::class, 'findCityJson'])
     ->name('findCityJson');
+
+/**
+ * broadcasting push
+ *
+ */
+Route::get('/android/testPush/{order_uid}', [PusherController::class, 'testPush'])
+    ->name('testPush');
+
+Route::get('/android/test ', [PusherController::class, 'test'])
+    ->name('test');
+
+Route::get('/android/sentUid/{order_uid} ', [PusherController::class, 'sentUid'])
+    ->name('sentUid');
+
+Route::get('/android/sentUidApp/{order_uid}/{app} ', [PusherController::class, 'sentUidApp'])
+    ->name('sentUidApp');

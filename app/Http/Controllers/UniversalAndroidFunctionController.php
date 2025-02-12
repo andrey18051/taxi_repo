@@ -6292,14 +6292,14 @@ class UniversalAndroidFunctionController extends Controller
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
                 Log::info("Успешный ответ API с кодом 200 startAddCostCardBottomCreat");
-//
-//                (new AndroidTestOSMController)->webordersCancelDoubleWithotMemory(
-//                    $uid,
-//                    $uid_Double,
-//                    $pay_method,
-//                    $city,
-//                    $application
-//                );
+
+                $responseArr = $responseFinal->json();
+                Log::debug("Ответ от API startAddCostCardBottomCreat: " . json_encode($responseArr));
+
+                $orderNew = $responseArr["dispatching_order_uid"];
+
+                (new PusherController)->sentUidApp($orderNew, $application);
+
                 (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,
                     $uid_Double,
@@ -6314,10 +6314,8 @@ class UniversalAndroidFunctionController extends Controller
                 $order->save();
 
 
-                $responseArr = $responseFinal->json();
-                Log::debug("Ответ от API startAddCostCardBottomCreat: " . json_encode($responseArr));
 
-                $orderNew = $responseArr["dispatching_order_uid"];
+
                 Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
