@@ -5187,10 +5187,10 @@ class UniversalAndroidFunctionController extends Controller
      *
      * @throws \Exception
      */
-    public function startAddCostWithAddBottomUpdate($uid, $cost)
+    public function startAddCostWithAddBottomUpdate($uid, $addCost)
     {
         Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
-        $typeAdd = 20;
+
 
         // Получаем UID из MemoryOrderChangeController
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -5198,7 +5198,7 @@ class UniversalAndroidFunctionController extends Controller
 
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-
+        $email = $order->email;
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
 
         // Ищем данные из памяти о заказе
@@ -5308,7 +5308,7 @@ class UniversalAndroidFunctionController extends Controller
         $parameter = json_decode($orderMemory->response, true);
 
         $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
             $url,
@@ -5316,14 +5316,12 @@ class UniversalAndroidFunctionController extends Controller
             $authorization,
             $identificationId,
             $apiVersion,
-            20,
+            $addCost,
             $order
         );
 
 
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + 20 + $addCostBalance;
-//        $parameter['add_cost'] = (int) $order->attempt_20 + 20 + $addCostBalance;
-
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int)$addCost + $addCostBalance;
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
@@ -5340,20 +5338,23 @@ class UniversalAndroidFunctionController extends Controller
             if ($response->successful() && $response->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
                 Log::info("Успешный ответ API с кодом 200");
+                $responseArr = $response->json();
+
+                $orderNew = $responseArr["dispatching_order_uid"];
+                (new PusherController)->sentUidAppEmail($orderNew, $application, $email);
 
                 (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
 
-                $responseArr = $response->json();
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
 
                 $newOrder = $order->replicate();
-                $orderNew = $responseArr["dispatching_order_uid"];
+
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
-                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+//                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -5416,7 +5417,7 @@ class UniversalAndroidFunctionController extends Controller
 
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-
+        $email = $order->email;
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
 
         // Ищем данные из памяти о заказе
@@ -5560,6 +5561,9 @@ class UniversalAndroidFunctionController extends Controller
                 Log::info("Успешный ответ API с кодом 200");
 
                 $responseArr = $response->json();
+                $orderNew = $responseArr["dispatching_order_uid"];
+                (new PusherController)->sentUidAppEmail($orderNew, $application, $email);
+
                 Log::debug("Ответ от API: " . json_encode($responseArr));
 
                 $newOrder = $order->replicate();
@@ -6130,6 +6134,7 @@ class UniversalAndroidFunctionController extends Controller
         // Ищем заказ
 
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $email = $order->email;
 
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
@@ -6298,7 +6303,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 $orderNew = $responseArr["dispatching_order_uid"];
 
-                (new PusherController)->sentUidApp($orderNew, $application);
+                (new PusherController)->sentUidAppEmail($orderNew, $application, $email);
 
                 (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,

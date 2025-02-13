@@ -221,3 +221,9 @@ Route::get('/android/sentUid/{order_uid} ', [PusherController::class, 'sentUid']
 
 Route::get('/android/sentUidApp/{order_uid}/{app} ', [PusherController::class, 'sentUidApp'])
     ->name('sentUidApp');
+
+Route::get('/android/sentUidAppEmail/{order_uid}/{app}/{email} ', [PusherController::class, 'sentUidAppEmail'])
+    ->name('sentUidApp');
+
+Route::get('/android/sentCostApp/{order_cost}/{app}/{email} ', [PusherController::class, 'sentCostApp'])
+    ->name('sentCostApp');

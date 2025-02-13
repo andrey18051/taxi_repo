@@ -1523,3 +1523,6 @@ Route::get('/lastAddressUser/{email}/{city}/{app}', [UniversalAndroidFunctionCon
 Route::get('/checkVisicomRequest', [OpenStreetMapController::class, 'checkVisicomRequest'])
     ->name('checkVisicomRequest');
 
+Route::get('/env-check', function () {
+    return env('FIREBASE_CREDENTIALS_DRIVER_TAXI', 'не найдено');
+});

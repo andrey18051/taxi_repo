@@ -3025,8 +3025,10 @@ class AndroidTestOSMController extends Controller
         $params['user_full_name'] = $userArr[0];
         if (count($userArr) >= 2) {
             $params['email'] = $userArr[1];
+            $email = $params['email'];
         } else {
             $params['email'] = "no email";
+            $email = "";
         }
 
         $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
@@ -3145,7 +3147,9 @@ class AndroidTestOSMController extends Controller
             $apiVersion
         );
         $responseArr = json_decode($response, true);
+        $order_cost = $responseArr["order_cost"];
 
+        (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
 
         $messageAdmin = "costSearchMarkersTime  ответ сервера" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
@@ -3213,6 +3217,9 @@ class AndroidTestOSMController extends Controller
                     Log::debug("response_arr: ", $response_arr);
                     if (isset($response_arr["order_cost"])) {
                         $response_arr = json_decode($response, true);
+                        $response_ok["order_cost"] = $response_arr["order_cost"];
+
+                        (new PusherController)->sentCostApp($response_ok["order_cost"], $application);
 
                         $response_ok["from_lat"] = $originLatitude;
                         $response_ok["from_lng"] = $originLongitude;
@@ -3226,7 +3233,6 @@ class AndroidTestOSMController extends Controller
                         }
 
                         $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
-                        $response_ok["order_cost"] = $response_arr["order_cost"];
 
                         $response_ok["currency"] = $response_arr["currency"];
 

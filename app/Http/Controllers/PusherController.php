@@ -80,4 +80,61 @@ class PusherController extends Controller
 
         return response()->json(['result' => 'ok']);
     }
+
+    public function  sentUidAppEmail($order_uid, $app, $email): \Illuminate\Http\JsonResponse
+    {
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            ['cluster' => env('PUSHER_APP_CLUSTER')]
+        );
+
+        // Отправка события на канал
+        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+
+        $pusher->trigger('teal-towel-48', 'order-status-updated-'. $app . "-" . $email, ['order_uid' =>  $order_uid]);
+        $messageAdmin = "Отправлен пользователю $email номер нового заказа в $app после пересоздания: " . $order_uid;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        return response()->json(['result' => 'ok']);
+    }
+    public function  sentCostApp($order_cost, $app): \Illuminate\Http\JsonResponse
+    {
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            ['cluster' => env('PUSHER_APP_CLUSTER')]
+        );
+
+        // Отправка события на канал
+        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+
+        $pusher->trigger('teal-towel-48', 'order-cost-'. $app, ['order_cost' =>  $order_cost]);
+        $messageAdmin = "Отправлена стоимость нового заказа в $app: " . $order_cost;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        return response()->json(['result' => 'ok']);
+    }
+
+    public function  sentCostAppEmail($order_cost, $app, $email): \Illuminate\Http\JsonResponse
+    {
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            ['cluster' => env('PUSHER_APP_CLUSTER')]
+        );
+
+        // Отправка события на канал
+        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+
+        $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' =>  $order_cost]);
+        $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $app: " . $order_cost;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        return response()->json(['result' => 'ok']);
+    }
+
 }
