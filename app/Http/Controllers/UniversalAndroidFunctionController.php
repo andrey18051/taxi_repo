@@ -5730,25 +5730,25 @@ class UniversalAndroidFunctionController extends Controller
 //        $invoice->save();
 
 
-        $transactionStatus = 'WaitingAuthComplete';
-
-        // Проверяем наличие записи
-        $invoice = DB::table('wfp_invoices')->where('orderReference', $orderReference)->first();
-
-        if ($invoice) {
-            // Обновляем статус, если запись существует
-            DB::table('wfp_invoices')
-                ->where('orderReference', $orderReference)
-                ->update(['transactionStatus' => $transactionStatus]);
-        } else {
-            // Создаем запись, если её нет
-            DB::table('wfp_invoices')->insert([
-                'orderReference' => $orderReference,
-                'transactionStatus' => $transactionStatus,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
+//        $transactionStatus = 'WaitingAuthComplete';
+//
+//        // Проверяем наличие записи
+//        $invoice = DB::table('wfp_invoices')->where('orderReference', $orderReference)->first();
+//
+//        if ($invoice) {
+//            // Обновляем статус, если запись существует
+//            DB::table('wfp_invoices')
+//                ->where('orderReference', $orderReference)
+//                ->update(['transactionStatus' => $transactionStatus]);
+//        } else {
+//            // Создаем запись, если её нет
+//            DB::table('wfp_invoices')->insert([
+//                'orderReference' => $orderReference,
+//                'transactionStatus' => $transactionStatus,
+//                'created_at' => now(),
+//                'updated_at' => now()
+//            ]);
+//        }
 
         self::startAddCostCardBottomCreat(
             $uid,
