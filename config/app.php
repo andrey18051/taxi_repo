@@ -14,8 +14,24 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+
+    'X-WO-API-APP-ID-SITE' => 'taxi_easy_ua_site',
     'X-WO-API-APP-ID-PAS1' => 'taxi_easy_ua_pas1',
     'X-WO-API-APP-ID-PAS2' => 'taxi_easy_ua_pas2',
+    'X-WO-API-APP-ID-PAS3' => 'taxi_easy_ua_pas3',
+    'X-WO-API-APP-ID-PAS4' => 'taxi_easy_ua_pas4',
+
+    'X-WO-API-APP-ID-TEST' => 'taxi_easy_ua_TEST',
+
+    'version-PAS1' => '1.734',
+    'version-PAS2' => '2.1042',
+    'version-PAS3' => '3.001',
+    'version-PAS4' => '4.065',
+    'version-PAS5' => '5.146',
+
+    'name-PAS1' => 'Таксі Доставка: легкий заказ',
+    'name-PAS2' => 'Попутчик таксі Україна дешево',
+    'name-PAS4' => 'Таксі Дюк Попутник',
 
     /*
     |--------------------------------------------------------------------------
@@ -124,7 +140,15 @@ return [
     'key' => env('APP_KEY'),
 
     'keyVisicom' => env('APP_KEY_VISICOM'),
+    'keyVisicomMy' => env('APP_KEY_VISICOM_MY'),
+    'keyMapbox' => env('APP_KEY_MAPBOX'),
+    'keyIP2Location' => env('APP_KEY_IP2Location'),
 
+    'merchantAccount' => env('APP_KEY_MERCHANT_ACCOUNT_VOD'),
+    'merchantSecretKey' => env('APP_KEY_MERCHANT_SECRET_KEY_VOD'),
+
+    'merchantAccountMy' => env('APP_KEY_MERCHANT_ACCOUNT'),
+    'merchantSecretKeyMy' => env('APP_KEY_MERCHANT_SECRET_KEY'),
     'cipher' => 'AES-256-CBC',
 
     /*
@@ -179,6 +203,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\FirebaseServiceProvider::class,
 
     ],
 
@@ -238,68 +263,38 @@ return [
 
     ],
 
-    /**
-     * URL API taxi
-     * Одесса http://188.190.245.102:7303
-     * Киев http://167.235.113.231:7306
-     * Киев http://134.249.181.173:7208
-     * Киев http://91.205.17.153:7208
-     */
+
+
     //Киев
-//        'taxi2012Url_1' => 'http://167.235.113.231:7306',
-//        'taxi2012Url_2' => 'http://134.249.181.173:7208',
-//        'taxi2012Url_3' => 'http://91.205.17.153:7208' ,
-//        'server' => 'Киев',
-//        'username' => 'ONLINE56',
-//        'password' => 'gggdsh5+',
+    'taxi2012Url_0' => 'http://167.235.113.231:7307',
+    'taxi2012Url_1' => 'http://167.235.113.231:7306',
+    'taxi2012Url_2' => 'http://134.249.181.173:7208',
+    'taxi2012Url_3' => 'http://91.205.17.153:7208' ,
+    'server' => 'Киев',
+    'username' => 'ONLINE56',
+    'password' => 'gggdsh5+',
 
-    //Одесса
-        'taxi2012Url_1' => 'http://188.190.245.102:7303',
-        'taxi2012Url_2' => 'http://188.190.245.102:7303',
-        'taxi2012Url_3' => 'http://188.190.245.102:7303' ,
-        'server' => 'Одесса',
-        'username' => '0936734488',
-        'password' => '22223344',
-
-
+//Одесса
+//        'taxi2012Url_1' => 'http://31.43.107.151:7303',
+//        'taxi2012Url_2' => 'http://31.43.107.151:7303',
+//        'taxi2012Url_3' => 'http://31.43.107.151:7303' ,
+//        'server' => 'Одесса',
+//        'username' => '0936734488',
+//        'password' => '22223344',
 
     /**
      * Номер колоны, в которую будут приходить заказы. 0, 1 или 2
      */
     'taxiColumnId' => '0',
+    'taxiColumnIdKyiv' => '1',
 
-    /**
-     * Мастер логин и пароль Одесса
-     * 'server' => 'Одесса',
-     * 'username' => '0936734488',
-     * 'password' => '22223344',
-     * http://188.190.245.102:7303
-     * http://188.190.245.102:7303
-     *
-     *
-     */
-
-
-
-    /**
-     * Мастер логин и пароль Киев**/
-//       'server' => 'Киев',
-//       'username' => 'ONLINE56',
-//       'password' => 'gggdsh5+',
-
-
-    /**
-     * Пароль пользователя Киев
-     * 'username' => '0936734488',
-     * 'password' => '11223344',
-     */
     /**
      * reCaptha key
      * 6LeE07AhAAAAAFVS8gtRKce0L76F8U1JzADOiho9
      * 6LeE07AhAAAAALvE4Yb8eftADKOLrvW4qBtNDfJY
      */
-    'RECAPTCHA_SITE_KEY' => '6LdJgrAhAAAAAJnFNzTDLxaaHM1U5-LJLzq1p3G3',
-    'RECAPTCHA_SECRET_KEY' => '6LdJgrAhAAAAABoiRvdHosArI6Pdd6jBVa5Ep5SL',
+    'RECAPTCHA_SITE_KEY' => '6LeE07AhAAAAAFVS8gtRKce0L76F8U1JzADOiho9',
+    'RECAPTCHA_SECRET_KEY' => '6LeE07AhAAAAALvE4Yb8eftADKOLrvW4qBtNDfJY',
 
     /**
      *  Google Maps Platform
@@ -308,7 +303,7 @@ return [
 
     /**
      * Комендантська година
-     * 23:00 05:00
+     * 00:00 05:00
      */
 
      'start_time' => '00:00',
@@ -318,12 +313,23 @@ return [
      * Коэфициенты диапазона цен
      */
 
-     'order_cost_min' => 1.25,
-     'order_cost_max' => 1.78,
+    'order_cost_min' => 1.25,
+    'order_cost_max' => 1.78,
 
     /**
      * Id telegramm для тревоги
      */
 
-    'chat_id_alarm' => 120352595,
+    'chat_id_alarm' => 1379298637,
+    /**
+     * Fondy
+     */
+    'merchantId' => '1534178',
+    'merchantPassword' => 'wKxF95EndeUu3xnJ5jJ3ySsLrVeq0vXT',
+    /**
+     * FIREBASE_API_KEY
+     */
+    'FIREBASE_API_KEY_PAS_1' => 'AIzaSyDPNH0xPdn1v7Wxf6k7PZ8uQTtiZ_QmXyQ',
+    'FIREBASE_API_KEY_PAS_2' => '0d6517d36ea943ae80711332cf46ed6b5e5dcabf',
+    'FIREBASE_API_KEY_PAS_4' => 'AIzaSyDHh_Tcy2nVUjqFgxKn4kl4ADUHRSCamyw'
 ];

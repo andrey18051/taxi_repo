@@ -124,6 +124,9 @@ Route::get('/android/webordersCancel/{uid}/{city}/{application}', [AndroidAppCon
 Route::get('/android/webordersCancelDouble/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidAppController::class, 'webordersCancelDouble'])
     ->name('webordersCancelDouble');
 
+Route::get('/android/webordersCancelDoubleWithotMemory/{uid}/{uid_Double}/{payment_type}/{city}/{application}', [AndroidAppController::class, 'webordersCancelDoubleWithotMemory'])
+    ->name('webordersCancelDoubleWithotMemory');
+
 Route::get('/android/historyUIDStatus/{uid}/{city}/{application}', [AndroidAppController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
 

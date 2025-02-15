@@ -31,8 +31,12 @@ return [
     |
     */
 
-    'stores' => [
 
+
+    'stores' => [
+        'none' => [
+            'driver' => 'null',
+        ],
         'apc' => [
             'driver' => 'apc',
         ],
@@ -51,7 +55,7 @@ return [
 
         'file' => [
             'driver' => 'file',
-            'path' => storage_path('framework/cache/data'),
+            'path' => '/var/www/html/cache',
         ],
 
         'memcached' => [

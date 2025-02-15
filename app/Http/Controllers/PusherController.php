@@ -21,18 +21,27 @@ class PusherController extends Controller
 
     public function testPush($order_uid)
     {
-        $pusher = new Pusher(
-            env('PUSHER_APP_KEY'),
-            env('PUSHER_APP_SECRET'),
-            env('PUSHER_APP_ID'),
-            ['cluster' => env('PUSHER_APP_CLUSTER')]
-        );
+        try {
+            $pusher = new \Pusher\Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ]
+            );
 
-        // Отправка события на канал
-        $pusher->trigger('teal-towel-48', 'order-status-updated', ['message' => 'Order status updated for order UID: ' . $order_uid]);
+            $response = $pusher->trigger('teal-towel-48', 'order-status-updated', [
+                'message' => 'Order status updated for order UID: ' . $order_uid
+            ]);
 
-        return response()->json(['result' => 'ok']);
+            return response()->json(['result' => $response ? 'ok' : 'fail']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+
 
     public function test()
     {
@@ -81,24 +90,104 @@ class PusherController extends Controller
         return response()->json(['result' => 'ok']);
     }
 
-    public function  sentUidAppEmail($order_uid, $app, $email): \Illuminate\Http\JsonResponse
+    public function sentUidAppEmail($order_uid, $app, $email): \Illuminate\Http\JsonResponse
     {
-        $pusher = new Pusher(
-            env('PUSHER_APP_KEY'),
-            env('PUSHER_APP_SECRET'),
-            env('PUSHER_APP_ID'),
-            ['cluster' => env('PUSHER_APP_CLUSTER')]
-        );
+        try {
+            // Инициализация Pusher
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
 
-        // Отправка события на канал
-        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+            // Подготовка данных для отправки
+            $data = [
+                'order_uid' => $order_uid,
+                'app' => $app,
+                'email' => $email
+            ];
 
-        $pusher->trigger('teal-towel-48', 'order-status-updated-'. $app . "-" . $email, ['order_uid' =>  $order_uid]);
-        $messageAdmin = "Отправлен пользователю $email номер нового заказа в $app после пересоздания: " . $order_uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            // Отправка события через Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'order-status-updated-'. $app . "-$email";    // Замените на нужное событие
 
-        return response()->json(['result' => 'ok']);
+            $pusher->trigger($channel, $event, $data);
+
+            Log::info("Событие $event успешно отправлено через Pusher для $email в $app. UID заказа: $order_uid");
+
+            $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app после пересоздания: $order_uid";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json(['result' => 'ok' . $order_uid]);
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка при отправке события через Pusher: {$e->getMessage()}", [
+                'order_uid' => $order_uid,
+                'app' => $app,
+                'email' => $email
+            ]);
+            $messageAdmin = "Ошибка при отправке события через Pusher: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
+    public function sendOrder($costMap, $app, $email): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Initialize Pusher or any other service
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
+
+
+            // Prepare the data for sending
+            $data = $costMap;
+
+            // Send the event via Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'order-'. $app . "-$email";    // Замените на нужное событие
+
+            $pusher->trigger($channel, $event, $data);
+
+            Log::info("Event $event sent successfully via Pusher with order UID: {$costMap['dispatching_order_uid']}");
+
+            // Optional: Send message to admin or log
+            $messageAdmin = "Event $event sent for order UID: {$costMap['dispatching_order_uid']}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            // Return a success response
+            return response()->json(['result' => 'ok', 'order_uid' => $costMap['dispatching_order_uid']], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error sending Pusher event: {$e->getMessage()}", [
+                'order_cost' => $costMap['order_cost'] ?? 'N/A',
+                'dispatching_order_uid' => $costMap['dispatching_order_uid'] ?? 'N/A',
+            ]);
+
+            // Optional: Send error message to admin
+            $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+
+
     public function  sentCostApp($order_cost, $app): \Illuminate\Http\JsonResponse
     {
         $pusher = new Pusher(

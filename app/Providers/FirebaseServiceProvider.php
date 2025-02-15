@@ -65,11 +65,9 @@ class FirebaseServiceProvider extends ServiceProvider
         $this->app->singleton('firebase.firestore', function ($app) {
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
 
-            $firebase = (new Factory)
+            return (new Factory)
                 ->withServiceAccount($serviceAccountPath)
                 ->createFirestore();
-
-            return $firebase;
         });
     }
 

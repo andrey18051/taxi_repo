@@ -112,7 +112,9 @@ Route::get('/android/orderSearchMarkersVisicom/{originLatitude}/{originLongitude
     ->name('orderSearchMarkers');
 
 Route::get('/android/orderSearchMarkersVisicomWfpInvoice/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{wfpInvoice}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'orderSearchMarkersVisicomWfpInvoice'])
-    ->name('orderSearchMarkers');
+    ->name('orderSearchMarkersVisicomWfpInvoice');
+Route::get('/android/orderSearchMarkersVisicomWfpInvoiceChannel/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{wfpInvoice}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'orderSearchMarkersVisicomWfpInvoiceChannel'])
+    ->name('orderSearchMarkersVisicomWfpInvoiceChannel');
 
 Route::get('/android/orderSearchMarkersVisicomWfpInvoiceSpeed/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{wfpInvoice}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'orderSearchMarkersVisicomWfpInvoiceSpeed'])
     ->name('orderSearchMarkersVisicomWfpInvoiceSpeed');
@@ -227,3 +229,10 @@ Route::get('/android/sentUidAppEmail/{order_uid}/{app}/{email} ', [PusherControl
 
 Route::get('/android/sentCostApp/{order_cost}/{app}/{email} ', [PusherController::class, 'sentCostApp'])
     ->name('sentCostApp');
+
+Route::get('/android/sendOrderResponse/{app}/{email}', [UniversalAndroidFunctionController::class, 'sendOrderResponse'])
+    ->name('sendOrderResponse');
+
+Route::get('/android/parseOrderResponse/{response}/{dispatching_order_uid_Double}', [UniversalAndroidFunctionController::class, 'parseOrderResponse'])
+    ->name('parseOrderResponse');
+

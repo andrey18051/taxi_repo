@@ -7,6 +7,7 @@ use App\Helpers\OpenStreetMapHelper;
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\StartAddCostCardCreat;
 
@@ -5198,8 +5199,8 @@ class UniversalAndroidFunctionController extends Controller
 
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $email = $order->email;
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
+        $email = $order->email;
 
         // Ищем данные из памяти о заказе
         $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
@@ -5724,9 +5725,31 @@ class UniversalAndroidFunctionController extends Controller
         $city,
         $addCost
     )  {
-        $invoice = WfpInvoice::where('orderReference', $orderReference )->first();
-        $invoice->transactionStatus = "WaitingAuthComplete";
-        $invoice->save();
+//        $invoice = WfpInvoice::where('orderReference', $orderReference )->first();
+//        $invoice->transactionStatus = "WaitingAuthComplete";
+//        $invoice->save();
+
+
+        $transactionStatus = 'WaitingAuthComplete';
+
+        // Проверяем наличие записи
+        $invoice = DB::table('wfp_invoices')->where('orderReference', $orderReference)->first();
+
+        if ($invoice) {
+            // Обновляем статус, если запись существует
+            DB::table('wfp_invoices')
+                ->where('orderReference', $orderReference)
+                ->update(['transactionStatus' => $transactionStatus]);
+        } else {
+            // Создаем запись, если её нет
+            DB::table('wfp_invoices')->insert([
+                'orderReference' => $orderReference,
+                'transactionStatus' => $transactionStatus,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
         self::startAddCostCardBottomCreat(
             $uid,
             $uid_Double,
@@ -6609,5 +6632,97 @@ class UniversalAndroidFunctionController extends Controller
 
 
     }
+
+
+    public function sendOrderResponse($app, $email)
+    {
+        // Данные, которые отправляем в запросе
+        $response_arr = [
+            "dispatching_order_uid" => "ac318bf73ec046e9b060ae6fabcf8715",
+            "discount_trip" => false,
+            "find_car_timeout" => 14400,
+            "find_car_delay" => 0,
+            "order_cost" => "78",
+            "currency" => " грн",
+            "route_address_from" => [
+                "name" => "поселок Дымер",
+                "number" => null,
+                "lat" => 50.7871845319286,
+                "lng" => 30.3048966509098
+            ],
+            "route_address_to" => [
+                "name" => "поселок Дымер",
+                "number" => null,
+                "lat" => 50.7871845319286,
+                "lng" => 30.3048966509098
+            ]
+        ];
+
+        $costMap = self::parseOrderResponse(
+            $response_arr,
+            "321356441316861",
+            $app,
+            $email
+        );
+
+        if (empty($costMap)) {
+            return response()->json(['error' => 'No data found'], 400); // Return an error if the data is empty
+        }
+
+        return response()->json($costMap, 200);
+
+    }
+
+
+    public function parseOrderResponse($response_arr, $dispatching_order_uid_Double, $app, $email): array
+    {
+        $costMap = [];
+
+        // Проверка, что данные получены
+        if ($response_arr && isset($response_arr['order_cost'])) {
+            Log::debug("API_CALL", ['Order cost' => $response_arr['order_cost']]); // Логируем стоимость заказа
+
+            // Если стоимость заказа не равна 0
+            if ($response_arr['order_cost'] !== "0") {
+                $costMap['from_lat'] = $response_arr['route_address_from']['lat'];
+                $costMap['from_lng'] = $response_arr['route_address_from']['lng'];
+                $costMap['lat'] = $response_arr['route_address_to']['lat'];
+                $costMap['lng'] = $response_arr['route_address_to']['lng'];
+                $costMap['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $costMap['order_cost'] = $response_arr['order_cost'];
+                $costMap['currency'] = $response_arr['currency'];
+                $costMap['routefrom'] = $response_arr['route_address_from']['name'];
+                $costMap['routefromnumber'] = $response_arr['route_address_from']['number'];
+                $costMap['routeto'] = $response_arr['route_address_to']['name'];
+                $costMap['to_number'] = $response_arr['route_address_to']['number'];
+                if(isset($response_arr['required_time']))  {
+                    $costMap['required_time'] = $response_arr['required_time'];
+                }
+
+                // Проверка на дополнительные поля, если они существуют
+
+                if ($dispatching_order_uid_Double != "*") {
+                    $costMap['dispatching_order_uid_Double'] = $dispatching_order_uid_Double;
+                } else {
+                    $costMap['dispatching_order_uid_Double'] = " ";
+                }
+            } else {
+                $costMap['order_cost'] = "0";
+                $costMap['message'] = $response_arr['message'] ?? 'Нет сообщения';
+                Log::debug("API_CALL", ['No cost found', 'Message' => $response_arr['message']]); // Логируем сообщение
+            }
+        } else {
+            $costMap['order_cost'] = "0";
+            $costMap['message'] = "Сталася помилка";
+            Log::error("API_CALL", ['Error in response' => 'Неверный формат ответа']); // Логируем ошибку ответа
+        }
+//dd($costMap);
+        (new PusherController)->sendOrder($costMap, $app, $email);
+        return $costMap;
+
+    }
+
+
+
 
 }

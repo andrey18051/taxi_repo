@@ -13,13 +13,15 @@ class CreatePartnersTable extends Migration
      */
     public function up()
     {
-        Schema::create('partners', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('partners')) {
+            Schema::create('partners', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('email');
+                $table->string('phone')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

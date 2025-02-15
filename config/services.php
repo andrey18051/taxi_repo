@@ -30,23 +30,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    /**
-     * Google online
-     */
-    /*'google' => [
+    'google' => [
         'client_id' => '834246822304-e6vofmt6sbvu7c4n0dhvn6ni0jilhpoa.apps.googleusercontent.com',
         'client_secret' => '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',
         'redirect' => '/auth/google/callback',
 
-    ],*/
-
-    /**
-     * Google local
-     */
-    'google' => [
-        'client_id' => '834246822304-1aclo0nle41o9q02crkrvc79ik6gu55d.apps.googleusercontent.com',
-        'client_secret' => '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',
-        'redirect' => '/auth/google/callback',
     ],
 
     /**
@@ -55,25 +43,26 @@ return [
     'facebook' => [
         'client_id' => '652484086549567',
         'client_secret' => 'd42d737772102bfd9d8ec694395256d3',
-        'redirect' => '/auth/facebook/callback',
+        'redirect' => 'https://m.easy-order-taxi.site/auth/facebook/callback',
     ],
+
 
     /**
      * Linkedin
      */
     'linkedin' => [
-    'client_id' => '77u506g57pz2vx',
-    'client_secret' => 'SdNOUJMZ3gZxscIP',
-    'redirect' => '/auth/linkedin/callback',
+        'client_id' => '77u506g57pz2vx',
+        'client_secret' => 'SdNOUJMZ3gZxscIP',
+        'redirect' => 'https://m.easy-order-taxi.site/auth/linkedin/callback',
     ],
 
     /**
      * Github
      */
     'github' => [
-    'client_id' => '1522b13c28b84a7e6f86',
-    'client_secret' => '04e51fca26b5514aaaefaf03bb5f59d98af11ae7',
-    'redirect' => '/auth/github/callback',
+        'client_id' => '1522b13c28b84a7e6f86',
+        'client_secret' => '04e51fca26b5514aaaefaf03bb5f59d98af11ae7',
+        'redirect' => '/auth/github/callback',
     ],
 
     /**
@@ -93,6 +82,5 @@ return [
         'client_secret' => env('TELEGRAM_TOKEN'),
         'redirect' => env('TELEGRAM_REDIRECT_URI'),
     ],
-
 
 ];

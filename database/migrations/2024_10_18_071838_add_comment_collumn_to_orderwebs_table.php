@@ -14,7 +14,8 @@ class AddCommentCollumnToOrderwebsTable extends Migration
     public function up()
     {
         Schema::table('orderwebs', function (Blueprint $table) {
-            $table->after('rout_distance', function ($table) {
+            $table->after('routetonumber', function ($table) {
+                $table->string('rout_distance')->nullable();
                 $table->string('comment_info')->nullable();
                 $table->string('extra_charge_codes')->nullable();
             });
@@ -31,6 +32,7 @@ class AddCommentCollumnToOrderwebsTable extends Migration
         Schema::table('orderwebs', function (Blueprint $table) {
             $table->dropColumn('comment_info');
             $table->dropColumn('extra_charge_codes');
+            $table->string('rout_distance')->nullable();
         });
     }
 }
