@@ -6725,7 +6725,13 @@ class AndroidTestOSMController extends Controller
                     $dispatching_order_uid_Double = "*";
                 }
                 (new PusherController)->sentUidAppEmail($response_arr['dispatching_order_uid'], $application, $email);
-                (new UniversalAndroidFunctionController)->parseOrderResponse($response_arr, $dispatching_order_uid_Double, $application, $email);
+                (new UniversalAndroidFunctionController)->parseOrderResponse(
+                    $response_arr,
+                    $dispatching_order_uid_Double,
+                    $required_time,
+                    $application,
+                    $email
+                );
             }
 
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {

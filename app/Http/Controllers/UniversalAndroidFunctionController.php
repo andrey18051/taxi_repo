@@ -6674,8 +6674,13 @@ class UniversalAndroidFunctionController extends Controller
     }
 
 
-    public function parseOrderResponse($response_arr, $dispatching_order_uid_Double, $app, $email): array
-    {
+    public function parseOrderResponse(
+        $response_arr,
+        $dispatching_order_uid_Double,
+        $required_time,
+        $app,
+        $email
+    ): array {
         $costMap = [];
 
         // Проверка, что данные получены
@@ -6695,9 +6700,14 @@ class UniversalAndroidFunctionController extends Controller
                 $costMap['routefromnumber'] = $response_arr['route_address_from']['number'];
                 $costMap['routeto'] = $response_arr['route_address_to']['name'];
                 $costMap['to_number'] = $response_arr['route_address_to']['number'];
-                if(isset($response_arr['required_time']))  {
-                    $costMap['required_time'] = $response_arr['required_time'];
+
+                if($required_time != null) {
+                    $costMap['required_time'] = $required_time;
+                } else {
+                    $costMap['required_time'] = "1970-01-01T03:00";
                 }
+
+
 
                 // Проверка на дополнительные поля, если они существуют
 
