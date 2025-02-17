@@ -1,0 +1,14 @@
+[Unit]
+Description=Watch for creation of laravel.log and change permissions
+After=network.target
+
+[Service]
+ExecStart=/var/www/html/laravel_logs/watch_log.sh
+Restart=always
+RestartSec=10
+User=root
+Group=root
+SyslogIdentifier=watch_log_service
+
+[Install]
+WantedBy=multi-user.target

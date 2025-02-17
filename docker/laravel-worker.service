@@ -1,0 +1,19 @@
+[Unit]
+Description=LARAVEL Worker Service
+After=network.target
+
+[Service]
+User=nginx
+Group=nginx
+WorkingDirectory=/var/www/html/public_html/
+Restart=always
+RestartSec=3
+ExecStart=php artisan queue:work --sleep=3 --tries=3 --timeout=0
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
