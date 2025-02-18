@@ -64,6 +64,8 @@ RUN cp /usr/share/nginx/html/taxi/docker/sert/nginx /etc/ssl/certs/nginx
 RUN cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service
 #копируем  службу контроля 777 для фалйа логов  в папку со службами
 RUN cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service
+#копируем  задачу  777 для файла логов  в папку со службами
+RUN cp /usr/share/nginx/html/taxi/docker/watch_log.sh /var/www/html/laravel_logs/watch_log.sh
 
 #RUN cp /usr/share/nginx/html/office/docker/main-local.php /usr/share/nginx/html/office/common/config/main-local.php
 #RUN cp /usr/share/nginx/html/office/docker/index_f.php /usr/share/nginx/html/office/frontend/views/site/index.php
