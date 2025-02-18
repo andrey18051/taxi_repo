@@ -138,7 +138,7 @@ class AndroidTestOSMController extends Controller
         $connectAPI,
         $uid
     ) {
-         $maxExecutionTime = 2*60; // Максимальное время выполнения - 3 часа
+         $maxExecutionTime = 1*60; // Максимальное время выполнения - 3 часа
 
         $startTime = time();
         $result = false;
@@ -150,7 +150,7 @@ class AndroidTestOSMController extends Controller
             ];
             $response_bonus = Http::withHeaders($header)->put($url);
 
-            $messageAdmin = "Отмена заказа repeatCancel  " .json_encode($response_bonus);
+            $messageAdmin = "2 Отмена заказа repeatCancel $url " .json_encode($response_bonus);
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             // Проверка статуса после отмены
@@ -165,7 +165,7 @@ class AndroidTestOSMController extends Controller
                 if ($response_uid->successful() && $response_uid->status() == 200) {
                     $response_arr = json_decode($response_uid->body(), true);
 
-                    $messageAdmin = "Отмена заказа repeatCancel  " .$response_arr['close_reason'];
+                    $messageAdmin = "1 Отмена заказа repeatCancel $url " .$response_arr['close_reason'];
                     (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                     if ($response_arr['close_reason'] == 1) {
@@ -186,7 +186,8 @@ class AndroidTestOSMController extends Controller
             sleep(5);
         } while (time() - $startTime < $maxExecutionTime);
         if (!$result) {
-            (new MessageSentController())->sentNoCancelInfo($uid);
+            $messageAdmin = "Заказ не удаляется $uid";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return null;
         }
     }
@@ -8641,6 +8642,9 @@ class AndroidTestOSMController extends Controller
         Log::debug("webordersCancelDouble city  $city");
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        $payment_type = $orderweb->pay_system;
+        Log::debug("webordersCancelDouble payment_type pay_system  $payment_type");
         if ($orderweb) {
             $connectAPI = $orderweb->server;
 
