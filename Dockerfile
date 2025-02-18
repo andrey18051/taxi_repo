@@ -73,12 +73,13 @@ RUN cp /usr/share/nginx/html/taxi/docker/watch_log.sh /var/www/html/laravel_logs
 #RUN cp /usr/share/nginx/html/office/docker/main.php  /usr/share/nginx/html/office/backend/config/main.php
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
-# Добавляем задачи в cron (проверь пути - я заменил /var/www/html/public_html на /var/www/html/taxi)
 RUN echo "*/15 * * * * cd /var/www/html/taxi && php artisan daily-task:run" >> /etc/cron.d/laravel-cron && \
     echo "0 22 * * * cd /var/www/html/taxi && php artisan driver-balance-report-task:run" >> /etc/cron.d/laravel-cron && \
+    echo "0 22 * * * cd /var/www/html/test_taxi.kyiv.ua/ && php artisan logs:send" >> /etc/cron.d/laravel-cron && \
     echo "0 21 * * * cd /var/www/html/taxi && php artisan clean-task:run" >> /etc/cron.d/laravel-cron && \
     chmod 0644 /etc/cron.d/laravel-cron && \
     crontab /etc/cron.d/laravel-cron
+
 
 # Запускаем cron и службы вручную
 CMD ["/bin/bash", "-c", "service cron start && systemctl start laravel-worker.service && systemctl start watch_log.service && tail -f /dev/null"]
