@@ -24,6 +24,12 @@
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
     <h1 class="display-4">Database reports</h1>
     <p class="lead">Quick selection of requests and reporting period</p>
+    <form action="{{ route('logs.send') }}" method="get" style="display:inline;">
+        <button type="submit" class="btn btn-primary btn-lg">
+            📤 Отправить логи
+        </button>
+    </form>
+
 </div>
 
 <div class="container">

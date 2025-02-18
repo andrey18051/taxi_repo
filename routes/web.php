@@ -27,6 +27,7 @@ use App\Http\Controllers\HelpInfoController;
 use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
 use App\Http\Controllers\PartnerController;
@@ -1526,3 +1527,7 @@ Route::get('/checkVisicomRequest', [OpenStreetMapController::class, 'checkVisico
 Route::get('/env-check', function () {
     return env('FIREBASE_CREDENTIALS_DRIVER_TAXI', 'не найдено');
 });
+/**
+ * Логи
+ */
+Route::get('/send-logs', [LogController::class, 'sendLogs'])->name('logs.send');
