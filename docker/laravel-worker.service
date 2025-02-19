@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=nginx
 Group=nginx
-WorkingDirectory=/var/www/html/public_html/
+WorkingDirectory=/usr/share/nginx/html/taxi/
 Restart=always
 RestartSec=3
 ExecStart=php artisan queue:work --sleep=3 --tries=3 --timeout=0
