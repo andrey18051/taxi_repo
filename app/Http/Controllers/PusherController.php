@@ -226,4 +226,49 @@ class PusherController extends Controller
         return response()->json(['result' => 'ok']);
     }
 
+    /**
+     * @throws \Pusher\PusherException
+     * @throws \Pusher\ApiErrorException
+     */
+    public function  sentStatusWfp($transactionStatus, $app, $email): \Illuminate\Http\JsonResponse
+    {
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            ['cluster' => env('PUSHER_APP_CLUSTER')]
+        );
+
+        // Отправка события на канал
+        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+
+        $pusher->trigger('teal-towel-48', 'transactionStatus-'. $app . "-" . $email, ['transactionStatus' =>  $transactionStatus]);
+        $messageAdmin = "Отправлен transactionStatus  клиенту $email в $app: " . $transactionStatus;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        return response()->json(['result' => 'ok']);
+    }
+
+    /**
+     * @throws \Pusher\PusherException
+     * @throws \Pusher\ApiErrorException
+     */
+    public function  sentCanceledStatus($canceled, $app, $email): \Illuminate\Http\JsonResponse
+    {
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            ['cluster' => env('PUSHER_APP_CLUSTER')]
+        );
+
+        // Отправка события на канал
+        Log::info("Pusher отправляет событие: eventCanceled-" . $app . " в канал teal-towel-48");
+
+        $pusher->trigger('teal-towel-48', 'eventCanceled-'. $app . "-" . $email, ['canceled' =>  $canceled]);
+        $messageAdmin = "Отправлен eventCanceled  клиенту $email в $app: " . $canceled;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        return response()->json(['result' => 'ok']);
+    }
 }

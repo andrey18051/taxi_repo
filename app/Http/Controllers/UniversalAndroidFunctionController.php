@@ -39,6 +39,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Factory;
 use phpDocumentor\Reflection\Types\True_;
+use Pusher\ApiErrorException;
+use Pusher\PusherException;
 use SebastianBergmann\Diff\Exception;
 use function Symfony\Component\Translation\t;
 
@@ -2830,7 +2832,25 @@ class UniversalAndroidFunctionController extends Controller
                 $uid_history->bonus_status = null;
                 $uid_history->double_status = null;
                 $uid_history->save();
-                $messageAdmin = "Отмена по 1 минуте
+
+                $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
+                switch ($orderweb->comment) {
+                    case 'taxi_easy_ua_pas1':
+                        $application = "PAS1";
+                        break;
+                    case 'taxi_easy_ua_pas2':
+                        $application = "PAS2";
+                        break;
+                    default:
+                        $application = "PAS4";
+                }
+                $email= $orderweb->email;
+                try {
+                    (new PusherController)->sentCanceledStatus("canceled", $application, $email);
+                } catch (ApiErrorException | PusherException $e) {
+                }
+
+                $messageAdmin = "Отмена вилки
                      безнал: $bonusOrder
                      дубль $doubleOrder";
 

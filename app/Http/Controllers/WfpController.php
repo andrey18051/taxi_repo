@@ -939,6 +939,7 @@ class WfpController extends Controller
                     }
 
                 }
+
             } else {
                 Log::error("No response received from WayforPay API");
             }
@@ -1850,11 +1851,13 @@ class WfpController extends Controller
             $response = Http::post('https://api.wayforpay.com/api ', $params);
             Log::debug("purchase: ", ['response' => $response->body()]);
 
-            self::checkStatus(
+            $responseStatus = self::checkStatus(
                 $application,
                 $city,
                 $orderReference
             );
+            $data = json_decode($responseStatus->body(), true);
+            (new PusherController)->sentStatusWfp($data['transactionStatus'], $application, $clientEmail);
 
             return $response;
         }
