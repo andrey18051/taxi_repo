@@ -165,6 +165,9 @@ Route::get('/android/webordersCancelDoubleWithotMemory/{uid}/{uid_Double}/{payme
 Route::get('/android/historyUIDStatus/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatus'])
     ->name('myHistoryStatus');
 
+Route::get('/android/historyUIDStatusNew/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatusNew'])
+    ->name('historyUIDStatusNew');
+
 Route::get('/android/historyUIDStatusWithoutMemory/{uid}/{city}/{application}', [AndroidTestOSMController::class, 'historyUIDStatusWithoutMemory'])
     ->name('historyUIDStatusWithoutMemory');
 

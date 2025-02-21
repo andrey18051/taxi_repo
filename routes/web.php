@@ -30,6 +30,7 @@ use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
+use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerEmailController;
 use App\Http\Controllers\PartnerGroupController;
@@ -1531,3 +1532,9 @@ Route::get('/env-check', function () {
  * Логи
  */
 Route::get('/send-logs', [LogController::class, 'sendLogs'])->name('logs.send');
+
+/**
+ *
+ */
+
+Route::get('/order/status/{currentState}/{nextState}/{closeReason?}', [OrderStatusController::class, 'showStatus']);
