@@ -1538,3 +1538,4 @@ Route::get('/send-logs', [LogController::class, 'sendLogs'])->name('logs.send');
  */
 
 Route::get('/order/status/{currentState}/{nextState}/{closeReason?}', [OrderStatusController::class, 'showStatus']);
+Route::get('/order/runTestWithRealData', [OrderStatusController::class, 'runTestWithRealData']);

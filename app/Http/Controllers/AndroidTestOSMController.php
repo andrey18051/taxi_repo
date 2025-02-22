@@ -9476,6 +9476,7 @@ class AndroidTestOSMController extends Controller
                             $response_double->body(),
                             $response_bonus->body()
                         );
+                        Log::error("historyUIDStatus response: " . json_encode($response ?: 'null'));
                         // Проверяем успешность ответа
                         if ($response_bonus->successful()) {
                             // Обрабатываем успешный ответ

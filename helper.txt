@@ -1,12 +1,7 @@
 
-in Dockerfile
-1.using sed replace 9000 with 9001 in:
- /opt/docker/etc/php/fpm/pool.d/application.conf
-
-2. same for: /opt/docker/etc/nginx/conf.d/10-php.conf 
-
-3. Resolve 502 from upstream nginx (errors in taxi container (docker logs taxi))
-
+1. Create our own base image with installing pre-requisites and compiling grpc through pecl
+2. Use base image in taxi dockerfile
+3. pecl install grpc-1.62.0
 
 
 
