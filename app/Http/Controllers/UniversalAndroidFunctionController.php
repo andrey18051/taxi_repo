@@ -217,8 +217,8 @@ class UniversalAndroidFunctionController extends Controller
     public function startNewProcessExecutionStatusJob($doubleOrderId, $jobId): ?string
     {
 
-        $messageAdmin = "!!! 10009 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        $messageAdmin = "!!! 10010 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         ExecStatusHistory::truncate();
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
@@ -347,6 +347,7 @@ class UniversalAndroidFunctionController extends Controller
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         if ($canceledAll) {
+
             $doubleOrderRecord->delete();
             return "exit";
         } else {
@@ -399,6 +400,9 @@ class UniversalAndroidFunctionController extends Controller
                          "bonusOrder  *: $bonusOrder   newStatusBonus: $newStatusBonus " .
                          "doubleOrder *: $doubleOrder  newStatusDouble: $newStatusDouble";
                     (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+
+
                     switch ($newStatusBonus) {
                         case "SearchesForCar":
                         case "WaitingCarSearch":
@@ -1407,6 +1411,7 @@ class UniversalAndroidFunctionController extends Controller
                          "bonusOrder  *: $bonusOrder   newStatusBonus: $newStatusBonus " .
                          "doubleOrder *: $doubleOrder  newStatusDouble: $newStatusDouble";
                         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
 
                         switch ($newStatusDouble) {
                             case "SearchesForCar":
@@ -2658,6 +2663,7 @@ class UniversalAndroidFunctionController extends Controller
                         );
 
                         if ($canceledAll) {
+
                             $messageAdmin = "canceled while
                              lastStatusBonus3:  $lastStatusBonus
                              lastStatusDouble3:  $lastStatusDouble
@@ -2693,7 +2699,34 @@ class UniversalAndroidFunctionController extends Controller
                     $apiVersion
                 );
 //                $uid_history->delete();
+                $canceledAll = self::canceledFinish(
+                    $lastStatusBonus,
+                    $lastStatusDouble,
+                    $bonusOrderHold,
+                    $bonusOrder,
+                    $connectAPI,
+                    $authorizationBonus,
+                    $identificationId,
+                    $apiVersion,
+                    $doubleOrder,
+                    $authorizationDouble
+                );
 
+                if ($canceledAll) {
+
+                    $messageAdmin = "canceled while
+                             lastStatusBonus3:  $lastStatusBonus
+                             lastStatusDouble3:  $lastStatusDouble
+                             doubleOrderRecord 3 $doubleOrderRecord";
+
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+
+                    $doubleOrderRecord->delete();
+//                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+
+                    return "exit";
+                }
 
                 $messageAdmin = "doubleOrderRecord orderCanceled $doubleOrderRecord";
 
@@ -2755,7 +2788,9 @@ class UniversalAndroidFunctionController extends Controller
                      $uid_history->double_status = json_encode($newStatusArr);
                      break;
              }
+
              $uid_history->save();
+             (new OrderStatusController)->getOrderStatusMessageResultPush($uid_history->uid_bonusOrderHold);
 
              return $newStatus;
          } else {
@@ -2829,9 +2864,6 @@ class UniversalAndroidFunctionController extends Controller
 
 //            if ($orderCanceledBonus && $orderCanceledDouble || $canceledOneMinute  || $uid_history->cancel) {
             if ($orderCanceledBonus && $orderCanceledDouble) {
-                $uid_history->bonus_status = null;
-                $uid_history->double_status = null;
-                $uid_history->save();
 
                 $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
                 switch ($orderweb->comment) {
@@ -2870,9 +2902,7 @@ class UniversalAndroidFunctionController extends Controller
                         case "Executed":
                         case "CostCalculation":
 
-                            $uid_history->bonus_status = null;
-                            $uid_history->double_status = null;
-                            $uid_history->save();
+
 
                             $messageAdmin = "Выход из вилки Отмена по налу
                                 безнал: $bonusOrder
@@ -2894,9 +2924,7 @@ class UniversalAndroidFunctionController extends Controller
                         case "Executed":
                         case "CostCalculation":
 
-                            $uid_history->bonus_status = null;
-                            $uid_history->double_status = null;
-                            $uid_history->save();
+
 
                             $messageAdmin = "Выход из вилки Отмена по безналу
                                 безнал: $bonusOrder

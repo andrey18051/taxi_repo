@@ -9,8 +9,5 @@ class DriverHistory extends Model
 {
     use HasFactory;
 
-    /**
-     * @var mixed|string
-     */
-    private $name;
+
 }

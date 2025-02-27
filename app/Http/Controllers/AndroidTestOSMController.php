@@ -6717,7 +6717,7 @@ class AndroidTestOSMController extends Controller
         if ($responseFinal->status() == 200) {
             $response_arr = json_decode($responseFinal, true);
             ///// Тут будет пуш в ПАС
-
+            $params['pay_system'] = $userArr[2];
 
             if($email != "no email") {
                 if(isset( $responseDoubleArr["dispatching_order_uid"])) {
@@ -6725,7 +6725,12 @@ class AndroidTestOSMController extends Controller
                 } else {
                     $dispatching_order_uid_Double = "*";
                 }
-                (new PusherController)->sentUidAppEmail($response_arr['dispatching_order_uid'], $application, $email);
+                (new PusherController)->sentUidAppEmailPayType(
+                    $response_arr['dispatching_order_uid'],
+                    $application,
+                    $email,
+                    $params["pay_system"]
+                );
                 (new UniversalAndroidFunctionController)->parseOrderResponse(
                     $response_arr,
                     $dispatching_order_uid_Double,
@@ -6746,7 +6751,7 @@ class AndroidTestOSMController extends Controller
                 $params['comment_info'] = $comment;
                 $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
                 $params['payment_type'] = $payment_type;
-                $params['pay_system'] = $userArr[2];
+
                 if ($params['pay_system'] == "bonus_payment") {
                     $params['bonus_status'] = 'hold';
                 } else {
@@ -8959,7 +8964,7 @@ class AndroidTestOSMController extends Controller
             $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
 
             $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid;
-            Log::debug(" webordersCancelDoubleWithoutReviewHold bonus $url");
+            Log::debug(" webordersCancelDoubleWithoutReviewHold bonus $url_cancel");
 
             $header = [
                 "Authorization" => $authorizationBonus,
@@ -9414,7 +9419,7 @@ class AndroidTestOSMController extends Controller
             $storedData = $orderweb_uid->auto;
 
             $dataDriver = json_decode($storedData, true);
-//            $name = $dataDriver["name"];
+
             $color = $dataDriver["color"];
             $brand = $dataDriver["brand"];
             $model = $dataDriver["model"];
@@ -9446,160 +9451,74 @@ class AndroidTestOSMController extends Controller
 
             $connectAPI = $orderweb_uid->server;
             if ($uid_history) {
-                $uid_history->bonus_status = null;
-                //Запрос статуса по ветке
-                if ($uid_history->bonus_status == null) {
-                    //Запрос по  статусу безнала
 
-                    $authorization = (new UniversalAndroidFunctionController)
-                        ->authorizationApp($city, $connectAPI, $application);
-                    try {
+//                    try {
+//                        $payment_type = $orderweb_uid->pay_system;
+//
+//                        $authorizationChoiceArr = self::authorizationChoiceApp($payment_type, $city, $connectAPI, $application);
+//                        $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
+//                        $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
+//
+//
+//                        $url = $connectAPI . '/api/weborders/' . $uid_history->uid_doubleOrder;
+//                        $response_double = Http::withHeaders([
+//                            "Authorization" => $authorizationDouble,
+//                            "X-WO-API-APP-ID" => self::identificationId($application),
+//                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                                ->apiVersionApp($city, $connectAPI, $application)
+//                        ])->get($url);
+//
+//
+//
+//                        $url = $connectAPI . '/api/weborders/' . $uid_history->uid_bonusOrder;
+//                        $response_bonus = Http::withHeaders([
+//                            "Authorization" => $authorizationBonus,
+//                            "X-WO-API-APP-ID" => self::identificationId($application),
+//                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
+//                                ->apiVersionApp($city, $connectAPI, $application)
+//                        ])->get($url);
+//
+//
+//
+//                        $response = (new OrderStatusController)->getOrderStatusMessageResult(
+//                            $response_double,
+//                            $response_bonus
+//                        );
+//
+//                        $response_arr = json_decode($response, true);
+//                        $messageAdmin = "historyUIDStatus response: dispatching_order_uid ". $response_arr['dispatching_order_uid'] .' action: '. $response_arr['action'] .' order_cost: '. $response_arr['order_cost'] .", close_reason: " . $response_arr['close_reason'] .", execution_status: " . $response_arr['execution_status'] ;
+//                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//
+//                        $response_arr = json_decode($response, true);
+//                        if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
+//                            $orderweb_uid->auto = $response_arr["order_car_info"];
+//                        }
+//                        if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
+//                            $orderweb_uid->closeReason = -1;
+//                        } else {
+//                            $orderweb_uid->closeReason = $response_arr["close_reason"] ?? -1; // Значение по умолчанию, если close_reason тоже отсутствует
+//                        }
+//
+//                        $orderweb_uid->save();
+//
+//                        return $response;
+//
+//                    } catch (\Exception $e) {
+//                        // Обработка исключений
+//                        Log::error("131 historyUIDStatus Exception caught: " . print_r($e->getMessage(), true));
+//
+//
+//                        $messageAdmin = "Ошибка опроса статуса  $uid_history->uid_bonusOrder Ответ: " . print_r($e->getMessage(), true);
+//
+//                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//
+//                        return [
+//                            "execution_status" => "failed_status",
+//                            "order_car_info" => null,
+//                            "driver_phone" => null,
+//                        ];
+//                    }
 
-                        $url = $connectAPI . '/api/weborders/' . $uid_history->uid_doubleOrder;
-                        $response_double = Http::withHeaders([
-                            "Authorization" => $authorization,
-                            "X-WO-API-APP-ID" => self::identificationId($application),
-                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                                ->apiVersionApp($city, $connectAPI, $application)
-                        ])->get($url);
-
-                        $url = $connectAPI . '/api/weborders/' . $uid_history->uid_bonusOrder;
-                        $response_bonus = Http::withHeaders([
-                            "Authorization" => $authorization,
-                            "X-WO-API-APP-ID" => self::identificationId($application),
-                            "X-API-VERSION" => (new UniversalAndroidFunctionController)
-                                ->apiVersionApp($city, $connectAPI, $application)
-                        ])->get($url);
-
-
-                        $response = (new OrderStatusController)->getOrderStatusMessageResult(
-                            $response_double->body(),
-                            $response_bonus->body()
-                        );
-                        Log::error("historyUIDStatus response: " . json_encode($response ?: 'null'));
-                        // Проверяем успешность ответа
-                        if ($response_bonus->successful()) {
-                            // Обрабатываем успешный ответ
-                            $response_bonus_arr = json_decode($response_bonus, true);
-
-                            if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
-                                || $response_bonus_arr["close_reason"] == -1) {
-                                //Безнал по окончанию вилки выполнен или в работе
-
-                                if ($response_bonus_arr["order_car_info"] != null) {
-                                    $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
-                                }
-                                $orderweb_uid->closeReason = $response_bonus_arr["close_reason"];
-                                $orderweb_uid->save();
-                            } else {
-                                //Безнал по окончанию вилки закрыт
-                                //Запрос по окончанию вилки статуса нала
-
-                                // Проверяем успешность ответа
-                                if ($response_double->successful()) {
-                                    // Обрабатываем успешный ответ
-                                    $response_arr_double = json_decode($response_double, true);
-                                    Log::debug("4 $url: ", $response_arr_double);
-
-                                    if ($response_arr_double["order_car_info"] != null) {
-                                        $orderweb_uid->auto = $response_arr_double["order_car_info"];
-                                    }
-                                    $orderweb_uid->closeReason = $response_arr_double["close_reason"];
-                                    $orderweb_uid->save();
-
-                                } else {
-                                    // Логируем ошибки в случае неудачного запроса
-                                    Log::error("5 historyUIDStatus Request failed with status: "
-                                        . $response_double->status());
-                                    Log::error("6 historyUIDStatus Response: " . $response_double->body());
-                                    $response_arr_double = json_decode($response_double, true);
-                                    $messageAdmin = "Ошибка опроса статуса наличного дублирующего заказа $uid_history->uid_doubleOrder Ответ:" . print_r($response_arr_double, true);
-                                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-                                    return [
-                                        "execution_status" => "failed_status",
-                                        "order_car_info" => null,
-                                        "driver_phone" => null,
-                                    ];
-                                }
-
-                            }
-                        } else {
-                            // Логируем ошибки в случае неудачного запроса
-                            Log::error("11 historyUIDStatus Request failed with status: " . $response_bonus->status());
-                            Log::error("12 historyUIDStatus Response: " . $response_bonus->body());
-                            $response_arr_bonus = json_decode($response_bonus, true);
-                            $messageAdmin = "Ошибка опроса статуса безналичного заказа 11 $uid_history->uid_bonusOrder Ответ:" . print_r($response_arr_bonus, true);
-                            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-
-                            return [
-                                "execution_status" => "failed_status",
-                                "order_car_info" => null,
-                                "driver_phone" => null,
-                            ];
-                        }
-                        return $response;
-
-                    } catch (\Exception $e) {
-                        // Обработка исключений
-                        Log::error("13 historyUIDStatus Exception caught: " . print_r($e->getMessage(), true));
-
-
-                        $messageAdmin = "Ошибка опроса статуса безналичного заказа 13 $uid_history->uid_bonusOrder Ответ: ";
-
-                        // Проверяем тип сообщения
-                        if (is_array($e->getMessage())) {
-                            $messageAdmin .= print_r($e->getMessage(), true);
-                        } elseif (is_object($e->getMessage())) {
-                            $messageAdmin .= json_encode($e->getMessage());
-                        } else {
-                            $messageAdmin .= (string)$e->getMessage();
-                        }
-                        Log::error("14 historyUIDStatus Exception caught: " . $messageAdmin);
-                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-                        return [
-                            "execution_status" => "failed_status",
-                            "order_car_info" => null,
-                            "driver_phone" => null,
-                        ];
-                    }
-                } else {
-                    $response_bonus = $uid_history->bonus_status;
-                    // Логируем тело ответа
-                    Log::debug("15 historyUIDStatus respons bonus: " . $response_bonus);
-                    // Обрабатываем успешный ответ
-                    $response_bonus_arr = json_decode($response_bonus, true);
-                    if ($response_bonus_arr["close_reason"] == 0 || $response_bonus_arr["close_reason"] == 8
-                        || $response_bonus_arr["close_reason"] == -1) {
-
-
-                        if ($response_bonus_arr["order_car_info"] != null) {
-                            $orderweb_uid->auto = $response_bonus_arr["order_car_info"];
-                        }
-                        $orderweb_uid->closeReason = $response_bonus_arr["close_reason"];
-                        $orderweb_uid->save();
-                        return $response_bonus;
-                    } else {
-                        $response_double = $uid_history->double_status;
-
-                        // Логируем тело ответа
-                        Log::debug("historyUIDStatus response double: " . $response_double);
-
-                        // Обрабатываем успешный ответ
-                        $response_double_arr = json_decode($response_double, true);
-                        Log::debug("responseArr double: ", $response_double_arr);
-
-
-                        if ($response_double_arr["order_car_info"] != null) {
-                            $orderweb_uid->auto = $response_double_arr["order_car_info"];
-                        }
-                        $orderweb_uid->closeReason = $response_double_arr["close_reason"];
-                        $orderweb_uid->save();
-                        return $response_double;
-                    }
-                }
             } else {
                 //Запрос статуса одиночного заказа
                 $authorization = (new UniversalAndroidFunctionController)

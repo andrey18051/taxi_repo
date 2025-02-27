@@ -90,7 +90,11 @@ class PusherController extends Controller
         return response()->json(['result' => 'ok']);
     }
 
-    public function sentUidAppEmail($order_uid, $app, $email): \Illuminate\Http\JsonResponse
+    public function sentUidAppEmail(
+        $order_uid,
+        $app,
+        $email
+    ): \Illuminate\Http\JsonResponse
     {
         try {
             // Инициализация Pusher
@@ -105,7 +109,60 @@ class PusherController extends Controller
             $data = [
                 'order_uid' => $order_uid,
                 'app' => $app,
+                'email' => $email,
+            ];
+
+            // Отправка события через Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'order-status-updated-'. $app . "-$email";    // Замените на нужное событие
+
+            $pusher->trigger($channel, $event, $data);
+
+            Log::info("Событие $event успешно отправлено через Pusher для $email в $app. UID заказа: $order_uid");
+
+            $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app после пересоздания: $order_uid";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json(['result' => 'ok' . $order_uid]);
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка при отправке события через Pusher: {$e->getMessage()}", [
+                'order_uid' => $order_uid,
+                'app' => $app,
                 'email' => $email
+            ]);
+            $messageAdmin = "Ошибка при отправке события через Pusher: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sentUidAppEmailPayType(
+        $order_uid,
+        $app,
+        $email,
+        $pay_system
+    ): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Инициализация Pusher
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
+
+            // Подготовка данных для отправки
+            $data = [
+                'order_uid' => $order_uid,
+                'app' => $app,
+                'email' => $email,
+                'paySystemStatus' => $pay_system
             ];
 
             // Отправка события через Pusher
@@ -166,6 +223,53 @@ class PusherController extends Controller
 
             // Return a success response
             return response()->json(['result' => 'ok', 'order_uid' => $costMap['dispatching_order_uid']], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error sending Pusher event: {$e->getMessage()}", [
+                'order_cost' => $costMap['order_cost'] ?? 'N/A',
+                'dispatching_order_uid' => $costMap['dispatching_order_uid'] ?? 'N/A',
+            ]);
+
+            // Optional: Send error message to admin
+            $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function sendDoubleStatus(
+        $response,
+        $app,
+        $email
+    ): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Initialize Pusher or any other service
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
+
+
+            // Prepare the data for sending
+            $data = $response;
+
+            // Send the event via Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'orderResponseEvent-'. $app . "-$email";    // Замените на нужное событие
+            $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app ";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            $pusher->trigger($channel, $event, $data);
+
+
+            // Return a success response
+            return response()->json(['result' => 'ok'], 200);
 
         } catch (\Exception $e) {
             Log::error("Error sending Pusher event: {$e->getMessage()}", [
@@ -253,7 +357,10 @@ class PusherController extends Controller
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException
      */
-    public function  sentCanceledStatus($canceled, $app, $email): \Illuminate\Http\JsonResponse
+    public function  sentCanceledStatus(
+        $canceled,
+        $app,
+        $email): \Illuminate\Http\JsonResponse
     {
         $pusher = new Pusher(
             env('PUSHER_APP_KEY'),
@@ -262,10 +369,13 @@ class PusherController extends Controller
             ['cluster' => env('PUSHER_APP_CLUSTER')]
         );
 
+        $data = [
+            'canceled' =>  $canceled,
+        ];
         // Отправка события на канал
         Log::info("Pusher отправляет событие: eventCanceled-" . $app . " в канал teal-towel-48");
 
-        $pusher->trigger('teal-towel-48', 'eventCanceled-'. $app . "-" . $email, ['canceled' =>  $canceled]);
+        $pusher->trigger('teal-towel-48', 'eventCanceled-'. $app . "-" . $email, $data);
         $messageAdmin = "Отправлен eventCanceled  клиенту $email в $app: " . $canceled;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
