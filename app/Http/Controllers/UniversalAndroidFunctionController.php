@@ -217,9 +217,12 @@ class UniversalAndroidFunctionController extends Controller
     public function startNewProcessExecutionStatusJob($doubleOrderId, $jobId): ?string
     {
 
-        $messageAdmin = "!!! 10010 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
+        $messageAdmin = "!!! 11011 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
+        (new PusherController)->sendOrderStartExecution(
+            $doubleOrderId
+        );
         ExecStatusHistory::truncate();
         $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
         if (!$doubleOrderRecord) {
@@ -5390,7 +5393,14 @@ class UniversalAndroidFunctionController extends Controller
                 $responseArr = $response->json();
 
                 $orderNew = $responseArr["dispatching_order_uid"];
-                (new PusherController)->sentUidAppEmail($orderNew, $application, $email);
+
+                (new PusherController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    "nal_payment"
+                );
+
 
                 (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
 
@@ -5611,7 +5621,14 @@ class UniversalAndroidFunctionController extends Controller
 
                 $responseArr = $response->json();
                 $orderNew = $responseArr["dispatching_order_uid"];
-                (new PusherController)->sentUidAppEmail($orderNew, $application, $email);
+
+
+                (new PusherController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    "nal_payment"
+                );
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
 
@@ -6374,7 +6391,12 @@ class UniversalAndroidFunctionController extends Controller
 
                 $orderNew = $responseArr["dispatching_order_uid"];
 
-                (new PusherController)->sentUidAppEmail($orderNew, $application, $email);
+                (new PusherController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    $pay_method
+                );
 
                 (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,

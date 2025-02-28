@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Events\OrderStatusUpdated;
+use App\Models\DoubleOrder;
+use App\Models\Orderweb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Pusher\Pusher;
@@ -262,7 +264,7 @@ class PusherController extends Controller
             // Send the event via Pusher
             $channel = 'teal-towel-48'; // Замените на нужный канал
             $event = 'orderResponseEvent-'. $app . "-$email";    // Замените на нужное событие
-            $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app ";
+            $messageAdmin = "Событие sendDoubleStatus $event отправлен пользователю $email  в $app ";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $pusher->trigger($channel, $event, $data);
@@ -276,6 +278,67 @@ class PusherController extends Controller
                 'order_cost' => $costMap['order_cost'] ?? 'N/A',
                 'dispatching_order_uid' => $costMap['dispatching_order_uid'] ?? 'N/A',
             ]);
+
+            // Optional: Send error message to admin
+            $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sendOrderStartExecution(
+        $doubleOrderId
+    ): \Illuminate\Http\JsonResponse
+    {
+        $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
+
+        $responseBonusStr = $doubleOrderRecord->responseBonusStr;
+        $responseBonus = json_decode($responseBonusStr, true);
+        $order = $responseBonus['dispatching_order_uid'];
+
+        $orderweb = Orderweb::where("dispatching_order_uid", $order)->first();
+        $email = $orderweb->email;
+        switch ($orderweb->comment) {
+            case 'taxi_easy_ua_pas1':
+                $app = "PAS1";
+                break;
+            case 'taxi_easy_ua_pas2':
+                $app = "PAS2";
+                break;
+            default:
+                $app = "PAS4";
+        }
+        try {
+            // Initialize Pusher or any other service
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
+
+
+            // Prepare the data for sending
+            $data = ["eventStartExecution" => $doubleOrderId];
+
+            // Send the event via Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'orderStartExecution-'. $app . "-$email";    // Замените на нужное событие
+            $messageAdmin = "Событие $event отправлен пользователю $email запущена вилка в $app ";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            $pusher->trigger($channel, $event, $data);
+
+
+            // Return a success response
+            return response()->json(['result' => 'ok'], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error sending Pusher event: {$e->getMessage()}");
 
             // Optional: Send error message to admin
             $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";

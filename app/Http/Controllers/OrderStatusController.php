@@ -553,9 +553,6 @@ class OrderStatusController extends Controller
         }
         $email = $orderweb->email;
 
-
-
-
         // Блок 1: Состояния "Поиск авто"
         if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&
             in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])) {
