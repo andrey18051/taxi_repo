@@ -1,68 +1,15 @@
 # Базовый образ - Ubuntu 22.04
-FROM ubuntu:22.04
+FROM ghcr.io/andrey18051/taxi:base
 
-# Установка переменной окружения для избежания интерактивных запросов
-ENV DEBIAN_FRONTEND=noninteractive
+RUN echo "[program:php-fpm]" > /etc/supervisor/conf.d/php-fpm.conf && \
+    echo "command=/opt/bitnami/php/sbin/php-fpm --nodaemonize" >> /etc/supervisor/conf.d/php-fpm.conf && \
+    echo "autostart=true" >> /etc/supervisor/conf.d/php-fpm.conf && \
+    echo "autorestart=true" >> /etc/supervisor/conf.d/php-fpm.conf && \
+    echo "stderr_logfile=/var/log/php-fpm.err.log" >> /etc/supervisor/conf.d/php-fpm.conf && \
+    echo "stdout_logfile=/var/log/php-fpm.out.log" >> /etc/supervisor/conf.d/php-fpm.conf && \
+    echo "priority=10" >> /etc/supervisor/conf.d/php-fpm.conf
 
-RUN mkdir -p /run/php
-# Обновляем ключ подписи для репозитория Nginx и добавляем репозиторий
-RUN apt-get update && apt-get install -y gnupg2 wget && \
-    wget -O - http://nginx.org/keys/nginx_signing.key | apt-key add - && \
-    echo "deb http://nginx.org/packages/ubuntu/ jammy nginx" > /etc/apt/sources.list.d/nginx.list && \
-    echo "deb-src http://nginx.org/packages/ubuntu/ jammy nginx" >> /etc/apt/sources.list.d/nginx.list
 
-# Обновляем пакеты и устанавливаем зависимости
-RUN apt update -y && apt install -y software-properties-common && add-apt-repository ppa:ondrej/php -y && apt update
-RUN  apt-get install -y \
-    software-properties-common \
-    nginx \
-    supervisor \
-    cron \
-    php7.3 \
-    php7.3-fpm \
-    php7.3-cli \
-    php7.3-common \
-    php7.3-mbstring \
-    php7.3-mysql \
-    php7.3-curl \
-    php \
-    php-pear \
-    php-dev \
-    && add-apt-repository ppa:ondrej/php -y && apt-get update && \
-    apt-get install -y php7.3-json && \
-    rm -rf /var/lib/apt/lists/*
-
-# Проверяем и устанавливаем модуль calendar через PECL, если он нужен
-RUN if ! php -m | grep -q calendar; then \
-    apt-get update && apt-get install -y php-pear php7.3-dev build-essential && \
-    pecl install calendar && \
-    echo "extension=calendar.so" > /etc/php/7.3/mods-available/calendar.ini && \
-    ln -s /etc/php/7.3/mods-available/calendar.ini /etc/php/7.3/fpm/conf.d/20-calendar.ini && \
-    ln -s /etc/php/7.3/mods-available/calendar.ini /etc/php/7.3/cli/conf.d/20-calendar.ini; \
-    fi
-
-# Очищаем временные файлы
-RUN apt-get clean && rm -rf /tmp/* /var/tmp/*
-
-# Настраиваем PHP-FPM и Nginx на порт 9001 вместо 9000
-RUN sed -i 's|listen = /run/php/php7.3-fpm.sock|listen = 127.0.0.1:9001|' /etc/php/7.3/fpm/pool.d/www.conf && \
-    echo "upstream php { server 127.0.0.1:9001; }" > /etc/nginx/conf.d/upstream.conf
-
-# Удаляем старые конфигурации Nginx и создаём директории
-RUN rm -f /etc/nginx/conf.d/default.conf && \
-    mkdir -p /usr/share/nginx/html/taxi \
-    /usr/share/nginx/html/sessions \
-    /usr/share/nginx/html/laravel_logs \
-    /usr/share/nginx/html/cache \
-    /etc/ssl/certs/nginx
-
-# Устанавливаем права доступа
-RUN chmod -R 755 /usr/share/nginx/html/sessions \
-    /usr/share/nginx/html/cache \
-    /etc/ssl/certs/nginx && \
-    chmod -R 777 /usr/share/nginx/html/laravel_logs
-
-RUN service php7.3-fpm start
 
 # Копируем файлы проекта
 COPY ./app /usr/share/nginx/html/taxi/app
@@ -95,6 +42,8 @@ COPY ./README.md /usr/share/nginx/html/taxi/
 COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
+#RUN  update-alternatives --set php /usr/bin/php7.3
+
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/supervisord.conf && \
     cp /usr/share/nginx/html/taxi/docker/taxi.conf /etc/nginx/conf.d/taxi.conf && \
@@ -102,6 +51,12 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/superv
     cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
+
+RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache
+RUN cd /usr/share/nginx/html/taxi/ && rm -rf vendor composer.lock
+RUN cd /usr/share/nginx/html/taxi/ && composer install --no-dev --optimize-autoloader
+RUN mkdir -p /var/www/html/laravel_logs
+RUN chmod 777 /var/www/html/laravel_logs
 
 # Настраиваем Cron
 RUN echo "*/15 * * * * cd /usr/share/nginx/html/taxi && php artisan daily-task:run" >> /etc/cron.d/laravel-cron && \
