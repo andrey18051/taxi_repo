@@ -423,7 +423,9 @@ class PusherController extends Controller
     public function  sentCanceledStatus(
         $canceled,
         $app,
-        $email): \Illuminate\Http\JsonResponse
+        $email,
+        $uid_bonusOrderHold
+    ): \Illuminate\Http\JsonResponse
     {
         $pusher = new Pusher(
             env('PUSHER_APP_KEY'),
@@ -434,6 +436,7 @@ class PusherController extends Controller
 
         $data = [
             'canceled' =>  $canceled,
+            'uid' =>  $uid_bonusOrderHold,
         ];
         // Отправка события на канал
         Log::info("Pusher отправляет событие: eventCanceled-" . $app . " в канал teal-towel-48");
