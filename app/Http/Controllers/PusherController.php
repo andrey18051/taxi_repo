@@ -294,60 +294,65 @@ class PusherController extends Controller
         $doubleOrderId
     ): \Illuminate\Http\JsonResponse
     {
-        $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
-
-        $responseBonusStr = $doubleOrderRecord->responseBonusStr;
-        $responseBonus = json_decode($responseBonusStr, true);
-        $order = $responseBonus['dispatching_order_uid'];
-
-        $orderweb = Orderweb::where("dispatching_order_uid", $order)->first();
-        $email = $orderweb->email;
-        switch ($orderweb->comment) {
-            case 'taxi_easy_ua_pas1':
-                $app = "PAS1";
-                break;
-            case 'taxi_easy_ua_pas2':
-                $app = "PAS2";
-                break;
-            default:
-                $app = "PAS4";
-        }
         try {
-            // Initialize Pusher or any other service
-            $pusher = new Pusher(
-                env('PUSHER_APP_KEY'),
-                env('PUSHER_APP_SECRET'),
-                env('PUSHER_APP_ID'),
-                ['cluster' => env('PUSHER_APP_CLUSTER')]
-            );
+            $doubleOrderRecord = DoubleOrder::findOrFail($doubleOrderId);
+
+            $responseBonusStr = $doubleOrderRecord->responseBonusStr;
+            $responseBonus = json_decode($responseBonusStr, true);
+            $order = $responseBonus['dispatching_order_uid'];
+
+            $orderweb = Orderweb::where("dispatching_order_uid", $order)->first();
+            $email = $orderweb->email;
+            switch ($orderweb->comment) {
+                case 'taxi_easy_ua_pas1':
+                    $app = "PAS1";
+                    break;
+                case 'taxi_easy_ua_pas2':
+                    $app = "PAS2";
+                    break;
+                default:
+                    $app = "PAS4";
+            }
+            try {
+                // Initialize Pusher or any other service
+                $pusher = new Pusher(
+                    env('PUSHER_APP_KEY'),
+                    env('PUSHER_APP_SECRET'),
+                    env('PUSHER_APP_ID'),
+                    ['cluster' => env('PUSHER_APP_CLUSTER')]
+                );
 
 
-            // Prepare the data for sending
-            $data = ["eventStartExecution" => $doubleOrderId];
+                // Prepare the data for sending
+                $data = ["eventStartExecution" => $doubleOrderId];
 
-            // Send the event via Pusher
-            $channel = 'teal-towel-48'; // Замените на нужный канал
-            $event = 'orderStartExecution-'. $app . "-$email";    // Замените на нужное событие
-            $messageAdmin = "Событие $event отправлен пользователю $email запущена вилка в $app ";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                // Send the event via Pusher
+                $channel = 'teal-towel-48'; // Замените на нужный канал
+                $event = 'orderStartExecution-'. $app . "-$email";    // Замените на нужное событие
+                $messageAdmin = "Событие $event отправлен пользователю $email запущена вилка в $app ";
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            $pusher->trigger($channel, $event, $data);
+                $pusher->trigger($channel, $event, $data);
 
 
-            // Return a success response
-            return response()->json(['result' => 'ok'], 200);
+                // Return a success response
+                return response()->json(['result' => 'ok'], 200);
 
-        } catch (\Exception $e) {
-            Log::error("Error sending Pusher event: {$e->getMessage()}");
+            } catch (\Exception $e) {
+                Log::error("Error sending Pusher event: {$e->getMessage()}");
 
-            // Optional: Send error message to admin
-            $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                // Optional: Send error message to admin
+                $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            return response()->json([
-                'result' => 'failed',
-                'error' => $e->getMessage()
-            ], 500);
+                return response()->json([
+                    'result' => 'failed',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+            return response()->json(['message' => 'Order execution started', 'data' => $responseBonusStr]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'Double order not found'], 404);
         }
     }
 
