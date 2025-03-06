@@ -17,7 +17,7 @@ RUN chmod -R 777 /etc/ssl/certs/nginx && \
     chmod -R 777 /usr/share/nginx/html/taxi/bootstrap/cache && \
     chown -R www-data:www-data /usr/share/nginx/html/taxi
 
-EXPOSE 7443
+EXPOSE 5443
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 

@@ -29,7 +29,7 @@ docker run --name taxi_test -d --network host ghcr.io/andrey18051/taxi_test:1.0
 
 зайти в контейнер
 docker exec -it taxi_test bash
-curl https://localhost:8443 --insecure
+curl https://localhost:6443 --insecure
 
 просмотр образов
 docker images
