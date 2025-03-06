@@ -1,14 +1,13 @@
 # Базовый образ - Ubuntu 22.04
-FROM ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
+FROM ghcr.io/andrey18051/taxi_laravel_8.83.29_work:base
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN install_packages nginx supervisor
 RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 
-COPY docker/nginx_test.conf /etc/nginx/nginx.conf
-
-COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
-COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/test-taxi.kyiv.ua.key
+COPY docker/nginx_work.conf /etc/nginx/nginx.conf
+COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-order-taxi-site.crt
+COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
 
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -18,7 +17,7 @@ RUN chmod -R 777 /etc/ssl/certs/nginx && \
     chmod -R 777 /usr/share/nginx/html/taxi/bootstrap/cache && \
     chown -R www-data:www-data /usr/share/nginx/html/taxi
 
-EXPOSE 8443
+EXPOSE 7443
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 
@@ -57,7 +56,7 @@ COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/supervisord.conf && \
-    cp /usr/share/nginx/html/taxi/docker/nginx_test.conf /etc/nginx/nginx.conf && \
+    cp /usr/share/nginx/html/taxi/docker/nginx_work.conf /etc/nginx/nginx.conf && \
     cp -r /usr/share/nginx/html/taxi/docker/certs/nginx /etc/ssl/certs/nginx && \
     cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \

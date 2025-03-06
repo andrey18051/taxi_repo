@@ -4,13 +4,16 @@ docker build -t ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base .
 
 
 отправить в гит хаб
-docker push ghcr.io/andrey18051/taxi_laravel_8.83.29:base
+docker push ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
 
 локальная проверка базовой установки Ларавель
-docker pull ghcr.io/andrey18051/taxi_laravel_8.83.29:base
-docker run --name taxi -d --network host ghcr.io/andrey18051/taxi_laravel_8.83.29:base
+docker pull ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
+docker run --name taxi -d --network host ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
+docker exec -it taxi_test bash
+curl https://localhost
 
 1. создать образ
+copy D:\OpenServer\domains\taxi2012\docker\dockerFinish\Test\Dockerfile D:\OpenServer\domains\taxi2012
 cd D:\OpenServer\domains\taxi2012
 
 docker build -t  ghcr.io/andrey18051/taxi_test:1.0 .
@@ -23,7 +26,10 @@ docker pull ghcr.io/andrey18051/taxi_test:1.0
 
 4. Собрать и запустить контейнер
 docker run --name taxi_test -d --network host ghcr.io/andrey18051/taxi_test:1.0
+
+зайти в контейнер
 docker exec -it taxi_test bash
+curl https://localhost:8443 --insecure
 
 просмотр образов
 docker images
@@ -38,8 +44,6 @@ docker stop 91
 удаление контейнера (91- первые 2 цифры в CONTAINER ID)
 docker rm 91
 
-зайти в контейнер
-docker exec -it taxi_test bash
 
 
 
