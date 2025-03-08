@@ -1,7 +1,7 @@
 #!/bin/bash
 
-FILE="/var/www/html/laravel_logs/laravel.log"
-LOG="/var/www/html/laravel_logs/watch_log_debug.log"
+FILE="/usr/share/nginx/html/laravel_logs/laravel.log"
+LOG="/usr/share/nginx/html/laravel_logs/watch_log_debug.log"
 
 echo "Скрипт запущен $(date)" >> "$LOG"
 

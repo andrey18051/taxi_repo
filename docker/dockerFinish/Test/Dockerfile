@@ -2,25 +2,37 @@
 FROM ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN install_packages nginx supervisor
+
+# Устанавливаем необходимые пакеты
+RUN apt-get update && apt-get install -y \
+    lsof \
+    net-tools \
+    inotify-tools \
+    nmap \
+    sysvinit-utils \
+    sudo \
+    systemd \
+    && apt-get clean
+
+
+# Создаём необходимые директории
 RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 
+# Копируем конфигурационные файлы
 COPY docker/nginx_test.conf /etc/nginx/nginx.conf
-
 COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
 COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/test-taxi.kyiv.ua.key
-
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Устанавливаем права и владельцев для необходимых файлов и директорий
 RUN chmod -R 777 /etc/ssl/certs/nginx && \
     chown -R www-data:www-data /var/log/nginx /run/nginx && \
     chmod -R 777 /usr/share/nginx/html/taxi/storage && \
     chmod -R 777 /usr/share/nginx/html/taxi/bootstrap/cache && \
     chown -R www-data:www-data /usr/share/nginx/html/taxi
 
+# Открываем нужные порты
 EXPOSE 6443
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
 
 # Копируем файлы проекта
 COPY ./app /usr/share/nginx/html/taxi/app
@@ -53,8 +65,6 @@ COPY ./README.md /usr/share/nginx/html/taxi/
 COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
-#RUN  update-alternatives --set php /usr/bin/php7.3
-
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/supervisord.conf && \
     cp /usr/share/nginx/html/taxi/docker/nginx_test.conf /etc/nginx/nginx.conf && \
@@ -63,20 +73,25 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/superv
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 
-RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache
-RUN cd /usr/share/nginx/html/taxi/ && rm -rf vendor composer.lock
-RUN cd /usr/share/nginx/html/taxi/ && composer install --no-dev --optimize-autoloader
-RUN mkdir -p /var/www/html/laravel_logs
-RUN chmod 777 /var/www/html/laravel_logs
+# Устанавливаем зависимости Laravel
+RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
+    rm -rf vendor composer.lock && \
+    composer install --no-dev --optimize-autoloader
+
+# Создаём директорию для логов и устанавливаем права
+RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
 
 # Настраиваем Cron
-RUN echo "*/15 * * * * cd /usr/share/nginx/html/taxi && php artisan daily-task:run" >> /etc/cron.d/laravel-cron && \
-    echo "0 22 * * * cd /usr/share/nginx/html/taxi && php artisan driver-balance-report-task:run" >> /etc/cron.d/laravel-cron && \
-    echo "0 22 * * * cd /usr/share/nginx/html/taxi && php artisan logs:send" >> /etc/cron.d/laravel-cron && \
-    echo "0 21 * * * cd /usr/share/nginx/html/taxi && php artisan clean-task:run" >> /etc/cron.d/laravel-cron && \
-    chmod 0644 /etc/cron.d/laravel-cron && \
-    crontab /etc/cron.d/laravel-cron
+RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
+    echo "*/15 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan daily-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan driver-balance-report-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    crontab -u root /tmp/cronfile && \
+    rm /tmp/cronfile
 
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
+# Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

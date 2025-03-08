@@ -8,7 +8,7 @@ docker push ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
 
 локальная проверка базовой установки Ларавель
 docker pull ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
-docker run --name taxi -d --network host ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
+docker run --name taxi_test -d --network host ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
 docker exec -it taxi_test bash
 curl https://localhost
 
@@ -25,17 +25,31 @@ docker push ghcr.io/andrey18051/taxi_test:1.0
 docker pull ghcr.io/andrey18051/taxi_test:1.0
 
 4. Собрать и запустить контейнер
-docker run --name taxi_test -d --network host ghcr.io/andrey18051/taxi_test:1.0
+//docker run --name taxi_test -d --network host ghcr.io/andrey18051/taxi_test:1.0
+
+docker stop taxi_test
+docker rm taxi_test
+docker run --name taxi_test -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_test:1.0
 
 зайти в контейнер
 docker exec -it taxi_test bash
+
 curl https://localhost:6443 --insecure
+ps aux | grep cron
+service cron status
+cat /etc/cron.d/laravel-cron
+ls -l /etc/cron.d/laravel-cron
+
+
+просмотр служб супервизора
+supervisorctl status
 
 просмотр образов
 docker images
 
 просмотр контейнеров
 docker ps
+df -h
 
 
 остановка контейнера (91- первые 2 цифры в CONTAINER ID)
@@ -45,7 +59,9 @@ docker stop 91
 docker rm 91
 
 
-
+ps aux | grep nginx
+просмотр служб супервизора
+supervisorctl status
 
 
 

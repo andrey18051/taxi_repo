@@ -57,7 +57,7 @@ return [
         'single' => [
             'driver' => 'single',
             //'path' => storage_path('logs/laravel.log'),
-            'path' => '/var/www/html/laravel_logs/laravel.log',
+            'path' => '/usr/share/nginx/html/laravel_logs/laravel.log',
 
             'level' => env('LOG_LEVEL', 'debug'),
         ],

@@ -13,7 +13,7 @@ class SendLogReport extends Command
 
     public function handle()
     {
-        $filePath = '/var/www/html/laravel_logs/laravel.log';
+        $filePath = '/usr/share/nginx/html/laravel_logs/laravel.log';
 
         if (file_exists($filePath) && filesize($filePath) > 0) {
             $recipient = env('LOG_REPORT_EMAIL', 'taxi.easy.ua@gmail.com');

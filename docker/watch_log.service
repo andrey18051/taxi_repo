@@ -3,7 +3,7 @@ Description=Watch for creation of laravel.log and change permissions
 After=network.target
 
 [Service]
-ExecStart=/var/www/html/laravel_logs/watch_log.sh
+ExecStart=/usr/share/nginx/html/laravel_logs/watch_log.sh
 Restart=always
 RestartSec=10
 User=root

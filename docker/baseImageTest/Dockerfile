@@ -6,7 +6,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir -p /run/php
 
-RUN install_packages autoconf gcc g++ make libtool php-dev zlib1g-dev wget nginx supervisor cron
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    gcc \
+    g++ \
+    make \
+    libtool \
+    php-dev \
+    zlib1g-dev \
+    wget \
+    nginx \
+    supervisor \
+    cron \
+    inotify-tools && apt-get clean
+
 
 # Настраиваем PHP-FPM и Nginx на порт 9002 вместо 9000
 RUN sed -i 's|listen = 9000|listen = 127.0.0.1:9002|'  /opt/bitnami/php/etc/php-fpm.d/www.conf && \

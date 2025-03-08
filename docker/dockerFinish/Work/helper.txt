@@ -25,11 +25,25 @@ docker push ghcr.io/andrey18051/taxi_work:1.0
 docker pull ghcr.io/andrey18051/taxi_work:1.0
 
 4. Собрать и запустить контейнер
-docker run --name taxi_work -d --network host ghcr.io/andrey18051/taxi_work:1.0
+//docker run --name taxi_work -d --network host ghcr.io/andrey18051/taxi_work:1.0
+
+docker stop taxi_work
+docker rm taxi_work
+
+docker run --name taxi_work -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_work:1.0
+ netstat -tuln | grep 7443
+
 
 зайти в контейнер
 docker exec -it taxi_work bash
+
+cat /etc/cron.d/laravel-cron
+docker ps -a | grep taxi_work
+
 curl https://localhost:7443 --insecure
+
+просмотр служб супервизора
+supervisorctl status
 
 просмотр образов
 docker images

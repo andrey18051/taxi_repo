@@ -55,7 +55,7 @@ return [
 
         'file' => [
             'driver' => 'file',
-            'path' => '/var/www/html/cache',
+            'path' => '/usr/share/nginx/html/cache',
         ],
 
         'memcached' => [
