@@ -402,7 +402,12 @@ class PusherController extends Controller
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException
      */
-    public function  sentStatusWfp($transactionStatus, $app, $email): \Illuminate\Http\JsonResponse
+    public function  sentStatusWfp(
+        $transactionStatus,
+        $uid,
+        $app,
+        $email
+    ): \Illuminate\Http\JsonResponse
     {
         $pusher = new Pusher(
             env('PUSHER_APP_KEY'),
@@ -414,7 +419,12 @@ class PusherController extends Controller
         // Отправка события на канал
         Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
 
-        $pusher->trigger('teal-towel-48', 'transactionStatus-'. $app . "-" . $email, ['transactionStatus' =>  $transactionStatus]);
+        $data = [
+            'transactionStatus' =>  $transactionStatus,
+            'uid' =>$uid
+        ];
+
+        $pusher->trigger('teal-towel-48', 'transactionStatus-'. $app . "-" . $email, $data);
         $messageAdmin = "Отправлен transactionStatus  клиенту $email в $app: " . $transactionStatus;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 

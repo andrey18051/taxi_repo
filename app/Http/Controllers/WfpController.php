@@ -1775,6 +1775,10 @@ class WfpController extends Controller
         return $response;
     }
 
+    /**
+     * @throws \Pusher\PusherException
+     * @throws \Pusher\ApiErrorException
+     */
     public function chargeActiveToken(
         $application,
         $city,
@@ -1857,7 +1861,29 @@ class WfpController extends Controller
                 $orderReference
             );
             $data = json_decode($responseStatus->body(), true);
-            (new PusherController)->sentStatusWfp($data['transactionStatus'], $application, $clientEmail);
+
+            $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)->first();
+            if ($wfpInvoices !== null) {
+                if (isset($data['transactionStatus'])) {
+                    try {
+                        $transactionStatus = $data['transactionStatus'];
+                        $uid = $wfpInvoices->dispatching_order_uid;
+                        (new PusherController)->sentStatusWfp(
+                            $transactionStatus,
+                            $uid,
+                            $application,
+                            $clientEmail
+                        );
+                    } catch (\Exception $e) {
+                        Log::error("Ошибка в sentStatusWfp для orderReference: $orderReference: " . $e->getMessage());
+                        throw $e;
+                    }
+                } else {
+                    Log::error("transactionStatus отсутствует в данных для orderReference: $orderReference");
+                }
+            } else {
+                Log::warning("WfpInvoice не найдено для orderReference: $orderReference");
+            }
 
             return $response;
         }
