@@ -22,6 +22,8 @@ RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 COPY docker/nginx_work.conf /etc/nginx/nginx.conf
 COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-order-taxi-site.crt
 COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
+COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
+COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/test-taxi.kyiv.ua.key
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Устанавливаем права и владельцев для необходимых файлов и директорий
@@ -69,7 +71,7 @@ COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/supervisord.conf && \
     cp /usr/share/nginx/html/taxi/docker/nginx_work.conf /etc/nginx/nginx.conf && \
     cp -r /usr/share/nginx/html/taxi/docker/certs/nginx /etc/ssl/certs/nginx && \
-    cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
+#    cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 

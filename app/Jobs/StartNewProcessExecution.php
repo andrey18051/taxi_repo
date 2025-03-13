@@ -41,20 +41,21 @@ class StartNewProcessExecution implements ShouldQueue
      */
     public function handle()
     {
-        // Получаем jobId для текущей задачи
         $this->jobId = $this->job->getJobId();
 
-
-            // Отправляем сообщение администратору
-        $messageAdmin = "!!!+++ Запущена вилка для заказа $this->orderId Job ID: {$this->jobId} started for order ID: {$this->orderId}";
+        $messageAdmin = "!!!+++13032025 Запущена вилка для заказа $this->orderId Job ID: {$this->jobId} started for order ID: {$this->orderId}";
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-        // Запускаем процесс
-//        $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($this->orderId);
-        $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
+        try {
+            Log::info("Запуск startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}");
+            $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
+            Log::info("Результат startNewProcessExecutionStatusJob: " . ($result ?? 'null'));
+        } catch (\Exception $e) {
+            Log::error("Ошибка в startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}: " . $e->getMessage());
+            throw $e; // Повторно выбросить исключение, чтобы задание пометилось как неудачное
+        }
 
         if ($result === "exit") {
-
             $messageAdmin = "Задача завершена для заказа $this->orderId (Job ID: {$this->jobId})";
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             try {
@@ -66,11 +67,10 @@ class StartNewProcessExecution implements ShouldQueue
                     (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                 }
             } catch (\Exception $e) {
-                // Handle the exception (log it, rethrow it, etc.)
+                Log::error("Ошибка при удалении DoubleOrder для orderId: {$this->orderId}: " . $e->getMessage());
             }
             return;
         }
-
 
         try {
             sleep(5);
@@ -81,9 +81,8 @@ class StartNewProcessExecution implements ShouldQueue
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             }
         } catch (\Exception $e) {
-            // Handle the exception (log it, rethrow it, etc.)
+            Log::error("Ошибка при удалении DoubleOrder (второй блок) для orderId: {$this->orderId}: " . $e->getMessage());
         }
-
     }
 
 

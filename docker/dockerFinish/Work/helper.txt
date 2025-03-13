@@ -58,7 +58,7 @@ docker stop 91
 удаление контейнера (91- первые 2 цифры в CONTAINER ID)
 docker rm 91
 
-
+docker system prune -a --volumes
 
 
 

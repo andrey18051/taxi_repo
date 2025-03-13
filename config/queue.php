@@ -38,9 +38,12 @@ return [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 3*24*60*60,
+            'retry_after' => 3 * 24 * 60 * 60,  // 3 дня
+            'timeout' => 3 * 24 * 60 * 60,  // 3 дня на выполнение задачи
+            'maxAttempts' => 1,  // Не даем задаче повторяться
             'after_commit' => false,
         ],
+
 
         'beanstalkd' => [
             'driver' => 'beanstalkd',
