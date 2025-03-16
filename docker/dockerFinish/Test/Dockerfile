@@ -85,13 +85,19 @@ RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
 
 # Настраиваем Cron
+#RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
+#    echo "*/15 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan daily-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan driver-balance-report-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    crontab -u root /tmp/cronfile && \
+#    rm /tmp/cronfile
+
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
-    echo "*/15 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan daily-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan driver-balance-report-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-    crontab -u root /tmp/cronfile && \
-    rm /tmp/cronfile
+        echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+        crontab -u root /tmp/cronfile && \
+        rm /tmp/cronfile
+
 
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/

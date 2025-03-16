@@ -1,3 +1,5 @@
+docker login ghcr.io -u andrey18051 -p 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
+
 Базовый образ
 cd D:\OpenServer\domains\taxi2012\docker\baseImageTest
 docker build -t ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base .
@@ -30,6 +32,11 @@ docker pull ghcr.io/andrey18051/taxi_test:1.0
 docker stop taxi_test
 docker rm taxi_test
 docker run --name taxi_test -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_test:1.0
+
+
+альтернативный автомат на сервере
+./deploy_taxi_test.sh
+
 
 зайти в контейнер
 docker exec -it taxi_test bash

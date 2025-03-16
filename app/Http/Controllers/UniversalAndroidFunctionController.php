@@ -5901,30 +5901,6 @@ class UniversalAndroidFunctionController extends Controller
         $city,
         $addCost
     )  {
-//        $invoice = WfpInvoice::where('orderReference', $orderReference )->first();
-//        $invoice->transactionStatus = "WaitingAuthComplete";
-//        $invoice->save();
-
-
-//        $transactionStatus = 'WaitingAuthComplete';
-//
-//        // Проверяем наличие записи
-//        $invoice = DB::table('wfp_invoices')->where('orderReference', $orderReference)->first();
-//
-//        if ($invoice) {
-//            // Обновляем статус, если запись существует
-//            DB::table('wfp_invoices')
-//                ->where('orderReference', $orderReference)
-//                ->update(['transactionStatus' => $transactionStatus]);
-//        } else {
-//            // Создаем запись, если её нет
-//            DB::table('wfp_invoices')->insert([
-//                'orderReference' => $orderReference,
-//                'transactionStatus' => $transactionStatus,
-//                'created_at' => now(),
-//                'updated_at' => now()
-//            ]);
-//        }
 
         self::startAddCostCardBottomCreat(
             $uid,
@@ -5935,96 +5911,6 @@ class UniversalAndroidFunctionController extends Controller
             $addCost
         );
     }
-//    public function startAddCostCardBottomUpdate(
-//        $uid,
-//        $uid_Double,
-//        $pay_method,
-//        $orderReference,
-//        $city,
-//        $addCost
-//    ): ?\Illuminate\Http\JsonResponse {
-//
-//
-////        $uid = (new MemoryOrderChangeController)->show($uid);
-//        Log::info("MemoryOrderChangeController startAddCostCardBottomUpdate возвращает UID: " . $uid);
-//
-////         Ищем заказ
-//        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-//
-//        Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
-//
-//        // Ищем данные из памяти о заказе
-//
-//        // Проверяем существование заказа
-//        if (!$order) {
-//            Log::error("startAddCostCardBottomUpdate Не удалось найти order или orderMemory с UID: " . $uid);
-//            return response()->json([
-//                "response" => "400"
-//            ], 200);
-//        }
-//
-//        Log::info("Город заказа: " . $city);
-//
-//        // Выбор приложения по комментарию
-//        switch ($order->comment) {
-//            case "taxi_easy_ua_pas1":
-//                $application = "PAS1";
-//                break;
-//            case "taxi_easy_ua_pas2":
-//                $application = "PAS2";
-//                break;
-//            default:
-//                $application = "PAS4";
-//                break;
-//        }
-//        Log::info("Приложение выбрано startAddCostCardBottomUpdate: " . $application);
-//
-//        // Переписываем город для определенных случаев
-//
-//
-//        $startTime = time(); // Время начала выполнения скрипта
-//        $maxDuration = 60; // 60 секундах
-//
-//
-//        do  { // Бесконечный цикл
-//            // Отправка POST-запроса к API
-//
-//            $response = (new WfpController)->checkStatus(
-//                $application,
-//                $city,
-//                $orderReference
-//            );
-//
-//            if ($response != "error") {
-//                $data = json_decode($response, true);
-//                if (isset($data['transactionStatus']) && !empty($data['transactionStatus'])) {
-//                    $transactionStatus = $data['transactionStatus'];
-//                    if ($transactionStatus == "Approved" ||
-//                        $transactionStatus == "WaitingAuthComplete") {
-//                        $messageAdmin = "startAddCostCardBottomUpdate Доплата по счету $orderReference на сумму $addCost $transactionStatus ";
-//                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
-//
-//                        self::startAddCostCardBottomCreat(
-//                            $uid,
-//                            $uid_Double,
-//                            $pay_method,
-//                            $orderReference,
-//                            $city,
-//                            $addCost
-//                        );
-//                    }
-//                }
-//            }
-//            sleep(10);
-//            if (time() - $startTime > $maxDuration) {
-//                Log::debug("refund Превышен лимит времени. Прекращение попыток. startAddCostCardBottomUpdate");
-//                return response()->json([
-//                    "response" => "400"
-//                ], 200);
-//            }
-//        } while (true);
-//    }
-
 
     /**
      * Show the form for creating a new resource.
@@ -6495,6 +6381,10 @@ class UniversalAndroidFunctionController extends Controller
 
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
+                $order->wfp_status_pay = "AddCost";
+                $order->closeReason = "1";
+                $order->save();
+
                 Log::info("Успешный ответ API с кодом 200 startAddCostCardBottomCreat");
 
                 $responseArr = $responseFinal->json();
@@ -6519,8 +6409,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 $newOrder = $order->replicate();
 
-                $order->wfp_status_pay = "AddCost";
-                $order->save();
+
 
 
 

@@ -31,6 +31,11 @@ docker stop taxi_work
 docker rm taxi_work
 
 docker run --name taxi_work -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_work:1.0
+
+альтернативный автомат
+./deploy_taxi_work.sh
+
+
  netstat -tuln | grep 7443
 
 
