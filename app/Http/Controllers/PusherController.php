@@ -301,7 +301,9 @@ class PusherController extends Controller
             $responseBonus = json_decode($responseBonusStr, true);
             $order = $responseBonus['dispatching_order_uid'];
 
+            $order = (new MemoryOrderChangeController)->show($order);
             $orderweb = Orderweb::where("dispatching_order_uid", $order)->first();
+
             $email = $orderweb->email;
             switch ($orderweb->comment) {
                 case 'taxi_easy_ua_pas1':

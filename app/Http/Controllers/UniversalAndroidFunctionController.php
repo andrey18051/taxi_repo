@@ -219,12 +219,12 @@ class UniversalAndroidFunctionController extends Controller
     public function startNewProcessExecutionStatusJob($doubleOrderId, $jobId): ?string
     {
         try {
-            $messageAdmin = "!!! 13032025 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
+            $messageAdmin = "!!! 17032025 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            (new PusherController)->sendOrderStartExecution(
-                $doubleOrderId
-            );
+//            (new PusherController)->sendOrderStartExecution(
+//                $doubleOrderId
+//            );
             ExecStatusHistory::truncate();
             $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
             if (!$doubleOrderRecord) {
@@ -248,6 +248,7 @@ class UniversalAndroidFunctionController extends Controller
             $bonusOrder = $responseBonus['dispatching_order_uid'];
             $bonusOrderHold = $bonusOrder;
             //Увеличеваем максимальное время для отстроченного заказа
+            $bonusOrderHold = (new MemoryOrderChangeController)->show($bonusOrderHold);
             $orderwebs = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
             if ($orderwebs->required_time != null) {
                 $maxExecutionTime +=  strtotime($orderwebs->required_time);
@@ -3056,6 +3057,7 @@ class UniversalAndroidFunctionController extends Controller
 
     private function canceledOneMinute($uid)
     {
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
 
         if (is_null($order)) {
@@ -3118,7 +3120,7 @@ class UniversalAndroidFunctionController extends Controller
      */
     public function cancelOnlyCardPayUid($uid)
     {
-
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         $messageAdmin = "Запущено ожидание оплаты для заказа $uid (cancelOnlyCardPayUid)";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
@@ -3700,6 +3702,7 @@ class UniversalAndroidFunctionController extends Controller
 
     public static function messageAboutFalseCanceled($uid)
     {
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         if ($order) {
             $wfp_order_id = "Номер заказа WFP: "  . $order->wfp_order_id;
@@ -3722,6 +3725,7 @@ class UniversalAndroidFunctionController extends Controller
 
     public static function messageAboutTrueCanceled($uid)
     {
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         if ($order) {
 
@@ -4431,6 +4435,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("orderIdMemory $uid");
         Log::debug("orderIdMemory $pay_system");
 
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
         switch ($pay_system) {
@@ -5154,9 +5159,10 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
             return null;
         }
-        $newOrder = $order->replicate();
+//        $newOrder = $order->replicate();
+//        $newOrder = $order;
         // Сохраняем копию в базе данных
-        $newOrder->save();
+
 
         $city = $order->city;
         Log::info("Город заказа: " . $city);
@@ -5303,18 +5309,18 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
 
-                $newOrder->dispatching_order_uid = $order_new_uid;
-                $newOrder->auto = null;
+                $order->dispatching_order_uid = $order_new_uid;
+                $order->auto = null;
 
-                $newOrder->web_cost = $responseArr["order_cost"];
+                $order->web_cost = $responseArr["order_cost"];
 
                 if ($typeAdd == 20) {
-                    $newOrder->attempt_20 = (int)$newOrder->attempt_20 + 1;
+                    $order->attempt_20 = (int)$order->attempt_20 + 1;
                 }
 
-                $newOrder->closeReason = "-1";
-                $newOrder->closeReasonI = "0";
-                $newOrder->save();
+                $order->closeReason = "-1";
+                $order->closeReasonI = "0";
+                $order->save();
 
                 Log::info("Обновлен order с новым UID: " . $order_new_uid);
 
@@ -5324,7 +5330,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
 
-                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
                 Log::info("Сообщение о восстановлении машины отправлено.");
 
 
@@ -5362,7 +5368,7 @@ class UniversalAndroidFunctionController extends Controller
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
-        $email = $order->email;
+
 
         // Ищем данные из памяти о заказе
         $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
@@ -5373,6 +5379,8 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
             return null;
         }
+
+        $email = $order->email;
 
 
         $city = $order->city;
@@ -5490,7 +5498,7 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
-        try {
+//        try {
             Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
             $response = Http::withHeaders([
                 "Authorization" => $authorization,
@@ -5503,6 +5511,14 @@ class UniversalAndroidFunctionController extends Controller
                 Log::info("Успешный ответ API с кодом 200");
                 $responseArr = $response->json();
 
+                if(isset($responseArr["Message"])) {
+                    $Message = $responseArr["Message"];
+                    return response()->json([
+                        "response" => $Message
+                    ], 200);
+                }
+
+
                 $orderNew = $responseArr["dispatching_order_uid"];
 
                 (new PusherController)->sentUidAppEmailPayType(
@@ -5513,18 +5529,15 @@ class UniversalAndroidFunctionController extends Controller
                 );
 
 
-                (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
 
-                $newOrder = $order->replicate();
 
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
-//                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-//                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -5533,23 +5546,23 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
 
-                $newOrder->dispatching_order_uid = $order_new_uid;
-                $newOrder->auto = null;
-                $newOrder->web_cost = $responseArr["order_cost"];
-                $newOrder->closeReason = "-1";
-                $newOrder->closeReasonI = "0";
-                $newOrder->attempt_20 += 20;
-                $newOrder->save();
+                $order->dispatching_order_uid = $order_new_uid;
+                $order->auto = null;
+                $order->web_cost = $responseArr["order_cost"];
+                $order->closeReason = "-1";
+                $order->closeReasonI = "0";
+                $order->attempt_20 += $addCost;
+                $order->save();
 
                 Log::info("Обновлен order с новым UID: " . $order_new_uid);
 
-                if ($newOrder->pay_system == "nal_payment" && $newOrder->route_undefined == "0") {
+                if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
                 }
 
                 Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
 
-                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
                 Log::info("Сообщение о восстановлении машины отправлено.");
 
 
@@ -5557,18 +5570,25 @@ class UniversalAndroidFunctionController extends Controller
                     "response" => "200"
                 ], 200);
             } else {
+
                 Log::error("Неудачный запрос: статус " . $response->status());
                 Log::error("Ответ от API: " . $response->body());
+                (new MessageSentController)->sentMessageAdmin("Неудачный запрос: статус " . $response->status());
+                (new MessageSentController)->sentMessageAdmin("Ответ от API: " . $response->body());
+                $responseArr = $response->json();
+
+                $Message = $responseArr["Message"];
                 return response()->json([
-                    "response" => "400"
+                    "response" => $Message
                 ], 200);
             }
-        } catch (\Exception $e) {
-            Log::error("Поймано исключение: 212 " . $e->getMessage());
-            return response()->json([
-                "response" => "401"
-            ], 200);
-        }
+//        } catch (\Exception $e) {
+//            Log::error("Поймано исключение: 212 " . $e->getMessage());
+//            (new MessageSentController)->sentMessageAdmin("Поймано исключение: 212 " . $e->getMessage());
+//            return response()->json([
+//                "response" => "401"
+//            ], 200);
+//        }
     }
 
     /**
@@ -5743,7 +5763,8 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
 
-                $newOrder = $order->replicate();
+//                $newOrder = $order->replicate();
+//                $newOrder = $order;
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -5757,13 +5778,13 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->save();
 
 
-                $newOrder->dispatching_order_uid = $order_new_uid;
-                $newOrder->auto = null;
-                $newOrder->web_cost = $responseArr["order_cost"];
-                $newOrder->closeReason = "-1";
-                $newOrder->closeReasonI = "0";
-                $newOrder->attempt_20 += (int)$addCost;
-                $newOrder->save();
+                $order->dispatching_order_uid = $order_new_uid;
+                $order->auto = null;
+                $order->web_cost = $responseArr["order_cost"];
+                $order->closeReason = "-1";
+                $order->closeReasonI = "0";
+                $order->attempt_20 += (int)$addCost;
+                $order->save();
 
                 Log::info("Обновлен order с новым UID: " . $order_new_uid);
 
@@ -5773,7 +5794,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::info("Запись в Firestore выполнена для UID: " . $order_new_uid);
 
-                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($newOrder);
+                (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
                 Log::info("Сообщение о восстановлении машины отправлено.");
 
 
@@ -5930,6 +5951,7 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "Метод startAddCostCardCreat вызван с UID: " . $uid;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
+
         $order_first = Orderweb::where("dispatching_order_uid", $uid)->first();
         // Получаем UID из MemoryOrderChangeController
         $uid = (new MemoryOrderChangeController)->show($uid);
@@ -6082,12 +6104,8 @@ class UniversalAndroidFunctionController extends Controller
                     $application
                 );
 
-                $newOrder = $order->replicate();
-                // Сохраняем копию в базе данных
-                $newOrder->save();
-
-                $order->wfp_status_pay = "AddCost";
-                $order->save();
+//                $newOrder = $order->replicate();
+//                $newOrder = $order;
 
 
                 $responseArr = $responseFinal->json();
@@ -6115,14 +6133,14 @@ class UniversalAndroidFunctionController extends Controller
                 }
 
 
-                $newOrder->dispatching_order_uid = $order_new_uid;
-                $newOrder->auto = null;
-                $newOrder->wfp_order_id = $orderReference;
-                $newOrder->web_cost = $responseArr["order_cost"];
-                $newOrder->attempt_20 = (int)$newOrder->attempt_20 + 1;
-                $newOrder->closeReason = "-1";
-                $newOrder->closeReasonI = "0";
-                $newOrder->save();
+                $order->dispatching_order_uid = $order_new_uid;
+                $order->auto = null;
+                $order->wfp_order_id = $orderReference;
+                $order->web_cost = $responseArr["order_cost"];
+                $order->attempt_20 = (int)$order->attempt_20 + 1;
+                $order->closeReason = "-1";
+                $order->closeReasonI = "0";
+                $order->save();
 
                 Log::info("Обновлен order с новым UID: " . $order_new_uid);
 //Запуск вилки
@@ -6219,7 +6237,6 @@ class UniversalAndroidFunctionController extends Controller
         // Ищем заказ
 
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $email = $order->email;
 
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
@@ -6228,6 +6245,8 @@ class UniversalAndroidFunctionController extends Controller
         } else {
             $uid_Double = $uid_history-> uid_doubleOrder;
         }
+        $email = $order->email;
+
 
         Log::debug("Найден order с UID startAddCostCardBottomCreat : " . ($order ? $order->dispatching_order_uid : 'null'));
         $messageAdmin = "Найден order с UID startAddCostCardBottomCreat: " . ($order ? $order->dispatching_order_uid : 'null');
@@ -6354,8 +6373,9 @@ class UniversalAndroidFunctionController extends Controller
             ) {
                 $messageAdmin = "startAddCostCardBottomCreat: новые заказы по вилке для доплаты не создались";
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
                 return response()->json([
-                    "response" => "400"
+                    "response" => "Новый заказ не создался"
                 ], 200);
 
             }
@@ -6381,13 +6401,34 @@ class UniversalAndroidFunctionController extends Controller
 
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
-                $order->wfp_status_pay = "AddCost";
-                $order->closeReason = "1";
-                $order->save();
+
+
+
+
+
 
                 Log::info("Успешный ответ API с кодом 200 startAddCostCardBottomCreat");
 
                 $responseArr = $responseFinal->json();
+                if(isset($responseArr["Message"])) {
+                    $Message = $responseArr["Message"];
+                    return response()->json([
+                        "response" => $Message
+                    ], 200);
+                }
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+                $uid_history->cancel = true;
+                $uid_history->save();
+
+                $controller = new AndroidTestOSMController();
+                $controller->webordersCancelDouble(
+                    $uid,
+                    $uid_Double,
+                    $payment_type,
+                    $city,
+                    $application
+                );
+
                 Log::debug("Ответ от API startAddCostCardBottomCreat: " . json_encode($responseArr));
 
                 $orderNew = $responseArr["dispatching_order_uid"];
@@ -6398,20 +6439,6 @@ class UniversalAndroidFunctionController extends Controller
                     $email,
                     $pay_method
                 );
-
-                (new AndroidTestOSMController)->webordersCancelDouble(
-                    $uid,
-                    $uid_Double,
-                    $pay_method,
-                    $city,
-                    $application
-                );
-
-                $newOrder = $order->replicate();
-
-
-
-
 
 
                 Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
@@ -6436,14 +6463,14 @@ class UniversalAndroidFunctionController extends Controller
                     }
                 }
 
-                $newOrder->dispatching_order_uid = $order_new_uid;
-                $newOrder->auto = null;
-                $newOrder->wfp_order_id = $orderReference;
-                $newOrder->web_cost = $responseArr["order_cost"];
-                $newOrder->closeReason = "-1";
-                $newOrder->closeReasonI = "0";
-                $newOrder->attempt_20 += $addCost;
-                $newOrder->save();
+                $order->dispatching_order_uid = $order_new_uid;
+                $order->auto = null;
+                $order->wfp_order_id = $orderReference;
+                $order->web_cost = $responseArr["order_cost"];
+                $order->closeReason = "-1";
+                $order->closeReasonI = "0";
+                $order->attempt_20 += $addCost;
+                $order->save();
 
                 Log::info("Обновлен order с новым UID startAddCostCardBottomCreat: " . $order_new_uid);
 //Запуск вилки
@@ -6513,6 +6540,7 @@ class UniversalAndroidFunctionController extends Controller
                     "response" => "200"
                 ], 200);
             } else {
+
                 Log::error("Неудачный запрос: статус  " . $response->status());
                 Log::error("Ответ от API: " . $response->body());
                 return response()->json([

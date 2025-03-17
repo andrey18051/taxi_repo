@@ -447,33 +447,6 @@ class UIDController extends Controller
     }
     public function UIDStatusShowEmailCancelApp($email, $cityApp, $app)
     {
-//        switch ($cityApp) {
-//            case "Lviv":
-//            case "Ivano_frankivsk":
-//            case "Vinnytsia":
-//            case "Poltava":
-//            case "Sumy":
-//            case "Kharkiv":
-//            case "Chernihiv":
-//            case "Rivne":
-//            case "Ternopil":
-//            case "Khmelnytskyi":
-//            case "Zakarpattya":
-//            case "Zhytomyr":
-//            case "Kropyvnytskyi":
-//            case "Mykolaiv":
-//            case "Сhernivtsi":
-//            case "Lutsk":
-//            case "foreign countries":
-//                $city = "OdessaTest";
-//                break;
-//            default:
-//                $city = $cityApp;
-//        }
-
-
-
-
         switch ($app) {
             case "PAS1":
                 $application = "taxi_easy_ua_pas1";
@@ -560,7 +533,6 @@ class UIDController extends Controller
             ->whereIn('closeReason', ['-1', '101', '102'])
             ->where("comment", $application)
             ->where("city", $city)
-
             ->orderBy("created_at", "desc")
             ->get();
 
@@ -585,6 +557,11 @@ class UIDController extends Controller
                 ->where("comment", $application)
                 ->orderBy("created_at", "desc")
                 ->get();
+
+//            $controller = new MemoryOrderChangeController();
+//            $orderHistory = $controller->getFilteredOrders($orderHistory);
+
+
             if ($orderHistory) {
                 $i = 0;
                 $orderUpdate = $orderHistory->toArray();
