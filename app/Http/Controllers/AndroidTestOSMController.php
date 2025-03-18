@@ -151,7 +151,7 @@ class AndroidTestOSMController extends Controller
             $response_bonus = Http::withHeaders($header)->put($url);
 
             $messageAdmin = "2 Отмена заказа repeatCancel $url " .json_encode($response_bonus);
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             // Проверка статуса после отмены
             sleep(5);
@@ -166,7 +166,7 @@ class AndroidTestOSMController extends Controller
                     $response_arr = json_decode($response_uid->body(), true);
 
                     $messageAdmin = "1 Отмена заказа repeatCancel $url " .$response_arr['close_reason'];
-                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                     if ($response_arr['close_reason'] == 1) {
                         Log::debug("repeatCancel: close_reason is 1, exiting.");
@@ -8738,15 +8738,14 @@ class AndroidTestOSMController extends Controller
 
             $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
-            if ($uid_history) {
-                $uid = $uid_history->uid_bonusOrder;
-                $uid_Double = $uid_history->uid_doubleOrder;
+            $uid = $uid_history->uid_bonusOrder;
+            $uid_Double = $uid_history->uid_doubleOrder;
 
-                $messageAdmin = "webordersCancelDouble \n uid_history " . print_r($uid_history->toArray()) ;
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-                Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
-            }
+            UniversalAndroidFunctionController::deleteJobByUid($uid);
+
 
             $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
@@ -8771,13 +8770,14 @@ class AndroidTestOSMController extends Controller
 
             // status bonus
             $url = $connectAPI . '/api/weborders/' . $uid;
+
             $responseArr = (new UniversalAndroidFunctionController)->getStatus(
                 $header,
                 $url
             );
 
-            $messageAdmin = "webordersCancelDouble stutus bonus Отмена заказа uid $uid \n " .json_encode($responseArr);
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            $messageAdmin = "webordersCancelDouble stutus bonus Отмена заказа uid $uid \n " .$responseArr["close_reason"];
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             if ($responseArr["close_reason"] != 1) {
                 $result_bonus_cancel = self::repeatCancel(
@@ -8798,7 +8798,7 @@ class AndroidTestOSMController extends Controller
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
 
-            $messageAdmin = "webordersCancelDouble uid_double \n url_cancel $url_cancel" ;
+            $messageAdmin = "webordersCancelDouble uid_double \n url $url" ;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $header = [
@@ -8820,7 +8820,7 @@ class AndroidTestOSMController extends Controller
                 $url
             );
 
-            $messageAdmin = "webordersCancelDouble status double Отмена заказа  " .json_encode($responseArr);
+            $messageAdmin = "webordersCancelDouble status double Отмена заказа  " . $responseArr["close_reason"];
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             if ($responseArr["close_reason"] != 1) {
@@ -8843,8 +8843,8 @@ class AndroidTestOSMController extends Controller
                 $orderweb->closeReason = "1";
                 $orderweb->save();
 
-                $uid_history->cancel = true;
-                $uid_history->save();
+
+
             }
 
             (new MessageSentController)->sentMessageAdmin("webordersCancelDouble orderweb \n $orderweb");

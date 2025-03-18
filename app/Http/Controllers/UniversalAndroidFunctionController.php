@@ -213,6 +213,55 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
+    public function deleteJobByUid($uid_bonusOrderHold)
+    {
+        try {
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid_bonusOrderHold)->first();
+            if (!$uid_history) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Запись с указанным ID не найдена',
+                ], 404);
+            }
+            $orderId = $uid_history->orderId;
+            $doubleOrderRecord = DoubleOrder::find($orderId);
+            if ($doubleOrderRecord) {
+                $doubleOrderRecord->delete();
+                $messageAdmin = "Запись  $orderId удалена из DoubleOrder";
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            }
+
+
+            $id = $uid_history->jobId;
+            // Проверяем, существует ли запись с указанным ID
+            $job = DB::table('jobs')->where('id', $id)->first();
+            if (!$job) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Запись с указанным ID не найдена',
+                ], 404);
+            }
+
+            // Удаляем запись
+            DB::table('jobs')->where('id', $id)->delete();
+            $messageAdmin = "Запись задачи $id удалена из Jobs";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            return response()->json([
+                'success' => true,
+                'message' => 'Запись успешно удалена',
+            ], 200);
+        } catch (\Exception $e) {
+            // Логируем ошибку
+
+            $messageAdmin = "Ошибка при удалении записи: " . $e->getMessage();
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            return response()->json([
+                'success' => false,
+                'message' => 'Произошла ошибка при удалении записи',
+            ], 500);
+        }
+    }
+
     /**
      * @throws \Exception
      */
