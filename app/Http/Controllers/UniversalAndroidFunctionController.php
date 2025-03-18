@@ -6402,11 +6402,6 @@ class UniversalAndroidFunctionController extends Controller
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
 
-
-
-
-
-
                 Log::info("Успешный ответ API с кодом 200 startAddCostCardBottomCreat");
 
                 $responseArr = $responseFinal->json();
@@ -6421,6 +6416,12 @@ class UniversalAndroidFunctionController extends Controller
                 $uid_history->save();
 
                 $controller = new AndroidTestOSMController();
+
+
+                $messageAdmin = "Add cost webordersCancelDouble \n uid $uid \n uid_Double $uid_Double \n payment_type $payment_type \n application $application" ;
+
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
                 $controller->webordersCancelDouble(
                     $uid,
                     $uid_Double,

@@ -8724,16 +8724,11 @@ class AndroidTestOSMController extends Controller
                 break;
         }
         $uid = (new MemoryOrderChangeController)->show($uid);
-        Log::debug("**********************************************************");
-        Log::debug("webordersCancelDouble uid $uid");
-        Log::debug("webordersCancelDouble uid_Double  $uid_Double");
-        Log::debug("webordersCancelDouble payment_type  $payment_type");
-        Log::debug("webordersCancelDouble city  $city");
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
         $payment_type = $orderweb->pay_system;
-        Log::debug("webordersCancelDouble payment_type pay_system  $payment_type");
+
         if ($orderweb) {
             $connectAPI = $orderweb->server;
 
@@ -8747,12 +8742,23 @@ class AndroidTestOSMController extends Controller
                 $uid = $uid_history->uid_bonusOrder;
                 $uid_Double = $uid_history->uid_doubleOrder;
 
+                $messageAdmin = "webordersCancelDouble \n uid_history " . print_r($uid_history->toArray()) ;
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
                 Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
             }
 
+            $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+
+            //// bonus section
+            // to cancel
             $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid;
             Log::debug(" webordersCancelDouble bonus $url_cancel");
+
+            $messageAdmin = "webordersCancelDouble bonus uid \n url_cancel $url_cancel" ;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $header = [
                 "Authorization" => $authorizationBonus,
@@ -8763,13 +8769,14 @@ class AndroidTestOSMController extends Controller
             $json_arrWeb_bonus = json_decode($response_bonus, true);
             Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
 
+            // status bonus
             $url = $connectAPI . '/api/weborders/' . $uid;
             $responseArr = (new UniversalAndroidFunctionController)->getStatus(
                 $header,
                 $url
             );
 
-            $messageAdmin = "Отмена заказа  " .json_encode($responseArr);
+            $messageAdmin = "webordersCancelDouble stutus bonus Отмена заказа uid $uid \n " .json_encode($responseArr);
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             if ($responseArr["close_reason"] != 1) {
@@ -8785,27 +8792,36 @@ class AndroidTestOSMController extends Controller
                 $result_bonus_cancel = "1";
             }
 
+
+            ///// double section
+            // to cancel
+
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
-            Log::debug(" webordersCancelDouble double $url");
+
+            $messageAdmin = "webordersCancelDouble uid_double \n url_cancel $url_cancel" ;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
             $header = [
                 "Authorization" => $authorizationDouble,
                 "X-WO-API-APP-ID" => self::identificationId($application),
             ];
+
             $response_double =Http::withHeaders($header)->put($url);
             $json_arrWeb_double = json_decode($response_double, true);
 
-            Log::debug("json_arrWeb_double", $json_arrWeb_double);
-            $messageAdmin = "Отмена заказа  $url json_arrWeb_double" .json_encode($json_arrWeb_double);
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
+            $messageAdmin = "webordersCancelDouble Отмена заказа  uid_double $uid_Double \n" .json_encode($json_arrWeb_double);
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            // status double
             $url = $connectAPI . '/api/weborders/' . $uid_Double;
             $responseArr = (new UniversalAndroidFunctionController)->getStatus(
                 $header,
                 $url
             );
 
-            $messageAdmin = "Отмена заказа  " .json_encode($responseArr);
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            $messageAdmin = "webordersCancelDouble status double Отмена заказа  " .json_encode($responseArr);
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             if ($responseArr["close_reason"] != 1) {
                 $result_double_cancel = self::repeatCancel(
@@ -8831,17 +8847,14 @@ class AndroidTestOSMController extends Controller
                 $uid_history->save();
             }
 
+            (new MessageSentController)->sentMessageAdmin("webordersCancelDouble orderweb \n $orderweb");
 
-            (new MessageSentController)->sentCancelInfo($orderweb);
-
-            Log::debug("webordersCancelDouble response $resp_answer");
-            Log::debug("**********************************************************");
 
         } else {
             $resp_answer = "Замовлення не вдалося скасувати.";
         }
 
-
+        (new MessageSentController)->sentMessageAdmin("webordersCancelDouble response $resp_answer");
         return [
             'response' => $resp_answer,
         ];
