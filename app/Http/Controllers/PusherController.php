@@ -123,7 +123,7 @@ class PusherController extends Controller
             Log::info("Событие $event успешно отправлено через Pusher для $email в $app. UID заказа: $order_uid");
 
             $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app после пересоздания: $order_uid";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             return response()->json(['result' => 'ok' . $order_uid]);
 
@@ -176,7 +176,7 @@ class PusherController extends Controller
             Log::info("Событие $event успешно отправлено через Pusher для $email в $app. UID заказа: $order_uid");
 
             $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app после пересоздания: $order_uid";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             return response()->json(['result' => 'ok' . $order_uid]);
 
@@ -265,7 +265,7 @@ class PusherController extends Controller
             $channel = 'teal-towel-48'; // Замените на нужный канал
             $event = 'orderResponseEvent-'. $app . "-$email";    // Замените на нужное событие
             $messageAdmin = "Событие sendDoubleStatus $event отправлен пользователю $email  в $app ";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             $pusher->trigger($channel, $event, $data);
 

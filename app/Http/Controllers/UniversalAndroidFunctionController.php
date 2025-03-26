@@ -5348,7 +5348,7 @@ class UniversalAndroidFunctionController extends Controller
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -5582,7 +5582,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
 
@@ -5817,7 +5817,7 @@ class UniversalAndroidFunctionController extends Controller
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -6163,7 +6163,7 @@ class UniversalAndroidFunctionController extends Controller
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::debug("Создан новый заказ с UID: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
 
@@ -6493,7 +6493,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
