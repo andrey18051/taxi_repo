@@ -38,7 +38,7 @@ class OrderHelper
         $parameter['add_cost'] =  (int)  $attempt_20 + (int)  $add_cost + (int) $newAddCost;
         $messageAdmin = "Параметры расчета нового заказа:" .
                    json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $responseCost = (new UniversalAndroidFunctionController)->postRequestHTTP(
             $urlCost,
@@ -73,7 +73,7 @@ class OrderHelper
 
             Log::error($messageAdmin);
         }
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
 

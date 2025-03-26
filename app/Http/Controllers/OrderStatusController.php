@@ -527,7 +527,7 @@ class OrderStatusController extends Controller
         $cardOrderInput = $uid_history->bonus_status;
 
         $messageAdmin = "getOrderStatusMessageResultPush: nal: $nalOrderInput, card: $cardOrderInput";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $nalOrder = json_decode($nalOrderInput, true);
         $cardOrder = json_decode($cardOrderInput, true);
@@ -536,7 +536,7 @@ class OrderStatusController extends Controller
         $cardState = $cardOrder['execution_status'] ?? 'SearchesForCar';
 
         $messageAdmin = "getOrderStatusMessageResultPush real: nalState: $nalState, cardState: $cardState";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
         $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
@@ -693,7 +693,7 @@ class OrderStatusController extends Controller
         $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
 
         $messageAdmin = "getOrderStatusMessageResultPush response: {$response}";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $response_arr = json_decode($response, true);
         if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
@@ -708,7 +708,7 @@ class OrderStatusController extends Controller
         $orderweb->save();
 
         $messageAdmin = "getOrderStatusMessageResultPush action: {$action}, nalState: $nalState, cardState: $cardState";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 //
 //        $messageAdmin = "getOrderStatusMessageResult response: dispatching_order_uid ". $response ;
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);

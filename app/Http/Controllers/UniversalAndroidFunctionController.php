@@ -228,7 +228,7 @@ class UniversalAndroidFunctionController extends Controller
             if ($doubleOrderRecord) {
                 $doubleOrderRecord->delete();
                 $messageAdmin = "Запись  $orderId удалена из DoubleOrder";
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             }
 
 
@@ -245,7 +245,7 @@ class UniversalAndroidFunctionController extends Controller
             // Удаляем запись
             DB::table('jobs')->where('id', $id)->delete();
             $messageAdmin = "Запись задачи $id удалена из Jobs";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             return response()->json([
                 'success' => true,
                 'message' => 'Запись успешно удалена',
@@ -254,7 +254,7 @@ class UniversalAndroidFunctionController extends Controller
             // Логируем ошибку
 
             $messageAdmin = "Ошибка при удалении записи: " . $e->getMessage();
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             return response()->json([
                 'success' => false,
                 'message' => 'Произошла ошибка при удалении записи',
@@ -5325,7 +5325,7 @@ class UniversalAndroidFunctionController extends Controller
 
 
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -5543,7 +5543,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int)$addCost + $addCostBalance;
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -5622,8 +5622,8 @@ class UniversalAndroidFunctionController extends Controller
 
                 Log::error("Неудачный запрос: статус " . $response->status());
                 Log::error("Ответ от API: " . $response->body());
-                (new MessageSentController)->sentMessageAdmin("Неудачный запрос: статус " . $response->status());
-                (new MessageSentController)->sentMessageAdmin("Ответ от API: " . $response->body());
+                (new MessageSentController)->sentMessageAdminLog("Неудачный запрос: статус " . $response->status());
+                (new MessageSentController)->sentMessageAdmin("Неудачный запрос: статус" . $response->status() . "Ответ от API: " . $response->body());
                 $responseArr = $response->json();
 
                 $Message = $responseArr["Message"];
@@ -5766,7 +5766,7 @@ class UniversalAndroidFunctionController extends Controller
         $url = $orderMemory->connectAPI;
         $parameter = json_decode($orderMemory->response, true);
         $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
             $url,
@@ -5782,7 +5782,7 @@ class UniversalAndroidFunctionController extends Controller
 //        $parameter['add_cost'] = (int) $order->attempt_20 + (int)$addCost+ $addCostBalance;
 
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -5998,7 +5998,7 @@ class UniversalAndroidFunctionController extends Controller
     {
         Log::info("Метод startAddCostCardCreat вызван с UID: " . $uid);
         $messageAdmin = "Метод startAddCostCardCreat вызван с UID: " . $uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
         $order_first = Orderweb::where("dispatching_order_uid", $uid)->first();
@@ -6007,7 +6007,7 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::info("MemoryOrderChangeController возвращает UID: " . $uid);
         $messageAdmin = "MemoryOrderChangeController возвращает UID: " . $uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
 
@@ -6066,7 +6066,7 @@ class UniversalAndroidFunctionController extends Controller
         $parameter['add_cost'] = (int) $order->web_cost - (int) $order_first->web_cost + (int) $order->add_cost + 20;
 
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
@@ -6246,7 +6246,7 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
 
                     $messageAdmin = "StartNewProcessExecution (startAddCostCardUpdate): " . json_encode($doubleOrder->toArray());
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                     StartNewProcessExecution::dispatch($doubleOrder->id);
                     return null;
@@ -6299,13 +6299,13 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::debug("Найден order с UID startAddCostCardBottomCreat : " . ($order ? $order->dispatching_order_uid : 'null'));
         $messageAdmin = "Найден order с UID startAddCostCardBottomCreat: " . ($order ? $order->dispatching_order_uid : 'null');
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         // Ищем данные из памяти о заказе
 
         $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
         Log::debug("Найден orderMemory с UID startAddCostCardBottomCreat: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null'));
         $messageAdmin = "Найден orderMemory с UID startAddCostCardBottomCreat: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null');
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         // Проверяем существование заказа
         if (!$order || !$orderMemory) {
             Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
@@ -6469,7 +6469,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 $messageAdmin = "Add cost webordersCancelDouble \n uid $uid \n uid_Double $uid_Double \n payment_type $payment_type \n application $application" ;
 
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $controller->webordersCancelDouble(
                     $uid,
@@ -6570,7 +6570,7 @@ class UniversalAndroidFunctionController extends Controller
                     Log::debug("response_arr : startAddCostCardBottomCreat" . json_encode($doubleOrder->toArray()));
 
                     $messageAdmin = "StartNewProcessExecution (startAddCostCardBottomCreat): " . json_encode($doubleOrder->toArray());
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                     self::deleteJobById($uid_history->orderId);
 

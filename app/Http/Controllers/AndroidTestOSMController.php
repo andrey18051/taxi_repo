@@ -151,7 +151,7 @@ class AndroidTestOSMController extends Controller
             $response_bonus = Http::withHeaders($header)->put($url);
 
             $messageAdmin = "2 Отмена заказа repeatCancel $url " .json_encode($response_bonus);
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             // Проверка статуса после отмены
             sleep(5);
@@ -166,7 +166,7 @@ class AndroidTestOSMController extends Controller
                     $response_arr = json_decode($response_uid->body(), true);
 
                     $messageAdmin = "1 Отмена заказа repeatCancel $url " .$response_arr['close_reason'];
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                     if ($response_arr['close_reason'] == 1) {
                         Log::debug("repeatCancel: close_reason is 1, exiting.");
@@ -8626,6 +8626,9 @@ class AndroidTestOSMController extends Controller
         (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb->closeReason = "1";
+        $orderweb->save();
+
         if ($orderweb) {
             $connectAPI = $orderweb->server;
 
@@ -8726,6 +8729,8 @@ class AndroidTestOSMController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb->closeReason = "1";
+        $orderweb->save();
 
         $payment_type = $orderweb->pay_system;
 
@@ -8744,7 +8749,7 @@ class AndroidTestOSMController extends Controller
             $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            UniversalAndroidFunctionController::deleteJobByUid($uid);
+            (new UniversalAndroidFunctionController)->deleteJobByUid($uid);
 
 
             $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
@@ -8842,12 +8847,9 @@ class AndroidTestOSMController extends Controller
             if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
                 $orderweb->closeReason = "1";
                 $orderweb->save();
-
-
-
             }
 
-            (new MessageSentController)->sentMessageAdmin("webordersCancelDouble orderweb \n $orderweb");
+            (new MessageSentController)->sentMessageAdminLog("webordersCancelDouble orderweb \n $orderweb");
 
 
         } else {

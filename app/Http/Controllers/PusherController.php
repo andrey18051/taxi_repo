@@ -69,7 +69,7 @@ class PusherController extends Controller
         // Отправка события на канал
         $pusher->trigger('teal-towel-48', 'order-status-updated', ['order_uid' =>  $order_uid]);
         $messageAdmin = "Отправлен номер нового заказа в ПАС после пересоздания: " . $order_uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         return response()->json(['result' => 'ok']);
     }
 
@@ -87,7 +87,7 @@ class PusherController extends Controller
 
         $pusher->trigger('teal-towel-48', 'order-status-updated-'. $app, ['order_uid' =>  $order_uid]);
         $messageAdmin = "Отправлен номер нового заказа в $app после пересоздания: " . $order_uid;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }
