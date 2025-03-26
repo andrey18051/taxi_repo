@@ -8626,8 +8626,8 @@ class AndroidTestOSMController extends Controller
         (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $orderweb->closeReason = "1";
-        $orderweb->save();
+//        $orderweb->closeReason = "1";
+//        $orderweb->save();
 
         if ($orderweb) {
             $connectAPI = $orderweb->server;
@@ -8729,8 +8729,8 @@ class AndroidTestOSMController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $orderweb->closeReason = "1";
-        $orderweb->save();
+//        $orderweb->closeReason = "1";
+//        $orderweb->save();
 
         $payment_type = $orderweb->pay_system;
 
