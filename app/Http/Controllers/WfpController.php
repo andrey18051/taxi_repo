@@ -2909,5 +2909,21 @@ class WfpController extends Controller
         RefundSettleCardPayJob::dispatch($params, $order["order_reference"], "refundVerifyCards");
     }
 
+    public function verifyHold ($uid): array
+    {
+        $result = "hold";
 
+        $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $uid)-> get();
+        if($wfpInvoices != null) {
+            foreach ($wfpInvoices as $value) {
+                if($value->transactionStatus !== "WaitingAuthComplete") {
+                    $result = "no_hold";
+                    return ["result" => $result];
+                }
+            }
+        }
+
+
+        return ["result" => $result];
+    }
 }

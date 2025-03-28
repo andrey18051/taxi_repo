@@ -8749,7 +8749,7 @@ class AndroidTestOSMController extends Controller
             $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            (new UniversalAndroidFunctionController)->deleteJobByUid($uid);
+//            (new UniversalAndroidFunctionController)->deleteJobByUid($uid);
 
 
             $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
