@@ -6464,14 +6464,12 @@ class UniversalAndroidFunctionController extends Controller
                 $uid_history->cancel = true;
                 $uid_history->save();
 
-                $controller = new AndroidTestOSMController();
-
 
                 $messageAdmin = "Add cost webordersCancelDouble \n uid $uid \n uid_Double $uid_Double \n payment_type $payment_type \n application $application" ;
 
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-                $controller->webordersCancelDouble(
+                (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,
                     $uid_Double,
                     $payment_type,

@@ -64,6 +64,34 @@ class MemoryOrderChangeController extends Controller
         }
         return $uid;
     }
+    public function getChain(string $uid)
+    {
+        $chain = []; // Массив для хранения всей цепочки номеров
+        $order_search = MemoryOrderChange::where("order_new", $uid)->first();
+
+        if ($order_search != null) {
+            do {
+                $chain[] = $uid;
+                $order_search = MemoryOrderChange::where("order_new", $uid)->first();
+                if ($order_search !== null) {
+                    $uid = $order_search->order_old; // Получаем новый номер
+                    $chain[] = $uid;// Добавляем текущий номер в массив
+                    // Проверяем, есть ли связь с следующим номером
+                    $orderweb = MemoryOrderChange::where("order_new", $uid)->first();
+                    if ($orderweb != null) {
+                        $uid = $orderweb->order_old;
+                    }
+                } else {
+                    $orderweb = null; // Завершаем цикл, если следующего номера нет
+                }
+
+
+
+            } while ($orderweb != null); // Продолжаем цикл, пока есть связь
+        }
+
+        return $chain; // Возвращаем массив номеров
+    }
 
     public function getFilteredOrders($orders)
     {

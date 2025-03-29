@@ -239,3 +239,5 @@ Route::get('/android/sendOrderResponse/{app}/{email}', [UniversalAndroidFunction
 Route::get('/android/parseOrderResponse/{response}/{dispatching_order_uid_Double}', [UniversalAndroidFunctionController::class, 'parseOrderResponse'])
     ->name('parseOrderResponse');
 
+Route::get('/android/getChain/{dispatching_order_uid_Double}', [\App\Http\Controllers\MemoryOrderChangeController::class, 'getChain'])
+    ->name('getChain');
