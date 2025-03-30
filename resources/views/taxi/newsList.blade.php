@@ -48,7 +48,7 @@
             </div>
 
 
-            <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" class="gradient"
+            <a  href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" class="gradient"
                 target="_blank" title="Розрахунок вартості"
                 style="text-decoration: none; margin-top: 20px">Низька ціна та Швидка подача таксі Києва та області.  <br>
                 Розрахуйте вартість поїздки онлайн.</a>
@@ -149,7 +149,7 @@
     <p class="mb-1">&copy; 2022</p> <!-- Легке замовлення таксі-->
     <ul class="list-inline">
     <!--        <li class="list-inline-item"><a href="{{ route('taxi-gdbr') }}" target="_blank">Конфіденційність</a></li>-->
-        <li class="list-inline-item"><a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank">Розрахунок вартості</a></li>
+        <li class="list-inline-item"><a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank">Розрахунок вартості</a></li>
         <li class="list-inline-item"><a href="{{ route('taxi-umovy') }}" target="_blank">Умови</a></li>
         <li class="list-inline-item"><a href="{{ route('feedback') }}" target="_blank">Підтримка</a></li>
         <li class="list-inline-item"><a href="https://www.facebook.com/people/Taxi-Easy-Ua/100085343706349/" target="_blank">Ми на Фейсбук</a></li>

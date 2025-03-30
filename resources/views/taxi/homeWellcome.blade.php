@@ -18,7 +18,7 @@
         <br>
 
         <div class="container text-center">
-            <a  class="btn btn-outline-success btn-sm col-3" href="{{route('homeStreet', [$phone, $user_name])}}" target="_blank">Вулиці</a>
+            <a  class="btn btn-outline-success btn-sm col-3" href="{{route('homeCombo', [$phone, $user_name])}}" target="_blank">Вулиці</a>
             <a  class="btn btn-outline-success btn-sm offset-1 col-3" href="{{route('homeObject', [$phone, $user_name])}}" target="_blank">Об'єкти</a>
             <a  class="btn btn-outline-success btn-sm offset-1 col-3" href="{{route('homeMap', [$phone, $user_name])}}" target="_blank">Мапа</a>
         </div>

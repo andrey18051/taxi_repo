@@ -45,7 +45,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-3 col-sm-6 col-md-3">
-                <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
 
                     <p  class="gradient text-opacity-25" id="poslugy">
                         <b>Послуги нашої служби.</b>
@@ -184,7 +184,7 @@
              <div class="col-lg-9 col-sm-6 col-md-9" >
 
                     <div class="container-fluid">
-                        <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}"
+                        <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}"
                                 style="text-decoration: none">
                             <h4 class="text-center text-primary"> <b>Пропонуємо Вам найсучасніший
                             сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h4>
@@ -280,7 +280,7 @@
 
 
                                         <li>
-                                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                                            <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                                                 <h5>
                                                     <i><b>На якому таксі дешевше?</b></i>
                                                 </h5>
@@ -333,7 +333,7 @@
                                         </li>
 
                                         <li>
-                                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                                            <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                                                 <h5>
                                                     <i><b>Яке таксі краще замовити у Києві та які є таксі?</b></i>
                                                 </h5>
@@ -346,7 +346,7 @@
                                         </li>
 
                                         <li>
-                                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                                            <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                                                 <h5>
                                                     <i><b>Коли таксі дешевше у Києві?</b></i>
                                                 </h5>
@@ -360,7 +360,7 @@
                                         </li>
 
                                         <li>
-                                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                                            <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                                                 <h5>
                                                     <i><b>Скільки коштує таксі в Києві зараз, яке таксі в Києві найдешевше
                                                             і які розцінки на послуги таксі?</b></i>
@@ -438,7 +438,7 @@
                                         </li>
 
                                         <li>
-                                            <a href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}"
+                                            <a href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}"
                                                target="_blank">
                                             <h5 style="text-align: center">
                                                 <b>Служба Таксі Лайт Юа – це завжди надійно, комфортно та вигідно. <br>
@@ -453,7 +453,7 @@
                             </div>
 
                 <news-component></news-component>
-                 <a  href="{{route('homeStreet', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
+                 <a  href="{{route('homeCombo', [$phone = '000', $user_name = 'Новий замовник'])}}" target="_blank" style="text-decoration: none;">
                      <blockquote class="blockquote-3">
                          <p> <?php echo $quitesArr[$rand] ?></p>
                          <cite>Цитата дня</cite>

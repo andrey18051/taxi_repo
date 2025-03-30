@@ -541,181 +541,183 @@ class OrderStatusController extends Controller
 
         $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
 
-        switch ($orderweb->comment) {
-            case 'taxi_easy_ua_pas1':
-                $app = "PAS1";
-                break;
-            case 'taxi_easy_ua_pas2':
-                $app = "PAS2";
-                break;
-            default:
-                $app = "PAS4";
-        }
-        $email = $orderweb->email;
+        if ($orderweb && isset($orderweb->comment) && isset($orderweb->email)) {
+            switch ($orderweb->comment) {
+                case 'taxi_easy_ua_pas1':
+                    $app = "PAS1";
+                    break;
+                case 'taxi_easy_ua_pas2':
+                    $app = "PAS2";
+                    break;
+                default:
+                    $app = "PAS4";
+            }
+            $email = $orderweb->email;
+            // Блок 1: Состояния "Поиск авто"
+            if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&
+                in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])) {
+                $action = 'Поиск авто';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'SearchesForCar' && $cardState === 'CostCalculation') {
+                $action = 'Поиск авто';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'CostCalculation' && $cardState === 'SearchesForCar') {
+                $action = 'Поиск авто';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'Canceled' && $cardState === 'SearchesForCar') {
+                $action = 'Поиск авто';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'SearchesForCar' && $cardState === 'Canceled') {
+                $action = 'Поиск авто';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'Canceled' && $cardState === 'WaitingCarSearch') {
+                $action = 'Поиск авто';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'WaitingCarSearch' && $cardState === 'Canceled') {
+                $action = 'Поиск авто';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'CostCalculation' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])){
+                $action = 'Поиск авто';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) && $cardState === 'CostCalculation') {
+                $action = 'Поиск авто';
+                $response = $nalOrderInput; // НАЛ
+            }
 
-        // Блок 1: Состояния "Поиск авто"
-        if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&
-            in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])) {
-            $action = 'Поиск авто';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'SearchesForCar' && $cardState === 'CostCalculation') {
-            $action = 'Поиск авто';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'CostCalculation' && $cardState === 'SearchesForCar') {
-            $action = 'Поиск авто';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'Canceled' && $cardState === 'SearchesForCar') {
-            $action = 'Поиск авто';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'SearchesForCar' && $cardState === 'Canceled') {
-            $action = 'Поиск авто';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'Canceled' && $cardState === 'WaitingCarSearch') {
-            $action = 'Поиск авто';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'WaitingCarSearch' && $cardState === 'Canceled') {
-            $action = 'Поиск авто';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'CostCalculation' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])){
-            $action = 'Поиск авто';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) && $cardState === 'CostCalculation') {
-            $action = 'Поиск авто';
-            $response = $nalOrderInput; // НАЛ
-        }
+            // Блок 2: Состояния "Авто найдено"
+            elseif ($nalState === 'SearchesForCar' && in_array($cardState, ['CarFound', 'Running'])) {
+                $action = 'Авто найдено';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'SearchesForCar') {
+                $action = 'Авто найдено';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'WaitingCarSearch' && in_array($cardState, ['CarFound', 'Running'])) {
+                $action = 'Авто найдено';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'WaitingCarSearch') {
+                $action = 'Авто найдено';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'CarFound' && in_array($cardState, ['CarFound', 'Running'])) {
+                $action = 'Авто найдено';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'Running' && $cardState === 'CarFound') {
+                $action = 'Авто найдено';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'Running' && $cardState === 'Running') {
+                $action = 'Авто найдено';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'Canceled' && in_array($cardState, ['CarFound', 'Running'])) {
+                $action = 'Авто найдено';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'Canceled') {
+                $action = 'Авто найдено';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'CostCalculation' && in_array($cardState, ['CarFound', 'Running'])) {
+                $action = 'Авто найдено';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'CostCalculation') {
+                $action = 'Авто найдено';
+                $response = $nalOrderInput; // НАЛ
+            }
 
-        // Блок 2: Состояния "Авто найдено"
-        elseif ($nalState === 'SearchesForCar' && in_array($cardState, ['CarFound', 'Running'])) {
-            $action = 'Авто найдено';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'SearchesForCar') {
-            $action = 'Авто найдено';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'WaitingCarSearch' && in_array($cardState, ['CarFound', 'Running'])) {
-            $action = 'Авто найдено';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'WaitingCarSearch') {
-            $action = 'Авто найдено';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'CarFound' && in_array($cardState, ['CarFound', 'Running'])) {
-            $action = 'Авто найдено';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'Running' && $cardState === 'CarFound') {
-            $action = 'Авто найдено';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'Running' && $cardState === 'Running') {
-            $action = 'Авто найдено';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'Canceled' && in_array($cardState, ['CarFound', 'Running'])) {
-            $action = 'Авто найдено';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'Canceled') {
-            $action = 'Авто найдено';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'CostCalculation' && in_array($cardState, ['CarFound', 'Running'])) {
-            $action = 'Авто найдено';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'CostCalculation') {
-            $action = 'Авто найдено';
-            $response = $nalOrderInput; // НАЛ
-        }
-
-        // Блок 3: Состояния "Заказ выполнен"
-        elseif ($nalState === 'Executed' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running'])) {
-            $action = 'Заказ выполнен';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running']) && $cardState === 'Executed') {
-            $action = 'Заказ выполнен';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'Executed' && $cardState === 'CostCalculation') {
-            $action = 'Заказ выполнен';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'CostCalculation' && $cardState === 'Executed') {
-            $action = 'Заказ выполнен';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        // Блок 4: Состояния "Заказ снят" с проверкой close_reason
-        elseif ($nalState === 'Canceled' && $cardState === 'CostCalculation') {
-            $closeReason = $nalOrder['close_reason'] ?? -1;
-            $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
-            $response = $nalOrderInput; // НАЛ
-        }
-        elseif ($nalState === 'CostCalculation' && $cardState === 'Canceled') {
-            $closeReason = $cardOrder['close_reason'] ?? -1;
-            $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'CostCalculation' && $cardState === 'CostCalculation') {
-            $closeReasonNal = $nalOrder['close_reason'] ?? -1;
-            $closeReasonCard = $cardOrder['close_reason'] ?? -1;
-            if($closeReasonNal != -1 && $closeReasonCard != -1) {
-                $action = 'Заказ снят';
+            // Блок 3: Состояния "Заказ выполнен"
+            elseif ($nalState === 'Executed' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running'])) {
+                $action = 'Заказ выполнен';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running']) && $cardState === 'Executed') {
+                $action = 'Заказ выполнен';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'Executed' && $cardState === 'CostCalculation') {
+                $action = 'Заказ выполнен';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'CostCalculation' && $cardState === 'Executed') {
+                $action = 'Заказ выполнен';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            // Блок 4: Состояния "Заказ снят" с проверкой close_reason
+            elseif ($nalState === 'Canceled' && $cardState === 'CostCalculation') {
+                $closeReason = $nalOrder['close_reason'] ?? -1;
+                $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                $response = $nalOrderInput; // НАЛ
+            }
+            elseif ($nalState === 'CostCalculation' && $cardState === 'Canceled') {
+                $closeReason = $cardOrder['close_reason'] ?? -1;
+                $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'CostCalculation' && $cardState === 'CostCalculation') {
+                $closeReasonNal = $nalOrder['close_reason'] ?? -1;
+                $closeReasonCard = $cardOrder['close_reason'] ?? -1;
+                if($closeReasonNal != -1 && $closeReasonCard != -1) {
+                    $action = 'Заказ снят';
+                } else {
+                    $action = 'Поиск авто';
+                }
+                $response = $cardOrderInput; // БЕЗНАЛ
+            }
+            elseif ($nalState === 'Canceled' && $cardState === 'Canceled') {
+                $closeReasonNal = $nalOrder['close_reason'] ?? -1;
+                $closeReasonCard = $cardOrder['close_reason'] ?? -1;
+                if($closeReasonNal != -1 && $closeReasonCard != -1) {
+                    $action = 'Заказ снят';
+                } else {
+                    $action = 'Поиск авто';
+                }
+                $response = $cardOrderInput; // БЕЗНАЛ
             } else {
                 $action = 'Поиск авто';
+                $response = $nalOrderInput;
             }
-            $response = $cardOrderInput; // БЕЗНАЛ
-        }
-        elseif ($nalState === 'Canceled' && $cardState === 'Canceled') {
-            $closeReasonNal = $nalOrder['close_reason'] ?? -1;
-            $closeReasonCard = $cardOrder['close_reason'] ?? -1;
-            if($closeReasonNal != -1 && $closeReasonCard != -1) {
-                $action = 'Заказ снят';
+
+            $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+
+            $messageAdmin = "getOrderStatusMessageResultPush response: {$response}";
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            $response_arr = json_decode($response, true);
+            if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
+                $orderweb->auto = $response_arr["order_car_info"];
+            }
+            if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
+                $orderweb->closeReason = 1;
             } else {
-                $action = 'Поиск авто';
+                $orderweb->closeReason = $response_arr["close_reason"] ?? -1; // Значение по умолчанию, если close_reason тоже отсутствует
             }
-            $response = $cardOrderInput; // БЕЗНАЛ
-        } else {
-            $action = 'Поиск авто';
-            $response = $nalOrderInput;
-        }
 
-        $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+            $orderweb->save();
 
-        $messageAdmin = "getOrderStatusMessageResultPush response: {$response}";
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-        $response_arr = json_decode($response, true);
-        if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
-            $orderweb->auto = $response_arr["order_car_info"];
-        }
-        if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
-            $orderweb->closeReason = 1;
-        } else {
-            $orderweb->closeReason = $response_arr["close_reason"] ?? -1; // Значение по умолчанию, если close_reason тоже отсутствует
-        }
-
-        $orderweb->save();
-
-        $messageAdmin = "getOrderStatusMessageResultPush action: {$action}, nalState: $nalState, cardState: $cardState";
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            $messageAdmin = "getOrderStatusMessageResultPush action: {$action}, nalState: $nalState, cardState: $cardState";
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 //
 //        $messageAdmin = "getOrderStatusMessageResult response: dispatching_order_uid ". $response ;
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        (new PusherController)->sendDoubleStatus($response, $app, $email);
+            (new PusherController)->sendDoubleStatus($response, $app, $email);
 
-//        return $response; // Возвращаем результат с action в JSON
+        }
+
+
     }
 
     public function addActionToResponse($response, $action)
