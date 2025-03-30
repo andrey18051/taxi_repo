@@ -24,6 +24,7 @@ use App\Models\OdessaCombo;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Models\ZaporizhzhiaCombo;
+use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
@@ -8595,44 +8596,43 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-
-        switch ($city) {
-            case "Lviv":
-            case "Ivano_frankivsk":
-            case "Vinnytsia":
-            case "Poltava":
-            case "Sumy":
-            case "Kharkiv":
-            case "Chernihiv":
-            case "Rivne":
-            case "Ternopil":
-            case "Khmelnytskyi":
-            case "Zakarpattya":
-            case "Zhytomyr":
-            case "Kropyvnytskyi":
-            case "Mykolaiv":
-            case "Сhernivtsi":
-            case "Lutsk":
-
-                $city = "OdessaTest";
-                break;
-            case "foreign countries":
-                $city = "Kyiv City";
-                break;
-        }
-        $resp_answer = "";
         $uid = (new MemoryOrderChangeController)->show($uid);
-
-        (new FCMController)->deleteDocumentFromFirestore($uid);
-        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-//        $orderweb->closeReason = "1";
-//        $orderweb->save();
-
+        $resp_answer = "";
         if ($orderweb) {
+            self::updateTimestamp($orderweb->id);
+
+            switch ($city) {
+                case "Lviv":
+                case "Ivano_frankivsk":
+                case "Vinnytsia":
+                case "Poltava":
+                case "Sumy":
+                case "Kharkiv":
+                case "Chernihiv":
+                case "Rivne":
+                case "Ternopil":
+                case "Khmelnytskyi":
+                case "Zakarpattya":
+                case "Zhytomyr":
+                case "Kropyvnytskyi":
+                case "Mykolaiv":
+                case "Сhernivtsi":
+                case "Lutsk":
+
+                    $city = "OdessaTest";
+                    break;
+                case "foreign countries":
+                    $city = "Kyiv City";
+                    break;
+            }
+
+
+
+            (new FCMController)->deleteDocumentFromFirestore($uid);
+            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
             $connectAPI = $orderweb->server;
 
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
@@ -8705,39 +8705,40 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        switch ($city) {
-            case "Lviv":
-            case "Ivano_frankivsk":
-            case "Vinnytsia":
-            case "Poltava":
-            case "Sumy":
-            case "Kharkiv":
-            case "Chernihiv":
-            case "Rivne":
-            case "Ternopil":
-            case "Khmelnytskyi":
-            case "Zakarpattya":
-            case "Zhytomyr":
-            case "Kropyvnytskyi":
-            case "Mykolaiv":
-            case "Сhernivtsi":
-            case "Lutsk":
-
-                $city = "OdessaTest";
-                break;
-            case "foreign countries":
-                $city = "Kyiv City";
-                break;
-        }
         $uid = (new MemoryOrderChangeController)->show($uid);
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-//        $orderweb->closeReason = "1";
-//        $orderweb->save();
-
-        $payment_type = $orderweb->pay_system;
 
         if ($orderweb) {
+            self::updateTimestamp($orderweb->id);
+
+            switch ($city) {
+                case "Lviv":
+                case "Ivano_frankivsk":
+                case "Vinnytsia":
+                case "Poltava":
+                case "Sumy":
+                case "Kharkiv":
+                case "Chernihiv":
+                case "Rivne":
+                case "Ternopil":
+                case "Khmelnytskyi":
+                case "Zakarpattya":
+                case "Zhytomyr":
+                case "Kropyvnytskyi":
+                case "Mykolaiv":
+                case "Сhernivtsi":
+                case "Lutsk":
+
+                    $city = "OdessaTest";
+                    break;
+                case "foreign countries":
+                    $city = "Kyiv City";
+                    break;
+            }
+
+            $payment_type = $orderweb->pay_system;
+
             $connectAPI = $orderweb->server;
 
             $authorizationChoiceArr = self::authorizationChoiceApp($payment_type, $city, $connectAPI, $application);
@@ -10354,6 +10355,13 @@ class AndroidTestOSMController extends Controller
             http_response_code(404);
             echo 'Файл не найден.';
         }
+    }
+
+    public static  function updateTimestamp($id)
+    {
+        $orderweb = Orderweb::find($id);
+        $orderweb->cancel_timestamp = Carbon::now();
+        $orderweb->save();
     }
 
 }
