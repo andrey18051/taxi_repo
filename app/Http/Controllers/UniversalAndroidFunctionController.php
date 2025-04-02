@@ -6469,13 +6469,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-                (new AndroidTestOSMController)->webordersCancelDouble(
-                    $uid,
-                    $uid_Double,
-                    $payment_type,
-                    $city,
-                    $application
-                );
+
 
                 Log::debug("Ответ от API startAddCostCardBottomCreat: " . json_encode($responseArr));
 
@@ -6488,6 +6482,13 @@ class UniversalAndroidFunctionController extends Controller
                     $pay_method
                 );
 
+                (new AndroidTestOSMController)->webordersCancelDouble(
+                    $uid,
+                    $uid_Double,
+                    $payment_type,
+                    $city,
+                    $application
+                );
 
                 Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

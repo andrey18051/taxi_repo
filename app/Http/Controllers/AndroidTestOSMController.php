@@ -8819,122 +8819,143 @@ class AndroidTestOSMController extends Controller
                 }
             }
 
+            $startTime = time(); // Запоминаем начальное время
 
+            do {
+                // Попробуем найти запись
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $uid = $uid_history->uid_bonusOrder;
+                    $uid_Double = $uid_history->uid_doubleOrder;
+                    break;
+                }
 
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+                // Ждём одну секунду перед следующим проверочным циклом
+                sleep(1);
+            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
 
-            $uid = $uid_history->uid_bonusOrder;
-            $uid_Double = $uid_history->uid_doubleOrder;
-
-            $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+// Если запись всё ещё не найдена, можно обработать ситуацию
+            if ($uid_history) {
+                Log::error("Запись uid_bonusOrderHold появилась в течение 1 минуты.");
+                $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
 //            (new UniversalAndroidFunctionController)->deleteJobByUid($uid);
 
 
-            $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
 
-            //// bonus section
-            // to cancel
-            $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid;
+                //// bonus section
+                // to cancel
+                $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid;
 
-            $messageAdmin = "webordersCancelDouble bonus uid \n url_cancel $url_cancel" ;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                $messageAdmin = "webordersCancelDouble bonus uid \n url_cancel $url_cancel" ;
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            $header = [
-                "Authorization" => $authorizationBonus,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-            ];
+                $header = [
+                    "Authorization" => $authorizationBonus,
+                    "X-WO-API-APP-ID" => self::identificationId($application),
+                ];
 
-            $response_bonus = Http::withHeaders($header)->put($url_cancel);
-            $json_arrWeb_bonus = json_decode($response_bonus, true);
+                $response_bonus = Http::withHeaders($header)->put($url_cancel);
+                $json_arrWeb_bonus = json_decode($response_bonus, true);
 
-            Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
+                Log::debug("json_arrWeb_bonus", $json_arrWeb_bonus);
 
-            // status bonus
-            $url = $connectAPI . '/api/weborders/' . $uid;
+                // status bonus
+                $url = $connectAPI . '/api/weborders/' . $uid;
 
-            $responseArr = (new UniversalAndroidFunctionController)->getStatus(
-                $header,
-                $url
-            );
-
-            $messageAdmin = "webordersCancelDouble status bonus Отмена заказа uid $uid \n " .$responseArr["close_reason"];
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-            if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
-                $result_bonus_cancel = self::repeatCancel(
-                    $url_cancel,
-                    $authorizationBonus,
-                    $application,
-                    $city,
-                    $connectAPI,
-                    $uid
+                $responseArr = (new UniversalAndroidFunctionController)->getStatus(
+                    $header,
+                    $url
                 );
-            } else {
-                $result_bonus_cancel = "1";
-            }
+
+                $messageAdmin = "webordersCancelDouble status bonus Отмена заказа uid $uid \n " .$responseArr["close_reason"];
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
+                    $result_bonus_cancel = self::repeatCancel(
+                        $url_cancel,
+                        $authorizationBonus,
+                        $application,
+                        $city,
+                        $connectAPI,
+                        $uid
+                    );
+                } else {
+                    $result_bonus_cancel = "1";
+                }
 
 
-            ///// double section
-            // to cancel
+                ///// double section
+                // to cancel
 
-            $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+                $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
 
-            $messageAdmin = "webordersCancelDouble uid_double \n url $url_cancel" ;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                $messageAdmin = "webordersCancelDouble uid_double \n url $url_cancel" ;
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            $header = [
-                "Authorization" => $authorizationDouble,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-            ];
+                $header = [
+                    "Authorization" => $authorizationDouble,
+                    "X-WO-API-APP-ID" => self::identificationId($application),
+                ];
 
-            $response_double =Http::withHeaders($header)->put($url_cancel);
-            $json_arrWeb_double = json_decode($response_double, true);
+                $response_double =Http::withHeaders($header)->put($url_cancel);
+                $json_arrWeb_double = json_decode($response_double, true);
 
 
-            $messageAdmin = "webordersCancelDouble Отмена заказа  uid_double $uid_Double \n" .json_encode($json_arrWeb_double);
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                $messageAdmin = "webordersCancelDouble Отмена заказа  uid_double $uid_Double \n" .json_encode($json_arrWeb_double);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-            // status double
-            $url = $connectAPI . '/api/weborders/' . $uid_Double;
-            $responseArr = (new UniversalAndroidFunctionController)->getStatus(
-                $header,
-                $url
-            );
-
-            $messageAdmin = "webordersCancelDouble status double Отмена заказа  " . $responseArr["close_reason"];
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-            if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
-                $result_double_cancel = self::repeatCancel(
-                    $url_cancel,
-                    $authorizationDouble,
-                    $application,
-                    $city,
-                    $connectAPI,
-                    $uid_Double
+                // status double
+                $url = $connectAPI . '/api/weborders/' . $uid_Double;
+                $responseArr = (new UniversalAndroidFunctionController)->getStatus(
+                    $header,
+                    $url
                 );
-            } else {
-                $result_double_cancel = "1";
+
+                $messageAdmin = "webordersCancelDouble status double Отмена заказа  " . $responseArr["close_reason"];
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
+                    $result_double_cancel = self::repeatCancel(
+                        $url_cancel,
+                        $authorizationDouble,
+                        $application,
+                        $city,
+                        $connectAPI,
+                        $uid_Double
+                    );
+                } else {
+                    $result_double_cancel = "1";
+                }
+
+                $resp_answer = "Запит на скасування замовлення надіслано. ";
+
+
+                if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
+                    $orderweb->closeReason = "1";
+                    $orderweb->save();
+                }
+
+                (new MessageSentController)->sentMessageAdmin("webordersCancelDouble orderweb \n $orderweb");
+
+            }
+            else {
+                // Другие действия при отсутствии записи
+                $resp_answer = "Замовлення $uid не вдалося скасувати.";
+                (new MessageSentController)->sentMessageAdmin($resp_answer);
             }
 
-            $resp_answer = "Запит на скасування замовлення надіслано. ";
-
-
-            if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
-                $orderweb->closeReason = "1";
-                $orderweb->save();
-            }
-
-            (new MessageSentController)->sentMessageAdmin("webordersCancelDouble orderweb \n $orderweb");
 
 
         } else {
-            $resp_answer = "Замовлення не вдалося скасувати.";
+            $resp_answer = "Замовлення $uid не вдалося скасувати.";
+            (new MessageSentController)->sentMessageAdmin($resp_answer);
         }
 
         (new MessageSentController)->sentMessageAdmin("webordersCancelDouble response $resp_answer");
