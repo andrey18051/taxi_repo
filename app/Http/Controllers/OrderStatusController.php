@@ -533,6 +533,16 @@ class OrderStatusController extends Controller
                 $nalOrderInput = $uid_history->double_status;
                 $cardOrderInput = $uid_history->bonus_status;
                 break;
+            } else {
+                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $nalOrderInput = $uid_history->double_status;
+                    $cardOrderInput = $uid_history->bonus_status;
+                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
+                    break;
+                }
             }
 
             // Ждём одну секунду перед следующим проверочным циклом
