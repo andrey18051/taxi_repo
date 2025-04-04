@@ -79,7 +79,8 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/superv
 # Устанавливаем зависимости Laravel
 RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
     rm -rf vendor composer.lock && \
-    composer install --no-dev --optimize-autoloader
+    composer install --no-dev --optimize-autoloader && \
+    composer require predis/predis
 
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
@@ -101,6 +102,9 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
 
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
+
+
+
 
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

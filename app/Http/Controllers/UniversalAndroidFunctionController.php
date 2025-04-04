@@ -8,6 +8,7 @@ use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\StartAddCostCardCreat;
 
@@ -4394,24 +4395,46 @@ class UniversalAndroidFunctionController extends Controller
 //        $messageAdmin = "authorizationApp $cityString, $connectAPI, $app";
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        switch ($app) {
-            case "PAS1":
-                $city = City_PAS1::where('name', $cityString)
-                    ->where("address", str_replace("http://", "", $connectAPI))
-                    ->first();
-                break;
-            case "PAS2":
-                $city = City_PAS2::where('name', $cityString)
-                    ->where("address", str_replace("http://", "", $connectAPI))
-                    ->first();
-                break;
-            //case "PAS4":
-            default:
-                $city = City_PAS4::where('name', $cityString)
-                    ->where("address", str_replace("http://", "", $connectAPI))
-                    ->first();
-                break;
-        }
+//        switch ($app) {
+//            case "PAS1":
+//                $city = City_PAS1::where('name', $cityString)
+//                    ->where("address", str_replace("http://", "", $connectAPI))
+//                    ->first();
+//                break;
+//            case "PAS2":
+//                $city = City_PAS2::where('name', $cityString)
+//                    ->where("address", str_replace("http://", "", $connectAPI))
+//                    ->first();
+//                break;
+//            //case "PAS4":
+//            default:
+//                $city = City_PAS4::where('name', $cityString)
+//                    ->where("address", str_replace("http://", "", $connectAPI))
+//                    ->first();
+//                break;
+//        }
+
+        $cacheKey = $app . '_' . $cityString . '_' . $connectAPI;
+//        $messageAdmin = "cacheKey $cacheKey";
+//        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        $city = Cache::remember($cacheKey, now()->addDays(1), function () use ($app, $cityString, $connectAPI) {
+            switch ($app) {
+                case "PAS1":
+                    return City_PAS1::where('name', $cityString)
+                        ->where("address", str_replace("http://", "", $connectAPI))
+                        ->first();
+                case "PAS2":
+                    return City_PAS2::where('name', $cityString)
+                        ->where("address", str_replace("http://", "", $connectAPI))
+                        ->first();
+                default:
+                    return City_PAS4::where('name', $cityString)
+                        ->where("address", str_replace("http://", "", $connectAPI))
+                        ->first();
+            }
+        });
+
 //        $messageAdmin = "authorizationApp $city";
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
@@ -6879,7 +6902,11 @@ class UniversalAndroidFunctionController extends Controller
 
     }
 
-
+     public function testCache () {
+         Cache::put('test_key_redis', 'test_value_redis', 60); // Сохранить на 60 second
+         $value = Cache::get('test_key_redis');
+         dd($value); // Должно вывести 'test_value'
+     }
 
 
 }

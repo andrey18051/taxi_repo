@@ -53,9 +53,14 @@ return [
             'lock_connection' => null,
         ],
 
+//        'file' => [
+//            'driver' => 'file',
+//            'path' => '/usr/share/nginx/html/cache',
+//        ],
+
         'file' => [
             'driver' => 'file',
-            'path' => '/usr/share/nginx/html/cache',
+            'path' => storage_path('framework/cache/data'),
         ],
 
         'memcached' => [
