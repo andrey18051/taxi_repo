@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CacheHandler;
 use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderHelper;
@@ -214,39 +215,31 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
-    public function deleteJobByUid($uid_bonusOrderHold)
+    public function deleteJobByUid($orderId)
     {
         try {
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid_bonusOrderHold)->first();
-            if (!$uid_history) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Запись с указанным ID не найдена',
-                ], 404);
-            }
-            $orderId = $uid_history->orderId;
             $doubleOrderRecord = DoubleOrder::find($orderId);
             if ($doubleOrderRecord) {
                 $doubleOrderRecord->delete();
                 $messageAdmin = "Запись  $orderId удалена из DoubleOrder";
-                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
             }
 
 
-            $id = $uid_history->jobId;
-            // Проверяем, существует ли запись с указанным ID
-            $job = DB::table('jobs')->where('id', $id)->first();
-            if (!$job) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Запись с указанным ID не найдена',
-                ], 404);
-            }
-
-            // Удаляем запись
-            DB::table('jobs')->where('id', $id)->delete();
-            $messageAdmin = "Запись задачи $id удалена из Jobs";
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//            $id = $uid_history->jobId;
+//            // Проверяем, существует ли запись с указанным ID
+//            $job = DB::table('jobs')->where('id', $id)->first();
+//            if (!$job) {
+//                return response()->json([
+//                    'success' => false,
+//                    'message' => 'Запись с указанным ID не найдена',
+//                ], 404);
+//            }
+//
+//            // Удаляем запись
+//            DB::table('jobs')->where('id', $id)->delete();
+//            $messageAdmin = "Запись задачи $id удалена из Jobs";
+//            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             return response()->json([
                 'success' => true,
                 'message' => 'Запись успешно удалена',
@@ -435,6 +428,11 @@ class UniversalAndroidFunctionController extends Controller
                 return "exit";
             } else {
                 while (time() - $startTime < $maxExecutionTime) {
+
+                    $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
+                    if (!$doubleOrderRecord) {
+                        return "exit";
+                    }
                     if (time() <= strtotime($orderwebs->required_time)) {
                         $updateTime = 60;
                         $no_required_time = false;
@@ -6505,6 +6503,7 @@ class UniversalAndroidFunctionController extends Controller
                     $pay_method
                 );
 
+//                CacheHandler::cacheEventPut($uid, true, 60);
                 (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,
                     $uid_Double,

@@ -245,7 +245,8 @@ class PusherController extends Controller
     public function sendDoubleStatus(
         $response,
         $app,
-        $email
+        $email,
+        $sticker
     ): \Illuminate\Http\JsonResponse
     {
         try {
@@ -264,8 +265,10 @@ class PusherController extends Controller
             // Send the event via Pusher
             $channel = 'teal-towel-48'; // Замените на нужный канал
             $event = 'orderResponseEvent-'. $app . "-$email";    // Замените на нужное событие
-            $messageAdmin = "Событие sendDoubleStatus $event отправлен пользователю $email  в $app ";
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            $messageAdmin = "$sticker Событие sendDoubleStatus $event.  Данные: \n $data";
+
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $pusher->trigger($channel, $event, $data);
 
