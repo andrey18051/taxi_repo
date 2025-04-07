@@ -8599,6 +8599,7 @@ class AndroidTestOSMController extends Controller
     ) {
         $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
         $resp_answer = "";
         if ($orderweb) {
             self::updateTimestamp($orderweb->id);
@@ -8712,6 +8713,7 @@ class AndroidTestOSMController extends Controller
 
         if ($orderweb) {
             self::updateTimestamp($orderweb->id);
+
 
             switch ($city) {
                 case "Lviv":
@@ -8942,24 +8944,23 @@ class AndroidTestOSMController extends Controller
 
 
                 if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
-//                    $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+                    $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
                     $orderweb->closeReason = "1";
                     $orderweb->save();
                     $uid_history->cancel = "1";
                     $uid_history->save();
 
-//                    if(!CacheHandler::cacheEventResult($uid)) {
-                        $action = 'Заказ снят';
-                        $email = $orderweb->email;
-                        $app = $application;
-                        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+                    $action = 'Заказ снят';
+                    $email = $orderweb->email;
+                    $app = $application;
+                    $dispatching_order_uid = $orderweb->dispatching_order_uid;
 
-                        $response = (new OrderStatusController)->addActionToResponseUid($response_double, $action, $dispatching_order_uid);
-                        (new PusherController)->sendDoubleStatus($response, $app, $email, "1111 webordersCancelDouble ");
-                    }
+                    $response = (new OrderStatusController)->addActionToResponseUid($response_bonus, $action, $dispatching_order_uid);
+                    (new PusherController)->sendDoubleStatus($response, $app, $email, "1111 webordersCancelDouble ");
+
                     (new MessageSentController)->sentMessageAdmin("webordersCancelDouble снят заказ $orderweb->dispatching_order_uid");
-//                }
+                }
 
             }
             else {
