@@ -52,7 +52,7 @@ class StartCancelOrder implements ShouldQueue
     public function handle()
     {
         $messageAdmin = "Запущен процесс удаления заказа $this->uid и $this->uid_Double";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $result = (new AndroidTestOSMController)->webordersCancelDoubleWithoutReviewHold(
             $this->uid,
             $this->uid_Double,

@@ -54,7 +54,7 @@ class StartAddCostCardBottomCreat implements ShouldQueue
     public function handle()
     {
         $messageAdmin = "Запущен процесс создания нового безнального заказа с добавкой $this->addCost грн к стоимости заказа $this->uid ";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $result =(new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
             $this->uid,
             $this->uid_Double,

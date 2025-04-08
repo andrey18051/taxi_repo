@@ -367,7 +367,7 @@ class OrderStatusController extends Controller
 
 
         $messageAdmin = "getOrderStatusMessageResult real: nalState: $nalState, cardState: $cardState";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $action = 'Поиск авто';
         $response = $nalOrderInput;
@@ -511,7 +511,7 @@ class OrderStatusController extends Controller
         $response = $this->addActionToResponse($response, $action);
 
         $messageAdmin = "getOrderStatusMessageResult action: {$action}, nalState: $nalState, cardState: $cardState";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 //
 //        $messageAdmin = "getOrderStatusMessageResult response: dispatching_order_uid ". $response ;
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);

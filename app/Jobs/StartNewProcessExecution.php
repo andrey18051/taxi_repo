@@ -88,7 +88,7 @@ class StartNewProcessExecution implements ShouldQueue
                     $ui_Double = $uid_history->uid_doubleOrder;
 
                     $messageAdmin = "Найдена запись Uid_history: " . $ui . " - " . $ui_Double;
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                     //// bonus section
                     // to cancel
 

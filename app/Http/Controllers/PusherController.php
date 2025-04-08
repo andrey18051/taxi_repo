@@ -221,7 +221,7 @@ class PusherController extends Controller
 
             // Optional: Send message to admin or log
             $messageAdmin = "Event $event sent for order UID: {$costMap['dispatching_order_uid']}";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             // Return a success response
             return response()->json(['result' => 'ok', 'order_uid' => $costMap['dispatching_order_uid']], 200);
@@ -268,7 +268,7 @@ class PusherController extends Controller
 
             $messageAdmin = "$sticker Событие sendDoubleStatus $event.  Данные: \n $data";
 
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             $pusher->trigger($channel, $event, $data);
 
@@ -335,7 +335,7 @@ class PusherController extends Controller
                 $channel = 'teal-towel-48'; // Замените на нужный канал
                 $event = 'orderStartExecution-'. $app . "-$email";    // Замените на нужное событие
                 $messageAdmin = "Событие $event отправлен пользователю $email запущена вилка в $app ";
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $pusher->trigger($channel, $event, $data);
 
@@ -379,7 +379,7 @@ class PusherController extends Controller
 
         $pusher->trigger('teal-towel-48', 'order-cost-'. $app, ['order_cost' =>  $order_cost]);
         $messageAdmin = "Отправлена стоимость нового заказа в $app: " . $order_cost;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }
@@ -398,7 +398,7 @@ class PusherController extends Controller
 
         $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' =>  $order_cost]);
         $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $app: " . $order_cost;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }
@@ -431,7 +431,7 @@ class PusherController extends Controller
 
         $pusher->trigger('teal-towel-48', 'transactionStatus-'. $app . "-" . $email, $data);
         $messageAdmin = "Отправлен transactionStatus  клиенту $email в $app: " . $transactionStatus;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }
@@ -463,7 +463,7 @@ class PusherController extends Controller
 
         $pusher->trigger('teal-towel-48', 'eventCanceled-'. $app . "-" . $email, $data);
         $messageAdmin = "Отправлен eventCanceled  клиенту $email в $app: " . $canceled;
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }

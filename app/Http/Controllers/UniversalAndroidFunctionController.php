@@ -263,7 +263,7 @@ class UniversalAndroidFunctionController extends Controller
     {
         try {
             $messageAdmin = "!!! 17032025 !!! startNewProcessExecutionStatusJob задача $doubleOrderId / $jobId";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 //            (new PusherController)->sendOrderStartExecution(
 //                $doubleOrderId
@@ -3171,7 +3171,7 @@ class UniversalAndroidFunctionController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         $messageAdmin = "Запущено ожидание оплаты для заказа $uid (cancelOnlyCardPayUid)";
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         if (is_null($order)) {
             Log::error("cancelOnlyDoubleUid Order not found with UID: $uid");
@@ -4479,18 +4479,30 @@ class UniversalAndroidFunctionController extends Controller
             // Если "http://" не найдено, сохраняем исходный URL
             $cleanedUrl = $url;
         }
-        switch ($app) {
-            case "PAS1":
-                $city = City_PAS1::where('name', $name)->where('address', $cleanedUrl)->first();
-                break;
-            case "PAS2":
-                $city = City_PAS2::where('name', $name)->where('address', $cleanedUrl)->first();
-                break;
-           //case "PAS4":
-            default:
-                $city = City_PAS4::where('name', $name)->where('address', $cleanedUrl)->first();
-        }
+//        switch ($app) {
+//            case "PAS1":
+//                $city = City_PAS1::where('name', $name)->where('address', $cleanedUrl)->first();
+//                break;
+//            case "PAS2":
+//                $city = City_PAS2::where('name', $name)->where('address', $cleanedUrl)->first();
+//                break;
+//           //case "PAS4":
+//            default:
+//                $city = City_PAS4::where('name', $name)->where('address', $cleanedUrl)->first();
+//        }
 
+        $cacheTime = 60 * 60 * 24; // 1 день
+
+        $city = Cache::remember("city_{$name}_{$cleanedUrl}_{$app}", $cacheTime, function () use ($app, $name, $cleanedUrl) {
+            switch ($app) {
+                case "PAS1":
+                    return City_PAS1::where('name', $name)->where('address', $cleanedUrl)->first();
+                case "PAS2":
+                    return City_PAS2::where('name', $name)->where('address', $cleanedUrl)->first();
+                default:
+                    return City_PAS4::where('name', $name)->where('address', $cleanedUrl)->first();
+            }
+        });
 //dd($city);
         if (isset($city)) {
             return $city->toArray()['versionApi'];
@@ -5953,7 +5965,7 @@ class UniversalAndroidFunctionController extends Controller
                     if ($transactionStatus != "Approved" ||
                         $transactionStatus != "WaitingAuthComplete") {
                         $messageAdmin = "Доплата по счету $orderReference на сумму 20 $transactionStatus ";
-                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                         StartAddCostCardCreat::dispatch(
                             $uid,

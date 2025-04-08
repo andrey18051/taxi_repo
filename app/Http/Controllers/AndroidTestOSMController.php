@@ -8843,13 +8843,13 @@ class AndroidTestOSMController extends Controller
             if ($uid_history) {
                 Log::error("Запись uid_bonusOrderHold появилась в течение 1 минуты.");
                 $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 (new UniversalAndroidFunctionController)->deleteJobByUid($uid_history->orderId);
 
 
                 $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
                 //// bonus section
@@ -8857,7 +8857,7 @@ class AndroidTestOSMController extends Controller
                 $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid;
 
                 $messageAdmin = "webordersCancelDouble bonus uid \n url_cancel $url_cancel" ;
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $header = [
                     "Authorization" => $authorizationBonus,
@@ -8878,7 +8878,7 @@ class AndroidTestOSMController extends Controller
                 );
 
                 $messageAdmin = "webordersCancelDouble status bonus Отмена заказа uid $uid \n " .$responseArr_bonus["close_reason"];
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
                 if (!isset($responseArr_bonus["close_reason"]) || $responseArr_bonus["close_reason"] != 1) {
@@ -8902,7 +8902,7 @@ class AndroidTestOSMController extends Controller
                 $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
 
                 $messageAdmin = "webordersCancelDouble uid_double \n url $url_cancel" ;
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $header = [
                     "Authorization" => $authorizationDouble,
@@ -8914,7 +8914,7 @@ class AndroidTestOSMController extends Controller
 
 
                 $messageAdmin = "webordersCancelDouble Отмена заказа  uid_double $uid_Double \n" .json_encode($json_arrWeb_double);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 // status double
                 $url = $connectAPI . '/api/weborders/' . $uid_Double;
@@ -8924,7 +8924,7 @@ class AndroidTestOSMController extends Controller
                 );
 
                 $messageAdmin = "webordersCancelDouble status double Отмена заказа  " . $responseArr_double["close_reason"];
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
                 if (!isset($responseArr_double["close_reason"]) || $responseArr_double["close_reason"] != 1) {
@@ -8959,7 +8959,7 @@ class AndroidTestOSMController extends Controller
                     $response = (new OrderStatusController)->addActionToResponseUid($response_bonus, $action, $dispatching_order_uid);
                     (new PusherController)->sendDoubleStatus($response, $app, $email, "1111 webordersCancelDouble ");
 
-                    (new MessageSentController)->sentMessageAdmin("webordersCancelDouble снят заказ $orderweb->dispatching_order_uid");
+                    (new MessageSentController)->sentMessageAdminLog("webordersCancelDouble снят заказ $orderweb->dispatching_order_uid");
                 }
 
             }
@@ -9300,7 +9300,7 @@ class AndroidTestOSMController extends Controller
             $close_reason = -1;
             $execution_status= "SearchesForCar";
             $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             return response()->json([
                 'close_reason' => $close_reason,
                 'execution_status' => $execution_status,
@@ -9619,7 +9619,7 @@ class AndroidTestOSMController extends Controller
             $close_reason = -1;
             $execution_status= "SearchesForCar";
             $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             return response()->json([
                 'close_reason' => $close_reason,
                 'execution_status' => $execution_status,

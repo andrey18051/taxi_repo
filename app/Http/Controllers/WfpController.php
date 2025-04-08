@@ -1335,7 +1335,7 @@ class WfpController extends Controller
 
                 if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
                     Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
-                    (new MessageSentController)->sentMessageAdmin("refund Статус транзакции: {$transactionStatus}");
+                    (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$transactionStatus}");
                     return "exit";
                 }
             }
@@ -1359,7 +1359,7 @@ class WfpController extends Controller
         Log::debug("refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus");
         $messageAdmin = "refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus";
 
-        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
         Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
@@ -1397,7 +1397,7 @@ class WfpController extends Controller
 
                     if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
                         Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
-                        (new MessageSentController)->sentMessageAdmin("refund Статус транзакции: {$transactionStatus}");
+                        (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$transactionStatus}");
 
                         $this->updateOrderStatus($responseArray, $orderReference);
                         return "exit";
@@ -2061,10 +2061,10 @@ class WfpController extends Controller
                     "X-WO-API-APP-ID" => $identificationId
                 ])->put($url);
                 $messageAdmin = "Запрос отмены безналичного заказа  $uid url: $url";
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $messageAdmin = "Ответ по запросу безналичного заказа  $uid url: " . json_decode($resp, true);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $url = $connectAPI . '/api/weborders/cancel/' .  $uid_double;
                 $resp = Http::withHeaders([
@@ -2073,10 +2073,10 @@ class WfpController extends Controller
                 ])->put($url);
 
                 $messageAdmin = "Запрос отмены наличного дубля заказа $uid_double url: $url";
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $messageAdmin = "Ответ по запросу отмены дубля заказа  $uid_double url: " . json_decode($resp, true);
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
             }
         }
     }
