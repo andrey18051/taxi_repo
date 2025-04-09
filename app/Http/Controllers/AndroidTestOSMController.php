@@ -8833,6 +8833,23 @@ class AndroidTestOSMController extends Controller
                     $uid = $uid_history->uid_bonusOrder;
                     $uid_Double = $uid_history->uid_doubleOrder;
                     break;
+                } else {
+                    $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+
+                    if ($uid_history) {
+                        // Если запись найдена, выходим из цикла
+                        $uid = $uid_history->uid_bonusOrder;
+                        $uid_Double = $uid_history->uid_doubleOrder;
+                        break;
+                    }
+                }
+
+                $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $uid = $uid_history->uid_bonusOrder;
+                    $uid_Double = $uid_history->uid_doubleOrder;
                 }
 
                 // Ждём одну секунду перед следующим проверочным циклом
