@@ -3047,6 +3047,37 @@ class UniversalAndroidFunctionController extends Controller
 
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
+                try {
+                    $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
+
+                    $orderweb->closeReason = "1";
+                    $orderweb->save();
+                    $uid_history->cancel = "1";
+                    $uid_history->save();
+
+                    $email = $orderweb->email;
+
+                    switch ($orderweb->comment) {
+                        case "taxi_easy_ua_pas1":
+                            $app = "PAS1";
+                            break;
+                        case "taxi_easy_ua_pas2":
+                            $app = "PAS2";
+                            break;
+                        //case "PAS4":
+                        default:
+                            $app = "PAS4";
+                    }
+
+                    $dispatching_order_uid = $orderweb->dispatching_order_uid;
+                    (new PusherController)->sentCanceledStatus(
+                        $app,
+                        $email,
+                        $dispatching_order_uid
+                    );
+                    return "exit";
+                } catch (ApiErrorException | PusherException $e) {
+                }
 
                 return true;
             } else {

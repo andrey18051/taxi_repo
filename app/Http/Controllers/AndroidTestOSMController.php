@@ -8973,10 +8973,15 @@ class AndroidTestOSMController extends Controller
                     $app = $application;
                     $dispatching_order_uid = $orderweb->dispatching_order_uid;
 
-                    $response = (new OrderStatusController)->addActionToResponseUid($response_bonus, $action, $dispatching_order_uid);
-                    (new PusherController)->sendDoubleStatus($response, $app, $email, "1111 webordersCancelDouble ");
 
-                    (new MessageSentController)->sentMessageAdminLog("webordersCancelDouble снят заказ $orderweb->dispatching_order_uid");
+//                    $response = (new OrderStatusController)->addActionToResponseUid(json_encode($responseArr_bonus), $action, $dispatching_order_uid);
+//                    (new PusherController)->sendDoubleStatus($response, $app, $email, "1111 webordersCancelDouble ");
+                    (new PusherController)->sentCanceledStatus(
+                        $app,
+                        $email,
+                        $dispatching_order_uid
+                    );
+//                    (new MessageSentController)->sentMessageAdmin("webordersCancelDouble снят заказ $orderweb->dispatching_order_uid");
                 }
 
             }

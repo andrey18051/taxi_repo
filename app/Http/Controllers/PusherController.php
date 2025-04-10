@@ -268,7 +268,7 @@ class PusherController extends Controller
 
             $messageAdmin = "$sticker Событие sendDoubleStatus $event.  Данные: \n $data";
 
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             $pusher->trigger($channel, $event, $data);
 
@@ -441,7 +441,6 @@ class PusherController extends Controller
      * @throws \Pusher\ApiErrorException
      */
     public function  sentCanceledStatus(
-        $canceled,
         $app,
         $email,
         $uid_bonusOrderHold
@@ -455,15 +454,15 @@ class PusherController extends Controller
         );
 
         $data = [
-            'canceled' =>  $canceled,
+            'canceled' =>  "canceled",
             'uid' =>  $uid_bonusOrderHold,
         ];
         // Отправка события на канал
         Log::info("Pusher отправляет событие: eventCanceled-" . $app . " в канал teal-towel-48");
 
         $pusher->trigger('teal-towel-48', 'eventCanceled-'. $app . "-" . $email, $data);
-        $messageAdmin = "Отправлен eventCanceled  клиенту $email в $app: " . $canceled;
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        $messageAdmin = "Отправлен eventCanceled  клиенту $email в $app: ";
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }
