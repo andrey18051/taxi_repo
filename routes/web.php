@@ -1541,3 +1541,5 @@ Route::get('/order/status/{currentState}/{nextState}/{closeReason?}', [OrderStat
 Route::get('/order/runTestWithRealData', [OrderStatusController::class, 'runTestWithRealData']);
 
 Route::get('/testCache', [UniversalAndroidFunctionController::class, 'testCache']);
+
+Route::get('/getOrderStatusMessageResultPush/{uid}', [OrderStatusController::class, 'getOrderStatusMessageResultPush']);

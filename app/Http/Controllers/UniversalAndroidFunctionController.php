@@ -2970,7 +2970,7 @@ class UniversalAndroidFunctionController extends Controller
              }
 
              $uid_history->save();
-             (new OrderStatusController)->getOrderStatusMessageResultPush($uid_history->uid_bonusOrderHold);
+//             (new OrderStatusController)->getOrderStatusMessageResultPush($uid_history->uid_bonusOrderHold);
 
              return $newStatus;
          } else {
