@@ -721,8 +721,8 @@ class OrderStatusController extends Controller
                 $response_arr = json_decode($response, true);
                 if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
                     $orderweb->auto = $response_arr["order_car_info"];
-                }
-                if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
+                    $orderweb->closeReason = -1;
+                } else if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
                     $orderweb->closeReason = 1;
                 } else {
                     $orderweb->closeReason = $response_arr["close_reason"] ?? -1; // Значение по умолчанию, если close_reason тоже отсутствует
