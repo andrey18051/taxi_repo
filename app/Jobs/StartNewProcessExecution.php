@@ -50,125 +50,127 @@ class StartNewProcessExecution implements ShouldQueue
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         $doubleOrderRecord = DoubleOrder::find($this->orderId);
+        if($doubleOrderRecord) {
+            $responseBonusStr = $doubleOrderRecord->responseBonusStr;
 
-        $responseBonusStr = $doubleOrderRecord->responseBonusStr;
+            $authorizationBonus = $doubleOrderRecord->authorizationBonus;
+            $authorizationDouble = $doubleOrderRecord->authorizationDouble;
 
-        $authorizationBonus = $doubleOrderRecord->authorizationBonus;
-        $authorizationDouble = $doubleOrderRecord->authorizationDouble;
+            $connectAPI = $doubleOrderRecord->connectAPI;
+            $identificationId = $doubleOrderRecord->identificationId;
+            $responseBonus = json_decode($responseBonusStr, true);
+            $bonusOrder = $responseBonus['dispatching_order_uid'];
 
-        $connectAPI = $doubleOrderRecord->connectAPI;
-        $identificationId = $doubleOrderRecord->identificationId;
-        $responseBonus = json_decode($responseBonusStr, true);
-        $bonusOrder = $responseBonus['dispatching_order_uid'];
+            try {
+                Log::info("Запуск startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}");
+                $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
+                Log::info("Результат startNewProcessExecutionStatusJob: " . ($result ?? 'null'));
+                if ($result === "exit") {
+                    $messageAdmin = "Задача завершена для заказа $this->orderId (Job ID: {$this->jobId})";
+                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        try {
-            Log::info("Запуск startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}");
-            $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
-            Log::info("Результат startNewProcessExecutionStatusJob: " . ($result ?? 'null'));
-            if ($result === "exit") {
-                $messageAdmin = "Задача завершена для заказа $this->orderId (Job ID: {$this->jobId})";
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    $uid = (new MemoryOrderChangeController)->show($bonusOrder);
 
-                $uid = (new MemoryOrderChangeController)->show($bonusOrder);
+                    $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
-                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-
-                if($orderweb) {
-                    $application = $orderweb->comment;
-                } else {
-                    $application = "taxi_easy_ua_pas2";
-                }
-                $city ='';
-
-                $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
-
-                if ($uid_history !== null) {
-                    // Действие, если запись найдена
-                    $ui = $uid_history->uid_bonusOrder;
-                    $ui_Double = $uid_history->uid_doubleOrder;
-
-                    $messageAdmin = "Найдена запись Uid_history: " . $ui . " - " . $ui_Double;
-                    (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-                    //// bonus section
-                    // to cancel
-
-
-                    $header = [
-                        "Authorization" => $authorizationBonus,
-                        "X-WO-API-APP-ID" => $identificationId,
-                    ];
-                    // status bonus
-                    $url = $connectAPI . '/api/weborders/' . $ui;
-
-                    $responseArr = (new UniversalAndroidFunctionController)->getStatus(
-                        $header,
-                        $url
-                    );
-
-                    if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
-                        $url_cancel = $connectAPI . '/api/weborders/cancel/' . $ui;
-                        $result = AndroidTestOSMController::repeatCancel(
-                            $url_cancel,
-                            $authorizationBonus,
-                            $application,
-                            $city,
-                            $connectAPI,
-                            $ui
-                        );
-                        if ($result === 1) {
-                            $messageAdmin = "123 Bonus (безнал) отменен по выходу из вилки, номер заказа: $ui";
-                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-                        }
+                    if($orderweb) {
+                        $application = $orderweb->comment;
                     } else {
-                        $messageAdmin = "321 Bonus (безнал) отменен ранее до выхода из вилки, номер заказа: $ui";
-                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                        $application = "taxi_easy_ua_pas2";
                     }
+                    $city ='';
+
+                    $uid_history = Uid_history::where("uid_bonusOrderHold", $bonusOrder)->first();
+
+                    if ($uid_history !== null) {
+                        // Действие, если запись найдена
+                        $ui = $uid_history->uid_bonusOrder;
+                        $ui_Double = $uid_history->uid_doubleOrder;
+
+                        $messageAdmin = "Найдена запись Uid_history: " . $ui . " - " . $ui_Double;
+                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                        //// bonus section
+                        // to cancel
 
 
-                    ///// double section
-                    // to cancel
+                        $header = [
+                            "Authorization" => $authorizationBonus,
+                            "X-WO-API-APP-ID" => $identificationId,
+                        ];
+                        // status bonus
+                        $url = $connectAPI . '/api/weborders/' . $ui;
 
-
-
-                    $header = [
-                        "Authorization" => $authorizationDouble,
-                        "X-WO-API-APP-ID" => $identificationId,
-                    ];
-
-                    $url = $connectAPI . '/api/weborders/' . $ui_Double;
-                    $responseArr = (new UniversalAndroidFunctionController)->getStatus(
-                        $header,
-                        $url
-                    );
-
-                    if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
-                        $url_cancel = $connectAPI . '/api/weborders/cancel/' . $ui_Double;
-                        $result = AndroidTestOSMController::repeatCancel(
-                            $url_cancel,
-                            $authorizationDouble,
-                            $application,
-                            $city,
-                            $connectAPI,
-                            $ui_Double
+                        $responseArr = (new UniversalAndroidFunctionController)->getStatus(
+                            $header,
+                            $url
                         );
-                        if ($result === 1) {
-                            $messageAdmin = "123 Double (нал) отменен по выходу из вилки, номер заказа: $ui_Double";
+
+                        if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
+                            $url_cancel = $connectAPI . '/api/weborders/cancel/' . $ui;
+                            $result = AndroidTestOSMController::repeatCancel(
+                                $url_cancel,
+                                $authorizationBonus,
+                                $application,
+                                $city,
+                                $connectAPI,
+                                $ui
+                            );
+                            if ($result === 1) {
+                                $messageAdmin = "123 Bonus (безнал) отменен по выходу из вилки, номер заказа: $ui";
+                                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                            }
+                        } else {
+                            $messageAdmin = "321 Bonus (безнал) отменен ранее до выхода из вилки, номер заказа: $ui";
                             (new MessageSentController)->sentMessageAdmin($messageAdmin);
                         }
 
-                    } else {
-                        $messageAdmin = "321 Double (нал) отменен ранее ранее до выхода из вилки, номер заказа: $ui_Double";
-                        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+                        ///// double section
+                        // to cancel
+
+
+
+                        $header = [
+                            "Authorization" => $authorizationDouble,
+                            "X-WO-API-APP-ID" => $identificationId,
+                        ];
+
+                        $url = $connectAPI . '/api/weborders/' . $ui_Double;
+                        $responseArr = (new UniversalAndroidFunctionController)->getStatus(
+                            $header,
+                            $url
+                        );
+
+                        if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != 1) {
+                            $url_cancel = $connectAPI . '/api/weborders/cancel/' . $ui_Double;
+                            $result = AndroidTestOSMController::repeatCancel(
+                                $url_cancel,
+                                $authorizationDouble,
+                                $application,
+                                $city,
+                                $connectAPI,
+                                $ui_Double
+                            );
+                            if ($result === 1) {
+                                $messageAdmin = "123 Double (нал) отменен по выходу из вилки, номер заказа: $ui_Double";
+                                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                            }
+
+                        } else {
+                            $messageAdmin = "321 Double (нал) отменен ранее ранее до выхода из вилки, номер заказа: $ui_Double";
+                            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                        }
                     }
+
+
+
+                    return;
                 }
-
-
-
-                return;
+            } catch (\Exception $e) {
+                Log::error("Ошибка в startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}: " . $e->getMessage());
+                throw $e; // Повторно выбросить исключение, чтобы задание пометилось как неудачное
             }
-        } catch (\Exception $e) {
-            Log::error("Ошибка в startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}: " . $e->getMessage());
-            throw $e; // Повторно выбросить исключение, чтобы задание пометилось как неудачное
+
         }
 
 //

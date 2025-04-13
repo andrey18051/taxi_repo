@@ -731,10 +731,10 @@ class OrderStatusController extends Controller
                 $orderweb->save();
 
                 $messageAdmin = "getOrderStatusMessageResultPush action: {$action}, nalState: $nalState, cardState: $cardState";
-                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
 //
-//        $messageAdmin = "getOrderStatusMessageResult response: dispatching_order_uid ". $response ;
-//        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        $messageAdmin = "getOrderStatusMessageResult response: dispatching_order_uid ". $response ;
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
 //                (new PusherController)->sendDoubleStatus($response, $app, $email, "2222 getOrderStatusMessageResult ");
                 return $response;
