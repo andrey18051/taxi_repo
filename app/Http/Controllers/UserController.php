@@ -97,6 +97,22 @@ class UserController extends Controller
     }
 
     /**
+     * find User from DB
+     *
+     */
+    public function findUser($email)
+    {
+        $result = ["checkUser" => false];
+
+        $user = User::where("email", $email)->first();
+         if ($user) {
+             $result = ["checkUser" => true];
+         }
+
+        return $result;
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
