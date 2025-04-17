@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Card;
 use App\Models\User;
 use App\Models\UserMessage;
 use App\Models\UserVisit;
@@ -177,7 +178,7 @@ class UserController extends Controller
             if (!$user) {
                 return response()->json(['error' => 'Пользователь не найден'], 404);
             }
-
+            $cards = Card::where("user_id", $user->id)->delete();
             $user->delete();
 
             // Удаление сообщений пользователя
