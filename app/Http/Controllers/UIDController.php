@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class UIDController extends Controller
 {
+
     public function closeReasonUIDStatus($uid, $connectAPI, $autorization, $identificationId)
     {
         $url = $connectAPI . '/api/weborders/' . $uid;
@@ -236,14 +237,34 @@ class UIDController extends Controller
         return $serverArray;
     }
 
+    private static function getAppName($app): string
+    {
+
+        switch ($app) {
+            case "PAS1":
+                $result  = "taxi_easy_ua_pas1";
+                break;
+            case "PAS2":
+                $result  = "taxi_easy_ua_pas2";
+                break;
+            //case "PAS4":
+            default:
+                $result  = "taxi_easy_ua_pas4";
+        }
+
+
+        return $result;
+    }
+
     public function UIDStatusShowEmailCityApp($email, $city, $app)
     {
         $serverArray = self::getServerArray($city, $app);
+        $app_name = self::getAppName($app);
         if ($serverArray != null) {
             $order = Orderweb:: where("email", $email)
                 ->whereNotIn('closeReason', ['-1', '101', '102'])
                 ->whereIn("server", $serverArray)
-                ->where("comment", "!=", null)
+                ->where("comment", $app_name)
                 ->orderBy("created_at", "desc")
                 ->get();
             Log::debug("UIDStatusShowEmail order", $order->toArray());
@@ -259,7 +280,7 @@ class UIDController extends Controller
                 -> where("startLan", "!=", null)
                 -> where("to_lat", "!=", null)
                 -> where("to_lng", "!=", null)
-                -> where("comment", "!=", null)
+                -> where("comment", $app_name)
                 -> orderBy("created_at", "desc")
                 -> get();
             if ($orderHistory) {
