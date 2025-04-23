@@ -51,7 +51,7 @@ COPY ./tests /usr/share/nginx/html/taxi/tests
 COPY ./tmp /usr/share/nginx/html/taxi/tmp
 COPY ./vendor /usr/share/nginx/html/taxi/vendor
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
-COPY ./.env /usr/share/nginx/html/taxi/
+COPY ../../../app/env/test/.env /usr/share/nginx/html/taxi/
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
 COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/

@@ -12,13 +12,22 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo Dockerfile copied successfully.
 
+echo Copying env...
+copy "D:\OpenServer\domains\taxi2012\app\env\work" "D:\OpenServer\domains\taxi2012"
+if %ERRORLEVEL% NEQ 0 (
+     echo Error copying Env.
+     exit /b 1
+ )
+ echo Env copied successfully.
+
+
 rem 2. Change directory
 echo Changing directory to D:\OpenServer\domains\taxi2012...
 cd /d "D:\OpenServer\domains\taxi2012"
 
 rem 3. Build Docker image
 echo Building Docker image...
-docker build -t ghcr.io/andrey18051/taxi_work:1.0 .
+docker build -t ghcr.io/andrey18051/taxi_work:1.0 --no-cache .
 if %ERRORLEVEL% NEQ 0 (
     echo Error while building Docker image.
     exit /b 1
