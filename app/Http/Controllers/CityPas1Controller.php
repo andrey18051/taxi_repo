@@ -126,16 +126,20 @@ class CityPas1Controller extends Controller
 
                 Log::debug($messageAdmin);
 
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                    $alarmMessage->sendMeMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $paramsCheck = [
-                        'subject' => 'Ошибка в телеграмм',
-                        'message' => $e->getMessage(),
-                    ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
+                if ($isCurrentTimeInRange) {
+                    try {
+                        $alarmMessage->sendAlarmMessage($messageAdmin);
+                        $alarmMessage->sendMeMessage($messageAdmin);
+                    } catch (Exception $e) {
+                        $paramsCheck = [
+                            'subject' => 'Ошибка в телеграмм',
+                            'message' => $e->getMessage(),
+                        ];
+                        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                    }
                 }
+
             }
 
             if ($online === "true" && $checking) {

@@ -134,16 +134,19 @@ class CityController extends Controller
                         $client_ip = $_SERVER['REMOTE_ADDR'];
                         $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $city->address
                             . ". IP $client_ip";Log::debug($messageAdmin);
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                            $alarmMessage->sendMeMessage($messageAdmin);
-                        } catch (Exception $e) {
-                            $paramsCheck = [
-                                'subject' => 'Ошибка в телеграмм',
-                                'message' => $e,
-                            ];
-                            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                        };
+                        $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
+                        if ($isCurrentTimeInRange) {
+                            try {
+                                $alarmMessage->sendAlarmMessage($messageAdmin);
+                                $alarmMessage->sendMeMessage($messageAdmin);
+                            } catch (Exception $e) {
+                                $paramsCheck = [
+                                    'subject' => 'Ошибка в телеграмм',
+                                    'message' => $e,
+                                ];
+                                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                            };
+                        }
                     }
                 }
             }
@@ -155,18 +158,21 @@ class CityController extends Controller
                     $city->save();
                     $alarmMessage = new TelegramController();
                         $client_ip = $_SERVER['REMOTE_ADDR'];
-                        $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $serverFalse->address
+                        $messageAdmin = "Нет подключения к серверу города $city->name->name http://" . $value["address"]
                             . ". IP $client_ip";Log::debug($messageAdmin);
-                    try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-                        $alarmMessage->sendMeMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        $paramsCheck = [
-                            'subject' => 'Ошибка в телеграмм',
-                            'message' => $e,
-                        ];
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-                    };
+                        $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
+                        if ($isCurrentTimeInRange) {
+                            try {
+                                $alarmMessage->sendAlarmMessage($messageAdmin);
+                                $alarmMessage->sendMeMessage($messageAdmin);
+                            } catch (Exception $e) {
+                                $paramsCheck = [
+                                    'subject' => 'Ошибка в телеграмм',
+                                    'message' => $e,
+                                ];
+                                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                            };
+                        }
                 }
             }
 

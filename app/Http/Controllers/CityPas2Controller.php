@@ -125,16 +125,18 @@ class CityPas2Controller extends Controller
                 $messageAdmin = "Нет подключения к серверу города {$city->name->name} http://{$value['address']}. IP $client_ip";
 
                 Log::debug($messageAdmin);
-
-                try {
-                    $alarmMessage->sendAlarmMessage($messageAdmin);
-                    $alarmMessage->sendMeMessage($messageAdmin);
-                } catch (Exception $e) {
-                    $paramsCheck = [
-                        'subject' => 'Ошибка в телеграмм',
-                        'message' => $e->getMessage(),
-                    ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
+                if ($isCurrentTimeInRange) {
+                    try {
+                        $alarmMessage->sendAlarmMessage($messageAdmin);
+                        $alarmMessage->sendMeMessage($messageAdmin);
+                    } catch (Exception $e) {
+                        $paramsCheck = [
+                            'subject' => 'Ошибка в телеграмм',
+                            'message' => $e->getMessage(),
+                        ];
+                        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                    }
                 }
             }
 

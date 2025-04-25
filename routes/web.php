@@ -1542,9 +1542,12 @@ Route::get('/order/runTestWithRealData', [OrderStatusController::class, 'runTest
 
 Route::get('/testCache', [UniversalAndroidFunctionController::class, 'testCache']);
 
+Route::get('/isCurrentTimeInRange', [UniversalAndroidFunctionController::class, 'isCurrentTimeInRange']);
+
 Route::get('/getOrderStatusMessageResultPush/{uid}', [OrderStatusController::class, 'getOrderStatusMessageResultPush']);
 
 /**
  * find User from DB
  */
 Route::get('/findUser/{email}', [UserController::class, 'findUser'])->name('findUser');
+

@@ -4447,23 +4447,45 @@ class UniversalAndroidFunctionController extends Controller
 //        $messageAdmin = "cacheKey $cacheKey";
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-        $city = Cache::remember($cacheKey, now()->addDays(1), function () use ($app, $cityString, $connectAPI) {
+        try {
+            $city = Cache::remember($cacheKey, now()->addDays(1), function () use ($app, $cityString, $connectAPI) {
+                switch ($app) {
+                    case "PAS1":
+                        return City_PAS1::where('name', $cityString)
+                            ->where("address", str_replace("http://", "", $connectAPI))
+                            ->first();
+                    case "PAS2":
+                        return City_PAS2::where('name', $cityString)
+                            ->where("address", str_replace("http://", "", $connectAPI))
+                            ->first();
+                    default:
+                        return City_PAS4::where('name', $cityString)
+                            ->where("address", str_replace("http://", "", $connectAPI))
+                            ->first();
+                }
+            });
+
+        } catch (\Exception $e) {
+            // Логирование ошибки
+            Log::error("Cache driver failed: " . $e->getMessage());
+
+            // Fallback: прямой запрос к базе данных
+            $cleanedAddress = str_replace("http://", "", $connectAPI);
             switch ($app) {
                 case "PAS1":
                     return City_PAS1::where('name', $cityString)
-                        ->where("address", str_replace("http://", "", $connectAPI))
+                        ->where("address", $cleanedAddress)
                         ->first();
                 case "PAS2":
                     return City_PAS2::where('name', $cityString)
-                        ->where("address", str_replace("http://", "", $connectAPI))
+                        ->where("address", $cleanedAddress)
                         ->first();
                 default:
                     return City_PAS4::where('name', $cityString)
-                        ->where("address", str_replace("http://", "", $connectAPI))
+                        ->where("address", $cleanedAddress)
                         ->first();
             }
-        });
-
+        }
 //        $messageAdmin = "authorizationApp $city";
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
@@ -4524,7 +4546,21 @@ class UniversalAndroidFunctionController extends Controller
 
         $cacheTime = 60 * 60 * 24; // 1 день
 
-        $city = Cache::remember("city_{$name}_{$cleanedUrl}_{$app}", $cacheTime, function () use ($app, $name, $cleanedUrl) {
+        try {
+            $city = Cache::remember("city_{$name}_{$cleanedUrl}_{$app}", $cacheTime, function () use ($app, $name, $cleanedUrl) {
+                switch ($app) {
+                    case "PAS1":
+                        return City_PAS1::where('name', $name)->where('address', $cleanedUrl)->first();
+                    case "PAS2":
+                        return City_PAS2::where('name', $name)->where('address', $cleanedUrl)->first();
+                    default:
+                        return City_PAS4::where('name', $name)->where('address', $cleanedUrl)->first();
+                }
+            });
+        } catch (\Exception $e) {
+            // Логирование ошибки
+            Log::error("Cache driver failed: " . $e->getMessage());
+            // Fallback: прямой запрос к базе данных
             switch ($app) {
                 case "PAS1":
                     return City_PAS1::where('name', $name)->where('address', $cleanedUrl)->first();
@@ -4533,7 +4569,7 @@ class UniversalAndroidFunctionController extends Controller
                 default:
                     return City_PAS4::where('name', $name)->where('address', $cleanedUrl)->first();
             }
-        });
+        }
 //dd($city);
         if (isset($city)) {
             return $city->toArray()['versionApi'];
@@ -4902,16 +4938,19 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address
             . ". Приложение $application. IP $client_ip";
         Log::debug("cityNoOnlineMessage $messageAdmin");
-        try {
-            $alarmMessage->sendAlarmMessageLog($messageAdmin);
-            $alarmMessage->sendMeMessageLog($messageAdmin);
-        } catch (Exception $e) {
-            $paramsCheck = [
-                'subject' => 'Ошибка в телеграмм',
-                'message' => $e,
-            ];
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
-        };
+        $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
+        if ($isCurrentTimeInRange) {
+            try {
+                $alarmMessage->sendAlarmMessageLog($messageAdmin);
+                $alarmMessage->sendMeMessageLog($messageAdmin);
+            } catch (Exception $e) {
+                $paramsCheck = [
+                    'subject' => 'Ошибка в телеграмм',
+                    'message' => $e,
+                ];
+                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            };
+        }
     }
     public function findCity($startLat, $startLan)
     {
@@ -6950,5 +6989,37 @@ class UniversalAndroidFunctionController extends Controller
          dd($value); // Должно вывести 'test_value'
      }
 
+
+
+    public function isCurrentTimeInRange(): bool
+    {
+        // Устанавливаем временную зону Киева
+        $now = Carbon::now('Europe/Kiev');
+
+        // Получаем start_time и end_time из конфига
+        $startTime = Carbon::createFromFormat('H:i', config('app.start_time'), 'Europe/Kiev');
+        $endTime = Carbon::createFromFormat('H:i', config('app.end_time'), 'Europe/Kiev');
+
+        // Проверяем, находится ли текущее время в диапазоне
+        $isInRange = $now->between($startTime, $endTime);
+
+        // Формируем сообщение
+        $messageAdmin = sprintf(
+            "Current Kyiv time: %s\nTime range: %s - %s\nIs in range: %s",
+            $now->format('H:i'),
+            $startTime->format('H:i'),
+            $endTime->format('H:i'),
+            $isInRange ? 'Yes' : 'No'
+        );
+
+        // Логируем сообщение
+        Log::debug($messageAdmin);
+
+        // Отправляем сообщение через Telegram
+//        $alarmMessage = new TelegramController();
+//        $alarmMessage->sendMeMessage($messageAdmin);
+
+        return $isInRange;
+    }
 
 }
