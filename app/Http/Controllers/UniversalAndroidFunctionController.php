@@ -4939,7 +4939,7 @@ class UniversalAndroidFunctionController extends Controller
             . ". Приложение $application. IP $client_ip";
         Log::debug("cityNoOnlineMessage $messageAdmin");
         $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
-        if ($isCurrentTimeInRange) {
+        if (!$isCurrentTimeInRange) {
             try {
                 $alarmMessage->sendAlarmMessageLog($messageAdmin);
                 $alarmMessage->sendMeMessageLog($messageAdmin);

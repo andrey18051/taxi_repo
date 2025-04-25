@@ -127,7 +127,7 @@ class CityPas1Controller extends Controller
                 Log::debug($messageAdmin);
 
                 $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
-                if ($isCurrentTimeInRange) {
+                if (!$isCurrentTimeInRange) {
                     try {
                         $alarmMessage->sendAlarmMessage($messageAdmin);
                         $alarmMessage->sendMeMessage($messageAdmin);
