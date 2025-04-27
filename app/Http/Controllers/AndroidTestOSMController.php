@@ -3153,7 +3153,7 @@ class AndroidTestOSMController extends Controller
             $apiVersion
         );
         $responseArr = json_decode($response, true);
-        $order_cost = $responseArr["order_cost"];
+//        $order_cost = $responseArr["order_cost"];
 
 //        (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
 
