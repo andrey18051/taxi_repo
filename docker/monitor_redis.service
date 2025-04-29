@@ -1,0 +1,14 @@
+[Unit]
+Description=Monitor Redis for READONLY errors and restart container
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/home/user_andre/monitor_redis.sh
+Restart=always
+RestartSec=60s
+User=root
+
+[Install]
+WantedBy=multi-user.target
+

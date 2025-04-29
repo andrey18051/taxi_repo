@@ -3,3 +3,14 @@ docker run -d --name redis_server -p 6379:6379 redis:alpine
 
 docker run -d --name redis_server --restart unless-stopped -p 6379:6379 redis:alpine
 docker run -d --name redis_server --restart unless-stopped -p 6379:6379 -v redis_data:/data redis:alpine
+
+docker volume rm redis_data
+
+docker run -d \
+  --name redis_server \
+  --restart unless-stopped \
+  -p 6379:6379 \
+  -v redis_data:/data \
+  redis:alpine \
+  redis-server --save 900 1 --appendonly yes
+

@@ -1751,7 +1751,7 @@ class WebOrderController extends Controller
         $arrCombo = Combo::where('name', $req->search)->first();
         $params['routetonumberBlockNone'] = 'none;'; //Скрываем поле дома
         $params['routetonumber'] = null; //Обязательный. Дом куда.
-        if ($arrCombo->street == 1) {
+        if ($arrCombo && $arrCombo->street == 1) {
             $req->validate([
                 'routetonumber' => ['required']
             ]);
