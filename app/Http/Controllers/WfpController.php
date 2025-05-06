@@ -2226,7 +2226,13 @@ class WfpController extends Controller
         $identificationId = $order->comment;
         $amount = $order->web_cost;
         $amount_settle = $amount;
-
+//        $amount = $order->web_cost;
+//
+//        if($order->client_cost !=null) {
+//            $amount = $order->client_cost + $order->attempt_20;
+//        }
+//
+//        $amount_settle = $amount;
         $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrder,
             $connectAPI,

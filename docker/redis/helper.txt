@@ -6,6 +6,10 @@ docker run -d --name redis_server --restart unless-stopped -p 6379:6379 -v redis
 
 docker volume rm redis_data
 
+docker stop redis_server
+
+docker rm redis_server
+
 docker run -d \
   --name redis_server \
   --restart unless-stopped \

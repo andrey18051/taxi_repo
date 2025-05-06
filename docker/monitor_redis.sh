@@ -29,17 +29,11 @@ while true; do
       docker stop "$REDIS_CONTAINER"
 
       # Удаляем контейнер Redis
-      docker rm "$REDIS_CONTAINER"
+     docker rm "$REDIS_CONTAINER"
 
       # Перезапускаем контейнер Redis с нужными параметрами
-      docker run -d \
-        --name redis_server \
-        --restart unless-stopped \
-        -p 6379:6379 \
-        -v redis_data:/data \
-        redis:alpine \
-        redis-server --save 900 1 --appendonly yes
-
+#      mkdir /tmp/redis || true && echo "cluster-enabled no" > /tmp/redis/redis.conf && docker run -d --name redis_server -v /tmp/redis/redis.conf:/usr/local/etc/redis/redis.conf -p 6379:6379 redis:alpine redis-server /usr/local/etc/redis/redis.conf
+      mkdir /tmp/redis || true && echo "cluster-enabled no" > /tmp/redis/redis.conf && docker run -d --name redis_server -v /tmp/redis/redis.conf:/usr/local/etc/redis/redis.conf -p 127.0.0.1:6379:6379 redis:alpine redis-server /usr/local/etc/redis/redis.conf
       # Очистка логов через команду artisan
       echo "$(date): Очистка логов приложения..."
       docker exec "$APP_CONTAINER" bash -c "cd $APP_DIR && $PHP_CLI artisan logs:send"

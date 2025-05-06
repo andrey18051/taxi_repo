@@ -7064,6 +7064,706 @@ class AndroidTestOSMController extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
+    } /**
+     * @throws \Exception
+     */
+    public function orderClientCost(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $clientCost,
+        $user,
+        $add_cost,
+        $time,
+        $comment,
+        $date,
+        $start,
+        $finish,
+        $wfpInvoice,
+        $services,
+        $city,
+        $application
+    ) {
+
+
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
+
+        $connectAPI = self::connectAPIAppOrder($city, $application);
+
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "ErrorMessage";
+
+            return $response_error;
+        }
+        $params["startLat"] = $originLatitude; //
+        $params["startLan"] = $originLongitude; //
+        $params["to_lat"] = $toLatitude; //
+        $params["to_lng"] = $toLongitude; //
+
+        if ($tariff == " ") {
+            $tariff = null;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+            (new UniversalAndroidFunctionController)->addUserNoNameWithEmailAndPhoneApp($params['email'], $phone, $application);
+        } else {
+            $params['email'] = "no email";
+        }
+
+        $email = $params['email'];
+
+        $params['user_phone'] = $phone;
+        $params['client_sub_card'] = null;
+        $params['wagon'] = 0;
+        $params['minibus'] = 0;
+        $params['premium'] = 0;
+        $params['route_address_entrance_from'] = null;
+
+        $params['flexible_tariff_name'] = $tariff; //Гибкий тариф
+        $params['comment'] = " "; //Комментарий к заказу
+        $params['add_cost'] = 0; //Добавленная стоимость
+        $params['taxiColumnId'] = config('app.taxiColumnId'); //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+
+
+        $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+
+        $authorization = $authorizationChoiceArr["authorization"];
+        $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
+        $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+
+        $identificationId = self::identificationId($application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
+
+
+        $params['route_undefined'] = false; //По городу: True, False
+
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        /**
+         * Откуда
+         */
+
+        $params['from_number'] = " ";
+
+        $from = $start;
+        $params['routefrom'] = $start;
+
+        if ($originLatitude == $toLatitude) {
+            if ($payment_type == 0) {
+                $route_undefined = true;
+            } else {
+                $route_undefined = false;
+            }
+
+            $params['to'] = 'по місту';
+            $params['to_number'] = " ";
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude]
+            ];
+            if ($comment == "no_comment") {
+                $comment = "ПО ГОРОДУ.";
+            } else {
+                $comment = "ПО ГОРОДУ. " . $comment;
+            }
+        } else {
+            $route_undefined = false;
+
+            $params['to'] = $finish;
+            $params['to_number'] = " ";
+
+            $to = $finish;
+            $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+                ['name' => $from, 'lat' => $originLatitude, 'lng' => $originLongitude],
+                ['name' => $to, 'lat' => $toLatitude, 'lng' => $toLongitude]
+            ];
+        }
+
+        $params['route_undefined'] = $route_undefined; //По городу: True, False
+
+        $params['from'] = $start;
+        $params['from_number'] = "";
+
+        $required_time = null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $params['reservation'] = $reservation;
+
+        $params["required_time"] = $required_time;
+
+        if (strpos($comment, "ПО ГОРОДУ.") !== false) {
+            $comment .= " ";
+            if ($userArr[2] == 'bonus_payment'
+                || $userArr[2] == 'fondy_payment'
+                || $userArr[2] == 'mono_payment'
+                || $userArr[2] == 'wfp_payment'
+            ) {
+                $comment .= "(Может быть продление маршрута)";
+                $route_undefined = false;
+            }
+        }
+
+
+        $url = $connectAPI . '/api/weborders';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+        $comment = str_replace("no_comment", "", $comment);
+        if ($userArr[2] == 'nal_payment') {
+            $comment = str_replace("ПО ГОРОДУ.", "", $comment);
+        }
+        $parameter = [
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
+            'user_phone' => $phone, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => $comment, //Комментарий к заказу
+            'add_cost' => $add_cost - config('app.cost_correction'),
+            'wagon' => 0, //Универсал: True, False
+            'minibus' => 0, //Микроавтобус: True, False
+            'premium' => 0, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $tariff, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes, //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ];
+
+//dd($parameter);
+        Log::debug("response_arr: 1111111122 ", $parameter);
+        $messageAdmin = "
+        url $url
+        Authorization $authorization,
+        X-WO-API-APP-ID $identificationId,
+        X-API-VERSION $apiVersion
+        orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        $responseDoubleArr = null;
+        $responseBonusArr = null;
+
+        if ($payment_type == 0) {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorization,
+                $identificationId,
+                $apiVersion
+            );
+            $responseArr = json_decode($response, true);
+            Log::debug("response_arr: 2222222233 ", $responseArr);
+
+            $messageAdmin = "orderSearchMarkersVisicom
+            ответ сервера"
+                . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            $responseFinal = $response;
+            if (isset($responseArr['dispatching_order_uid'])) {
+                (new DriverMemoryOrderController)->store(
+                    $responseArr['dispatching_order_uid'],
+                    json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                    $authorization,
+                    $url,
+                    $identificationId,
+                    $apiVersion
+                );
+            }
+
+        }
+        else {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
+            $responseFinal = $response;
+            $responseBonusArr = json_decode($response, true);
+            $responseBonusArr["url"] = $url;
+            Log::debug("responseBonusArr: 333333333344 ", $responseBonusArr);
+
+            if (isset($responseBonusArr['dispatching_order_uid'])) {
+                (new DriverMemoryOrderController)->store(
+                    $responseBonusArr['dispatching_order_uid'],
+                    json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                    $authorization,
+                    $url,
+                    $identificationId,
+                    $apiVersion
+                );
+            }
+            if ($authorizationDouble != null) {
+                $responseBonusArr["parameter"] = $parameter;
+
+                $parameter['payment_type'] = 0;
+
+                $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                    $url,
+                    $parameter,
+                    $authorizationDouble,
+                    $identificationId,
+                    $apiVersion
+                );
+
+                $responseDoubleArr = json_decode($responseDouble, true);
+                Log::debug("responseDoubleArr: 44444444444 ", $responseDoubleArr);
+
+                if (isset($responseDoubleArr['dispatching_order_uid']) && !isset($responseBonusArr['dispatching_order_uid'])) {
+                    (new DriverMemoryOrderController)->store(
+                        $responseDoubleArr['dispatching_order_uid'],
+                        json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                        $authorization,
+                        $url,
+                        $identificationId,
+                        $apiVersion
+                    );
+                }
+                //Сообщение что нет обоих заказаов безнального и дубля
+                if ($responseBonusArr != null
+                    && isset($responseBonusArr["Message"])
+                    && $responseDoubleArr != null
+                    && isset($responseDoubleArr["Message"])
+                ) {
+
+                    $response_error["order_cost"] = "0";
+                    $response_error["Message"] = $responseBonusArr["Message"];
+
+                    $response_error["order_cost"] = "0";
+
+                    $message = $response_error["Message"];
+                    $blacklist_phrase = "Вы в черном списке";
+
+                    if (strpos($message, $blacklist_phrase) !== false) {
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                        $response_error["Message"] = $cityArr["black_list"];
+                    } else {
+                        Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                    }
+
+
+                    $message = "Ошибка заказа: " . $responseBonusArr["Message"]
+                        . "Параметры запроса: " . json_encode($parameter, JSON_UNESCAPED_UNICODE);
+                    Log::error("orderSearchMarkersVisicom 111" . $message);
+                    (new MessageSentController)->sentMessageAdmin($message);
+                    return response($response_error, 200)
+                        ->header('Content-Type', 'json');
+                }
+                if ($responseBonusArr == null
+                    || isset($responseBonusArr["Message"])
+                    && $responseDoubleArr != null
+                    && !isset($responseDoubleArr["Message"])
+                ) {
+                    $responseFinal = $responseDouble;
+                }
+                if (!isset($responseDoubleArr["Message"])) {
+                    $responseDoubleArr["url"] = $url;
+                    $responseDoubleArr["parameter"] = $parameter;
+                } else {
+
+                    $messageAdmin = "orderSearchMarkersVisicom: дубль  не создался";
+                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                    $responseDoubleArr = null;
+                }
+
+            }
+        }
+
+        if ($responseFinal->status() == 200) {
+            $response_arr = json_decode($responseFinal, true);
+            ///// Тут будет пуш в ПАС
+            $params['pay_system'] = $userArr[2];
+
+            if($email != "no email") {
+                if(isset( $responseDoubleArr["dispatching_order_uid"])) {
+                    $dispatching_order_uid_Double = $responseDoubleArr["dispatching_order_uid"];
+                } else {
+                    $dispatching_order_uid_Double = "*";
+                }
+                (new PusherController)->sentUidAppEmailPayType(
+                    $response_arr['dispatching_order_uid'],
+                    $application,
+                    $email,
+                    $params["pay_system"]
+                );
+                (new UniversalAndroidFunctionController)->parseOrderResponse(
+                    $response_arr,
+                    $dispatching_order_uid_Double,
+                    $required_time,
+                    $application,
+                    $email
+                );
+            }
+
+            if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
+                $params["order_cost"] = $response_arr["order_cost"];
+
+                $params["add_cost"] = $add_cost;
+                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
+
+                $params['closeReason'] = "-1";
+                $params['comment_info'] = $comment;
+                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
+                $params['payment_type'] = $payment_type;
+                $params['clientCost'] = $clientCost;
+
+                if ($params['pay_system'] == "bonus_payment") {
+                    $params['bonus_status'] = 'hold';
+                } else {
+                    $params['bonus_status'] = '';
+                }
+                Log::debug('Order Parameters:', $params);
+                $order_id = (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
+
+
+                if($wfpInvoice != "*") {
+                    $orderReference = $wfpInvoice;
+                    $amount = $clientCost;
+                    $productName = "Інша допоміжна діяльність у сфері транспорту";
+                    $clientEmail = $params['email'];
+                    $clientPhone = $params["user_phone"];
+                    $pay_system = $params['pay_system'];
+
+                    (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
+                    (new WfpController)->chargeActiveToken(
+                        $application,
+                        $city,
+                        $orderReference,
+                        $amount,
+                        $productName,
+                        $clientEmail,
+                        $clientPhone
+                    );
+                    (new WfpController)->checkStatus(
+                        $application,
+                        $city,
+                        $orderReference
+                    );
+                }
+
+
+                Log::debug("Перед проверкой условий:");
+                Log::debug("Содержимое \$responseBonusArr: " . json_encode($responseBonusArr));
+                Log::debug("Содержимое \$responseDoubleArr: " . json_encode($responseDoubleArr));
+                Log::debug("Содержимое \$params: " . json_encode($params));
+                if (isset($responseBonusArr)
+                    && !isset($responseBonusArr["Message"])
+                    && $responseDoubleArr == null
+                ) {
+                    //60 секунд на оплату водителю на карту
+                    Log::debug("StartStatusPaymentReview " . $responseFinal);
+                    Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
+                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                }
+
+                $response_ok["from_lat"] = $originLatitude;
+                $response_ok["from_lng"] = $originLongitude;
+
+                $response_ok["lat"] = $toLatitude;
+                $response_ok["lng"] = $toLongitude;
+
+                $response_ok["dispatching_order_uid"] = $response_arr["dispatching_order_uid"];
+                $response_ok["order_cost"] = $response_arr["order_cost"];
+                $response_ok["add_cost"] = $add_cost;
+                $response_ok["currency"] = $response_arr["currency"];
+                $response_ok["routefrom"] = $params['from'];
+                $response_ok["routefromnumber"] = $params['from_number'];
+                $response_ok["routeto"] = $params['to'];
+                $response_ok["to_number"] = $params['to_number'];
+                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["flexible_tariff_name"] = $tariff;
+                $response_ok["comment_info"] = $comment;
+                $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
+                if ($responseBonusArr != null) {
+                    Log::debug("responseBonusArr", $responseBonusArr);
+                }
+                if ($responseDoubleArr != null) {
+                    Log::debug("responseDoubleArr", $responseDoubleArr);
+                };
+
+                /////////////////////////////////////////////////////////////            ;
+                //Запуск вилки
+                if ($responseBonusArr != null
+                    && $responseDoubleArr != null
+                    && isset($responseBonusArr["dispatching_order_uid"])
+                    && isset($responseDoubleArr["dispatching_order_uid"])
+                ) {
+                    Log::debug("responseDoubleArr: 44444444 ", $responseDoubleArr);
+                    $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+
+                    Log::debug("******************************");
+                    Log::debug("DoubleOrder parameters1111: ", [
+                        'responseBonusStr' => json_encode($responseBonusArr),
+                        'responseDoubleStr' => json_encode($responseDoubleArr),
+                        'authorizationBonus' => $authorizationBonus,
+                        'authorizationDouble' => $authorizationDouble,
+                        'connectAPI' => $connectAPI,
+                        'identificationId' => $identificationId,
+                        'apiVersion' => $apiVersion
+                    ]);
+
+                    Log::debug("******************************");
+
+
+
+                    $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+                    $doubleOrder = new DoubleOrder();
+                    $doubleOrder->responseBonusStr = json_encode($responseBonusArr);
+                    $doubleOrder->responseDoubleStr = json_encode($responseDoubleArr);
+                    $doubleOrder->authorizationBonus = $authorizationBonus;
+                    $doubleOrder->authorizationDouble = $authorizationDouble;
+                    $doubleOrder->connectAPI = $connectAPI;
+                    $doubleOrder->identificationId = $identificationId;
+                    $doubleOrder->apiVersion = $apiVersion;
+
+                    Log::debug("Values set in DoubleOrder:", [
+                        'responseBonusStr' => $doubleOrder->responseBonusStr,
+                        'responseDoubleStr' => $doubleOrder->responseDoubleStr,
+                        'authorizationBonus' => $doubleOrder->authorizationBonus,
+                        'authorizationDouble' => $doubleOrder->authorizationDouble,
+                        'connectAPI' => $doubleOrder->connectAPI,
+                        'identificationId' => $doubleOrder->identificationId,
+                        'apiVersion' => $doubleOrder->apiVersion,
+                    ]);
+
+                    $doubleOrder->save();
+
+                    $uid_history = new Uid_history();
+                    $uid_history->uid_bonusOrder = $responseBonusArr["dispatching_order_uid"];
+                    $uid_history->uid_doubleOrder = $responseDoubleArr["dispatching_order_uid"];
+                    $uid_history->uid_bonusOrderHold = $responseBonusArr["dispatching_order_uid"];
+                    $uid_history->cancel = false;
+                    $uid_history->orderId = $doubleOrder->id;
+                    $uid_history->save();
+
+                    $response_ok["doubleOrder"] = $doubleOrder->id;
+                    Log::info("doubleOrder->id" . $doubleOrder->id);
+                    Log::debug("StartNewProcessExecution 5895");
+                    Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
+                    StartNewProcessExecution::dispatch($doubleOrder->id);
+//                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+                }
+//                else {
+//                    if ($responseBonusArr != null
+//                        && $responseDoubleArr == null
+//                        && isset($responseBonusArr["dispatching_order_uid"])
+//                    ) {
+//                        Log::debug("responseDoubleArr: 44444444 ", $responseDoubleArr);
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//
+//                        Log::debug("******************************");
+//                        Log::debug("DoubleOrder parameters1111: ", [
+//                            'responseBonusStr' => json_encode($responseBonusArr),
+//                            'responseDoubleStr' => json_encode($responseBonusArr),
+//                            'authorizationBonus' => $authorizationBonus,
+//                            'authorizationDouble' => $authorizationDouble,
+//                            'connectAPI' => $connectAPI,
+//                            'identificationId' => $identificationId,
+//                            'apiVersion' => $apiVersion
+//                        ]);
+//
+//                        Log::debug("******************************");
+//
+//
+//
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//                        $doubleOrder = new DoubleOrder();
+//                        $doubleOrder->responseBonusStr = json_encode($responseBonusArr);
+//                        $doubleOrder->responseDoubleStr = json_encode($responseBonusArr);
+//                        $doubleOrder->authorizationBonus = $authorizationBonus;
+//                        $doubleOrder->authorizationDouble = $authorizationBonus;
+//                        $doubleOrder->connectAPI = $connectAPI;
+//                        $doubleOrder->identificationId = $identificationId;
+//                        $doubleOrder->apiVersion = $apiVersion;
+//
+//                        Log::debug("Values set in DoubleOrder:", [
+//                            'responseBonusStr' => $doubleOrder->responseBonusStr,
+//                            'responseDoubleStr' => $doubleOrder->responseDoubleStr,
+//                            'authorizationBonus' => $doubleOrder->authorizationBonus,
+//                            'authorizationDouble' => $doubleOrder->authorizationDouble,
+//                            'connectAPI' => $doubleOrder->connectAPI,
+//                            'identificationId' => $doubleOrder->identificationId,
+//                            'apiVersion' => $doubleOrder->apiVersion,
+//                        ]);
+//
+//                        $doubleOrder->save();
+//
+//                        $response_ok["doubleOrder"] = $doubleOrder->id;
+//                        Log::info("doubleOrder->id" . $doubleOrder->id);
+//                        Log::debug("StartNewProcessExecution 5895");
+//                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
+//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+//                    }
+//                    if ($responseBonusArr == null
+//                        && $responseDoubleArr != null
+//                        && isset($responseDoubleArr["dispatching_order_uid"])
+//                    ) {
+//                        Log::debug("responseDoubleArr: 44444444 ", $responseDoubleArr);
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//
+//                        Log::debug("******************************");
+//                        Log::debug("DoubleOrder parameters1111: ", [
+//                            'responseBonusStr' => json_encode($responseDoubleArr),
+//                            'responseDoubleStr' => json_encode($responseDoubleArr),
+//                            'authorizationBonus' => $authorizationDouble,
+//                            'authorizationDouble' => $authorizationDouble,
+//                            'connectAPI' => $connectAPI,
+//                            'identificationId' => $identificationId,
+//                            'apiVersion' => $apiVersion
+//                        ]);
+//
+//                        Log::debug("******************************");
+//
+//
+//
+//                        $response_ok["dispatching_order_uid_Double"] = $responseDoubleArr["dispatching_order_uid"];
+//                        $doubleOrder = new DoubleOrder();
+//                        $doubleOrder->responseBonusStr = json_encode($responseDoubleArr);
+//                        $doubleOrder->responseDoubleStr = json_encode($responseDoubleArr);
+//                        $doubleOrder->authorizationBonus = $authorizationDouble;
+//                        $doubleOrder->authorizationDouble = $authorizationDouble;
+//                        $doubleOrder->connectAPI = $connectAPI;
+//                        $doubleOrder->identificationId = $identificationId;
+//                        $doubleOrder->apiVersion = $apiVersion;
+//
+//                        Log::debug("Values set in DoubleOrder:", [
+//                            'responseBonusStr' => $doubleOrder->responseBonusStr,
+//                            'responseDoubleStr' => $doubleOrder->responseDoubleStr,
+//                            'authorizationBonus' => $doubleOrder->authorizationBonus,
+//                            'authorizationDouble' => $doubleOrder->authorizationDouble,
+//                            'connectAPI' => $doubleOrder->connectAPI,
+//                            'identificationId' => $doubleOrder->identificationId,
+//                            'apiVersion' => $doubleOrder->apiVersion,
+//                        ]);
+//
+//                        $doubleOrder->save();
+//
+//                        $response_ok["doubleOrder"] = $doubleOrder->id;
+//                        Log::info("doubleOrder->id" . $doubleOrder->id);
+//                        Log::debug("StartNewProcessExecution 5895");
+//                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
+//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
+//                    }
+//                }
+
+
+
+                if (count($userArr) > 3) {
+                    $email = $params['email'];
+//                    SearchOrderToDeleteJob::dispatch(
+                    self::searchOrderToDelete(
+                        $originLatitude,
+                        $originLongitude,
+                        $toLatitude,
+                        $toLongitude,
+                        $email,
+                        $start,
+                        $finish,
+                        $payment_type,
+                        $city,
+                        $application
+                    );
+                }
+                return response($response_ok, 200)
+                    ->header('Content-Type', 'json');
+            } else {
+                $response_arr = json_decode($response, true);
+
+                $response_error["order_cost"] = "0";
+
+                $message = $response_arr["Message"];
+                $blacklist_phrase = "Вы в черном списке";
+
+                if (strpos($message, $blacklist_phrase) !== false) {
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                    $response_error["Message"] = $cityArr["black_list"];
+                } else {
+                    Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                    $response_error["Message"] = $response_arr["Message"];
+                }
+
+                $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
+                (new DailyTaskController)->sentTaskMessage($message);
+
+
+                return response($response_error, 200)
+                    ->header('Content-Type', 'json');
+            }
+        } else {
+            $response_arr = json_decode($response, true);
+
+            $response_error["order_cost"] = "0";
+
+            $message = $response_arr["Message"];
+            $blacklist_phrase = "Вы в черном списке";
+
+            if (strpos($message, $blacklist_phrase) !== false) {
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                $cityArr = (new CityController)->maxPayValueApp($city, $application);
+                $response_error["Message"] = $cityArr["black_list"];
+            } else {
+                Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                $response_error["Message"] = $response_arr["Message"];
+            }
+
+            $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr, JSON_UNESCAPED_UNICODE);
+            (new DailyTaskController)->sentTaskMessage($message);
+
+            return response($response_error, 200)
+                ->header('Content-Type', 'json');
+        }
     }
     /**
      * @throws \Exception

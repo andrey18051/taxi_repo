@@ -305,6 +305,10 @@ class UIDController extends Controller
                         $auto =  $value["auto"];
                     }
                     if ($i < 10) {
+                        $cost = $value["web_cost"];
+                        if($value["client_cost"] !=null) {
+                            $cost = $value["client_cost"]+ $value["attempt_20"];
+                        }
                         $response[] = [
                             'routefrom' => $value["routefrom"],
                             'routefromnumber' => $value["routefromnumber"],
@@ -314,7 +318,7 @@ class UIDController extends Controller
                             'routetonumber' => $value["routetonumber"],
                             'to_lat' => $value["to_lat"],
                             'to_lng' => $value["to_lng"],
-                            'web_cost' => $value["web_cost"],
+                            'web_cost' => $cost,
                             'closeReason' => $value["closeReason"],
                             'auto' => $auto,
                             'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
@@ -615,7 +619,10 @@ class UIDController extends Controller
                     } else {
                         $dispatchingOrderUidDouble = " ";
                     }
-
+                    $cost = $value["web_cost"];
+                    if($value["client_cost"] !=null) {
+                        $cost = $value["client_cost"]+ $value["attempt_20"];
+                    }
                     $response[] = [
                         'uid' => $value["dispatching_order_uid"],
                         'routefrom' => $value["routefrom"],
@@ -626,7 +633,7 @@ class UIDController extends Controller
                         'routetonumber' => $value["routetonumber"],
                         'to_lat' => $value["to_lat"],
                         'to_lng' => $value["to_lng"],
-                        'web_cost' => $value["web_cost"],
+                        'web_cost' => $cost,
                         'closeReason' => $value["closeReason"],
                         'auto' => $auto,
                         'flexible_tariff_name' => $value["flexible_tariff_name"],

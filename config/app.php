@@ -331,5 +331,10 @@ return [
      */
     'FIREBASE_API_KEY_PAS_1' => 'AIzaSyDPNH0xPdn1v7Wxf6k7PZ8uQTtiZ_QmXyQ',
     'FIREBASE_API_KEY_PAS_2' => '0d6517d36ea943ae80711332cf46ed6b5e5dcabf',
-    'FIREBASE_API_KEY_PAS_4' => 'AIzaSyDHh_Tcy2nVUjqFgxKn4kl4ADUHRSCamyw'
+    'FIREBASE_API_KEY_PAS_4' => 'AIzaSyDHh_Tcy2nVUjqFgxKn4kl4ADUHRSCamyw',
+
+    /**
+     *
+     */
+    'cost_correction' => '1'
 ];
