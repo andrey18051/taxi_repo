@@ -4001,14 +4001,14 @@ class UniversalAndroidFunctionController extends Controller
             $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
                 " до "  . $params['to'] . " " . $params['to_number'] .
-                ". Вартість поїздки становитиме: " . $params['order_cost'] . "грн. $pay_type Номер замовлення: " .
+                ". Вартість поїздки становитиме: " . $params['clientCost'] . "грн. $pay_type Номер замовлення: " .
                 $params['dispatching_order_uid'] .
                 ", сервер " . $params['server'];
             ;
         } else {
             $order = "Нове замовлення від " . $params['user_full_name'] . " (телефон $user_phone, email $email) " .
                 " за маршрутом від " . $params['from'] . " " . $params['from_number'] .
-                " по місту. Вартість поїздки становитиме: " . $params['order_cost'] . "грн. $pay_type Номер замовлення: " .
+                " по місту. Вартість поїздки становитиме: " . $params['clientCost'] . "грн. $pay_type Номер замовлення: " .
                 $params['dispatching_order_uid'] .
                 ", сервер " . $params['server'];
         }
@@ -4508,6 +4508,63 @@ class UniversalAndroidFunctionController extends Controller
 //        (new MessageSentController)->sentMessageAdmin($messageAdmin);
         return 'Basic ' . base64_encode($username . ':' . $password);
     }
+
+    public function costCorrectionValue($cityString, $connectAPI, $app): string
+    {
+
+        $cacheKey = $app . '_' . $cityString . '_' . $connectAPI . '_costCorrectionValue';
+
+        try {
+            return Cache::remember($cacheKey, now()->addDays(1), function () use ($app, $cityString, $connectAPI) {
+                switch ($app) {
+                    case "PAS1":
+                        $city = City_PAS1::where('name', $cityString)
+                            ->where('address', str_replace('http://', '', $connectAPI))
+                            ->first();
+
+                        return $city ? $city->cost_correction : 0;
+                    case "PAS2":
+                        $city = City_PAS2::where('name', $cityString)
+                            ->where('address', str_replace('http://', '', $connectAPI))
+                            ->first();
+
+                        return $city ? $city->cost_correction : 0;
+
+                    default:
+                        $city = City_PAS4::where('name', $cityString)
+                            ->where('address', str_replace('http://', '', $connectAPI))
+                            ->first();
+
+                        return $city ? $city->cost_correction : 0;
+                }
+            });
+
+        } catch (\Exception $e) {
+            // Логирование ошибки
+            Log::error("Cache driver failed: " . $e->getMessage());
+
+            // Fallback: прямой запрос к базе данных
+
+            switch ($app) {
+                case "PAS1":
+                    $city = City_PAS1::where('name', $cityString)
+                        ->where('address', str_replace('http://', '', $connectAPI))
+                        ->first();
+                    return $city ? $city->cost_correction : 0;
+                case "PAS2":
+                    $city = City_PAS2::where('name', $cityString)
+                        ->where('address', str_replace('http://', '', $connectAPI))
+                        ->first();
+                    return $city ? $city->cost_correction : 0;
+                default:
+                    $city = City_PAS4::where('name', $cityString)
+                        ->where('address', str_replace('http://', '', $connectAPI))
+                        ->first();
+                    return $city ? $city->cost_correction : 0;
+            }
+        }
+    }
+
     public function apiVersion($name, $address)
     {
 
@@ -5512,7 +5569,7 @@ class UniversalAndroidFunctionController extends Controller
      *
      * @throws \Exception
      */
-    public function startAddCostWithAddBottomUpdate($uid, $addCost)
+    public function startAddCostWithAddBottomUpdate($uid, $addCost): ?\Illuminate\Http\JsonResponse
     {
         Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
 
