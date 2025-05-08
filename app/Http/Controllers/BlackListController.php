@@ -43,6 +43,7 @@ class BlackListController extends Controller
             $blackList = new BlackList();
             $blackList->email = $req->email;
             $blackList->save();
+            (new PusherController)->sentActivateBlackUser("0",$req->email);
             return redirect()->route('index-black');
         }
     }
@@ -59,7 +60,7 @@ class BlackListController extends Controller
         } else {
             Log::warning("No entry found for email in blacklist: " . $req->email);
         }
-
+        (new PusherController)->sentActivateBlackUser("1", $req->email);
         Log::info("Redirecting to the blacklist index page.");
         return redirect()->route('index-black');
     }

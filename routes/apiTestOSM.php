@@ -241,6 +241,9 @@ Route::get('/android/sentUidAppEmail/{order_uid}/{app}/{email} ', [PusherControl
 Route::get('/android/sentCostApp/{order_cost}/{app}/{email} ', [PusherController::class, 'sentCostApp'])
     ->name('sentCostApp');
 
+Route::get('/android/sentActivateBlackUser/{active}/{email} ', [PusherController::class, 'sentActivateBlackUser'])
+    ->name('sentActivateBlackUser');
+
 Route::get('/android/sendOrderResponse/{app}/{email}', [UniversalAndroidFunctionController::class, 'sendOrderResponse'])
     ->name('sendOrderResponse');
 

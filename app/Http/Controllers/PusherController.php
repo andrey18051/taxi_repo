@@ -196,6 +196,56 @@ class PusherController extends Controller
         }
     }
 
+
+    public function sentActivateBlackUser(
+        $active,
+        $email
+    ): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Инициализация Pusher
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
+
+            // Подготовка данных для отправки
+            $data = [
+                'active' => $active,
+                'email' => $email,
+            ];
+
+            // Отправка события через Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'black-user-status-'. "-$email";    // Замените на нужное событие
+
+            $pusher->trigger($channel, $event, $data);
+
+            Log::info("Событие $event успешно отправлено через Pusher для $email. active: $active");
+
+            $messageAdmin = "Событие $event успешно отправлено через Pusher для $email. active: $active";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json(['result' => 'ok' . $active]);
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка при отправке события через Pusher: {$e->getMessage()}", [
+                'active' => $active,
+                'email' => $email,
+            ]);
+            $messageAdmin = "Ошибка при отправке события через Pusher: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function sendOrder($costMap, $app, $email): \Illuminate\Http\JsonResponse
     {
         try {
