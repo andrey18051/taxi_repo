@@ -2932,4 +2932,16 @@ class WfpController extends Controller
 
         return ["result" => $result];
     }
+
+    public function deleteInvoice($orderReference): array
+    {
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+
+        if ($invoice !== null) {
+            $invoice->delete();
+            return ['result' => 'deleted'];
+        }
+
+        return ['result' => 'not_found'];
+    }
 }

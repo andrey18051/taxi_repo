@@ -57,3 +57,4 @@ Route::get('/deleteCardToken/{id}', [CardsController::class, 'deleteCardToken'])
  * verify Hold
  */
 Route::get('/verifyHold/{uid}', [WfpController::class, 'verifyHold'])->name('verifyHold');
+Route::get('/deleteInvoice/{orderReference}', [WfpController::class, 'deleteInvoice'])->name('deleteInvoice');
