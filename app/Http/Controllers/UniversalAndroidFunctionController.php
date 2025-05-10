@@ -3930,7 +3930,10 @@ class UniversalAndroidFunctionController extends Controller
         $order->bonus_status = $params['bonus_status'];
         $order->pay_system = $params["pay_system"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
-        $order->client_cost = $params['clientCost'];
+        if (isset($params['clientCost'])) {
+            $order->client_cost = $params['clientCost'];
+        }
+
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
         $order->closeReason = $params['closeReason'];
         $order->closeReasonI = 1;

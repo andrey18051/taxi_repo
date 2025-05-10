@@ -83,9 +83,16 @@ class IPController extends Controller
 
     public function countryName($ip): \Illuminate\Http\JsonResponse
     {
+        // Use the provided $ip parameter instead of getenv("REMOTE_ADDR")
+        $LocationData = Location::get($ip);
 
-        $LocationData = Location::get(getenv("REMOTE_ADDR"));
-        return response()->json(['response' => $LocationData->countryCode]);
+        // Check if $LocationData is valid
+        if ($LocationData && isset($LocationData->countryCode)) {
+            return response()->json(['response' => $LocationData->countryCode]);
+        }
+
+        // Return a fallback response if location data is not available
+        return response()->json(['response' => 'Unknown'], 404);
     }
 
     public function address(): \Illuminate\Http\JsonResponse
