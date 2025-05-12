@@ -6615,6 +6615,7 @@ class UniversalAndroidFunctionController extends Controller
             }
 
 
+
             if ($responseFinal->successful() && $responseFinal->status() == 200) {
                 // Вызываем отмену заказа в AndroidTestOSMController
 
@@ -6642,6 +6643,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 $orderNew = $responseArr["dispatching_order_uid"];
 
+
                 (new PusherController)->sentUidAppEmailPayType(
                     $orderNew,
                     $application,
@@ -6649,6 +6651,15 @@ class UniversalAndroidFunctionController extends Controller
                     $pay_method
                 );
 
+                if(isset($responseDoubleArr["dispatching_order_uid"])) {
+                    $orderDoubleNew = $responseDoubleArr["dispatching_order_uid"];
+                    (new PusherController)->sentUidDoubleAppEmailPayType(
+                        $orderDoubleNew,
+                        $application,
+                        $email,
+                        $pay_method
+                    );
+                }
 //                CacheHandler::cacheEventPut($uid, true, 60);
                 (new AndroidTestOSMController)->webordersCancelDouble(
                     $uid,

@@ -1,5 +1,5 @@
 # Базовый образ - Ubuntu 22.04
-FROM ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
+FROM ghcr.io/andrey18051/taxi_laravel_8.83.29_work:base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -19,12 +19,11 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 
 # Копируем конфигурационные файлы
-COPY docker/nginx_test.conf /etc/nginx/nginx.conf
+COPY docker/nginx_work.conf /etc/nginx/nginx.conf
 COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-order-taxi-site.crt
 COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
 COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
 COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/test-taxi.kyiv.ua.key
-
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Устанавливаем права и владельцев для необходимых файлов и директорий
@@ -35,7 +34,7 @@ RUN chmod -R 777 /etc/ssl/certs/nginx && \
     chown -R www-data:www-data /usr/share/nginx/html/taxi
 
 # Открываем нужные порты
-EXPOSE 6443
+EXPOSE 7443
 
 # Копируем файлы проекта
 COPY ./app /usr/share/nginx/html/taxi/app
@@ -51,7 +50,7 @@ COPY ./tests /usr/share/nginx/html/taxi/tests
 COPY ./tmp /usr/share/nginx/html/taxi/tmp
 COPY ./vendor /usr/share/nginx/html/taxi/vendor
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
-COPY ../../../app/env/test/.env /usr/share/nginx/html/taxi/
+COPY ../../../app/env/work/.env /usr/share/nginx/html/taxi/
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
 COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
@@ -70,7 +69,7 @@ COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/supervisord.conf && \
-    cp /usr/share/nginx/html/taxi/docker/nginx_test.conf /etc/nginx/nginx.conf && \
+    cp /usr/share/nginx/html/taxi/docker/nginx_work.conf /etc/nginx/nginx.conf && \
     cp -r /usr/share/nginx/html/taxi/docker/certs/nginx /etc/ssl/certs/nginx && \
 #    cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
@@ -86,24 +85,16 @@ RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
 
 # Настраиваем Cron
-#RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
-#    echo "*/15 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan daily-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-#    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan driver-balance-report-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-#    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-#    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-#    crontab -u root /tmp/cronfile && \
-#    rm /tmp/cronfile
-
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
-        echo "1 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-        crontab -u root /tmp/cronfile && \
-        rm /tmp/cronfile
-
+    echo "*/15 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan daily-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan driver-balance-report-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 20 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    crontab -u root /tmp/cronfile && \
+    rm /tmp/cronfile
 
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
-
-
 
 
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)

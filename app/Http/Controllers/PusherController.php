@@ -196,7 +196,58 @@ class PusherController extends Controller
         }
     }
 
+    public function sentUidDoubleAppEmailPayType(
+        $order_uid,
+        $app,
+        $email,
+        $pay_system
+    ): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Инициализация Pusher
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
 
+            // Подготовка данных для отправки
+            $data = [
+                'order_uid' => $order_uid,
+                'app' => $app,
+                'email' => $email,
+                'paySystemStatus' => $pay_system
+            ];
+
+            // Отправка события через Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'orderDouble-status-updated-'. $app . "-$email";    // Замените на нужное событие
+
+            $pusher->trigger($channel, $event, $data);
+
+            Log::info("Событие $event успешно отправлено через Pusher для $email в $app. UID заказа: $order_uid");
+
+            $messageAdmin = "Событие $event отправлен пользователю $email номер нового заказа в $app после пересоздания: $order_uid";
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            return response()->json(['result' => 'ok' . $order_uid]);
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка при отправке события через Pusher: {$e->getMessage()}", [
+                'order_uid' => $order_uid,
+                'app' => $app,
+                'email' => $email
+            ]);
+            $messageAdmin = "Ошибка при отправке события через Pusher: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function sentActivateBlackUser(
         $active,
         $email
