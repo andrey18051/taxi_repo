@@ -495,11 +495,11 @@ class PusherController extends Controller
         );
 
         // Отправка события на канал
-        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+        Log::info("Pusher отправляет событие: order-cost-" . $app . " в канал teal-towel-48");
 
         $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' =>  $order_cost]);
         $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $app: " . $order_cost;
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         return response()->json(['result' => 'ok']);
     }

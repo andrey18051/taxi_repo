@@ -3685,9 +3685,12 @@ class AndroidTestOSMController extends Controller
             $apiVersion
         );
         $responseArr = json_decode($response, true);
-//        $order_cost = $responseArr["order_cost"];
 
-//        (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
+        if(isset($responseArr["order_cost"])) {
+            $order_cost = $responseArr["order_cost"];
+            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
+        }
+
 
         $messageAdmin = "costSearchMarkersTime  ответ сервера" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);

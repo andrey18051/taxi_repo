@@ -6515,18 +6515,19 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
-            $url,
-            $parameter,
-            $authorization,
-            $identificationId,
-            $apiVersion,
-            $addCost,
-            $order
-        );
-
-
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
+//        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+//            $url,
+//            $parameter,
+//            $authorization,
+//            $identificationId,
+//            $apiVersion,
+//            $addCost,
+//            $order
+//        );
+//
+//
+//        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
 
 //        $parameter['add_cost'] = (int) $order->attempt_20 + (int)$addCost+ $addCostBalance;
 
