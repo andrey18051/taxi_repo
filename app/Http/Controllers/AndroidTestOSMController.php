@@ -9862,7 +9862,21 @@ class AndroidTestOSMController extends Controller
     ) {
         $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        if(!$orderweb) {
+            $startTime = time();
+            do {
+                // Попробуем найти запись
+                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
+                if ($orderweb) {
+                    // Если запись найдена, выходим из цикла
+                    break;
+                }
+
+                // Ждём одну секунду перед следующим проверочным циклом
+                sleep(1);
+            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+        }
         $resp_answer = "";
         if ($orderweb) {
             self::updateTimestamp($orderweb->id);
@@ -10354,7 +10368,6 @@ class AndroidTestOSMController extends Controller
 
 
                 if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
-                    $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
                     $orderweb->closeReason = "1";
                     $orderweb->save();
