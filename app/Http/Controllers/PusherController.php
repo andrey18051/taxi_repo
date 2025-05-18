@@ -343,6 +343,54 @@ class PusherController extends Controller
             ], 500);
         }
     }
+
+
+    public function sendAutoOrder($costMap, $app, $email): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Initialize Pusher or any other service
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                ['cluster' => env('PUSHER_APP_CLUSTER')]
+            );
+
+
+            // Prepare the data for sending
+            $data = $costMap;
+
+            // Send the event via Pusher
+            $channel = 'teal-towel-48'; // Замените на нужный канал
+            $event = 'orderAuto-'. $app . "-$email";    // Замените на нужное событие
+
+            $pusher->trigger($channel, $event, $data);
+
+            Log::info("Event $event sent successfully via Pusher with order UID: {$costMap['dispatching_order_uid']}");
+
+            // Optional: Send message to admin or log
+            $messageAdmin = "Event $event sent for order UID: {$costMap['dispatching_order_uid']}";
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            // Return a success response
+            return response()->json(['result' => 'ok', 'order_uid' => $costMap['dispatching_order_uid']], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error sending Pusher event: {$e->getMessage()}", [
+                'order_cost' => $costMap['order_cost'] ?? 'N/A',
+                'dispatching_order_uid' => $costMap['dispatching_order_uid'] ?? 'N/A',
+            ]);
+
+            // Optional: Send error message to admin
+            $messageAdmin = "Error sending Pusher event: {$e->getMessage()}";
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+            return response()->json([
+                'result' => 'failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function sendDoubleStatus(
         $response,
         $app,

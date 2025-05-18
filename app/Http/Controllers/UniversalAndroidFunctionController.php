@@ -7,6 +7,7 @@ use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
+use App\Jobs\SearchAutoOrderJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -3948,6 +3949,8 @@ class UniversalAndroidFunctionController extends Controller
 
         $order_id = $order->id;
 
+        SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
+
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
         if (isset($params['user_phone'], $params['email'], $params['comment_info'])
             && strpos($params['comment_info'], 'цифра номера') === false
@@ -7059,6 +7062,242 @@ class UniversalAndroidFunctionController extends Controller
 
     }
 
+
+//    public function searchAutoOrderJob($uid) {
+//        $uid = (new MemoryOrderChangeController)->show($uid);
+//        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+//        if($orderweb) {
+//            do {
+//                if ($orderweb->closeReason == "-1") {
+//                    if ($orderweb->auto != null) {
+//                        self::sendAutoOrderResponse($orderweb);
+//                        return ['status' => 'success', 'message' => $orderweb->auto];
+//                    } else {
+//                        sleep(5);
+//                    }
+//                } else {
+//                    return ['status' => 'success', 'message' => 'Заказ снят'];
+//                }
+//
+//            } while (true);
+//        } else {
+//            return ['status' => 'success', 'message' => 'Заказ не найден'];
+//        }
+//    }
+
+//    public function sendAutoOrderResponse($orderweb) {
+//        $costMap['dispatching_order_uid'] = $orderweb->dispatching_order_uid;
+//        $costMap['order_cost'] = $orderweb->client_cost;
+//        $costMap['currency'] = $orderweb->currency;
+//        $costMap['routefrom'] = $orderweb->routefrom;
+//        $costMap['routefromnumber'] = $orderweb->routefromnumber;
+//        $costMap['routeto'] = $orderweb->routeto;
+//        $costMap['to_number'] = $orderweb->routetonumber;
+//
+//        if($orderweb->required_time != null) {
+//            $costMap['required_time'] = $orderweb->required_time;
+//        } else {
+//            $costMap['required_time'] = "1970-01-01T03:00";
+//        }
+//
+//        $costMap['comment_info'] = $orderweb->comment_info;
+//        $costMap['extra_charge_codes'] = $orderweb->extra_charge_codes;
+//
+//
+//        // Проверка на дополнительные поля, если они существуют
+//        $uid_history = Uid_history::where("uid_bonusOrderHold", $orderweb->dispatching_order_uid)->first();
+//
+//        if ($uid_history) {
+//            // Если запись найдена, выходим из цикла
+//            $costMap['dispatching_order_uid'] = $uid_history->uid_bonusOrder;
+//            $dispatching_order_uid_Double = $uid_history->uid_doubleOrder;
+//            $costMap['dispatching_order_uid_Double'] = $dispatching_order_uid_Double;
+//        } else {
+//            $costMap['dispatching_order_uid_Double'] = " ";
+//        }
+//
+//        $email = $orderweb->email;
+//
+//        switch ($orderweb->comment) {
+//            case "taxi_easy_ua_pas1":
+//                $app = "PAS1";
+//                break;
+//            case "taxi_easy_ua_pas2":
+//                $app = "PAS2";
+//                break;
+//            //case "PAS4":
+//            default:
+//                $app = "PAS4";
+//                break;
+//        }
+//        (new PusherController)->sendAutoOrder($costMap, $app, $email);
+//
+//    }
+
+    public function searchAutoOrderJob($uid)
+    {
+        Log::info('searchAutoOrderJob: Начало обработки', ['uid' => $uid]);
+
+        // Валидация входного параметра
+        if (empty($uid)) {
+            Log::error('searchAutoOrderJob: Неверный UID', ['uid' => $uid]);
+            return ['status' => 'error', 'message' => 'Неверный UID'];
+        }
+
+        try {
+            // Получение обработанного UID
+            $processedUid = (new MemoryOrderChangeController)->show($uid);
+            if ($processedUid === null) {
+                Log::warning('searchAutoOrderJob: Обработка UID вернула null', ['uid' => $uid]);
+                return ['status' => 'error', 'message' => 'Обработка UID не удалась'];
+            }
+            Log::info('searchAutoOrderJob: UID обработан', ['uid' => $uid, 'processedUid' => $processedUid]);
+
+            // Поиск заказа
+            $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
+            if (!$orderweb) {
+                Log::warning('searchAutoOrderJob: Заказ не найден', ['processedUid' => $processedUid]);
+                return ['status' => 'success', 'message' => 'Заказ не найден'];
+            }
+            Log::info('searchAutoOrderJob: Заказ найден', [
+                'processedUid' => $processedUid,
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'closeReason' => $orderweb->closeReason
+            ]);
+
+            $messageAdmin = 'searchAutoOrderJob: closeReason' . $orderweb->closeReason;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            do {
+                Log::info('searchAutoOrderJob: Проверка условий цикла', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                    'closeReason' => $orderweb->closeReason,
+                    'auto' => $orderweb->auto
+                ]);
+                if ($orderweb->closeReason == "-1") {
+                    if ($orderweb->auto != null) {
+                        Log::info('searchAutoOrderJob: Найден автоматический заказ, отправка ответа', [
+                            'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                            'auto' => $orderweb->auto
+                        ]);
+                        self::sendAutoOrderResponse($orderweb);
+                        Log::info('searchAutoOrderJob: Ответ отправлен', [
+                            'dispatching_order_uid' => $orderweb->dispatching_order_uid
+                        ]);
+                        return ['status' => 'success', 'message' => $orderweb->auto];
+                    } else {
+                        sleep(5);
+                        $processedUid = (new MemoryOrderChangeController)->show($uid);
+                        $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
+                        $city = "OdessaTest";
+                        $application = "PAS2";
+                        (new AndroidTestOSMController)->historyUIDStatusNew(
+                            $processedUid,
+                            $city,
+                            $application
+                        );
+                    }
+                } else {
+                    Log::info('searchAutoOrderJob: Заказ снят', [
+                        'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                        'closeReason' => $orderweb->closeReason
+                    ]);
+                    return ['status' => 'success', 'message' => 'Заказ снят'];
+                }
+
+            } while (true);
+        } catch (\Exception $e) {
+            Log::error('searchAutoOrderJob: Произошла ошибка', [
+                'uid' => $uid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return ['status' => 'error', 'message' => 'Ошибка обработки: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Отправка ответа для автоматического заказа.
+     *
+     * @param Orderweb $orderweb Объект заказа
+     * @return void
+     */
+    protected function sendAutoOrderResponse($orderweb): void
+    {
+        Log::info('sendAutoOrderResponse started', [
+            'dispatching_order_uid' => $orderweb->dispatching_order_uid
+        ]);
+
+        try {
+            // Формирование costMap
+            $costMap = [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'order_cost' => $orderweb->client_cost,
+                'currency' => $orderweb->currency,
+                'routefrom' => $orderweb->routefrom,
+                'routefromnumber' => $orderweb->routefromnumber,
+                'routeto' => $orderweb->routeto,
+                'to_number' => $orderweb->routetonumber,
+                'required_time' => $orderweb->required_time ?? '1970-01-01T03:00',
+                'comment_info' => $orderweb->comment_info,
+                'extra_charge_codes' => $orderweb->extra_charge_codes,
+            ];
+            Log::info('sendAutoOrderResponse: costMap prepared', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'costMap' => $costMap
+            ]);
+
+            // Проверка на дополнительные поля
+            $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+            if ($uid_history) {
+                $costMap['dispatching_order_uid'] = $uid_history->uid_bonusOrder;
+                $costMap['dispatching_order_uid_Double'] = $uid_history->uid_doubleOrder;
+                Log::info('sendAutoOrderResponse: Uid_history found', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                    'uid_bonusOrder' => $uid_history->uid_bonusOrder,
+                    'uid_doubleOrder' => $uid_history->uid_doubleOrder
+                ]);
+            } else {
+                $costMap['dispatching_order_uid_Double'] = ' ';
+                Log::info('sendAutoOrderResponse: Uid_history not found', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid
+                ]);
+            }
+
+            // Определение приложения
+            $email = $orderweb->email;
+            switch ($orderweb->comment) {
+                case "taxi_easy_ua_pas1":
+                    $app = "PAS1";
+                    break;
+                case "taxi_easy_ua_pas2":
+                    $app = "PAS2";
+                    break;
+                //case "PAS4":
+                default:
+                    $app = "PAS4";
+                    break;
+            }
+            Log::info('sendAutoOrderResponse: App determined', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'app' => $app,
+                'email' => $email
+            ]);
+
+            // Отправка данных через PusherController
+            (new PusherController)->sendAutoOrder($costMap, $app, $email);
+            Log::info('sendAutoOrderResponse: Auto order sent successfully', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('sendAutoOrderResponse: Exception occurred', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e; // Перебрасываем исключение для обработки выше
+        }
+    }
      public function testCache () {
          Cache::put('test_key_redis', 'test_value_redis', 60); // Сохранить на 60 second
          $value = Cache::get('test_key_redis');
