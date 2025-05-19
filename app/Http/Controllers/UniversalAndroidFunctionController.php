@@ -3949,7 +3949,10 @@ class UniversalAndroidFunctionController extends Controller
 
         $order_id = $order->id;
 
-        SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
+        if ($params["payment_type"] != 1) {
+            SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
+        }
+
 
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);
         if (isset($params['user_phone'], $params['email'], $params['comment_info'])
@@ -7188,8 +7191,12 @@ class UniversalAndroidFunctionController extends Controller
                         sleep(5);
                         $processedUid = (new MemoryOrderChangeController)->show($uid);
                         $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
-                        $city = "OdessaTest";
-                        $application = "PAS2";
+//                        $city = "OdessaTest";
+                        $city = self::cityFinder($orderweb->city, $orderweb->server);
+
+//                        $application = "PAS2";
+                        $application = self::appFinder($orderweb->comment);
+
                         (new AndroidTestOSMController)->historyUIDStatusNew(
                             $processedUid,
                             $city,
@@ -7214,7 +7221,99 @@ class UniversalAndroidFunctionController extends Controller
             return ['status' => 'error', 'message' => 'Ошибка обработки: ' . $e->getMessage()];
         }
     }
+    private function cityFinder(String $cityInp, String $serverInp): string {
+//$order->city $order->server
+        switch ($cityInp) {
+            case "city_kiev":
+                $city = "Kyiv City";
+                break;
+            case "city_cherkassy":
+                $city = "Cherkasy Oblast";
+                break;
+            case "city_odessa":
+                if($serverInp == "http://188.190.245.102:7303") {
+                    $city = "OdessaTest";
+                } else {
+                    $city = "Odessa";
+                }
+                break;
+            case "city_zaporizhzhia":
+                $city = "Zaporizhzhia";
+                break;
+            case "city_dnipro":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "city_lviv":
+                $city = "Lviv";
+                break;
+            case "city_ivano_frankivsk":
+                $city = "Ivano_frankivsk";
+                break;
+            case "city_vinnytsia":
+                $city = "Vinnytsia";
+                break;
+            case "city_poltava":
+                $city = "Poltava";
+                break;
+            case "city_sumy":
+                $city = "Sumy";
+                break;
+            case "city_kharkiv":
+                $city = "Kharkiv";
+                break;
+            case "city_chernihiv":
+                $city = "Chernihiv";
+                break;
+            case "city_rivne":
+                $city = "Rivne";
+                break;
+            case "city_ternopil":
+                $city = "Ternopil";
+                break;
+            case "city_khmelnytskyi":
+                $city = "Khmelnytskyi";
+                break;
+            case "city_zakarpattya":
+                $city = "Zakarpattya";
+                break;
+            case "city_zhytomyr":
+                $city = "Zhytomyr";
+                break;
+            case "city_kropyvnytskyi":
+                $city = "Kropyvnytskyi";
+                break;
+            case "city_mykolaiv":
+                $city = "Mykolaiv";
+                break;
+            case "city_chernivtsi":
+                $city = "Сhernivtsi";
+                break;
+            case "city_lutsk":
+                $city = "Lutsk";
+                break;
+            default:
+                $city = "all";
+        }
+        Log::debug("cityFinder $city");
+        return $city;
+    }
 
+
+    public function appFinder(String $comment): string {
+//        $orderweb->comment
+        switch ($comment) {
+            case 'taxi_easy_ua_pas1':
+                $application = "PAS1";
+                break;
+            case 'taxi_easy_ua_pas2':
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+        }
+        Log::debug("appFinder $application");
+        return $application;
+    }
     /**
      * Отправка ответа для автоматического заказа.
      *
