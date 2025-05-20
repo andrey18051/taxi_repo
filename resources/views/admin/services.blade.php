@@ -41,7 +41,7 @@
                                                     <input type="text" id="name" name="name" autocomplete="off" class="form-control" placeholder="name"/>
                                                 </div>
                                                 <div class="col-3">
-                                                    <input type="text" id="email" name="email" autocomplete="off" class="form-control" value="taxi.easy.ua@gmail.com"/>
+                                                    <input type="text" id="email" name="email" autocomplete="off" class="form-control" value="taxi.easy.ua.sup@gmail.com"/>
                                                 </div>
                                                 <div class="col-3">
                                                     <input type="text" id="telegram_id" name="viber_id" autocomplete="off" class="form-control" placeholder="telegram_id"/>

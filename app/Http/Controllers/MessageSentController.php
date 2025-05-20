@@ -816,7 +816,7 @@ class MessageSentController extends Controller
                         ];
 
                         Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new CheckVod($paramsCheck));
+                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
 
                     } catch (Exception $e) {
                         Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
@@ -907,7 +907,7 @@ google_id: $uidDriver отправил данные авто и ожидает �
                             ];
 
                             Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
-                            Mail::to('taxi.easy.ua@gmail.com')->send(new CheckVod($paramsCheck));
+                            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
                         } catch (Exception $e) {
                             Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
                         }

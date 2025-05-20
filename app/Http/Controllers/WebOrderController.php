@@ -69,7 +69,7 @@ class WebOrderController extends Controller
 //                $alarmMessage->sendAlarmMessage($messageAdmin);
 //
 //                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-//                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
 //
 //                return config('app.taxi2012Url_2');
 //            } catch (Exception $e) {
@@ -92,7 +92,7 @@ class WebOrderController extends Controller
 //                    $alarmMessage->sendAlarmMessage($messageAdmin);
 //
 //                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-//                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
 //
 //                    return '400';
 //                }
@@ -2716,7 +2716,7 @@ class WebOrderController extends Controller
 
             }
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                 Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
@@ -2868,7 +2868,7 @@ class WebOrderController extends Controller
 
 
                 try {
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Admin($paramsAdmin));
+                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Admin($paramsAdmin));
                     Mail::to('cartaxi4@gmail.com')->send(new Admin($paramsAdmin));
                 } catch (\Exception $e) {
                     Log::error('Mail send failed: ' . $e->getMessage());
@@ -2950,7 +2950,7 @@ class WebOrderController extends Controller
 
 
                 try {
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Feedback($params));
+                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Feedback($params));
                 } catch (\Exception $e) {
                     Log::error('Mail send failed: ' . $e->getMessage());
                     // Дополнительные действия для предотвращения сбоя

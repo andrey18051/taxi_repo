@@ -1938,7 +1938,7 @@ google_id: $uidDriver ожидает возврата средств:
 
                 ];
 
-                Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new DriverInfo($paramsAdmin));
 
                 Mail::to('cartaxi4@gmail.com')->send(new DriverInfo($paramsAdmin));
 
@@ -2097,7 +2097,7 @@ google_id: $uidDriver ожидает отмены заявки на возвра
 
                 ];
 
-                Mail::to('taxi.easy.ua@gmail.com')->send(new DriverInfo($paramsAdmin));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new DriverInfo($paramsAdmin));
 
                 Mail::to('cartaxi4@gmail.com')->send(new DriverInfo($paramsAdmin));
 

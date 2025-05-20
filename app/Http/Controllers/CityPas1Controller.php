@@ -136,7 +136,7 @@ class CityPas1Controller extends Controller
                             'subject' => 'Ошибка в телеграмм',
                             'message' => $e->getMessage(),
                         ];
-                        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                     }
                 }
 
@@ -277,7 +277,7 @@ class CityPas1Controller extends Controller
                         'subject' => 'Ошибка в телеграмм',
                         'message' => $e,
                     ];
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                 };
                 return false;
             }

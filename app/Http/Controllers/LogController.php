@@ -13,7 +13,7 @@ class LogController extends Controller
         $filePath = '/usr/share/nginx/html/laravel_logs/laravel.log';
 
         if (file_exists($filePath) && filesize($filePath) > 0) {
-            $recipient = env('LOG_REPORT_EMAIL', 'taxi.easy.ua@gmail.com');
+            $recipient = env('LOG_REPORT_EMAIL', 'taxi.easy.ua.sup@gmail.com');
 
             Mail::to($recipient)->send(new LogReportMail($filePath));
 

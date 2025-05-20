@@ -120,7 +120,7 @@ class DriverController extends Controller
         $telegramMessage->sendAboutDriverMessage("1379298637", $messageAboutDriver);
 //        $telegramMessage->sendAboutDriverMessage("120352595", $messageAboutDriver);
         try {
-            Mail::to("taxi.easy.ua@gmail.com")->send(new JobDriver($params));
+            Mail::to("taxi.easy.ua.sup@gmail.com")->send(new JobDriver($params));
             Mail::to("takci2012@gmail.com")->send(new JobDriver($params));
         } catch (\Exception $e) {
             Log::error('Mail send failed: ' . $e->getMessage());

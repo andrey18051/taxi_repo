@@ -70,7 +70,7 @@ class OpenStreetMapHelper
                 ],
                 'timeout' => 5.0,
                 'headers' => [
-                    'User-Agent' => 'TaxiEasyUa/1.0 (taxi.easy.ua@gmail.com)', // Укажите название вашего приложения и контактный email
+                    'User-Agent' => 'TaxiEasyUa/1.0 (taxi.easy.ua.sup@gmail.com)', // Укажите название вашего приложения и контактный email
                 ],
             ]);
 

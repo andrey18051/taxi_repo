@@ -132,14 +132,14 @@
 {{--                                </p>--}}
 {{--                                <h3>7. Your rights</h3>--}}
 {{--                                <p class="lead" style="text-align: justify">--}}
-{{--                                    You have the right at any time to request access to your personal data, to make changes or to remove it from our database. To do this, contact us at taxi.easy.ua@gmail.com.--}}
+{{--                                    You have the right at any time to request access to your personal data, to make changes or to remove it from our database. To do this, contact us at taxi.easy.ua.sup@gmail.com.--}}
 {{--                                </p>--}}
 {{--                                <h3>8. Consent and changes</h3>--}}
 {{--                                <p class="lead" style="text-align: justify">--}}
 {{--                                    By using our app, you agree to the terms of our privacy policy. We reserve the right to make changes to this policy and you will be notified.--}}
 {{--                                </p>--}}
 {{--                                <p class="lead" style="text-align: justify">--}}
-{{--                                    You have the right at any time to request access to your personal data, to make changes or to remove it from our database. To do this, contact us at taxi.easy.ua@gmail.com.--}}
+{{--                                    You have the right at any time to request access to your personal data, to make changes or to remove it from our database. To do this, contact us at taxi.easy.ua.sup@gmail.com.--}}
 {{--                                </p>--}}
 {{--                                <p class="lead" style="text-align: justify">--}}
 {{--                                    If you have any further questions or inquiries regarding your privacy and data, please contact us at the contact address below.--}}
@@ -149,7 +149,7 @@
 {{--                                    Effective date: 01/01/2023--}}
 {{--                                </p>--}}
 {{--                                <p class="lead" style="text-align: justify">--}}
-{{--                                    Contact information: taxi.easy.ua@gmail.com--}}
+{{--                                    Contact information: taxi.easy.ua.sup@gmail.com--}}
 {{--                                <p class="lead"> Please familiarize yourself with--}}
 {{--                                    <a href="{{ route('taxi-umovy') }}">Terms of service.</a>--}}
 {{--                                </p>--}}
@@ -200,14 +200,14 @@
                                 </p>
                                 <h3>7. Ваші права</h3>
                                 <p class="lead" style="text-align: justify">
-                                    Ви маєте право в будь-який час запросити доступ до ваших особистих даних, внести зміни або видалити їх з нашої бази даних. Для цього зв'яжіться з нами за адресою taxi.easy.ua@gmail.com.
+                                    Ви маєте право в будь-який час запросити доступ до ваших особистих даних, внести зміни або видалити їх з нашої бази даних. Для цього зв'яжіться з нами за адресою taxi.easy.ua.sup@gmail.com.
                                 </p>
                                 <h3>8. Згода та зміни</h3>
                                 <p class="lead" style="text-align: justify">
                                     Використовуючи нашу програму, ви погоджуєтесь з умовами нашої політики конфіденційності. Ми залишаємо за собою право вносити зміни до цієї політики, про що ви будете повідомлені.
                                 </p>
                                 <p class="lead" style="text-align: justify">
-                                    Ви маєте право в будь-який час запросити доступ до ваших особистих даних, внести зміни або видалити їх з нашої бази даних. Для цього зв'яжіться з нами за адресою taxi.easy.ua@gmail.com.
+                                    Ви маєте право в будь-який час запросити доступ до ваших особистих даних, внести зміни або видалити їх з нашої бази даних. Для цього зв'яжіться з нами за адресою taxi.easy.ua.sup@gmail.com.
                                 </p>
                                 <p class="lead" style="text-align: justify">
                                     Якщо у вас є додаткові запитання або запити щодо вашої конфіденційності та даних, будь ласка, зв'яжіться з нами за вказаною нижче контактною адресою.
@@ -217,7 +217,7 @@
                                     Дата набрання чинності: 01/01/2023
                                 </p>
                                 <p class="lead" style="text-align: justify">
-                                    Контактна інформація: taxi.easy.ua@gmail.com
+                                    Контактна інформація: taxi.easy.ua.sup@gmail.com
                                 <p class="lead"> Будь ласка, ознайомтесь з
                                     <a href="{{ route('taxi-umovy') }}">Умовами користування сервісом.</a>
                                 </p>

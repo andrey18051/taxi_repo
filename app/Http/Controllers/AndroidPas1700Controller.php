@@ -1507,7 +1507,7 @@ class AndroidPas1700Controller extends Controller
         ];
 
 
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
         $message = new TelegramController();
         try {
             $message->sendMeMessage($order);
@@ -1518,7 +1518,7 @@ class AndroidPas1700Controller extends Controller
                 'message' => $e,
             ];
 
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
         };
     }
 
@@ -1875,11 +1875,11 @@ class AndroidPas1700Controller extends Controller
                 'message' => $e,
             ];
 
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
         };
 
         Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
     }
 
     public function addUser($name, $email)

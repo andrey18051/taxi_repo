@@ -105,7 +105,7 @@ marginheight=0 marginwidth=0 height=&quot;1000px&quot;  width=&quot;600px&quot;&
                                         <div class="container">
                                             <div class="row gradient">
                                                 <a  class="borderElement"
-                                                    href="mailto:taxi.easy.ua@gmail.com">Переробка віджету на замовлення</a>
+                                                    href="mailto:taxi.easy.ua.sup@gmail.com">Переробка віджету на замовлення</a>
                                             </div>
                                         </div>
                                     </div>

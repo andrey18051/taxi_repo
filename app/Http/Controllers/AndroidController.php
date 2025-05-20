@@ -88,7 +88,7 @@ class AndroidController extends Controller
 //                    'subject' => $subject,
 //                    'message' => $e,
 //                ];
-//                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+//                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
 //            };
 //
 //            if (self::checkDomain($server1 . $url)) {
@@ -107,11 +107,11 @@ class AndroidController extends Controller
 //                        'subject' => $subject,
 //                        'message' => $e,
 //                    ];
-//                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+//                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
 //                };
 //
 //                Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-//                Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
 //                return $server1;
 //            } else {
 //                if (self::checkDomain($server2 . $url)) {
@@ -130,10 +130,10 @@ class AndroidController extends Controller
 //                            'subject' => $subject,
 //                            'message' => $e,
 //                        ];
-//                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
+//                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsCheck));
 //                    };
 //                    Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-//                    Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
 //                    return $server2;
 //                } else {
 //                    if (self::checkDomain($server3 . $url)) {
@@ -153,10 +153,10 @@ class AndroidController extends Controller
 //                                'subject' => $subject,
 //                                'message' => $e,
 //                            ];
-//                            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsCheck));
+//                            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsCheck));
 //                        };
 //                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-//                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
 //                        return $server3;
 //                    } else {
 //                        $messageAdmin = "Ошибка подключения к серверу " . $server0 . ".   " . PHP_EOL .
@@ -172,7 +172,7 @@ class AndroidController extends Controller
 //                        $alarmMessage->sendAlarmMessage($messageAdmin);
 //
 //                        Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-//                        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+//                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
 //
 //                        return '400';
 //                    }
@@ -948,7 +948,7 @@ class AndroidController extends Controller
             'message' => $order,
         ];
 
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
         $message = new TelegramController();
         $message->sendMeMessage($order);
     }
@@ -1194,7 +1194,7 @@ class AndroidController extends Controller
         $alarmMessage->sendAlarmMessage($messageAdmin);
 
         Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-        Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
     }
 
     public function addUser($name, $email)

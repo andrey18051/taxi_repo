@@ -1373,7 +1373,7 @@ class ReportController extends Controller
         ];
 
 
-        Mail::to('taxi.easy.ua@gmail.com')->send(new DriverReportsInfo($paramsAdmin));
+        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new DriverReportsInfo($paramsAdmin));
 
         Mail::to('cartaxi4@gmail.com')->send(new DriverReportsInfo($paramsAdmin));
 

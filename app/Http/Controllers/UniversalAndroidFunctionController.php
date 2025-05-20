@@ -138,7 +138,7 @@ class UniversalAndroidFunctionController extends Controller
                 'message' => $e,
             ];
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
 
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
@@ -4039,7 +4039,7 @@ class UniversalAndroidFunctionController extends Controller
                 'message' => $e,
             ];
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                 Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
@@ -4049,7 +4049,7 @@ class UniversalAndroidFunctionController extends Controller
         };
 
         try {
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
             Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
         } catch (\Exception $e) {
             Log::error('Mail send failed: ' . $e->getMessage());
@@ -5018,7 +5018,7 @@ class UniversalAndroidFunctionController extends Controller
                     'subject' => 'Ошибка в телеграмм',
                     'message' => $e,
                 ];
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
             };
         }
     }

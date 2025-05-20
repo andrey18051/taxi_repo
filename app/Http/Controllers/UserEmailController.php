@@ -335,7 +335,7 @@ class UserEmailController extends Controller
             'message' => $text_message,
             'email' => $user->email,
             'text_button' => "Лист адміністратору",
-            'url' =>"mailto:taxi.easy.ua@gmail.com"
+            'url' =>"mailto:taxi.easy.ua.sup@gmail.com"
         ];
         Mail::to($email)->send(new InfoEmail($paramsMail));
         return redirect()->route('home-news')

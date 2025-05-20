@@ -2298,7 +2298,7 @@ class AndroidAppController extends Controller
             ];
 
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                 Mail::to('cartaxi4@gmail.com')->send(new Check($paramsCheck));
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
@@ -2308,7 +2308,7 @@ class AndroidAppController extends Controller
         };
         try {
             Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
         } catch (\Exception $e) {
             Log::error('Mail send failed: ' . $e->getMessage());
             // Дополнительные действия для предотвращения сбоя
@@ -2377,7 +2377,7 @@ class AndroidAppController extends Controller
                 'message' => $e,
             ];
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
                 // Дополнительные действия для предотвращения сбоя
@@ -2387,7 +2387,7 @@ class AndroidAppController extends Controller
 
         try {
             Mail::to('cartaxi4@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new ServerServiceMessage($paramsAdmin));
         } catch (\Exception $e) {
             Log::error('Mail send failed: ' . $e->getMessage());
             // Дополнительные действия для предотвращения сбоя

@@ -94,7 +94,7 @@ class WfpController extends Controller
             ];
 
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
                 // Дополнительные действия для предотвращения сбоя
@@ -103,7 +103,7 @@ class WfpController extends Controller
         };
 
         try {
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsAdmin));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsAdmin));
             Mail::to('cartaxi4@gmail.com')->send(new Check($paramsAdmin));
         } catch (\Exception $e) {
             Log::error('Mail send failed: ' . $e->getMessage());
@@ -2353,7 +2353,7 @@ class WfpController extends Controller
                 ];
 
                 try {
-                    Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                 } catch (\Exception $e) {
                     Log::error('Mail send failed: ' . $e->getMessage());
                     // Дополнительные действия для предотвращения сбоя
@@ -2362,7 +2362,7 @@ class WfpController extends Controller
             };
 
             try {
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsAdmin));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsAdmin));
                 Mail::to('cartaxi4@gmail.com')->send(new Check($paramsAdmin));
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());

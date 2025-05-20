@@ -827,11 +827,11 @@ class BonusBalanceController extends Controller
                     'message' => $e,
                 ];
 
-                Mail::to('taxi.easy.ua@gmail.com')->send(new Check($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
             };
 
             Mail::to('cartaxi4@gmail.com')->send(new Server($paramsAdmin));
-            Mail::to('taxi.easy.ua@gmail.com')->send(new Server($paramsAdmin));
+            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Server($paramsAdmin));
         }
         $app = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first()->comment;
         Log::debug("app $app");
