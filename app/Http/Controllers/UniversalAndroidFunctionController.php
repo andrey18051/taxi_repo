@@ -7,6 +7,7 @@ use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
+use App\Jobs\SearchAutoOrderCardJob;
 use App\Jobs\SearchAutoOrderJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -3951,6 +3952,8 @@ class UniversalAndroidFunctionController extends Controller
 
         if ($params["payment_type"] != 1) {
             SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
+        } else {
+            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
         }
 
 
@@ -7214,6 +7217,81 @@ class UniversalAndroidFunctionController extends Controller
             } while (true);
         } catch (\Exception $e) {
             Log::error('searchAutoOrderJob: Произошла ошибка', [
+                'uid' => $uid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return ['status' => 'error', 'message' => 'Ошибка обработки: ' . $e->getMessage()];
+        }
+    }
+
+    public function searchAutoOrderCardJob($uid)
+    {
+        Log::info('searchAutoOrderCardJob: Начало обработки', ['uid' => $uid]);
+
+        // Валидация входного параметра
+        if (empty($uid)) {
+            Log::error('searchAutoOrderCardJob: Неверный UID', ['uid' => $uid]);
+            return ['status' => 'error', 'message' => 'Неверный UID'];
+        }
+
+        try {
+            // Получение обработанного UID
+            $processedUid = (new MemoryOrderChangeController)->show($uid);
+            if ($processedUid === null) {
+                Log::warning('searchAutoOrderCardJob: Обработка UID вернула null', ['uid' => $uid]);
+                return ['status' => 'error', 'message' => 'Обработка UID не удалась'];
+            }
+            Log::info('searchAutoOrderCardJob: UID обработан', ['uid' => $uid, 'processedUid' => $processedUid]);
+
+            // Поиск заказа
+            $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
+            if (!$orderweb) {
+                Log::warning('searchAutoOrderCardJob: Заказ не найден', ['processedUid' => $processedUid]);
+                return ['status' => 'success', 'message' => 'Заказ не найден'];
+            }
+            Log::info('searchAutoOrderCardJob: Заказ найден', [
+                'processedUid' => $processedUid,
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'closeReason' => $orderweb->closeReason
+            ]);
+
+            $messageAdmin = 'searchAutoOrderCardJob: closeReason' . $orderweb->closeReason;
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            do {
+                Log::info('searchAutoOrderCardJob: Проверка условий цикла', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                    'closeReason' => $orderweb->closeReason,
+                    'auto' => $orderweb->auto
+                ]);
+                if ($orderweb->closeReason == "-1") {
+                    if ($orderweb->auto != null) {
+                        Log::info('searchAutoOrderCardJob: Найден автоматический заказ, отправка ответа', [
+                            'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                            'auto' => $orderweb->auto
+                        ]);
+                        self::sendAutoOrderResponse($orderweb);
+                        Log::info('searchAutoOrderCardJob: Ответ отправлен', [
+                            'dispatching_order_uid' => $orderweb->dispatching_order_uid
+                        ]);
+                        return ['status' => 'success', 'message' => $orderweb->auto];
+                    } else {
+                        sleep(5);
+                        $processedUid = (new MemoryOrderChangeController)->show($uid);
+                        $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
+                        (new OrderStatusController)->getOrderStatusMessageResultPush($processedUid);
+                    }
+                } else {
+                    Log::info('searchAutoOrderCardJob: Заказ снят', [
+                        'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                        'closeReason' => $orderweb->closeReason
+                    ]);
+                    return ['status' => 'success', 'message' => 'Заказ снят'];
+                }
+
+            } while (true);
+        } catch (\Exception $e) {
+            Log::error('searchAutoOrderCardJob: Произошла ошибка', [
                 'uid' => $uid,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
