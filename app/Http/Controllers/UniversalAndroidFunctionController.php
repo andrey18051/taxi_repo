@@ -7462,6 +7462,13 @@ class UniversalAndroidFunctionController extends Controller
 
             // Отправка данных через PusherController
             (new PusherController)->sendAutoOrder($costMap, $app, $email);
+
+            // Отправка данных через FCMController
+            $user = User::where("email", $orderweb->email)->first();
+            if(isset ($user)) {
+                $body ="Найдена авто $orderweb->auto";
+                (new FCMController)->sendNotification($body, $app, $user->id);
+            }
             Log::info('sendAutoOrderResponse: Auto order sent successfully', [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid
             ]);
