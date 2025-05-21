@@ -11158,7 +11158,7 @@ class AndroidTestOSMController extends Controller
             $close_reason = -1;
             $execution_status= "SearchesForCar";
             $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return response()->json([
                 'close_reason' => $close_reason,
                 'execution_status' => $execution_status,

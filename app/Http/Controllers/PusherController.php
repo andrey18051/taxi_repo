@@ -370,7 +370,7 @@ class PusherController extends Controller
 
             // Optional: Send message to admin or log
             $messageAdmin = "Event $event sent for order UID: {$costMap['dispatching_order_uid']}";
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
             // Return a success response
             return response()->json(['result' => 'ok', 'order_uid' => $costMap['dispatching_order_uid']], 200);

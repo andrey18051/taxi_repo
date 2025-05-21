@@ -7171,14 +7171,17 @@ class UniversalAndroidFunctionController extends Controller
                 'closeReason' => $orderweb->closeReason
             ]);
 
-            $messageAdmin = 'searchAutoOrderJob: closeReason' . $orderweb->closeReason;
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
             do {
                 Log::info('searchAutoOrderJob: Проверка условий цикла', [
                     'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                     'closeReason' => $orderweb->closeReason,
                     'auto' => $orderweb->auto
                 ]);
+
+                $messageAdmin = 'searchAutoOrderJob: dispatching_order_uid' . $orderweb->dispatching_order_uid . "\n closeReason" . $orderweb->closeReason;
+                (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
                 if ($orderweb->closeReason == "-1") {
                     if ($orderweb->auto != null) {
                         Log::info('searchAutoOrderJob: Найден автоматический заказ, отправка ответа', [
@@ -7408,7 +7411,7 @@ class UniversalAndroidFunctionController extends Controller
             // Формирование costMap
             $costMap = [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid,
-                'order_cost' => $orderweb->client_cost,
+                'order_cost' => $orderweb->client_cost + $orderweb->attempt_20 + $orderweb->add_cost,
                 'currency' => $orderweb->currency,
                 'routefrom' => $orderweb->routefrom,
                 'routefromnumber' => $orderweb->routefromnumber,
