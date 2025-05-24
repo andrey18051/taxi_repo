@@ -334,7 +334,13 @@ return [
     'FIREBASE_API_KEY_PAS_4' => 'AIzaSyDHh_Tcy2nVUjqFgxKn4kl4ADUHRSCamyw',
 
     /**
+     * Разница коррпектировки стоимоости
      *
      */
-    'cost_correction' => '1'
+    'cost_correction' => '1',
+
+    /**
+     * Время работы вилки
+     */
+    'exec_time' => env('EXEC_TIME', 60),
 ];

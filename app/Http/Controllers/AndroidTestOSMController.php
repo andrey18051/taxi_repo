@@ -7608,7 +7608,81 @@ class AndroidTestOSMController extends Controller
             return response($response_error, 200)
                 ->header('Content-Type', 'json');
         }
-    } /**
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function orderCacheReorder(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $clientCost,
+        $user,
+        $add_cost,
+        $time,
+        $comment,
+        $date,
+        $start,
+        $finish,
+        $wfpInvoice,
+        $services,
+        $city,
+        $application,
+        $uid
+    ) {
+        $startTime = time();
+        do {
+            $response = (new OrderStatusController)->getOrderStatusMessageResultPush($uid);
+
+            $messageAdmin = "orderCacheReorder response: " . $response;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+// Decode JSON string into an associative array
+            $response = json_decode($response, true);
+
+// Access the "action" value
+            $action_value = $response['action'];
+
+            if( $action_value == "Заказ снят" ) {
+                return self::orderClientCost(
+                    $originLatitude,
+                    $originLongitude,
+                    $toLatitude,
+                    $toLongitude,
+                    $tariff,
+                    $phone,
+                    $clientCost,
+                    $user,
+                    $add_cost,
+                    $time,
+                    $comment,
+                    $date,
+                    $start,
+                    $finish,
+                    $wfpInvoice,
+                    $services,
+                    $city,
+                    $application
+                );
+            } else {
+                sleep(5);
+
+            }
+        } while (time() - $startTime < 60);
+
+
+        $response_error["order_cost"] = "0";
+        $response_error["Message"] = "Error";
+
+        return response($response_error, 200)
+            ->header('Content-Type', 'json');
+    }
+
+
+    /**
      * @throws \Exception
      */
     public function orderClientCost(
@@ -7997,7 +8071,10 @@ class AndroidTestOSMController extends Controller
                             $params["pay_system"]
                         );
                     }
-                    $response_arr["order_cost"] = $clientCost;
+                    if($clientCost != 0) {
+                        $response_arr["order_cost"] = $clientCost;
+                    }
+
                     (new UniversalAndroidFunctionController)->parseOrderResponse(
                         $response_arr,
                         $dispatching_order_uid_Double,

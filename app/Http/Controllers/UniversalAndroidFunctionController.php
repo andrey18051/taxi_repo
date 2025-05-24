@@ -285,7 +285,8 @@ class UniversalAndroidFunctionController extends Controller
             $apiVersion = $doubleOrderRecord->apiVersion;
 
 //        $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
-            $maxExecutionTime = 60*60; // Максимальное время выполнения - 3 суток
+//            $maxExecutionTime = 60*60; // Максимальное время выполнения - 3 суток
+            $maxExecutionTime = config("app.exec_time");; // Максимальное время выполнения - 3 суток
 
             $startTime = time();
 
@@ -3933,7 +3934,12 @@ class UniversalAndroidFunctionController extends Controller
         $order->pay_system = $params["pay_system"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
         $order->web_cost = $params['order_cost'];
         if (isset($params['clientCost'])) {
-            $order->client_cost = $params['clientCost'];
+            if($params['clientCost'] != "0") {
+                $order->client_cost = $params['clientCost'];
+            } else {
+                $order->client_cost = $params['order_cost'];
+            }
+
         }
 
         $order->dispatching_order_uid = $params['dispatching_order_uid'];
@@ -7055,7 +7061,7 @@ class UniversalAndroidFunctionController extends Controller
             } else {
                 $costMap['order_cost'] = "0";
                 $costMap['message'] = $response_arr['message'] ?? 'Нет сообщения';
-                Log::debug("API_CALL", ['No cost found', 'Message' => $response_arr['message']]); // Логируем сообщение
+
             }
         } else {
             $costMap['order_cost'] = "0";
@@ -7407,11 +7413,20 @@ class UniversalAndroidFunctionController extends Controller
             'dispatching_order_uid' => $orderweb->dispatching_order_uid
         ]);
 
+        if ($orderweb->client_cost) {
+            $cost = $orderweb->client_cost;
+        } else {
+            if ($orderweb->client_cost) {
+                $cost = $orderweb->web_cost;
+            } else {
+                $cost = 0;
+            }
+        }
         try {
             // Формирование costMap
             $costMap = [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid,
-                'order_cost' => $orderweb->client_cost + $orderweb->attempt_20 + $orderweb->add_cost,
+                'order_cost' => $cost + $orderweb->attempt_20 + $orderweb->add_cost,
                 'currency' => $orderweb->currency,
                 'routefrom' => $orderweb->routefrom,
                 'routefromnumber' => $orderweb->routefromnumber,
