@@ -946,110 +946,329 @@ class UIDController extends Controller
         foreach ($order->toArray() as $value) {
             $currentTime = time();
             $uid = $value["dispatching_order_uid"];
-            $timeElapsed = $currentTime - strtotime($value["updated_at"]);
-            $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5 * 60;
 
-            $closeReason = $value["closeReason"];
-            $closeReasonI = $value["closeReasonI"];
-            $connectAPI = $value["server"];
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
-            switch ($value["comment"]) {
-                case "taxi_easy_ua_pas1":
-                    $application = "PAS1";
-                    break;
-                case "taxi_easy_ua_pas2":
-                    $application = "PAS2";
-                    break;
-                default:
-                    $application = "PAS4";
-            }
-            Log::debug("UIDStatusReview application $application");
-
-            $address = str_replace("http://", "", $connectAPI);
-            switch ($application) {
-                case "PAS1":
-                    $serverInfo = City_PAS1::where('address', $address)->first();
-                    break;
-                case "PAS2":
-                    $serverInfo = City_PAS2::where('address', $address)->first();
-                    break;
-                default:
-                    $serverInfo = City_PAS4::where('address', $address)->first();
-            }
-
-            // Проверка, найден ли сервер
-            if ($serverInfo && $serverInfo->online == "true") {
-                Log::debug("UIDStatusReview serverInfo online: true");
-                $identificationId = $value["comment"];
-                switch ($closeReason) {
-                    case "-1":
-                        if ($timeElapsed >= 60) {
-                            UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                        }
-                        break;
-                    case "0":
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                        switch ($closeReasonI) {
-                            case 1:
-                                if ($timeElapsed5 >= 5 * 60 && $timeElapsed >= 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                            case 2:
-                                if ($timeElapsed >= 60 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                            case 3:
-                                if ($timeElapsed >= 24 * 60 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                            case 4:
-                                if ($timeElapsed >= 3 * 24 * 60 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                        }
-                        break;
-                    case "6":
-                    case "7":
-                    case "8":
-                    case "9":
-                        switch ($closeReasonI) {
-                            case "1":
-                                if ($timeElapsed >= 5 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                            case "2":
-                                if ($timeElapsed >= 60 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                            case "3":
-                                if ($timeElapsed >= 24 * 60 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                            case "4":
-                                if ($timeElapsed >= 3 * 24 * 60 * 60) {
-                                    UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                }
-                                break;
-                        }
-                        break;
-                }
+            if ($uid_history) {
+                self::UIDStatusReviewCard($uid);
             } else {
-                Log::error("UIDStatusReview serverInfo is null or offline for address $address");
+                $timeElapsed = $currentTime - strtotime($value["updated_at"]);
+                $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5 * 60;
+
+                $closeReason = $value["closeReason"];
+                $closeReasonI = $value["closeReasonI"];
+                $connectAPI = $value["server"];
+
+                switch ($value["comment"]) {
+                    case "taxi_easy_ua_pas1":
+                        $application = "PAS1";
+                        break;
+                    case "taxi_easy_ua_pas2":
+                        $application = "PAS2";
+                        break;
+                    default:
+                        $application = "PAS4";
+                }
+                Log::debug("UIDStatusReview application $application");
+
+                $address = str_replace("http://", "", $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $serverInfo = City_PAS1::where('address', $address)->first();
+                        break;
+                    case "PAS2":
+                        $serverInfo = City_PAS2::where('address', $address)->first();
+                        break;
+                    default:
+                        $serverInfo = City_PAS4::where('address', $address)->first();
+                }
+
+                // Проверка, найден ли сервер
+                if ($serverInfo && $serverInfo->online == "true") {
+                    Log::debug("UIDStatusReview serverInfo online: true");
+                    $identificationId = $value["comment"];
+                    switch ($closeReason) {
+                        case "-1":
+                            if ($timeElapsed >= 60) {
+                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                            }
+                            break;
+                        case "0":
+                        case "1":
+                        case "2":
+                        case "3":
+                        case "4":
+                        case "5":
+                            switch ($closeReasonI) {
+                                case 1:
+                                    if ($timeElapsed5 >= 5 * 60 && $timeElapsed >= 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                                case 2:
+                                    if ($timeElapsed >= 60 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                                case 3:
+                                    if ($timeElapsed >= 24 * 60 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                                case 4:
+                                    if ($timeElapsed >= 3 * 24 * 60 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                            }
+                            break;
+                        case "6":
+                        case "7":
+                        case "8":
+                        case "9":
+                            switch ($closeReasonI) {
+                                case "1":
+                                    if ($timeElapsed >= 5 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                                case "2":
+                                    if ($timeElapsed >= 60 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                                case "3":
+                                    if ($timeElapsed >= 24 * 60 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                                case "4":
+                                    if ($timeElapsed >= 3 * 24 * 60 * 60) {
+                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                } else {
+                    Log::error("UIDStatusReview serverInfo is null or offline for address $address");
+                }
             }
+
         }
     }
 
+    public function UIDStatusReviewCard($dispatching_order_uid)
+    {
+
+        $startTime = time(); // Запоминаем начальное время
+
+        do {
+            // Попробуем найти запись
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
+
+            if ($uid_history) {
+                // Если запись найдена, выходим из цикла
+                $nalOrderInput = $uid_history->double_status;
+                $cardOrderInput = $uid_history->bonus_status;
+                break;
+            } else {
+                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $nalOrderInput = $uid_history->double_status;
+                    $cardOrderInput = $uid_history->bonus_status;
+                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
+                    break;
+                }
+            }
+
+            // Ждём одну секунду перед следующим проверочным циклом
+            sleep(1);
+        } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+
+        if ($uid_history) {
+            $messageAdmin = "getOrderStatusMessageResultPush: nal: $nalOrderInput, card: $cardOrderInput";
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            $nalOrder = json_decode($nalOrderInput, true);
+            $cardOrder = json_decode($cardOrderInput, true);
+
+            $nalState = $nalOrder['execution_status'] ?? 'SearchesForCar';
+            $cardState = $cardOrder['execution_status'] ?? 'SearchesForCar';
+
+            $messageAdmin = "getOrderStatusMessageResultPush real: nalState: $nalState, cardState: $cardState";
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+            $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
+
+            if (isset($orderweb)) {
+
+                // Блок 1: Состояния "Поиск авто"
+                if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&
+                    in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])) {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'SearchesForCar' && $cardState === 'CostCalculation') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'CostCalculation' && $cardState === 'SearchesForCar') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'Canceled' && $cardState === 'SearchesForCar') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'SearchesForCar' && $cardState === 'Canceled') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'Canceled' && $cardState === 'WaitingCarSearch') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'WaitingCarSearch' && $cardState === 'Canceled') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'CostCalculation' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])){
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) && $cardState === 'CostCalculation') {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+                }
+
+                // Блок 2: Состояния "Авто найдено"
+                elseif ($nalState === 'SearchesForCar' && in_array($cardState, ['CarFound', 'Running'])) {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                    $response = $cardOrderInput; // БЕЗНАЛ
+                }
+                elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'SearchesForCar') {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                    $response = $nalOrderInput; // НАЛ
+                }
+                elseif ($nalState === 'WaitingCarSearch' && in_array($cardState, ['CarFound', 'Running'])) {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                    $response = $cardOrderInput; // БЕЗНАЛ
+                }
+                elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'WaitingCarSearch') {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                    $response = $nalOrderInput; // НАЛ
+                }
+                elseif ($nalState === 'CarFound' && in_array($cardState, ['CarFound', 'Running'])) {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'Running' && $cardState === 'CarFound') {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'Running' && $cardState === 'Running') {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                    $response = $cardOrderInput; // БЕЗНАЛ
+                }
+                elseif ($nalState === 'Canceled' && in_array($cardState, ['CarFound', 'Running'])) {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'Canceled') {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif ($nalState === 'CostCalculation' && in_array($cardState, ['CarFound', 'Running'])) {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                }
+                elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'CostCalculation') {
+                    $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
+                }
+
+                // Блок 3: Состояния "Заказ выполнен"
+                elseif ($nalState === 'Executed' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running'])) {
+                    $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
+                }
+                elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running']) && $cardState === 'Executed') {
+                    $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
+                }
+                elseif ($nalState === 'Executed' && $cardState === 'CostCalculation') {
+                    $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
+                }
+                elseif ($nalState === 'CostCalculation' && $cardState === 'Executed') {
+                    $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
+                }
+                // Блок 4: Состояния "Заказ снят" с проверкой close_reason
+                elseif ($nalState === 'Canceled' && $cardState === 'CostCalculation') {
+                    $closeReason = $nalOrder['close_reason'] ?? -1;
+                    $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                    $orderweb->closeReason = $closeReason;
+
+                }
+                elseif ($nalState === 'CostCalculation' && $cardState === 'Canceled') {
+                    $closeReason = $cardOrder['close_reason'] ?? -1;
+                    $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                    $orderweb->closeReason = $closeReason;
+                }
+                elseif ($nalState === 'CostCalculation' && $cardState === 'CostCalculation') {
+                    $closeReasonNal = $nalOrder['close_reason'] ?? -1;
+                    $closeReasonCard = $cardOrder['close_reason'] ?? -1;
+                    if($closeReasonNal != -1 && $closeReasonCard != -1) {
+                        $action = 'Заказ снят';
+                        $orderweb->closeReason = "1";
+                    } else {
+                        $action = 'Поиск авто';
+                        $orderweb->closeReason = "-1";
+                    }
+
+                }
+                elseif ($nalState === 'Canceled' && $cardState === 'Canceled') {
+                    $closeReasonNal = $nalOrder['close_reason'] ?? -1;
+                    $closeReasonCard = $cardOrder['close_reason'] ?? -1;
+                    if($closeReasonNal != -1 && $closeReasonCard != -1) {
+                        $action = 'Заказ снят';
+                        $orderweb->closeReason = "1";
+                    } else {
+                        $action = 'Поиск авто';
+                        $orderweb->closeReason = "-1";
+                    }
+                    $response = $cardOrderInput; // БЕЗНАЛ
+                } else {
+                    $action = 'Поиск авто';
+                    $orderweb->closeReason = "-1";
+
+                }
+
+                $orderweb->save();
+
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+    }
 
     public function autorization($connectApi)
     {

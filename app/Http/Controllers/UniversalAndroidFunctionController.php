@@ -286,7 +286,9 @@ class UniversalAndroidFunctionController extends Controller
 
 //        $maxExecutionTime = 3*24*60*60; // Максимальное время выполнения - 3 суток
 //            $maxExecutionTime = 60*60; // Максимальное время выполнения - 3 суток
+
             $maxExecutionTime = config("app.exec_time");; // Максимальное время выполнения - 3 суток
+
 
             $startTime = time();
 
@@ -329,6 +331,9 @@ class UniversalAndroidFunctionController extends Controller
                 throw $e; // Повторно выбросить исключение для обработки очередью
             }
 
+            $messageAdmin = "maxExecutionTime $doubleOrderId / $jobId $maxExecutionTime";
+
+            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 // Безнал
 
             $newStatusBonus =  self::newStatus(
@@ -4668,7 +4673,7 @@ class UniversalAndroidFunctionController extends Controller
                 $orderweb->wfp_order_id = $order_id;
                 self::wfpInvoice(
                     $order_id,
-                    $orderweb->web_cost,
+                    $orderweb->client_cost,
                     $uid);
 
                 break;
