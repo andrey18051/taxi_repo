@@ -2291,16 +2291,262 @@ class WfpController extends Controller
 //
 //        $order->save();
     }
+//    public function wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold)
+//    {
+//        Log::info("wfpStatus");
+//        $result = 0;
+//        $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
+//        $wfp_order_id = $order->wfp_order_id;
+//        $connectAPI = $order->server;
+//
+//        $messageAdmin = "function wfpStatus запущена для  $bonusOrder, $doubleOrder, $bonusOrderHold ";
+//        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//
+//        switch ($order->comment) {
+//            case "taxi_easy_ua_pas1":
+//                $application = "PAS1";
+//                break;
+//            case "taxi_easy_ua_pas2":
+//                $application = "PAS2";
+//                break;
+//            default:
+//                $application = "PAS4";
+//        }
+//        switch ($order->server) {
+//            case "http://188.190.245.102:7303":
+//            case "http://31.43.107.151:7303":
+//                $city = "OdessaTest";
+//                break;
+//            case "http://167.235.113.231:7307":
+//            case "http://167.235.113.231:7306":
+//            case "http://134.249.181.173:7208":
+//            case "http://91.205.17.153:7208":
+//                $city = "Kyiv City";
+//                break;
+//            case "http://142.132.213.111:8071":
+//            case "http://167.235.113.231:7308":
+//                $city = "Dnipropetrovsk Oblast";
+//                break;
+//            case "http://142.132.213.111:8072":
+//                $city = "Odessa";
+//                break;
+//            case "http://142.132.213.111:8073":
+//                $city = "Zaporizhzhia";
+//                break;
+//            default:
+//                $city = "Cherkasy Oblast";
+//        }
+//
+//        $orderReference = $wfp_order_id;
+//
+//        $autorization = self::autorization($connectAPI);
+//        $identificationId = $order->comment;
+//        $amount = $order->web_cost;
+//        $amount_settle = $amount;
+////        $amount = $order->web_cost;
+////
+////        if($order->client_cost !=null) {
+////            $amount = $order->client_cost + $order->attempt_20;
+////        }
+////
+////        $amount_settle = $amount;
+//        $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+//            $bonusOrder,
+//            $connectAPI,
+//            $autorization,
+//            $identificationId
+//        );
+//        if ($bonusOrder_response != -1) {
+//            $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
+//            $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
+//            $order_car_info_bonusOrder = $bonusOrder_response["order_car_info"];
+//            Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
+//            Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
+//        } else {
+//            $closeReason_bonusOrder = -1;
+//            $order_cost_bonusOrder = $amount;
+//            $order_car_info_bonusOrder = null;
+//            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
+//        }
+//        $messageAdmin = "function wfpStatus closeReason_bonusOrder: $closeReason_bonusOrder";
+//        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//
+//        $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+//            $doubleOrder,
+//            $connectAPI,
+//            $autorization,
+//            $identificationId
+//        );
+//        if ($doubleOrder_response != -1) {
+//            $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
+//            $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
+//            $order_car_info_doubleOrder = $doubleOrder_response["order_car_info"];
+//            Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
+//            Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
+//        } else {
+//            $closeReason_doubleOrder = -1;
+//            $order_cost_doubleOrder = $amount;
+//            $order_car_info_doubleOrder = null;
+//            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
+//        }
+//        $messageAdmin = "function wfpStatus closeReason_doubleOrder: $closeReason_doubleOrder";
+//        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//
+//        $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
+//            $bonusOrderHold,
+//            $connectAPI,
+//            $autorization,
+//            $identificationId
+//        );
+//        if ($bonusOrderHold_response != -1) {
+//            $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
+//            $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
+//            $order_car_info_bonusOrderHold = $bonusOrderHold_response["order_car_info"];
+//            Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
+//            Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
+//        } else {
+//            $closeReason_bonusOrderHold = -1;
+//            $order_cost_bonusOrderHold = $amount;
+//            $order_car_info_bonusOrderHold = null;
+//            self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
+//        }
+//
+//
+//        $hold_bonusOrder = false;
+//        switch ($closeReason_bonusOrder) {
+//            case "0":
+//            case "8":
+//                $hold_bonusOrder = true;
+//                $amount_settle = $order_cost_bonusOrder;
+//                $result = 1;
+//                $order->auto = $order_car_info_bonusOrder;
+//                break;
+//        }
+//        $hold_doubleOrder = false;
+//        switch ($closeReason_doubleOrder) {
+//            case "0":
+//            case "8":
+//                $hold_doubleOrder = true;
+//                $amount_settle = $order_cost_bonusOrderHold;
+//                $result = 1;
+//                $order->auto = $order_car_info_doubleOrder;
+//                break;
+//        }
+//        $hold_bonusOrderHold = false;
+//        switch ($closeReason_bonusOrderHold) {
+//            case "0":
+//            case "8":
+//                $hold_bonusOrderHold = true;
+//                $amount_settle = $order_cost_bonusOrderHold;
+//                $result = 1;
+//                $order->auto = $order_car_info_bonusOrderHold;
+//                break;
+//        }
+//        if ($amount >= $amount_settle) {
+//            $amount = $amount_settle;
+//            $order->web_cost = $amount;
+//            $order->save();
+//        } else {
+//            $subject = "Оплата поездки больше холда";
+//            $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
+//            $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $localCreatedAt.
+//                 Маршрут $order->routefrom - $order->routeto.
+//                 Телефон клиента:  $order->user_phone.
+//                 Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
+//            $paramsAdmin = [
+//                'subject' => $subject,
+//                'message' => $messageAdmin,
+//            ];
+//            $alarmMessage = new TelegramController();
+//
+//            try {
+//                $alarmMessage->sendAlarmMessage($messageAdmin);
+//                $alarmMessage->sendMeMessage($messageAdmin);
+//            } catch (Exception $e) {
+//                $subject = 'Ошибка в телеграмм';
+//                $paramsCheck = [
+//                    'subject' => $subject,
+//                    'message' => $e,
+//                ];
+//
+//                try {
+//                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
+//                } catch (\Exception $e) {
+//                    Log::error('Mail send failed: ' . $e->getMessage());
+//                    // Дополнительные действия для предотвращения сбоя
+//                }
+//
+//            };
+//
+//            try {
+//                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsAdmin));
+//                Mail::to('cartaxi4@gmail.com')->send(new Check($paramsAdmin));
+//            } catch (\Exception $e) {
+//                Log::error('Mail send failed: ' . $e->getMessage());
+//                // Дополнительные действия для предотвращения сбоя
+//            }
+//
+//        }
+//
+//        if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
+//            self::settle(
+//                $application,
+//                $city,
+//                $orderReference,
+//                $amount
+//            );
+//            $user = User::where("email", $order->email)->first();
+//            (new BonusBalanceController)->recordsAddApp($order->id, $user->id, "2", $amount, $application);
+//            (new BonusBalanceController)->userBalanceApp($user->id, $application);
+//
+//            if ($hold_bonusOrder) {
+//                $order->closeReason = $closeReason_bonusOrder;
+//            }
+//            if ($hold_doubleOrder) {
+//                $order->closeReason = $closeReason_doubleOrder;
+//            }
+//            if ($hold_bonusOrderHold) {
+//                $order->closeReason = $closeReason_bonusOrderHold;
+//            }
+//        } else {
+//            if ($closeReason_bonusOrder != "-1"
+//                && $closeReason_doubleOrder != "-1"
+//                && $closeReason_bonusOrderHold != "-1") {
+//                self::refund(
+//                    $application,
+//                    $city,
+//                    $orderReference,
+//                    $amount
+//                );
+//                $order->closeReason = $closeReason_bonusOrderHold;
+//            }
+//        }
+//
+//
+////        self::checkStatus(
+////            $application,
+////            $city,
+////            $orderReference
+////        );
+//
+//        $order->save();
+////        }
+//        return $result;
+//
+//    }
     public function wfpStatus($bonusOrder, $doubleOrder, $bonusOrderHold)
     {
-        Log::info("wfpStatus");
+        Log::info("wfpStatus started for bonusOrder: $bonusOrder, doubleOrder: $doubleOrder, bonusOrderHold: $bonusOrderHold");
         $result = 0;
         $order = Orderweb::where("dispatching_order_uid", $bonusOrderHold)->first();
+        Log::info("Order retrieved: dispatching_order_uid=$bonusOrderHold, wfp_order_id={$order->wfp_order_id}, server={$order->server}, initial closeReason={$order->closeReason}");
+
         $wfp_order_id = $order->wfp_order_id;
         $connectAPI = $order->server;
 
-        $messageAdmin = "function wfpStatus запущена для  $bonusOrder, $doubleOrder, $bonusOrderHold ";
+        $messageAdmin = "function wfpStatus запущена для $bonusOrder, $doubleOrder, $bonusOrderHold";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        Log::info("Admin message sent: $messageAdmin");
 
         switch ($order->comment) {
             case "taxi_easy_ua_pas1":
@@ -2312,6 +2558,8 @@ class WfpController extends Controller
             default:
                 $application = "PAS4";
         }
+        Log::info("Application determined: $application");
+
         switch ($order->server) {
             case "http://188.190.245.102:7303":
             case "http://31.43.107.151:7303":
@@ -2336,20 +2584,17 @@ class WfpController extends Controller
             default:
                 $city = "Cherkasy Oblast";
         }
+        Log::info("City determined: $city");
 
         $orderReference = $wfp_order_id;
-
         $autorization = self::autorization($connectAPI);
+        Log::info("Authorization completed for connectAPI: $connectAPI");
+
         $identificationId = $order->comment;
         $amount = $order->web_cost;
         $amount_settle = $amount;
-//        $amount = $order->web_cost;
-//
-//        if($order->client_cost !=null) {
-//            $amount = $order->client_cost + $order->attempt_20;
-//        }
-//
-//        $amount_settle = $amount;
+        Log::info("Initial amount: $amount, amount_settle: $amount_settle");
+
         $bonusOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrder,
             $connectAPI,
@@ -2360,16 +2605,17 @@ class WfpController extends Controller
             $closeReason_bonusOrder = $bonusOrder_response["close_reason"];
             $order_cost_bonusOrder = $bonusOrder_response["order_cost"];
             $order_car_info_bonusOrder = $bonusOrder_response["order_car_info"];
-            Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder");
-            Log::debug("order_cost_bonusOrder: $order_cost_bonusOrder");
+            Log::debug("closeReason_bonusOrder: $closeReason_bonusOrder, order_cost_bonusOrder: $order_cost_bonusOrder");
         } else {
             $closeReason_bonusOrder = -1;
             $order_cost_bonusOrder = $amount;
             $order_car_info_bonusOrder = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrder);
+            Log::info("bonusOrder_response failed, closeReason_bonusOrder set to -1");
         }
         $messageAdmin = "function wfpStatus closeReason_bonusOrder: $closeReason_bonusOrder";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        Log::info("Admin message sent: $messageAdmin");
 
         $doubleOrder_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $doubleOrder,
@@ -2381,16 +2627,17 @@ class WfpController extends Controller
             $closeReason_doubleOrder = $doubleOrder_response["close_reason"];
             $order_cost_doubleOrder = $doubleOrder_response["order_cost"];
             $order_car_info_doubleOrder = $doubleOrder_response["order_car_info"];
-            Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder");
-            Log::debug("order_cost_doubleOrder : $order_cost_doubleOrder");
+            Log::debug("closeReason_doubleOrder: $closeReason_doubleOrder, order_cost_doubleOrder: $order_cost_doubleOrder");
         } else {
             $closeReason_doubleOrder = -1;
             $order_cost_doubleOrder = $amount;
             $order_car_info_doubleOrder = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $doubleOrder);
+            Log::info("doubleOrder_response failed, closeReason_doubleOrder set to -1");
         }
         $messageAdmin = "function wfpStatus closeReason_doubleOrder: $closeReason_doubleOrder";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        Log::info("Admin message sent: $messageAdmin");
 
         $bonusOrderHold_response = (new UIDController)->closeReasonUIDStatusFirstWfp(
             $bonusOrderHold,
@@ -2402,15 +2649,14 @@ class WfpController extends Controller
             $closeReason_bonusOrderHold = $bonusOrderHold_response["close_reason"];
             $order_cost_bonusOrderHold = $bonusOrderHold_response["order_cost"];
             $order_car_info_bonusOrderHold = $bonusOrderHold_response["order_car_info"];
-            Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold");
-            Log::debug("order_cost_bonusOrderHold : $order_cost_bonusOrderHold");
+            Log::debug("closeReason_bonusOrderHold: $closeReason_bonusOrderHold, order_cost_bonusOrderHold: $order_cost_bonusOrderHold");
         } else {
             $closeReason_bonusOrderHold = -1;
             $order_cost_bonusOrderHold = $amount;
             $order_car_info_bonusOrderHold = null;
             self::messageAboutCloseReasonUIDStatusFirstWfp($bonusOrderHold, $bonusOrderHold);
+            Log::info("bonusOrderHold_response failed, closeReason_bonusOrderHold set to -1");
         }
-
 
         $hold_bonusOrder = false;
         switch ($closeReason_bonusOrder) {
@@ -2420,8 +2666,12 @@ class WfpController extends Controller
                 $amount_settle = $order_cost_bonusOrder;
                 $result = 1;
                 $order->auto = $order_car_info_bonusOrder;
+                Log::info("hold_bonusOrder set to true, amount_settle: $amount_settle, result: $result, order->auto updated");
                 break;
+            default:
+                Log::info("closeReason_bonusOrder ($closeReason_bonusOrder) not 0 or 8, hold_bonusOrder remains false");
         }
+
         $hold_doubleOrder = false;
         switch ($closeReason_doubleOrder) {
             case "0":
@@ -2430,8 +2680,12 @@ class WfpController extends Controller
                 $amount_settle = $order_cost_bonusOrderHold;
                 $result = 1;
                 $order->auto = $order_car_info_doubleOrder;
+                Log::info("hold_doubleOrder set to true, amount_settle: $amount_settle, result: $result, order->auto updated");
                 break;
+            default:
+                Log::info("closeReason_doubleOrder ($closeReason_doubleOrder) not 0 or 8, hold_doubleOrder remains false");
         }
+
         $hold_bonusOrderHold = false;
         switch ($closeReason_bonusOrderHold) {
             case "0":
@@ -2440,19 +2694,24 @@ class WfpController extends Controller
                 $amount_settle = $order_cost_bonusOrderHold;
                 $result = 1;
                 $order->auto = $order_car_info_bonusOrderHold;
+                Log::info("hold_bonusOrderHold set to true, amount_settle: $amount_settle, result: $result, order->auto updated");
                 break;
+            default:
+                Log::info("closeReason_bonusOrderHold ($closeReason_bonusOrderHold) not 0 or 8, hold_bonusOrderHold remains false");
         }
+
         if ($amount >= $amount_settle) {
             $amount = $amount_settle;
             $order->web_cost = $amount;
             $order->save();
+            Log::info("amount ($amount) >= amount_settle ($amount_settle), updated order->web_cost: $amount, order saved");
         } else {
             $subject = "Оплата поездки больше холда";
             $localCreatedAt = Carbon::parse($order->created_at)->setTimezone('Europe/Kiev');
             $messageAdmin = "Заказ $bonusOrderHold. Сервер $connectAPI. Время $localCreatedAt.
-                 Маршрут $order->routefrom - $order->routeto.
-                 Телефон клиента:  $order->user_phone.
-                 Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
+             Маршрут $order->routefrom - $order->routeto.
+             Телефон клиента: $order->user_phone.
+             Сумма холда $amount грн. Сумма заказа $amount_settle грн.";
             $paramsAdmin = [
                 'subject' => $subject,
                 'message' => $messageAdmin,
@@ -2462,30 +2721,28 @@ class WfpController extends Controller
             try {
                 $alarmMessage->sendAlarmMessage($messageAdmin);
                 $alarmMessage->sendMeMessage($messageAdmin);
+                Log::info("Telegram messages sent successfully");
             } catch (Exception $e) {
                 $subject = 'Ошибка в телеграмм';
                 $paramsCheck = [
                     'subject' => $subject,
                     'message' => $e,
                 ];
-
                 try {
                     Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
+                    Log::info("Error mail sent to taxi.easy.ua.sup@gmail.com");
                 } catch (\Exception $e) {
                     Log::error('Mail send failed: ' . $e->getMessage());
-                    // Дополнительные действия для предотвращения сбоя
                 }
-
-            };
+            }
 
             try {
                 Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsAdmin));
                 Mail::to('cartaxi4@gmail.com')->send(new Check($paramsAdmin));
+                Log::info("Admin mails sent successfully");
             } catch (\Exception $e) {
                 Log::error('Mail send failed: ' . $e->getMessage());
-                // Дополнительные действия для предотвращения сбоя
             }
-
         }
 
         if ($hold_bonusOrder || $hold_doubleOrder || $hold_bonusOrderHold) {
@@ -2498,15 +2755,19 @@ class WfpController extends Controller
             $user = User::where("email", $order->email)->first();
             (new BonusBalanceController)->recordsAddApp($order->id, $user->id, "2", $amount, $application);
             (new BonusBalanceController)->userBalanceApp($user->id, $application);
+            Log::info("Settle called, recordsAddApp and userBalanceApp executed");
 
             if ($hold_bonusOrder) {
                 $order->closeReason = $closeReason_bonusOrder;
+                Log::info("order->closeReason set to $closeReason_bonusOrder due to hold_bonusOrder");
             }
             if ($hold_doubleOrder) {
                 $order->closeReason = $closeReason_doubleOrder;
+                Log::info("order->closeReason set to $closeReason_doubleOrder due to hold_doubleOrder");
             }
             if ($hold_bonusOrderHold) {
                 $order->closeReason = $closeReason_bonusOrderHold;
+                Log::info("order->closeReason set to $closeReason_bonusOrderHold due to hold_bonusOrderHold");
             }
         } else {
             if ($closeReason_bonusOrder != "-1"
@@ -2519,22 +2780,18 @@ class WfpController extends Controller
                     $amount
                 );
                 $order->closeReason = $closeReason_bonusOrderHold;
+                Log::info("Refund called, order->closeReason set to $closeReason_bonusOrderHold");
+            } else {
+                Log::info("Refund not called, at least one closeReason is -1");
             }
         }
 
-
-//        self::checkStatus(
-//            $application,
-//            $city,
-//            $orderReference
-//        );
-
+        Log::info("Final order->closeReason before save: {$order->closeReason}");
         $order->save();
-//        }
+        Log::info("Order saved with closeReason: {$order->closeReason}, result: $result");
+
         return $result;
-
     }
-
     private function autorization($connectApi)
     {
 

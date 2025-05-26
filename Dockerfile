@@ -76,10 +76,10 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/superv
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 
 # Устанавливаем зависимости Laravel
-RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
-    rm -rf vendor composer.lock && \
-    composer install --no-dev --optimize-autoloader && \
-    composer require predis/predis
+#RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
+#    rm -rf vendor composer.lock && \
+#    composer install --no-dev --optimize-autoloader && \
+#    composer require predis/predis
 
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs

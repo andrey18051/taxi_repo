@@ -902,32 +902,38 @@ class UIDController extends Controller
 
             // Обработка каждой записи
             foreach ($orderwebs as $value) {
-                $order = $orderData->get($value->dispatching_order_uid);
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $value->dispatching_order_uid)->first();
 
-                if ($order) {
-                    $connectAPI = $order->server;
-                    $autorization = self::autorization($connectAPI);
-                    $identificationId = $order->comment;
-
-                    try {
-                        Log::info("Processing order UID: {$value->dispatching_order_uid}");
-
-                        $order->closeReason = self::closeReasonUIDStatusFirst(
-                            $value->dispatching_order_uid,
-                            $connectAPI,
-                            $autorization,
-                            $identificationId
-                        );
-                        $order->save();
-
-                        $processedCount++;
-                        Log::info("Order UID {$value->dispatching_order_uid} successfully updated.");
-                    } catch (\Exception $e) {
-                        $errorsCount++;
-                        Log::error("Error updating order UID {$value->dispatching_order_uid}: {$e->getMessage()}");
-                    }
+                if ($uid_history) {
+                    self::UIDStatusReviewCard($value->dispatching_order_uid);
                 } else {
-                    Log::warning("No matching order found for UID: {$value->dispatching_order_uid}");
+                    $order = $orderData->get($value->dispatching_order_uid);
+
+                    if ($order) {
+                        $connectAPI = $order->server;
+                        $autorization = self::autorization($connectAPI);
+                        $identificationId = $order->comment;
+
+                        try {
+                            Log::info("Processing order UID: {$value->dispatching_order_uid}");
+
+                            $order->closeReason = self::closeReasonUIDStatusFirst(
+                                $value->dispatching_order_uid,
+                                $connectAPI,
+                                $autorization,
+                                $identificationId
+                            );
+                            $order->save();
+
+                            $processedCount++;
+                            Log::info("Order UID {$value->dispatching_order_uid} successfully updated.");
+                        } catch (\Exception $e) {
+                            $errorsCount++;
+                            Log::error("Error updating order UID {$value->dispatching_order_uid}: {$e->getMessage()}");
+                        }
+                    } else {
+                        Log::warning("No matching order found for UID: {$value->dispatching_order_uid}");
+                    }
                 }
             }
 

@@ -435,7 +435,8 @@ class UniversalAndroidFunctionController extends Controller
                 $doubleOrderRecord->delete();
                 return "exit";
             } else {
-                while (time() - $startTime < $maxExecutionTime) {
+//                while (time() - $startTime < $maxExecutionTime) {
+                while (true) {
 
                     $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
                     if (!$doubleOrderRecord) {
@@ -2835,92 +2836,92 @@ class UniversalAndroidFunctionController extends Controller
                         }
                     }
                 }
-                if (time() - $startTime >= $maxExecutionTime) {
-                    try {
-                        self::orderCanceled(
-                            $bonusOrder,
-                            'bonus',
-                            $connectAPI,
-                            $authorizationBonus,
-                            $identificationId,
-                            $apiVersion
-                        );
-
-                        self::orderCanceled(
-                            $doubleOrder,
-                            "double",
-                            $connectAPI,
-                            $authorizationDouble,
-                            $identificationId,
-                            $apiVersion
-                        );
-        //                $uid_history->delete();
-                        $canceledAll = self::canceledFinish(
-                            $lastStatusBonus,
-                            $lastStatusDouble,
-                            $bonusOrderHold,
-                            $bonusOrder,
-                            $connectAPI,
-                            $authorizationBonus,
-                            $identificationId,
-                            $apiVersion,
-                            $doubleOrder,
-                            $authorizationDouble
-                        );
-
-                        if ($canceledAll) {
-                            self::newStatus(
-                                $authorizationBonus,
-                                $identificationId,
-                                $apiVersion,
-                                $responseBonus["url"],
-                                $bonusOrder,
-                                "bonus",
-                                $lastTimeUpdate,
-                                $updateTime,
-                                $uid_history
-                            );
-
-                            self::newStatus(
-                                $authorizationDouble,
-                                $identificationId,
-                                $apiVersion,
-                                $responseDouble["url"],
-                                $doubleOrder,
-                                "double",
-                                $lastTimeUpdate,
-                                $updateTime,
-                                $uid_history
-                            );
-                            $messageAdmin = "canceled while
-                                     lastStatusBonus3:  $lastStatusBonus
-                                     lastStatusDouble3:  $lastStatusDouble
-                                     doubleOrderRecord 3 $doubleOrderRecord";
-
-                            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-
-                            $doubleOrderRecord->delete();
-        //                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
-
-                            return "exit";
-                        }
-
-                        $messageAdmin = "doubleOrderRecord orderCanceled $doubleOrderRecord";
-
-                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-                        Log::info("Превышено время выполнения для doubleOrderId: $doubleOrderId, перенос задания");
-//                        StartNewProcessExecution::dispatch($doubleOrderId)->delay(now()->addMinutes(5));
-                        $doubleOrderRecord->delete();
-                        return "exit";
-                    } catch (\Exception $e) {
-                        Log::error("Ошибка в цикле для doubleOrderId: $doubleOrderId: " . $e->getMessage());
-                        throw $e; // Повторно выбросить для отметки задания как неудачного
-                    }
-                    sleep(5);
-
-                }
-                return "exit";
+//                if (time() - $startTime >= $maxExecutionTime) {
+//                    try {
+//                        self::orderCanceled(
+//                            $bonusOrder,
+//                            'bonus',
+//                            $connectAPI,
+//                            $authorizationBonus,
+//                            $identificationId,
+//                            $apiVersion
+//                        );
+//
+//                        self::orderCanceled(
+//                            $doubleOrder,
+//                            "double",
+//                            $connectAPI,
+//                            $authorizationDouble,
+//                            $identificationId,
+//                            $apiVersion
+//                        );
+//        //                $uid_history->delete();
+//                        $canceledAll = self::canceledFinish(
+//                            $lastStatusBonus,
+//                            $lastStatusDouble,
+//                            $bonusOrderHold,
+//                            $bonusOrder,
+//                            $connectAPI,
+//                            $authorizationBonus,
+//                            $identificationId,
+//                            $apiVersion,
+//                            $doubleOrder,
+//                            $authorizationDouble
+//                        );
+//
+//                        if ($canceledAll) {
+//                            self::newStatus(
+//                                $authorizationBonus,
+//                                $identificationId,
+//                                $apiVersion,
+//                                $responseBonus["url"],
+//                                $bonusOrder,
+//                                "bonus",
+//                                $lastTimeUpdate,
+//                                $updateTime,
+//                                $uid_history
+//                            );
+//
+//                            self::newStatus(
+//                                $authorizationDouble,
+//                                $identificationId,
+//                                $apiVersion,
+//                                $responseDouble["url"],
+//                                $doubleOrder,
+//                                "double",
+//                                $lastTimeUpdate,
+//                                $updateTime,
+//                                $uid_history
+//                            );
+//                            $messageAdmin = "canceled while
+//                                     lastStatusBonus3:  $lastStatusBonus
+//                                     lastStatusDouble3:  $lastStatusDouble
+//                                     doubleOrderRecord 3 $doubleOrderRecord";
+//
+//                            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//
+//
+//                            $doubleOrderRecord->delete();
+//        //                            self::orderReview($bonusOrder, $doubleOrder, $bonusOrderHold);
+//
+//                            return "exit";
+//                        }
+//
+//                        $messageAdmin = "doubleOrderRecord orderCanceled $doubleOrderRecord";
+//
+//                        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//                        Log::info("Превышено время выполнения для doubleOrderId: $doubleOrderId, перенос задания");
+////                        StartNewProcessExecution::dispatch($doubleOrderId)->delay(now()->addMinutes(5));
+//                        $doubleOrderRecord->delete();
+//                        return "exit";
+//                    } catch (\Exception $e) {
+//                        Log::error("Ошибка в цикле для doubleOrderId: $doubleOrderId: " . $e->getMessage());
+//                        throw $e; // Повторно выбросить для отметки задания как неудачного
+//                    }
+//                    sleep(5);
+//
+//                }
+//                return "exit";
             }
         } catch (\Exception $e) {
             Log::error("Критическая ошибка в startNewProcessExecutionStatusJob для doubleOrderId: $doubleOrderId: " . $e->getMessage());
@@ -3841,6 +3842,7 @@ class UniversalAndroidFunctionController extends Controller
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         $order = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
+        Log::info("orderReview: dispatching_order_uid=$bonusOrderHold, closeReason={$order->closeReason}");
 
         Log::info("orderReview");
         if ($order) {
