@@ -926,11 +926,11 @@ google_id: $uidDriver отправил данные авто и ожидает �
 
     public function sentMessageAdmin($messageAdmin)
     {
-
-        $alarmMessage = new TelegramController();
-
-        $alarmMessage->sendAlarmMessage($messageAdmin);
-        $alarmMessage->sendMeMessage($messageAdmin);
+//
+//        $alarmMessage = new TelegramController();
+//
+//        $alarmMessage->sendAlarmMessage($messageAdmin);
+//        $alarmMessage->sendMeMessage($messageAdmin);
         Log::debug("sentMessageAdmin  $messageAdmin");
     }
     public function sentMessageAdminLog($messageAdmin)

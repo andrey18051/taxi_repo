@@ -2958,7 +2958,7 @@ class UniversalAndroidFunctionController extends Controller
              $newStatus = $newStatusArr["execution_status"];
              $messageAdmin = "function newStatus выход $orderType: " . $newStatus;
 
-             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+             (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
              if ($newStatus == "Canceled") {
                  if ($newStatusArr["close_reason"] == "-1") {

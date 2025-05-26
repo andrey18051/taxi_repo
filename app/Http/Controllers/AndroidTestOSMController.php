@@ -10407,7 +10407,7 @@ class AndroidTestOSMController extends Controller
                 $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-                (new UniversalAndroidFunctionController)->deleteJobByUid($uid_history->orderId);
+//                (new UniversalAndroidFunctionController)->deleteJobByUid($uid_history->orderId);
 
 
                 $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
@@ -11374,7 +11374,7 @@ class AndroidTestOSMController extends Controller
                         // Обрабатываем успешный ответ
                         $response_arr = json_decode($response, true);
                         Log::debug("$url: ", $response_arr);
-
+                        $orderweb_uid->auto = null;
                         if ($response_arr["order_car_info"] != null) {
                             $orderweb_uid->auto = $response_arr["order_car_info"];
                         }

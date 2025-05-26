@@ -1115,38 +1115,47 @@ class UIDController extends Controller
                 if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&
                     in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])) {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'SearchesForCar' && $cardState === 'CostCalculation') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'SearchesForCar') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'SearchesForCar') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'SearchesForCar' && $cardState === 'Canceled') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'WaitingCarSearch') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'WaitingCarSearch' && $cardState === 'Canceled') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif ($nalState === 'CostCalculation' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])){
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
                 elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) && $cardState === 'CostCalculation') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
                 }
 
@@ -1229,6 +1238,9 @@ class UIDController extends Controller
                     $closeReason = $cardOrder['close_reason'] ?? -1;
                     $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
                     $orderweb->closeReason = $closeReason;
+                    if($closeReason == "-1") {
+                        $orderweb->auto = null;
+                    }
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'CostCalculation') {
                     $closeReasonNal = $nalOrder['close_reason'] ?? -1;
@@ -1238,6 +1250,7 @@ class UIDController extends Controller
                         $orderweb->closeReason = "1";
                     } else {
                         $action = 'Поиск авто';
+                        $orderweb->auto = null;
                         $orderweb->closeReason = "-1";
                     }
 
@@ -1250,11 +1263,13 @@ class UIDController extends Controller
                         $orderweb->closeReason = "1";
                     } else {
                         $action = 'Поиск авто';
+                        $orderweb->auto = null;
                         $orderweb->closeReason = "-1";
                     }
                     $response = $cardOrderInput; // БЕЗНАЛ
                 } else {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "-1";
 
                 }
