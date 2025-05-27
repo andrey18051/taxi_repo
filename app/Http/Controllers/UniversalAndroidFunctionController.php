@@ -3966,7 +3966,7 @@ class UniversalAndroidFunctionController extends Controller
         if ($params["payment_type"] != 1) {
             SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
         } else {
-            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
+//            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
         }
 
 

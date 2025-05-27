@@ -588,37 +588,30 @@ class OrderStatusController extends Controller
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'SearchesForCar') {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'SearchesForCar') {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'SearchesForCar' && $cardState === 'Canceled') {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'WaitingCarSearch') {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'WaitingCarSearch' && $cardState === 'Canceled') {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'CostCalculation' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])){
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) && $cardState === 'CostCalculation') {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $nalOrderInput; // НАЛ
                 }
 
@@ -690,17 +683,13 @@ class OrderStatusController extends Controller
                     $closeReason = $nalOrder['close_reason'] ?? -1;
                     $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
                     $response = $nalOrderInput; // НАЛ
-                    if($closeReason == "-1") {
-                        $orderweb->auto = null;
-                    }
+
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'Canceled') {
                     $closeReason = $cardOrder['close_reason'] ?? -1;
                     $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
                     $response = $cardOrderInput; // БЕЗНАЛ
-                    if($closeReason == "-1") {
-                        $orderweb->auto = null;
-                    }
+
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'CostCalculation') {
                     $closeReasonNal = $nalOrder['close_reason'] ?? -1;
@@ -709,7 +698,6 @@ class OrderStatusController extends Controller
                         $action = 'Заказ снят';
                     } else {
                         $action = 'Поиск авто';
-                        $orderweb->auto = null;
                     }
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
@@ -720,12 +708,10 @@ class OrderStatusController extends Controller
                         $action = 'Заказ снят';
                     } else {
                         $action = 'Поиск авто';
-                        $orderweb->auto = null;
                     }
                     $response = $cardOrderInput; // БЕЗНАЛ
                 } else {
                     $action = 'Поиск авто';
-                    $orderweb->auto = null;
                     $response = $nalOrderInput;
                 }
 
@@ -741,7 +727,7 @@ class OrderStatusController extends Controller
                 } else if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
                     $orderweb->closeReason = 1;
                 } else {
-                    $orderweb->auto = null;
+
                     $orderweb->closeReason = $response_arr["close_reason"] ?? -1; // Значение по умолчанию, если close_reason тоже отсутствует
                 }
 
