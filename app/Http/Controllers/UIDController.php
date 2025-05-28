@@ -1231,6 +1231,9 @@ class UIDController extends Controller
                 elseif ($nalState === 'Canceled' && $cardState === 'CostCalculation') {
                     $closeReason = $nalOrder['close_reason'] ?? -1;
                     $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                    if ($closeReason == "-1") {
+                        $orderweb->auto = null;
+                    }
                     $orderweb->closeReason = $closeReason;
 
                 }

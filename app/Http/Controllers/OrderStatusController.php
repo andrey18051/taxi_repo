@@ -580,114 +580,155 @@ class OrderStatusController extends Controller
                 if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&
                     in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])) {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'SearchesForCar' && $cardState === 'CostCalculation') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'SearchesForCar') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'SearchesForCar') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'SearchesForCar' && $cardState === 'Canceled') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'WaitingCarSearch') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'WaitingCarSearch' && $cardState === 'Canceled') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'CostCalculation' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch'])){
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) && $cardState === 'CostCalculation') {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
 
                 // Блок 2: Состояния "Авто найдено"
                 elseif ($nalState === 'SearchesForCar' && in_array($cardState, ['CarFound', 'Running'])) {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'SearchesForCar') {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'WaitingCarSearch' && in_array($cardState, ['CarFound', 'Running'])) {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'WaitingCarSearch') {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'CarFound' && in_array($cardState, ['CarFound', 'Running'])) {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'Running' && $cardState === 'CarFound') {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'Running' && $cardState === 'Running') {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'Canceled' && in_array($cardState, ['CarFound', 'Running'])) {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'Canceled') {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'CostCalculation' && in_array($cardState, ['CarFound', 'Running'])) {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif (in_array($nalState, ['CarFound', 'Running']) && $cardState === 'CostCalculation') {
                     $action = 'Авто найдено';
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput; // НАЛ
                 }
 
                 // Блок 3: Состояния "Заказ выполнен"
                 elseif ($nalState === 'Executed' && in_array($cardState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running'])) {
                     $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch', 'CarFound', 'Running']) && $cardState === 'Executed') {
                     $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'Executed' && $cardState === 'CostCalculation') {
                     $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
                     $response = $nalOrderInput; // НАЛ
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'Executed') {
                     $action = 'Заказ выполнен';
+                    $orderweb->closeReason = "0";
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 // Блок 4: Состояния "Заказ снят" с проверкой close_reason
                 elseif ($nalState === 'Canceled' && $cardState === 'CostCalculation') {
                     $closeReason = $nalOrder['close_reason'] ?? -1;
                     $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                    $orderweb->closeReason = $closeReason;
+                    if ($closeReason == "-1") {
+                        $orderweb->auto = null;
+                    }
                     $response = $nalOrderInput; // НАЛ
 
                 }
                 elseif ($nalState === 'CostCalculation' && $cardState === 'Canceled') {
                     $closeReason = $cardOrder['close_reason'] ?? -1;
                     $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                    $orderweb->closeReason = $closeReason;
+                    if ($closeReason == "-1") {
+                        $orderweb->auto = null;
+                    }
                     $response = $cardOrderInput; // БЕЗНАЛ
 
                 }
@@ -696,9 +737,13 @@ class OrderStatusController extends Controller
                     $closeReasonCard = $cardOrder['close_reason'] ?? -1;
                     if($closeReasonNal != -1 && $closeReasonCard != -1) {
                         $action = 'Заказ снят';
+                        $orderweb->closeReason = "1";
                     } else {
                         $action = 'Поиск авто';
+                        $orderweb->auto = null;
+                        $orderweb->closeReason = "-1";
                     }
+
                     $response = $cardOrderInput; // БЕЗНАЛ
                 }
                 elseif ($nalState === 'Canceled' && $cardState === 'Canceled') {
@@ -706,14 +751,20 @@ class OrderStatusController extends Controller
                     $closeReasonCard = $cardOrder['close_reason'] ?? -1;
                     if($closeReasonNal != -1 && $closeReasonCard != -1) {
                         $action = 'Заказ снят';
+                        $orderweb->closeReason = "1";
                     } else {
                         $action = 'Поиск авто';
+                        $orderweb->auto = null;
+                        $orderweb->closeReason = "-1";
                     }
                     $response = $cardOrderInput; // БЕЗНАЛ
                 } else {
                     $action = 'Поиск авто';
+                    $orderweb->auto = null;
+                    $orderweb->closeReason = "-1";
                     $response = $nalOrderInput;
                 }
+                $orderweb->save();
 
                 $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
 

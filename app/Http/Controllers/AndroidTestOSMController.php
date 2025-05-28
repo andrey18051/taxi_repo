@@ -11375,9 +11375,12 @@ class AndroidTestOSMController extends Controller
                         $response_arr = json_decode($response, true);
                         Log::debug("$url: ", $response_arr);
 //                        $orderweb_uid->auto = null;
-                        if ($response_arr["order_car_info"] != null) {
-                            $orderweb_uid->auto = $response_arr["order_car_info"];
-                        }
+//                        if ($response_arr["order_car_info"] != null) {
+//                            $orderweb_uid->auto = $response_arr["order_car_info"];
+//                        }
+
+                        $orderweb_uid->auto = $response_arr["order_car_info"];
+
                         $orderweb_uid->closeReason = $response_arr["close_reason"];
                         $orderweb_uid->save();
                         return $response;
