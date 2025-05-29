@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Http\Controllers\MessageSentController;
+use App\Http\Controllers\UIDController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Models\DoubleOrder;
 use App\Models\Orderweb;
@@ -62,9 +63,13 @@ class StartNewProcessExecution implements ShouldQueue
             $bonusOrder = $responseBonus['dispatching_order_uid'];
 
             try {
+
+
                 Log::info("Запуск startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}");
                 $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
                 Log::info("Результат startNewProcessExecutionStatusJob: " . ($result ?? 'null'));
+
+
                 if ($result === "exit") {
                     $messageAdmin = "Задача завершена для заказа $this->orderId (Job ID: {$this->jobId})";
                     (new MessageSentController)->sentMessageAdmin($messageAdmin);
@@ -162,7 +167,7 @@ class StartNewProcessExecution implements ShouldQueue
                         }
                     }
 
-
+                    (new UIDController())->UIDStatusReviewDaily();
 
                     return;
                 }
@@ -173,19 +178,7 @@ class StartNewProcessExecution implements ShouldQueue
 
         }
 
-//
-//
-//        try {
-//            sleep(5);
-//            $doubleOrderRecord = DoubleOrder::find($this->orderId);
-//            if ($doubleOrderRecord) {
-//                $doubleOrderRecord->delete();
-//                $messageAdmin = "Вилка $this->orderId (Job ID: {$this->jobId}) удалена";
-//                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-//            }
-//        } catch (\Exception $e) {
-//            Log::error("Ошибка при удалении DoubleOrder (второй блок) для orderId: {$this->orderId}: " . $e->getMessage());
-//        }
+
     }
 
 

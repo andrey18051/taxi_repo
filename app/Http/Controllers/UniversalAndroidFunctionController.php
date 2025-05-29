@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CacheHandler;
 use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
-use App\Jobs\SearchAutoOrderCardJob;
+
 use App\Jobs\SearchAutoOrderJob;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\StartAddCostCardCreat;
@@ -295,7 +293,11 @@ class UniversalAndroidFunctionController extends Controller
             $responseBonus = json_decode($responseBonusStr, true);
             $bonusOrder = $responseBonus['dispatching_order_uid'];
             $bonusOrderHold = $bonusOrder;
+
+
+
             //Увеличеваем максимальное время для отстроченного заказа
+
             $bonusOrderHold = (new MemoryOrderChangeController)->show($bonusOrderHold);
             $orderwebs = Orderweb::where('dispatching_order_uid', $bonusOrderHold)->first();
             if ($orderwebs->required_time != null) {
@@ -322,6 +324,7 @@ class UniversalAndroidFunctionController extends Controller
                     $uid_history->uid_bonusOrderHold = $bonusOrder;
                     $uid_history->cancel = false;
                     $uid_history->save();
+
                 } else {
                     $messageAdmin = "uid_history: " . print_r($uid_history->toArray(), true);
                     (new MessageSentController)->sentMessageAdminLog($messageAdmin);
@@ -437,7 +440,7 @@ class UniversalAndroidFunctionController extends Controller
             } else {
 //                while (time() - $startTime < $maxExecutionTime) {
                 while (true) {
-
+                    self::writeAutoInfo($uid_history);
                     $doubleOrderRecord = DoubleOrder::find($doubleOrderId);
                     if (!$doubleOrderRecord) {
                         return "exit";
@@ -2835,6 +2838,7 @@ class UniversalAndroidFunctionController extends Controller
                             }
                         }
                     }
+
                 }
 //                if (time() - $startTime >= $maxExecutionTime) {
 //                    try {
@@ -2977,8 +2981,8 @@ class UniversalAndroidFunctionController extends Controller
                      $uid_history->double_status = json_encode($newStatusArr);
                      break;
              }
-
              $uid_history->save();
+
 //             (new OrderStatusController)->getOrderStatusMessageResultPush($uid_history->uid_bonusOrderHold);
 
              return $newStatus;
@@ -2992,6 +2996,51 @@ class UniversalAndroidFunctionController extends Controller
 
     }
 
+    private function writeAutoInfo($uid_history) {
+
+
+        if ($uid_history) {
+
+            $nalOrderInput = $uid_history->double_status;
+            $cardOrderInput = $uid_history->bonus_status;
+            $messageAdmin = "function writeAutoInfo nalOrderInput $nalOrderInput" ;
+            (new MessageSentController)->sentMessageMe($messageAdmin);
+
+            $messageAdmin = "function writeAutoInfo cardOrderInput $cardOrderInput" ;
+            (new MessageSentController)->sentMessageMe($messageAdmin);
+
+            $nalOrder = json_decode($nalOrderInput, true);
+            $cardOrder = json_decode($cardOrderInput, true);
+
+            $autoInfoNal =  $nalOrder['order_car_info'];
+            $messageAdmin = "function writeAutoInfo autoInfoNal $autoInfoNal" ;
+            (new MessageSentController)->sentMessageMe($messageAdmin);
+
+            $autoInfoCard =  $cardOrder['order_car_info'];
+            $messageAdmin = "function writeAutoInfo autoInfoCard $autoInfoCard" ;
+            (new MessageSentController)->sentMessageMe($messageAdmin);
+
+            $orderweb = Orderweb::where("dispatching_order_uid", $uid_history->uid_bonusOrderHold)->first();
+            $old_auto = $orderweb->auto;
+            if ($orderweb) {
+                $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
+
+                $orderweb->save();
+                $messageAdmin = "function writeAutoInfo $orderweb->auto" ;
+                (new MessageSentController)->sentMessageMe($messageAdmin);
+                if ($orderweb->auto != null && $old_auto != $orderweb->auto) {
+                    Log::info('writeAutoInfo: Найден автоматический заказ, отправка ответа', [
+                        'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                        'auto' => $orderweb->auto
+                    ]);
+                    (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+                    Log::info('writeAutoInfo: Ответ отправлен', [
+                        'dispatching_order_uid' => $orderweb->dispatching_order_uid
+                    ]);
+                }
+            }
+        }
+    }
     /**
      * @param $lastStatusBonus
      * @param $lastStatusDouble
@@ -3966,7 +4015,7 @@ class UniversalAndroidFunctionController extends Controller
         if ($params["payment_type"] != 1) {
             SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
         } else {
-//            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
+//            ProcessOrderAutoInfoStatus::dispatch($params['dispatching_order_uid']);
         }
 
 
@@ -7414,7 +7463,7 @@ class UniversalAndroidFunctionController extends Controller
      * @param Orderweb $orderweb Объект заказа
      * @return void
      */
-    protected function sendAutoOrderResponse($orderweb): void
+    public function sendAutoOrderResponse($orderweb): void
     {
         Log::info('sendAutoOrderResponse started', [
             'dispatching_order_uid' => $orderweb->dispatching_order_uid
