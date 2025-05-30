@@ -7471,11 +7471,11 @@ class UniversalAndroidFunctionController extends Controller
             'dispatching_order_uid' => $orderweb->dispatching_order_uid
         ]);
 
-        if ($orderweb->client_cost) {
-            $cost = $orderweb->client_cost;
+        if (isset($orderweb->client_cost)) {
+            $cost = $orderweb->client_cost  + $orderweb->attempt_20;
         } else {
-            if ($orderweb->client_cost) {
-                $cost = $orderweb->web_cost;
+            if (isset($orderweb->web_cost)) {
+                $cost = $orderweb->web_cost + $orderweb->attempt_20;
             } else {
                 $cost = 0;
             }
@@ -7484,7 +7484,8 @@ class UniversalAndroidFunctionController extends Controller
             // Формирование costMap
             $costMap = [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid,
-                'order_cost' => $cost + $orderweb->attempt_20 + $orderweb->add_cost,
+//                'order_cost' => $cost + $orderweb->attempt_20 + $orderweb->add_cost,
+                'order_cost' => $cost,
                 'currency' => $orderweb->currency,
                 'routefrom' => $orderweb->routefrom,
                 'routefromnumber' => $orderweb->routefromnumber,
@@ -7504,10 +7505,13 @@ class UniversalAndroidFunctionController extends Controller
             if ($uid_history) {
                 $costMap['dispatching_order_uid'] = $uid_history->uid_bonusOrder;
                 $costMap['dispatching_order_uid_Double'] = $uid_history->uid_doubleOrder;
+                $costMap['pay_method'] = "wfp_payment";
                 Log::info('sendAutoOrderResponse: Uid_history found', [
                     'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                     'uid_bonusOrder' => $uid_history->uid_bonusOrder,
-                    'uid_doubleOrder' => $uid_history->uid_doubleOrder
+                    'uid_doubleOrder' => $uid_history->uid_doubleOrder,
+                    'pay_method' => $uid_history->uid_doubleOrder
+
                 ]);
             } else {
                 $costMap['dispatching_order_uid_Double'] = ' ';
