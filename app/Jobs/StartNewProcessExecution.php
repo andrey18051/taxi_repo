@@ -63,13 +63,9 @@ class StartNewProcessExecution implements ShouldQueue
             $bonusOrder = $responseBonus['dispatching_order_uid'];
 
             try {
-
-
                 Log::info("Запуск startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}");
                 $result = (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusJob($this->orderId, $this->jobId);
                 Log::info("Результат startNewProcessExecutionStatusJob: " . ($result ?? 'null'));
-
-
                 if ($result === "exit") {
                     $messageAdmin = "Задача завершена для заказа $this->orderId (Job ID: {$this->jobId})";
                     (new MessageSentController)->sentMessageAdmin($messageAdmin);
@@ -177,7 +173,6 @@ class StartNewProcessExecution implements ShouldQueue
             }
 
         }
-
 
     }
 
