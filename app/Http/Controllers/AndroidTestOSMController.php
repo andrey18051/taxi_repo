@@ -9957,7 +9957,25 @@ class AndroidTestOSMController extends Controller
         $resp_answer = "";
         if ($orderweb) {
             self::updateTimestamp($orderweb->id);
+            (new FCMController)->deleteDocumentFromFirestore($uid);
+            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 
+            if($orderweb->closeReason == "101" || $orderweb->closeReason == "102") {
+
+
+                $resp_answer = $resp_answer . "Замовлення скасоване.";
+                $orderweb->auto = null;
+                $orderweb->closeReason = "1";
+                $orderweb->save();
+
+                (new MessageSentController)->sentCancelInfo($orderweb);
+
+                return [
+                    'response' => $resp_answer,
+                ];
+            }
             switch ($city) {
                 case "Lviv":
                 case "Ivano_frankivsk":
@@ -9985,10 +10003,9 @@ class AndroidTestOSMController extends Controller
 
 
 
-            (new FCMController)->deleteDocumentFromFirestore($uid);
-            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+
+
+
             $connectAPI = $orderweb->server;
 
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);

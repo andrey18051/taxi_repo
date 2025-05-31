@@ -263,7 +263,7 @@ class DriverController extends Controller
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
             $response = Http::withHeaders([
                 "Authorization" => $authorization,
-                "X-WO-API-APP-ID" =>(new  AndroidTestOSMController)::identificationId($application),
+                "X-WO-API-APP-ID" =>(new  AndroidTestOSMController)->identificationId($application),
                 "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
             ])->put($url);
 
@@ -273,7 +273,6 @@ class DriverController extends Controller
             if ($json_arrWeb["order_client_cancel_result"] != 1) {
                 AndroidTestOSMController::repeatCancel(
                     $url,
-                    $authorization,
                     $authorization,
                     $application,
                     $city,

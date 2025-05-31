@@ -7246,7 +7246,7 @@ class UniversalAndroidFunctionController extends Controller
                 $messageAdmin = 'searchAutoOrderJob: dispatching_order_uid' . $orderweb->dispatching_order_uid . "\n closeReason" . $orderweb->closeReason;
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
-                if ($orderweb->closeReason == "-1") {
+                if ($orderweb->closeReason == "-1" || $orderweb->closeReason == "101" ) {
                     if ($orderweb->auto != null) {
                         Log::info('searchAutoOrderJob: Найден автоматический заказ, отправка ответа', [
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid,
