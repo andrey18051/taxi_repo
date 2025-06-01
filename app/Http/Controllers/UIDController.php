@@ -555,7 +555,7 @@ class UIDController extends Controller
         }
 
         $order = Orderweb:: where("email", $email)
-            ->whereIn('closeReason', ['-1', '101', '102'])
+            ->whereIn('closeReason', ['-1', '0', '8', '101', '102', '103', '104'])
             ->where("comment", $application)
             ->where("city", $city)
             ->orderBy("created_at", "desc")
@@ -572,7 +572,7 @@ class UIDController extends Controller
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
             $orderHistory = Orderweb::where("email", $email)
-                ->whereIn('closeReason', ['-1', '101', '102'])
+                ->whereIn('closeReason', ['-1', '101', '102', '103'])
 
                 ->where("city", $city)
                 ->where("startLat", "!=", null)
@@ -958,107 +958,110 @@ class UIDController extends Controller
             if ($uid_history) {
                 self::UIDStatusReviewCard($uid);
             } else {
-                $timeElapsed = $currentTime - strtotime($value["updated_at"]);
-                $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5 * 60;
+              if (!in_array($value['closeReason'],  ['-1', '101', '102', '103', '104'] )) {
 
-                $closeReason = $value["closeReason"];
-                $closeReasonI = $value["closeReasonI"];
-                $connectAPI = $value["server"];
+                  $timeElapsed = $currentTime - strtotime($value["updated_at"]);
+                  $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5 * 60;
 
-                switch ($value["comment"]) {
-                    case "taxi_easy_ua_pas1":
-                        $application = "PAS1";
-                        break;
-                    case "taxi_easy_ua_pas2":
-                        $application = "PAS2";
-                        break;
-                    default:
-                        $application = "PAS4";
-                }
-                Log::debug("UIDStatusReview application $application");
+                  $closeReason = $value["closeReason"];
+                  $closeReasonI = $value["closeReasonI"];
+                  $connectAPI = $value["server"];
 
-                $address = str_replace("http://", "", $connectAPI);
-                switch ($application) {
-                    case "PAS1":
-                        $serverInfo = City_PAS1::where('address', $address)->first();
-                        break;
-                    case "PAS2":
-                        $serverInfo = City_PAS2::where('address', $address)->first();
-                        break;
-                    default:
-                        $serverInfo = City_PAS4::where('address', $address)->first();
-                }
+                  switch ($value["comment"]) {
+                      case "taxi_easy_ua_pas1":
+                          $application = "PAS1";
+                          break;
+                      case "taxi_easy_ua_pas2":
+                          $application = "PAS2";
+                          break;
+                      default:
+                          $application = "PAS4";
+                  }
+                  Log::debug("UIDStatusReview application $application");
 
-                // Проверка, найден ли сервер
-                if ($serverInfo && $serverInfo->online == "true") {
-                    Log::debug("UIDStatusReview serverInfo online: true");
-                    $identificationId = $value["comment"];
-                    switch ($closeReason) {
-                        case "-1":
-                            if ($timeElapsed >= 60) {
-                                UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                            }
-                            break;
-                        case "0":
-                        case "1":
-                        case "2":
-                        case "3":
-                        case "4":
-                        case "5":
-                            switch ($closeReasonI) {
-                                case 1:
-                                    if ($timeElapsed5 >= 5 * 60 && $timeElapsed >= 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                                case 2:
-                                    if ($timeElapsed >= 60 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                                case 3:
-                                    if ($timeElapsed >= 24 * 60 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                                case 4:
-                                    if ($timeElapsed >= 3 * 24 * 60 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                            }
-                            break;
-                        case "6":
-                        case "7":
-                        case "8":
-                        case "9":
-                            switch ($closeReasonI) {
-                                case "1":
-                                    if ($timeElapsed >= 5 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                                case "2":
-                                    if ($timeElapsed >= 60 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                                case "3":
-                                    if ($timeElapsed >= 24 * 60 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                                case "4":
-                                    if ($timeElapsed >= 3 * 24 * 60 * 60) {
-                                        UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                } else {
-                    Log::error("UIDStatusReview serverInfo is null or offline for address $address");
-                }
+                  $address = str_replace("http://", "", $connectAPI);
+                  switch ($application) {
+                      case "PAS1":
+                          $serverInfo = City_PAS1::where('address', $address)->first();
+                          break;
+                      case "PAS2":
+                          $serverInfo = City_PAS2::where('address', $address)->first();
+                          break;
+                      default:
+                          $serverInfo = City_PAS4::where('address', $address)->first();
+                  }
+
+                  // Проверка, найден ли сервер
+                  if ($serverInfo && $serverInfo->online == "true") {
+                      Log::debug("UIDStatusReview serverInfo online: true");
+                      $identificationId = $value["comment"];
+                      switch ($closeReason) {
+                          case "-1":
+                              if ($timeElapsed >= 60) {
+                                  UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                              }
+                              break;
+                          case "0":
+                          case "1":
+                          case "2":
+                          case "3":
+                          case "4":
+                          case "5":
+                              switch ($closeReasonI) {
+                                  case 1:
+                                      if ($timeElapsed5 >= 5 * 60 && $timeElapsed >= 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                                  case 2:
+                                      if ($timeElapsed >= 60 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                                  case 3:
+                                      if ($timeElapsed >= 24 * 60 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                                  case 4:
+                                      if ($timeElapsed >= 3 * 24 * 60 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                              }
+                              break;
+                          case "6":
+                          case "7":
+                          case "8":
+                          case "9":
+                              switch ($closeReasonI) {
+                                  case "1":
+                                      if ($timeElapsed >= 5 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                                  case "2":
+                                      if ($timeElapsed >= 60 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                                  case "3":
+                                      if ($timeElapsed >= 24 * 60 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                                  case "4":
+                                      if ($timeElapsed >= 3 * 24 * 60 * 60) {
+                                          UIDController::closeReasonUIDStatus($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                                      }
+                                      break;
+                              }
+                              break;
+                      }
+                  } else {
+                      Log::error("UIDStatusReview serverInfo is null or offline for address $address");
+                  }
+              }
             }
 
         }

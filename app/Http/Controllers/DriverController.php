@@ -261,25 +261,25 @@ class DriverController extends Controller
 
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-            $response = Http::withHeaders([
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" =>(new  AndroidTestOSMController)->identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-            ])->put($url);
-
-            $json_arrWeb = json_decode($response, true);
-
-            Log::debug("json_arrWeb_bonus", $json_arrWeb);
-            if ($json_arrWeb["order_client_cancel_result"] != 1) {
-                AndroidTestOSMController::repeatCancel(
-                    $url,
-                    $authorization,
-                    $application,
-                    $city,
-                    $connectAPI,
-                    $uid
-                );
-            }
+//            $response = Http::withHeaders([
+//                "Authorization" => $authorization,
+//                "X-WO-API-APP-ID" =>(new  AndroidTestOSMController)->identificationId($application),
+//                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+//            ])->put($url);
+//
+//            $json_arrWeb = json_decode($response, true);
+//
+//            Log::debug("json_arrWeb_bonus", $json_arrWeb);
+//            if ($json_arrWeb["order_client_cancel_result"] != 1) {
+//                AndroidTestOSMController::repeatCancel(
+//                    $url,
+//                    $authorization,
+//                    $application,
+//                    $city,
+//                    $connectAPI,
+//                    $uid
+//                );
+//            }
 
             $dataDriver = (new FCMController)->readDriverInfoFromFirestore($uidDriver);
 
@@ -295,6 +295,18 @@ class DriverController extends Controller
             (new MessageSentController())->sentCarTakingInfo($orderweb);
             $status = "orderTaking";
             (new FCMController)->ordersTakingStatus($uid, $status);
+
+            try {
+                AndroidTestOSMController::repeatCancel(
+                    $url,
+                    $authorization,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid
+                );
+            } catch (\Exception $e) {
+            }
             // Вернуть JSON с сообщением об успехе
             return response()->json([
                 'status' => $status,
@@ -319,6 +331,11 @@ class DriverController extends Controller
         (new MessageSentController())->sentDriverInStartPoint($uid, $uidDriver);
 
         $status = "driverInStartPoint";
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb->time_to_start_point = "";
+        $orderweb->closeReason = "102";
+        $orderweb->save();
+
         (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -354,6 +371,11 @@ class DriverController extends Controller
         (new MessageSentController())->sentDriverInRout($uid, $uidDriver);
 
         $status = "driverInRout";
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb->time_to_start_point = "";
+        $orderweb->closeReason = "103";
+        $orderweb->save();
+
         (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -377,7 +399,7 @@ class DriverController extends Controller
         $status = "driverCloseOrder";
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        $orderweb->closeReason = "103";
+        $orderweb->closeReason = "104";
         $orderweb->time_to_start_point = "";
         $orderweb->save();
 

@@ -7546,7 +7546,22 @@ class UniversalAndroidFunctionController extends Controller
             // Отправка данных через FCMController
             $user = User::where("email", $orderweb->email)->first();
             if(isset ($user)) {
-                $body ="Найдена авто $orderweb->auto";
+
+                if ($orderweb->closeReason !== "-1") {
+                    $storedData = $orderweb->auto;
+
+                    $dataDriver = json_decode($storedData, true);
+//                            $name = $dataDriver["name"];
+                    $color = $dataDriver["color"];
+                    $brand = $dataDriver["brand"];
+                    $model = $dataDriver["model"];
+                    $number = $dataDriver["number"];
+                    $auto = "Авто $number, цвет $color  $brand $model";
+                } else{
+                    $auto = $orderweb->auto;
+                }
+
+                $body ="Найдена авто $auto";
                 (new FCMController)->sendNotification($body, $app, $user->id);
             }
             Log::info('sendAutoOrderResponse: Auto order sent successfully', [
