@@ -129,31 +129,50 @@ class UIDController extends Controller
     public function UIDStatusShowEmail($email)
     {
 
+//        $order = Orderweb::where("email", $email)
+//
+//           ->where("closeReason", "!=", null)
+//            ->where("closeReason", "-1")
+//            ->where("server", "!=", null)
+//            ->where("comment", "!=", null)
+//            ->orderBy("created_at", "desc")
+//            ->get();
         $order = Orderweb::where("email", $email)
-
-            ->where("closeReason", "!=", null)
             ->where("closeReason", "-1")
-            ->where("server", "!=", null)
-            ->where("comment", "!=", null)
+            ->whereNotNull("server")
+            ->whereNotNull("comment")
             ->orderBy("created_at", "desc")
             ->get();
+
 //dd($order);
         $response = null;
         Log::debug("UIDStatusShowEmail order", $order->toArray());
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
         }
-        $orderHistory = Orderweb::where("email", $email)
+//        $orderHistory = Orderweb::where("email", $email)
+//
+//            -> where("closeReason", "!=", null)
+//            -> where("server", "!=", null)
+//            -> where("startLat", "!=", null)
+//            -> where("startLan", "!=", null)
+//            -> where("to_lat", "!=", null)
+//            -> where("to_lng", "!=", null)
+//            -> where("comment", "!=", null)
+//            -> orderBy("created_at", "desc")
+//            -> get();
 
-            -> where("closeReason", "!=", null)
-            -> where("server", "!=", null)
-            -> where("startLat", "!=", null)
-            -> where("startLan", "!=", null)
-            -> where("to_lat", "!=", null)
-            -> where("to_lng", "!=", null)
-            -> where("comment", "!=", null)
-            -> orderBy("created_at", "desc")
-            -> get();
+        $orderHistory = Orderweb::where("email", $email)
+            ->whereNotNull("closeReason")
+            ->whereNotNull("server")
+            ->whereNotNull("startLat")
+            ->whereNotNull("startLan")
+            ->whereNotNull("to_lat")
+            ->whereNotNull("to_lng")
+            ->whereNotNull("comment")
+            ->orderBy("created_at", "desc")
+            ->get();
+
         if ($orderHistory) {
             $i=0;
             $orderUpdate = $orderHistory->toArray();
@@ -272,17 +291,28 @@ class UIDController extends Controller
 //            if (!$order->isEmpty()) {
 //                self::UIDStatusReview($order);
 //            }
+//            $orderHistory = Orderweb::where("email", $email)
+//
+//                ->whereNotIn('closeReason', ['-1', '101', '102'])
+//                -> whereIn("server", $serverArray)
+//                -> where("startLat", "!=", null)
+//                -> where("startLan", "!=", null)
+//                -> where("to_lat", "!=", null)
+//                -> where("to_lng", "!=", null)
+//                -> where("comment", $app_name)
+//                -> orderBy("created_at", "desc")
+//                -> get();
             $orderHistory = Orderweb::where("email", $email)
-
                 ->whereNotIn('closeReason', ['-1', '101', '102'])
-                -> whereIn("server", $serverArray)
-                -> where("startLat", "!=", null)
-                -> where("startLan", "!=", null)
-                -> where("to_lat", "!=", null)
-                -> where("to_lng", "!=", null)
-                -> where("comment", $app_name)
-                -> orderBy("created_at", "desc")
-                -> get();
+                ->whereIn("server", $serverArray)
+                ->whereNotNull("startLat")
+                ->whereNotNull("startLan")
+                ->whereNotNull("to_lat")
+                ->whereNotNull("to_lng")
+                ->where("comment", $app_name)
+                ->orderBy("created_at", "desc")
+                ->get();
+
             if ($orderHistory) {
                 $i=0;
                 $orderUpdate = $orderHistory->toArray();
@@ -378,16 +408,27 @@ class UIDController extends Controller
         Log::debug("UIDStatusShowEmailCancel order", $order->toArray());
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
+//            $orderHistory = Orderweb::where("email", $email)
+//                -> whereIn('closeReason', ['-1', '101', '102'])
+//                -> where("server", "!=", null)
+//                -> where("startLat", "!=", null)
+//                -> where("startLan", "!=", null)
+//                -> where("to_lat", "!=", null)
+//                -> where("to_lng", "!=", null)
+//                -> where("comment", "!=", null)
+//                -> orderBy("created_at", "desc")
+//                -> get();
             $orderHistory = Orderweb::where("email", $email)
-                -> whereIn('closeReason', ['-1', '101', '102'])
-                -> where("server", "!=", null)
-                -> where("startLat", "!=", null)
-                -> where("startLan", "!=", null)
-                -> where("to_lat", "!=", null)
-                -> where("to_lng", "!=", null)
-                -> where("comment", "!=", null)
-                -> orderBy("created_at", "desc")
-                -> get();
+                ->whereIn('closeReason', ['-1', '101', '102'])
+                ->whereNotNull("server")
+                ->whereNotNull("startLat")
+                ->whereNotNull("startLan")
+                ->whereNotNull("to_lat")
+                ->whereNotNull("to_lng")
+                ->whereNotNull("comment")
+                ->orderBy("created_at", "desc")
+                ->get();
+
             if ($orderHistory) {
                 $i=0;
                 $orderUpdate = $orderHistory->toArray();
@@ -571,14 +612,24 @@ class UIDController extends Controller
 
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
+//            $orderHistory = Orderweb::where("email", $email)
+//                ->whereIn('closeReason', ['-1', '101', '102', '103'])
+//
+//                ->where("city", $city)
+//                ->where("startLat", "!=", null)
+//                ->where("startLan", "!=", null)
+//                ->where("to_lat", "!=", null)
+//                ->where("to_lng", "!=", null)
+//                ->where("comment", $application)
+//                ->orderBy("created_at", "desc")
+//                ->get();
             $orderHistory = Orderweb::where("email", $email)
                 ->whereIn('closeReason', ['-1', '101', '102', '103'])
-
                 ->where("city", $city)
-                ->where("startLat", "!=", null)
-                ->where("startLan", "!=", null)
-                ->where("to_lat", "!=", null)
-                ->where("to_lng", "!=", null)
+                ->whereNotNull("startLat")
+                ->whereNotNull("startLan")
+                ->whereNotNull("to_lat")
+                ->whereNotNull("to_lng")
                 ->where("comment", $application)
                 ->orderBy("created_at", "desc")
                 ->get();
@@ -715,17 +766,28 @@ class UIDController extends Controller
         if (!$order->isEmpty()) {
             self::UIDStatusReview($order);
         }
+//        $orderHistory = Orderweb::where("email", $email)
+//
+//            -> where("closeReason", "!=", null)
+//            -> where("server", "!=", null)
+//            -> where("startLat", "!=", null)
+//            -> where("startLan", "!=", null)
+//            -> where("to_lat", "!=", null)
+//            -> where("to_lng", "!=", null)
+//            -> where("comment", "!=", null)
+//            -> orderBy("created_at", "desc")
+//            -> get();
         $orderHistory = Orderweb::where("email", $email)
+            ->whereNotNull("closeReason")
+            ->whereNotNull("server")
+            ->whereNotNull("startLat")
+            ->whereNotNull("startLan")
+            ->whereNotNull("to_lat")
+            ->whereNotNull("to_lng")
+            ->whereNotNull("comment")
+            ->orderBy("created_at", "desc")
+            ->get();
 
-            -> where("closeReason", "!=", null)
-            -> where("server", "!=", null)
-            -> where("startLat", "!=", null)
-            -> where("startLan", "!=", null)
-            -> where("to_lat", "!=", null)
-            -> where("to_lng", "!=", null)
-            -> where("comment", "!=", null)
-            -> orderBy("created_at", "desc")
-            -> get();
         if (!$orderHistory->isEmpty()) {
             $i=0;
             $orderUpdate = $orderHistory->toArray();
