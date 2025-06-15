@@ -295,7 +295,7 @@ class OpenStreetMapController extends Controller
 
     public function reverseAddressLocal($originLatitude, $originLongitude, $local)
     {
-        $radius = 50; // Радиус поиска в метрах
+        $radius = 200; // Радиус поиска в метрах
         $url = "https://overpass-api.de/api/interpreter?data=[out:json];node(around:$radius,$originLatitude,$originLongitude);out;";
 
         Log::info("Overpass API Request URL: $url");
@@ -352,12 +352,12 @@ class OpenStreetMapController extends Controller
             Log::error("Overpass API Error: " . $e->getMessage());
         }
 
-        $r = 50; // Радиус поиска в метрах
+        $r = 200; // Радиус поиска в метрах
         $url = "https://api.visicom.ua/data-api/5.0/$local/geocode.json?categories=adr_address&near="
             . $originLongitude
             . "," . $originLatitude
             . "&r=" . $r . "&l=1&key="
-            . config("app.keyVisicom");
+            . config("app.keyVisicomMy");
 //        $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near=30.51043,50.45358&r=50&l=1&key=". config("app.keyVisicom");
 
         Log::info("Visicom Request URL: $url");
