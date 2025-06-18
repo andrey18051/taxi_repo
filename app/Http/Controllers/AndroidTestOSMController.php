@@ -3822,7 +3822,7 @@ class AndroidTestOSMController extends Controller
                         }
                         (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
-                        $response_error["Message"] = "ErrorMessage";
+                        $response_error["Message"] = "Ошибка создания заказа";
 
                         return response($response_error, 200)
                             ->header('Content-Type', 'json');
@@ -3830,7 +3830,9 @@ class AndroidTestOSMController extends Controller
                 }
                 if (self::connectAPIAppOrder($city, $application) == 400) {
                     $response_error["order_cost"] = 0;
+
                     $response_error["Message"] = "ErrorMessage";
+
 
                     return response($response_error, 200)
                         ->header('Content-Type', 'json');
@@ -3973,7 +3975,7 @@ class AndroidTestOSMController extends Controller
                         }
                         (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
                         $response_error["order_cost"] = 0;
-                        $response_error["Message"] = "ErrorMessage";
+                        $response_error["Message"] = "Ошибка создания заказа";
 
                         return response($response_error, 200)
                             ->header('Content-Type', 'json');
@@ -4022,7 +4024,7 @@ class AndroidTestOSMController extends Controller
                         ->header('Content-Type', 'json');
                 } else {
                     $response_error["order_cost"] = 0;
-                    $response_error["Message"] = "ErrorMessage";
+                    $response_error["Message"] = "Ошибка создания заказа";
 
                     return response($response_error, 200)
                         ->header('Content-Type', 'json');

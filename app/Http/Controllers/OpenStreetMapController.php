@@ -371,7 +371,7 @@ class OpenStreetMapController extends Controller
                 $city_text = $local === "ru" ? "город " : ($local === "en" ? "city " : "місто ");
                 $building_text = $local === "ru" ? "д." : ($local === "en" ? "build." : "буд.");
 
-                return ["result" => $response_arr_from["properties"]["street_type"]
+                return ["result" => $response_arr_from["properties"]["street_type"] . " "
                     . $response_arr_from["properties"]["street"]
                     . ", $building_text" . $response_arr_from["properties"]["name"]
                     . ", " . $response_arr_from["properties"]["settlement_type"]
