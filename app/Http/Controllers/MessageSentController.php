@@ -950,4 +950,11 @@ google_id: $uidDriver отправил данные авто и ожидает �
 //        echo $messageAdmin;
         Log::debug("sentMessageAdmin  $messageAdmin");
     }
+
+    public function sentMessageMeCancel($messageAdmin)
+    {
+         $alarmMessage = new TelegramController();
+         $alarmMessage->sendMeMessage($messageAdmin);
+        Log::debug("sentMessageAdmin  $messageAdmin");
+    }
 }

@@ -9,6 +9,7 @@ use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Jobs\SearchAutoOrderCardJob;
 use App\Jobs\SearchAutoOrderJob;
+use App\Jobs\WebordersCancelAndRestorDoubleJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -6735,23 +6736,24 @@ class UniversalAndroidFunctionController extends Controller
                     );
                 }
 //                CacheHandler::cacheEventPut($uid, true, 60);
-                (new AndroidTestOSMController)->webordersCancelDouble(
-                    $uid,
-                    $uid_Double,
-                    $payment_type,
-                    $city,
-                    $application
-                );
+//                (new AndroidTestOSMController)->webordersCancelAndRestorDouble(
+//                    $uid,
+//                    $uid_Double,
+//                    $payment_type,
+//                    $city,
+//                    $application
+//                );
 
-                Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
-                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                WebordersCancelAndRestorDoubleJob::dispatch($uid, $uid_Double, $city, $application, $order);
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
 
-
                 (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+                Log::debug("Создан новый заказ с UID startAddCostCardBottomCreat: " . $orderNew);
+                $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();

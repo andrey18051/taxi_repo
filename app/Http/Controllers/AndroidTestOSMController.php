@@ -10451,14 +10451,14 @@ class AndroidTestOSMController extends Controller
                 // to cancel
 
                 $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
-                    $result_double_cancel = self::repeatCancel(
-                        $url_cancel,
-                        $authorizationDouble,
-                        $application,
-                        $city,
-                        $connectAPI,
-                        $uid_Double
-                    );
+                $result_double_cancel = self::repeatCancel(
+                    $url_cancel,
+                    $authorizationDouble,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid_Double
+                );
 
                 $resp_answer = "Запит на скасування замовлення надіслано. ";
 
@@ -10496,6 +10496,166 @@ class AndroidTestOSMController extends Controller
             (new MessageSentController)->sentMessageAdmin($resp_answer);
         }
 
+
+        return [
+            'response' => $resp_answer,
+        ];
+    }
+
+    public function webordersCancelAndRestorDouble(
+        $uid,
+        $uid_Double,
+        $city,
+        $application,
+        $order
+    ) {
+
+
+        $orderweb = $order;
+
+        if ($orderweb) {
+            self::updateTimestamp($orderweb->id);
+
+
+            switch ($city) {
+                case "Lviv":
+                case "Ivano_frankivsk":
+                case "Vinnytsia":
+                case "Poltava":
+                case "Sumy":
+                case "Kharkiv":
+                case "Chernihiv":
+                case "Rivne":
+                case "Ternopil":
+                case "Khmelnytskyi":
+                case "Zakarpattya":
+                case "Zhytomyr":
+                case "Kropyvnytskyi":
+                case "Mykolaiv":
+                case "Сhernivtsi":
+                case "Lutsk":
+
+                    $city = "OdessaTest";
+                    break;
+                case "foreign countries":
+                    $city = "Kyiv City";
+                    break;
+            }
+
+            $payment_type = $orderweb->pay_system;
+
+            $connectAPI = $orderweb->server;
+
+            $authorizationChoiceArr = self::authorizationChoiceApp($payment_type, $city, $connectAPI, $application);
+            $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
+            $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
+
+
+            $startTime = time(); // Запоминаем начальное время
+
+            do {
+                // Попробуем найти запись
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $uid = $uid_history->uid_bonusOrder;
+                    $uid_Double = $uid_history->uid_doubleOrder;
+                    break;
+                } else {
+                    $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+
+                    if ($uid_history) {
+                        // Если запись найдена, выходим из цикла
+                        $uid = $uid_history->uid_bonusOrder;
+                        $uid_Double = $uid_history->uid_doubleOrder;
+                        break;
+                    }
+                }
+
+                $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $uid = $uid_history->uid_bonusOrder;
+                    $uid_Double = $uid_history->uid_doubleOrder;
+                }
+
+                // Ждём одну секунду перед следующим проверочным циклом
+                sleep(1);
+            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+
+// Если запись всё ещё не найдена, можно обработать ситуацию
+            if ($uid_history) {
+                Log::error("Запись uid_bonusOrderHold появилась в течение 1 минуты.");
+                $messageAdmin = "webordersCancelDouble uid_history \n uid_history->uid_bonusOrder $uid_history->uid_bonusOrder \n uid_history->uid_doubleOrder $uid_history->uid_doubleOrder" ;
+                (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+
+//                (new UniversalAndroidFunctionController)->deleteJobByUid($uid_history->orderId);
+
+
+                $messageAdmin = "webordersCancelDouble uid $uid \n uid_Double  $uid_Double \n  payment_type  $payment_type \n  city  $city \n payment_type $payment_type" ;
+                (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+
+
+                //// bonus section
+                // to cancel
+                $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid;
+
+                $result_bonus_cancel = self::repeatCancel(
+                    $url_cancel,
+                    $authorizationBonus,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid
+                );
+
+
+                ///// double section
+                // to cancel
+
+                $url_cancel = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
+                $result_double_cancel = self::repeatCancel(
+                    $url_cancel,
+                    $authorizationDouble,
+                    $application,
+                    $city,
+                    $connectAPI,
+                    $uid_Double
+                );
+
+                $resp_answer = "Запит на скасування замовлення надіслано. ";
+
+
+                if ($result_bonus_cancel == "1" && $result_double_cancel == "1") {
+
+                    $uid_history->cancel = "1";
+                    $uid_history->save();
+
+                    $action = 'Заказ снят';
+                    $email = $orderweb->email;
+                    $app = $application;
+                    $dispatching_order_uid = $orderweb->dispatching_order_uid;
+
+                }
+
+            }
+            else {
+                // Другие действия при отсутствии записи
+                $resp_answer = "Замовлення $uid не вдалося скасувати. 1";
+                (new MessageSentController)->sentMessageMeCancel($resp_answer);
+            }
+
+
+
+        } else {
+            $resp_answer = "Замовлення $uid не вдалося скасувати. 2";
+            (new MessageSentController)->sentMessageMeCancel($resp_answer);
+        }
+
+        $resp = "Замовлення $uid  $resp_answer";
+        (new MessageSentController)->sentMessageMeCancel($resp);
 
         return [
             'response' => $resp_answer,
