@@ -92,6 +92,10 @@ class ProcessAutoOrder implements ShouldQueue
 
             if (!isset($responseArr["auto"]) || $responseArr["auto"] === null) {
                 Log::info('ProcessAutoOrder: auto == null, перезапуск SearchAutoOrderJob', ['uid' => $this->uid]);
+
+                $orderweb->auto = null;
+                $orderweb->save();
+
                 SearchAutoOrderJob::dispatch($this->uid);
                 (new FCMController)->writeDocumentToFirestore($this->uid);
                 return;
