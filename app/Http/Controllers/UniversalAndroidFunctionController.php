@@ -7,6 +7,7 @@ use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
+use App\Jobs\ProcessAutoOrder;
 use App\Jobs\SearchAutoOrderCardJob;
 use App\Jobs\SearchAutoOrderJob;
 use App\Jobs\WebordersCancelAndRestorDoubleJob;
@@ -7265,6 +7266,9 @@ class UniversalAndroidFunctionController extends Controller
 
                         }
                         self::sendAutoOrderResponse($orderweb);
+
+                        ProcessAutoOrder::dispatch($processedUid);
+
                         Log::info('searchAutoOrderJob: Ответ отправлен', [
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid
                         ]);
@@ -7378,7 +7382,7 @@ class UniversalAndroidFunctionController extends Controller
             return ['status' => 'error', 'message' => 'Ошибка обработки: ' . $e->getMessage()];
         }
     }
-    private function cityFinder(String $cityInp, String $serverInp): string {
+    public function cityFinder(String $cityInp, String $serverInp): string {
 //$order->city $order->server
         switch ($cityInp) {
             case "city_kiev":

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Jobs\SearchAutoOrderJob;
 use App\Mail\Check;
 use App\Mail\Driver;
 use App\Mail\JobDriver;
@@ -698,6 +699,8 @@ class DriverController extends Controller
 
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
                     (new MessageSentController())->sentCarRestoreOrder($order);
+
+                    SearchAutoOrderJob::dispatch($order_new_uid);
 
                     return $order;
                 } else {
