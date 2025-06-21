@@ -7470,7 +7470,7 @@ class UniversalAndroidFunctionController extends Controller
      * @param Orderweb $orderweb Объект заказа
      * @return void
      */
-    protected function sendAutoOrderResponse($orderweb): void
+    public function sendAutoOrderResponse($orderweb): void
     {
         Log::info('sendAutoOrderResponse started', [
             'dispatching_order_uid' => $orderweb->dispatching_order_uid

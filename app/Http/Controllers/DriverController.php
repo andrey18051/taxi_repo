@@ -288,6 +288,8 @@ class DriverController extends Controller
             $orderweb->time_to_start_point = "";
             $orderweb->save();
 
+            (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+
             (new FCMController)->calculateTimeToStart($uid);
 
             (new FCMController)->writeDocumentToBalanceFirestore($uid, $uidDriver, "hold");
@@ -335,7 +337,7 @@ class DriverController extends Controller
         $orderweb->time_to_start_point = "";
         $orderweb->closeReason = "102";
         $orderweb->save();
-
+        (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
         (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -375,7 +377,7 @@ class DriverController extends Controller
         $orderweb->time_to_start_point = "";
         $orderweb->closeReason = "103";
         $orderweb->save();
-
+        (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
         (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -402,7 +404,7 @@ class DriverController extends Controller
         $orderweb->closeReason = "104";
         $orderweb->time_to_start_point = "";
         $orderweb->save();
-
+        (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,
