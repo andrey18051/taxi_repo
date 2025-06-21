@@ -10,6 +10,7 @@ use App\Helpers\TimeHelper;
 use App\Jobs\SearchAutoOrderCardJob;
 use App\Jobs\SearchAutoOrderJob;
 use App\Jobs\WebordersCancelAndRestorDoubleJob;
+use App\Jobs\WebordersCancelAndRestorNalJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -5819,7 +5820,9 @@ class UniversalAndroidFunctionController extends Controller
                 );
 
 
-                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
+//                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
+//                (new AndroidTestOSMController)->webordersCancelRestorAddCostNal($uid, $city, $application, $order);
+                WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $order);
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
