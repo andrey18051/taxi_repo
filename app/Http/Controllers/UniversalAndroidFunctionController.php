@@ -7257,6 +7257,13 @@ class UniversalAndroidFunctionController extends Controller
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                             'auto' => $orderweb->auto
                         ]);
+                        if($orderweb->closeReason == "-1" ) {
+                            (new FCMController)->deleteDocumentFromFirestore($processedUid);
+                            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($processedUid);
+                            (new FCMController)->deleteDocumentFromSectorFirestore($processedUid);
+                            (new FCMController)->writeDocumentToHistoryFirestore($processedUid, "cancelled");
+
+                        }
                         self::sendAutoOrderResponse($orderweb);
                         Log::info('searchAutoOrderJob: Ответ отправлен', [
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid

@@ -959,8 +959,12 @@ class FCMController extends Controller
      */
     public function calculateTimeToStart($uid)
     {
+
         $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+
+
         $currentDateTime = Carbon::now(); // Получаем текущее время
         $kievTimeZone = new DateTimeZone('Europe/Kiev'); // Создаем объект временной зоны для Киева
         $dateTime = new DateTime($currentDateTime->format('Y-m-d H:i:s')); // Создаем объект DateTime

@@ -288,7 +288,6 @@ class DriverController extends Controller
             $orderweb->time_to_start_point = "";
             $orderweb->save();
 
-            (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
 
             (new FCMController)->calculateTimeToStart($uid);
 
@@ -297,6 +296,7 @@ class DriverController extends Controller
             (new MessageSentController())->sentCarTakingInfo($orderweb);
             $status = "orderTaking";
             (new FCMController)->ordersTakingStatus($uid, $status);
+            (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
 
             try {
                 AndroidTestOSMController::repeatCancel(
