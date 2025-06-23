@@ -7572,13 +7572,13 @@ class UniversalAndroidFunctionController extends Controller
                     $brand = $dataDriver["brand"];
                     $model = $dataDriver["model"];
                     $number = $dataDriver["number"];
-                    $auto = "Авто $number, цвет $color  $brand $model";
+                    $auto = "$number, $color  $brand $model";
                 } else{
                     $auto = $orderweb->auto;
                 }
 
-                $body ="Найдена авто $auto";
-                (new FCMController)->sendNotification($body, $app, $user->id);
+                $body = $auto;
+                (new FCMController)->sendNotificationAuto($body, $app, $user->id);
             }
             Log::info('sendAutoOrderResponse: Auto order sent successfully', [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid

@@ -93,6 +93,42 @@ class FCMController extends Controller
 
 
 
+    public function sendNotificationAuto($body, $app, $user_id)
+    {
+        $userToken = UserTokenFmsS::where("user_id", $user_id)->first();
+
+        if ($userToken != null) {
+            switch ($app) {
+                case "PAS1":
+                    $to = $userToken->token_app_pas_1;
+                    $firebaseMessaging = app('firebase.messaging')['app1'];
+                    break;
+                case "PAS2":
+                    $to = $userToken->token_app_pas_2;
+                    $firebaseMessaging = app('firebase.messaging')['app2'];
+                    break;
+                default:
+                    $to = $userToken->token_app_pas_4;
+                    $firebaseMessaging = app('firebase.messaging')['app4'];
+            }
+
+
+            $message = CloudMessage::withTarget('token', $to)
+                ->withData([
+                    'message_uk' => 'Знайдено авто: ' . $body,
+                    'message_en' => 'Found car: ' . $body,
+                    'message_ru' => 'Найдена авто:  ' . $body,
+                ]);
+
+            $firebaseMessaging->send($message);
+
+            return response()->json(['message' => 'Notification sent']);
+        }
+
+        return response()->json(['message' => 'User token not found'], 404);
+    }
+
+
     public function readDocumentFromUsersFirestore($uidDriver)
     {
         try {
