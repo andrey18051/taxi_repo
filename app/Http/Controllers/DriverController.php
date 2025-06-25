@@ -297,7 +297,7 @@ class DriverController extends Controller
             (new MessageSentController())->sentCarTakingInfo($orderweb);
             $status = "orderTaking";
             (new FCMController)->ordersTakingStatus($uid, $status);
-            (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+            (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
 
             try {
                 AndroidTestOSMController::repeatCancel(
@@ -338,7 +338,7 @@ class DriverController extends Controller
         $orderweb->time_to_start_point = "";
         $orderweb->closeReason = "102";
         $orderweb->save();
-        (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+        (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
         (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -378,7 +378,7 @@ class DriverController extends Controller
         $orderweb->time_to_start_point = "";
         $orderweb->closeReason = "103";
         $orderweb->save();
-        (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+        (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
         (new FCMController)->ordersTakingStatus($uid, $status);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -405,7 +405,7 @@ class DriverController extends Controller
         $orderweb->closeReason = "104";
         $orderweb->time_to_start_point = "";
         $orderweb->save();
-        (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+        (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,

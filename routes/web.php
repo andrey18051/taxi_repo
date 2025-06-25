@@ -1551,3 +1551,8 @@ Route::get('/getOrderStatusMessageResultPush/{uid}', [OrderStatusController::cla
  */
 Route::get('/findUser/{email}', [UserController::class, 'findUser'])->name('findUser');
 
+
+/**
+ * My tests
+ */
+Route::get('/sendNotificationAuto/{body}/{app}/{user_id}', [FCMController::class, 'sendNotificationAuto'])->name('sendNotificationAuto');

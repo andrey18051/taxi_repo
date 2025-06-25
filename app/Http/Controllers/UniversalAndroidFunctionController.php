@@ -301,7 +301,7 @@ class UniversalAndroidFunctionController extends Controller
                         'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                         'auto' => $orderweb->auto
                     ]);
-                    (new UniversalAndroidFunctionController)->sendAutoOrderResponse($orderweb);
+                    (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
                     Log::info('writeAutoInfo: Ответ отправлен', [
                         'dispatching_order_uid' => $orderweb->dispatching_order_uid
                     ]);
@@ -7580,6 +7580,119 @@ class UniversalAndroidFunctionController extends Controller
                 $body = $auto;
                 (new FCMController)->sendNotificationAuto($body, $app, $user->id);
             }
+            Log::info('sendAutoOrderResponse: Auto order sent successfully', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('sendAutoOrderResponse: Exception occurred', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e; // Перебрасываем исключение для обработки выше
+        }
+    }
+
+    public function sendAutoOrderMyVodResponse($orderweb): void
+    {
+        Log::info('sendAutoOrderResponse started', [
+            'dispatching_order_uid' => $orderweb->dispatching_order_uid
+        ]);
+
+        if (isset($orderweb->client_cost)) {
+            $cost = $orderweb->client_cost  + $orderweb->attempt_20;
+        } else {
+            if (isset($orderweb->web_cost)) {
+                $cost = $orderweb->web_cost + $orderweb->attempt_20;
+            } else {
+                $cost = 0;
+            }
+        }
+        try {
+            // Формирование costMap
+            $costMap = [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+//                'order_cost' => $cost + $orderweb->attempt_20 + $orderweb->add_cost,
+                'order_cost' => $cost,
+                'currency' => $orderweb->currency,
+                'routefrom' => $orderweb->routefrom,
+                'routefromnumber' => $orderweb->routefromnumber,
+                'routeto' => $orderweb->routeto,
+                'to_number' => $orderweb->routetonumber,
+                'required_time' => $orderweb->required_time ?? '1970-01-01T03:00',
+                'comment_info' => $orderweb->comment_info,
+                'extra_charge_codes' => $orderweb->extra_charge_codes,
+            ];
+            Log::info('sendAutoOrderResponse: costMap prepared', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'costMap' => $costMap
+            ]);
+
+            // Проверка на дополнительные поля
+            $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+            if ($uid_history) {
+                $costMap['dispatching_order_uid'] = $uid_history->uid_bonusOrder;
+                $costMap['dispatching_order_uid_Double'] = $uid_history->uid_doubleOrder;
+                $costMap['pay_method'] = "wfp_payment";
+                Log::info('sendAutoOrderResponse: Uid_history found', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                    'uid_bonusOrder' => $uid_history->uid_bonusOrder,
+                    'uid_doubleOrder' => $uid_history->uid_doubleOrder,
+                    'pay_method' => $uid_history->uid_doubleOrder
+
+                ]);
+            } else {
+                $costMap['dispatching_order_uid_Double'] = ' ';
+                Log::info('sendAutoOrderResponse: Uid_history not found', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid
+                ]);
+            }
+
+            // Определение приложения
+            $email = $orderweb->email;
+            switch ($orderweb->comment) {
+                case "taxi_easy_ua_pas1":
+                    $app = "PAS1";
+                    break;
+                case "taxi_easy_ua_pas2":
+                    $app = "PAS2";
+                    break;
+                //case "PAS4":
+                default:
+                    $app = "PAS4";
+                    break;
+            }
+            Log::info('sendAutoOrderResponse: App determined', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'app' => $app,
+                'email' => $email
+            ]);
+
+            // Отправка данных через PusherController
+            (new PusherController)->sendAutoOrder($costMap, $app, $email);
+
+            // Отправка данных через FCMController
+            $user = User::where("email", $orderweb->email)->first();
+//            if(isset ($user)) {
+//
+//                if ($orderweb->closeReason !== "-1") {
+//                    $storedData = $orderweb->auto;
+//
+//                    $dataDriver = json_decode($storedData, true);
+////                            $name = $dataDriver["name"];
+//                    $color = $dataDriver["color"];
+//                    $brand = $dataDriver["brand"];
+//                    $model = $dataDriver["model"];
+//                    $number = $dataDriver["number"];
+//                    $auto = "$number, $color  $brand $model";
+//                } else{
+//                    $auto = $orderweb->auto;
+//                }
+//
+//                $body = $auto;
+//                (new FCMController)->sendNotificationAuto($body, $app, $user->id);
+//            }
             Log::info('sendAutoOrderResponse: Auto order sent successfully', [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid
             ]);
