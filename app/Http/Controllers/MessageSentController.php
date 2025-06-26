@@ -124,7 +124,7 @@ class MessageSentController extends Controller
         $updated_at = $formattedTime;
         Log::debug("updated_at " .$updated_at);
 
-        $subject = "Найдена авто";
+        $subject = "Найдено авто";
 
         $messageAdmin = "$subject. Клиент $user_full_name (телефон $user_phone, email $email)
          Получил авто $number (цвет $color  $brand $model телефон водителя $phoneNumber)

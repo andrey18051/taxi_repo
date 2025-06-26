@@ -117,7 +117,7 @@ class FCMController extends Controller
                 ->withData([
                     'message_uk' => 'Знайдено авто: ' . $body,
                     'message_en' => 'Found car: ' . $body,
-                    'message_ru' => 'Найдена авто:  ' . $body,
+                    'message_ru' => 'Найдено авто:  ' . $body,
                 ]);
 
             $firebaseMessaging->send($message);

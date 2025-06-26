@@ -164,9 +164,7 @@ class TelegramController extends Controller
     public function sendAlarmMessage($message)
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-        $attempts = 3;
-        $delay = 2; // Delay in seconds between attempts
-
+        Log::debug('sendAlarmMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
         Queue::push(new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message));
         return response()->json(['status' => 'Message sent in background'], 200);
@@ -175,8 +173,7 @@ class TelegramController extends Controller
     public function sendMeMessage($message)
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-
-        // Отправляем в фоновую задачу
+        Log::debug('sendMeMessage sending message: ' . $message);
         Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
         return response()->json(['status' => 'Message sent in background'], 200);
     }
@@ -184,9 +181,8 @@ class TelegramController extends Controller
     public function sendAlarmMessageLog($message)
     {
         $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
-        $attempts = 3;
-        $delay = 2; // Delay in seconds between attempts
 
+        Log::debug('sendAlarmMessageLog sending message: ' . $message);
         // Отправляем в фоновую задачу
         Queue::push(new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message));
         return response()->json(['status' => 'Message sent in background'], 200);
@@ -194,7 +190,7 @@ class TelegramController extends Controller
 
     public function sendMeMessageLog($message)
     {
-
+        Log::debug('sendMeMessageLog sending message: ' . $message);
 //        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
 //        $bot = '8014868428:AAGhoxe4QJ6umD3XC3gMKo24eAze3uOjoxY'; //@andrey_log_bot
 //        // Отправляем в фоновую задачу
@@ -205,7 +201,7 @@ class TelegramController extends Controller
     public function sendInformMessage($message)
     {
         $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
-
+        Log::debug('sendInformMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
         Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
         return response()->json(['status' => 'Message sent in background'], 200);
@@ -214,7 +210,7 @@ class TelegramController extends Controller
     public function sendAboutDriverMessage($chat_id, $message)
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-
+        Log::debug('sendAboutDriverMessage sending message: ' . $message);
         // Отправляем в фоновую задачу для каждого чата
         Queue::push(new SendTelegramMessageJob($bot, $chat_id, $message));
         Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));

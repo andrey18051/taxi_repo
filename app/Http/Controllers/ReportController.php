@@ -1101,11 +1101,18 @@ class ReportController extends Controller
         // Группировка записей баланса по driver_uid
         $groupedBalanceRecords = [];
         foreach ($balanceRecords as $balanceRecord) {
-            $driverUid = $balanceRecord['driver_uid'];
-            if (!isset($groupedBalanceRecords[$driverUid])) {
-                $groupedBalanceRecords[$driverUid] = [];
+            if (isset($balanceRecord['driver_uid'])) {
+                $driverUid = $balanceRecord['driver_uid'];
+
+                if (!isset($groupedBalanceRecords[$driverUid])) {
+                    $groupedBalanceRecords[$driverUid] = [];
+                }
+
+                $groupedBalanceRecords[$driverUid][] = $balanceRecord;
+            } else {
+                // Optionally handle records without driver_uid (e.g., log, skip, or throw an error)
+                continue; // Skip records without driver_uid
             }
-            $groupedBalanceRecords[$driverUid][] = $balanceRecord;
         }
 
         // Создаем новую таблицу
