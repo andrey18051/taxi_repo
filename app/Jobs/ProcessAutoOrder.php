@@ -74,14 +74,6 @@ class ProcessAutoOrder implements ShouldQueue
                 return;
             }
 
-            if ($orderweb->closeReason != 101 || $orderweb->closeReason != -1) {
-                Log::info('ProcessAutoOrder: Заказ больше не активен', [
-                    'uid' => $processedUid,
-                    'closeReason' => $orderweb->closeReason
-                ]);
-                return;
-            }
-
             $url = $connectAPI . '/api/weborders/' . $processedUid;
             $responseArr = (new UniversalAndroidFunctionController)->getStatus($header, $url);
 
@@ -90,7 +82,7 @@ class ProcessAutoOrder implements ShouldQueue
                 'response' => $responseArr,
             ]);
 
-            if (!isset($responseArr["auto"]) || $responseArr["auto"] === null) {
+            if (!isset($responseArr["order_car_info"]) || $responseArr["order_car_info"] === null) {
                 Log::info('ProcessAutoOrder: auto == null, перезапуск SearchAutoOrderJob', ['uid' => $this->uid]);
 
                 $orderweb->auto = null;
@@ -117,7 +109,7 @@ class ProcessAutoOrder implements ShouldQueue
                 return;
             }
 
-            sleep(5);
+            sleep(30);
         }
     }
 }
