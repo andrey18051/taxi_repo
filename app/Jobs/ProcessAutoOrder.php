@@ -87,9 +87,11 @@ class ProcessAutoOrder implements ShouldQueue
 
                 $orderweb->auto = null;
                 $orderweb->save();
+                if ($responseArr["close_reason"] == -1) {
+                    SearchAutoOrderJob::dispatch($this->uid);
+                    (new FCMController)->writeDocumentToFirestore($this->uid);
+                }
 
-                SearchAutoOrderJob::dispatch($this->uid);
-                (new FCMController)->writeDocumentToFirestore($this->uid);
                 return;
             }
 
@@ -98,6 +100,10 @@ class ProcessAutoOrder implements ShouldQueue
                     'uid' => $this->uid,
                     'close_reason' => $responseArr["close_reason"]
                 ]);
+                (new FCMController)->deleteDocumentFromFirestore($this->uid);
+                (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($this->uid);
+                (new FCMController)->deleteDocumentFromSectorFirestore($this->uid);
+                (new FCMController)->writeDocumentToHistoryFirestore($this->uid, "cancelled");
                 return;
             }
 
