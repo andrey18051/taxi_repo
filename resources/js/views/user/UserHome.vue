@@ -147,7 +147,7 @@ export default {
                 )
         },
         deleteUser(id) {
-
+            window.alert("Данные обновлены /users/destroy/" + id)
             axios.get('/users/destroy/'+ id)
                 .then(response => {
                     let i = this.users.map(data => data.id).indexOf(id);
@@ -169,7 +169,7 @@ export default {
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();
-                    window.alert("Данные обновлены");
+                    window.alert("Данные обновлены /bonus/bonusAdmin/"+ id + '/'+ bonus + '/');
                 })
         }
 
