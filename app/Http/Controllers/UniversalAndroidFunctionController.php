@@ -50,6 +50,8 @@ use Pusher\ApiErrorException;
 use Pusher\PusherException;
 use SebastianBergmann\Diff\Exception;
 use function Symfony\Component\Translation\t;
+use Illuminate\Http\Client\Response as LaravelResponse;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 
 class UniversalAndroidFunctionController extends Controller
 {
@@ -64,6 +66,108 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("sentErrorMessage: Ошибка отправки в телеграмм");
         };
     }
+
+    public function postRequestCostHTTP(
+        $url,
+        $parameter,
+        $authorization,
+        $identificationId,
+        $apiVersion
+    ): string {
+        Log::debug("⏳ [postRequestHTTP] Запуск функции...");
+
+        if (empty($url)) {
+            Log::error("[postRequestHTTP] Пустой URL — прерывание запроса.");
+
+            return json_encode([
+                'Message' => 'Пустой URL',
+                'status' => 0,
+                'success' => false
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        Log::debug("[postRequestHTTP] Входные данные", [
+            'url' => $url,
+            'headers' => [
+                'Authorization' => $authorization,
+                'X-WO-API-APP-ID' => $identificationId,
+                'X-API-VERSION' => $apiVersion
+            ],
+            'parameter' => $parameter
+        ]);
+
+        if (self::containsApiWebordersCost($url)) {
+            $secondsToNextHour = TimeHelper::isFifteenSecondsToNextHour();
+            Log::debug("[postRequestHTTP] Проверка следующего часа: осталось {$secondsToNextHour} сек.");
+
+            if ($secondsToNextHour <= 15) {
+                $sleepTime = $secondsToNextHour + 1;
+                Log::info("[postRequestHTTP] Ждём до следующего часа: спим {$sleepTime} сек.");
+                sleep($sleepTime);
+            }
+        }
+
+        try {
+            Log::info("[postRequestHTTP] Выполнение POST-запроса к: $url");
+
+            $response = Http::withHeaders([
+                "Authorization" => $authorization,
+                "X-WO-API-APP-ID" => $identificationId,
+                "X-API-VERSION" => $apiVersion
+            ])
+                ->timeout(60)
+                ->post($url, $parameter);
+
+            $statusCode = $response->status();
+            $body = $response->body();
+
+            Log::debug("[postRequestHTTP] HTTP статус: $statusCode");
+            Log::debug("[postRequestHTTP] Тело ответа: $body");
+
+            // Пробуем декодировать, чтобы убедиться, что JSON валиден
+            $decoded = json_decode($body, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+                Log::warning("[postRequestHTTP] Невалидный JSON: " . json_last_error_msg());
+
+                return json_encode([
+                    'Message' => 'Некорректный JSON от сервера',
+                    'status' => $statusCode,
+                    'success' => false,
+                    'raw' => $body
+                ], JSON_UNESCAPED_UNICODE);
+            }
+
+            if ($response->successful()) {
+                Log::info("[postRequestHTTP] Успешный ответ получен.");
+                return $body; // оригинальный JSON от сервера
+            }
+
+            // Сервер вернул ошибку с валидным JSON
+            $message = $decoded['Message'] ?? 'Ошибка со стороны сервера';
+            Log::error("[postRequestHTTP] Ошибка HTTP: $statusCode / Message: $message");
+
+            return json_encode([
+                'Message' => $message,
+                'status' => $statusCode,
+                'success' => false,
+                'data' => $decoded
+            ], JSON_UNESCAPED_UNICODE);
+
+        } catch (\Exception $e) {
+            Log::critical("[postRequestHTTP] Исключение при выполнении запроса: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return json_encode([
+                'Message' => $e->getMessage(),
+                'status' => 500,
+                'success' => false,
+                'exception' => true
+            ], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
 
     public function postRequestHTTP(
         $url,
@@ -3375,7 +3479,7 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion,
         $url,
         $parameter
-    ): string {
+    ) {
         $order = "New UID ";
         $maxExecutionTime = 60; // Максимальное время выполнения - 3 часа
 

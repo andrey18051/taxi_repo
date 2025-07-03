@@ -3661,7 +3661,7 @@ class AndroidTestOSMController extends Controller
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
-        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+        $response = (new UniversalAndroidFunctionController)->postRequestCostHTTP(
             $url,
             $parameter,
             $authorization,
@@ -3821,7 +3821,7 @@ class AndroidTestOSMController extends Controller
         $authorization = $payment_type == 0 ?
             $authorizationChoiceArr["authorization"] : $authorizationChoiceArr["authorizationBonus"];
 
-        $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+        $response = (new UniversalAndroidFunctionController)->postRequestCostHTTP(
             $url,
             $parameter,
             $authorization,
