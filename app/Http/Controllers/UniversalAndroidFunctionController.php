@@ -74,7 +74,7 @@ class UniversalAndroidFunctionController extends Controller
     ) {
         if (self::containsApiWebordersCost($url)) {
             $secondsToNextHour = TimeHelper::isFifteenSecondsToNextHour();
-            if($secondsToNextHour <= 15) {
+            if ($secondsToNextHour <= 15) {
                 sleep($secondsToNextHour + 1);
             };
         }

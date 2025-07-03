@@ -66,5 +66,5 @@ docker rm 91
 docker system prune -a --volumes
 
 
-
+cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send
 

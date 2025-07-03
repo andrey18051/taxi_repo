@@ -1,6 +1,6 @@
 https://github.com/settings/tokens
 
-docker login ghcr.io -u andrey18051 -p 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
+docker login ghcr.io -u andrey18051 -p  цццц
 
 Базовый образ
 cd D:\OpenServer\domains\taxi2012\docker\baseImageTest
