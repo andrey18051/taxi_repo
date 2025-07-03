@@ -76,7 +76,7 @@ class CityAppOrderService
 
         $curl = curl_init($url);
         curl_setopt_array($curl, [
-            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_CONNECTTIMEOUT => 60,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
