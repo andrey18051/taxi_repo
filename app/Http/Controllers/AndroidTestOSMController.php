@@ -3670,7 +3670,8 @@ class AndroidTestOSMController extends Controller
         );
         $responseArr = json_decode($response, true);
 
-        $messageAdmin = "costSearchMarkersTime  ответ сервера" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "costSearchMarkersTime  ответ сервера" .
+            json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         if (isset($responseArr["order_cost"])) {
             $order_cost = $responseArr["order_cost"];
@@ -3701,11 +3702,18 @@ class AndroidTestOSMController extends Controller
         }
         Log::debug("city_count: " . $city_count);
 
-        if ($response == null || (isset($responseArr["Message"]) && $city_count > 1)) {
-            $connectAPI = str_replace('http://', '', $connectAPI);
-            self::markCityOffline($application, $connectAPI);
+        if ($response === null || (isset($responseArr["Message"]) && $city_count >= 1)) {
+            // Проверяем, был ли повторный запрос
+            if (!empty($responseArr["Message"]) && $responseArr["Message"] === 'Повторный запрос') {
+                $retryAfter = $responseArr["retry_after_seconds"] ?? 60;
+                Log::info("[postRequestHTTP] Повторный запрос. Ожидание {$retryAfter} сек. перед повторной попыткой.");
+                return response([
+                    "order_cost" => 0,
+                    "Message" => "Повторный запрос"
+                ], 200)->header('Content-Type', 'json');
+            }
 
-            $count = 1;
+            $attempt = 1;
             do {
                 $responseArr = self::tryConnectToCity(
                     $city,
@@ -3720,21 +3728,26 @@ class AndroidTestOSMController extends Controller
                     $toLongitude,
                     $route_undefined
                 );
-                if ($responseArr["order_cost"] == 0) {
-                    $count++;
-                } else {
+
+                // Безопасное логирование типа и содержимого
+                Log::debug('[ResponseType] Попытка #' . $attempt, [
+                    'type' => is_object($responseArr) ? get_class($responseArr) : gettype($responseArr),
+                    'response' => is_object($responseArr) && method_exists($responseArr, 'getContent')
+                        ? $responseArr->getContent()
+                        : $responseArr
+                ]);
+
+                // Проверяем успешный ответ
+                if (is_array($responseArr) && isset($responseArr["order_cost"]) && $responseArr["order_cost"] > 0) {
                     return $responseArr;
                 }
 
-            } while ($count <= $city_count);
+                $attempt++;
+            } while ($attempt <= $city_count);
 
-
-
-            return response([
-                "order_cost" => 0,
-                "Message" => "Ошибка создания заказа"
-            ], 200)->header('Content-Type', 'json');
         }
+        // Если после всех попыток не удалось получить стоимость — возвращаем заглушку
+
 
         return response([
             "order_cost" => 0,

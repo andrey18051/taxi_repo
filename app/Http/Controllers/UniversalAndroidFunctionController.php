@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CacheHandler;
+
 use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Jobs\ProcessAutoOrder;
-use App\Jobs\SearchAutoOrderCardJob;
 use App\Jobs\SearchAutoOrderJob;
 use App\Jobs\WebordersCancelAndRestorDoubleJob;
 use App\Jobs\WebordersCancelAndRestorNalJob;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\StartAddCostCardCreat;
@@ -44,14 +41,10 @@ use DateTimeZone;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Kreait\Firebase\Factory;
-use phpDocumentor\Reflection\Types\True_;
+use Illuminate\Support\Facades\Redis;
 use Pusher\ApiErrorException;
 use Pusher\PusherException;
 use SebastianBergmann\Diff\Exception;
-use function Symfony\Component\Translation\t;
-use Illuminate\Http\Client\Response as LaravelResponse;
-use GuzzleHttp\Psr7\Response as GuzzleResponse;
 
 class UniversalAndroidFunctionController extends Controller
 {
@@ -67,93 +60,33 @@ class UniversalAndroidFunctionController extends Controller
         };
     }
 
-    public function postRequestCostHTTP(
-        $url,
-        $parameter,
-        $authorization,
-        $identificationId,
-        $apiVersion
-    ): string {
+    public function postRequestCostHTTP($url, $parameter, $authorization, $identificationId, $apiVersion): string
+    {
         Log::debug("⏳ [postRequestHTTP] Запуск функции...");
 
-        if (empty($url)) {
-            Log::error("[postRequestHTTP] Пустой URL — прерывание запроса.");
+        // Создаем уникальный ключ для запроса
+        $requestKey = md5($url . json_encode($parameter));
+        $retryAfter = $this->isDuplicateRequest($requestKey);
 
+        if ($retryAfter !== null) {
             return json_encode([
-                'Message' => 'Пустой URL',
-                'status' => 0,
-                'success' => false
+                'Message' => 'Повторный запрос',
+                'retry_after_seconds' => $retryAfter
             ], JSON_UNESCAPED_UNICODE);
         }
 
-        Log::debug("[postRequestHTTP] Входные данные", [
-            'url' => $url,
-            'headers' => [
-                'Authorization' => $authorization,
-                'X-WO-API-APP-ID' => $identificationId,
-                'X-API-VERSION' => $apiVersion
-            ],
-            'parameter' => $parameter
-        ]);
 
-        if (self::containsApiWebordersCost($url)) {
-            $secondsToNextHour = TimeHelper::isFifteenSecondsToNextHour();
-            Log::debug("[postRequestHTTP] Проверка следующего часа: осталось {$secondsToNextHour} сек.");
-
-            if ($secondsToNextHour <= 15) {
-                $sleepTime = $secondsToNextHour + 1;
-                Log::info("[postRequestHTTP] Ждём до следующего часа: спим {$sleepTime} сек.");
-                sleep($sleepTime);
-            }
-        }
+        // Логируем успешную запись в кэш
+        Log::debug("[postRequestHTTP] Ключ {$requestKey} успешно записан в кэш с TTL 60 сек.");
 
         try {
-            Log::info("[postRequestHTTP] Выполнение POST-запроса к: $url");
+            $this->logRequestInput($url, $parameter, $authorization, $identificationId, $apiVersion);
 
-            $response = Http::withHeaders([
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => $identificationId,
-                "X-API-VERSION" => $apiVersion
-            ])
-                ->timeout(60)
-                ->post($url, $parameter);
+            $this->waitIfNearNextHour($url);
 
-            $statusCode = $response->status();
-            $body = $response->body();
+            $response = $this->sendHttpPost($url, $parameter, $authorization, $identificationId, $apiVersion);
 
-            Log::debug("[postRequestHTTP] HTTP статус: $statusCode");
-            Log::debug("[postRequestHTTP] Тело ответа: $body");
-
-            // Пробуем декодировать, чтобы убедиться, что JSON валиден
-            $decoded = json_decode($body, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
-                Log::warning("[postRequestHTTP] Невалидный JSON: " . json_last_error_msg());
-
-                return json_encode([
-                    'Message' => 'Некорректный JSON от сервера',
-                    'status' => $statusCode,
-                    'success' => false,
-                    'raw' => $body
-                ], JSON_UNESCAPED_UNICODE);
-            }
-
-            if ($response->successful()) {
-                Log::info("[postRequestHTTP] Успешный ответ получен.");
-                return $body; // оригинальный JSON от сервера
-            }
-
-            // Сервер вернул ошибку с валидным JSON
-            $message = $decoded['Message'] ?? 'Ошибка со стороны сервера';
-            Log::error("[postRequestHTTP] Ошибка HTTP: $statusCode / Message: $message");
-
-            return json_encode([
-                'Message' => $message,
-                'status' => $statusCode,
-                'success' => false,
-                'data' => $decoded
-            ], JSON_UNESCAPED_UNICODE);
-
+            return $this->handleHttpResponse($response);
         } catch (\Exception $e) {
             Log::critical("[postRequestHTTP] Исключение при выполнении запроса: " . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -166,6 +99,134 @@ class UniversalAndroidFunctionController extends Controller
                 'exception' => true
             ], JSON_UNESCAPED_UNICODE);
         }
+    }
+
+
+    private function isDuplicateRequest(string $key, int $ttlSeconds = 60): ?int
+    {
+        $redis = Redis::connection();
+        $prefix = config('cache.prefix', 'laravel_cache');
+        $fullKey = "{$prefix}{$key}";
+
+        // Пробуем установить ключ с TTL через SET ... NX EX
+        $set = $redis->set($fullKey, true, 'EX', $ttlSeconds, 'NX');
+
+        if ($set) {
+            Log::debug("[DuplicateRequest] Ключ {$key} успешно установлен в Redis на {$ttlSeconds} сек.");
+            return null;
+        }
+
+        // TTL проверки
+        $ttl = $redis->ttl($fullKey);
+        Log::debug("[DuplicateRequest] TTL от Redis: {$ttl} (ключ: {$fullKey})");
+
+        switch (true) {
+            case $ttl === -2:
+                $ttlMessage = 'ключ не найден';
+                $ttl = 0;
+                break;
+            case $ttl === -1:
+                $ttlMessage = 'TTL не установлен';
+                $ttl = $ttlSeconds;
+                break;
+            case is_numeric($ttl) && (int)$ttl >= 0:
+                $ttl = (int)$ttl;
+                $ttlMessage = "{$ttl} сек.";
+                break;
+            default:
+                Log::error("[DuplicateRequest] Неизвестный формат TTL от Redis: " . var_export($ttl, true));
+                $ttlMessage = 'неизвестно';
+                $ttl = $ttlSeconds;
+                break;
+        }
+
+        Log::warning("[DuplicateRequest] Повторный запрос заблокирован. Осталось: {$ttlMessage} (ключ: {$fullKey})");
+        return $ttl;
+    }
+
+
+
+
+    private function logRequestInput($url, $parameter, $authorization, $identificationId, $apiVersion): void
+    {
+        Log::debug("[postRequestHTTP] Входные данные", [
+            'url' => $url,
+            'headers' => [
+                'Authorization' => $authorization,
+                'X-WO-API-APP-ID' => $identificationId,
+                'X-API-VERSION' => $apiVersion
+            ],
+            'parameter' => $parameter
+        ]);
+    }
+
+    private function waitIfNearNextHour(string $url): void
+    {
+        if (self::containsApiWebordersCost($url)) {
+            $secondsToNextHour = TimeHelper::isFifteenSecondsToNextHour();
+            Log::debug("[postRequestHTTP] Проверка следующего часа: осталось {$secondsToNextHour} сек.");
+
+            if ($secondsToNextHour <= 15) {
+                $sleepTime = $secondsToNextHour + 1;
+                Log::info("[postRequestHTTP] Ждём до следующего часа: спим {$sleepTime} сек.");
+                sleep($sleepTime);
+            }
+        }
+    }
+
+    private function sendHttpPost(
+        $url,
+        $parameter,
+        $authorization,
+        $identificationId,
+        $apiVersion
+    ): \Illuminate\Http\Client\Response {
+        Log::info("[postRequestHTTP] Выполнение POST-запроса к: $url");
+
+        return Http::withHeaders([
+            "Authorization" => $authorization,
+            "X-WO-API-APP-ID" => $identificationId,
+            "X-API-VERSION" => $apiVersion
+        ])
+            ->timeout(60)
+            ->post($url, $parameter);
+    }
+
+    private function handleHttpResponse(\Illuminate\Http\Client\Response $response): string
+    {
+        $statusCode = $response->status();
+        $body = $response->body();
+
+        Log::debug("[postRequestHTTP] HTTP статус: $statusCode");
+        Log::debug("[postRequestHTTP] Тело ответа: $body");
+
+        $decoded = json_decode($body, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            Log::warning("[postRequestHTTP] Невалидный JSON: " . json_last_error_msg());
+
+            return json_encode([
+                'Message' => 'Некорректный JSON от сервера',
+                'status' => $statusCode,
+                'success' => false,
+                'raw' => $body
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        if ($response->successful()) {
+            Log::info("[postRequestHTTP] Успешный ответ получен.");
+            return $body;
+        }
+
+        $message = $decoded['Message'] ?? 'Ошибка со стороны сервера';
+        Log::error("[postRequestHTTP] Ошибка HTTP: $statusCode / Message: $message");
+
+        return json_encode([
+            'Message' => $message,
+            'status' => $statusCode,
+            'success' => false,
+            'data' => $decoded
+        ], JSON_UNESCAPED_UNICODE);
     }
 
 

@@ -11,17 +11,13 @@ class TimeHelper
      *
      * @return int
      */
-    public static function isFifteenSecondsToNextHour(): bool
+    public static function isFifteenSecondsToNextHour(): int
     {
-        // Получаем текущее время
         $currentTime = Carbon::now();
-
-        // Получаем количество оставшихся секунд до конца текущего часа
         $secondsToNextHour = 3600 - ($currentTime->minute * 60 + $currentTime->second);
-
-        // Проверяем, осталось ли ровно 15 секунд
 
         return $secondsToNextHour;
     }
+
 }
 
