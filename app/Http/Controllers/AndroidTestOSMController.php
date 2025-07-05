@@ -3544,9 +3544,6 @@ class AndroidTestOSMController extends Controller
         }
 
 
-//        $connectAPI = self::connectAPIAppOrder($city, $application);
-//        Log::debug("1 connectAPI $connectAPI");
-
         $service = new CityAppOrderService();
         $connectAPI = $service->cityOnlineOrder($city, $application);
         Log::debug("2 connectAPI $connectAPI");
@@ -3815,8 +3812,6 @@ class AndroidTestOSMController extends Controller
         $toLongitude,
         $route_undefined
     ) {
-//        $connectAPI = self::connectAPIAppOrder($city, $application);
-//        Log::debug("3 connectAPI $connectAPI");
 
         $service = new CityAppOrderService();
         $connectAPI = $service->cityOnlineOrder($city, $application);
@@ -7568,9 +7563,6 @@ class AndroidTestOSMController extends Controller
                 $city = "Kyiv City";
                 break;
         }
-
-//        $connectAPI = self::connectAPIAppOrder($city, $application);
-
 
         $service = new CityAppOrderService();
         $connectAPI = $service->cityOnlineOrder($city, $application);
