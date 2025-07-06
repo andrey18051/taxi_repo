@@ -5699,7 +5699,7 @@ class UniversalAndroidFunctionController extends Controller
                 $city = "Mykolaiv";
                 break;
             case "city_chernivtsi":
-                $city = "Сhernivtsi";
+                $city = "Chernivtsi";
                 break;
             case "city_lutsk":
                 $city = "Lutsk";
@@ -5918,7 +5918,7 @@ class UniversalAndroidFunctionController extends Controller
                 $city = "Mykolaiv";
                 break;
             case "city_chernivtsi":
-                $city = "Сhernivtsi";
+                $city = "Chernivtsi";
                 break;
             case "city_lutsk":
                 $city = "Lutsk";
@@ -6157,7 +6157,7 @@ class UniversalAndroidFunctionController extends Controller
                 $city = "Mykolaiv";
                 break;
             case "city_chernivtsi":
-                $city = "Сhernivtsi";
+                $city = "Chernivtsi";
                 break;
             case "city_lutsk":
                 $city = "Lutsk";
@@ -7156,7 +7156,7 @@ class UniversalAndroidFunctionController extends Controller
             case "Mykolaiv":
                 $city = "city_mykolaiv";
                 break;
-            case "Сhernivtsi":
+            case "Chernivtsi":
                 $city = "city_chernivtsi";
                 break;
             case "Lutsk":
@@ -7612,7 +7612,7 @@ class UniversalAndroidFunctionController extends Controller
                 $city = "Mykolaiv";
                 break;
             case "city_chernivtsi":
-                $city = "Сhernivtsi";
+                $city = "Chernivtsi";
                 break;
             case "city_lutsk":
                 $city = "Lutsk";

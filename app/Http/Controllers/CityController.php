@@ -409,7 +409,7 @@ class CityController extends Controller
             case "Zhytomyr":
             case "Kropyvnytskyi":
             case "Mykolaiv":
-            case "Сhernivtsi":
+            case "Chernivtsi":
             case "Lutsk":
 
                 $city = "OdessaTest";

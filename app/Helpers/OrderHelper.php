@@ -111,7 +111,7 @@ class OrderHelper
                 $city = "Mykolaiv";
                 break;
             case "city_chernivtsi":
-                $city = "Сhernivtsi";
+                $city = "Chernivtsi";
                 break;
             case "city_lutsk":
                 $city = "Lutsk";

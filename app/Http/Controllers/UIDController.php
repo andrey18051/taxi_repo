@@ -251,7 +251,7 @@ class UIDController extends Controller
             case "Zhytomyr":
             case "Kropyvnytskyi":
             case "Mykolaiv":
-            case "Сhernivtsi":
+            case "Chernivtsi":
             case "Lutsk":
                 $city = "OdessaTest";
                 break;
@@ -366,7 +366,7 @@ class UIDController extends Controller
                 case "Mykolaiv":
                     $city = "city_mykolaiv";
                     break;
-                case "Сhernivtsi":
+                case "Chernivtsi":
                     $city = "city_chernivtsi";
                     break;
                 case "Lutsk":
@@ -690,7 +690,7 @@ class UIDController extends Controller
             case "Mykolaiv":
                 $city = "city_mykolaiv";
                 break;
-            case "Сhernivtsi":
+            case "Chernivtsi":
                 $city = "city_chernivtsi";
                 break;
             case "Lutsk":
