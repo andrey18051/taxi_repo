@@ -16,6 +16,7 @@
         "kreait/firebase-php": "^5.19",
         "laravel-lang/lang": "^12.1",
         "laravel/framework": "^8.75",
+        "laravel/horizon": "5.0",
         "laravel/sanctum": "^2.11",
         "laravel/socialite": "^5.5",
         "laravel/tinker": "^2.5",

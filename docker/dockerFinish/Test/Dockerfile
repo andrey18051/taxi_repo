@@ -50,6 +50,10 @@ COPY ./storage /usr/share/nginx/html/taxi/storage
 COPY ./tests /usr/share/nginx/html/taxi/tests
 COPY ./tmp /usr/share/nginx/html/taxi/tmp
 COPY ./vendor /usr/share/nginx/html/taxi/vendor
+
+# Заменяем WorkCommand.php на оригинальный из Laravel 8.83.29
+COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/framework/src/Illuminate/Queue/Console/WorkCommand.php
+
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
 COPY ../../../app/env/test/.env /usr/share/nginx/html/taxi/
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
@@ -69,7 +73,7 @@ COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
 # Копируем конфигурации и службы
-RUN cp /usr/share/nginx/html/taxi/docker/supervisord.conf /etc/supervisor/supervisord.conf && \
+RUN cp /usr/share/nginx/html/taxi/docker/supervisord_test.conf /etc/supervisor/supervisord.conf && \
     cp /usr/share/nginx/html/taxi/docker/nginx_test.conf /etc/nginx/nginx.conf && \
     cp -r /usr/share/nginx/html/taxi/docker/certs/nginx /etc/ssl/certs/nginx && \
 #    cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
