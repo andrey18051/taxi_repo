@@ -236,6 +236,31 @@ class UIDController extends Controller
 
     public function getServerArray($city, $app): array
     {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Сhernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
+
+
         switch ($app) {
             case "PAS1":
                 $serverInfo = City_PAS1::where("name", $city)->get();
@@ -280,13 +305,90 @@ class UIDController extends Controller
     {
         $serverArray = self::getServerArray($city, $app);
         $app_name = self::getAppName($app);
+
         if ($serverArray != null) {
+            switch ($city) {
+                case "Kyiv City":
+                    $city = "city_kiev";
+                    break;
+                case "Cherkasy Oblast":
+                    $city = "city_cherkassy";
+                    break;
+                case "Odessa":
+                case "OdessaTest":
+                    $city = "city_odessa";
+                    break;
+                case "Zaporizhzhia":
+                    $city = "city_zaporizhzhia";
+                    break;
+                case "Dnipropetrovsk Oblast":
+                    $city = "city_dnipro";
+                    break;
+                case "Lviv":
+                    $city = "city_lviv";
+                    break;
+                case "Ivano_frankivsk":
+                    $city = "city_ivano_frankivsk";
+                    break;
+                case "Vinnytsia":
+                    $city = "city_vinnytsia";
+                    break;
+                case "Poltava":
+                    $city = "city_poltava";
+                    break;
+                case "Sumy":
+                    $city = "city_sumy";
+                    break;
+                case "Kharkiv":
+                    $city = "city_kharkiv";
+                    break;
+                case "Chernihiv":
+                    $city = "city_chernihiv";
+                    break;
+                case "Rivne":
+                    $city = "city_rivne";
+                    break;
+                case "Ternopil":
+                    $city = "city_ternopil";
+                    break;
+                case "Khmelnytskyi":
+                    $city = "city_khmelnytskyi";
+                    break;
+                case "Zakarpattya":
+                    $city = "city_zakarpattya";
+                    break;
+                case "Zhytomyr":
+                    $city = "city_zhytomyr";
+                    break;
+                case "Kropyvnytskyi":
+                    $city = "city_kropyvnytskyi";
+                    break;
+                case "Mykolaiv":
+                    $city = "city_mykolaiv";
+                    break;
+                case "Сhernivtsi":
+                    $city = "city_chernivtsi";
+                    break;
+                case "Lutsk":
+                    $city = "city_lutsk";
+                    break;
+                default:
+                    $city = "all";
+            }
+
             $order = Orderweb:: where("email", $email)
-                ->whereIn('closeReason', ['-1'])
-//                ->whereIn("server", $serverArray)
-//                ->where("comment", $app_name)
-//                ->orderBy("created_at", "desc")
+                ->whereIn('closeReason', ['-1', '101', '102'])
+                ->where("comment", $app_name)
+                ->where("city", $city)
+                ->orderBy("created_at", "desc")
                 ->get();
+
+//            $order = Orderweb:: where("email", $email)
+//                ->whereIn('closeReason', ['-1'])
+////                ->whereIn("server", $serverArray)
+////                ->where("comment", $app_name)
+////                ->orderBy("created_at", "desc")
+//                ->get();
             Log::debug("UIDStatusShowEmail order 2", $order->toArray());
             $response = null;
             if (!$order->isEmpty()) {
@@ -311,6 +413,7 @@ class UIDController extends Controller
 //                ->whereNotNull("to_lat")
 //                ->whereNotNull("to_lng")
                 ->where("comment", $app_name)
+                ->where("city", $city)
                 ->orderBy("created_at", "desc")
                 ->get()
                 ->take(10);

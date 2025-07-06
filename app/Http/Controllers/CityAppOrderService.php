@@ -69,7 +69,8 @@ class CityAppOrderService
                 foreach ($servers as $server) {
                     if ($this->hasPassedFiveMinutes($server->updated_at) &&
                         $this->checkDomain($server->address)) {
-                        $server->update(['online' => 'true']);
+                        $server->online = 'true';
+                        $server->save();
                         Log::info("↻ Сервер разблокирован: {$server->address}");
                         return $server;
                     }
