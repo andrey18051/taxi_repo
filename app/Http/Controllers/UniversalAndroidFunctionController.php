@@ -5257,149 +5257,317 @@ class UniversalAndroidFunctionController extends Controller
             };
         }
     }
+//    public function findCity($startLat, $startLan)
+//    {
+//        Log::debug("findCity $startLat, $startLan");
+//
+//        $cities = [
+//            'city_kiev' => [ // оставляем как есть
+//                'lat_min' => 49.8000,
+//                'lat_max' => 50.2999,
+//                'lan_min' => 29.9000,
+//                'lan_max' => 31.4999,
+//            ],
+//            'city_cherkassy' => [
+//                'lat_min' => 49.3500,
+//                'lat_max' => 49.5000,
+//                'lan_min' => 31.9500,
+//                'lan_max' => 32.1500,
+//            ],
+//            'city_odessa' => [
+//                'lat_min' => 46.3500,
+//                'lat_max' => 46.6000,
+//                'lan_min' => 30.5500,
+//                'lan_max' => 30.9000,
+//            ],
+//            'city_zaporizhzhia' => [
+//                'lat_min' => 47.7500,
+//                'lat_max' => 47.9500,
+//                'lan_min' => 35.0000,
+//                'lan_max' => 35.3000,
+//            ],
+//            'city_dnipro' => [
+//                'lat_min' => 48.3500,
+//                'lat_max' => 48.5500,
+//                'lan_min' => 34.8500,
+//                'lan_max' => 35.1500,
+//            ],
+//            'city_lviv' => [
+//                'lat_min' => 49.7500,
+//                'lat_max' => 49.9500,
+//                'lan_min' => 23.9000,
+//                'lan_max' => 24.2000,
+//            ],
+//            'city_ivano_frankivsk' => [
+//                'lat_min' => 48.8500,
+//                'lat_max' => 48.9500,
+//                'lan_min' => 24.6500,
+//                'lan_max' => 24.8500,
+//            ],
+//            'city_vinnytsia' => [
+//                'lat_min' => 49.1900,
+//                'lat_max' => 49.3000,
+//                'lan_min' => 28.3500,
+//                'lan_max' => 28.5500,
+//            ],
+//            'city_poltava' => [
+//                'lat_min' => 49.5300,
+//                'lat_max' => 49.6500,
+//                'lan_min' => 34.4500,
+//                'lan_max' => 34.6500,
+//            ],
+//            'city_sumy' => [
+//                'lat_min' => 50.8500,
+//                'lat_max' => 50.9500,
+//                'lan_min' => 34.7000,
+//                'lan_max' => 34.9000,
+//            ],
+//            'city_kharkiv' => [
+//                'lat_min' => 49.8500,
+//                'lat_max' => 50.0500,
+//                'lan_min' => 36.1500,
+//                'lan_max' => 36.4500,
+//            ],
+//            'city_chernihiv' => [
+//                'lat_min' => 51.4500,
+//                'lat_max' => 51.6000,
+//                'lan_min' => 31.2000,
+//                'lan_max' => 31.5000,
+//            ],
+//            'city_rivne' => [
+//                'lat_min' => 50.5800,
+//                'lat_max' => 50.7000,
+//                'lan_min' => 26.2000,
+//                'lan_max' => 26.4000,
+//            ],
+//            'city_ternopil' => [
+//                'lat_min' => 49.5000,
+//                'lat_max' => 49.6500,
+//                'lan_min' => 25.5000,
+//                'lan_max' => 25.7000,
+//            ],
+//            'city_khmelnytskyi' => [
+//                'lat_min' => 49.3700,
+//                'lat_max' => 49.5000,
+//                'lan_min' => 26.9500,
+//                'lan_max' => 27.1500,
+//            ],
+//            'city_zakarpattya' => [ // Ужгород
+//                'lat_min' => 48.5800,
+//                'lat_max' => 48.6700,
+//                'lan_min' => 22.2300,
+//                'lan_max' => 22.3500,
+//            ],
+//            'city_zhytomyr' => [
+//                'lat_min' => 50.2000,
+//                'lat_max' => 50.3500,
+//                'lan_min' => 28.5500,
+//                'lan_max' => 28.7500,
+//            ],
+//            'city_kropyvnytskyi' => [
+//                'lat_min' => 48.4500,
+//                'lat_max' => 48.6000,
+//                'lan_min' => 32.1500,
+//                'lan_max' => 32.3500,
+//            ],
+//            'city_mykolaiv' => [
+//                'lat_min' => 46.8500,
+//                'lat_max' => 47.0000,
+//                'lan_min' => 31.9000,
+//                'lan_max' => 32.1500,
+//            ],
+//            'city_chernivtsi' => [
+//                'lat_min' => 48.2500,
+//                'lat_max' => 48.3500,
+//                'lan_min' => 25.8500,
+//                'lan_max' => 26.0500,
+//            ],
+//            'city_lutsk' => [
+//                'lat_min' => 50.7000,
+//                'lat_max' => 50.8500,
+//                'lan_min' => 25.2500,
+//                'lan_max' => 25.4500,
+//            ],
+//        ];
+//
+//
+//
+//        foreach ($cities as $city => $coords) {
+//            if ($startLat >= $coords['lat_min'] && $startLat <= $coords['lat_max'] &&
+//                $startLan >= $coords['lan_min'] && $startLan <= $coords['lan_max']) {
+//                return $city; // Возвращаем имя города, если точка в пределах его границ
+//            }
+//        }
+//
+//        return "all"; // Если город не найден
+//    }
+
+
+
     public function findCity($startLat, $startLan)
     {
-        Log::debug("findCity $startLat, $startLan");
-        $cities = [
-            'city_kiev' => [
-                'lat_min' => 49.8000,  // Минимальная широта для области
-                'lat_max' => 51.5000,  // Максимальная широта для области
-                'lan_min' => 29.9000,  // Минимальная долгота для области
-                'lan_max' => 31.7000,  // Максимальная долгота для области
-            ],
-            'city_cherkassy' => [
-                'lat_min' => 49.0000,  // Сдвигаем минимальную широту, чтобы исключить Кропивницкий
-                'lat_max' => 49.7000,
-                'lan_min' => 31.5000,
-                'lan_max' => 32.5000,
-            ],
-            'city_odessa' => [
-                'lat_min' => 45.5000,  // Минимальная широта для области
-                'lat_max' => 47.0000,  // Максимальная широта для области
-                'lan_min' => 29.5000,  // Минимальная долгота для области
-                'lan_max' => 31.5000,  // Максимальная долгота для области
-            ],
-            'city_zaporizhzhia' => [
-                'lat_min' => 47.4000,  // Минимальная широта для области
-                'lat_max' => 48.2000,  // Максимальная широта для области
-                'lan_min' => 34.5000,  // Минимальная долгота для области
-                'lan_max' => 36.0000,  // Максимальная долгота для области
-            ],
-            'city_dnipro' => [
-                'lat_min' => 47.8000,  // Минимальная широта для области
-                'lat_max' => 49.1000,  // Максимальная широта для области
-                'lan_min' => 33.8000,  // Минимальная долгота для области
-                'lan_max' => 35.5000,  // Максимальная долгота для области
-            ],
-            'city_lviv' => [
-                'lat_min' => 48.9000,
-                'lat_max' => 50.6000,
-                'lan_min' => 22.0000,
-                'lan_max' => 25.5000,
-            ],
-            'city_ivano_frankivsk' => [
-                'lat_min' => 47.5000,
-                'lat_max' => 49.2000,
-                'lan_min' => 23.8000,
-                'lan_max' => 25.6000,
-            ],
-            'city_vinnytsia' => [
-                'lat_min' => 48.2000,
-                'lat_max' => 49.9000,
-                'lan_min' => 27.3000,
-                'lan_max' => 29.4000,
-            ],
-            'city_poltava' => [
-                'lat_min' => 48.5000,
-                'lat_max' => 50.6000,
-                'lan_min' => 32.4000,
-                'lan_max' => 35.0000,
-            ],
-            'city_sumy' => [
-                'lat_min' => 50.1000,
-                'lat_max' => 52.3000,
-                'lan_min' => 33.0000,
-                'lan_max' => 35.3000,
-            ],
-            'city_kharkiv' => [
-                'lat_min' => 48.9000,
-                'lat_max' => 50.6000,
-                'lan_min' => 35.0000,
-                'lan_max' => 37.3000,
-            ],
-            'city_chernihiv' => [
-                'lat_min' => 50.4000,
-                'lat_max' => 52.5000,
-                'lan_min' => 30.4000,
-                'lan_max' => 33.2000,
-            ],
-            'city_rivne' => [
-                'lat_min' => 49.6000,
-                'lat_max' => 51.0000,
-                'lan_min' => 25.5000,
-                'lan_max' => 27.4000,
-            ],
-            'city_ternopil' => [
-                'lat_min' => 48.8000,
-                'lat_max' => 50.2000,
-                'lan_min' => 24.0000,
-                'lan_max' => 26.2000,
-            ],
-            'city_khmelnytskyi' => [
-                'lat_min' => 48.8000,
-                'lat_max' => 50.3000,
-                'lan_min' => 25.9000,
-                'lan_max' => 28.0000,
-            ],
-            'city_zakarpattya' => [
-                'lat_min' => 47.5000,
-                'lat_max' => 49.0000,
-                'lan_min' => 22.1000,
-                'lan_max' => 24.4000,
-            ],
-            'city_zhytomyr' => [
-                'lat_min' => 49.7000,
-                'lat_max' => 51.5000,
-                'lan_min' => 27.6000,
-                'lan_max' => 29.4000,
-            ],
-            'city_kropyvnytskyi' => [
-                'lat_min' => 47.8000,  // Уточняем диапазон для Кропивницкого
-                'lat_max' => 48.9999, // Ограничиваем, чтобы не пересекаться с Черкассами
-                'lan_min' => 30.4000,
-                'lan_max' => 32.7000, // Увеличиваем, чтобы включить 32.26982
-            ],
-            'city_mykolaiv' => [
-                'lat_min' => 46.0000,
-                'lat_max' => 48.1000,
-                'lan_min' => 30.0000,
-                'lan_max' => 32.5000,
-            ],
-            'city_chernivtsi' => [
-                'lat_min' => 47.9000,
-                'lat_max' => 48.8000,
-                'lan_min' => 25.6000,
-                'lan_max' => 27.3000,
-            ],
-            'city_lutsk' => [
-                'lat_min' => 50.5900,  // Минимальная широта для области
-                'lat_max' => 51.8000,  // Максимальная широта для области
-                'lan_min' => 23.5000,  // Минимальная долгота для области
-                'lan_max' => 26.9000,  // Максимальная долгота для области
-            ],
-        ];
+        Log::debug("findCity: запрошены координаты lat=$startLat, lon=$startLan");
+
+        $cacheKey = "geo_city_" . round($startLat, 4) . "_" . round($startLan, 4);
+
+        return Cache::remember($cacheKey, now()->addMinutes(1), function () use ($startLat, $startLan) {
+
+            Log::debug("findCity: выполняем запрос к Nominatim...");
+
+            $cityNameMap = [
+                // Kyiv
+                'kyiv' => 'city_kiev',
+                'київ' => 'city_kiev',
+                'киев' => 'city_kiev',
+
+                // Cherkasy
+                'cherkasy' => 'city_cherkassy',
+                'черкаси' => 'city_cherkassy',
+                'черкассы' => 'city_cherkassy',
+
+                // Odesa
+                'odesa' => 'city_odessa',
+                'одеса' => 'city_odessa',
+                'одесса' => 'city_odessa',
+
+                // Zaporizhzhia
+                'zaporizhzhia' => 'city_zaporizhzhia',
+                'запоріжжя' => 'city_zaporizhzhia',
+                'запорожье' => 'city_zaporizhzhia',
+
+                // Dnipro
+                'dnipro' => 'city_dnipro',
+                'дніпро' => 'city_dnipro',
+                'днепр' => 'city_dnipro',
+
+                // Lviv
+                'lviv' => 'city_lviv',
+                'львів' => 'city_lviv',
+                'львов' => 'city_lviv',
+
+                // Ivano-Frankivsk
+                'ivano-frankivsk' => 'city_ivano_frankivsk',
+                'івано-франківськ' => 'city_ivano_frankivsk',
+                'ивано-франковск' => 'city_ivano_frankivsk',
+
+                // Vinnytsia
+                'vinnytsia' => 'city_vinnytsia',
+                'вінниця' => 'city_vinnytsia',
+                'винница' => 'city_vinnytsia',
+
+                // Poltava
+                'poltava' => 'city_poltava',
+                'полтава' => 'city_poltava',
+
+                // Sumy
+                'sumy' => 'city_sumy',
+                'суми' => 'city_sumy',
+
+                // Kharkiv
+                'kharkiv' => 'city_kharkiv',
+                'харків' => 'city_kharkiv',
+                'харьков' => 'city_kharkiv',
+
+                // Chernihiv
+                'chernihiv' => 'city_chernihiv',
+                'чернігів' => 'city_chernihiv',
+                'чернигов' => 'city_chernihiv',
+
+                // Rivne
+                'rivne' => 'city_rivne',
+                'рівне' => 'city_rivne',
+                'ровно' => 'city_rivne',
+
+                // Ternopil
+                'ternopil' => 'city_ternopil',
+                'тернопіль' => 'city_ternopil',
+                'тернополь' => 'city_ternopil',
+
+                // Khmelnytskyi
+                'khmelnytskyi' => 'city_khmelnytskyi',
+                'хмельницький' => 'city_khmelnytskyi',
+                'хмельницкий' => 'city_khmelnytskyi',
+
+                // Uzhhorod (Zakarpattya)
+                'uzhhorod' => 'city_zakarpattya',
+                'ужгород' => 'city_zakarpattya',
+
+                // Zhytomyr
+                'zhytomyr' => 'city_zhytomyr',
+                'житомир' => 'city_zhytomyr',
+
+                // Kropyvnytskyi
+                'kropyvnytskyi' => 'city_kropyvnytskyi',
+                'кропивницький' => 'city_kropyvnytskyi',
+                'кировоград' => 'city_kropyvnytskyi', // старое название
+
+                // Mykolaiv
+                'mykolaiv' => 'city_mykolaiv',
+                'миколаїв' => 'city_mykolaiv',
+                'николаев' => 'city_mykolaiv',
+
+                // Chernivtsi
+                'chernivtsi' => 'city_chernivtsi',
+                'чернівці' => 'city_chernivtsi',
+                'черновцы' => 'city_chernivtsi',
+
+                // Lutsk
+                'lutsk' => 'city_lutsk',
+                'луцьк' => 'city_lutsk',
+                'луцк' => 'city_lutsk',
+            ];
 
 
 
-        foreach ($cities as $city => $coords) {
-            if ($startLat >= $coords['lat_min'] && $startLat <= $coords['lat_max'] &&
-                $startLan >= $coords['lan_min'] && $startLan <= $coords['lan_max']) {
-                return $city; // Возвращаем имя города, если точка в пределах его границ
+            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=$startLat&lon=$startLan";
+            $context = stream_context_create([
+                "http" => [
+                    "header" => "User-Agent: MyApp/1.0\r\n"
+                ]
+            ]);
+
+            $response = @file_get_contents($url, false, $context);
+
+            if (!$response) {
+                Log::error("findCity: ошибка при обращении к Nominatim для координат lat=$startLat, lon=$startLan");
+                return "all";
             }
-        }
 
-        return "all"; // Если город не найден
+            Log::debug("findCity: успешный ответ от Nominatim");
+
+            $data = json_decode($response, true);
+            $possibleNames = [];
+
+            if (isset($data['address'])) {
+                $address = $data['address'];
+                Log::debug("findCity: адрес из Nominatim: " . json_encode($address, JSON_UNESCAPED_UNICODE));
+
+                foreach (['city', 'town', 'village', 'municipality', 'state'] as $field) {
+                    if (!empty($address[$field])) {
+                        $normalized = mb_strtolower(trim($address[$field]));
+                        $possibleNames[] = $normalized;
+                        Log::debug("findCity: найдено имя '$normalized' в поле '$field'");
+                    }
+                }
+            } else {
+                Log::warning("findCity: поле address отсутствует в ответе Nominatim");
+            }
+
+            foreach ($possibleNames as $name) {
+                if (isset($cityNameMap[$name])) {
+                    Log::info("findCity: сопоставлено '$name' => " . $cityNameMap[$name]);
+                    return $cityNameMap[$name];
+                } else {
+                    Log::debug("findCity: '$name' не найдено в cityNameMap");
+                }
+            }
+
+            Log::info("findCity: город не найден, возвращаем 'all'");
+            return "all";
+        });
     }
+
+
 
     public function findCityJson($startLat, $startLan)
     {
