@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     sysvinit-utils \
     sudo \
     systemd \
+    netcat \
     && apt-get clean
 
 
@@ -80,6 +81,10 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord_test.conf /etc/supervisor/s
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 
+# Копируем скрипт ожидания Redis и запуска artisan-команды
+COPY ./docker/wait-for-redis-then-restart-task.sh /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
+RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
+
 # Устанавливаем зависимости Laravel
 #RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
 #    rm -rf vendor composer.lock && \
@@ -115,4 +120,5 @@ RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
 
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+

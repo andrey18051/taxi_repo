@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Redis;
 
 class DailyTaskController extends Controller
 {
@@ -60,38 +61,55 @@ class DailyTaskController extends Controller
      *
      */
 
+
+
     public function restartProcessExecutionStatus()
     {
-        // Используем retryQuery для повторения запроса в случае неудачи
-        sleep(30);
         try {
-            $doubleOrder = $this->retryQuery(function () {
+            $doubleOrders = $this->retryQuery(function () {
                 return DoubleOrder::all();
             });
 
             $message = "Перезапуск сервера";
-            Log::info("restartProcessExecutionStatus: Перезапуск сервера");
+            Log::info("restartProcessExecutionStatus: $message");
             self::sentTaskMessage($message);
 
-            if ($doubleOrder) {
-                foreach ($doubleOrder as $value) {
-                    $responseBonusStrArr = json_decode($value->responseBonusStr, true);
-                    $message = "Запущен заново процесс опроса статусов заказа: "
-                        . $responseBonusStrArr['dispatching_order_uid'];
-                    self::sentTaskMessage($message);
-                    Log::info("restartProcessExecutionStatus: $message");
-                    StartNewProcessExecution::dispatch($value->id);
-                }
-            } else {
+            if ($doubleOrders->isEmpty()) {
                 $message = "Нет активных задач опроса для перезапуска";
-                Log::info("restartProcessExecutionStatus: Нет активных задача опроса для перезапуска");
+                Log::info("restartProcessExecutionStatus: $message");
                 self::sentTaskMessage($message);
+                return;
+            }
+
+            foreach ($doubleOrders as $order) {
+                $responseBonusStrArr = json_decode($order->responseBonusStr, true);
+                $uid = $responseBonusStrArr['dispatching_order_uid'] ?? 'неизвестен';
+
+                // Проверяем ключ в Redis, например "double_order_processing:{id}"
+                $redisKey = "double_order_processing:" . $order->id;
+
+                if (Redis::exists($redisKey)) {
+                    Log::info("restartProcessExecutionStatus: Задача для заказа $uid (ID {$order->id}) уже запущена, пропускаем");
+                    continue; // задача уже в очереди или выполняется
+                }
+
+                // Помечаем, что задача запущена
+                // Установка ключа без срока жизни (будет храниться бессрочно)
+                Redis::set($redisKey, true);
+
+
+                $message = "Запущен заново процесс опроса статусов заказа: $uid (ID: {$order->id})";
+                Log::info("restartProcessExecutionStatus: $message");
+                self::sentTaskMessage($message);
+
+                StartNewProcessExecution::dispatch($order->id);
             }
         } catch (Exception $e) {
             Log::error("Ошибка при выполнении запроса: " . $e->getMessage());
             self::sentTaskMessage("Ошибка при выполнении запроса: " . $e->getMessage());
         }
     }
+
 
     /**
      * Пересмотр холдов

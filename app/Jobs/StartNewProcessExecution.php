@@ -15,10 +15,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
-
+use Illuminate\Support\Facades\Redis;
 
 class StartNewProcessExecution implements ShouldQueue
 {
@@ -46,6 +44,9 @@ class StartNewProcessExecution implements ShouldQueue
     public function handle()
     {
         $this->jobId = $this->job->getJobId();
+
+        $redisKey = "double_order_processing:" . $this->orderId;
+        Redis::set($redisKey, true);
 
         $messageAdmin = "!!!+++13032025 Запущена вилка для заказа $this->orderId Job ID: {$this->jobId} started for order ID: {$this->orderId}";
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
@@ -170,8 +171,9 @@ class StartNewProcessExecution implements ShouldQueue
             } catch (\Exception $e) {
                 Log::error("Ошибка в startNewProcessExecutionStatusJob для orderId: {$this->orderId}, jobId: {$this->jobId}: " . $e->getMessage());
                 throw $e; // Повторно выбросить исключение, чтобы задание пометилось как неудачное
+            } finally {
+                Redis::del($redisKey);
             }
-
         }
 
     }
