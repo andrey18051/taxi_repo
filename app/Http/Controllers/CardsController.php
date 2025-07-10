@@ -221,11 +221,11 @@ class CardsController extends Controller
             case "Mykolaiv":
             case "Chernivtsi":
             case "Lutsk":
+                $city = "OdessaTest";
+                break;
             case "foreign countries":
                 $city = "Kyiv City";
                 break;
-            default:
-                $city = $cityApp;
         }
 
 

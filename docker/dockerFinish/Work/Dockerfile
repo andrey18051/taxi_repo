@@ -103,4 +103,4 @@ RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
 
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
