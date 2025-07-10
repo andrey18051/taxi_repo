@@ -3767,6 +3767,7 @@ class AndroidTestOSMController extends Controller
 
     private static function markCityOffline($application, $address)
     {
+        Log::debug("⏳ markCityOffline $application хост $address " );
         $cityServer = self::getCityServer($application, $address);
         if ($cityServer) {
             $cityServer->online = "false";

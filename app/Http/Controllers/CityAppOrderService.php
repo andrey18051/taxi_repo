@@ -104,10 +104,10 @@ class CityAppOrderService
                     Log::info("ℹ️ Нет активных серверов с online=true");
                 }
                 Log::info("🚫 Не найден доступный сервер ни в online, ни в offline списках.");
-                return null;
+                return 400;
             } catch (\Throwable $e) {
                 Log::error("🔥 Исключение при поиске сервера: {$e->getMessage()}");
-                return null;
+                return 400;
             } finally {
                 $lock->release();
                 Log::info("🔒 Блокировка снята для города: {$city}");
@@ -115,7 +115,7 @@ class CityAppOrderService
         }
 
         Log::warning("🔐 Не удалось получить блокировку для города: {$city} (уже используется)");
-        return null;
+        return 400;
     }
 
 
@@ -155,7 +155,7 @@ class CityAppOrderService
 
             $curl = curl_init($url);
             curl_setopt_array($curl, [
-                CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 60),
+                CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 6),
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_SSL_VERIFYHOST => false,

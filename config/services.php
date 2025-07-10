@@ -83,4 +83,8 @@ return [
         'redirect' => env('TELEGRAM_REDIRECT_URI'),
     ],
 
+    'city_app_order' => [
+        'cache_ttl' => 300, // Время жизни кэша в секундах
+        'curl_timeout' => 6, // Таймаут подключения cURL в секундах
+    ],
 ];

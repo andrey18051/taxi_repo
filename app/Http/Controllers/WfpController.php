@@ -712,39 +712,48 @@ class WfpController extends Controller
         $clientEmail,
         $clientPhone
     ): Response {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
-                $secretKey = $merchant->wfp_merchantSecretKey;
-                if($city != "OdessaTest") {
-                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
-                } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS1";
-                }
-
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
-                $secretKey = $merchant->wfp_merchantSecretKey;
-                if($city != "OdessaTest") {
-                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
-                } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS2";
-                }
-
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
-                $secretKey = $merchant->wfp_merchantSecretKey;
-                if($city != "OdessaTest") {
-                    $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
-                } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS4";
-                }
         }
+
+        if($city != "OdessaTest") {
+            $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+        } else {
+            $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS4";
+        }
+
+        $merchantAccount = $merchant->wfp_merchantAccount;
+        $secretKey = $merchant->wfp_merchantSecretKey;
 
         $orderDate =  strtotime(date('Y-m-d H:i:s'));
 
@@ -814,7 +823,7 @@ class WfpController extends Controller
                 if($city != "OdessaTest") {
                     $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS1";
+                    $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 }
                 break;
             case "PAS2":
@@ -824,7 +833,7 @@ class WfpController extends Controller
                 if($city != "OdessaTest") {
                     $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS2";
+                    $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 }
                 break;
             default:
@@ -834,7 +843,7 @@ class WfpController extends Controller
                 if($city != "OdessaTest") {
                     $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
                 } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS4";
+                    $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS4";
                 }
         }
 
@@ -1617,7 +1626,7 @@ class WfpController extends Controller
                 if($city != "OdessaTest") {
                     $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS1";
+                    $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS1";
                 }
 
                 break;
@@ -1628,7 +1637,7 @@ class WfpController extends Controller
                 if($city != "OdessaTest") {
                     $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS2";
+                    $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS2";
                 }
 
                 break;
@@ -1639,7 +1648,7 @@ class WfpController extends Controller
                 if($city != "OdessaTest") {
                     $serviceUrl =  "https://m.easy-order-taxi.site/wfp/serviceUrl/PAS4";
                 } else {
-                    $serviceUrl =  "https://test-taxi.kyiv.ua/wfp/serviceUrl/PAS4";
+                    $serviceUrl =  "https://t.easy-order-taxi.site/wfp/serviceUrl/PAS4";
                 }
 
         }
