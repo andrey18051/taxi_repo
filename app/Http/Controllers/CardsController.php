@@ -13,37 +13,61 @@ use Illuminate\Support\Facades\Log;
 
 class CardsController extends Controller
 {
-    public function getActiveCard($email, $city, $application): ?array
+    public function getActiveCard($email, $city, $application)
     {
 
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
         }
 
-        $user = User::where("email", $email)->first();
 
-        if($user) {
-            $activeCard = Card::
+        if (isset($merchant)) {
+            $merchantAccount = $merchant->wfp_merchantAccount;
+            $user = User::where("email", $email)->first();
+
+            if ($user) {
+                $activeCard = Card::
                 where("user_id", $user->id)->
                 where('merchant', $merchantAccount)->
                 where('app', $application)->
-                where("active", true) -> first();
-            $messageAdmin = "getActiveCard" . $activeCard;
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-            if($activeCard) {
-                return ["rectoken" => $activeCard->rectoken];
-            } else {
-                return  null;
+                where("active", true)->first();
+                $messageAdmin = "getActiveCard" . $activeCard;
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+                if ($activeCard) {
+                    return ["rectoken" => $activeCard->rectoken];
+                } else {
+                    return null;
+                }
             }
         }
     }
@@ -89,40 +113,64 @@ class CardsController extends Controller
     public function setActiveCardApp($email, $id, $city, $application)
     {
 
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
-                $merchantAccount = $merchant->wfp_merchantAccount;
         }
 
 
-        $activeCard = Card::where("id", $id)->first();
-        if($activeCard) {
-            $activeCard->active = true;
-            $activeCard->save();
+        if (isset($merchant)) {
+            $merchantAccount = $merchant->wfp_merchantAccount;
 
-            $user = User::where("email", $email)->first();
-            $userCards = Card::where("user_id", $user->id)
-                ->where('merchant', $merchantAccount)
-                ->where('app', $application)
-                ->get();
+            $activeCard = Card::where("id", $id)->first();
+            if ($activeCard) {
+                $activeCard->active = true;
+                $activeCard->save();
 
-            foreach ($userCards as $value) {
-                if($value->id != $id) {
-                    $value->active = false;
-                    $value->save();
+                $user = User::where("email", $email)->first();
+                $userCards = Card::where("user_id", $user->id)
+                    ->where('merchant', $merchantAccount)
+                    ->where('app', $application)
+                    ->get();
+
+                foreach ($userCards as $value) {
+                    if ($value->id != $id) {
+                        $value->active = false;
+                        $value->save();
+                    }
                 }
             }
+            return ["result" => "ok"];
         }
-        return ["result" => "ok"];
     }
 
     public function setActiveCardAfterDelete(
