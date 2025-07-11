@@ -49,7 +49,7 @@ class CityAppOrderService
      * @param string $modelClass Класс модели
      * @return object|null Найденный сервер или null
      */
-    protected function findOrUnlockServer(string $city, string $modelClass): ?object
+    protected function findOrUnlockServer(string $city, string $modelClass)
     {
         Log::info("🔓 findOrUnlockServer: {$city}");
         Log::info("🔓 findOrUnlockServer: {$modelClass}");

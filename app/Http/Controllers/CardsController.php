@@ -246,13 +246,13 @@ class CardsController extends Controller
     }
     public function getCardTokenIdApp(
         $application,
-        $cityApp,
+        $city,
         $email,
         $pay_system
     ): \Illuminate\Http\JsonResponse {
         $user = User::where('email', $email)->first();
 
-        switch ($cityApp) {
+        switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
             case "Vinnytsia":
