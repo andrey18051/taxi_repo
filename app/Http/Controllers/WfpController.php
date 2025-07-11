@@ -21,6 +21,7 @@ use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -1269,9 +1270,6 @@ class WfpController extends Controller
             }
 
         }
-
-
-
     }
 
 
@@ -1281,7 +1279,17 @@ class WfpController extends Controller
         $city,
         $orderReference,
         $amount
-    ) {
+    ): JsonResponse {
+        // Log input parameters
+        Log::info('Starting refundVerifyCards', [
+            'application' => $application,
+            'city' => $city,
+            'orderReference' => $orderReference,
+            'amount' => $amount
+        ]);
+
+        // City mapping
+        $originalCity = $city; // Store original city for logging
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
@@ -1300,51 +1308,143 @@ class WfpController extends Controller
             case "Chernivtsi":
             case "Lutsk":
                 $city = "OdessaTest";
+                Log::debug('City mapped', [
+                    'original_city' => $originalCity,
+                    'mapped_city' => $city
+                ]);
                 break;
             case "foreign countries":
                 $city = "Kyiv City";
+                Log::debug('City mapped', [
+                    'original_city' => $originalCity,
+                    'mapped_city' => $city
+                ]);
+                break;
+            default:
+                Log::debug('City not mapped, using original', ['city' => $city]);
                 break;
         }
+
+        // Merchant selection
         switch ($application) {
             case "PAS1":
                 $merchant = City_PAS1::where("name", $city)->first();
+                Log::info('Merchant query for PAS1', [
+                    'city' => $city,
+                    'merchant_found' => $merchant !== null
+                ]);
                 break;
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
+                Log::info('Merchant query for PAS2', [
+                    'city' => $city,
+                    'merchant_found' => $merchant !== null
+                ]);
                 break;
             default:
                 $merchant = City_PAS4::where("name", $city)->first();
+                Log::info('Merchant query for PAS4 (default)', [
+                    'city' => $city,
+                    'merchant_found' => $merchant !== null
+                ]);
+                break;
         }
 
+        // Check if merchant exists
+        if ($merchant === null) {
+            Log::warning('No merchant found for city and application', [
+                'city' => $city,
+                'application' => $application,
+                'orderReference' => $orderReference
+            ]);
+            return response()->json([
+                'orderReference' => $orderReference,
+                'reasonCode' => 1001,
+                'reason' => 'No merchant found for the specified city and application',
+                'transactionStatus' => 'FAILED',
+                'merchantAccount' => null
+            ], 404);
+        }
 
-        if (isset($merchant)) {
-            $merchantAccount = $merchant->wfp_merchantAccount;
-            $secretKey = $merchant->wfp_merchantSecretKey;
+        $merchantAccount = $merchant->wfp_merchantAccount;
+        $secretKey = $merchant->wfp_merchantSecretKey;
 
-            if ($merchantAccount != null) {
+        // Log merchant details
+        Log::info('Merchant details retrieved', [
+            'merchantAccount' => $merchantAccount,
+            'secretKey' => !empty($secretKey) ? 'set' : 'not set'
+        ]);
 
-                $params = [
-                    "merchantAccount" => $merchantAccount,
-                    "orderReference" => $orderReference,
-                    "amount" => $amount,
-                    "currency" => "UAH",
-                ];
+        // Check if merchant account is valid
+        if ($merchantAccount === null) {
+            Log::warning('Merchant account is null, skipping refund', [
+                'city' => $city,
+                'application' => $application,
+                'orderReference' => $orderReference
+            ]);
+            return response()->json([
+                'orderReference' => $orderReference,
+                'reasonCode' => 1002,
+                'reason' => 'Invalid merchant account',
+                'transactionStatus' => 'FAILED',
+                'merchantAccount' => null
+            ], 400);
+        }
 
-                $params = [
-                    "transactionType" => "REFUND",
-                    "merchantAccount" => $merchantAccount,
-                    "orderReference" => $orderReference,
-                    "amount" => $amount,
-                    "currency" => "UAH",
-                    "comment" => "Повернення платежу",
-                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
-                    "apiVersion" => 1
-                ];
+        $params = [
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "amount" => $amount,
+            "currency" => "UAH",
+        ];
 
-                RefundSettleCardPayJob::dispatch($params, $orderReference, "refundVerifyCards");
-            }
+        Log::debug('Initial refund parameters', $params);
+
+        $params = [
+            "transactionType" => "REFUND",
+            "merchantAccount" => $merchantAccount,
+            "orderReference" => $orderReference,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "comment" => "Повернення платежу",
+            "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "refund"),
+            "apiVersion" => 1
+        ];
+
+        Log::debug('Final refund parameters', array_merge($params, [
+            'merchantSignature' => !empty($params['merchantSignature']) ? 'generated' : 'not generated'
+        ]));
+
+        // Dispatch refund job
+        try {
+            RefundSettleCardPayJob::dispatch($params, $orderReference, "refundVerifyCards");
+            Log::info('Refund job dispatched', [
+                'orderReference' => $orderReference,
+                'job' => 'RefundSettleCardPayJob'
+            ]);
+            return response()->json([
+                'orderReference' => $orderReference,
+                'reasonCode' => 0,
+                'reason' => 'Refund job dispatched successfully',
+                'transactionStatus' => 'PENDING',
+                'merchantAccount' => $merchantAccount
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to dispatch refund job', [
+                'orderReference' => $orderReference,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'orderReference' => $orderReference,
+                'reasonCode' => 1003,
+                'reason' => 'Failed to dispatch refund job: ' . $e->getMessage(),
+                'transactionStatus' => 'FAILED',
+                'merchantAccount' => $merchantAccount
+            ], 500);
         }
     }
+
+
     public function refundSettle($params, $orderReference)
     {
         $startTime = time(); // Время начала выполнения скрипта

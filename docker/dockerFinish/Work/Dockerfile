@@ -80,6 +80,11 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord_work.conf /etc/supervisor/s
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 
+# Преобразуем окончания строк уже в контейнере
+RUN apt-get update && apt-get install -y dos2unix
+RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
+
+
 # Устанавливаем зависимости Laravel
 #RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
 #    rm -rf vendor composer.lock && \
