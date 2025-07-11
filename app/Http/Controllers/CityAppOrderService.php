@@ -58,9 +58,6 @@ class CityAppOrderService
         if ($lock->get()) {
             try {
                 Log::info("🔓 Блокировка получена для города: {$city}");
-
-
-
                 // Поиск offline-серверов
                 $servers = $modelClass::where('name', $city)
                     ->where('online', 'false')
@@ -104,10 +101,10 @@ class CityAppOrderService
                     Log::info("ℹ️ Нет активных серверов с online=true");
                 }
                 Log::info("🚫 Не найден доступный сервер ни в online, ни в offline списках.");
-                return 400;
+                return null;
             } catch (\Throwable $e) {
                 Log::error("🔥 Исключение при поиске сервера: {$e->getMessage()}");
-                return 400;
+                return null;
             } finally {
                 $lock->release();
                 Log::info("🔒 Блокировка снята для города: {$city}");
@@ -115,7 +112,7 @@ class CityAppOrderService
         }
 
         Log::warning("🔐 Не удалось получить блокировку для города: {$city} (уже используется)");
-        return 400;
+        return null;
     }
 
 
