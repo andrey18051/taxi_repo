@@ -1555,3 +1555,4 @@ Route::get('/findUser/{email}', [UserController::class, 'findUser'])->name('find
  * My tests
  */
 Route::get('/sendNotificationAuto/{body}/{app}/{user_id}', [FCMController::class, 'sendNotificationAuto'])->name('sendNotificationAuto');
+Route::get('/geo/city/{lat}/{lon}', [UniversalAndroidFunctionController::class, 'detectCity']);
