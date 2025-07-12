@@ -5576,88 +5576,80 @@ class UniversalAndroidFunctionController extends Controller
 
         return Cache::remember($cacheKey, now()->addMinutes(1), function () use ($startLat, $startLon) {
 
-            Log::debug("findCity: выполняем запрос к Nominatim...");
+            // Вспомогательная функция для нормализации
+            $normalize = function ($name) {
+                return mb_strtolower(trim($name));
+            };
 
-            // Прямое соответствие названий городов
-            $cityNameMap = array_change_key_case([
-                'Киев' => 'city_kiev',
-                'Київ' => 'city_kiev',
-                'Черкассы' => 'city_cherkassy',
-                'Черкаси' => 'city_cherkassy',
-                'Одесса' => 'city_odessa',
-                'Одеса' => 'city_odessa',
-                'Запорожье' => 'city_zaporizhzhia',
-                'Запоріжжя' => 'city_zaporizhzhia',
-                'Днепр' => 'city_dnipro',
-                'Дніпро' => 'city_dnipro',
-                'Львов' => 'city_lviv',
-                'Львів' => 'city_lviv',
-                'Ивано-Франковск' => 'city_ivano_frankivsk',
-                'Івано-Франківськ' => 'city_ivano_frankivsk',
-                'Винница' => 'city_vinnytsia',
-                'Вінниця' => 'city_vinnytsia',
+
+            // Прямое соответствие: название города => код
+            $rawCityMap = [
+                'Киев' => 'city_kiev', 'Київ' => 'city_kiev',
+                'Черкассы' => 'city_cherkassy', 'Черкаси' => 'city_cherkassy',
+                'Одесса' => 'city_odessa', 'Одеса' => 'city_odessa',
+                'Запорожье' => 'city_zaporizhzhia', 'Запоріжжя' => 'city_zaporizhzhia',
+                'Днепр' => 'city_dnipro', 'Дніпро' => 'city_dnipro',
+                'Львов' => 'city_lviv', 'Львів' => 'city_lviv',
+                'Ивано-Франковск' => 'city_ivano_frankivsk', 'Івано-Франківськ' => 'city_ivano_frankivsk',
+                'Винница' => 'city_vinnytsia', 'Вінниця' => 'city_vinnytsia',
                 'Полтава' => 'city_poltava',
-                'Сумы' => 'city_sumy',
-                'Суми' => 'city_sumy',
-                'Харьков' => 'city_kharkiv',
-                'Харків' => 'city_kharkiv',
-                'Чернигов' => 'city_chernihiv',
-                'Чернігів' => 'city_chernihiv',
-                'Ровно' => 'city_rivne',
-                'Рівне' => 'city_rivne',
-                'Тернополь' => 'city_ternopil',
-                'Тернопіль' => 'city_ternopil',
-                'Хмельницкий' => 'city_khmelnytskyi',
-                'Хмельницький' => 'city_khmelnytskyi',
+                'Сумы' => 'city_sumy', 'Суми' => 'city_sumy',
+                'Харьков' => 'city_kharkiv', 'Харків' => 'city_kharkiv',
+                'Чернигов' => 'city_chernihiv', 'Чернігів' => 'city_chernihiv',
+                'Ровно' => 'city_rivne', 'Рівне' => 'city_rivne',
+                'Тернополь' => 'city_ternopil', 'Тернопіль' => 'city_ternopil',
+                'Хмельницкий' => 'city_khmelnytskyi', 'Хмельницький' => 'city_khmelnytskyi',
                 'Ужгород' => 'city_zakarpattya',
-                'Луцк' => 'city_lutsk',
-                'Луцьк' => 'city_lutsk',
+                'Луцк' => 'city_lutsk', 'Луцьк' => 'city_lutsk',
                 'Житомир' => 'city_zhytomyr',
-                'Кропивницкий' => 'city_kropyvnytskyi',
-                'Кропивницький' => 'city_kropyvnytskyi',
+                'Кропивницкий' => 'city_kropyvnytskyi', 'Кропивницький' => 'city_kropyvnytskyi',
                 'Кировоград' => 'city_kropyvnytskyi',
-                'Николаев' => 'city_mykolaiv',
-                'Миколаїв' => 'city_mykolaiv',
-                'Черновцы' => 'city_chernivtsi',
-                'Чернівці' => 'city_chernivtsi',
-                'Донецк' => 'city_donetsk',
-                'Донецьк' => 'city_donetsk',
-                'Луганск' => 'city_luhansk',
-                'Луганськ' => 'city_luhansk',
+                'Николаев' => 'city_mykolaiv', 'Миколаїв' => 'city_mykolaiv',
+                'Черновцы' => 'city_chernivtsi', 'Чернівці' => 'city_chernivtsi',
+                'Донецк' => 'city_donetsk', 'Донецьк' => 'city_donetsk',
+                'Луганск' => 'city_luhansk', 'Луганськ' => 'city_luhansk',
                 'Херсон' => 'city_kherson',
                 'Симферополь' => 'city_simferopol',
-            ], CASE_LOWER);
+            ];
+            $cityNameMap = [];
+            foreach ($rawCityMap as $name => $code) {
+                $cityNameMap[$normalize($name)] = $code;
+            }
 
-            // Маппинг областей → код города-центра
-            $regionToCityMap = array_change_key_case([
-                // Области — украинские и русские
-                'київська область' => 'city_kiev', 'киевская область' => 'city_kiev',
-                'черкаська область' => 'city_cherkassy', 'черкасская область' => 'city_cherkassy',
-                'одеська область' => 'city_odessa', 'одесская область' => 'city_odessa',
-                'запорізька область' => 'city_zaporizhzhia', 'запорожская область' => 'city_zaporizhzhia',
-                'дніпропетровська область' => 'city_dnipro', 'днепропетровская область' => 'city_dnipro',
-                'львівська область' => 'city_lviv', 'львовская область' => 'city_lviv',
-                'івано-франківська область' => 'city_ivano_frankivsk', 'ивано-франковская область' => 'city_ivano_frankivsk',
-                'вінницька область' => 'city_vinnytsia', 'винницкая область' => 'city_vinnytsia',
-                'полтавська область' => 'city_poltava', 'полтавская область' => 'city_poltava',
-                'сумська область' => 'city_sumy', 'сумская область' => 'city_sumy',
-                'харківська область' => 'city_kharkiv', 'харьковская область' => 'city_kharkiv',
-                'чернігівська область' => 'city_chernihiv', 'черниговская область' => 'city_chernihiv',
-                'рівненська область' => 'city_rivne', 'ровненская область' => 'city_rivne',
-                'тернопільська область' => 'city_ternopil', 'тернопольская область' => 'city_ternopil',
-                'хмельницька область' => 'city_khmelnytskyi', 'хмельницкая область' => 'city_khmelnytskyi',
-                'закарпатська область' => 'city_zakarpattya', 'закарпатская область' => 'city_zakarpattya',
-                'житомирська область' => 'city_zhytomyr', 'житомирская область' => 'city_zhytomyr',
-                'кіровоградська область' => 'city_kropyvnytskyi', 'кировоградская область' => 'city_kropyvnytskyi',
-                'миколаївська область' => 'city_mykolaiv', 'николаевская область' => 'city_mykolaiv',
-                'чернівецька область' => 'city_chernivtsi', 'черновицкая область' => 'city_chernivtsi',
-                'волинська область' => 'city_lutsk', 'волынская область' => 'city_lutsk',
-                'донецька область' => 'city_donetsk', 'донецкая область' => 'city_donetsk',
-                'луганська область' => 'city_luhansk', 'луганская область' => 'city_luhansk',
-                'херсонська область' => 'city_kherson', 'херсонская область' => 'city_kherson',
-                'автономна республіка крим' => 'city_simferopol', 'автономная республика крым' => 'city_simferopol',
-            ], CASE_LOWER);
+            // Сопоставление регионов
+            $rawRegionMap = [
+                'Київська область' => 'city_kiev', 'Киевская область' => 'city_kiev',
+                'Черкаська область' => 'city_cherkassy', 'Черкасская область' => 'city_cherkassy',
+                'Одеська область' => 'city_odessa', 'Одесская область' => 'city_odessa',
+                'Запорізька область' => 'city_zaporizhzhia', 'Запорожская область' => 'city_zaporizhzhia',
+                'Дніпропетровська область' => 'city_dnipro', 'Днепропетровская область' => 'city_dnipro',
+                'Львівська область' => 'city_lviv', 'Львовская область' => 'city_lviv',
+                'Івано-Франківська область' => 'city_ivano_frankivsk', 'Ивано-Франковская область' => 'city_ivano_frankivsk',
+                'Вінницька область' => 'city_vinnytsia', 'Винницкая область' => 'city_vinnytsia',
+                'Полтавська область' => 'city_poltava', 'Полтавская область' => 'city_poltava',
+                'Сумська область' => 'city_sumy', 'Сумская область' => 'city_sumy',
+                'Харківська область' => 'city_kharkiv', 'Харьковская область' => 'city_kharkiv',
+                'Чернігівська область' => 'city_chernihiv', 'Черниговская область' => 'city_chernihiv',
+                'Рівненська область' => 'city_rivne', 'Ровненская область' => 'city_rivne',
+                'Тернопільська область' => 'city_ternopil', 'Тернопольская область' => 'city_ternopil',
+                'Хмельницька область' => 'city_khmelnytskyi', 'Хмельницкая область' => 'city_khmelnytskyi',
+                'Закарпатська область' => 'city_zakarpattya', 'Закарпатская область' => 'city_zakarpattya',
+                'Житомирська область' => 'city_zhytomyr', 'Житомирская область' => 'city_zhytomyr',
+                'Кіровоградська область' => 'city_kropyvnytskyi', 'Кировоградская область' => 'city_kropyvnytskyi',
+                'Миколаївська область' => 'city_mykolaiv', 'Николаевская область' => 'city_mykolaiv',
+                'Чернівецька область' => 'city_chernivtsi', 'Черновицкая область' => 'city_chernivtsi',
+                'Волинська область' => 'city_lutsk', 'Волынская область' => 'city_lutsk',
+                'Донецька область' => 'city_donetsk', 'Донецкая область' => 'city_donetsk',
+                'Луганська область' => 'city_luhansk', 'Луганская область' => 'city_luhansk',
+                'Херсонська область' => 'city_kherson', 'Херсонская область' => 'city_kherson',
+                'Автономна Республіка Крим' => 'city_simferopol', 'Автономная Республика Крым' => 'city_simferopol',
+            ];
+            $regionToCityMap = [];
+            foreach ($rawRegionMap as $name => $code) {
+                $regionToCityMap[$normalize($name)] = $code;
+            }
 
+            // Запрос к Nominatim
             $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=$startLat&lon=$startLon";
             $context = stream_context_create([
                 "http" => [
@@ -5666,10 +5658,9 @@ class UniversalAndroidFunctionController extends Controller
             ]);
 
             $response = @file_get_contents($url, false, $context);
-
             if (!$response) {
-                Log::error("findCity: ошибка при обращении к Nominatim для координат lat=$startLat, lon=$startLon");
-                return "all";
+                Log::error("findCity: ошибка при запросе к Nominatim");
+                return 'all';
             }
 
             Log::debug("findCity: успешный ответ от Nominatim");
@@ -5677,24 +5668,22 @@ class UniversalAndroidFunctionController extends Controller
             $data = json_decode($response, true);
             $possibleNames = [];
 
-            if (isset($data['address'])) {
+            if (!empty($data['address'])) {
                 $address = $data['address'];
                 Log::debug("findCity: адрес из Nominatim: " . json_encode($address, JSON_UNESCAPED_UNICODE));
 
-                foreach (['city', 'town', 'village', 'municipality', 'district', 'state'] as $field) {
+                foreach (['city', 'town', 'village', 'municipality', 'borough', 'district', 'state'] as $field) {
                     if (!empty($address[$field])) {
-                        $normalized = mb_strtolower(trim($address[$field]));
+                        $normalized = $normalize($address[$field]);
                         $possibleNames[] = $normalized;
                         Log::debug("findCity: найдено значение '$normalized' в поле '$field'");
                     }
                 }
-
-                Log::debug("findCity: список возможных названий: " . implode(', ', $possibleNames));
-            } else {
-                Log::warning("findCity: поле address отсутствует в ответе Nominatim");
             }
 
-            // Сначала ищем прямое соответствие названия города
+            Log::debug("findCity: список возможных названий: " . implode(', ', $possibleNames));
+
+            // Сопоставление по названию города
             foreach ($possibleNames as $name) {
                 if (isset($cityNameMap[$name])) {
                     Log::info("findCity: прямое совпадение '$name' => " . $cityNameMap[$name]);
@@ -5702,7 +5691,7 @@ class UniversalAndroidFunctionController extends Controller
                 }
             }
 
-            // Затем проверяем по региону/области
+            // Сопоставление по региону
             foreach ($possibleNames as $name) {
                 if (isset($regionToCityMap[$name])) {
                     Log::info("findCity: совпадение по региону '$name' => " . $regionToCityMap[$name]);
@@ -5711,9 +5700,10 @@ class UniversalAndroidFunctionController extends Controller
             }
 
             Log::info("findCity: город не определён, возвращаем 'all'");
-            return "all";
+            return 'all';
         });
     }
+
 
 
     public function detectCity($lat, $lon)

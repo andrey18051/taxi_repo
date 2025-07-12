@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CacheHandler;
+use App\Jobs\AutoCancelJob;
 use App\Jobs\SearchOrderToDeleteJob;
 use App\Jobs\StartStatusPaymentReview;
 use App\Jobs\StartNewProcessExecution;
@@ -7885,12 +7886,17 @@ class AndroidTestOSMController extends Controller
                 $params['pay_system'] = $userArr[2];
                 $order_cost = $response_arr["order_cost"];
 
-                if($email != "no email") {
+                if ($email != "no email") {
                     if(isset( $responseDoubleArr["dispatching_order_uid"])) {
                         $dispatching_order_uid_Double = $responseDoubleArr["dispatching_order_uid"];
                     } else {
                         $dispatching_order_uid_Double = "*";
                     }
+                    $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
+                    Log::debug("AutoCancelJob:  $delayMinutes  ");
+                    AutoCancelJob::dispatch($response_arr['dispatching_order_uid'])->delay(now()->addMinutes($delayMinutes));;
+
+
                     (new PusherController)->sentUidAppEmailPayType(
                         $response_arr['dispatching_order_uid'],
                         $application,
@@ -10280,7 +10286,6 @@ class AndroidTestOSMController extends Controller
                 case "Mykolaiv":
                 case "Chernivtsi":
                 case "Lutsk":
-
                     $city = "OdessaTest";
                     break;
                 case "foreign countries":
