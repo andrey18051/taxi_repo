@@ -99,7 +99,9 @@ class CityAppOrderService
                             Log::info("🔓 Сервер разблокирован и установлен в online=true: {$server->address}");
                             return $server;
                         } else {
-                            Log::warning("❌ Сервер недоступен (не разблокирован): {$server->address}");
+                            $server->online = 'false';
+                            $server->save();
+                            Log::warning("❌ Сервер недоступен (заблокирован): {$server->address}");
                         }
                     }
                 } else {
