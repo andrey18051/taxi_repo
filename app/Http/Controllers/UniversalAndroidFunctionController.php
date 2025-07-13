@@ -3235,11 +3235,13 @@ class UniversalAndroidFunctionController extends Controller
         // Пример вызова функции
 
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
+        $canceledNoServerCity = $this->canceledNoServerCity($uid_bonusOrderHold);
 
 
         $messageAdmin = "Canceled uid_history->cancel $uid_history->cancel";
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-        if ($canceledOneMinute|| $uid_history->cancel == "1") { //Выход по 1 минуте или нажатию отмены
+        //Выход по 1 минуте или нажатию отмены или по безсерверному городу
+        if ($canceledOneMinute || $canceledNoServerCity || $uid_history->cancel == "1") {
             if ($lastStatusBonus !== "Canceled") {
                 $orderCanceledBonus = self::orderCanceledReturn(
                     $bonusOrder,
@@ -3362,7 +3364,7 @@ class UniversalAndroidFunctionController extends Controller
         return false;
     }
 
-    private function canceledOneMinute($uid)
+    private function canceledOneMinute($uid): bool
     {
         $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
@@ -3420,6 +3422,52 @@ class UniversalAndroidFunctionController extends Controller
             }
 
         }
+    }
+
+    private function canceledNoServerCity($uid): bool
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        if (is_null($order)) {
+            Log::error("Order not found with UID: $uid");
+            return false;
+        }
+
+        $autoCancelCities = [
+            "city_lviv", "city_ivano_frankivsk", "city_vinnytsia", "city_poltava",
+            "city_sumy", "city_kharkiv", "city_chernihiv", "city_rivne", "city_ternopil",
+            "city_khmelnytskyi", "city_zakarpattya", "city_zhytomyr", "city_kropyvnytskyi",
+            "city_mykolaiv", "city_chernivtsi", "city_lutsk", "all"
+        ];
+
+        if (!in_array($order->city, $autoCancelCities)) {
+            Log::info("canceledNoServerCity: автоотмена не применяется для города {$order->city}");
+            return false;
+        }
+        // Заданное время
+        $created_at = $order->created_at;
+
+        // Текущие дата и время
+        $current_time = date('Y-m-d H:i:s');
+
+        // Преобразование строковых дат во временные метки
+        $created_at_timestamp = strtotime($created_at);
+        $current_time_timestamp = strtotime($current_time);
+
+        $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
+        Log::debug("canceledNoServerCity:  $delayMinutes  ");
+        // Проверка, прошла ли одна минута
+
+        if (($current_time_timestamp - $created_at_timestamp) >= $delayMinutes * 60) {
+            if ($order->auto !== null) {
+                Log::info("AutoCancelJob: авто уже назначено, отмена не требуется (uid {$uid})");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

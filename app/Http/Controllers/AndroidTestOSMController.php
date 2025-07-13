@@ -7892,9 +7892,14 @@ class AndroidTestOSMController extends Controller
                     } else {
                         $dispatching_order_uid_Double = "*";
                     }
-                    $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
-                    Log::debug("AutoCancelJob:  $delayMinutes  ");
-                    AutoCancelJob::dispatch($response_arr['dispatching_order_uid'])->delay(now()->addMinutes($delayMinutes));;
+
+                    Log::debug("AutoCancelJob payment_type:  $payment_type");
+                    if($payment_type == 0) {
+                        $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
+                        Log::debug("AutoCancelJob:  $delayMinutes  ");
+                        AutoCancelJob::dispatch($response_arr['dispatching_order_uid'])->delay(now()->addMinutes($delayMinutes));;
+                    }
+
 
 
                     (new PusherController)->sentUidAppEmailPayType(
