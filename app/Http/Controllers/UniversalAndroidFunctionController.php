@@ -3269,19 +3269,20 @@ class UniversalAndroidFunctionController extends Controller
             }
 
             if ($orderCanceledBonus && $orderCanceledDouble) {
-
-
                 $messageAdmin = "Отмена вилки
                      безнал: $bonusOrder
                      дубль $doubleOrder";
 
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
+                (new MessageSentController)->sentMessageMeCancel($messageAdmin);
 
                 try {
                     $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
-
+                    (new AndroidTestOSMController)->updateTimestamp($orderweb->id);
+                    $orderweb->auto = null;
                     $orderweb->closeReason = "1";
                     $orderweb->save();
+
                     $uid_history->cancel = "1";
                     $uid_history->save();
 
@@ -3323,16 +3324,13 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
-
-
-
                             $messageAdmin = "Выход из вилки Отмена по налу
                                 безнал: $bonusOrder
                                 статус б/н: $lastStatusBonus
                                 нал $doubleOrder
                                 статус нал: $lastStatusDouble";
                                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
+                                (new MessageSentController)->sentMessageMeCancel($messageAdmin);
                         return true;
                     }
                     break;
@@ -3346,16 +3344,13 @@ class UniversalAndroidFunctionController extends Controller
                         case "Canceled":
                         case "Executed":
                         case "CostCalculation":
-
-
-
                             $messageAdmin = "Выход из вилки Отмена по безналу
                                 безнал: $bonusOrder
                                 статус б/н: $lastStatusBonus
                                 нал $doubleOrder
                                 статус нал: $lastStatusDouble";
                                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
+                                (new MessageSentController)->sentMessageMeCancel($messageAdmin);
                         return true;
                     }
                     break;
