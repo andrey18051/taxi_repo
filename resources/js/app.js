@@ -50,6 +50,7 @@ Vue.component('new-message-email', require('./views/user/NewMessageEmail').defau
 Vue.component('partner-email', require('./views/partners/PartnerEmail').default);
 Vue.component('new-partner-email', require('./views/partners/NewPartnerEmail').default);
 Vue.component('partner-group', require('./views/partners/PartnerGroup').default);
+Vue.component('user_black_list_set', require('./views/user/UserBlackListSet.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

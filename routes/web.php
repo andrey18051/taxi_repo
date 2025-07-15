@@ -1295,6 +1295,9 @@ Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNa
 Route::get('/android/verifyBlackListUser/{email}/{androidDom}', [UniversalAndroidFunctionController::class, 'verifyBlackListUser'])
     ->name('verifyBlackListUser');
 
+Route::get('/users/blackListSet/{id}/{black_list_PAS1}/{black_list_PAS2}/{black_list_PAS4}', [UserController::class, 'blackListSet'])
+    ->name('blackListSet');
+
 /**
  * Universal
  */

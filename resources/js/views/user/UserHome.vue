@@ -5,6 +5,9 @@
             <h1 class="display-5">Users</h1>
             <p class="lead">Information about users</p>
         </div>
+        <button class="btn btn-outline-primary" @click="blackListSetButton()" style="margin-left: 5px">
+            Черный список
+        </button>
         <div class="container-fluid">
             <v-table
                 :data="users"
@@ -18,12 +21,12 @@
                 <thead slot="head">
                 <v-th sortKey="id" style="width: 30px">#</v-th>
                 <v-th sortKey="name" style="width: 200px">Name</v-th>
-                <v-th sortKey="email"style="width: 300px">Email</v-th>
-                <v-th sortKey="user_phone"style="width: 300px">user_phone</v-th>
-                <v-th sortKey="bonus"style="width: 100px">Bonus</v-th>
-                <v-th sortKey="bonus"style="width: 100px">Bonus_pas_1</v-th>
-                <v-th sortKey="bonus"style="width: 100px">Bonus_pas_2</v-th>
-                <v-th sortKey="bonus"style="width: 100px">Bonus_pas_4</v-th>
+                <v-th sortKey="email" style="width: 300px">Email</v-th>
+                <v-th sortKey="user_phone" style="width: 300px">user_phone</v-th>
+                <v-th sortKey="bonus" style="width: 100px">Bonus</v-th>
+                <v-th sortKey="bonus" style="width: 100px">Bonus_pas_1</v-th>
+                <v-th sortKey="bonus" style="width: 100px">Bonus_pas_2</v-th>
+                <v-th sortKey="bonus" style="width: 100px">Bonus_pas_4</v-th>
                 <v-th sortKey="bonus_pay" style="width: 30px">Бонус</v-th>
                 <v-th sortKey="card_pay" style="width: 30px">Карта</v-th>
                 <v-th sortKey="black_list" style="width: 30px">Black list</v-th>
@@ -32,13 +35,13 @@
                 <tr>
                     <td><input class="form-input input-sm" style="width: 30px" v-model="filters.id.value" placeholder="Select by id"></td>
                     <td><input class="form-input input-lg" style="width: 200px" v-model="filters.name.value" placeholder="Select by name"></td>
-                    <td><input class="form-input input-lg" style="width: 300px"v-model="filters.email.value"  placeholder="Select by email"></td>
-                    <td><input class="form-input input-lg" style="width: 300px"v-model="filters.user_phone.value"  placeholder="Select by user_phone"></td>
-                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus.value"  placeholder="Select by bonus"></td>
-                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus_pas_1.value"  placeholder="Select by bonus"></td>
-                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus_pas_2.value"  placeholder="Select by bonus"></td>
-                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.bonus_pas_4.value"  placeholder="Select by bonus"></td>
-                    <td><input class="form-input input-lg" style="width: 100px"v-model="filters.black_list.value"  placeholder="Select by black_list"></td>
+                    <td><input class="form-input input-lg" style="width: 300px" v-model="filters.email.value"  placeholder="Select by email"></td>
+                    <td><input class="form-input input-lg" style="width: 300px" v-model="filters.user_phone.value"  placeholder="Select by user_phone"></td>
+                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_pas_1.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_pas_2.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_pas_4.value"  placeholder="Select by bonus"></td>
+                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.black_list.value"  placeholder="Select by black_list"></td>
                     <td style="width: 30px"></td>
                     <td style="width: 30px"></td>
                     <td style="width: 100px"></td>
@@ -171,7 +174,11 @@ export default {
                     // document.location.reload();
                     window.alert("Данные обновлены /bonus/bonusAdmin/"+ id + '/'+ bonus + '/');
                 })
-        }
+        },
+        blackListSetButton() {
+            this.$router.push('/admin/users/UserBlackListSet');
+
+        },
 
     }
 }

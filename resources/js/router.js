@@ -4,6 +4,7 @@ import Vue from 'vue';
 Vue.use(vueRouter);
 
 import Index from './views/Index';
+import UserBlackListSet from './views/user/UserBlackListSet';
 import Users from './views/user/UserHome';
 import Services from './views/service/ServiceHome';
 import UserEdit from './views/user/UserEdit';
@@ -33,6 +34,10 @@ const  routes = [
     {
         path: "/admin/users",
         component: Users
+    },
+    {
+        path: "/admin/users/UserBlackListSet",
+        component: UserBlackListSet
     },
     {
         path: "/admin/new_balance",

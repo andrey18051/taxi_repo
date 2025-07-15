@@ -193,6 +193,26 @@ class UserController extends Controller
             return response()->json(['error' => 'Произошла ошибка при удалении пользователя'], 500);
         }
     }
+    public function blackListSet(
+        $id,
+        $black_list_PAS1,
+        $black_list_PAS2,
+        $black_list_PAS4
+    ) {
+        // Предположим, что у тебя есть модель User
+        $user = User::find($id);
+
+        if ($user) {
+            $user->black_list_PAS1 = $black_list_PAS1;
+            $user->black_list_PAS2 = $black_list_PAS2;
+            $user->black_list_PAS4 = $black_list_PAS4;
+            $user->save();
+
+            return response()->json(['success' => true, 'message' => 'Данные успешно обновлены.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Пользователь не найден.'], 404);
+        }
+    }
 
     public function userPas_2()
     {
