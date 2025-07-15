@@ -1787,7 +1787,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 1.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -1959,7 +1959,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 2.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -2271,7 +2271,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 3.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -2469,7 +2469,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 4.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -2788,7 +2788,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 5.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -2999,7 +2999,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 6.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -5729,7 +5729,7 @@ class AndroidTestOSMController extends Controller
                     $blacklist_phrase = "Вы в черном списке";
 
                     if (strpos($message, $blacklist_phrase) !== false) {
-                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке' 7.");
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
@@ -6020,7 +6020,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 8.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -6044,7 +6044,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 9.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -6374,7 +6374,7 @@ class AndroidTestOSMController extends Controller
                     $blacklist_phrase = "Вы в черном списке";
 
                     if (strpos($message, $blacklist_phrase) !== false) {
-                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке' 10.");
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
@@ -6696,7 +6696,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 11.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -6720,7 +6720,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 12.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -7053,7 +7053,7 @@ class AndroidTestOSMController extends Controller
                     $blacklist_phrase = "Вы в черном списке";
 
                     if (strpos($message, $blacklist_phrase) !== false) {
-                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке' 13.");
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
@@ -7404,7 +7404,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 14.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -7428,7 +7428,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 15.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -7841,7 +7841,7 @@ class AndroidTestOSMController extends Controller
                     $blacklist_phrase = "Вы в черном списке";
 
                     if (strpos($message, $blacklist_phrase) !== false) {
-                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке' 16.");
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
@@ -8212,13 +8212,19 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 17.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
 
-                    $email = $params['email'];
+
                     $app= $application;
                     $status = "true";
+                    Log::info('📥 Запрос на обновление чёрного списка', [
+                        'email' => $email,
+                        'app' => $app,
+                        'status' => $status,
+                    ]);
+
                     (new UserController)->blackListSetFromOrderErrorUpdate($email, $app, $status);
 
                 } else {
@@ -8242,9 +8248,19 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 18.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
+                $app= $application;
+                $status = "true";
+                Log::info('📥 Запрос на обновление чёрного списка', [
+                    'email' => $email,
+                    'app' => $app,
+                    'status' => $status,
+                ]);
+
+                (new UserController)->blackListSetFromOrderErrorUpdate($email, $app, $status);
+
             } else {
                 Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
                 $response_error["Message"] = $response_arr["Message"];
@@ -8571,7 +8587,7 @@ class AndroidTestOSMController extends Controller
                     $blacklist_phrase = "Вы в черном списке";
 
                     if (strpos($message, $blacklist_phrase) !== false) {
-                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке' 19.");
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
@@ -8795,7 +8811,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 20.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -8819,7 +8835,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке'  21.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {
@@ -9143,7 +9159,7 @@ class AndroidTestOSMController extends Controller
                     $blacklist_phrase = "Вы в черном списке";
 
                     if (strpos($message, $blacklist_phrase) !== false) {
-                        Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                        Log::debug("Сообщение содержит фразу 'Вы в черном списке' 22.");
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
@@ -9434,7 +9450,7 @@ class AndroidTestOSMController extends Controller
                 $blacklist_phrase = "Вы в черном списке";
 
                 if (strpos($message, $blacklist_phrase) !== false) {
-                    Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                    Log::debug("Сообщение содержит фразу 'Вы в черном списке' 23.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
                 } else {
@@ -9458,7 +9474,7 @@ class AndroidTestOSMController extends Controller
             $blacklist_phrase = "Вы в черном списке";
 
             if (strpos($message, $blacklist_phrase) !== false) {
-                Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
+                Log::debug("Сообщение содержит фразу 'Вы в черном списке' 24.");
                 $cityArr = (new CityController)->maxPayValueApp($city, $application);
                 $response_error["Message"] = $cityArr["black_list"];
             } else {

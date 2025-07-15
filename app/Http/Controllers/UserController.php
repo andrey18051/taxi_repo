@@ -227,97 +227,92 @@ class UserController extends Controller
         }
     }
 
-    use Illuminate\Support\Facades\Log;
+
 
     public function blackListSetFromOrderErrorUpdate($email, $app, $status)
     {
-        Log::info('Запрос на обновление чёрного списка.', [
+        Log::info('📥 Запрос на обновление чёрного списка', [
             'email' => $email,
             'app' => $app,
-            'status' => $status
+            'status' => $status,
         ]);
 
-        // Проверка валидности статуса
-        if (!in_array($status, ['true', 'false'], true)) {
-            Log::warning('Неверный формат значения status', [
-                'status' => $status
-            ]);
+        // Проверка допустимых значений
+        if ($status !== 'true' && $status !== 'false') {
+            Log::warning('❗ Недопустимое значение статуса', ['status' => $status]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Неверное значение статуса. Допустимы только "true" или "false".'
+                'message' => 'Недопустимый статус. Разрешены только "true" или "false".',
             ], 400);
         }
 
         // Поиск пользователя
         $user = User::where('email', $email)->first();
-
         if (!$user) {
-            Log::warning('Пользователь не найден при обновлении чёрного списка.', [
-                'email' => $email
+            Log::warning('❗ Пользователь не найден при обновлении чёрного списка', [
+                'email' => $email,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Пользователь не найден.'
+                'message' => 'Пользователь не найден.',
             ], 404);
         }
 
-        // Обновление нужного поля
+        // Определение поля для обновления
         $fieldUpdated = null;
 
-        switch ($app) {
-            case 'PAS1':
-                $user->black_list_PAS1 = $status;
-                $fieldUpdated = 'black_list_PAS1';
-                break;
-            case 'PAS2':
-                $user->black_list_PAS2 = $status;
-                $fieldUpdated = 'black_list_PAS2';
-                break;
-            default:
-                $user->black_list_PAS4 = $status;
-                $fieldUpdated = 'black_list_PAS4';
-                $app = 'PAS4'; // Поддержка корректного кода приложения
-                break;
+        if ($app === 'PAS1') {
+            $user->black_list_PAS1 = $status;
+            $fieldUpdated = 'black_list_PAS1';
+        } elseif ($app === 'PAS2') {
+            $user->black_list_PAS2 = $status;
+            $fieldUpdated = 'black_list_PAS2';
+        } else {
+            $user->black_list_PAS4 = $status;
+            $fieldUpdated = 'black_list_PAS4';
+            $app = 'PAS4'; // если не PAS1 и не PAS2 — считаем PAS4
         }
 
         try {
             $user->save();
 
-            Log::info('Обновление пользователя успешно.', [
+            Log::info('✅ Данные пользователя обновлены', [
                 'email' => $email,
-                'обновлённое_поле' => $fieldUpdated,
-                'значение' => $status
+                'поле' => $fieldUpdated,
+                'новое_значение' => $status,
             ]);
 
+            // Обновление Firestore
+            $action = ($status === 'true') ? 'add' : 'remove';
             $fcmController = new FCMController();
-            $action = $status === 'true' ? 'add' : 'remove';
-
             $fcmController->toggleFirestoreBlackListEmail($email, $action, $app);
 
-            Log::info('Firestore чёрный список успешно синхронизирован.', [
+            Log::info('☁️ Firestore чёрный список синхронизирован', [
                 'email' => $email,
                 'action' => $action,
-                'app' => $app
+                'app' => $app,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Данные успешно обновлены.'
-            ]);
+                'message' => 'Чёрный список успешно обновлён.',
+            ], 200);
+
         } catch (\Exception $e) {
-            Log::error('Ошибка при сохранении пользователя или синхронизации с Firestore.', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::error('💥 Ошибка при обновлении чёрного списка', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при обновлении данных.'
+                'message' => 'Произошла ошибка при обновлении данных пользователя.',
             ], 500);
         }
     }
+
 
 
     public function userPas_2()
