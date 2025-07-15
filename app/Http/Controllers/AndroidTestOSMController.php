@@ -8215,6 +8215,12 @@ class AndroidTestOSMController extends Controller
                     Log::debug("Сообщение содержит фразу 'Вы в черном списке'.");
                     $cityArr = (new CityController)->maxPayValueApp($city, $application);
                     $response_error["Message"] = $cityArr["black_list"];
+
+                    $email = $params['email'];
+                    $app= $application;
+                    $status = "true";
+                    (new UserController)->blackListSetFromOrderErrorUpdate($email, $app, $status);
+
                 } else {
                     Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
                     $response_error["Message"] = $response_arr["Message"];

@@ -207,10 +207,68 @@ class UserController extends Controller
             $user->black_list_PAS2 = $black_list_PAS2;
             $user->black_list_PAS4 = $black_list_PAS4;
             $user->save();
+            $email = $user->email;
 
+            $user = User::find($id);
+            $appCode = "PAS1";
+            if($user->black_list_PAS1 == "true") {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
+            } else {
+               (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
+            }
+            $appCode = "PAS2";
+            if($user->black_list_PAS2 == "true") {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
+            } else {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
+            }
+            $appCode = "PAS4";
+            if($user->black_list_PAS4 == "true") {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
+            } else {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
+            }
             return response()->json(['success' => true, 'message' => 'Данные успешно обновлены.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Пользователь не найден.'], 404);
+        }
+    }
+
+    public function blackListSetFromOrderErrorUpdate($email, $app, $status)
+    {
+        // Найти пользователя по ID
+        $user = User::where("email", $email)->first();
+
+        if ($user) {
+            switch ($app) {
+                case "PAS1":
+                    $user->black_list_PAS1 = $status;
+                    break;
+                case "PAS2":
+                    $user->black_list_PAS2 = $status;
+                    break;
+                default:
+                    $user->black_list_PAS4 = $status;
+            }
+
+            $user->save();
+
+            $appCode = $app;
+            if($status == "true") {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
+            } else {
+                (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Данные успешно обновлены.'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Пользователь не найден.'
+            ], 404);
         }
     }
 

@@ -107,13 +107,21 @@ export default {
     methods: {
         getUsers() {
             axios.get('/users/all')
-                .then(
-                    res => {
-                        this.users = res.data;
-                        this.loading = false;
-                    }
-                )
+                .then(res => {
+                    this.users = res.data.map(user => ({
+                        ...user,
+                        black_list_PAS1: user.black_list_PAS1 === "true",
+                        black_list_PAS2: user.black_list_PAS2 === "true",
+                        black_list_PAS4: user.black_list_PAS4 === "true"
+                    }));
+                    this.loading = false;
+                })
+                .catch(error => {
+                    console.error("Ошибка при получении пользователей:", error);
+                    this.loading = false;
+                });
         },
+
 
         editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4) {
             axios.get('/users/blackListSet/'+ id + '/' + black_list_PAS1 + '/' + black_list_PAS2 + '/' + black_list_PAS4 )

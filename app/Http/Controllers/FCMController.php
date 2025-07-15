@@ -319,6 +319,67 @@ class FCMController extends Controller
         }
     }
 
+
+    public function toggleFirestoreBlackListEmail(string $email, string $action, string $appCode): JsonResponse
+    {
+        try {
+            // Выбор нужного файла учетных данных Firebase по коду приложения
+            $credentialsMap = [
+                'PAS1' => env('FIREBASE_CREDENTIALS_PAS_1'),
+                'PAS2' => env('FIREBASE_CREDENTIALS_PAS_2'),
+                'PAS4' => env('FIREBASE_CREDENTIALS_PAS_4'),
+            ];
+
+            if (!isset($credentialsMap[$appCode])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Неизвестный код приложения: $appCode"
+                ], 400);
+            }
+
+            $serviceAccountPath = $credentialsMap[$appCode];
+            Log::info("Firebase credentials [$appCode]: $serviceAccountPath");
+
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            $normalizedEmail = strtolower(trim($email));
+            $docId = md5($normalizedEmail); // безопасный ID (если email содержит спец. символы)
+            $document = $firestore->collection('blackList')->document($docId);
+
+            if ($action === 'add') {
+                $document->set([
+                    'email' => $normalizedEmail,
+                    'created_at' => now()->toDateTimeString()
+                ]);
+                Log::info("[$appCode] Email добавлен в blackList: $normalizedEmail");
+
+                return response()->json(['success' => true, 'message' => 'Email добавлен в черный список.']);
+            }
+
+            if ($action === 'remove') {
+                $document->delete();
+                Log::info("[$appCode] Email удален из blackList: $normalizedEmail");
+
+                return response()->json(['success' => true, 'message' => 'Email удален из черного списка.']);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Недопустимое действие. Разрешены: add, remove.'
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error("Ошибка Firestore blackList [$appCode][$action]: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка при работе с Firestore blackList.'
+            ], 500);
+        }
+    }
+
+
+
     public function deleteDocumentFromFirestore($uid)
     {
         // Найти запись в базе данных по $uid
