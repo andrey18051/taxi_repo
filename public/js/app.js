@@ -8761,10 +8761,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     },
     editUser: function editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/blackListSet/' + id + '/' + black_list_PAS1 + '/' + black_list_PAS2 + '/' + black_list_PAS4).then(function (ret) {
-        console.log(ret.data); // document.location.reload();
+      var _this2 = this;
 
-        window.alert("Данные обновлены");
+      var url = "/users/blackListSet/".concat(id, "/").concat(black_list_PAS1.toString(), "/").concat(black_list_PAS2.toString(), "/").concat(black_list_PAS4.toString());
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get(url).then(function (response) {
+        console.log(response.data);
+        window.alert("Данные обновлены: " + url); // Обновляем локальные данные, чтобы избежать перезагрузки страницы
+
+        var user = _this2.users.find(function (u) {
+          return u.id === id;
+        });
+
+        if (user) {
+          user.black_list_PAS1 = black_list_PAS1;
+          user.black_list_PAS2 = black_list_PAS2;
+          user.black_list_PAS4 = black_list_PAS4;
+        }
+      })["catch"](function (error) {
+        console.error("Ошибка при обновлении пользователя:", error.response ? error.response.data : error.message);
+        window.alert("Ошибка при обновлении данных: " + (error.response ? error.response.data.message : error.message));
       });
     }
   }
@@ -9001,9 +9016,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserComponent",
@@ -9090,7 +9102,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     editUser: function editUser(id, name, email, bonus, bonus_pay, card_pay, black_list) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email + '/' + bonus + '/' + bonus_pay + '/' + card_pay + '/' + black_list).then(function (ret) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/users/edit/' + id + '/' + name + '/' + email + '/' + bonus + '/' + bonus_pay + '/' + card_pay).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -47497,35 +47509,6 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
-                          _c("td", [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.filters.black_list.value,
-                                  expression: "filters.black_list.value",
-                                },
-                              ],
-                              staticClass: "form-input input-lg",
-                              staticStyle: { width: "100px" },
-                              attrs: { placeholder: "Select by black_list" },
-                              domProps: { value: _vm.filters.black_list.value },
-                              on: {
-                                input: function ($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.filters.black_list,
-                                    "value",
-                                    $event.target.value
-                                  )
-                                },
-                              },
-                            }),
-                          ]),
-                          _vm._v(" "),
                           _c("td", { staticStyle: { width: "30px" } }),
                           _vm._v(" "),
                           _c("td", { staticStyle: { width: "30px" } }),
@@ -47847,56 +47830,6 @@ var render = function () {
                               ]),
                               _vm._v(" "),
                               _c("td", [
-                                _c("input", {
-                                  directives: [
-                                    {
-                                      name: "model",
-                                      rawName: "v-model",
-                                      value: row.black_list,
-                                      expression: "row.black_list",
-                                    },
-                                  ],
-                                  staticStyle: { width: "30px" },
-                                  attrs: { type: "checkbox", id: "black_list" },
-                                  domProps: {
-                                    checked: Array.isArray(row.black_list)
-                                      ? _vm._i(row.black_list, null) > -1
-                                      : row.black_list,
-                                  },
-                                  on: {
-                                    change: function ($event) {
-                                      var $$a = row.black_list,
-                                        $$el = $event.target,
-                                        $$c = $$el.checked ? true : false
-                                      if (Array.isArray($$a)) {
-                                        var $$v = null,
-                                          $$i = _vm._i($$a, $$v)
-                                        if ($$el.checked) {
-                                          $$i < 0 &&
-                                            _vm.$set(
-                                              row,
-                                              "black_list",
-                                              $$a.concat([$$v])
-                                            )
-                                        } else {
-                                          $$i > -1 &&
-                                            _vm.$set(
-                                              row,
-                                              "black_list",
-                                              $$a
-                                                .slice(0, $$i)
-                                                .concat($$a.slice($$i + 1))
-                                            )
-                                        }
-                                      } else {
-                                        _vm.$set(row, "black_list", $$c)
-                                      }
-                                    },
-                                  },
-                                }),
-                              ]),
-                              _vm._v(" "),
-                              _c("td", [
                                 _c(
                                   "div",
                                   {
@@ -47926,8 +47859,7 @@ var render = function () {
                                                   row.email,
                                                   row.bonus,
                                                   row.bonus_pay,
-                                                  row.card_pay,
-                                                  row.black_list
+                                                  row.card_pay
                                                 )
                                               },
                                             },
@@ -48150,15 +48082,6 @@ var render = function () {
                       attrs: { sortKey: "card_pay" },
                     },
                     [_vm._v("Карта")]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-th",
-                    {
-                      staticStyle: { width: "30px" },
-                      attrs: { sortKey: "black_list" },
-                    },
-                    [_vm._v("Black list")]
                   ),
                 ],
                 1

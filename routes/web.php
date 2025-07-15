@@ -287,7 +287,7 @@ Route::get('/show/{id}', [UserController::class,'show']);
 Route::get('/setForAllPermissionsTrue', [UserController::class,'setForAllPermissionsTrue']);
 Route::get('/users/destroy/{id}', [UserController::class,'destroy']);
 Route::get('/users/destroyEmail/{email}', [UserController::class,'destroyEmail']);
-Route::get('/users/edit/{id}/{name}/{email}/{bonus}/{bonus_pay}/{card_pay}/{black_list}', [UserController::class,'edit']);
+Route::get('/users/edit/{id}/{name}/{email}/{bonus}/{bonus_pay}/{card_pay}', [UserController::class,'edit']);
 
 Route::get('/users/show/{id}', [UserController::class,'show']);
 
@@ -1295,8 +1295,7 @@ Route::get('/fixIncorrectNameEmail', [WebOrderController::class, 'fixIncorrectNa
 Route::get('/android/verifyBlackListUser/{email}/{androidDom}', [UniversalAndroidFunctionController::class, 'verifyBlackListUser'])
     ->name('verifyBlackListUser');
 
-Route::get('/users/blackListSet/{id}/{black_list_PAS1}/{black_list_PAS2}/{black_list_PAS4}', [UserController::class, 'blackListSet'])
-    ->name('blackListSet');
+Route::get('/users/blackListSet/{id}/{black_list_PAS1}/{black_list_PAS2}/{black_list_PAS4}', [UserController::class, 'blackListSet']);
 
 /**
  * Universal

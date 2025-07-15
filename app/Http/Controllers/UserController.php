@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -61,7 +62,7 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id, $name, $email, $bonus, $bonus_pay, $card_pay, $black_list)
+    public function edit($id, $name, $email, $bonus, $bonus_pay, $card_pay)
     {
         Log::info("bonus_pay  $bonus_pay");
         Log::info("card_pay  $card_pay");
@@ -77,11 +78,8 @@ class UserController extends Controller
         if ($card_pay === "false" || $card_pay === "0" || $card_pay === "null") {
             $c_pay = 0;
         }
-        $b_list = 1;
 
-        if ($black_list === "false" || $black_list === "0" || $black_list === "null") {
-            $b_list = null;
-        }
+
         Log::info("bon_pay  $bon_pay");
         Log::info("c_pay  $c_pay");
         $user = User::find($id);
@@ -91,7 +89,6 @@ class UserController extends Controller
         $user->bonus = $bonus;
         $user->bonus_pay = $bon_pay;
         $user->card_pay = $c_pay;
-        $user->black_list = $b_list;
         $user->save();
 
         return response()->json(User::find($id));
@@ -193,44 +190,40 @@ class UserController extends Controller
             return response()->json(['error' => 'Произошла ошибка при удалении пользователя'], 500);
         }
     }
-    public function blackListSet(
-        $id,
-        $black_list_PAS1,
-        $black_list_PAS2,
-        $black_list_PAS4
-    ) {
-        // Предположим, что у тебя есть модель User
-        $user = User::find($id);
+    public function blackListSet($id, $black_list_PAS1, $black_list_PAS2, $black_list_PAS4)
+    {
+        try {
 
-        if ($user) {
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'Пользователь не найден.'], 404);
+            }
+
             $user->black_list_PAS1 = $black_list_PAS1;
             $user->black_list_PAS2 = $black_list_PAS2;
             $user->black_list_PAS4 = $black_list_PAS4;
             $user->save();
             $email = $user->email;
 
-            $user = User::find($id);
-            $appCode = "PAS1";
-            if($user->black_list_PAS1 == "true") {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
-            } else {
-               (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
+            $appCodes = ['PAS1', 'PAS2', 'PAS4'];
+            foreach ($appCodes as $appCode) {
+                $field = "black_list_$appCode";
+                if ($user->$field == "true") {
+                    (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);
+                } else {
+                    (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode);
+                }
             }
-            $appCode = "PAS2";
-            if($user->black_list_PAS2 == "true") {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
-            } else {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
-            }
-            $appCode = "PAS4";
-            if($user->black_list_PAS4 == "true") {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
-            } else {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
-            }
+
             return response()->json(['success' => true, 'message' => 'Данные успешно обновлены.']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Пользователь не найден.'], 404);
+        } catch (\Exception $e) {
+            \Log::error("Ошибка в blackListSet: " . $e->getMessage(), [
+                'id' => $id,
+                'black_list_PAS1' => $black_list_PAS1,
+                'black_list_PAS2' => $black_list_PAS2,
+                'black_list_PAS4' => $black_list_PAS4,
+            ]);
+            return response()->json(['success' => false, 'message' => 'Внутренняя ошибка сервера.'], 500);
         }
     }
 

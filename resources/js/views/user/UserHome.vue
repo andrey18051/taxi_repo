@@ -29,7 +29,6 @@
                 <v-th sortKey="bonus" style="width: 100px">Bonus_pas_4</v-th>
                 <v-th sortKey="bonus_pay" style="width: 30px">Бонус</v-th>
                 <v-th sortKey="card_pay" style="width: 30px">Карта</v-th>
-                <v-th sortKey="black_list" style="width: 30px">Black list</v-th>
                 </thead>
                 <tbody slot="body" slot-scope="{displayData}">
                 <tr>
@@ -41,7 +40,7 @@
                     <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_pas_1.value"  placeholder="Select by bonus"></td>
                     <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_pas_2.value"  placeholder="Select by bonus"></td>
                     <td><input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_pas_4.value"  placeholder="Select by bonus"></td>
-                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.black_list.value"  placeholder="Select by black_list"></td>
+
                     <td style="width: 30px"></td>
                     <td style="width: 30px"></td>
                     <td style="width: 100px"></td>
@@ -61,9 +60,7 @@
                     <td>
                         <input type="checkbox" id="card_pay" style="width: 30px" v-model="row.card_pay" >
                     </td>
-                    <td>
-                        <input type="checkbox" id="black_list" style="width: 30px" v-model="row.black_list" >
-                    </td>
+
 
 
 
@@ -73,7 +70,7 @@
                     <td>
                         <div  class="container-fluid" style="width:100px">
                             <div class="btn-group" role="group">
-                                <button class="btn btn-success" @click="editUser(row.id, row.name, row.email, row.bonus, row.bonus_pay, row.card_pay, row.black_list)" style="margin-left: 5px">
+                                <button class="btn btn-success" @click="editUser(row.id, row.name, row.email, row.bonus, row.bonus_pay, row.card_pay)" style="margin-left: 5px">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                         <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                                     </svg>
@@ -160,7 +157,7 @@ export default {
                 });
         },
         editUser(id, name, email, bonus, bonus_pay, card_pay, black_list) {
-            axios.get('/users/edit/'+ id +'/'+name+'/'+email+'/'+ bonus + '/' + bonus_pay + '/' + card_pay+ '/' + black_list)
+            axios.get('/users/edit/'+ id +'/'+name+'/'+email+'/'+ bonus + '/' + bonus_pay + '/' + card_pay)
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();

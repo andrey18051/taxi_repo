@@ -124,13 +124,24 @@ export default {
 
 
         editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4) {
-            axios.get('/users/blackListSet/'+ id + '/' + black_list_PAS1 + '/' + black_list_PAS2 + '/' + black_list_PAS4 )
-                .then(function(ret) {
-                    console.log(ret.data);
-                    // document.location.reload();
-                    window.alert("Данные обновлены");
+            const url = `/users/blackListSet/${id}/${black_list_PAS1.toString()}/${black_list_PAS2.toString()}/${black_list_PAS4.toString()}`;
+            axios.get(url)
+                .then(response => {
+                    console.log(response.data);
+                    window.alert("Данные обновлены: " + url);
+                    // Обновляем локальные данные, чтобы избежать перезагрузки страницы
+                    const user = this.users.find(u => u.id === id);
+                    if (user) {
+                        user.black_list_PAS1 = black_list_PAS1;
+                        user.black_list_PAS2 = black_list_PAS2;
+                        user.black_list_PAS4 = black_list_PAS4;
+                    }
                 })
-        },
+                .catch(error => {
+                    console.error("Ошибка при обновлении пользователя:", error.response ? error.response.data : error.message);
+                    window.alert("Ошибка при обновлении данных: " + (error.response ? error.response.data.message : error.message));
+                });
+        }
 
     }
 }
