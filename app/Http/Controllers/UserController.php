@@ -227,43 +227,98 @@ class UserController extends Controller
         }
     }
 
+    use Illuminate\Support\Facades\Log;
+
     public function blackListSetFromOrderErrorUpdate($email, $app, $status)
     {
-        // Найти пользователя по ID
-        $user = User::where("email", $email)->first();
+        Log::info('Запрос на обновление чёрного списка.', [
+            'email' => $email,
+            'app' => $app,
+            'status' => $status
+        ]);
 
-        if ($user) {
-            switch ($app) {
-                case "PAS1":
-                    $user->black_list_PAS1 = $status;
-                    break;
-                case "PAS2":
-                    $user->black_list_PAS2 = $status;
-                    break;
-                default:
-                    $user->black_list_PAS4 = $status;
-            }
-
-            $user->save();
-
-            $appCode = $app;
-            if($status == "true") {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);    // добавить
-            } else {
-                (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode); // удалить
-            }
+        // Проверка валидности статуса
+        if (!in_array($status, ['true', 'false'], true)) {
+            Log::warning('Неверный формат значения status', [
+                'status' => $status
+            ]);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Данные успешно обновлены.'
+                'success' => false,
+                'message' => 'Неверное значение статуса. Допустимы только "true" или "false".'
+            ], 400);
+        }
+
+        // Поиск пользователя
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            Log::warning('Пользователь не найден при обновлении чёрного списка.', [
+                'email' => $email
             ]);
-        } else {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Пользователь не найден.'
             ], 404);
         }
+
+        // Обновление нужного поля
+        $fieldUpdated = null;
+
+        switch ($app) {
+            case 'PAS1':
+                $user->black_list_PAS1 = $status;
+                $fieldUpdated = 'black_list_PAS1';
+                break;
+            case 'PAS2':
+                $user->black_list_PAS2 = $status;
+                $fieldUpdated = 'black_list_PAS2';
+                break;
+            default:
+                $user->black_list_PAS4 = $status;
+                $fieldUpdated = 'black_list_PAS4';
+                $app = 'PAS4'; // Поддержка корректного кода приложения
+                break;
+        }
+
+        try {
+            $user->save();
+
+            Log::info('Обновление пользователя успешно.', [
+                'email' => $email,
+                'обновлённое_поле' => $fieldUpdated,
+                'значение' => $status
+            ]);
+
+            $fcmController = new FCMController();
+            $action = $status === 'true' ? 'add' : 'remove';
+
+            $fcmController->toggleFirestoreBlackListEmail($email, $action, $app);
+
+            Log::info('Firestore чёрный список успешно синхронизирован.', [
+                'email' => $email,
+                'action' => $action,
+                'app' => $app
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Данные успешно обновлены.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Ошибка при сохранении пользователя или синхронизации с Firestore.', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Произошла ошибка при обновлении данных.'
+            ], 500);
+        }
     }
+
 
     public function userPas_2()
     {
