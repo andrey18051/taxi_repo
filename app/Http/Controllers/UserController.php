@@ -105,6 +105,7 @@ class UserController extends Controller
         $user = User::where("email", $email)->first();
          if ($user) {
              $result = ["checkUser" => true];
+             (new FCMController())->checkEmailInAllFirestoreBlackLists($email);
          }
 
         return $result;
