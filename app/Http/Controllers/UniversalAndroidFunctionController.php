@@ -4433,10 +4433,12 @@ class UniversalAndroidFunctionController extends Controller
             $username = "user_" . $newUser->id;
             $user->name = $username;
             $user->save();
+            (new FCMController())->checkEmailInAllFirestoreBlackLists($email);
 
 //            (new BonusBalanceController)->recordsAdd(0, $user->id, 1, 1);
             return ["user_name" => $username];
         } else {
+            (new FCMController())->checkEmailInAllFirestoreBlackLists($email);
             return ["user_name" => "no_name"];
         }
     }

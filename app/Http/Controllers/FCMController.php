@@ -379,6 +379,75 @@ class FCMController extends Controller
         }
     }
 
+    public function checkEmailInAllFirestoreBlackLists(string $email): JsonResponse
+    {
+        try {
+            $credentialsMap = [
+                'PAS1' => env('FIREBASE_CREDENTIALS_PAS_1'),
+                'PAS2' => env('FIREBASE_CREDENTIALS_PAS_2'),
+                'PAS4' => env('FIREBASE_CREDENTIALS_PAS_4'),
+            ];
+
+            $fieldMap = [
+                'PAS1' => 'black_list_PAS1',
+                'PAS2' => 'black_list_PAS2',
+                'PAS4' => 'black_list_PAS4',
+            ];
+
+            $normalizedEmail = strtolower(trim($email));
+            $docId = md5($normalizedEmail);
+
+            // Найти пользователя по email
+            $user = \App\Models\User::where('email', $normalizedEmail)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Пользователь с email [$normalizedEmail] не найден.",
+                ], 404);
+            }
+
+            $results = [];
+
+            foreach ($credentialsMap as $code => $serviceAccountPath) {
+                try {
+                    $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+                    $firestore = $firebase->createFirestore()->database();
+
+                    $document = $firestore->collection('blackList')->document($docId);
+                    $snapshot = $document->snapshot();
+                    $exists = $snapshot->exists();
+                    $resultText = $exists ? 'true' : 'false';
+
+                    $fieldName = $fieldMap[$code];
+                    $user->$fieldName = $resultText;
+
+                    $results[$code] = $resultText;
+                    Log::info("[$code] Проверка: {$normalizedEmail} => {$resultText}");
+                } catch (\Exception $e) {
+                    Log::error("Ошибка при проверке [$code]: " . $e->getMessage());
+                    $results[$code] = 'error';
+                    // В случае ошибки — можно записать 'error' или оставить старое значение
+                }
+            }
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'email' => $normalizedEmail,
+                'results' => $results,
+                'message' => 'Проверка завершена.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Общая ошибка при проверке email в Firestore: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Внутренняя ошибка сервера.',
+            ], 500);
+        }
+    }
 
 
     public function deleteDocumentFromFirestore($uid)
