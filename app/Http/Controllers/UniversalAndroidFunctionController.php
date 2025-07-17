@@ -454,8 +454,9 @@ class UniversalAndroidFunctionController extends Controller
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             $orderweb = Orderweb::where("dispatching_order_uid", $uid_history->uid_bonusOrderHold)->first();
-            $old_auto = $orderweb->auto;
+
             if ($orderweb) {
+                $old_auto = $orderweb->auto;
                 $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
 
                 $orderweb->save();
@@ -3238,8 +3239,8 @@ class UniversalAndroidFunctionController extends Controller
         $canceledNoServerCity = $this->canceledNoServerCity($uid_bonusOrderHold);
 
 
-        $messageAdmin = "Canceled uid_history->cancel $uid_history->cancel";
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//        $messageAdmin = "Canceled uid_history->cancel $uid_history->cancel";
+//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         //Выход по 1 минуте или нажатию отмены или по безсерверному городу
         if ($canceledOneMinute || $canceledNoServerCity || $uid_history->cancel == "1") {
             if ($lastStatusBonus !== "Canceled") {
@@ -3283,8 +3284,8 @@ class UniversalAndroidFunctionController extends Controller
                     $orderweb->closeReason = "1";
                     $orderweb->save();
 
-                    $uid_history->cancel = "1";
-                    $uid_history->save();
+//                    $uid_history->cancel = "1";
+//                    $uid_history->save();
 
                     $email = $orderweb->email;
 
@@ -6314,6 +6315,7 @@ class UniversalAndroidFunctionController extends Controller
         $messageAdmin = "Параметры проверки стоимости" .
             json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        $url =  $url . "/api/weborders";
 
         $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
             $url,
@@ -7119,35 +7121,47 @@ class UniversalAndroidFunctionController extends Controller
 
         // Выбор приложения по комментарию
 
-        $connectAPI = (new AndroidTestOSMController)->connectAPIAppOrder($city, $application);
-        $authorizationChoiceArr = (new AndroidTestOSMController)->authorizationChoiceApp($pay_method, $city, $connectAPI, $application);
+//        $connectAPI = (new AndroidTestOSMController)->connectAPIAppOrder($city, $application);
+        $service = new CityAppOrderService();
+        $url = $service->cityOnlineOrder($city, $application);
+        $connectAPI = $service->cityOnlineOrder($city, $application);
+
+        $authorizationChoiceArr = (new AndroidTestOSMController)->authorizationChoiceApp($pay_method, $city, $url, $application);
 
         $authorization = $authorizationChoiceArr["authorization"];
         $authorizationBonus = $authorizationChoiceArr["authorizationBonus"];
         $authorizationDouble = $authorizationChoiceArr["authorizationDouble"];
         $payment_type = $authorizationChoiceArr["payment_type"];
 
-        $identificationId = $orderMemory->identificationId;
-        $apiVersion = $orderMemory->apiVersion;
-        $url = $orderMemory->connectAPI;
+//        $identificationId = $orderMemory->identificationId;
+//        $apiVersion = $orderMemory->apiVersion;
+
+        $identificationId = (new AndroidTestOSMController)->identificationId($application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $url, $application);
+
+//        $url = $orderMemory->connectAPI;
+
+        $url =  $url . "/api/weborders";
+
         $parameter = json_decode($orderMemory->response, true);
 
-        $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "Параметры проверки стоимости" .
+            json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-//        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
-//            $url,
-//            $parameter,
-//            $authorization,
-//            $identificationId,
-//            $apiVersion,
-//            $addCost,
-//            $order
-//        );
-//
-//
-//        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
+        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $addCost,
+            $order
+        );
+
+
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
+//        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
 
 //        $parameter['add_cost'] = (int) $order->attempt_20 + (int)$addCost+ $addCostBalance;
 
@@ -7156,10 +7170,12 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
-        Log::info("Параметры API запроса startAddCostCardBottomCreat: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
+        Log::info("Параметры API запроса startAddCostCardBottomCreat: URL - {$url},
+         API Version - {$apiVersion}, ID - {$identificationId}");
 
 //        try {
-            Log::info("Отправка POST-запроса с параметрами startAddCostCardBottomCreat: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
+            Log::info("Отправка POST-запроса с параметрами startAddCostCardBottomCreat: "
+                . json_encode($parameter, JSON_UNESCAPED_UNICODE));
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
                 $parameter,
@@ -7249,9 +7265,9 @@ class UniversalAndroidFunctionController extends Controller
                         "response" => $Message
                     ], 200);
                 }
-                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-                $uid_history->cancel = true;
-                $uid_history->save();
+//                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+//                $uid_history->cancel = true;
+//                $uid_history->save();
 
 
                 $messageAdmin = "Add cost webordersCancelDouble \n uid $uid \n uid_Double $uid_Double \n payment_type $payment_type \n application $application" ;
