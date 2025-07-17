@@ -6229,6 +6229,9 @@ class UniversalAndroidFunctionController extends Controller
                 break;
             case "city_odessa":
                 $city = "Odessa";
+                if($order->server == "http://188.190.245.102:7303") {
+                    $city = "OdessaTest  ";
+                }
                 break;
             case "city_zaporizhzhia":
                 $city = "Zaporizhzhia";
@@ -6290,13 +6293,26 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::info("Город изменен с {$originalCity} на {$city}");
 
-        $authorization = $orderMemory->authorization;
-        $identificationId = $orderMemory->identificationId;
-        $apiVersion = $orderMemory->apiVersion;
-        $url = $orderMemory->connectAPI;
+//        $authorization = $orderMemory->authorization;
+//        $identificationId = $orderMemory->identificationId;
+//        $apiVersion = $orderMemory->apiVersion;
+//        $url = $orderMemory->connectAPI;
+
+        $service = new CityAppOrderService();
+        $url = $service->cityOnlineOrder($city, $application);
+
+        $authorizationChoiceArr = (new AndroidTestOSMController)
+            ->authorizationChoiceApp('nal_payment', $city, $url, $application);
+
+        $authorization = $authorizationChoiceArr["authorization"];
+
+        $identificationId = (new AndroidTestOSMController)->identificationId($application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $url, $application);
+
         $parameter = json_decode($orderMemory->response, true);
 
-        $messageAdmin = "Параметры проверки стоимости" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $messageAdmin = "Параметры проверки стоимости" .
+            json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
