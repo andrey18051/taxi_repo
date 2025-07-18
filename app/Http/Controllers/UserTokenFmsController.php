@@ -37,44 +37,48 @@ class UserTokenFmsController extends Controller
     public function store($email, $app, $token)
     {
         $user = User::where("email", $email)->first();
-        $userToken = UserTokenFmsS::where("user_id", $user->id)->first();
-        if ($userToken == null) {
-            $userToken = new UserTokenFmsS();
+        if ($user) {
+            $userToken = UserTokenFmsS::where("user_id", $user->id)->first();
+            if ($userToken == null) {
+                $userToken = new UserTokenFmsS();
+            }
+            $userToken->user_id = $user->id;
+            switch ($app) {
+                case "PAS1":
+                    $userToken->token_app_pas_1 = $token;
+                    break;
+                case "PAS2":
+                    $userToken->token_app_pas_2 = $token;
+                    break;
+                default:
+                    $userToken->token_app_pas_4 = $token;
+            }
+            $userToken->save();
         }
-        $userToken->user_id = $user->id;
-        switch ($app) {
-            case "PAS1":
-                $userToken->token_app_pas_1 = $token;
-                break;
-            case "PAS2":
-                $userToken->token_app_pas_2 = $token;
-                break;
-            default:
-                $userToken->token_app_pas_4 = $token;
-        }
-        $userToken->save();
     }
 
     public function storeLocal($email, $app, $token, $local)
     {
         $user = User::where("email", $email)->first();
-        $userToken = UserTokenFmsS::where("user_id", $user->id)->first();
-        if ($userToken == null) {
-            $userToken = new UserTokenFmsS();
+        if ($user) {
+            $userToken = UserTokenFmsS::where("user_id", $user->id)->first();
+            if ($userToken == null) {
+                $userToken = new UserTokenFmsS();
+            }
+            $userToken->user_id = $user->id;
+            switch ($app) {
+                case "PAS1":
+                    $userToken->token_app_pas_1 = $token;
+                    break;
+                case "PAS2":
+                    $userToken->token_app_pas_2 = $token;
+                    break;
+                default:
+                    $userToken->token_app_pas_4 = $token;
+            }
+            $userToken->save();
+            (new UserLocalAppController)->store($email, $app, $local);
         }
-        $userToken->user_id = $user->id;
-        switch ($app) {
-            case "PAS1":
-                $userToken->token_app_pas_1 = $token;
-                break;
-            case "PAS2":
-                $userToken->token_app_pas_2 = $token;
-                break;
-            default:
-                $userToken->token_app_pas_4 = $token;
-        }
-        $userToken->save();
-        (new UserLocalAppController)->store($email, $app, $local);
     }
 
     /**
