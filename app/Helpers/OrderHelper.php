@@ -149,6 +149,79 @@ class OrderHelper
         return $addCostBalance;
     }
 
+    public static function calculateCostBalanceBeforeOrder(
+        string $url,
+        array  $parameter,
+        string $authorization,
+        string $identificationId,
+        string $apiVersion,
+        string $cost_correction,
+        string $clientCost
+    ): int {
+
+        $urlCost = $url . "/cost";
+
+        // Лог администратору перед запросом
+        $messageAdmin = "
+
+        urlCost: $urlCost
+        parameter: " . json_encode($parameter, JSON_UNESCAPED_UNICODE) . "
+        cost_correction: $cost_correction
+
+        Параметры: " . json_encode($parameter, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        try {
+            $responseCost = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $urlCost,
+                $parameter,
+                $authorization,
+                $identificationId,
+                $apiVersion
+            );
+
+            if ($responseCost && method_exists($responseCost, 'successful')
+                && $responseCost->successful()
+                && $responseCost->status() == 200
+            ) {
+                Log::info("Успешный ответ API с кодом 200");
+
+                $responseCostArr = $responseCost->json();
+
+                $orderNewCost = $responseCostArr["order_cost"];
+
+                $addCostBalanceClear = (int)$clientCost - (int)$orderNewCost + (int)$parameter['add_cost'];
+                $addCostBalance = $addCostBalanceClear - (int)$cost_correction;
+
+                $responseCostArrAnswer = "Полный ответ: " .
+                    json_encode($responseCostArr, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+                $messageAdmin = "После перепроверки базовая стоимость:
+                Стоимость клиента: $clientCost
+                Новая: $orderNewCost
+                addCostBalanceClear: $addCostBalanceClear
+                cost_correction: $cost_correction
+                Корректировка нового заказа: $addCostBalance
+                $responseCostArrAnswer";
+
+            } else {
+                $body = $responseCost && method_exists($responseCost, 'body') ? $responseCost->body() : "нет ответа";
+                $messageAdmin = "Ошибка при получении стоимости. Детали: $body";
+                Log::warning($messageAdmin);
+                return 0; // Возвращаем 0, т.е. без корректировки
+            }
+
+        } catch (\Throwable $e) {
+            $messageAdmin = "Исключение при запросе новой стоимости: " . $e->getMessage();
+            Log::error($messageAdmin);
+            return 0; // Возвращаем 0 при ошибке
+        }
+
+        (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        return $addCostBalance;
+    }
 
 
 

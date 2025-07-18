@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CacheHandler;
+use App\Helpers\OrderHelper;
 use App\Jobs\AutoCancelJob;
 use App\Jobs\SearchOrderToDeleteJob;
 use App\Jobs\StartStatusPaymentReview;
@@ -7746,6 +7747,17 @@ class AndroidTestOSMController extends Controller
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $responseDoubleArr = null;
         $responseBonusArr = null;
+
+        $parameter['add_cost'] = OrderHelper::calculateCostBalanceBeforeOrder(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $cost_correction,
+            $clientCost
+        );
+
 
         if ($payment_type == 0) {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
