@@ -6241,55 +6241,55 @@ class UniversalAndroidFunctionController extends Controller
                 $city = "Dnipropetrovsk Oblast";
                 break;
             case "city_lviv":
-                $city = "Lviv";
+                $city = "OdessaTest";
                 break;
             case "city_ivano_frankivsk":
-                $city = "Ivano_frankivsk";
+                $city = "OdessaTest";
                 break;
             case "city_vinnytsia":
-                $city = "Vinnytsia";
+                $city = "OdessaTest";
                 break;
             case "city_poltava":
-                $city = "Poltava";
+                $city = "OdessaTest";
                 break;
             case "city_sumy":
-                $city = "Sumy";
+                $city = "OdessaTest";
                 break;
             case "city_kharkiv":
-                $city = "Kharkiv";
+                $city = "OdessaTest";
                 break;
             case "city_chernihiv":
-                $city = "Chernihiv";
+                $city = "OdessaTest";
                 break;
             case "city_rivne":
-                $city = "Rivne";
+                $city = "OdessaTest";
                 break;
             case "city_ternopil":
-                $city = "Ternopil";
+                $city = "OdessaTest";
                 break;
             case "city_khmelnytskyi":
-                $city = "Khmelnytskyi";
+                $city = "OdessaTest";
                 break;
             case "city_zakarpattya":
-                $city = "Zakarpattya";
+                $city = "OdessaTest";
                 break;
             case "city_zhytomyr":
-                $city = "Zhytomyr";
+                $city = "OdessaTest";
                 break;
             case "city_kropyvnytskyi":
-                $city = "Kropyvnytskyi";
+                $city = "OdessaTest";
                 break;
             case "city_mykolaiv":
-                $city = "Mykolaiv";
+                $city = "OdessaTest";
                 break;
             case "city_chernivtsi":
-                $city = "Chernivtsi";
+                $city = "OdessaTest";
                 break;
             case "city_lutsk":
-                $city = "Lutsk";
+                $city = "OdessaTest";
                 break;
             default:
-                $city = "all";
+                $city = "OdessaTest";
         }
 
         Log::info("Город изменен с {$originalCity} на {$city}");
@@ -6334,7 +6334,7 @@ class UniversalAndroidFunctionController extends Controller
 
         Log::info("Параметры API запроса: URL - {$url}, API Version - {$apiVersion}, ID - {$identificationId}");
 
-//        try {
+        try {
             Log::info("Отправка POST-запроса с параметрами: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
             $response = Http::withHeaders([
                 "Authorization" => $authorization,
@@ -6420,13 +6420,13 @@ class UniversalAndroidFunctionController extends Controller
                     "response" => $Message
                 ], 200);
             }
-//        } catch (\Exception $e) {
-//            Log::error("Поймано исключение: 212 " . $e->getMessage());
-//            (new MessageSentController)->sentMessageAdmin("Поймано исключение: 212 " . $e->getMessage());
-//            return response()->json([
-//                "response" => "401"
-//            ], 200);
-//        }
+        } catch (\Exception $e) {
+            Log::error("Поймано исключение: 212 " . $e->getMessage());
+            (new MessageSentController)->sentMessageAdmin("Поймано исключение: 212 " . $e->getMessage());
+            return response()->json([
+                "response" => "401"
+            ], 200);
+        }
     }
 
     /**
