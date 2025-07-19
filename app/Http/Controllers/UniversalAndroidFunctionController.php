@@ -7119,8 +7119,80 @@ class UniversalAndroidFunctionController extends Controller
         }
         Log::info("Приложение выбрано startAddCostCardBottomCreat: " . $application);
 
-        // Выбор приложения по комментарию
+        // Переписываем город для определенных случаев
+        $originalCity = $order->city;
+        switch ($originalCity) {
+            case "city_kiev":
+                $city = "Kyiv City";
+                break;
+            case "city_cherkassy":
+                $city = "Cherkasy Oblast";
+                break;
+            case "city_odessa":
+                $city = "Odessa";
+                if($order->server == "http://188.190.245.102:7303") {
+                    $city = "OdessaTest  ";
+                }
+                break;
+            case "city_zaporizhzhia":
+                $city = "Zaporizhzhia";
+                break;
+            case "city_dnipro":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "city_lviv":
+                $city = "OdessaTest";
+                break;
+            case "city_ivano_frankivsk":
+                $city = "OdessaTest";
+                break;
+            case "city_vinnytsia":
+                $city = "OdessaTest";
+                break;
+            case "city_poltava":
+                $city = "OdessaTest";
+                break;
+            case "city_sumy":
+                $city = "OdessaTest";
+                break;
+            case "city_kharkiv":
+                $city = "OdessaTest";
+                break;
+            case "city_chernihiv":
+                $city = "OdessaTest";
+                break;
+            case "city_rivne":
+                $city = "OdessaTest";
+                break;
+            case "city_ternopil":
+                $city = "OdessaTest";
+                break;
+            case "city_khmelnytskyi":
+                $city = "OdessaTest";
+                break;
+            case "city_zakarpattya":
+                $city = "OdessaTest";
+                break;
+            case "city_zhytomyr":
+                $city = "OdessaTest";
+                break;
+            case "city_kropyvnytskyi":
+                $city = "OdessaTest";
+                break;
+            case "city_mykolaiv":
+                $city = "OdessaTest";
+                break;
+            case "city_chernivtsi":
+                $city = "OdessaTest";
+                break;
+            case "city_lutsk":
+                $city = "OdessaTest";
+                break;
+            default:
+                $city = "OdessaTest";
+        }
 
+        Log::info("Город изменен с {$originalCity} на {$city}");
 //        $connectAPI = (new AndroidTestOSMController)->connectAPIAppOrder($city, $application);
         $service = new CityAppOrderService();
         $url = $service->cityOnlineOrder($city, $application);
