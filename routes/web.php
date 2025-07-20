@@ -1559,3 +1559,14 @@ Route::get('/findUser/{email}', [UserController::class, 'findUser'])->name('find
 Route::get('/sendNotificationAuto/{body}/{app}/{user_id}', [FCMController::class, 'sendNotificationAuto'])->name('sendNotificationAuto');
 Route::get('/checkEmailInAllFirestoreBlackLists/{email}', [FCMController::class, 'checkEmailInAllFirestoreBlackLists'])->name('checkEmailInAllFirestoreBlackLists');
 Route::get('/geo/city/{lat}/{lon}', [UniversalAndroidFunctionController::class, 'detectCity']);
+
+/**
+ * Logs
+ */
+Route::get('/logs/download', [LogController::class, 'downloadLog'])
+    ->name('logs.download');
+
+Route::get('/logs/view', [LogController::class, 'viewLog'])
+    ->name('logs.view');
+
+Route::get('/logs/clear', [LogController::class, 'clearLogs'])->name('logs.clear');

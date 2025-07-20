@@ -32,6 +32,7 @@ use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -11120,7 +11121,156 @@ class AndroidTestOSMController extends Controller
 
             }
         }
-    }/**
+    }
+    /**
+     * @throws \Exception
+     */
+//    public function historyUIDStatusNew(
+//        $uid,
+//        $city,
+//        $application
+//    ) {
+//
+//        $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
+//        Log::debug("1 historyUIDStatus uid $uid");
+//
+//        if (!$orderweb_uid) {
+//
+//            $close_reason = -1;
+//            $execution_status= "SearchesForCar";
+//            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
+//            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//            return response()->json([
+//                'close_reason' => $close_reason,
+//                'execution_status' => $execution_status,
+//            ]);
+//        } else {
+//            Log::info('Поиск записи с dispatching_order_uid',
+//                ['
+//                    uid' => $uid,
+//                    'orderweb_uid' => $orderweb_uid,
+//                    'closeReason' => $orderweb_uid->closeReason
+//                ]);
+//
+//        }
+//
+//        if (in_array($orderweb_uid->closeReason,  ['101', '102', '103', '104'] )) {
+//            $storedData = $orderweb_uid->auto;
+//
+//            $dataDriver = json_decode($storedData, true);
+//
+//            $color = $dataDriver["color"];
+//            $brand = $dataDriver["brand"];
+//            $model = $dataDriver["model"];
+//            $number = $dataDriver["number"];
+//            $phoneNumber = $dataDriver["phoneNumber"];
+//
+//            $auto = "$number, цвет $color  $brand $model. ";
+//
+//
+//            // Обновление полей
+//            $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
+//            $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
+//            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point; // Замените на ваш существующий $phoneNumber
+//            $responseData['execution_status'] = "";
+//
+//            $responseData['close_reason'] = $orderweb_uid->closeReason;
+//            return $responseData;
+//        } else {
+//
+//            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+//
+//            $connectAPI = $orderweb_uid->server;
+//            if (!$uid_history) {
+//
+//                switch ($city) {
+//                    case "Lviv":
+//                    case "Ivano_frankivsk":
+//                    case "Vinnytsia":
+//                    case "Poltava":
+//                    case "Sumy":
+//                    case "Kharkiv":
+//                    case "Chernihiv":
+//                    case "Rivne":
+//                    case "Ternopil":
+//                    case "Khmelnytskyi":
+//                    case "Zakarpattya":
+//                    case "Zhytomyr":
+//                    case "Kropyvnytskyi":
+//                    case "Mykolaiv":
+//                    case "Chernivtsi":
+//                    case "Lutsk":
+//
+//                        $city = "OdessaTest";
+//                        break;
+//                    case "foreign countries":
+//                        $city = "Kyiv City";
+//                        break;
+//                }
+//                //Поиск смены номеров заказов
+//                Log::debug("0 historyUIDStatus uid $uid");
+//                $uid = (new MemoryOrderChangeController)->show($uid);
+//
+//                Log::debug("1 historyUIDStatus uid $uid");
+//
+//
+//
+//                //Запрос статуса одиночного заказа
+//                $authorization = (new UniversalAndroidFunctionController)
+//                    ->authorizationApp($city, $connectAPI, $application);
+//                $url = $connectAPI . '/api/weborders/' . $uid;
+//                try {
+//                    $response = Http::withHeaders([
+//                        "Authorization" => $authorization,
+//                        "X-WO-API-APP-ID" => self::identificationId($application),
+//                        "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+//                    ])->get($url);
+//
+//                    // Логируем тело ответа
+//                    Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
+//
+//                    // Проверяем успешность ответа
+//                    if ($response->successful()) {
+//                        // Обрабатываем успешный ответ
+//                        $response_arr = json_decode($response, true);
+//                        Log::debug("$url: ", $response_arr);
+////                        $orderweb_uid->auto = null;
+////                        if ($response_arr["order_car_info"] != null) {
+////                            $orderweb_uid->auto = $response_arr["order_car_info"];
+////                        }
+//
+//                        $orderweb_uid->auto = $response_arr["order_car_info"];
+//
+//                        $orderweb_uid->closeReason = $response_arr["close_reason"];
+//                        $orderweb_uid->save();
+//                        return $response;
+//
+//                    } else {
+//                        // Логируем ошибки в случае неудачного запроса
+//                        Log::error("historyUIDStatus Request failed with status: " . $response->status());
+//                        Log::error("historyUIDStatus Response: " . $response->body());
+//
+//                        return [
+//                            "execution_status" => "failed_status",
+//                            "order_car_info" => null,
+//                            "driver_phone" => null,
+//                        ];
+//                    }
+//                } catch (\Exception $e) {
+//                    // Обработка исключений
+//                    Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
+//                    return [
+//                        "execution_status" => "failed_status",
+//                        "order_car_info" => null,
+//                        "driver_phone" => null,
+//                    ];
+//                }
+//
+//            }
+//        }
+//    }
+
+    /**
      * @throws \Exception
      */
     public function historyUIDStatusNew(
@@ -11133,26 +11283,24 @@ class AndroidTestOSMController extends Controller
         Log::debug("1 historyUIDStatus uid $uid");
 
         if (!$orderweb_uid) {
-
             $close_reason = -1;
             $execution_status= "SearchesForCar";
-            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
+            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason
+              execution_status $execution_status" ;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return response()->json([
                 'close_reason' => $close_reason,
                 'execution_status' => $execution_status,
             ]);
         } else {
-            Log::info('Поиск записи с dispatching_order_uid',
-                ['
+            Log::info('Найдена  запись о заказе', ['
                     uid' => $uid,
                     'orderweb_uid' => $orderweb_uid,
                     'closeReason' => $orderweb_uid->closeReason
                 ]);
-
         }
 
-        if (in_array($orderweb_uid->closeReason,  ['101', '102', '103', '104'] )) {
+        if (in_array($orderweb_uid->closeReason, ['101', '102', '103', '104'])) {
             $storedData = $orderweb_uid->auto;
 
             $dataDriver = json_decode($storedData, true);
@@ -11167,107 +11315,19 @@ class AndroidTestOSMController extends Controller
 
 
             // Обновление полей
-            $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
-            $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
-            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point; // Замените на ваш существующий $phoneNumber
+            $responseData['order_car_info'] = $auto;
+            $responseData['driver_phone'] = $phoneNumber;
+            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point;
             $responseData['execution_status'] = "";
 
             $responseData['close_reason'] = $orderweb_uid->closeReason;
             return $responseData;
         } else {
-
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-
-            $connectAPI = $orderweb_uid->server;
-            if (!$uid_history) {
-
-                switch ($city) {
-                    case "Lviv":
-                    case "Ivano_frankivsk":
-                    case "Vinnytsia":
-                    case "Poltava":
-                    case "Sumy":
-                    case "Kharkiv":
-                    case "Chernihiv":
-                    case "Rivne":
-                    case "Ternopil":
-                    case "Khmelnytskyi":
-                    case "Zakarpattya":
-                    case "Zhytomyr":
-                    case "Kropyvnytskyi":
-                    case "Mykolaiv":
-                    case "Chernivtsi":
-                    case "Lutsk":
-
-                        $city = "OdessaTest";
-                        break;
-                    case "foreign countries":
-                        $city = "Kyiv City";
-                        break;
-                }
-                //Поиск смены номеров заказов
-                Log::debug("0 historyUIDStatus uid $uid");
-                $uid = (new MemoryOrderChangeController)->show($uid);
-
-                Log::debug("1 historyUIDStatus uid $uid");
-
-
-
-                //Запрос статуса одиночного заказа
-                $authorization = (new UniversalAndroidFunctionController)
-                    ->authorizationApp($city, $connectAPI, $application);
-                $url = $connectAPI . '/api/weborders/' . $uid;
-                try {
-                    $response = Http::withHeaders([
-                        "Authorization" => $authorization,
-                        "X-WO-API-APP-ID" => self::identificationId($application),
-                        "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-                    ])->get($url);
-
-                    // Логируем тело ответа
-                    Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
-
-                    // Проверяем успешность ответа
-                    if ($response->successful()) {
-                        // Обрабатываем успешный ответ
-                        $response_arr = json_decode($response, true);
-                        Log::debug("$url: ", $response_arr);
-//                        $orderweb_uid->auto = null;
-//                        if ($response_arr["order_car_info"] != null) {
-//                            $orderweb_uid->auto = $response_arr["order_car_info"];
-//                        }
-
-                        $orderweb_uid->auto = $response_arr["order_car_info"];
-
-                        $orderweb_uid->closeReason = $response_arr["close_reason"];
-                        $orderweb_uid->save();
-                        return $response;
-
-                    } else {
-                        // Логируем ошибки в случае неудачного запроса
-                        Log::error("historyUIDStatus Request failed with status: " . $response->status());
-                        Log::error("historyUIDStatus Response: " . $response->body());
-
-                        return [
-                            "execution_status" => "failed_status",
-                            "order_car_info" => null,
-                            "driver_phone" => null,
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Обработка исключений
-                    Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
-                    return [
-                        "execution_status" => "failed_status",
-                        "order_car_info" => null,
-                        "driver_phone" => null,
-                    ];
-                }
-
-            }
-        }
+            $cacheKey = "order_status_" . $uid;
+            $responseArr = Cache::get($cacheKey);
+            return json_encode($responseArr, JSON_UNESCAPED_UNICODE);
+        };
     }
-
     /**
      * @throws \Exception
      */

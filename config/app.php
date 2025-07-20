@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'timeSleepForStatusUpdate' => env('APP_Time_Sleep_For_Status_Update', 5),
+
+
     'X-WO-API-APP-ID-SITE' => 'taxi_easy_ua_site',
     'X-WO-API-APP-ID-PAS1' => 'taxi_easy_ua_pas1',
     'X-WO-API-APP-ID-PAS2' => 'taxi_easy_ua_pas2',

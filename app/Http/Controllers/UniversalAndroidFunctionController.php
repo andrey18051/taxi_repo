@@ -3742,7 +3742,8 @@ class UniversalAndroidFunctionController extends Controller
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             if ($response->failed()) {
-                $messageAdmin = "Ошибка при получении статуса execution_status URL: $url Статус: " . $response->status() . "\nОтвет: " . $response->body();
+                $messageAdmin = "Ошибка при получении статуса execution_status URL: $url Статус: " .
+                    $response->status() . "\nОтвет: " . $response->body();
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
                 return [
                     'success' => false,
@@ -3762,18 +3763,12 @@ class UniversalAndroidFunctionController extends Controller
                 ];
             }
 
-            $messageAdmin = "Успешное получение execution_status URL: $url execution_status: " . print_r($responseArr["execution_status"], true) . " close_reason: " . ($responseArr["close_reason"] ?? 'null');
+            $messageAdmin = "Успешное получение execution_status URL: $url execution_status: " .
+                print_r($responseArr["execution_status"], true) .
+                " close_reason: " . ($responseArr["close_reason"] ?? 'null');
             (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
             return $responseArr;
-        } catch (Illuminate\Http\Client\ConnectionException $e) {
-            // Логирование ошибки в случае таймаута
-            $messageAdmin = "Таймаут при запросе getExecutionStatus Ошибка: " . $e->getMessage() . " URL: " . $url;
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-            return [
-                'success' => false,
-                'message' => 'Server did not respond within 20 seconds'
-            ];
         } catch (Exception $e) {
             // Логирование всех остальных ошибок
             $messageAdmin = "Исключение в getExecutionStatus Ошибка: " . $e->getMessage() . " URL: " . $url;
@@ -4228,6 +4223,7 @@ class UniversalAndroidFunctionController extends Controller
 
         if ($params["payment_type"] != 1) {
             SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
+            ProcessAutoOrder::dispatch($params['dispatching_order_uid']);
         } else {
 //            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
         }
@@ -7870,25 +7866,28 @@ class UniversalAndroidFunctionController extends Controller
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                 'closeReason' => $orderweb->closeReason
             ]);
+            Log::info('searchAutoOrderJob: Проверка условий цикла', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'closeReason' => $orderweb->closeReason,
+                'auto' => $orderweb->auto
+            ]);
 
-
+            $messageAdmin = 'searchAutoOrderJob: dispatching_order_uid' .
+                $orderweb->dispatching_order_uid . "\n closeReason" . $orderweb->closeReason;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            $timeSleep = config("app.timeSleepForStatusUpdate");
             do {
-                Log::info('searchAutoOrderJob: Проверка условий цикла', [
-                    'dispatching_order_uid' => $orderweb->dispatching_order_uid,
-                    'closeReason' => $orderweb->closeReason,
-                    'auto' => $orderweb->auto
-                ]);
-
-                $messageAdmin = 'searchAutoOrderJob: dispatching_order_uid' . $orderweb->dispatching_order_uid . "\n closeReason" . $orderweb->closeReason;
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-                if ($orderweb->closeReason == "-1" || $orderweb->closeReason == "101" ) {
+                if ($orderweb->closeReason == "-1"
+                    || $orderweb->closeReason == "101"
+                    || $orderweb->closeReason == "102"
+                    || $orderweb->closeReason == "103"
+                ) {
                     if ($orderweb->auto != null) {
                         Log::info('searchAutoOrderJob: Найден автоматический заказ, отправка ответа', [
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                             'auto' => $orderweb->auto
                         ]);
-                        if($orderweb->closeReason == "-1" ) {
+                        if ($orderweb->closeReason == "-1") {
                             (new FCMController)->deleteDocumentFromFirestore($processedUid);
                             (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($processedUid);
                             (new FCMController)->deleteDocumentFromSectorFirestore($processedUid);
@@ -7897,28 +7896,17 @@ class UniversalAndroidFunctionController extends Controller
                         }
                         self::sendAutoOrderResponse($orderweb);
 
-                        ProcessAutoOrder::dispatch($processedUid);
+//                        ProcessAutoOrder::dispatch($processedUid);
 
-                        Log::info('searchAutoOrderJob: Ответ отправлен', [
-                            'dispatching_order_uid' => $orderweb->dispatching_order_uid
+
+                        Log::info('searchAutoOrderJob: Проверка условий цикла', [
+                            'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                            'closeReason' => $orderweb->closeReason,
+                            'auto' => $orderweb->auto
                         ]);
                         return ['status' => 'success', 'message' => $orderweb->auto];
-                    } else {
-                        sleep(5);
-                        $processedUid = (new MemoryOrderChangeController)->show($uid);
-                        $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
-//                        $city = "OdessaTest";
-                        $city = self::cityFinder($orderweb->city, $orderweb->server);
-
-//                        $application = "PAS2";
-                        $application = self::appFinder($orderweb->comment);
-
-                        (new AndroidTestOSMController)->historyUIDStatusNew(
-                            $processedUid,
-                            $city,
-                            $application
-                        );
                     }
+
                 } else {
                     Log::info('searchAutoOrderJob: Заказ снят', [
                         'dispatching_order_uid' => $orderweb->dispatching_order_uid,
@@ -7926,7 +7914,7 @@ class UniversalAndroidFunctionController extends Controller
                     ]);
                     return ['status' => 'success', 'message' => 'Заказ снят'];
                 }
-
+                sleep($timeSleep);
             } while (true);
         } catch (\Exception $e) {
             Log::error('searchAutoOrderJob: Произошла ошибка', [

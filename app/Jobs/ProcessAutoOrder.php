@@ -13,6 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class ProcessAutoOrder implements ShouldQueue
 {
@@ -26,6 +27,9 @@ class ProcessAutoOrder implements ShouldQueue
         $this->uid = $uid;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function handle(): void
     {
         Log::info('ProcessAutoOrder: Запуск задачи', ['uid' => $this->uid]);
@@ -58,11 +62,12 @@ class ProcessAutoOrder implements ShouldQueue
         $header = [
             "Authorization" => $authorization,
             "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
-            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application),
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)
+                ->apiVersionApp($city, $connectAPI, $application),
         ];
 
-        $startTime = time();
-        $maxDuration = 30 * 60; // 30 минут
+
+        $timeSleep = config("app.timeSleepForStatusUpdate");
 
         while (true) {
             // Обновляем данные о заказе
@@ -74,48 +79,59 @@ class ProcessAutoOrder implements ShouldQueue
                 return;
             }
 
+            $cacheKey = "order_status_" . $processedUid;
             $url = $connectAPI . '/api/weborders/' . $processedUid;
-            $responseArr = (new UniversalAndroidFunctionController)->getStatus($header, $url);
 
-            Log::debug('ProcessAutoOrder: Ответ от API получен', [
-                'uid' => $processedUid,
-                'response' => $responseArr,
-            ]);
+            // Новый ответ от API
+            $newResponseArr = (new UniversalAndroidFunctionController)->getStatus($header, $url);
 
-            if (!isset($responseArr["order_car_info"]) || $responseArr["order_car_info"] === null) {
-                Log::info('ProcessAutoOrder: auto == null, перезапуск SearchAutoOrderJob', ['uid' => $this->uid]);
+            // Получаем старый ответ из кэша
+            $oldResponseArr = Cache::get($cacheKey);
 
-                $orderweb->auto = null;
-                $orderweb->save();
-                if ($responseArr["close_reason"] == -1) {
-                    SearchAutoOrderJob::dispatch($this->uid);
-                    (new FCMController)->writeDocumentToFirestore($this->uid);
-                }
-
-                return;
+            // Если данные изменились — обновляем кэш
+            if ($oldResponseArr !== $newResponseArr) {
+                Cache::put($cacheKey, $newResponseArr, 600); // сохраняем на 10 минут
+                Log::info('ProcessAutoOrder: Обновлены данные в кэше', ['uid' => $processedUid]);
+            } else {
+                Log::debug('ProcessAutoOrder: Данные не изменились, используем кэш', [
+                    'uid' => $processedUid,
+                    'cached_response' => $oldResponseArr
+                ]);
             }
 
+            // Работаем с актуальными данными
+            $responseArr = $newResponseArr;
+
+            // Если нет данных об авто
+            if (!isset($responseArr["order_car_info"])) {
+                Log::info('ProcessAutoOrder: auto == null ', ['uid' => $this->uid]);
+
+                $orderweb->auto = null;
+
+            } else {
+                $orderweb->auto = $responseArr["order_car_info"];
+
+                $orderweb->closeReason = $responseArr["close_reason"];
+            }
+            $orderweb->save();
+
+            // Проверка на закрытие заказа
             if (isset($responseArr["close_reason"]) && $responseArr["close_reason"] != -1) {
-                Log::info('ProcessAutoOrder: Заказ отменён/закрыт (close_reason != -1)', [
+                Log::info('ProcessAutoOrder: Заказ отменён/закрыт', [
                     'uid' => $this->uid,
                     'close_reason' => $responseArr["close_reason"]
                 ]);
+
                 (new FCMController)->deleteDocumentFromFirestore($this->uid);
                 (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($this->uid);
                 (new FCMController)->deleteDocumentFromSectorFirestore($this->uid);
                 (new FCMController)->writeDocumentToHistoryFirestore($this->uid, "cancelled");
+
+//                Cache::forget($cacheKey);
                 return;
             }
 
-            // Проверка времени
-            if (time() - $startTime > $maxDuration) {
-                Log::warning('ProcessAutoOrder: Превышен лимит ожидания (30 минут)', [
-                    'uid' => $this->uid
-                ]);
-                return;
-            }
-
-            sleep(30);
+            sleep($timeSleep);
         }
     }
 }
