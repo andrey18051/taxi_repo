@@ -4221,12 +4221,12 @@ class UniversalAndroidFunctionController extends Controller
 
         $order_id = $order->id;
 
-        if ($params["payment_type"] != 1) {
-            SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
-            ProcessAutoOrder::dispatch($params['dispatching_order_uid']);
-        } else {
-//            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
-        }
+//        if ($params["payment_type"] != 1) {
+//            SearchAutoOrderJob::dispatch($params['dispatching_order_uid']);
+//            ProcessAutoOrder::dispatch($params['dispatching_order_uid']);
+//        } else {
+////            SearchAutoOrderCardJob::dispatch($params['dispatching_order_uid']);
+//        }
 
 
         $order->city = (new UniversalAndroidFunctionController)->findCity($order->startLat, $order->startLan);

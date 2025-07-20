@@ -9812,138 +9812,138 @@ class AndroidTestOSMController extends Controller
      * Запрос отмены при перезаказе по налу
      * @throws \Exception
      */
-//    public function webordersCancelRestorAddCostNal(
-//        $uid,
-//        $city,
-//        $application,
-//        $orderweb
-//    ) {
-//
-//        switch ($city) {
-//            case "Lviv":
-//            case "Ivano_frankivsk":
-//            case "Vinnytsia":
-//            case "Poltava":
-//            case "Sumy":
-//            case "Kharkiv":
-//            case "Chernihiv":
-//            case "Rivne":
-//            case "Ternopil":
-//            case "Khmelnytskyi":
-//            case "Zakarpattya":
-//            case "Zhytomyr":
-//            case "Kropyvnytskyi":
-//            case "Mykolaiv":
-//            case "Chernivtsi":
-//            case "Lutsk":
-//                $city = "OdessaTest";
-//                break;
-//            case "foreign countries":
-//                $city = "Kyiv City";
-//                break;
-//        }
-//
-//        (new FCMController)->deleteDocumentFromFirestore($uid);
-//        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-//        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-//        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-//
-//        $connectAPI = $orderweb->server;
-//
-//        $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
-//        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-//
-//        $header = [
-//            "Authorization" => $authorization,
-//            "X-WO-API-APP-ID" => self::identificationId($application),
-//            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-//        ];
-//        $response = Http::withHeaders($header)->put($url);
-//
-//        $messageAdmin = "Отправлена Отмена $url заказа $response";
-//        (new MessageSentController)->sentMessageMeCancel($messageAdmin);
-//
-//        $url = $connectAPI . '/api/weborders/' . $uid;
-//        $responseArr = (new UniversalAndroidFunctionController)->getStatus(
-//            $header,
-//            $url
-//        );
-//        $messageAdmin = "Статус Отмены заказа  " . json_encode($responseArr) . " responseArr[close_reason]: " . $responseArr['close_reason'];
-//        (new MessageSentController)->sentMessageMeCancel($messageAdmin);
-//
-//        if ($responseArr["close_reason"] != 1) {
-//            self::repeatCancel(
-//                $url,
-//                $authorization,
-//                $application,
-//                $city,
-//                $connectAPI,
-//                $uid
-//            );
-//        }
-//        return [
-//            'response' => "200",
-//        ];
-//    }
+    public function webordersCancelRestorAddCostNal(
+        $uid,
+        $city,
+        $application,
+        $orderweb
+    ) {
 
-    public function webordersCancelRestorAddCostNal($uid, $city, $application, $orderweb)
-    {
-        // Normalize city name
-        $city = $this->normalizeCity($city);
-
-        // Perform Firestore operations
-        try {
-            $this->performFirestoreOperations($uid);
-        } catch (\Exception $e) {
-            Log::error("Firestore operations failed for UID {$uid}: {$e->getMessage()}");
-            throw $e;
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
         }
 
-        // Prepare API connection details
+        (new FCMController)->deleteDocumentFromFirestore($uid);
+        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+
         $connectAPI = $orderweb->server;
+
         $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
-        $headers = [
-            'Authorization' => $authorization,
-            'X-WO-API-APP-ID' => $this->identificationId($application),
-            'X-API-VERSION' => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application),
+        $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+
+        $header = [
+            "Authorization" => $authorization,
+            "X-WO-API-APP-ID" => self::identificationId($application),
+            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
         ];
+        $response = Http::withHeaders($header)->put($url);
 
-        // Cancel the order
-        $cancelUrl = "{$connectAPI}/api/weborders/cancel/{$uid}";
-        try {
-            $response = Http::timeout(30)->retry(3, 1000)->withHeaders($headers)->put($cancelUrl);
+        $messageAdmin = "Отправлена Отмена $url заказа $response";
+        (new MessageSentController)->sentMessageMeCancel($messageAdmin);
 
-            if (!$response->successful()) {
-                throw new \Exception("API cancel request failed: {$response->body()}");
-            }
+        $url = $connectAPI . '/api/weborders/' . $uid;
+        $responseArr = (new UniversalAndroidFunctionController)->getStatus(
+            $header,
+            $url
+        );
+        $messageAdmin = "Статус Отмены заказа  " . json_encode($responseArr) . " responseArr[close_reason]: " . $responseArr['close_reason'];
+        (new MessageSentController)->sentMessageMeCancel($messageAdmin);
 
-            $messageAdmin = "Отправлена отмена заказа: {$cancelUrl}, Response: {$response->body()}";
-            (new MessageSentController)->sentMessageMeCancel($messageAdmin);
-        } catch (\Exception $e) {
-            Log::error("Failed to cancel order for UID {$uid}: {$e->getMessage()}");
-            throw $e;
+        if ($responseArr["close_reason"] != 1) {
+            self::repeatCancel(
+                $url,
+                $authorization,
+                $application,
+                $city,
+                $connectAPI,
+                $uid
+            );
         }
-
-        // Check order status
-        $statusUrl = "{$connectAPI}/api/weborders/{$uid}";
-        try {
-            $responseArr = (new UniversalAndroidFunctionController)->getStatus($headers, $statusUrl);
-            $closeReason = $responseArr['close_reason'] ?? 'N/A';
-
-            $messageAdmin = "Статус отмены заказа: " . json_encode($responseArr) . ", close_reason: {$closeReason}";
-            (new MessageSentController)->sentMessageMeCancel($messageAdmin);
-
-            // Retry if close_reason is not 1
-            if ($closeReason != 1) {
-                $this->repeatCancel($statusUrl, $authorization, $application, $city, $connectAPI, $uid, 3);
-            }
-        } catch (\Exception $e) {
-            Log::error("Failed to check status for UID {$uid}: {$e->getMessage()}");
-            throw $e;
-        }
-
-        return ['response' => '200'];
+        return [
+            'response' => "200",
+        ];
     }
+
+//    public function webordersCancelRestorAddCostNal($uid, $city, $application, $orderweb)
+//    {
+//        // Normalize city name
+//        $city = $this->normalizeCity($city);
+//
+//        // Perform Firestore operations
+//        try {
+//            $this->performFirestoreOperations($uid);
+//        } catch (\Exception $e) {
+//            Log::error("Firestore operations failed for UID {$uid}: {$e->getMessage()}");
+//            throw $e;
+//        }
+//
+//        // Prepare API connection details
+//        $connectAPI = $orderweb->server;
+//        $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
+//        $headers = [
+//            'Authorization' => $authorization,
+//            'X-WO-API-APP-ID' => $this->identificationId($application),
+//            'X-API-VERSION' => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application),
+//        ];
+//
+//        // Cancel the order
+//        $cancelUrl = "{$connectAPI}/api/weborders/cancel/{$uid}";
+//        try {
+//            $response = Http::timeout(30)->retry(3, 1000)->withHeaders($headers)->put($cancelUrl);
+//
+//            if (!$response->successful()) {
+//                throw new \Exception("API cancel request failed: {$response->body()}");
+//            }
+//
+//            $messageAdmin = "Отправлена отмена заказа: {$cancelUrl}, Response: {$response->body()}";
+//            (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+//        } catch (\Exception $e) {
+//            Log::error("Failed to cancel order for UID {$uid}: {$e->getMessage()}");
+//            throw $e;
+//        }
+//
+//        // Check order status
+//        $statusUrl = "{$connectAPI}/api/weborders/{$uid}";
+//        try {
+//            $responseArr = (new UniversalAndroidFunctionController)->getStatus($headers, $statusUrl);
+//            $closeReason = $responseArr['close_reason'] ?? 'N/A';
+//
+//            $messageAdmin = "Статус отмены заказа: " . json_encode($responseArr) . ", close_reason: {$closeReason}";
+//            (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+//
+//            // Retry if close_reason is not 1
+//            if ($closeReason != 1) {
+//                $this->repeatCancel($statusUrl, $authorization, $application, $city, $connectAPI, $uid, 3);
+//            }
+//        } catch (\Exception $e) {
+//            Log::error("Failed to check status for UID {$uid}: {$e->getMessage()}");
+//            throw $e;
+//        }
+//
+//        return ['response' => '200'];
+//    }
 
     /**
      * Normalize city name based on predefined rules.
@@ -10143,13 +10143,13 @@ class AndroidTestOSMController extends Controller
             $orderweb->auto = null;
             $orderweb->closeReason = "1";
             $orderweb->save();
-
-            $cacheKey = "order_status_" . $uid;
-            $responseArr = Cache::get($cacheKey);
-            if (is_array($responseArr)) {
-                $responseArr['close_reason'] = 1; // Меняем значение
-                Cache::put($cacheKey, $responseArr, 600); // Перезаписываем кэш на 10 минут
-            }
+//
+//            $cacheKey = "order_status_" . $uid;
+//            $responseArr = Cache::get($cacheKey);
+//            if (is_array($responseArr)) {
+//                $responseArr['close_reason'] = 1; // Меняем значение
+//                Cache::put($cacheKey, $responseArr, 600); // Перезаписываем кэш на 10 минут
+//            }
 
             if ($orderweb->closeReason == "101" || $orderweb->closeReason == "102") {
                 (new MessageSentController)->sentCancelInfo($orderweb);
@@ -10161,8 +10161,14 @@ class AndroidTestOSMController extends Controller
                 ];
             }
 
-            WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $orderweb);
+//            WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $orderweb);
 
+            $this->webordersCancelRestorAddCostNal(
+                $uid,
+                $city,
+                $application,
+                $orderweb
+            );
             $resp_answer = "Запит на скасування замовлення надіслано. ";
 
             (new MessageSentController)->sentMessageMeCancel($uid . " " .$resp_answer);
@@ -11228,154 +11234,6 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Exception
      */
-//    public function historyUIDStatusNew(
-//        $uid,
-//        $city,
-//        $application
-//    ) {
-//
-//        $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
-//        Log::debug("1 historyUIDStatus uid $uid");
-//
-//        if (!$orderweb_uid) {
-//
-//            $close_reason = -1;
-//            $execution_status= "SearchesForCar";
-//            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
-//            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-//            return response()->json([
-//                'close_reason' => $close_reason,
-//                'execution_status' => $execution_status,
-//            ]);
-//        } else {
-//            Log::info('Поиск записи с dispatching_order_uid',
-//                ['
-//                    uid' => $uid,
-//                    'orderweb_uid' => $orderweb_uid,
-//                    'closeReason' => $orderweb_uid->closeReason
-//                ]);
-//
-//        }
-//
-//        if (in_array($orderweb_uid->closeReason,  ['101', '102', '103', '104'] )) {
-//            $storedData = $orderweb_uid->auto;
-//
-//            $dataDriver = json_decode($storedData, true);
-//
-//            $color = $dataDriver["color"];
-//            $brand = $dataDriver["brand"];
-//            $model = $dataDriver["model"];
-//            $number = $dataDriver["number"];
-//            $phoneNumber = $dataDriver["phoneNumber"];
-//
-//            $auto = "$number, цвет $color  $brand $model. ";
-//
-//
-//            // Обновление полей
-//            $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
-//            $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
-//            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point; // Замените на ваш существующий $phoneNumber
-//            $responseData['execution_status'] = "";
-//
-//            $responseData['close_reason'] = $orderweb_uid->closeReason;
-//            return $responseData;
-//        } else {
-//
-//            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-//
-//            $connectAPI = $orderweb_uid->server;
-//            if (!$uid_history) {
-//
-//                switch ($city) {
-//                    case "Lviv":
-//                    case "Ivano_frankivsk":
-//                    case "Vinnytsia":
-//                    case "Poltava":
-//                    case "Sumy":
-//                    case "Kharkiv":
-//                    case "Chernihiv":
-//                    case "Rivne":
-//                    case "Ternopil":
-//                    case "Khmelnytskyi":
-//                    case "Zakarpattya":
-//                    case "Zhytomyr":
-//                    case "Kropyvnytskyi":
-//                    case "Mykolaiv":
-//                    case "Chernivtsi":
-//                    case "Lutsk":
-//
-//                        $city = "OdessaTest";
-//                        break;
-//                    case "foreign countries":
-//                        $city = "Kyiv City";
-//                        break;
-//                }
-//                //Поиск смены номеров заказов
-//                Log::debug("0 historyUIDStatus uid $uid");
-//                $uid = (new MemoryOrderChangeController)->show($uid);
-//
-//                Log::debug("1 historyUIDStatus uid $uid");
-//
-//
-//
-//                //Запрос статуса одиночного заказа
-//                $authorization = (new UniversalAndroidFunctionController)
-//                    ->authorizationApp($city, $connectAPI, $application);
-//                $url = $connectAPI . '/api/weborders/' . $uid;
-//                try {
-//                    $response = Http::withHeaders([
-//                        "Authorization" => $authorization,
-//                        "X-WO-API-APP-ID" => self::identificationId($application),
-//                        "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-//                    ])->get($url);
-//
-//                    // Логируем тело ответа
-//                    Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
-//
-//                    // Проверяем успешность ответа
-//                    if ($response->successful()) {
-//                        // Обрабатываем успешный ответ
-//                        $response_arr = json_decode($response, true);
-//                        Log::debug("$url: ", $response_arr);
-////                        $orderweb_uid->auto = null;
-////                        if ($response_arr["order_car_info"] != null) {
-////                            $orderweb_uid->auto = $response_arr["order_car_info"];
-////                        }
-//
-//                        $orderweb_uid->auto = $response_arr["order_car_info"];
-//
-//                        $orderweb_uid->closeReason = $response_arr["close_reason"];
-//                        $orderweb_uid->save();
-//                        return $response;
-//
-//                    } else {
-//                        // Логируем ошибки в случае неудачного запроса
-//                        Log::error("historyUIDStatus Request failed with status: " . $response->status());
-//                        Log::error("historyUIDStatus Response: " . $response->body());
-//
-//                        return [
-//                            "execution_status" => "failed_status",
-//                            "order_car_info" => null,
-//                            "driver_phone" => null,
-//                        ];
-//                    }
-//                } catch (\Exception $e) {
-//                    // Обработка исключений
-//                    Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
-//                    return [
-//                        "execution_status" => "failed_status",
-//                        "order_car_info" => null,
-//                        "driver_phone" => null,
-//                    ];
-//                }
-//
-//            }
-//        }
-//    }
-
-    /**
-     * @throws \Exception
-     */
     public function historyUIDStatusNew(
         $uid,
         $city,
@@ -11386,24 +11244,26 @@ class AndroidTestOSMController extends Controller
         Log::debug("1 historyUIDStatus uid $uid");
 
         if (!$orderweb_uid) {
+
             $close_reason = -1;
             $execution_status= "SearchesForCar";
-            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason
-              execution_status $execution_status" ;
+            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return response()->json([
                 'close_reason' => $close_reason,
                 'execution_status' => $execution_status,
             ]);
         } else {
-            Log::info('Найдена  запись о заказе', ['
+            Log::info('Поиск записи с dispatching_order_uid',
+                ['
                     uid' => $uid,
                     'orderweb_uid' => $orderweb_uid,
                     'closeReason' => $orderweb_uid->closeReason
                 ]);
+
         }
 
-        if (in_array($orderweb_uid->closeReason, ['101', '102', '103', '104'])) {
+        if (in_array($orderweb_uid->closeReason,  ['101', '102', '103', '104'] )) {
             $storedData = $orderweb_uid->auto;
 
             $dataDriver = json_decode($storedData, true);
@@ -11418,19 +11278,335 @@ class AndroidTestOSMController extends Controller
 
 
             // Обновление полей
-            $responseData['order_car_info'] = $auto;
-            $responseData['driver_phone'] = $phoneNumber;
-            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point;
+            $responseData['order_car_info'] = $auto; // Замените на ваш существующий $auto
+            $responseData['driver_phone'] = $phoneNumber; // Замените на ваш существующий $phoneNumber
+            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point; // Замените на ваш существующий $phoneNumber
             $responseData['execution_status'] = "";
 
             $responseData['close_reason'] = $orderweb_uid->closeReason;
             return $responseData;
         } else {
-            $cacheKey = "order_status_" . $uid;
-            $responseArr = Cache::get($cacheKey);
-            return json_encode($responseArr, JSON_UNESCAPED_UNICODE);
-        };
+
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+            $connectAPI = $orderweb_uid->server;
+            if (!$uid_history) {
+
+                switch ($city) {
+                    case "Lviv":
+                    case "Ivano_frankivsk":
+                    case "Vinnytsia":
+                    case "Poltava":
+                    case "Sumy":
+                    case "Kharkiv":
+                    case "Chernihiv":
+                    case "Rivne":
+                    case "Ternopil":
+                    case "Khmelnytskyi":
+                    case "Zakarpattya":
+                    case "Zhytomyr":
+                    case "Kropyvnytskyi":
+                    case "Mykolaiv":
+                    case "Chernivtsi":
+                    case "Lutsk":
+
+                        $city = "OdessaTest";
+                        break;
+                    case "foreign countries":
+                        $city = "Kyiv City";
+                        break;
+                }
+                //Поиск смены номеров заказов
+                Log::debug("0 historyUIDStatus uid $uid");
+                $uid = (new MemoryOrderChangeController)->show($uid);
+
+                Log::debug("1 historyUIDStatus uid $uid");
+
+
+
+                //Запрос статуса одиночного заказа
+                $authorization = (new UniversalAndroidFunctionController)
+                    ->authorizationApp($city, $connectAPI, $application);
+                $url = $connectAPI . '/api/weborders/' . $uid;
+                try {
+                    $response = Http::withHeaders([
+                        "Authorization" => $authorization,
+                        "X-WO-API-APP-ID" => self::identificationId($application),
+                        "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+                    ])->get($url);
+
+                    // Логируем тело ответа
+                    Log::debug("historyUIDStatus postRequestHTTP: " . $response->body());
+
+                    // Проверяем успешность ответа
+                    if ($response->successful()) {
+                        // Обрабатываем успешный ответ
+                        $response_arr = json_decode($response, true);
+                        Log::debug("$url: ", $response_arr);
+//                        $orderweb_uid->auto = null;
+//                        if ($response_arr["order_car_info"] != null) {
+//                            $orderweb_uid->auto = $response_arr["order_car_info"];
+//                        }
+
+                        $orderweb_uid->auto = $response_arr["order_car_info"];
+
+                        $orderweb_uid->closeReason = $response_arr["close_reason"];
+                        $orderweb_uid->save();
+                        return $response;
+
+                    } else {
+                        // Логируем ошибки в случае неудачного запроса
+                        Log::error("historyUIDStatus Request failed with status: " . $response->status());
+                        Log::error("historyUIDStatus Response: " . $response->body());
+
+                        return [
+                            "execution_status" => "failed_status",
+                            "order_car_info" => null,
+                            "driver_phone" => null,
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Обработка исключений
+                    Log::error("historyUIDStatus Exception caught: " . $e->getMessage());
+                    return [
+                        "execution_status" => "failed_status",
+                        "order_car_info" => null,
+                        "driver_phone" => null,
+                    ];
+                }
+
+            }
+        }
     }
+
+//    public function reviewOrder(string $uid): void
+//    {
+//        try {
+//            Log::info('reviewOrder: Запуск задачи', ['uid' => $uid]);
+//
+//            $processedUid = (new MemoryOrderChangeController())->show($uid);
+//            $orderweb = Orderweb::where('dispatching_order_uid', $processedUid)->first();
+//
+//            if (!$orderweb) {
+//                Log::warning('reviewOrder: Заказ не найден в базе', ['uid' => $processedUid]);
+//                return;
+//            }
+//
+//            switch ($orderweb->comment) {
+//                case 'taxi_easy_ua_pas1':
+//                    $application = config('app.X-WO-API-APP-ID-PAS1');
+//                    break;
+//                case 'taxi_easy_ua_pas2':
+//                    $application = config('app.X-WO-API-APP-ID-PAS2');
+//                    break;
+//                default:
+//                    $application = config('app.X-WO-API-APP-ID-PAS4');
+//                    break;
+//            }
+//
+//            $universalController = new UniversalAndroidFunctionController();
+//            $androidTestOSMController = new AndroidTestOSMController();
+//
+//            $city = $universalController->cityFinder($orderweb->city, $orderweb->server);
+//            $connectAPI = $orderweb->server;
+//
+//            $authorization = $universalController->authorizationApp($city, $connectAPI, $application);
+//
+//            $header = [
+//                'Authorization' => $authorization,
+//                'X-WO-API-APP-ID' => $androidTestOSMController->identificationId($application),
+//                'X-API-VERSION' => $universalController->apiVersionApp($city, $connectAPI, $application),
+//            ];
+//
+//            $cacheKey = 'order_status_' . $processedUid;
+//            $url = $connectAPI . '/api/weborders/' . $processedUid;
+//
+//            $newResponseArr = $universalController->getStatus($header, $url);
+//            $oldResponseArr = Cache::get($cacheKey);
+//
+//            if ($oldResponseArr !== $newResponseArr) {
+//                Cache::put($cacheKey, $newResponseArr, 600); // 10 минут кеш
+//                Log::info('reviewOrder: Обновлены данные в кэше', ['uid' => $processedUid]);
+//            } else {
+//                Log::debug('reviewOrder: Данные не изменились, используем кэш', [
+//                    'uid' => $processedUid,
+//                    'cached_response' => $oldResponseArr,
+//                ]);
+//            }
+//
+//            $responseArr = $newResponseArr;
+//
+//            if (!isset($responseArr['order_car_info'])) {
+//                Log::info('reviewOrder: auto == null', ['uid' => $uid]);
+//                $orderweb->auto = null;
+//            } else {
+//                $orderweb->auto = $responseArr['order_car_info'];
+//            }
+//            $orderweb->closeReason = $responseArr['close_reason'] ?? "-1";
+//            $orderweb->save();
+//
+//            if (isset($responseArr['close_reason']) && $responseArr['close_reason'] != -1) {
+//                Log::info('reviewOrder: Заказ отменён/закрыт', [
+//                    'uid' => $uid,
+//                    'close_reason' => $responseArr['close_reason'],
+//                ]);
+//
+//                $fcmController = new FCMController();
+//                $fcmController->deleteDocumentFromFirestore($uid);
+//                $fcmController->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+//                $fcmController->deleteDocumentFromSectorFirestore($uid);
+//                $fcmController->writeDocumentToHistoryFirestore($uid, 'cancelled');
+//            }
+//        } catch (Exception $e) {
+//            Log::error('Ошибка в reviewOrder', [
+//                'uid' => $uid,
+//                'message' => $e->getMessage(),
+//                'trace' => $e->getTraceAsString(),
+//            ]);
+//        }
+//    }
+
+
+
+//    public function reviewOrder($uid)
+//    {
+//        try {
+//            Log::info('Проверка заказа', ['uid' => $uid]);
+//
+//            // Получение заказа
+//            $processedUid = (new MemoryOrderChangeController)->show($uid);
+//            $orderweb = Orderweb::where('dispatching_order_uid', $processedUid)->first();
+//
+//            if (!$orderweb) {
+//                Log::warning('Заказ не найден', ['uid' => $processedUid]);
+//                return null;
+//            }
+//
+//            // Определение конфигурации приложения
+//            $appConfigMap = [
+//                'taxi_easy_ua_pas1' => 'app.X-WO-API-APP-ID-PAS1',
+//                'taxi_easy_ua_pas2' => 'app.X-WO-API-APP-ID-PAS2',
+//            ];
+//            $application = config($appConfigMap[$orderweb->comment] ?? 'app.X-WO-API-APP-ID-PAS4');
+//
+//            // Подготовка API-запроса
+//            $universalController = new UniversalAndroidFunctionController;
+//            $city = $universalController->cityFinder($orderweb->city, $orderweb->server);
+//            $connectAPI = $orderweb->server;
+//
+//            $header = [
+//                'Authorization' => $universalController->authorizationApp($city, $connectAPI, $application),
+//                'X-WO-API-APP-ID' => (new AndroidTestOSMController)->identificationId($application),
+//                'X-API-VERSION' => $universalController->apiVersionApp($city, $connectAPI, $application),
+//            ];
+//
+//            // Получение статуса заказа
+//            $url = "{$connectAPI}/api/weborders/{$processedUid}";
+//            $responseArr = $universalController->getStatus($header, $url);
+//
+//            // Обновление данных заказа
+//            $orderweb->auto = $responseArr['order_car_info'] ?? null;
+//            $orderweb->closeReason = $responseArr['close_reason'] ?? null;
+//            $orderweb->save();
+//
+//            // Обработка закрытия заказа
+//            if (isset($responseArr['close_reason']) && $responseArr['close_reason'] != -1) {
+//                Log::info('Заказ закрыт', [
+//                    'uid' => $uid,
+//                    'close_reason' => $responseArr['close_reason']
+//                ]);
+//
+//                $fcmController = new FCMController;
+//                $fcmController->deleteDocumentFromFirestore($uid);
+//                $fcmController->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+//                $fcmController->deleteDocumentFromSectorFirestore($uid);
+//                $fcmController->writeDocumentToHistoryFirestore($uid, 'cancelled');
+//            }
+//
+//            return json_encode($responseArr, JSON_UNESCAPED_UNICODE);
+//
+//        } catch (Exception $e) {
+//            Log::error('Ошибка при проверке заказа', [
+//                'uid' => $uid,
+//                'error' => $e->getMessage(),
+//                'trace' => $e->getTraceAsString()
+//            ]);
+//            return null;
+//        }
+//    }
+
+    /**
+     * @throws \Exception
+     */
+//    public function historyUIDStatusNew(
+//        $uid,
+//        $city,
+//        $application
+//    ) {
+//
+//        $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
+//
+//
+//        if (!$orderweb_uid) {
+//            $close_reason = -1;
+//            $execution_status= "SearchesForCar";
+//            $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason
+//              execution_status $execution_status" ;
+//            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+//            return response()->json([
+//                'close_reason' => $close_reason,
+//                'execution_status' => $execution_status,
+//            ]);
+//        } else {
+//            Log::info('Найдена  запись о заказе', ['
+//                    uid' => $uid,
+//                    'orderweb_uid' => $orderweb_uid,
+//                    'closeReason' => $orderweb_uid->closeReason
+//                ]);
+//        }
+//
+//        if (in_array($orderweb_uid->closeReason, ['101', '102', '103', '104'])) {
+//            $storedData = $orderweb_uid->auto;
+//
+//            $dataDriver = json_decode($storedData, true);
+//
+//            $color = $dataDriver["color"];
+//            $brand = $dataDriver["brand"];
+//            $model = $dataDriver["model"];
+//            $number = $dataDriver["number"];
+//            $phoneNumber = $dataDriver["phoneNumber"];
+//
+//            $auto = "$number, цвет $color  $brand $model. ";
+//
+//
+//            // Обновление полей
+//            $responseData['order_car_info'] = $auto;
+//            $responseData['driver_phone'] = $phoneNumber;
+//            $responseData['time_to_start_point'] = $orderweb_uid->time_to_start_point;
+//            $responseData['execution_status'] = "";
+//
+//            $responseData['close_reason'] = $orderweb_uid->closeReason;
+//            return $responseData;
+//        } else {
+//
+//            $this->reviewOrder($uid);
+//
+//            $cacheKey = "order_status_" . $uid;
+//            $responseArr = Cache::get($cacheKey);
+//            if ($responseArr === null) {
+//                // Например, вернуть пустой объект или ошибку
+//                return response()->json($responseArr, 200, [], JSON_UNESCAPED_UNICODE);
+//            } else {
+//                $close_reason = -1;
+//                $execution_status= "SearchesForCar";
+//                return response()->json([
+//                    'close_reason' => $close_reason,
+//                    'execution_status' => $execution_status,
+//                ]);
+//            }
+//
+//        };
+//    }
     /**
      * @throws \Exception
      */
