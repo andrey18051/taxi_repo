@@ -114,6 +114,7 @@ RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/ht
 #    rm /tmp/cronfile
 
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
+        echo "* * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan schedule:run >> /dev/null 2>&1" >> /tmp/cronfile && \
         echo "1 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
         crontab -u root /tmp/cronfile && \
         rm /tmp/cronfile

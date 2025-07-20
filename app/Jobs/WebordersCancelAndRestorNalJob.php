@@ -14,6 +14,10 @@ class WebordersCancelAndRestorNalJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $tries = 5; // Максимум 5 попыток
+    public $timeout = 0; // Таймаут 120 секунд
+    public $backoff = [10, 30, 60]; // Задержки перед повторными попытками
+
     protected $uid;
     protected $city;
     protected $application;
@@ -35,6 +39,14 @@ class WebordersCancelAndRestorNalJob implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info("Starting WebordersCancelAndRestorNalJob", [
+            'uid' => $this->uid,
+            'city' => $this->city,
+            'application' => $this->application,
+            'order_id' => $this->order->id ?? 'N/A',
+            'attempt' => $this->attempts(),
+        ]);
+
         try {
             $controller = new AndroidTestOSMController();
             $result = $controller->webordersCancelRestorAddCostNal(
@@ -44,18 +56,54 @@ class WebordersCancelAndRestorNalJob implements ShouldQueue
                 $this->order
             );
 
-            // Check the response to determine if the job should be considered failed
-            if (isset($result['response'])) {
-                Log::info('WebordersCancelAndRestorNalJob completed successfully: ' . $result['response']);
+            // Проверяем результат выполнения
+            if (isset($result['response']) && $result['response'] === '200') {
+                Log::info("WebordersCancelAndRestorNalJob completed successfully", [
+                    'uid' => $this->uid,
+                    'response' => $result['response'],
+                ]);
                 return;
-            } else {
-                // Job will complete if no naturally  exception is thrown
-                Log::error('WebordersCancelAndRestorDoubleJob failed: ' . $result['response']);
-                $this->fail(new \Exception($result['response']));
             }
+
+            // Если response отсутствует или некорректен
+            Log::error("WebordersCancelAndRestorNalJob failed: Invalid or missing response", [
+                'uid' => $this->uid,
+                'result' => $result,
+            ]);
+            $this->fail(new \Exception('Invalid or missing response: ' . json_encode($result)));
         } catch (\Exception $e) {
-            Log::error('Error in WebordersCancelAndRestorNalJob: ' . $e->getMessage());
+            Log::error("Error in WebordersCancelAndRestorNalJob", [
+                'uid' => $this->uid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             $this->fail($e);
+        }
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(\Exception $exception): void
+    {
+        Log::critical("WebordersCancelAndRestorNalJob failed permanently", [
+            'uid' => $this->uid,
+            'city' => $this->city,
+            'application' => $this->application,
+            'order_id' => $this->order->id ?? 'N/A',
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
+
+        // Отправка уведомления администратору
+        try {
+            \Illuminate\Support\Facades\Notification::route('mail', 'taxi.easy.ua.sup@gmail.com')
+                ->notify(new \App\Notifications\FailedJobsAlert(1));
+        } catch (\Exception $e) {
+            Log::error("Failed to send notification for WebordersCancelAndRestorNalJob", [
+                'uid' => $this->uid,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

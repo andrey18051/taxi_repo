@@ -178,12 +178,12 @@ return [
     'environments' => [
         'production' => [
             'supervisor-1' => [
-                'connection' => 'redis',  // Это ключ из 'redis' в config/database.php
+                'connection' => 'redis',
                 'queue' => ['default'],
                 'balance' => 'auto',
-                'minProcesses' => 1,
-                'maxProcesses' => 10,
-                'tries' => 3,
+                'maxProcesses' => 4,
+                'tries' => 1,
+                'timeout' => 0,
             ],
         ],
 
@@ -199,5 +199,12 @@ return [
         ],
     ],
 
+    'notifications' => [
+        'enabled' => true,
+        'slack' => [
+            'webhook_url' => env('HORIZON_SLACK_WEBHOOK_URL'),
+            'channel' => '#horizon-alerts',
+        ],
+    ],
 
 ];
