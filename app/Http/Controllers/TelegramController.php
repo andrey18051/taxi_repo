@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Telegram;
+use App\Jobs\ClearFailedSendTelegramJobs;
 use App\Jobs\SendTelegramMessageJob;
 use App\Mail\PromoList;
 use App\Models\Config;
 use App\Models\Promo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -166,7 +168,10 @@ class TelegramController extends Controller
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
         Log::debug('sendAlarmMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
-        Queue::push(new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message));
+        Bus::chain([
+            new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message),
+            new ClearFailedSendTelegramJobs()
+        ])->dispatch();
         return response()->json(['status' => 'Message sent in background'], 200);
     }
 
@@ -174,7 +179,13 @@ class TelegramController extends Controller
     {
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
         Log::debug('sendMeMessage sending message: ' . $message);
-        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
+
+
+        Bus::chain([
+            new SendTelegramMessageJob($bot, 120352595, $message),
+            new ClearFailedSendTelegramJobs()
+        ])->dispatch();
+
         return response()->json(['status' => 'Message sent in background'], 200);
     }
 
@@ -184,7 +195,10 @@ class TelegramController extends Controller
 
         Log::debug('sendAlarmMessageLog sending message: ' . $message);
         // Отправляем в фоновую задачу
-        Queue::push(new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message));
+        Bus::chain([
+            new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message),
+            new ClearFailedSendTelegramJobs()
+        ])->dispatch();
         return response()->json(['status' => 'Message sent in background'], 200);
     }
 
@@ -203,7 +217,10 @@ class TelegramController extends Controller
         $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
         Log::debug('sendInformMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
-        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
+        Bus::chain([
+            new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message),
+            new ClearFailedSendTelegramJobs()
+        ])->dispatch();
         return response()->json(['status' => 'Message sent in background'], 200);
     }
 
@@ -212,9 +229,15 @@ class TelegramController extends Controller
         $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
         Log::debug('sendAboutDriverMessage sending message: ' . $message);
         // Отправляем в фоновую задачу для каждого чата
-        Queue::push(new SendTelegramMessageJob($bot, $chat_id, $message));
-        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
 
+        Bus::chain([
+            new SendTelegramMessageJob($bot, $chat_id, $message),
+            new ClearFailedSendTelegramJobs()
+        ])->dispatch();
+        Bus::chain([
+            new SendTelegramMessageJob($bot, 120352595, $message),
+            new ClearFailedSendTelegramJobs()
+        ])->dispatch();
         return response()->json(['status' => 'Messages sent in background'], 200);
     }
 

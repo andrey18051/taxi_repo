@@ -181,8 +181,8 @@ return [
                 'connection' => 'redis',
                 'queue' => ['default'],
                 'balance' => 'auto',
-                'maxProcesses' => 4,
-                'tries' => 1,
+                'maxProcesses' => 10,
+                'tries' => 3,        // 3 попытки
                 'timeout' => 0,
             ],
         ],
