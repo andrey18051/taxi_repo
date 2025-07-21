@@ -1,0 +1,3 @@
+ flyctl auth login
+ flyctl apps set taxi2012
+ flyctl status
