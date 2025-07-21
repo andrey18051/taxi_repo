@@ -6,7 +6,6 @@ docker login ghcr.io -u andrey18051 -p  цццц
 cd D:\OpenServer\domains\taxi2012\docker\baseImageTest
 docker build -t ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base .
 
-
 отправить в гит хаб
 docker push ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
 
