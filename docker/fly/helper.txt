@@ -1,3 +1,8 @@
  flyctl auth login
  flyctl apps set taxi2012
  flyctl status
+
+ Проверьте настройки домена в Fly.io с помощью команды, чтобы убедиться, что домен правильно привязан к вашему приложению.
+
+ flyctl domains list
+

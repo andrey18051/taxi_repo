@@ -1,9 +1,9 @@
-# Используем базовый образ с PHP-FPM 7.3 (bitnami) или ваш базовый
+# Базовый образ - Ubuntu 22.04
 FROM ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Обновляем источники и устанавливаем необходимые пакеты
+# Устанавливаем необходимые пакеты
 RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list \
  && sed -i 's|http://security.debian.org|http://archive.debian.org/debian-security|g' /etc/apt/sources.list \
  && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until \
@@ -17,27 +17,34 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
     sudo \
     systemd \
     netcat-traditional \
-    dos2unix \
-    supervisor \
-    cron \
-    nginx \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Создаем необходимые директории
-RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor /usr/share/nginx/html/taxi/laravel_logs
 
-# Копируем конфигурационные файлы nginx и supervisord (адаптированные под Fly)
+
+# Создаём необходимые директории
+RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
+
+# Копируем конфигурационные файлы
 COPY docker/nginx_fly.conf /etc/nginx/nginx.conf
-COPY docker/supervisord_fly.conf /etc/supervisor/supervisord.conf
+COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-order-taxi-site.crt
+COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
+COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
+COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/test-taxi.kyiv.ua.key
 
-# Копируем сертификаты (при необходимости, если есть)
-COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/
-COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/
-COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/
-COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Копируем проект в контейнер
+# Устанавливаем права и владельцев для необходимых файлов и директорий
+RUN chmod -R 777 /etc/ssl/certs/nginx && \
+    chown -R www-data:www-data /var/log/nginx /run/nginx && \
+    chmod -R 777 /usr/share/nginx/html/taxi/storage && \
+    chmod -R 777 /usr/share/nginx/html/taxi/bootstrap/cache && \
+    chown -R www-data:www-data /usr/share/nginx/html/taxi
+
+# Открываем нужные порты
+EXPOSE 8080
+
+# Копируем файлы проекта
 COPY ./app /usr/share/nginx/html/taxi/app
 COPY ./bootstrap /usr/share/nginx/html/taxi/bootstrap
 COPY ./config /usr/share/nginx/html/taxi/config
@@ -54,7 +61,6 @@ COPY ./vendor /usr/share/nginx/html/taxi/vendor
 # Заменяем WorkCommand.php на оригинальный из Laravel 8.83.29
 COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/framework/src/Illuminate/Queue/Console/WorkCommand.php
 
-# Копируем дополнительные файлы проекта
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
 COPY ../../../app/env/test/.env /usr/share/nginx/html/taxi/
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
@@ -73,31 +79,45 @@ COPY ./README.md /usr/share/nginx/html/taxi/
 COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
-# Копируем системные службы и скрипты
-RUN cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
-    cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/taxi/laravel_logs/watch_log.sh
+# Копируем конфигурации и службы
+RUN cp /usr/share/nginx/html/taxi/docker/supervisord_fly.conf /etc/supervisor/supervisord.conf && \
+    cp /usr/share/nginx/html/taxi/docker/nginx_fly.conf /etc/nginx/nginx.conf && \
+    cp -r /usr/share/nginx/html/taxi/docker/certs/nginx /etc/ssl/certs/nginx && \
+#    cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
+    cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
+    cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 
-# Копируем и делаем исполняемыми необходимые скрипты
-COPY docker/wait-for-redis-then-restart-task.sh /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
-RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh \
- && dos2unix /usr/share/nginx/html/taxi/laravel_logs/watch_log.sh
+# Преобразуем окончания строк уже в контейнере
+RUN apt-get update && apt-get install -y dos2unix
+RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 
-# Устанавливаем права и владельцев для каталогов и файлов проекта
-RUN chmod -R 777 /etc/ssl/certs/nginx && \
-    chown -R www-data:www-data /var/log/nginx /run/nginx && \
-    chmod -R 777 /usr/share/nginx/html/taxi/storage && \
-    chmod -R 777 /usr/share/nginx/html/taxi/bootstrap/cache && \
-    chown -R www-data:www-data /usr/share/nginx/html/taxi && \
-    chmod -R 777 /usr/share/nginx/html/taxi
+# Копируем скрипт ожидания Redis и запуска artisan-команды
+COPY ./docker/wait-for-redis-then-restart-task.sh /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
+RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 
-# Открываем порт 8080 (Fly.io требует именно этот порт)
-EXPOSE 8080
+# Устанавливаем зависимости Laravel
+#RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
+#    rm -rf vendor composer.lock && \
+#    composer install --no-dev --optimize-autoloader && \
+#    composer require predis/predis
 
-# Настраиваем Cron задания
+# Создаём директорию для логов и устанавливаем права
+RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
+
+
+
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
-    echo "* * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan schedule:run >> /dev/null 2>&1" >> /tmp/cronfile && \
-    echo "1 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-    crontab -u root /tmp/cronfile && rm /tmp/cronfile
+        echo "* * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan schedule:run >> /dev/null 2>&1" >> /tmp/cronfile && \
+        echo "1 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+        crontab -u root /tmp/cronfile && \
+        rm /tmp/cronfile
 
-# Запускаем supervisord для управления nginx, php-fpm, cron и другими службами
+
+# Устанавливаем права доступа ко всем файлам проекта
+RUN chmod -R 777 /usr/share/nginx/html/taxi/
+
+
+
+# Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+

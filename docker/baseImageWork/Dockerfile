@@ -6,19 +6,25 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir -p /run/php
 
-RUN apt-get update && apt-get install -y \
-    autoconf \
-    gcc \
-    g++ \
-    make \
-    libtool \
-    php-dev \
-    zlib1g-dev \
-    wget \
-    nginx \
-    supervisor \
-    cron \
-    inotify-tools && apt-get clean
+# Update apt sources to use Debian archive and install packages
+RUN echo "deb http://archive.debian.org/debian buster main" > /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list && \
+    apt-get update --allow-unauthenticated && \
+    apt-get install -y --allow-unauthenticated \
+        autoconf \
+        gcc \
+        g++ \
+        make \
+        libtool \
+        php-dev \
+        zlib1g-dev \
+        wget \
+        nginx \
+        supervisor \
+        cron \
+        inotify-tools && \
+    apt-get clean
+
 
 # Настраиваем PHP-FPM и Nginx на порт 9002 вместо 9000
 RUN sed -i 's|listen = 9000|listen = 127.0.0.1:9003|'  /opt/bitnami/php/etc/php-fpm.d/www.conf && \
