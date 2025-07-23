@@ -1,4 +1,5 @@
- flyctl auth login
+
+flyctl auth login
  flyctl apps set taxi2012
  flyctl status
 
@@ -6,3 +7,8 @@
 
  flyctl domains list
 
+
+Your app is running in a single region
+Scale and run your app in more regions with one command: fly scale count 4 --region ewr
+
+Check out the documentation for more details on scaling.

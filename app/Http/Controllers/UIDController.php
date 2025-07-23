@@ -82,6 +82,28 @@ class UIDController extends Controller
         }
 //        return "-1";
     }
+
+    public function closeReasonUIDStatusService($uid, $connectAPI, $autorization, $identificationId)
+    {
+        $url = $connectAPI . '/api/weborders/' . $uid;
+        $response = Http::withHeaders([
+            "Authorization" => $autorization,
+            "X-WO-API-APP-ID" => $identificationId,
+        ])->get($url);
+        if ($response->status() == 200) {
+            $response_arr = json_decode($response, true);
+
+            $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
+            Log::debug("closeReasonUIDStatusService uid $uid");
+            $orderweb_uid->auto = $response_arr["order_car_info"];
+
+            $orderweb_uid->closeReason = $response_arr["close_reason"];
+            $orderweb_uid->save();
+
+            return $response_arr["close_reason"];
+        }
+    }
+
     public function closeReasonUIDStatusFirstWfp($uid, $connectAPI, $autorization, $identificationId)
     {
         $url = $connectAPI . '/api/weborders/' . $uid;
@@ -1232,6 +1254,58 @@ class UIDController extends Controller
             }
 
         }
+    }
+
+    public function UIDStatusReviewService($order)
+    {
+        $value = $order->toArray();
+        Log::debug("UIDStatusReview", $value);
+        $uid = $value["dispatching_order_uid"];
+
+        $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+        if ($uid_history) {
+            self::UIDStatusReviewCard($uid);
+        } else {
+            if (!in_array($value['closeReason'],  ['101', '102', '103', '104'] )) {
+                $connectAPI = $value["server"];
+
+                switch ($value["comment"]) {
+                    case "taxi_easy_ua_pas1":
+                        $application = "PAS1";
+                        break;
+                    case "taxi_easy_ua_pas2":
+                        $application = "PAS2";
+                        break;
+                    default:
+                        $application = "PAS4";
+                }
+                Log::debug("UIDStatusReview application $application");
+
+                $address = str_replace("http://", "", $connectAPI);
+                switch ($application) {
+                    case "PAS1":
+                        $serverInfo = City_PAS1::where('address', $address)->first();
+                        break;
+                    case "PAS2":
+                        $serverInfo = City_PAS2::where('address', $address)->first();
+                        break;
+                    default:
+                        $serverInfo = City_PAS4::where('address', $address)->first();
+                }
+
+                // Проверка, найден ли сервер
+                if ($serverInfo && $serverInfo->online == "true") {
+                    Log::debug("UIDStatusReview serverInfo online: true");
+                    $identificationId = $value["comment"];
+                    UIDController::closeReasonUIDStatusService($uid, $connectAPI, self::autorization($connectAPI), $identificationId);
+                } else {
+                    Log::error("UIDStatusReview serverInfo is null or offline for address $address");
+                }
+            }
+        }
+
+
     }
 
     public function UIDStatusReviewCard($dispatching_order_uid)

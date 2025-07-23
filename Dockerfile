@@ -26,7 +26,7 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
 RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 
 # Копируем конфигурационные файлы
-COPY docker/nginx_fly.conf /etc/nginx/nginx.conf
+COPY docker/nginx_test.conf /etc/nginx/nginx.conf
 COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-order-taxi-site.crt
 COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
 COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
@@ -42,7 +42,7 @@ RUN chmod -R 777 /etc/ssl/certs/nginx && \
     chown -R www-data:www-data /usr/share/nginx/html/taxi
 
 # Открываем нужные порты
-EXPOSE 8080
+EXPOSE 6443
 
 # Копируем файлы проекта
 COPY ./app /usr/share/nginx/html/taxi/app
@@ -80,8 +80,8 @@ COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
 # Копируем конфигурации и службы
-RUN cp /usr/share/nginx/html/taxi/docker/supervisord_fly.conf /etc/supervisor/supervisord.conf && \
-    cp /usr/share/nginx/html/taxi/docker/nginx_fly.conf /etc/nginx/nginx.conf && \
+RUN cp /usr/share/nginx/html/taxi/docker/supervisord_test.conf /etc/supervisor/supervisord.conf && \
+    cp /usr/share/nginx/html/taxi/docker/nginx_test.conf /etc/nginx/nginx.conf && \
     cp -r /usr/share/nginx/html/taxi/docker/certs/nginx /etc/ssl/certs/nginx && \
 #    cp /usr/share/nginx/html/taxi/docker/laravel-worker.service /etc/systemd/system/laravel-worker.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
@@ -104,7 +104,14 @@ RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
 
-
+# Настраиваем Cron
+#RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
+#    echo "*/15 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan daily-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan driver-balance-report-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    echo "0 22 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    echo "0 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+#    crontab -u root /tmp/cronfile && \
+#    rm /tmp/cronfile
 
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
         echo "* * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan schedule:run >> /dev/null 2>&1" >> /tmp/cronfile && \
@@ -115,6 +122,11 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
 
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
+
+# Миграции
+#RUN cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate
+#cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_05_27_125407_create_audits_table.php
+
 
 
 

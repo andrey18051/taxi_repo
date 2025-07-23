@@ -94,38 +94,79 @@ class FCMController extends Controller
 
 
 
-    public function sendNotificationAuto($body, $app, $user_id)
+    public function sendNotificationAuto(
+        $body,
+        $app,
+        $user_id,
+        $uid
+    )
     {
+        Log::info("=== Запуск sendNotificationAuto ===", [
+            'body'    => $body,
+            'app'     => $app,
+            'user_id' => $user_id,
+            'uid'     => $uid,
+        ]);
+
+        // Получаем токен пользователя
         $userToken = UserTokenFmsS::where("user_id", $user_id)->first();
 
         if ($userToken != null) {
+            Log::info("Найден UserTokenFmsS", ['user_id' => $user_id]);
+
+            // Определяем токен и firebaseMessaging в зависимости от app
             switch ($app) {
                 case "PAS1":
                     $to = $userToken->token_app_pas_1;
                     $firebaseMessaging = app('firebase.messaging')['app1'];
+                    Log::info("Выбран PAS1", ['token' => $to]);
                     break;
                 case "PAS2":
                     $to = $userToken->token_app_pas_2;
                     $firebaseMessaging = app('firebase.messaging')['app2'];
+                    Log::info("Выбран PAS2", ['token' => $to]);
                     break;
                 default:
                     $to = $userToken->token_app_pas_4;
                     $firebaseMessaging = app('firebase.messaging')['app4'];
+                    Log::info("Выбран PAS4 (default)", ['token' => $to]);
             }
 
+            // Формируем сообщение
+            $dataPayload = [
+                'message_uk' => 'Знайдено авто: ' . $body,
+                'message_en' => 'Found car: ' . $body,
+                'message_ru' => 'Найдено авто:  ' . $body,
+                'uid'        => $uid,
+            ];
+
+            Log::info("Формируем CloudMessage", ['data' => $dataPayload]);
 
             $message = CloudMessage::withTarget('token', $to)
-                ->withData([
-                    'message_uk' => 'Знайдено авто: ' . $body,
-                    'message_en' => 'Found car: ' . $body,
-                    'message_ru' => 'Найдено авто:  ' . $body,
+                ->withData($dataPayload);
+
+            try {
+                // Отправляем уведомление
+                $firebaseMessaging->send($message);
+                Log::info("Уведомление успешно отправлено", [
+                    'token' => $to,
+                    'uid'   => $uid
                 ]);
 
-            $firebaseMessaging->send($message);
-
-            return response()->json(['message' => 'Notification sent']);
+                return response()->json(['message' => 'Notification sent']);
+            } catch (\Exception $e) {
+                Log::error("Ошибка при отправке уведомления", [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return response()->json([
+                    'message' => 'Failed to send notification',
+                    'error'   => $e->getMessage()
+                ], 500);
+            }
         }
 
+        Log::warning("UserTokenFmsS не найден", ['user_id' => $user_id]);
         return response()->json(['message' => 'User token not found'], 404);
     }
 

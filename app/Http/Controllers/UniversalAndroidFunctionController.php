@@ -7836,7 +7836,7 @@ class UniversalAndroidFunctionController extends Controller
 //
 //    }
 
-    public function searchAutoOrderJob($uid)
+    public function searchAutoOrderJob($uid, $mes_info)
     {
         Log::info('searchAutoOrderJob: Начало обработки', ['uid' => $uid]);
 
@@ -7894,7 +7894,7 @@ class UniversalAndroidFunctionController extends Controller
                             (new FCMController)->writeDocumentToHistoryFirestore($processedUid, "cancelled");
 
                         }
-                        self::sendAutoOrderResponse($orderweb);
+                        self::sendAutoOrderResponse($orderweb, $mes_info);
 
 //                        ProcessAutoOrder::dispatch($processedUid);
 
@@ -7926,7 +7926,160 @@ class UniversalAndroidFunctionController extends Controller
         }
     }
 
-    public function searchAutoOrderCardJob($uid)
+
+
+    public function searchAutoOrderServiceAll($email, $app, $mes_info): array
+    {
+        Log::info("=== Запуск searchAutoOrderServiceAll ===", [
+            'email' => $email,
+            'app' => $app
+        ]);
+
+        // Определяем comment в зависимости от приложения
+        switch ($app) {
+            case "PAS1":
+                $comment = config("app.X-WO-API-APP-ID-PAS1");
+                break;
+            case "PAS2":
+                $comment = config("app.X-WO-API-APP-ID-PAS2");
+                break;
+            default:
+                $comment = config("app.X-WO-API-APP-ID-PAS4");
+        }
+
+        Log::info("Выбран comment: {$comment}");
+
+        // Получаем все заказы
+        $orders = Orderweb::where('email', $email)
+            ->where('comment', $comment)
+            ->where('closeReason', "-1")
+            ->where('pay_system', "nal_payment")
+            ->get();
+
+        $count = $orders->count();
+        Log::info("Найдено заказов: {$count}");
+
+        $orderNumbers = [];
+
+        // Запускаем searchAutoOrderService для каждого uid
+        foreach ($orders as $index => $order) {
+            $orderNumber = $index + 1;
+            Log::info("Запуск searchAutoOrderService", [
+                'номер' => $orderNumber,
+                'dispatching_order_uid' => $order->dispatching_order_uid
+            ]);
+
+            $this->searchAutoOrderService($order->dispatching_order_uid, $mes_info);
+
+            $orderNumbers[] = [
+                'номер' => $orderNumber,
+                'dispatching_order_uid' => $order->dispatching_order_uid
+            ];
+        }
+
+        Log::info("=== Завершение searchAutoOrderServiceAll ===", [
+            'orders' => $orderNumbers
+        ]);
+
+        return [
+            'status' => 'success',
+            'message' => 'Обработка завершена',
+            'total_orders' => $count,
+            'orders' => $orderNumbers
+        ];
+    }
+
+
+
+
+    public function searchAutoOrderService($uid, $mes_info): array
+    {
+        Log::info('searchAutoOrderJob: Начало обработки', ['uid' => $uid]);
+
+        // Валидация входного параметра
+        if (empty($uid)) {
+            Log::error('searchAutoOrderJob: Неверный UID', ['uid' => $uid]);
+            return ['status' => 'error', 'message' => 'Неверный UID'];
+        }
+
+        try {
+            // Получение обработанного UID
+            $processedUid = (new MemoryOrderChangeController)->show($uid);
+            if ($processedUid === null) {
+                Log::warning('searchAutoOrderJob: Обработка UID вернула null', ['uid' => $uid]);
+                return ['status' => 'error', 'message' => 'Обработка UID не удалась'];
+            }
+            Log::info('searchAutoOrderJob: UID обработан', ['uid' => $uid, 'processedUid' => $processedUid]);
+
+            // Поиск заказа
+            $orderweb = Orderweb::where("dispatching_order_uid", $processedUid)->first();
+            if (!$orderweb) {
+                Log::warning('searchAutoOrderJob: Заказ не найден', ['processedUid' => $processedUid]);
+                return ['status' => 'success', 'message' => 'Заказ не найден'];
+            }
+            Log::info('searchAutoOrderJob: Заказ найден', [
+                'processedUid' => $processedUid,
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'closeReason' => $orderweb->closeReason
+            ]);
+            Log::info('searchAutoOrderJob: Проверка условий цикла', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'closeReason' => $orderweb->closeReason,
+                'auto' => $orderweb->auto
+            ]);
+
+            $messageAdmin = 'searchAutoOrderJob: dispatching_order_uid' .
+                $orderweb->dispatching_order_uid . "\n closeReason" . $orderweb->closeReason;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            (new UIDController())->UIDStatusReviewService($orderweb);
+
+            if ($orderweb->closeReason == "-1"
+                || $orderweb->closeReason == "101"
+                || $orderweb->closeReason == "102"
+                || $orderweb->closeReason == "103"
+            ) {
+                if ($orderweb->auto != null) {
+                    Log::info('searchAutoOrderJob: Найден автоматический заказ, отправка ответа', [
+                        'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                        'auto' => $orderweb->auto
+                    ]);
+                    if ($orderweb->closeReason == "-1") {
+                        (new FCMController)->deleteDocumentFromFirestore($processedUid);
+                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($processedUid);
+                        (new FCMController)->deleteDocumentFromSectorFirestore($processedUid);
+                        (new FCMController)->writeDocumentToHistoryFirestore($processedUid, "cancelled");
+                    }
+                    self::sendAutoOrderResponse($orderweb, $mes_info);
+
+                    // Ensure return after sending response
+                    Log::info('searchAutoOrderJob: Проверка условий цикла', [
+                        'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                        'closeReason' => $orderweb->closeReason,
+                        'auto' => $orderweb->auto
+                    ]);
+                    return ['status' => 'success', 'message' => $orderweb->auto];
+                }
+
+                // Add return for the case where $orderweb->auto is null
+                return ['status' => 'success', 'message' => 'Автоматический заказ не найден'];
+            } else {
+                Log::info('searchAutoOrderJob: Заказ снят', [
+                    'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                    'closeReason' => $orderweb->closeReason
+                ]);
+                return ['status' => 'success', 'message' => 'Заказ снят'];
+            }
+        } catch (\Exception $e) {
+            Log::error('searchAutoOrderJob: Произошла ошибка', [
+                'uid' => $uid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return ['status' => 'error', 'message' => 'Ошибка обработки: ' . $e->getMessage()];
+        }
+    }
+
+    public function searchAutoOrderCardJob($uid, $mes_info)
     {
         Log::info('searchAutoOrderCardJob: Начало обработки', ['uid' => $uid]);
 
@@ -7971,7 +8124,7 @@ class UniversalAndroidFunctionController extends Controller
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid,
                             'auto' => $orderweb->auto
                         ]);
-                        self::sendAutoOrderResponse($orderweb);
+                        self::sendAutoOrderResponse($orderweb, $mes_info);
                         Log::info('searchAutoOrderCardJob: Ответ отправлен', [
                             'dispatching_order_uid' => $orderweb->dispatching_order_uid
                         ]);
@@ -8099,10 +8252,12 @@ class UniversalAndroidFunctionController extends Controller
      * @param Orderweb $orderweb Объект заказа
      * @return void
      */
-    public function sendAutoOrderResponse($orderweb): void
+    public function sendAutoOrderResponse($orderweb, $mes_info): void
     {
         Log::info('sendAutoOrderResponse started', [
-            'dispatching_order_uid' => $orderweb->dispatching_order_uid
+            'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+            'mes_info' => $mes_info,
+
         ]);
 
         if (isset($orderweb->client_cost)) {
@@ -8196,7 +8351,16 @@ class UniversalAndroidFunctionController extends Controller
                 }
 
                 $body = $auto;
-                (new FCMController)->sendNotificationAuto($body, $app, $user->id);
+                Log::info('sendAutoOrderResponse: $mes_info' . $mes_info);
+                if ($mes_info == "yes_mes") {
+                    (new FCMController)->sendNotificationAuto(
+                        $body,
+                        $app,
+                        $user->id,
+                        $orderweb->dispatching_order_uid
+                    );
+                }
+
             }
             Log::info('sendAutoOrderResponse: Auto order sent successfully', [
                 'dispatching_order_uid' => $orderweb->dispatching_order_uid

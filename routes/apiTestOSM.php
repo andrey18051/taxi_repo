@@ -258,3 +258,9 @@ Route::get('/android/parseOrderResponse/{response}/{dispatching_order_uid_Double
 
 Route::get('/android/getChain/{dispatching_order_uid_Double}', [\App\Http\Controllers\MemoryOrderChangeController::class, 'getChain'])
     ->name('getChain');
+
+Route::get('/android/searchAutoOrderService/{uid}/{mess_info}', [\App\Http\Controllers\UniversalAndroidFunctionController::class, 'searchAutoOrderService'])
+    ->name('searchAutoOrderService');
+
+Route::get('/android/searchAutoOrderServiceAll/{email}/{app}/{mess_info}', [\App\Http\Controllers\UniversalAndroidFunctionController::class, 'searchAutoOrderServiceAll'])
+    ->name('searchAutoOrderServiceAll');

@@ -51,7 +51,7 @@ class SearchAutoOrderJob implements ShouldQueue
             }
 
             // Вызов сервиса для обработки
-            $result = (new \App\Http\Controllers\UniversalAndroidFunctionController)->searchAutoOrderJob($this->uid);
+            $result = (new \App\Http\Controllers\UniversalAndroidFunctionController)->searchAutoOrderJob($this->uid, "yes_mes");
 
             // Логирование результата
             Log::info('SearchAutoOrderJob completed', [

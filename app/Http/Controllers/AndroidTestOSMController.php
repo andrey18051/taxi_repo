@@ -11244,7 +11244,6 @@ class AndroidTestOSMController extends Controller
         Log::debug("1 historyUIDStatus uid $uid");
 
         if (!$orderweb_uid) {
-
             $close_reason = -1;
             $execution_status= "SearchesForCar";
             $messageAdmin = "Метод historyUIDStatus  $uid  close_reason $close_reason  execution_status $execution_status" ;
