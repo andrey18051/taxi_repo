@@ -3,7 +3,6 @@
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Horizon Domain
@@ -14,7 +13,6 @@ return [
     | application. Otherwise, this value will serve as the subdomain.
     |
     */
-
     'domain' => null,
 
     /*
@@ -27,7 +25,6 @@ return [
     | affect the paths of its internal API that aren't exposed to users.
     |
     */
-
     'path' => 'horizon',
 
     /*
@@ -40,7 +37,6 @@ return [
     | of supervisors, failed jobs, job metrics, and other information.
     |
     */
-
     'use' => 'default',
 
     /*
@@ -53,11 +49,7 @@ return [
     | of Horizon on the same server so that they don't have problems.
     |
     */
-
-    'prefix' => env(
-        'HORIZON_PREFIX',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_horizon:'
-    ),
+    'prefix' => env('HORIZON_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_horizon:'),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,8 +61,7 @@ return [
     | the existing middleware. Or, you can simply stick with this list.
     |
     */
-
-    'middleware' => ['web'],
+    'middleware' => ['web', 'auth'], // Добавлен auth для безопасности
 
     /*
     |--------------------------------------------------------------------------
@@ -82,9 +73,10 @@ return [
     | own, unique threshold (in seconds) before this event is fired.
     |
     */
-
     'waits' => [
-        'redis:default' => 60,
+        'redis:high' => 60,   // Очередь high
+        'redis:medium' => 60, // Очередь medium
+        'redis:low' => 60,    // Очередь low
     ],
 
     /*
@@ -97,7 +89,6 @@ return [
     | for one hour while all failed jobs are stored for an entire week.
     |
     */
-
     'trim' => [
         'recent' => 60,
         'pending' => 60,
@@ -117,7 +108,6 @@ return [
     | `horizon:snapshot` schedule to define how long to retain metrics.
     |
     */
-
     'metrics' => [
         'trim_snapshots' => [
             'job' => 24,
@@ -126,9 +116,9 @@ return [
     ],
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------
     | Fast Termination
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------
     |
     | When this option is enabled, Horizon's "terminate" command will not
     | wait on all of the workers to terminate unless the --wait option
@@ -137,68 +127,96 @@ return [
     | instance will continue to terminate each of its workers.
     |
     */
-
-    'fast_termination' => false,
+    'fast_termination' => true, // Включено для быстрого развертывания
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------
     | Memory Limit (MB)
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------
     |
     | This value describes the maximum amount of memory the Horizon worker
     | may consume before it is terminated and restarted. You should set
     | this value according to the resources available to your server.
     |
     */
-
-    'memory_limit' => 64,
+    'memory_limit' => 256, // Увеличено до 256 МБ для тяжелых задач
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------
     | Queue Worker Configuration
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------
     |
     | Here you may define the queue worker settings used by your application
     | in all environments. These supervisors and settings handle all your
     | queued jobs and will be provisioned by Horizon during deployment.
     |
     */
-
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default'],
+            'queue' => ['high', 'medium', 'low'],
             'balance' => 'auto',
-            'maxProcesses' => 1,
-            'tries' => 1,
+            'maxProcesses' => 10,
+            'minProcesses' => 1,
+            'tries' => 3,
             'nice' => 0,
+            'timeout' => 3600, // 1 час
         ],
     ],
 
     'environments' => [
         'production' => [
-            'supervisor-1' => [
+            'supervisor-high' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
-                'balance' => 'auto',
-                'maxProcesses' => 10,
-                'tries' => 3,        // 3 попытки
-                'timeout' => 0,
+                'queue' => ['high'],
+                'balance' => 'simple',
+                'maxProcesses' => 12, // Увеличено для приоритетной очереди
+                'minProcesses' => 2,
+                'tries' => 3,
+                'timeout' => 3600,
+            ],
+            'supervisor-medium' => [
+                'connection' => 'redis',
+                'queue' => ['medium'],
+                'balance' => 'simple',
+                'maxProcesses' => 6, // Увеличено для средней очереди
+                'minProcesses' => 1,
+                'tries' => 3,
+                'timeout' => 3600,
+            ],
+            'supervisor-low' => [
+                'connection' => 'redis',
+                'queue' => ['low'],
+                'balance' => 'simple',
+                'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
+                'minProcesses' => 1,
+                'tries' => 3,
+                'timeout' => 3600,
             ],
         ],
-
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
+                'queue' => ['high', 'medium', 'low'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
                 'tries' => 3,
+                'timeout' => 3600,
             ],
         ],
     ],
 
+    /*
+    |----------------------------------------------------------------
+    | Notifications
+    |----------------------------------------------------------------
+    |
+    | Horizon can send notifications to a Slack channel when something
+    | goes wrong with your queues, such as long wait times or failed
+    | jobs. Make sure to configure the webhook URL in your .env file.
+    |
+    */
     'notifications' => [
         'enabled' => true,
         'slack' => [
@@ -206,5 +224,4 @@ return [
             'channel' => '#horizon-alerts',
         ],
     ],
-
 ];
