@@ -71,5 +71,5 @@ ps aux | grep nginx
 просмотр служб супервизора
 supervisorctl status
 
-
-
+очитстить очередь задач
+docker exec -it redis_server redis-cli -a 18And051971 FLUSHALL

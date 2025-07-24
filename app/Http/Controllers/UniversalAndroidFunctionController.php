@@ -6173,7 +6173,7 @@ class UniversalAndroidFunctionController extends Controller
      */
     public function startAddCostWithAddBottomUpdate($uid, $addCost): ?\Illuminate\Http\JsonResponse
     {
-        Log::info("Метод startAddCostUpdate вызван с UID: " . $uid);
+        Log::info("Метод startAddCostWithAddBottomUpdate вызван с UID: " . $uid);
 
 
         // Получаем UID из MemoryOrderChangeController
@@ -6363,7 +6363,9 @@ class UniversalAndroidFunctionController extends Controller
 
 //                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
 //                (new AndroidTestOSMController)->webordersCancelRestorAddCostNal($uid, $city, $application, $order);
-                WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $order);
+//                WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $order);
+                dispatch((new WebordersCancelAndRestorNalJob($uid, $city, $application, $order))
+                    ->onQueue('high'));
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -6719,7 +6721,7 @@ class UniversalAndroidFunctionController extends Controller
                         $messageAdmin = "Доплата по счету $orderReference на сумму 20 $transactionStatus ";
                         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-                        StartAddCostCardCreat::dispatch(
+                        dispatch(new StartAddCostCardCreat(
                             $uid,
                             $uid_Double,
                             $pay_method,
@@ -6727,7 +6729,8 @@ class UniversalAndroidFunctionController extends Controller
                             $application,
                             $city,
                             $transactionStatus
-                        );
+                        ))->onQueue('medium');
+
                         return response()->json([
                             "response" => "200"
                         ], 200);
@@ -7033,7 +7036,12 @@ class UniversalAndroidFunctionController extends Controller
                     $messageAdmin = "StartNewProcessExecution (startAddCostCardUpdate): " . json_encode($doubleOrder->toArray());
                     (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
                     return null;
                 }
 
@@ -7374,7 +7382,14 @@ class UniversalAndroidFunctionController extends Controller
 //                    $application
 //                );
 
-                WebordersCancelAndRestorDoubleJob::dispatch($uid, $uid_Double, $city, $application, $order);
+                dispatch(new WebordersCancelAndRestorDoubleJob(
+                    $uid,
+                    $uid_Double,
+                    $city,
+                    $application,
+                    $order
+                ))->onQueue('high');
+
 
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
@@ -7466,7 +7481,12 @@ class UniversalAndroidFunctionController extends Controller
                     $uid_history->orderId = $doubleOrder->id;
                     $uid_history->save();
 
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 
                 }
 

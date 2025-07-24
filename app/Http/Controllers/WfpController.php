@@ -969,7 +969,9 @@ class WfpController extends Controller
                     $data = json_decode($response->body(), true);
                     $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
                     if ($data['transactionStatus'] != "WaitingAuthComplete") {
-                        CheckStatusJob::dispatch($application, $city, $orderReference);
+                        dispatch(new CheckStatusJob($application, $city, $orderReference))
+                            ->onQueue('medium');
+
                     }
                     if ($invoice) {
                         $invoice->transactionStatus = $data['transactionStatus'];
@@ -1264,7 +1266,9 @@ class WfpController extends Controller
                         ];
 
                         // Диспетчеризация задачи RefundSettleCardPayJob
-                        RefundSettleCardPayJob::dispatch($params, $value->orderReference, "refund");
+                        dispatch(new RefundSettleCardPayJob($params, $value->orderReference, "refund"))
+                            ->onQueue('medium');
+
                     }
                 }
             }
@@ -1417,7 +1421,9 @@ class WfpController extends Controller
 
         // Dispatch refund job
         try {
-            RefundSettleCardPayJob::dispatch($params, $orderReference, "refundVerifyCards");
+            dispatch(new RefundSettleCardPayJob($params, $orderReference, "refundVerifyCards"))
+                ->onQueue('medium');
+
             Log::info('Refund job dispatched', [
                 'orderReference' => $orderReference,
                 'job' => 'RefundSettleCardPayJob'
@@ -1723,7 +1729,9 @@ class WfpController extends Controller
                             "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
                             "apiVersion" => 1
                         ];
-                        RefundSettleCardPayJob::dispatch($params, $orderReference, "settle");
+                        dispatch(new RefundSettleCardPayJob($params, $orderReference, "settle"))
+                            ->onQueue('medium');
+
                     }
 
 
@@ -3495,7 +3503,9 @@ class WfpController extends Controller
          ];
 
         // Диспетчеризация задачи RefundSettleCardPayJob
-        RefundSettleCardPayJob::dispatch($params, $order["order_reference"], "refundVerifyCards");
+        dispatch(new RefundSettleCardPayJob($params, $order["order_reference"], "refundVerifyCards"))
+            ->onQueue('medium');
+
     }
 
     public function verifyHold ($uid): array

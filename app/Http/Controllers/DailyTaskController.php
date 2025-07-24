@@ -102,7 +102,9 @@ class DailyTaskController extends Controller
                 Log::info("restartProcessExecutionStatus: $message");
                 self::sentTaskMessage($message);
 
-                StartNewProcessExecution::dispatch($order->id);
+                dispatch(new StartNewProcessExecution($order->id))
+                    ->onQueue('medium');
+
             }
         } catch (Exception $e) {
             Log::error("Ошибка при выполнении запроса: " . $e->getMessage());

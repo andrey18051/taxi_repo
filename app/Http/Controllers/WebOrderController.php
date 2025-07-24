@@ -3319,7 +3319,9 @@ class WebOrderController extends Controller
 
     public function version_combo()
     {
-        VersionKyivJob::dispatch();
+        dispatch(new VersionKyivJob())
+            ->onQueue('low');
+
         return redirect()->route('home-admin')->with('success', "База обновляется.");
     }
 

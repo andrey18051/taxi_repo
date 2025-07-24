@@ -1881,7 +1881,8 @@ class AndroidTestOSMController extends Controller
                 //60 секунд на оплату водителю на карту
                 Log::debug("StartStatusPaymentReview " . $responseFinal);
                 Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+
             }
 
             //Запуск вилки
@@ -1914,7 +1915,11 @@ class AndroidTestOSMController extends Controller
                 $response_ok["doubleOrder"] = $doubleOrder->id;
 
 
-                StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
 
 
             }
@@ -1935,8 +1940,7 @@ class AndroidTestOSMController extends Controller
                 Log::debug("city" . $city);
                 Log::debug("application" . $application);
 
-                SearchOrderToDeleteJob::dispatch(
-//                self::searchOrderToDelete(
+                dispatch((new SearchOrderToDeleteJob(
                     $response_ok["from_lat"],
                     $response_ok["from_lng"],
                     $response_ok["lat"],
@@ -1947,7 +1951,8 @@ class AndroidTestOSMController extends Controller
                     $payment_type,
                     $city,
                     $application
-                );
+                ))->onQueue('medium'));
+
             }
 
             return response($response_ok, 200)
@@ -2391,7 +2396,8 @@ class AndroidTestOSMController extends Controller
                 //60 секунд на оплату водителю на карту
                 Log::debug("StartStatusPaymentReview " . $responseFinal);
                 Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+
             }
 
             //Запуск вилки
@@ -2424,7 +2430,12 @@ class AndroidTestOSMController extends Controller
                 $response_ok["doubleOrder"] = $doubleOrder->id;
 
 
-                StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 
 
             }
@@ -2445,8 +2456,7 @@ class AndroidTestOSMController extends Controller
                 Log::debug("city" . $city);
                 Log::debug("application" . $application);
 
-                SearchOrderToDeleteJob::dispatch(
-//                self::searchOrderToDelete(
+                dispatch((new SearchOrderToDeleteJob(
                     $response_ok["from_lat"],
                     $response_ok["from_lng"],
                     $response_ok["lat"],
@@ -2457,7 +2467,8 @@ class AndroidTestOSMController extends Controller
                     $payment_type,
                     $city,
                     $application
-                );
+                ))->onQueue('medium'));
+
             }
 
             return response($response_ok, 200)
@@ -2921,7 +2932,8 @@ class AndroidTestOSMController extends Controller
                 //60 секунд на оплату водителю на карту
                 Log::debug("StartStatusPaymentReview " . $responseFinal);
                 Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+
             }
 
             //Запуск вилки
@@ -2954,7 +2966,12 @@ class AndroidTestOSMController extends Controller
                 $response_ok["doubleOrder"] = $doubleOrder->id;
 
 
-                StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 
 
             }
@@ -2975,8 +2992,7 @@ class AndroidTestOSMController extends Controller
                 Log::debug("city" . $city);
                 Log::debug("application" . $application);
 
-                SearchOrderToDeleteJob::dispatch(
-//                self::searchOrderToDelete(
+                dispatch((new SearchOrderToDeleteJob(
                     $response_ok["from_lat"],
                     $response_ok["from_lng"],
                     $response_ok["lat"],
@@ -2987,7 +3003,8 @@ class AndroidTestOSMController extends Controller
                     $payment_type,
                     $city,
                     $application
-                );
+                ))->onQueue('medium'));
+
             }
 
             return response($response_ok, 200)
@@ -5386,7 +5403,12 @@ class AndroidTestOSMController extends Controller
 
                     $response_ok["doubleOrder"] = $doubleOrder->id;
 
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
                 return response($response_ok, 200)
@@ -5799,7 +5821,8 @@ class AndroidTestOSMController extends Controller
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                    dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+
                 }
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -5886,7 +5909,12 @@ class AndroidTestOSMController extends Controller
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
 //                else {
@@ -5938,7 +5966,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                    if ($responseBonusArr == null
@@ -5989,7 +6022,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                }
@@ -6475,7 +6513,7 @@ class AndroidTestOSMController extends Controller
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                    dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
                 }
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -6562,7 +6600,12 @@ class AndroidTestOSMController extends Controller
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
 //                else {
@@ -6614,7 +6657,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                    if ($responseBonusArr == null
@@ -6665,7 +6713,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                }
@@ -7183,7 +7236,7 @@ class AndroidTestOSMController extends Controller
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                    dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
                 }
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -7270,7 +7323,12 @@ class AndroidTestOSMController extends Controller
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
 //                else {
@@ -7322,7 +7380,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                    if ($responseBonusArr == null
@@ -7373,7 +7436,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                }
@@ -7908,10 +7976,14 @@ class AndroidTestOSMController extends Controller
                     }
 
                     Log::debug("AutoCancelJob payment_type:  $payment_type");
-                    if($payment_type == 0) {
+                    if ($payment_type == 0) {
                         $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
                         Log::debug("AutoCancelJob:  $delayMinutes  ");
-                        AutoCancelJob::dispatch($response_arr['dispatching_order_uid'])->delay(now()->addMinutes($delayMinutes));;
+                        dispatch(new AutoCancelJob($response_arr['dispatching_order_uid']))
+                            ->delay(now()->addMinutes($delayMinutes))
+                            ->onQueue('low');
+
+
                     }
 
 
@@ -8002,7 +8074,9 @@ class AndroidTestOSMController extends Controller
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                    dispatch(new StartStatusPaymentReview($params['dispatching_order_uid']))
+                        ->onQueue('medium');
+
                 }
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -8089,7 +8163,12 @@ class AndroidTestOSMController extends Controller
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
 //                else {
@@ -8141,7 +8220,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                    if ($responseBonusArr == null
@@ -8192,7 +8276,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                }
@@ -8706,7 +8795,9 @@ class AndroidTestOSMController extends Controller
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                    dispatch(new StartStatusPaymentReview($params['dispatching_order_uid']))
+                        ->onQueue('medium');
+
                 }
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -8793,15 +8884,19 @@ class AndroidTestOSMController extends Controller
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 
                 }
 
 
                 if (count($userArr) > 3) {
                     $email = $params['email'];
-                    SearchOrderToDeleteJob::dispatch(
-//                    self::searchOrderToDelete(
+                    dispatch(new SearchOrderToDeleteJob(
                         $originLatitude,
                         $originLongitude,
                         $toLatitude,
@@ -8812,7 +8907,8 @@ class AndroidTestOSMController extends Controller
                         $payment_type,
                         $city,
                         $application
-                    );
+                    ))->onQueue('medium');
+
                 }
                 return response($response_ok, 200)
                     ->header('Content-Type', 'json');
@@ -9240,7 +9336,9 @@ class AndroidTestOSMController extends Controller
                     //60 секунд на оплату водителю на карту
                     Log::debug("StartStatusPaymentReview " . $responseFinal);
                     Log::debug("dispatching_order_uid " .  $params['dispatching_order_uid']);
-                    StartStatusPaymentReview::dispatch ($params['dispatching_order_uid']);
+                    dispatch(new StartStatusPaymentReview($params['dispatching_order_uid']))
+                        ->onQueue('medium');
+
                 }
 
                 $response_ok["from_lat"] = $originLatitude;
@@ -9327,7 +9425,12 @@ class AndroidTestOSMController extends Controller
                     Log::info("doubleOrder->id" . $doubleOrder->id);
                     Log::debug("StartNewProcessExecution 5895");
                     Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                    StartNewProcessExecution::dispatch($doubleOrder->id);
+                    dispatch(
+                        (new StartNewProcessExecution($doubleOrder->id))
+                            ->onQueue('high')
+                    );
+
+
 //                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
                 }
 //                else {
@@ -9379,7 +9482,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                    if ($responseBonusArr == null
@@ -9430,7 +9538,12 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-//                        StartNewProcessExecution::dispatch($doubleOrder->id);
+                dispatch(
+                    (new StartNewProcessExecution($doubleOrder->id))
+                        ->onQueue('high')
+                );
+
+
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
 //                    }
 //                }

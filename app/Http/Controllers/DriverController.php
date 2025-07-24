@@ -700,7 +700,8 @@ class DriverController extends Controller
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
                     (new MessageSentController())->sentCarRestoreOrder($order);
 
-                    SearchAutoOrderJob::dispatch($order_new_uid);
+                    dispatch((new SearchAutoOrderJob($order_new_uid))->onQueue('medium'));
+
 
                     return $order;
                 } else {
