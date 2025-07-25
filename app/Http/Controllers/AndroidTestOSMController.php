@@ -5966,10 +5966,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -6022,10 +6022,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -6657,10 +6657,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -6713,10 +6713,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -7380,10 +7380,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -7436,10 +7436,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -8220,10 +8220,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -8276,10 +8276,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -9482,10 +9482,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
@@ -9538,10 +9538,10 @@ class AndroidTestOSMController extends Controller
 //                        Log::info("doubleOrder->id" . $doubleOrder->id);
 //                        Log::debug("StartNewProcessExecution 5895");
 //                        Log::debug("response_arr22222:" . json_encode($doubleOrder->toArray()));
-                dispatch(
-                    (new StartNewProcessExecution($doubleOrder->id))
-                        ->onQueue('high')
-                );
+//                dispatch(
+//                    (new StartNewProcessExecution($doubleOrder->id))
+//                        ->onQueue('high')
+//                );
 
 
 ////                    (new UniversalAndroidFunctionController)->startNewProcessExecutionStatusEmu($doubleOrder->id);
