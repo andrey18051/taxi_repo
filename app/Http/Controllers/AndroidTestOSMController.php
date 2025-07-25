@@ -12208,95 +12208,185 @@ class AndroidTestOSMController extends Controller
         return redirect()->route('home-admin')->with('success', "База $base обновлена.");
     }
 
+
     public function authorizationChoiceApp(
         $payment,
         $city,
         $connectAPI,
         $application
     ): array {
+        // Очистка входных данных
+        $city = trim($city);
+        Log::info("Инициализирован пустой массив \$authorizationChoiceArr. Входные параметры: payment='$payment', city='$city', connectAPI='$connectAPI', application='$application'.");
+
+        // Инициализация массива
         $authorizationChoiceArr = array();
+        Log::info("Инициализирован пустой массив \$authorizationChoiceArr.");
 
+        // Установка базовой авторизации
         $authorizationChoiceArr["authorization"] = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
+        Log::info("Вызван метод authorizationApp с параметрами: city='$city', connectAPI='$connectAPI', application='$application'. Результат сохранен в \$authorizationChoiceArr['authorization'].");
         $authorizationChoiceArr["payment_type"] = 0;
+        Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 0.");
 
+        // Обработка типа оплаты
+        Log::info("Проверка типа оплаты: '$payment'.");
         switch ($payment) {
             case 'fondy_payment':
             case 'mono_payment':
             case 'wfp_payment':
+                Log::info("Тип оплаты: '$payment'. Вход в ветку fondy/mono/wfp.");
                 $authorizationChoiceArr["payment_type"] = 1;
+                Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 1.");
 
+                // Проверка города
+                Log::info("Проверка города: '$city'.");
                 switch ($city) {
                     case "OdessaTest":
+                        Log::info("Город: 'OdessaTest'.");
                         $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("Test_Card_Pay", $connectAPI, $application);
+                        Log::info("Вызван authorizationApp('Test_Card_Pay', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                         $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("Test_Double", $connectAPI, $application);
+                        Log::info("Вызван authorizationApp('Test_Double', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationDouble'].");
                         break;
                     case "Kyiv City":
+                        Log::info("Город: 'Kyiv City'. Проверка API.");
                         switch ($connectAPI) {
                             case "http://167.235.113.231:7307":
+                                Log::info("API: 'http://167.235.113.231:7307'.");
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Card_Pay", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_1_Card_Pay', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Double", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_1_Double', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationDouble'].");
                                 break;
                             case "http://167.235.113.231:7306":
+                                Log::info("API: 'http://167.235.113.231:7306'.");
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_2_Card_Pay", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_2_Card_Pay', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_2_Double", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_2_Double', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationDouble'].");
                                 break;
                             default:
+                                Log::info("API: '$connectAPI' не соответствует известным значениям.");
                                 $authorizationChoiceArr["authorizationBonus"] = null;
+                                Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
                                 $authorizationChoiceArr["authorizationDouble"] = null;
+                                Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
                         }
+                        Log::info("Выход из проверки API для города 'Kyiv City'.");
                         break;
                     case "Dnipropetrovsk Oblast":
                     case "Odessa":
                     case "Zaporizhzhia":
                     case "Cherkasy Oblast":
+                        Log::info("Город: '$city'.");
                         $authorizationChoiceArr["payment_type"] = 0;
-
+                        Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 0.");
+                        $authorizationChoiceArr["authorizationBonus"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
+                        $authorizationChoiceArr["authorizationDouble"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
+                        break;
+                    default:
+                        Log::info("Город: '$city' не соответствует известным значениям.");
+                        $authorizationChoiceArr["authorizationBonus"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
+                        $authorizationChoiceArr["authorizationDouble"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
                         break;
                 }
+                Log::info("Выход из проверки города для оплаты '$payment'.");
                 break;
-            case 'bonus_payment':
-                $authorizationChoiceArr["payment_type"] = 1;
 
+            case 'bonus_payment':
+                Log::info("Тип оплаты: 'bonus_payment'.");
+                $authorizationChoiceArr["payment_type"] = 1;
+                Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 1.");
+
+                // Проверка города
+                Log::info("Проверка города: '$city'.");
                 switch ($city) {
                     case "OdessaTest":
+                        Log::info("Город: 'OdessaTest'.");
                         $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTest", $connectAPI, $application);
+                        Log::info("Вызван authorizationApp('BonusTest', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                         $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("BonusTestDouble", $connectAPI, $application);
+                        Log::info("Вызван authorizationApp('BonusTestDouble', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationDouble'].");
                         break;
                     case "Kyiv City":
+                        Log::info("Город: 'Kyiv City'. Проверка API.");
                         switch ($connectAPI) {
                             case "http://167.235.113.231:7307":
+                                Log::info("API: 'http://167.235.113.231:7307'.");
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Bonus", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_1_Bonus', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Bonus_Double", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_1_Bonus_Double', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationDouble'].");
                                 break;
                             case "http://167.235.113.231:7306":
+                                Log::info("API: 'http://167.235.113.231:7306'.");
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_2_Bonus", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_2_Bonus', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_2_Bonus_Double", $connectAPI, $application);
+                                Log::info("Вызван authorizationApp('KyivCity_2_Bonus_Double', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationDouble'].");
                                 break;
                             default:
+                                Log::info("API: '$connectAPI' не соответствует известным значениям.");
                                 $authorizationChoiceArr["authorizationBonus"] = null;
+                                Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
                                 $authorizationChoiceArr["authorizationDouble"] = null;
+                                Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
                         }
+                        Log::info("Выход из проверки API для города 'Kyiv City'.");
                         break;
                     case "Dnipropetrovsk Oblast":
                     case "Odessa":
                     case "Zaporizhzhia":
                     case "Cherkasy Oblast":
+                        Log::info("Город: '$city'.");
                         $authorizationChoiceArr["payment_type"] = 0;
+                        Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 0.");
                         $authorizationChoiceArr["authorizationBonus"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
                         $authorizationChoiceArr["authorizationDouble"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
+                        break;
+                    default:
+                        Log::info("Город: '$city' не соответствует известным значениям.");
+                        $authorizationChoiceArr["authorizationBonus"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
+                        $authorizationChoiceArr["authorizationDouble"] = null;
+                        Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
                         break;
                 }
+                Log::info("Выход из проверки города для оплаты 'bonus_payment'.");
                 break;
-            case 'nal_payment':
-                $authorizationChoiceArr["payment_type"] = 0;
 
+            case 'nal_payment':
+                Log::info("Тип оплаты: 'nal_payment'.");
+                $authorizationChoiceArr["payment_type"] = 0;
+                Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 0.");
                 $authorizationChoiceArr["authorizationBonus"] = null;
+                Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
                 $authorizationChoiceArr["authorizationDouble"] = null;
+                Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
+                break;
+
+            default:
+                Log::info("Тип оплаты: '$payment' не соответствует известным значениям.");
+                $authorizationChoiceArr["authorizationBonus"] = null;
+                Log::info("Установлено \$authorizationChoiceArr['authorizationBonus'] = null.");
+                $authorizationChoiceArr["authorizationDouble"] = null;
+                Log::info("Установлено \$authorizationChoiceArr['authorizationDouble'] = null.");
                 break;
         }
+        Log::info("Выход из switch по типу оплаты.");
 
+        // Возврат результата
+        Log::info("Возвращен массив \$authorizationChoiceArr с ключами: 'authorization', 'payment_type', 'authorizationBonus', 'authorizationDouble'.");
         return $authorizationChoiceArr;
     }
+
 
     public function costCorrectionValue(
         $payment,
