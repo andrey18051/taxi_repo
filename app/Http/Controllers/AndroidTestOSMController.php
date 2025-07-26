@@ -9931,7 +9931,7 @@ class AndroidTestOSMController extends Controller
         $application,
         $orderweb
     ) {
-
+        $city = trim($city);
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":

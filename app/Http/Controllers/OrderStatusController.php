@@ -526,6 +526,7 @@ class OrderStatusController extends Controller
 
         do {
             // Попробуем найти запись
+            $dispatching_order_uid = (new MemoryOrderChangeController)->show($dispatching_order_uid);
             $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
 
             if ($uid_history) {
