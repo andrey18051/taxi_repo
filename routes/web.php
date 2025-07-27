@@ -1556,7 +1556,7 @@ Route::get('/findUser/{email}', [UserController::class, 'findUser'])->name('find
 /**
  * My tests
  */
-Route::get('/sendNotificationAuto/{body}/{app}/{user_id}', [FCMController::class, 'sendNotificationAuto'])->name('sendNotificationAuto');
+Route::get('/sendNotificationAuto/{body}/{app}/{user_id}/{uid}', [FCMController::class, 'sendNotificationAuto'])->name('sendNotificationAuto');
 Route::get('/checkEmailInAllFirestoreBlackLists/{email}', [FCMController::class, 'checkEmailInAllFirestoreBlackLists'])->name('checkEmailInAllFirestoreBlackLists');
 Route::get('/geo/city/{lat}/{lon}', [UniversalAndroidFunctionController::class, 'detectCity']);
 
