@@ -7873,7 +7873,9 @@ class UniversalAndroidFunctionController extends Controller
     }
 
 
-
+    /**
+     * @throws \Exception
+     */
     public function searchAutoOrderServiceAll($email, $app, $mes_info): array
     {
         Log::info("=== Запуск searchAutoOrderServiceAll ===", [
@@ -7899,7 +7901,7 @@ class UniversalAndroidFunctionController extends Controller
         $orders = Orderweb::where('email', $email)
             ->where('comment', $comment)
             ->where('closeReason', "-1")
-            ->where('pay_system', "nal_payment")
+//            ->where('pay_system', "nal_payment")
             ->get();
 
         $count = $orders->count();
@@ -7914,8 +7916,12 @@ class UniversalAndroidFunctionController extends Controller
                 'номер' => $orderNumber,
                 'dispatching_order_uid' => $order->dispatching_order_uid
             ]);
-
-            $this->searchAutoOrderService($order->dispatching_order_uid, $mes_info);
+            if ($order->pay_system == "nal_payment") {
+                $this->searchAutoOrderService($order->dispatching_order_uid, $mes_info);
+            } else {
+                (new OrderStatusController)
+                    ->getOrderStatusMessageResultPushOnPasInBackground($order->dispatching_order_uid);
+            }
 
             $orderNumbers[] = [
                 'номер' => $orderNumber,
@@ -8281,7 +8287,6 @@ class UniversalAndroidFunctionController extends Controller
             // Отправка данных через FCMController
             $user = User::where("email", $orderweb->email)->first();
             if(isset ($user)) {
-
                 if ($orderweb->closeReason !== "-1") {
                     $storedData = $orderweb->auto;
 
@@ -8292,7 +8297,7 @@ class UniversalAndroidFunctionController extends Controller
                     $model = $dataDriver["model"];
                     $number = $dataDriver["number"];
                     $auto = "$number, $color  $brand $model";
-                } else{
+                } else {
                     $auto = $orderweb->auto;
                 }
 

@@ -63,43 +63,114 @@ class FCMController extends Controller
 
     public function sendNotification($body, $app, $user_id)
     {
+        Log::info("=== Запуск sendNotification ===", [
+            'body'    => $body,
+            'app'     => $app,
+            'user_id' => $user_id,
+        ]);
+
+        // Получаем токен пользователя
         $userToken = UserTokenFmsS::where("user_id", $user_id)->first();
 
-        if ($userToken != null) {
-            switch ($app) {
-                case "PAS1":
-                    $to = $userToken->token_app_pas_1;
-                    $firebaseMessaging = app('firebase.messaging')['app1'];
-                    break;
-                case "PAS2":
-                    $to = $userToken->token_app_pas_2;
-                    $firebaseMessaging = app('firebase.messaging')['app2'];
-                    break;
-                default:
-                    $to = $userToken->token_app_pas_4;
-                    $firebaseMessaging = app('firebase.messaging')['app4'];
-            }
-
-            $message = CloudMessage::withTarget('token', $to)
-                ->withNotification(Notification::create("Повідомлення", $body))
-                ->withData(['key' => 'value']);
-
-            $firebaseMessaging->send($message);
-
-            return response()->json(['message' => 'Notification sent']);
+        if ($userToken === null) {
+            Log::warning("UserTokenFmsS не найден", ['user_id' => $user_id]);
+            return response()->json(['message' => 'User token not found'], 404);
         }
 
-        return response()->json(['message' => 'User token not found'], 404);
+        // Определяем токен и Firebase Messaging
+        $to = null;
+        $firebaseMessaging = null;
+        switch ($app) {
+            case "PAS1":
+                $to = $userToken->token_app_pas_1;
+                $firebaseMessaging = app('firebase.messaging')['app1'] ?? null;
+                Log::info("Выбран PAS1", ['token' => $to]);
+                break;
+            case "PAS2":
+                $to = $userToken->token_app_pas_2;
+                $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
+                Log::info("Выбран PAS2", ['token' => $to]);
+                break;
+            default:
+                $to = $userToken->token_app_pas_4;
+                $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
+                Log::info("Выбран PAS4 (default)", ['token' => $to]);
+        }
+
+        // Логируем все токены пользователя
+        Log::info("Все токены пользователя", [
+            'token_app_pas_1' => $userToken->token_app_pas_1,
+            'token_app_pas_2' => $userToken->token_app_pas_2,
+            'token_app_pas_4' => $userToken->token_app_pas_4,
+        ]);
+
+        // Проверяем токен
+        if (empty($to)) {
+            Log::warning("Токен пустой для пользователя", ['user_id' => $user_id, 'app' => $app]);
+            return response()->json(['message' => 'Empty token for user'], 400);
+        }
+
+        // Логируем конфигурацию firebase.messaging
+        Log::info("Firebase messaging конфиг", [
+            'config_keys' => array_keys(app('firebase.messaging')),
+        ]);
+
+        if ($firebaseMessaging === null) {
+            Log::error("Firebase Messaging не настроен для app", ['app' => $app]);
+            return response()->json(['message' => 'Firebase messaging config not found'], 500);
+        }
+
+        // Формируем сообщение
+        $dataPayload = ['key' => 'value'];
+
+        $message = CloudMessage::withTarget('token', $to)
+            ->withNotification(Notification::create("Повідомлення", $body))
+            ->withData($dataPayload);
+
+        Log::info("Формируем CloudMessage", [
+            'token'        => $to,
+            'notification' => ['title' => "Повідомлення", 'body' => $body],
+            'data'         => $dataPayload
+        ]);
+
+        // Пытаемся отправить
+        try {
+            $firebaseMessaging->send($message);
+            Log::info("Уведомление успешно отправлено", [
+                'user_id' => $user_id,
+                'token'   => $to
+            ]);
+
+            return response()->json(['message' => 'Notification sent']);
+        } catch (\Kreait\Firebase\Exception\Messaging\NotFound $e) {
+            Log::warning("FCM токен недействителен (NotFound)", [
+                'user_id' => $user_id,
+                'token'   => $to,
+                'error'   => $e->getMessage(),
+            ]);
+            return response()->json([
+                'message' => 'Invalid FCM token',
+                'error'   => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error("Ошибка при отправке уведомления", [
+                'user_id' => $user_id,
+                'token'   => $to,
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to send notification',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
 
 
-    public function sendNotificationAuto(
-        $body,
-        $app,
-        $user_id,
-        $uid
-    )
+
+    public function sendNotificationAuto($body, $app, $user_id, $uid)
     {
         Log::info("=== Запуск sendNotificationAuto ===", [
             'body'    => $body,
@@ -111,64 +182,84 @@ class FCMController extends Controller
         // Получаем токен пользователя
         $userToken = UserTokenFmsS::where("user_id", $user_id)->first();
 
-        if ($userToken != null) {
-            Log::info("Найден UserTokenFmsS", ['user_id' => $user_id]);
+        if ($userToken === null) {
+            Log::warning("UserTokenFmsS не найден", ['user_id' => $user_id]);
+            return response()->json(['message' => 'User token not found'], 404);
+        }
 
-            // Определяем токен и firebaseMessaging в зависимости от app
-            switch ($app) {
-                case "PAS1":
-                    $to = $userToken->token_app_pas_1;
-                    $firebaseMessaging = app('firebase.messaging')['app1'];
-                    Log::info("Выбран PAS1", ['token' => $to]);
-                    break;
-                case "PAS2":
-                    $to = $userToken->token_app_pas_2;
-                    $firebaseMessaging = app('firebase.messaging')['app2'];
-                    Log::info("Выбран PAS2", ['token' => $to]);
-                    break;
-                default:
-                    $to = $userToken->token_app_pas_4;
-                    $firebaseMessaging = app('firebase.messaging')['app4'];
-                    Log::info("Выбран PAS4 (default)", ['token' => $to]);
-            }
+        Log::info("Найден UserTokenFmsS", ['user_id' => $user_id]);
 
-            // Формируем сообщение
-            $dataPayload = [
-                'message_uk' => 'Знайдено авто: ' . $body,
-                'message_en' => 'Found car: ' . $body,
-                'message_ru' => 'Найдено авто:  ' . $body,
-                'uid'        => $uid,
-            ];
+        // Определяем токен и firebaseMessaging
+        $to = null;
+        $firebaseMessaging = null;
 
-            Log::info("Формируем CloudMessage", ['data' => $dataPayload]);
+        switch ($app) {
+            case "PAS1":
+                $to = $userToken->token_app_pas_1;
+                $firebaseMessaging = app('firebase.messaging')['app1'] ?? null;
+                Log::info("Выбран PAS1", ['token' => $to]);
+                break;
+            case "PAS2":
+                $to = $userToken->token_app_pas_2;
+                $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
+                Log::info("Выбран PAS2", ['token' => $to]);
+                break;
+            default:
+                $to = $userToken->token_app_pas_4;
+                $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
+                Log::info("Выбран PAS4 (default)", ['token' => $to]);
+        }
 
+        // Проверяем токен
+        if (empty($to)) {
+            Log::error("Токен пустой для пользователя", [
+                'user_id' => $user_id,
+                'app'     => $app
+            ]);
+            return response()->json(['message' => 'Empty token for user'], 400);
+        }
+
+        // Проверяем конфигурацию firebase.messaging
+        if ($firebaseMessaging === null) {
+            Log::error("FirebaseMessaging не настроен для приложения", ['app' => $app]);
+            return response()->json(['message' => 'Firebase messaging config not found'], 500);
+        }
+
+        // Формируем сообщение
+        $dataPayload = [
+            'message_uk' => 'Знайдено авто: ' . $body,
+            'message_en' => 'Found car: ' . $body,
+            'message_ru' => 'Найдено авто: ' . $body,
+            'uid'        => $uid,
+        ];
+
+        Log::info("Формируем CloudMessage", ['data' => $dataPayload]);
+
+        try {
             $message = CloudMessage::withTarget('token', $to)
                 ->withData($dataPayload);
 
-            try {
-                // Отправляем уведомление
-                $firebaseMessaging->send($message);
-                Log::info("Уведомление успешно отправлено", [
-                    'token' => $to,
-                    'uid'   => $uid
-                ]);
+            // Отправляем уведомление
+            $firebaseMessaging->send($message);
+            Log::info("Уведомление успешно отправлено", [
+                'token' => $to,
+                'uid'   => $uid
+            ]);
 
-                return response()->json(['message' => 'Notification sent']);
-            } catch (\Exception $e) {
-                Log::error("Ошибка при отправке уведомления", [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                return response()->json([
-                    'message' => 'Failed to send notification',
-                    'error'   => $e->getMessage()
-                ], 500);
-            }
+            return response()->json(['message' => 'Notification sent']);
+        } catch (\Exception $e) {
+            Log::error("Ошибка при отправке уведомления", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'token' => $to
+            ]);
+            return response()->json([
+                'message' => 'Failed to send notification',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        Log::warning("UserTokenFmsS не найден", ['user_id' => $user_id]);
-        return response()->json(['message' => 'User token not found'], 404);
     }
+
 
 
     public function readDocumentFromUsersFirestore($uidDriver)
