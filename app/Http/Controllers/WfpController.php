@@ -13,6 +13,7 @@ use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\Orderweb;
 use App\Models\Transaction;
+use App\Models\Uid_history;
 use App\Models\User;
 use App\Models\WfpInvoice;
 use Carbon\Carbon;
@@ -2072,6 +2073,159 @@ class WfpController extends Controller
                                 $application,
                                 $clientEmail
                             );
+                        } catch (\Exception $e) {
+                            Log::error("Ошибка в sentStatusWfp для orderReference: $orderReference: " . $e->getMessage());
+                            throw $e;
+                        }
+                    } else {
+                        Log::error("transactionStatus отсутствует в данных для orderReference: $orderReference");
+                    }
+                } else {
+                    Log::warning("WfpInvoice не найдено для orderReference: $orderReference");
+                }
+
+                return $response;
+            }
+        }
+    }
+
+
+    /**
+     * @throws \Pusher\PusherException
+     * @throws \Pusher\ApiErrorException
+     */
+    public function chargeActiveTokenAddCost(
+        $application,
+        $city,
+        $orderReference,
+        $amount,
+        $productName,
+        $clientEmail,
+        $clientPhone
+    ) {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
+        switch ($application) {
+            case "PAS1":
+                $merchant = City_PAS1::where("name", $city)->first();
+                break;
+            case "PAS2":
+                $merchant = City_PAS2::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS4::where("name", $city)->first();
+        }
+
+        if (isset($merchant)) {
+            $merchantAccount = $merchant->wfp_merchantAccount;
+            $secretKey = $merchant->wfp_merchantSecretKey;
+
+            $recToken = (new CardsController)->getActiveCard($clientEmail, $city, $application)['rectoken'];
+            if ($recToken != null) {
+                $recToken = (new CardsController)->decryptToken($recToken);
+
+                $orderDate = strtotime(date('Y-m-d H:i:s'));
+
+                $params = [
+                    "merchantAccount" => $merchantAccount,
+                    "merchantDomainName" => "m.easy-order-taxi.site",
+                    "orderReference" => $orderReference,
+                    "orderDate" => $orderDate,
+                    "amount" => $amount,
+                    "currency" => "UAH",
+                    "productName" => [$productName],
+                    "productPrice" => [$amount],
+                    "productCount" => [1]
+                ];
+
+
+                $params = [
+                    "transactionType" => "CHARGE",
+                    "merchantAccount" => $merchantAccount,
+                    "merchantAuthType" => "SimpleSignature",
+                    "merchantDomainName" => "m.easy-order-taxi.site",
+                    "merchantTransactionType" => "AUTH",
+                    //            "merchantTransactionSecureType" => "AUTO",
+                    "merchantTransactionSecureType" => "NON3DS",
+                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "charge"),
+                    "apiVersion" => 1,
+                    "orderReference" => $orderReference,
+                    "orderDate" => $orderDate,
+                    "amount" => $amount,
+                    "currency" => "UAH",
+                    "recToken" => $recToken,
+                    "productName" => [$productName],
+                    "productPrice" => [$amount],
+                    "productCount" => [1],
+                    "clientFirstName" => "Bulba",
+                    "clientLastName" => "Taras",
+                    "clientEmail" => $clientEmail,
+                    "clientPhone" => $clientPhone,
+                    "clientCountry" => "UKR",
+                    "notifyMethod" => "bot"
+                ];
+
+                // Відправлення POST-запиту
+                $response = Http::post('https://api.wayforpay.com/api ', $params);
+                Log::debug("purchase: ", ['response' => $response->body()]);
+
+                $responseStatus = self::checkStatus(
+                    $application,
+                    $city,
+                    $orderReference
+                );
+                $data = json_decode($responseStatus->body(), true);
+
+                $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)->first();
+                if ($wfpInvoices !== null) {
+                    if (isset($data['transactionStatus'])) {
+                        try {
+                            $transactionStatus = $data['transactionStatus'];
+                            $uid = $wfpInvoices->dispatching_order_uid;
+                            (new PusherController)->sentStatusWfp(
+                                $transactionStatus,
+                                $uid,
+                                $application,
+                                $clientEmail
+                            );
+                            if ($transactionStatus == "Approved" || $transactionStatus == "WaitingAuthComplete") {
+                                $pay_method = "wfp_payment";
+
+                                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+                                if ($uid_history) {
+                                    $uid_Double = $uid_history->uid_doubleOrder;
+                                    (new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
+                                        $uid,
+                                        $uid_Double,
+                                        $pay_method,
+                                        $orderReference,
+                                        $city,
+                                        $amount
+                                    );
+                                }
+                            }
                         } catch (\Exception $e) {
                             Log::error("Ошибка в sentStatusWfp для orderReference: $orderReference: " . $e->getMessage());
                             throw $e;

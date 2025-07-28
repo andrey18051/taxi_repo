@@ -20,6 +20,7 @@ Route::get('/createInvoice/{application}/{city}/{orderReference}/{amount}/{langu
 Route::get('/charge/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/{recToken}', [WfpController::class, 'charge'])->name('charge');
 
 Route::get('/chargeActiveToken/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/', [WfpController::class, 'chargeActiveToken'])->name('chargeActiveToken');
+Route::get('/chargeActiveTokenAddCost/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/', [WfpController::class, 'chargeActiveTokenAddCost'])->name('chargeActiveTokenAddCost');
 Route::get('/chargeActiveTokenWithChangeToken/{application}/{city}/{orderReference}/{uid}/{productName}/{clientEmail}/{clientPhone}/', [WfpController::class, 'chargeActiveTokenWithChangeToken'])->name('chargeActiveTokenWithChangeToken');
 
 Route::get('/refund/{application}/{city}/{orderReference}/{amount}', [WfpController::class, 'refund'])->name('refund');
