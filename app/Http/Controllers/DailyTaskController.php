@@ -86,7 +86,7 @@ class DailyTaskController extends Controller
                 $uid = $responseBonusStrArr['dispatching_order_uid'] ?? 'неизвестен';
 
                 // Проверяем ключ в Redis, например "double_order_processing:{id}"
-                $redisKey = "double_order_processing:" . $order->id;
+                $redisKey = "double_order_processing_key:" . $order->id;
 
                 if (Redis::exists($redisKey)) {
                     Log::info("restartProcessExecutionStatus: Задача для заказа $uid (ID {$order->id}) уже запущена, пропускаем");
@@ -103,7 +103,7 @@ class DailyTaskController extends Controller
                 self::sentTaskMessage($message);
 
                 dispatch(new StartNewProcessExecution($order->id))
-                    ->onQueue('medium');
+                    ->onQueue('high');
 
             }
         } catch (Exception $e) {
