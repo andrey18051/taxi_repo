@@ -20,8 +20,8 @@ class SendTelegramMessageJob implements ShouldQueue
     protected $bot;
     protected $chatId;
     protected $message;
-    public $tries = 3; // Увеличено до 3 попыток
-    public $timeout = 60; // Таймаут 60 секунд
+    public $tries = 0; // Увеличено до 3 попыток
+    public $timeout = 0;
 
     /**
      * Create a new job instance.

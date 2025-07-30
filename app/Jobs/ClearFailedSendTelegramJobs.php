@@ -16,8 +16,8 @@ class ClearFailedSendTelegramJobs implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 3; // Уменьшено до 3 попыток
-    public $timeout = 30; // Таймаут 30 секунд
+    public $tries = 0; // Уменьшено до 3 попыток
+    public $timeout = 0; // Таймаут 30 секунд
 
     /**
      * Create a new job instance.

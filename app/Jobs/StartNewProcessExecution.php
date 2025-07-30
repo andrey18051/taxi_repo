@@ -24,7 +24,8 @@ class StartNewProcessExecution implements ShouldQueue
 
     protected $orderId;
     protected $jobId; // Поле для сохранения ID задачи
-
+    public $timeout = 0;
+    public $tries = 0;
     /**
      * Create a new job instance.
      *

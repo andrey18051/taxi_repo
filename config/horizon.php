@@ -156,11 +156,11 @@ return [
             'connection' => 'redis',
             'queue' => ['high', 'medium', 'low'],
             'balance' => 'auto',
-            'maxProcesses' => 10,
+            'maxProcesses' => 20,
             'minProcesses' => 1,
-            'tries' => 3,
+            'tries' => 0,
             'nice' => 0,
-            'timeout' => 0, //72 часа
+            'timeout' => 0, // 1 час
         ],
     ],
 
@@ -172,8 +172,8 @@ return [
                 'balance' => 'simple',
                 'maxProcesses' => 12, // Увеличено для приоритетной очереди
                 'minProcesses' => 2,
-                'tries' => 3,
-                'timeout' => 0,//72 часа
+                'tries' => 0,
+                'timeout' => 0,
             ],
             'supervisor-medium' => [
                 'connection' => 'redis',
@@ -181,8 +181,8 @@ return [
                 'balance' => 'simple',
                 'maxProcesses' => 6, // Увеличено для средней очереди
                 'minProcesses' => 1,
-                'tries' => 3,
-                'timeout' => 0,//72 часа
+                'tries' => 0,
+                'timeout' => 0,
             ],
             'supervisor-low' => [
                 'connection' => 'redis',
@@ -190,19 +190,37 @@ return [
                 'balance' => 'simple',
                 'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
                 'minProcesses' => 1,
-                'tries' => 3,
-                'timeout' => 0,//72 часа
+                'tries' => 0,
+                'timeout' => 0,
             ],
         ],
         'local' => [
-            'supervisor-1' => [
+            'supervisor-high' => [
                 'connection' => 'redis',
-                'queue' => ['high', 'medium', 'low'],
-                'balance' => 'auto',
+                'queue' => ['high'],
+                'balance' => 'simple',
+                'maxProcesses' => 12, // Увеличено для приоритетной очереди
+                'minProcesses' => 2,
+                'tries' => 0,
+                'timeout' => 0,
+            ],
+            'supervisor-medium' => [
+                'connection' => 'redis',
+                'queue' => ['medium'],
+                'balance' => 'simple',
+                'maxProcesses' => 6, // Увеличено для средней очереди
                 'minProcesses' => 1,
-                'maxProcesses' => 3,
-                'tries' => 3,
-                'timeout' => 0,//72 часа
+                'tries' => 0,
+                'timeout' => 0,
+            ],
+            'supervisor-low' => [
+                'connection' => 'redis',
+                'queue' => ['low'],
+                'balance' => 'simple',
+                'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
+                'minProcesses' => 1,
+                'tries' => 0,
+                'timeout' => 0,
             ],
         ],
     ],
