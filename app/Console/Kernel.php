@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground();
-        $schedule->command('logs:send')->dailyAt('22:00');
+//        $schedule->command('logs:send')->dailyAt('22:00');
         $schedule->command('queue:monitor-failed')->everyFiveMinutes();
     }
 

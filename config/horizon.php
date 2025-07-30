@@ -160,7 +160,7 @@ return [
             'minProcesses' => 1,
             'tries' => 3,
             'nice' => 0,
-            'timeout' => 3600, // 1 час
+            'timeout' => 0, //72 часа
         ],
     ],
 
@@ -173,7 +173,7 @@ return [
                 'maxProcesses' => 12, // Увеличено для приоритетной очереди
                 'minProcesses' => 2,
                 'tries' => 3,
-                'timeout' => 3600,
+                'timeout' => 0,//72 часа
             ],
             'supervisor-medium' => [
                 'connection' => 'redis',
@@ -182,7 +182,7 @@ return [
                 'maxProcesses' => 6, // Увеличено для средней очереди
                 'minProcesses' => 1,
                 'tries' => 3,
-                'timeout' => 3600,
+                'timeout' => 0,//72 часа
             ],
             'supervisor-low' => [
                 'connection' => 'redis',
@@ -191,7 +191,7 @@ return [
                 'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
                 'minProcesses' => 1,
                 'tries' => 3,
-                'timeout' => 3600,
+                'timeout' => 0,//72 часа
             ],
         ],
         'local' => [
@@ -202,7 +202,7 @@ return [
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
                 'tries' => 3,
-                'timeout' => 3600,
+                'timeout' => 0,//72 часа
             ],
         ],
     ],
