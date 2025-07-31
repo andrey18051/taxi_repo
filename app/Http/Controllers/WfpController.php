@@ -1493,6 +1493,87 @@ class WfpController extends Controller
         return "exit";
     }
 
+//    public function refundSettleJob($params, $orderReference)
+//    {
+//        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+//
+//        Log::debug("refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus");
+//        $messageAdmin = "refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus";
+//
+//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//
+//        $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+//        Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
+//        $messageAdmin = "refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}";
+//
+//        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+//
+//
+//        if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+//            return "exit";
+//        } else {
+//            Log::debug("refundSettleJob Транзакция отклонена.");
+//
+//
+//            $startTime = time(); // Время начала выполнения скрипта
+//            $maxDuration = 2 * 60; // 2 минуты в секундах
+//            $maxAttempts = 12; // Максимум 12 попыток (2 минуты при 10 секундах ожидания)
+//            $attempts = 0;
+//            while (true) {
+//                // Отправка POST-запроса к API
+//                $response = Http::post('https://api.wayforpay.com/api', $params);
+//                $responseArray = $response->json(); // Проверка на валидный JSON
+//
+//                if (!is_array($responseArray)) {
+//                    Log::error("refundSettleJob Некорректный ответ от API", ['response' => $response->body()]);
+//
+//                } else {
+//                    Log::debug("refundSettleJob Ответ от API", $responseArray);
+//
+//                    (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
+//
+//                    // Проверка статуса транзакции
+//
+//                    $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
+//
+//                    if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+//                        Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
+//                        (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$transactionStatus}");
+//
+//                        $this->updateOrderStatus($responseArray, $orderReference);
+//                        return "exit";
+//                    } else {
+//                        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+//                        $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+//                        Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
+//
+//                        if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+//                            return "exit";
+//                        } else {
+//                            Log::debug("refundSettleJob Транзакция отклонена. Повторная попытка через 10 секунд.");
+//                        }
+//                    }
+//                    // Проверяем, превышено ли время ожидания
+//
+//                    if (time() - $startTime > $maxDuration) {
+//                        $this->updateOrderStatus($responseArray, $orderReference);
+//                        Log::warning("refundSettleJob Превышен лимит времени. Прекращение попыток.");
+//                        return "exit";
+//                    }
+//                }
+//
+//                $attempts++;
+//                if ($attempts > $maxAttempts) {
+//                    Log::warning("refundSettleJob Превышено число попыток. Прекращение цикла.");
+//                    return "exit";
+//                }
+//                sleep(10);
+//            }
+//
+//            Log::debug("refundSettleJob Завершение метода");
+//            return "exit";
+//        }
+//    }
     public function refundSettleJob($params, $orderReference)
     {
         $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
@@ -1509,70 +1590,40 @@ class WfpController extends Controller
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
 
-        if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-            return "exit";
-        } else {
+        if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
             Log::debug("refundSettleJob Транзакция отклонена.");
+            // Отправка POST-запроса к API
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            $responseArray = $response->json(); // Проверка на валидный JSON
+            Log::debug("refundSettleJob Ответ от API", $responseArray);
 
+            (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
 
-            $startTime = time(); // Время начала выполнения скрипта
-            $maxDuration = 2 * 60; // 2 минуты в секундах
-            $maxAttempts = 12; // Максимум 12 попыток (2 минуты при 10 секундах ожидания)
-            $attempts = 0;
-            while (true) {
-                // Отправка POST-запроса к API
-                $response = Http::post('https://api.wayforpay.com/api', $params);
-                $responseArray = $response->json(); // Проверка на валидный JSON
+            // Проверка статуса транзакции
 
-                if (!is_array($responseArray)) {
-                    Log::error("refundSettleJob Некорректный ответ от API", ['response' => $response->body()]);
+            $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
 
-                } else {
-                    Log::debug("refundSettleJob Ответ от API", $responseArray);
+            if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
+                (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$transactionStatus}");
 
-                    (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
+                $this->updateOrderStatus($responseArray, $orderReference);
+                return "exit";
+            } else {
+                $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+                $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+                Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
 
-                    // Проверка статуса транзакции
-
-                    $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
-
-                    if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-                        Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
-                        (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$transactionStatus}");
-
-                        $this->updateOrderStatus($responseArray, $orderReference);
-                        return "exit";
-                    } else {
-                        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
-                        $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
-                        Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
-
-                        if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-                            return "exit";
-                        } else {
-                            Log::debug("refundSettleJob Транзакция отклонена. Повторная попытка через 10 секунд.");
-                        }
-                    }
-                    // Проверяем, превышено ли время ожидания
-
-                    if (time() - $startTime > $maxDuration) {
-                        $this->updateOrderStatus($responseArray, $orderReference);
-                        Log::warning("refundSettleJob Превышен лимит времени. Прекращение попыток.");
-                        return "exit";
-                    }
-                }
-
-                $attempts++;
-                if ($attempts > $maxAttempts) {
-                    Log::warning("refundSettleJob Превышено число попыток. Прекращение цикла.");
+                if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
                     return "exit";
+                } else {
+                    Log::debug("refundSettleJob Транзакция отклонена. Повторная попытка через 10 секунд.");
                 }
-                sleep(10);
             }
 
             Log::debug("refundSettleJob Завершение метода");
-            return "exit";
         }
+        return "exit";
     }
 
     public function refundSettleOneUAH($params)

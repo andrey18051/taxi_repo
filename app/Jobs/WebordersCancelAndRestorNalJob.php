@@ -14,9 +14,9 @@ class WebordersCancelAndRestorNalJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 5; // Максимум 5 попыток
-    public $timeout = 0; // Таймаут 120 секунд
-    public $backoff = [10, 30, 60]; // Задержки перед повторными попытками
+    public $tries = 1; // Максимум 1 попыток
+    public $timeout = 30; // Таймаут 30 секунд
+
 
     protected $uid;
     protected $city;

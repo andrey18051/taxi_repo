@@ -20,6 +20,9 @@ class WebordersCancelAndRestorDoubleJob implements ShouldQueue
     protected $application;
     protected $order;
 
+    public $timeout = 300;
+    public $tries = 1;
+
     /**
      * Create a new job instance.
      */

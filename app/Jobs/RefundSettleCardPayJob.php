@@ -18,6 +18,10 @@ class RefundSettleCardPayJob implements ShouldQueue
     protected $params;
     protected $orderReference;
     protected $method;
+
+    public $tries = 1; //   1 попытка
+    public $timeout = 3600;
+
     /**
      * Create a new job instance.
      *

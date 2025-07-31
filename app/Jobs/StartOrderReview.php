@@ -16,6 +16,10 @@ class StartOrderReview implements ShouldQueue
     protected $bonusOrder;
     protected $doubleOrder;
     protected $bonusOrderHold;
+
+    public $timeout = 3600;
+    public $tries = 1;
+
     /**
      * Create a new job instance.
      *

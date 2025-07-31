@@ -3275,8 +3275,7 @@ class UniversalAndroidFunctionController extends Controller
                      безнал: $bonusOrder
                      дубль $doubleOrder";
 
-                (new MessageSentController)->sentMessageAdmin($messageAdmin);
-                (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+                (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
                 try {
                     $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
@@ -7339,8 +7338,10 @@ class UniversalAndroidFunctionController extends Controller
                 }
 
                 // Запуск задачи отмены и восстановления
-                dispatch(new WebordersCancelAndRestorDoubleJob($uid, $uid_Double, $city, $application, $order))->onQueue('high');
-                Log::info("Запущена задача WebordersCancelAndRestorDoubleJob для uid='$uid', uid_Double='$uid_Double', city='$city', application='$application'.");
+//                dispatch(new WebordersCancelAndRestorDoubleJob($uid, $uid_Double, $city, $application, $order))->onQueue('high');
+                Log::info("Запущена отмена webordersCancelAndRestorDouble для uid='$uid', uid_Double='$uid_Double', city='$city', application='$application'.");
+                (new AndroidTestOSMController)->webordersCancelAndRestorDouble($uid, $uid_Double, $city, $application, $order);
+
 
                 // Сохранение нового заказа
                 $order_old_uid = $order->dispatching_order_uid;
