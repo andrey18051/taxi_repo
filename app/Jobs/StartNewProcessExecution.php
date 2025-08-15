@@ -53,7 +53,7 @@ class StartNewProcessExecution implements ShouldQueue
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         $doubleOrderRecord = DoubleOrder::find($this->orderId);
-        if($doubleOrderRecord) {
+        if ($doubleOrderRecord) {
             $responseBonusStr = $doubleOrderRecord->responseBonusStr;
 
             $authorizationBonus = $doubleOrderRecord->authorizationBonus;
@@ -76,7 +76,7 @@ class StartNewProcessExecution implements ShouldQueue
 
                     $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
-                    if($orderweb) {
+                    if ($orderweb) {
                         $application = $orderweb->comment;
                     } else {
                         $application = "taxi_easy_ua_pas2";
@@ -176,10 +176,5 @@ class StartNewProcessExecution implements ShouldQueue
                 Redis::del($redisKey);
             }
         }
-
     }
-
-
-
 }
-
