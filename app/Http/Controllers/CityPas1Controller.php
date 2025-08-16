@@ -6,6 +6,7 @@ use App\Mail\Check;
 use App\Models\City_PAS1;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -128,15 +129,22 @@ class CityPas1Controller extends Controller
 
                 $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
                 if (!$isCurrentTimeInRange) {
-                    try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
-                        $alarmMessage->sendMeMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        $paramsCheck = [
-                            'subject' => 'Ошибка в телеграмм',
-                            'message' => $e->getMessage(),
-                        ];
-                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
+                    $cacheKey = 'alarm_message_' . md5($messageAdmin);
+                    $lock = Cache::lock($cacheKey, 300); // Lock for 5 minutes (300 seconds)
+
+                    if ($lock->get()) {
+                        try {
+                            $alarmMessage->sendAlarmMessage($messageAdmin);
+                            $alarmMessage->sendMeMessage($messageAdmin);
+                        } catch (Exception $e) {
+                            $paramsCheck = [
+                                'subject' => 'Ошибка в телеграмм',
+                                'message' => $e->getMessage(),
+                            ];
+                            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
+                        } finally {
+                            $lock->release();
+                        }
                     }
                 }
 

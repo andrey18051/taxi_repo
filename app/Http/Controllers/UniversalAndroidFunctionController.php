@@ -8694,16 +8694,23 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("cityNoOnlineMessage $messageAdmin");
         $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
         if (!$isCurrentTimeInRange) {
-            try {
-                $alarmMessage->sendAlarmMessageLog($messageAdmin);
-                $alarmMessage->sendMeMessageLog($messageAdmin);
-            } catch (\Exception  $e) {
-                $paramsCheck = [
-                    'subject' => 'Ошибка в телеграмм',
-                    'message' => $e,
-                ];
-                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
-            };
+            $cacheKey = 'alarm_message_' . md5($messageAdmin);
+            $lock = Cache::lock($cacheKey, 300); // Lock for 5 minutes (300 seconds)
+
+            if ($lock->get()) {
+                try {
+                    $alarmMessage->sendAlarmMessageLog($messageAdmin);
+                    $alarmMessage->sendMeMessageLog($messageAdmin);
+                } catch (\Exception  $e) {
+                    $paramsCheck = [
+                        'subject' => 'Ошибка в телеграмм',
+                        'message' => $e,
+                    ];
+                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
+                } finally {
+                    $lock->release();
+                }
+            }
         }
     }
 //    public function findCity($startLat, $startLan)
