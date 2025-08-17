@@ -1235,19 +1235,44 @@ class WfpController extends Controller
         }
 
 
+
+
         if (isset($merchant)) {
+            Log::info('Merchant is set', ['merchant_id' => $merchant->id ?? null]);
+
             $merchantAccount = $merchant->wfp_merchantAccount;
             $secretKey = $merchant->wfp_merchantSecretKey;
-            $orderwebs = Orderweb::where("wfp_order_id", $orderReference) ->latest()
-                ->first();
-            $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
+
+            Log::info('Retrieved merchant account and secret key', [
+                'merchantAccount' => $merchantAccount,
+                'orderReference' => $orderReference
+            ]);
+
+            $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->latest()->first();
+
+            if ($orderwebs) {
+                Log::info('Orderweb found', ['dispatching_order_uid' => $orderwebs->dispatching_order_uid]);
+                $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
+            } else {
+                $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)->get();
+            }
             if ($wfpInvoices->isNotEmpty()) {
+                Log::info('Processing invoices', ['invoice_count' => $wfpInvoices->count()]);
+
                 foreach ($wfpInvoices as $value) {
-                    // Проверка статуса текущей транзакции
-//                    $transactionStatus = strtolower(trim($value->transactionStatus ?? ''));
+                    Log::info('Checking transaction status for invoice', [
+                        'invoice_id' => $value->id,
+                        'orderReference' => $value->orderReference,
+                        'transactionStatus' => $value->transactionStatus
+                    ]);
+
                     $transactionStatus = $value->transactionStatus;
                     if ($transactionStatus == 'WaitingAuthComplete') {
-//                    if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
+                        Log::info('Transaction status is WaitingAuthComplete, preparing refund', [
+                            'invoice_id' => $value->id,
+                            'orderReference' => $value->orderReference
+                        ]);
+
                         // Параметры для REFUND
                         $params = [
                             "transactionType" => "REFUND",
@@ -1266,14 +1291,30 @@ class WfpController extends Controller
                             "apiVersion" => 1,
                         ];
 
+                        Log::info('Refund parameters prepared', [
+                            'params' => $params,
+                            'orderReference' => $value->orderReference
+                        ]);
+
                         // Диспетчеризация задачи RefundSettleCardPayJob
                         dispatch(new RefundSettleCardPayJob($params, $value->orderReference, "refund"))
                             ->onQueue('medium');
 
+                        Log::info('Refund job dispatched to medium queue', [
+                            'orderReference' => $value->orderReference
+                        ]);
+                    } else {
+                        Log::warning('Transaction status not eligible for refund', [
+                            'invoice_id' => $value->id,
+                            'transactionStatus' => $transactionStatus
+                        ]);
                     }
                 }
+            } else {
+                Log::warning('No invoices found for processing', ['orderReference' => $orderReference]);
             }
-
+        } else {
+            Log::error('Merchant not set', ['orderReference' => $orderReference]);
         }
     }
 
@@ -1762,7 +1803,13 @@ class WfpController extends Controller
             $secretKey = $merchant->wfp_merchantSecretKey;
             if ($merchantAccount != null) {
                 $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->first();
-                $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
+                if ($orderwebs) {
+                    $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)
+                        ->get();
+                } else {
+                    $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)
+                        ->get();
+                }
                 if ($wfpInvoices->isNotEmpty()) {
                     foreach ($wfpInvoices as $value) {
                         $params = [
@@ -1788,25 +1835,7 @@ class WfpController extends Controller
 
 
                 }
-//            else {
-//                $params = [
-//                    "merchantAccount" => $merchantAccount,
-//                    "orderReference" => $orderReference,
-//                    "amount" => $amount,
-//                    "currency" => "UAH",
-//                ];
-//
-//                $params = [
-//                    "transactionType" => "SETTLE",
-//                    "merchantAccount" => $merchantAccount,
-//                    "orderReference" => $orderReference,
-//                    "amount" => $amount,
-//                    "currency" => "UAH",
-//                    "merchantSignature" => self::generateHmacMd5Signature($params, $secretKey, "settle"),
-//                    "apiVersion" => 1
-//                ];
-//                RefundSettleCardPayJob::dispatch($params, $orderReference);
-//            }
+
             }
         }
     }
@@ -3174,6 +3203,19 @@ class WfpController extends Controller
                 $orderReference,
                 $amount
             );
+            $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $bonusOrder) -> get();
+            if ($wfpInvoices != null) {
+                foreach ($wfpInvoices as $value) {
+                    $orderReference = $value->orderReference;
+                    $amount = $value->amount;
+                    self::settle(
+                        $application,
+                        $city,
+                        $orderReference,
+                        $amount
+                    );
+                }
+            }
             $user = User::where("email", $order->email)->first();
             (new BonusBalanceController)->recordsAddApp($order->id, $user->id, "2", $amount, $application);
             (new BonusBalanceController)->userBalanceApp($user->id, $application);
@@ -3201,6 +3243,20 @@ class WfpController extends Controller
                     $orderReference,
                     $amount
                 );
+                $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $bonusOrder) -> get();
+                if ($wfpInvoices != null) {
+                    foreach ($wfpInvoices as $value) {
+                        $orderReference = $value->orderReference;
+                        $amount = $value->amount;
+                        self::refund(
+                            $application,
+                            $city,
+                            $orderReference,
+                            $amount
+                        );
+                    }
+                }
+
                 $order->closeReason = $closeReason_bonusOrderHold;
                 Log::info("Refund called, order->closeReason set to $closeReason_bonusOrderHold");
             } else {
