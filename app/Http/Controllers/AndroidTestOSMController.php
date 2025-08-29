@@ -11464,7 +11464,7 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
         Log::debug("1 historyUIDStatus uid $uid");
 

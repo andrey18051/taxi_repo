@@ -1,6 +1,8 @@
 https://github.com/settings/tokens
 
-docker login ghcr.io -u andrey18051 -p
+docker login ghcr.io -u andrey18051 -p пароль гит хаба
+
+echo "пароль гит хаба" | docker login ghcr.io -u andrey18051 --password-stdin
 
 Базовый образ
 cd D:\OpenServer\domains\taxi2012\docker\baseImageTest
