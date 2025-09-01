@@ -264,3 +264,13 @@ Route::get('/android/searchAutoOrderService/{uid}/{mess_info}', [\App\Http\Contr
 
 Route::get('/android/searchAutoOrderServiceAll/{email}/{app}/{mess_info}', [\App\Http\Controllers\UniversalAndroidFunctionController::class, 'searchAutoOrderServiceAll'])
     ->name('searchAutoOrderServiceAll');
+
+/*
+ * Cost actions
+ */
+
+Route::get('/android/saveFinishCost/{uid}/{cost}', [\App\Http\Controllers\CostController::class, 'save_finish_cost'])
+    ->name('save_finish_cost');
+
+Route::get('/android/showFinishCost/{uid}', [\App\Http\Controllers\CostController::class, 'show_finish_cost'])
+    ->name('show_finish_cost');

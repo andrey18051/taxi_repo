@@ -75,3 +75,5 @@ supervisorctl status
 
 очитстить очередь задач
 docker exec -it redis_server redis-cli -a 18And051971 FLUSHALL
+
+cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_09_01_073657_add_collumn_finish_cost_to_orderwebs_table.php
