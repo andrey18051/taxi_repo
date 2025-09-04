@@ -45,7 +45,7 @@ class ConnectionErrorHandler
 
         // Проверка времени для отправки уведомлений
         $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
-        if ($isCurrentTimeInRange) {
+        if (!$isCurrentTimeInRange) {
             Log::debug("Отправка уведомления разрешена: текущее время в допустимом диапазоне");
         } else {
             Log::debug("Отправка уведомления заблокирована: вне разрешенного временного диапазона");
