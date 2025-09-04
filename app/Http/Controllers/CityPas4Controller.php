@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ConnectionErrorHandler;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\City;
@@ -123,31 +124,35 @@ class CityPas4Controller extends Controller
                 $city->online = "false";
                 $city->save();
 
-                $alarmMessage = new TelegramController();
-                $client_ip = $_SERVER['REMOTE_ADDR'];
-                $messageAdmin = "Нет подключения к серверу города {$city->name->name} http://{$value['address']}. IP $client_ip";
+//                $alarmMessage = new TelegramController();
+//                $client_ip = $_SERVER['REMOTE_ADDR'];
+//                $messageAdmin = "Нет подключения к серверу города {$city->name->name} http://{$value['address']}. IP $client_ip";
+//
+//                Log::debug($messageAdmin);
+//                $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
+//                if (!$isCurrentTimeInRange) {
+//                    $cacheKey = 'alarm_message_' . md5($messageAdmin);
+//                    $lock = Cache::lock($cacheKey, 300); // Lock for 5 minutes (300 seconds)
+//
+//                    if ($lock->get()) {
+//                        try {
+//                            $alarmMessage->sendAlarmMessage($messageAdmin);
+//                            $alarmMessage->sendMeMessage($messageAdmin);
+//                        } catch (Exception $e) {
+//                            $paramsCheck = [
+//                                'subject' => 'Ошибка в телеграмм',
+//                                'message' => $e->getMessage(),
+//                            ];
+//                            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
+//                        } finally {
+//                            $lock->release();
+//                        }
+//                    }
+//                }
+                $handler = new ConnectionErrorHandler();
+                $handler->handleConnectionError($city, $value, $_SERVER['REMOTE_ADDR'], $checking, $online, $timeFive);
 
-                Log::debug($messageAdmin);
-                $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
-                if (!$isCurrentTimeInRange) {
-                    $cacheKey = 'alarm_message_' . md5($messageAdmin);
-                    $lock = Cache::lock($cacheKey, 300); // Lock for 5 minutes (300 seconds)
 
-                    if ($lock->get()) {
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                            $alarmMessage->sendMeMessage($messageAdmin);
-                        } catch (Exception $e) {
-                            $paramsCheck = [
-                                'subject' => 'Ошибка в телеграмм',
-                                'message' => $e->getMessage(),
-                            ];
-                            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
-                        } finally {
-                            $lock->release();
-                        }
-                    }
-                }
             }
 
             if ($online === "true" && $checking) {
