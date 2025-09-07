@@ -466,6 +466,9 @@ class UIDController extends Controller
                         if($value["client_cost"] !=null) {
                             $cost = $value["client_cost"]+ $value["attempt_20"];
                         }
+                        if ($value["finish_cost"] !=null) {
+                            $cost = $value["finish_cost"];
+                        }
                         $response[] = [
                             'routefrom' => $value["routefrom"],
                             'routefromnumber' => $value["routefromnumber"],
@@ -798,8 +801,11 @@ class UIDController extends Controller
                         $dispatchingOrderUidDouble = " ";
                     }
                     $cost = $value["web_cost"];
-                    if($value["client_cost"] !=null) {
+                    if ($value["client_cost"] !=null) {
                         $cost = $value["client_cost"]+ $value["attempt_20"];
+                    }
+                    if ($value["finish_cost"] !=null) {
+                        $cost = $value["finish_cost"];
                     }
                     $response[] = [
                         'uid' => $value["dispatching_order_uid"],

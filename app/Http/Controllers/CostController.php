@@ -17,14 +17,14 @@ class CostController extends Controller
         $orderweb = $this->orderweb_actual($uid);
 
         if ($orderweb) {
-            $orderweb->finish_cost = $cost;
+            $finish_cost = $orderweb->client_cost + $orderweb->attempt_20 + $cost;
+            $orderweb->finish_cost = $finish_cost;
             $orderweb->save();
-
             return response()->json([
                 "result" => "success",
                 "message" => "save_finish_cost $uid $cost successful",
                 "order_id" => $orderweb->id,
-                "finish_cost" => $orderweb->finish_cost,
+                "finish_cost" => $finish_cost,
             ]);
         }
 

@@ -498,10 +498,6 @@ class MessageSentController extends Controller
     {
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
-        $orderweb->closeReason = "1";
-        $orderweb->save();
-
-
         $user_full_name = $orderweb->user_full_name;
         $user_phone = $orderweb->user_phone;
         $email = $orderweb->email;

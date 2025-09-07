@@ -9024,6 +9024,142 @@ class UniversalAndroidFunctionController extends Controller
         });
     }
 
+//    public function findCity($startLat, $startLon)
+//    {
+//        Log::debug("findCity: запрошены координаты lat=$startLat, lon=$startLon");
+//
+//        $cacheKey = "geo_city_" . round($startLat, 4) . "_" . round($startLon, 4);
+//
+//        return Cache::remember($cacheKey, now()->addMinutes(1), function () use ($startLat, $startLon) {
+//
+//            // Вспомогательная функция для нормализации
+//            $normalize = function ($name) {
+//                return mb_strtolower(trim($name));
+//            };
+//
+//
+//            // Прямое соответствие: название города => код
+//            $rawCityMap = [
+//                'Киев' => 'city_kiev', 'Київ' => 'city_kiev',
+//                'Черкассы' => 'city_cherkassy', 'Черкаси' => 'city_cherkassy',
+//                'Одесса' => 'city_odessa', 'Одеса' => 'city_odessa',
+//                'Запорожье' => 'city_zaporizhzhia', 'Запоріжжя' => 'city_zaporizhzhia',
+//                'Днепр' => 'city_dnipro', 'Дніпро' => 'city_dnipro',
+//                'Львов' => 'city_lviv', 'Львів' => 'city_lviv',
+//                'Ивано-Франковск' => 'city_ivano_frankivsk', 'Івано-Франківськ' => 'city_ivano_frankivsk',
+//                'Винница' => 'city_vinnytsia', 'Вінниця' => 'city_vinnytsia',
+//                'Полтава' => 'city_poltava',
+//                'Сумы' => 'city_sumy', 'Суми' => 'city_sumy',
+//                'Харьков' => 'city_kharkiv', 'Харків' => 'city_kharkiv',
+//                'Чернигов' => 'city_chernihiv', 'Чернігів' => 'city_chernihiv',
+//                'Ровно' => 'city_rivne', 'Рівне' => 'city_rivne',
+//                'Тернополь' => 'city_ternopil', 'Тернопіль' => 'city_ternopil',
+//                'Хмельницкий' => 'city_khmelnytskyi', 'Хмельницький' => 'city_khmelnytskyi',
+//                'Ужгород' => 'city_zakarpattya',
+//                'Луцк' => 'city_lutsk', 'Луцьк' => 'city_lutsk',
+//                'Житомир' => 'city_zhytomyr',
+//                'Кропивницкий' => 'city_kropyvnytskyi', 'Кропивницький' => 'city_kropyvnytskyi',
+//                'Кировоград' => 'city_kropyvnytskyi',
+//                'Николаев' => 'city_mykolaiv', 'Миколаїв' => 'city_mykolaiv',
+//                'Черновцы' => 'city_chernivtsi', 'Чернівці' => 'city_chernivtsi',
+//                'Донецк' => 'city_donetsk', 'Донецьк' => 'city_donetsk',
+//                'Луганск' => 'city_luhansk', 'Луганськ' => 'city_luhansk',
+//                'Херсон' => 'city_kherson',
+//                'Симферополь' => 'city_simferopol',
+//            ];
+//            $cityNameMap = [];
+//            foreach ($rawCityMap as $name => $code) {
+//                $cityNameMap[$normalize($name)] = $code;
+//            }
+//
+//            // Сопоставление регионов
+//            $rawRegionMap = [
+//                'Київська область' => 'city_kiev', 'Киевская область' => 'city_kiev',
+//                'Черкаська область' => 'city_cherkassy', 'Черкасская область' => 'city_cherkassy',
+//                'Одеська область' => 'city_odessa', 'Одесская область' => 'city_odessa',
+//                'Запорізька область' => 'city_zaporizhzhia', 'Запорожская область' => 'city_zaporizhzhia',
+//                'Дніпропетровська область' => 'city_dnipro', 'Днепропетровская область' => 'city_dnipro',
+//                'Львівська область' => 'city_lviv', 'Львовская область' => 'city_lviv',
+//                'Івано-Франківська область' => 'city_ivano_frankivsk', 'Ивано-Франковская область' => 'city_ivano_frankivsk',
+//                'Вінницька область' => 'city_vinnytsia', 'Винницкая область' => 'city_vinnytsia',
+//                'Полтавська область' => 'city_poltava', 'Полтавская область' => 'city_poltava',
+//                'Сумська область' => 'city_sumy', 'Сумская область' => 'city_sumy',
+//                'Харківська область' => 'city_kharkiv', 'Харьковская область' => 'city_kharkiv',
+//                'Чернігівська область' => 'city_chernihiv', 'Черниговская область' => 'city_chernihiv',
+//                'Рівненська область' => 'city_rivne', 'Ровненская область' => 'city_rivne',
+//                'Тернопільська область' => 'city_ternopil', 'Тернопольская область' => 'city_ternopil',
+//                'Хмельницька область' => 'city_khmelnytskyi', 'Хмельницкая область' => 'city_khmelnytskyi',
+//                'Закарпатська область' => 'city_zakarpattya', 'Закарпатская область' => 'city_zakarpattya',
+//                'Житомирська область' => 'city_zhytomyr', 'Житомирская область' => 'city_zhytomyr',
+//                'Кіровоградська область' => 'city_kropyvnytskyi', 'Кировоградская область' => 'city_kropyvnytskyi',
+//                'Миколаївська область' => 'city_mykolaiv', 'Николаевская область' => 'city_mykolaiv',
+//                'Чернівецька область' => 'city_chernivtsi', 'Черновицкая область' => 'city_chernivtsi',
+//                'Волинська область' => 'city_lutsk', 'Волынская область' => 'city_lutsk',
+//                'Донецька область' => 'city_donetsk', 'Донецкая область' => 'city_donetsk',
+//                'Луганська область' => 'city_luhansk', 'Луганская область' => 'city_luhansk',
+//                'Херсонська область' => 'city_kherson', 'Херсонская область' => 'city_kherson',
+//                'Автономна Республіка Крим' => 'city_simferopol', 'Автономная Республика Крым' => 'city_simferopol',
+//            ];
+//            $regionToCityMap = [];
+//            foreach ($rawRegionMap as $name => $code) {
+//                $regionToCityMap[$normalize($name)] = $code;
+//            }
+//
+//            // Запрос к Nominatim
+//            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=$startLat&lon=$startLon";
+//            $context = stream_context_create([
+//                "http" => [
+//                    "header" => "User-Agent: MyApp/1.0\r\n"
+//                ]
+//            ]);
+//
+//            $response = @file_get_contents($url, false, $context);
+//            if (!$response) {
+//                Log::error("findCity: ошибка при запросе к Nominatim");
+//                return 'all';
+//            }
+//
+//            Log::debug("findCity: успешный ответ от Nominatim");
+//
+//            $data = json_decode($response, true);
+//            $possibleNames = [];
+//
+//            if (!empty($data['address'])) {
+//                $address = $data['address'];
+//                Log::debug("findCity: адрес из Nominatim: " . json_encode($address, JSON_UNESCAPED_UNICODE));
+//
+//                foreach (['city', 'town', 'village', 'municipality', 'borough', 'district', 'state'] as $field) {
+//                    if (!empty($address[$field])) {
+//                        $normalized = $normalize($address[$field]);
+//                        $possibleNames[] = $normalized;
+//                        Log::debug("findCity: найдено значение '$normalized' в поле '$field'");
+//                    }
+//                }
+//            }
+//
+//            Log::debug("findCity: список возможных названий: " . implode(', ', $possibleNames));
+//
+//            // Сопоставление по названию города
+//            foreach ($possibleNames as $name) {
+//                if (isset($cityNameMap[$name])) {
+//                    Log::info("findCity: прямое совпадение '$name' => " . $cityNameMap[$name]);
+//                    return $cityNameMap[$name];
+//                }
+//            }
+//
+//            // Сопоставление по региону
+//            foreach ($possibleNames as $name) {
+//                if (isset($regionToCityMap[$name])) {
+//                    Log::info("findCity: совпадение по региону '$name' => " . $regionToCityMap[$name]);
+//                    return $regionToCityMap[$name];
+//                }
+//            }
+//
+//            Log::info("findCity: город не определён, возвращаем 'all'");
+//            return 'all';
+//        });
+//    }
+
     public function findCity($startLat, $startLon)
     {
         Log::debug("findCity: запрошены координаты lat=$startLat, lon=$startLon");
@@ -9106,6 +9242,7 @@ class UniversalAndroidFunctionController extends Controller
             }
 
             // Запрос к Nominatim
+            $address = null;
             $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=$startLat&lon=$startLon";
             $context = stream_context_create([
                 "http" => [
@@ -9114,28 +9251,33 @@ class UniversalAndroidFunctionController extends Controller
             ]);
 
             $response = @file_get_contents($url, false, $context);
-            if (!$response) {
-                Log::error("findCity: ошибка при запросе к Nominatim");
+            if ($response) {
+                Log::debug("findCity: успешный ответ от Nominatim");
+                $data = json_decode($response, true);
+                if (!empty($data['address'])) {
+                    $address = $data['address'];
+                    Log::debug("findCity: адрес из Nominatim: " . json_encode($address, JSON_UNESCAPED_UNICODE));
+                }
+            } else {
+                Log::error("findCity: ошибка при запросе к Nominatim, пробуем Mapbox...");
+                $address = $this->getAddressFromMapbox($startLat, $startLon);
+            }
+
+            if (!$address) {
+                Log::info("findCity: адрес не найден, возвращаем 'all'");
                 return 'all';
             }
 
-            Log::debug("findCity: успешный ответ от Nominatim");
 
-            $data = json_decode($response, true);
             $possibleNames = [];
-
-            if (!empty($data['address'])) {
-                $address = $data['address'];
-                Log::debug("findCity: адрес из Nominatim: " . json_encode($address, JSON_UNESCAPED_UNICODE));
-
-                foreach (['city', 'town', 'village', 'municipality', 'borough', 'district', 'state'] as $field) {
-                    if (!empty($address[$field])) {
-                        $normalized = $normalize($address[$field]);
-                        $possibleNames[] = $normalized;
-                        Log::debug("findCity: найдено значение '$normalized' в поле '$field'");
-                    }
+            foreach (['city', 'town', 'village', 'municipality', 'borough', 'district', 'state'] as $field) {
+                if (!empty($address[$field])) {
+                    $normalized = $normalize($address[$field]);
+                    $possibleNames[] = $normalized;
+                    Log::debug("findCity: найдено значение '$normalized' в поле '$field'");
                 }
             }
+
 
             Log::debug("findCity: список возможных названий: " . implode(', ', $possibleNames));
 
@@ -9159,7 +9301,44 @@ class UniversalAndroidFunctionController extends Controller
             return 'all';
         });
     }
+    private function getAddressFromMapbox($lat, $lon)
+    {
+        $mapboxToken = config('app.keyMapbox'); // ваш токен храните в .env
+        $url = "https://api.mapbox.com/geocoding/v5/mapbox.places/$lon,$lat.json?access_token=$mapboxToken&language=uk";
 
+        $response = @file_get_contents($url);
+        if (!$response) {
+            Log::error("getAddressFromMapbox: ошибка при запросе к Mapbox");
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        if (empty($data['features'])) {
+            Log::error("getAddressFromMapbox: пустой ответ");
+            return null;
+        }
+
+        // Берём первую фичу (самую релевантную)
+        $feature = $data['features'][0];
+        $context = $feature['context'] ?? [];
+
+        $address = [];
+        if (!empty($feature['text'])) {
+            $address['city'] = $feature['text'];
+        }
+
+        foreach ($context as $c) {
+            if (str_contains($c['id'], 'region')) {
+                $address['state'] = $c['text'];
+            }
+            if (str_contains($c['id'], 'place')) {
+                $address['town'] = $c['text'];
+            }
+        }
+
+        Log::debug("getAddressFromMapbox: адрес: " . json_encode($address, JSON_UNESCAPED_UNICODE));
+        return $address;
+    }
 
 
     public function detectCity($lat, $lon)
