@@ -3,7 +3,7 @@
 chcp 65001 > nul
 
 echo Copying Dockerfile...
-copy "D:\OpenServer\domains\taxi2012\docker\dockerFinish\Test\Dockerfile" "D:\OpenServer\domains\taxi2012"
+copy "C:\OpenServer\domains\taxi2012\docker\dockerFinish\Test\Dockerfile" "C:\OpenServer\domains\taxi2012"
 if %ERRORLEVEL% NEQ 0 (
     echo Error copying Dockerfile.
     exit /b 1
@@ -11,14 +11,14 @@ if %ERRORLEVEL% NEQ 0 (
 echo Dockerfile copied successfully.
 
 echo Copying env...
-copy "D:\OpenServer\domains\taxi2012\app\env\test" "D:\OpenServer\domains\taxi2012"
+copy "C:\OpenServer\domains\taxi2012\app\env\test" "C:\OpenServer\domains\taxi2012"
 if %ERRORLEVEL% NEQ 0 (
      echo Error copying Env.
      exit /b 1
  )
 echo Env copied successfully.
 
-cd /d "D:\OpenServer\domains\taxi2012"
+cd /d "C:\OpenServer\domains\taxi2012"
 
 echo Building Docker image...
 docker build -t ghcr.io/andrey18051/taxi_test:1.0 .

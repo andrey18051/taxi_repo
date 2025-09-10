@@ -19,7 +19,7 @@ if %ERRORLEVEL% NEQ 0 (
  )
 echo Env copied successfully.
 
-cd /d "D:\OpenServer\domains\taxi2012"
+cd /d "C:\OpenServer\domains\taxi2012"
 
 echo Building Docker image...
 docker build -t ghcr.io/andrey18051/taxi_test:1.0 .

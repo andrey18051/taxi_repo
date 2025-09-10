@@ -5,7 +5,7 @@ chcp 65001 > nul
 
 rem 1. Copy Dockerfile
 echo Copying Dockerfile...
-copy "D:\OpenServer\domains\taxi2012\docker\dockerFinish\Work\Dockerfile" "D:\OpenServer\domains\taxi2012"
+copy "C:\OpenServer\domains\taxi2012\docker\dockerFinish\Work\Dockerfile" "C:\OpenServer\domains\taxi2012"
 if %ERRORLEVEL% NEQ 0 (
     echo Error while copying Dockerfile.
     exit /b 1
@@ -13,7 +13,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo Dockerfile copied successfully.
 
 echo Copying env...
-copy "D:\OpenServer\domains\taxi2012\app\env\work" "D:\OpenServer\domains\taxi2012"
+copy "C:\OpenServer\domains\taxi2012\app\env\work" "C:\OpenServer\domains\taxi2012"
 if %ERRORLEVEL% NEQ 0 (
      echo Error copying Env.
      exit /b 1
@@ -22,8 +22,8 @@ if %ERRORLEVEL% NEQ 0 (
 
 
 rem 2. Change directory
-echo Changing directory to D:\OpenServer\domains\taxi2012...
-cd /d "D:\OpenServer\domains\taxi2012"
+echo Changing directory to C:\OpenServer\domains\taxi2012...
+cd /d "C:\OpenServer\domains\taxi2012"
 
 rem 3. Build Docker image
 echo Building Docker image...

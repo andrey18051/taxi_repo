@@ -22,8 +22,8 @@ if %ERRORLEVEL% NEQ 0 (
 
 
 rem 2. Change directory
-echo Changing directory to D:\OpenServer\domains\taxi2012...
-cd /d "D:\OpenServer\domains\taxi2012"
+echo Changing directory to C:\OpenServer\domains\taxi2012...
+cd /d "C:\OpenServer\domains\taxi2012"
 
 rem 3. Build Docker image
 echo Building Docker image...

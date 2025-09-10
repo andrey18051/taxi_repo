@@ -3,6 +3,7 @@
 use App\Http\Controllers\AndroidController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\DriverKarmaController;
 use App\Http\Controllers\FCMController;
 use App\Http\Controllers\ServicesController;
 use Illuminate\Http\Request;
@@ -95,3 +96,20 @@ Route::get('/deleteDocumentsByDriverUid/{uidDriver}', [FCMController::class, 'de
 
 Route::get('/driverCurrentSectorLocationStoreFirestore/{uidDriver}/{latitude}/{longitude}', [DriverController::class, 'driverCurrentSectorLocationStoreFirestore'])
     ->name('driverCurrentSectorLocationStoreFirestore');
+
+// Создать новую запись (store) с параметрами в сегментах URL
+Route::get('/driver-karmas/create/{driver_id}/{order_id}/{action}',
+    [DriverKarmaController::class, 'store'])->name('driver-karmas.store');
+
+// Получить запись по ID (show)
+Route::get('/driver-karmas/{id}', [DriverKarmaController::class, 'show'])->name('driver-karmas.show');
+
+// Обновить запись по ID (update)
+Route::put('/driver-karmas/{id}', [DriverKarmaController::class, 'update'])->name('driver-karmas.update');
+
+// Удалить запись по ID (destroy)
+Route::delete('/driver-karmas/{id}', [DriverKarmaController::class, 'destroy'])->name('driver-karmas.destroy');
+
+// Подсчитать записи по action для driver_id
+Route::get('/driver-karmas/count/{uidDriver}', [DriverKarmaController::class, 'countByAction'])->name('driver-karmas.countByAction');
+
