@@ -1,11 +1,12 @@
 https://github.com/settings/tokens
 
-docker login ghcr.io -u andrey18051 -p пароль гит хаба
+docker login ghcr.io -u andrey18051 -p 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
 
-echo "пароль гит хаба" | docker login ghcr.io -u andrey18051 --password-stdin
+
+echo "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" | docker login ghcr.io -u andrey18051 --password-stdin
 
 Базовый образ
-cd D:\OpenServer\domains\taxi2012\docker\baseImageTest
+cd C:\OpenServer\domains\taxi2012\docker\baseImageTest
 docker build -t ghcr.io/andrey18051/taxi_laravel_8.83.29_test:base .
 
 отправить в гит хаб
@@ -18,8 +19,8 @@ docker exec -it taxi_test bash
 curl https://localhost
 
 1. создать образ
-copy D:\OpenServer\domains\taxi2012\docker\dockerFinish\Test\Dockerfile D:\OpenServer\domains\taxi2012
-cd D:\OpenServer\domains\taxi2012
+copy C:\OpenServer\domains\taxi2012\docker\dockerFinish\Test\Dockerfile C:\OpenServer\domains\taxi2012
+cd C:\OpenServer\domains\taxi2012
 
 docker build -t  ghcr.io/andrey18051/taxi_test:1.0 .
 
@@ -76,4 +77,4 @@ supervisorctl status
 очитстить очередь задач
 docker exec -it redis_server redis-cli -a 18And051971 FLUSHALL
 
-cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_09_01_073657_add_collumn_finish_cost_to_orderwebs_table.php
+cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_09_10_101052_create_driver_karmas_table.php

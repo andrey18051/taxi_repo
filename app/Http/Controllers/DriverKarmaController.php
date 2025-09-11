@@ -177,6 +177,20 @@ class DriverKarmaController extends Controller
             ->take(100)
             ->pluck('id');
 
+        if ($latestRecords->isEmpty()) {
+            $counts = [
+
+            ];
+            return response()->json([
+                'status' => 'success',
+                'message' => "Counted records for uidDriver $uidDriver grouped by action",
+                'data' => [
+                    'uidDriver' => $uidDriver,
+                    'karma' => 100,
+                    'counts' => $counts
+                ]
+            ], 200);
+        }
         // Группируем записи по уникальным значениям action и подсчитываем количество
         $counts = DriverKarma::where('uidDriver', $uidDriver)
             ->whereIn('id', $latestRecords)
@@ -186,11 +200,17 @@ class DriverKarmaController extends Controller
             ->pluck('count', 'action')
             ->toArray();
 
+        $orderUnTaking = ($counts['orderUnTaking'] ?? 0) + ($counts['orderUnTakingPersonal'] ?? 0);
+
+        $karma = 100 - $orderUnTaking;
+
+
         return response()->json([
             'status' => 'success',
             'message' => "Counted records for uidDriver $uidDriver grouped by action",
             'data' => [
                 'uidDriver' => $uidDriver,
+                'karma' => $karma,   // вот здесь явно есть karma
                 'counts' => $counts
             ]
         ], 200);

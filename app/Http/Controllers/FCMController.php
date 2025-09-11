@@ -441,7 +441,7 @@ class FCMController extends Controller
             // Запишите данные в документ
             $document->set($data);
 
-            sleep(20);
+            sleep(40);
             (new FCMController)->deleteOrderPersonalDocumentFromFirestore($order->dispatching_order_uid, $driver_uid);
 
             Log::info("Document successfully written!");
@@ -1003,10 +1003,14 @@ class FCMController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
+
         if (!$order) {
             Log::error("Order not found for dispatching_order_uid: {$uid}");
             return "Order not found.";
         }
+
+        $status = "orderUnTakingPersonal";
+
 
         $documentId = $order->id;
         Log::info("Found order with ID: {$documentId}");
@@ -1031,7 +1035,7 @@ class FCMController extends Controller
                 // Удаление документа
                 $document->delete();
                 Log::info("Document with ID {$documentId} successfully deleted from orders_personal.");
-
+                (new DriverKarmaController)->store($driver_uid, $order->id, $status);
                 // Перемещение данных в другую коллекцию
                 $collection = $firestore->collection('orders');
                 $document = $collection->document($documentId);

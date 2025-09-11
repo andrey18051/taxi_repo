@@ -299,6 +299,7 @@ class DriverController extends Controller
             (new FCMController)->ordersTakingStatus($uid, $status);
             (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
 
+
             try {
                 AndroidTestOSMController::repeatCancel(
                     $url,
@@ -317,6 +318,7 @@ class DriverController extends Controller
             ], 200);
         } else {
             $status = "orderTaking";
+
             // Вернуть JSON с сообщением об успехе
             return response()->json([
                 'status' => $status,
@@ -340,6 +342,7 @@ class DriverController extends Controller
         $orderweb->save();
         (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
         (new FCMController)->ordersTakingStatus($uid, $status);
+
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,
@@ -400,11 +403,13 @@ class DriverController extends Controller
         (new FCMController())->writeDocumentToHistoryFirestore($uid, $status);
 
         $status = "driverCloseOrder";
-
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         $orderweb->closeReason = "104";
         $orderweb->time_to_start_point = "";
         $orderweb->save();
+
+        (new DriverKarmaController)->store($uidDriver, $orderweb->id, $status);
+
         (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -485,9 +490,15 @@ class DriverController extends Controller
 
         (new FCMController)->deleteOrderTakingDocumentFromFirestore($uid, $uidDriver);
         $uid = (new MemoryOrderChangeController)->show($uid);
-        self::createNewOrder($uid);
+
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
 
         $status = "orderUnTaking";
+        (new DriverKarmaController)->store($uidDriver, $orderweb->id, $status);
+
+        self::createNewOrder($uid);
+
         // Вернуть JSON с сообщением об успехе
         return response()->json([
             'status' => $status,

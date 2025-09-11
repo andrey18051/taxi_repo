@@ -1,5 +1,5 @@
 Базовый образ
-cd D:\OpenServer\domains\taxi2012\docker\baseImageWork
+cd C:\OpenServer\domains\taxi2012\docker\baseImageWork
 docker build -t ghcr.io/andrey18051/taxi_laravel_8.83.29_work:base .
 
 
@@ -13,8 +13,8 @@ docker exec -it taxi_test bash
 curl https://localhost
 
 1. создать образ
-copy D:\OpenServer\domains\taxi2012\docker\dockerFinish\Work\Dockerfile D:\OpenServer\domains\taxi2012
-cd D:\OpenServer\domains\taxi2012
+copy C:\OpenServer\domains\taxi2012\docker\dockerFinish\Work\Dockerfile C:\OpenServer\domains\taxi2012
+cd C:\OpenServer\domains\taxi2012
 
 docker build -t  ghcr.io/andrey18051/taxi_work:1.0 .
 
