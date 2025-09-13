@@ -6,6 +6,7 @@ use App\Models\ExecutionStatus;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class OrderStatusController extends Controller
@@ -1107,434 +1108,612 @@ class OrderStatusController extends Controller
 //        }
 //    }
 
+    public function cityAndApp($order) {
+        $city = $order->city;
+        Log::info("Город заказа: " . $city);
 
+        // Выбор приложения по комментарию
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+                break;
+        }
+        Log::info("Приложение выбрано: " . $application);
+
+        // Переписываем город для определенных случаев
+        $originalCity = $city;
+        switch ($originalCity) {
+            case "city_kiev":
+                $city = "Kyiv City";
+                break;
+            case "city_cherkassy":
+                $city = "Cherkasy Oblast";
+                break;
+            case "city_odessa":
+                $city = "Odessa";
+                break;
+            case "city_zaporizhzhia":
+                $city = "Zaporizhzhia";
+                break;
+            case "city_dnipro":
+                $city = "Dnipropetrovsk Oblast";
+                break;
+            case "city_lviv":
+                $city = "Lviv";
+                break;
+            case "city_ivano_frankivsk":
+                $city = "Ivano_frankivsk";
+                break;
+            case "city_vinnytsia":
+                $city = "Vinnytsia";
+                break;
+            case "city_poltava":
+                $city = "Poltava";
+                break;
+            case "city_sumy":
+                $city = "Sumy";
+                break;
+            case "city_kharkiv":
+                $city = "Kharkiv";
+                break;
+            case "city_chernihiv":
+                $city = "Chernihiv";
+                break;
+            case "city_rivne":
+                $city = "Rivne";
+                break;
+            case "city_ternopil":
+                $city = "Ternopil";
+                break;
+            case "city_khmelnytskyi":
+                $city = "Khmelnytskyi";
+                break;
+            case "city_zakarpattya":
+                $city = "Zakarpattya";
+                break;
+            case "city_zhytomyr":
+                $city = "Zhytomyr";
+                break;
+            case "city_kropyvnytskyi":
+                $city = "Kropyvnytskyi";
+                break;
+            case "city_mykolaiv":
+                $city = "Mykolaiv";
+                break;
+            case "city_chernivtsi":
+                $city = "Chernivtsi";
+                break;
+            case "city_lutsk":
+                $city = "Lutsk";
+                break;
+            default:
+                $city = "all";
+        }
+
+        Log::info("Город изменен с {$originalCity} на {$city}");
+
+        return [
+            'city'=> $city,
+            'application'=> $application
+
+        ];
+    }
 
     public function getOrderStatusMessageResultPush($dispatching_order_uid)
     {
         Log::info('Entering getOrderStatusMessageResultPush', ['dispatching_order_uid' => $dispatching_order_uid]);
 
-        $startTime = time(); // Запоминаем начальное время
-        Log::debug('Start time set', ['startTime' => $startTime]);
 
-        do {
-            Log::debug('Entering loop iteration', ['current_time' => time(), 'elapsed' => time() - $startTime]);
+            $startTime = time(); // Запоминаем начальное время
+            Log::debug('Start time set', ['startTime' => $startTime]);
 
-            // Попробуем найти запись
-            $dispatching_order_uid = (new MemoryOrderChangeController)->show($dispatching_order_uid);
-            Log::debug('Updated dispatching_order_uid from MemoryOrderChangeController', ['dispatching_order_uid' => $dispatching_order_uid]);
+            do {
+                Log::debug('Entering loop iteration', ['current_time' => time(), 'elapsed' => time() - $startTime]);
 
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
-            Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
+                // Попробуем найти запись
+                $dispatching_order_uid = (new MemoryOrderChangeController)->show($dispatching_order_uid);
+                Log::debug('Updated dispatching_order_uid from MemoryOrderChangeController', ['dispatching_order_uid' => $dispatching_order_uid]);
+
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
+                Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    $nalOrderInput = $uid_history->double_status;
+                    $cardOrderInput = $uid_history->bonus_status;
+                    Log::info('Found uid_history by uid_bonusOrderHold', [
+                        'nalOrderInput' => $nalOrderInput,
+                        'cardOrderInput' => $cardOrderInput
+                    ]);
+                    break;
+                } else {
+                    $uid_history = Uid_history::where("uid_bonusOrder", $dispatching_order_uid)->first();
+                    Log::debug('Searched Uid_history by uid_bonusOrder', ['found' => !is_null($uid_history)]);
+
+                    if ($uid_history) {
+                        // Если запись найдена, выходим из цикла
+                        $nalOrderInput = $uid_history->double_status;
+                        $cardOrderInput = $uid_history->bonus_status;
+                        $dispatching_order_uid = $uid_history->uid_bonusOrder;
+                        Log::info('Found uid_history by uid_bonusOrder', [
+                            'nalOrderInput' => $nalOrderInput,
+                            'cardOrderInput' => $cardOrderInput,
+                            'updated_dispatching_order_uid' => $dispatching_order_uid
+                        ]);
+                        break;
+                    }
+
+                    $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
+                    Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
+
+                    if ($uid_history) {
+                        // Если запись найдена, выходим из цикла
+                        $nalOrderInput = $uid_history->double_status;
+                        $cardOrderInput = $uid_history->bonus_status;
+                        $dispatching_order_uid = $uid_history->uid_bonusOrder;
+                        Log::info('Found uid_history by uid_doubleOrder', [
+                            'nalOrderInput' => $nalOrderInput,
+                            'cardOrderInput' => $cardOrderInput,
+                            'updated_dispatching_order_uid' => $dispatching_order_uid
+                        ]);
+                        break;
+                    }
+                }
+
+                Log::debug('Sleeping for 1 second');
+                sleep(1);
+            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+            Log::debug('Exited loop', ['total_elapsed' => time() - $startTime, 'found_uid_history' => !is_null($uid_history ?? null)]);
 
             if ($uid_history) {
-                // Если запись найдена, выходим из цикла
-                $nalOrderInput = $uid_history->double_status;
-                $cardOrderInput = $uid_history->bonus_status;
-                Log::info('Found uid_history by uid_bonusOrderHold', [
-                    'nalOrderInput' => $nalOrderInput,
-                    'cardOrderInput' => $cardOrderInput
+                Log::info('Processing uid_history', ['nalOrderInput' => $nalOrderInput, 'cardOrderInput' => $cardOrderInput]);
+
+
+
+                $nalOrder = json_decode($nalOrderInput, true);
+                $cardOrder = json_decode($cardOrderInput, true);
+
+
+
+                Log::debug('Decoded orders', [
+                    'nalOrder' => $nalOrder,
+                    'cardOrder' => $cardOrder
                 ]);
-                break;
-            } else {
-                $uid_history = Uid_history::where("uid_bonusOrder", $dispatching_order_uid)->first();
-                Log::debug('Searched Uid_history by uid_bonusOrder', ['found' => !is_null($uid_history)]);
 
-                if ($uid_history) {
-                    // Если запись найдена, выходим из цикла
-                    $nalOrderInput = $uid_history->double_status;
-                    $cardOrderInput = $uid_history->bonus_status;
-                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                    Log::info('Found uid_history by uid_bonusOrder', [
-                        'nalOrderInput' => $nalOrderInput,
-                        'cardOrderInput' => $cardOrderInput,
-                        'updated_dispatching_order_uid' => $dispatching_order_uid
-                    ]);
-                    break;
-                }
+                $nalState = $nalOrder['execution_status'] ?? 'SearchesForCar';
+                $cardState = $cardOrder['execution_status'] ?? 'SearchesForCar';
+                Log::info('Extracted states', ['nalState' => $nalState, 'cardState' => $cardState]);
 
-                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
-                Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
+                $autoInfoNal = $nalOrder['order_car_info'] ?? null;
+                $autoInfoCard = $cardOrder['order_car_info'] ?? null;
+                Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
-                if ($uid_history) {
-                    // Если запись найдена, выходим из цикла
-                    $nalOrderInput = $uid_history->double_status;
-                    $cardOrderInput = $uid_history->bonus_status;
-                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                    Log::info('Found uid_history by uid_doubleOrder', [
-                        'nalOrderInput' => $nalOrderInput,
-                        'cardOrderInput' => $cardOrderInput,
-                        'updated_dispatching_order_uid' => $dispatching_order_uid
-                    ]);
-                    break;
-                }
-            }
+                $orderweb = Orderweb::where("dispatching_order_uid", $uid_history->uid_bonusOrderHold)->first();
+                Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
-            Log::debug('Sleeping for 1 second');
-            sleep(1);
-        } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
-        Log::debug('Exited loop', ['total_elapsed' => time() - $startTime, 'found_uid_history' => !is_null($uid_history ?? null)]);
+                if ($orderweb) {
 
-        if ($uid_history) {
-            Log::info('Processing uid_history', ['nalOrderInput' => $nalOrderInput, 'cardOrderInput' => $cardOrderInput]);
-
-            if ($uid_history->cancel == "1") {
-                $response = $cardOrderInput; // БЕЗНАЛ
-                $action = 'Заказ снят';
-                $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
-                Log::info('Order canceled', [
-                    'action' => $action,
-                    'response' => $response,
-                    'dispatching_order_uid' => $dispatching_order_uid
-                ]);
-                Log::info('Exiting function due to cancel', ['response' => $response]);
-                return $response;
-            }
-
-            $nalOrder = json_decode($nalOrderInput, true);
-            $cardOrder = json_decode($cardOrderInput, true);
-            Log::debug('Decoded orders', [
-                'nalOrder' => $nalOrder,
-                'cardOrder' => $cardOrder
-            ]);
-
-            $nalState = $nalOrder['execution_status'] ?? 'SearchesForCar';
-            $cardState = $cardOrder['execution_status'] ?? 'SearchesForCar';
-            Log::info('Extracted states', ['nalState' => $nalState, 'cardState' => $cardState]);
-
-            $autoInfoNal = $nalOrder['order_car_info'] ?? null;
-            $autoInfoCard = $cardOrder['order_car_info'] ?? null;
-            Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
-
-            $orderweb = Orderweb::where("dispatching_order_uid", $uid_history->uid_bonusOrderHold)->first();
-            Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
-
-            if ($orderweb) {
-                $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
-                Log::debug('Set orderweb auto initially', ['auto' => $orderweb->auto]);
-
-                // Combine nalState and cardState as a key for switch
-                $stateKey = $nalState . '|' . $cardState;
-                Log::debug('Generated state key for switch', ['stateKey' => $stateKey]);
-
-                $orderweb->closeReason = "-1";
-                $orderweb->auto = null;
-
-                switch ($stateKey) {
-                    // Block 1: Состояния "Поиск авто"
-                    case 'SearchesForCar|SearchesForCar':
-                    case 'SearchesForCar|WaitingCarSearch':
-                    case 'WaitingCarSearch|SearchesForCar':
-                    case 'WaitingCarSearch|WaitingCarSearch':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Поиск авто (both searching/waiting)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'SearchesForCar|CostCalculation':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Поиск авто (nal searching, card cost calc)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CostCalculation|SearchesForCar':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Поиск авто (nal cost calc, card searching)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'Canceled|SearchesForCar':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Поиск авто (nal canceled, card searching)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'SearchesForCar|Canceled':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Поиск авто (nal searching, card canceled)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'Canceled|WaitingCarSearch':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Поиск авто (nal canceled, card waiting)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'WaitingCarSearch|Canceled':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Поиск авто (nal waiting, card canceled)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CostCalculation|WaitingCarSearch':
-                    case 'CostCalculation|SearchesForCar':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Поиск авто (nal cost calc, card searching/waiting)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'SearchesForCar|CostCalculation':
-                    case 'WaitingCarSearch|CostCalculation':
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Поиск авто (nal searching/waiting, card cost calc)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    // Block 2: Состояния "Авто найдено"
-                    case 'SearchesForCar|CarFound':
-                    case 'SearchesForCar|Running':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Авто найдено (nal searching, card found/running)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CarFound|SearchesForCar':
-                    case 'Running|SearchesForCar':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Авто найдено (nal found/running, card searching)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'WaitingCarSearch|CarFound':
-                    case 'WaitingCarSearch|Running':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Авто найдено (nal waiting, card found/running)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CarFound|WaitingCarSearch':
-                    case 'Running|WaitingCarSearch':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Авто найдено (nal found/running, card waiting)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CarFound|CarFound':
-                    case 'CarFound|Running':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Авто найдено (nal found, card found/running)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'Running|CarFound':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Авто найдено (nal running, card found)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'Running|Running':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Авто найдено (both running)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'Canceled|CarFound':
-                    case 'Canceled|Running':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Авто найдено (nal canceled, card found/running)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CarFound|Canceled':
-                    case 'Running|Canceled':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Авто найдено (nal found/running, card canceled)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CostCalculation|CarFound':
-                    case 'CostCalculation|Running':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Авто найдено (nal cost calc, card found/running)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CarFound|CostCalculation':
-                    case 'Running|CostCalculation':
-                        $action = 'Авто найдено';
-                        $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Авто найдено (nal found/running, card cost calc)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    // Block 3: Состояния "Заказ выполнен"
-                    case 'Executed|SearchesForCar':
-                    case 'Executed|WaitingCarSearch':
-                    case 'Executed|CarFound':
-                    case 'Executed|Running':
-                        $action = 'Заказ выполнен';
-                        $orderweb->closeReason = "0";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Заказ выполнен (nal executed, card various)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'SearchesForCar|Executed':
-                    case 'WaitingCarSearch|Executed':
-                    case 'CarFound|Executed':
-                    case 'Running|Executed':
-                        $action = 'Заказ выполнен';
-                        $orderweb->closeReason = "0";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Заказ выполнен (nal various, card executed)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'Executed|CostCalculation':
-                        $action = 'Заказ выполнен';
-                        $orderweb->closeReason = "0";
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Заказ выполнен (nal executed, card cost calc)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    case 'CostCalculation|Executed':
-                        $action = 'Заказ выполнен';
-                        $orderweb->closeReason = "0";
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Заказ выполнен (nal cost calc, card executed)', ['action' => $action, 'response' => $response]);
-                        break;
-
-                    // Block 4: Состояния "Заказ снят" с проверкой close_reason
-                    case 'Canceled|CostCalculation':
-                        $closeReason = $nalOrder['close_reason'] ?? -1;
-                        $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
-                        $orderweb->closeReason = $closeReason;
-                        if ($closeReason == "-1") {
-                            $orderweb->auto = null;
+                    if (in_array($orderweb->closeReason,  ['101', '102', '103', '104']) ) {
+                        if($cardOrderInput == null) {
+                            return null;
                         }
-                        $response = $nalOrderInput; // НАЛ
-                        Log::info('Switch: Заказ снят/Поиск авто (nal canceled, card cost calc)', [
-                            'action' => $action,
-                            'closeReason' => $closeReason,
-                            'response' => $response
-                        ]);
-                        break;
+                        $response = $cardOrderInput;
 
-                    case 'CostCalculation|Canceled':
-                        $closeReason = $cardOrder['close_reason'] ?? -1;
-                        $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
-                        $orderweb->closeReason = $closeReason;
-                        if ($closeReason == "-1") {
-                            $orderweb->auto = null;
+                        $field = "close_reason";
+                        $newValue = $orderweb->closeReason;
+                        $response = $this->replaceFieldValueInResponse($response, $field, $newValue);
+
+                        $storedData = $orderweb->auto ?? null;
+                        Log::debug('Set orderweb auto initially', ['auto' => $storedData]);
+                        if($storedData != null) {
+                            $dataDriver = json_decode($storedData, true);
+//            $name = $dataDriver["name"];
+                            $color = $dataDriver["color"];
+                            $brand = $dataDriver["brand"];
+                            $model = $dataDriver["model"];
+                            $number = $dataDriver["number"];
+                            $phoneNumber = $dataDriver["phoneNumber"];
+
+                            $auto = "$number, цвет $color  $brand $model. ";
+
+
+                            // Обновление полей
+
+                            $this->addCarInfoToResponseUid(
+                                $response,
+                                $auto,
+                                $phoneNumber,
+                                $orderweb->time_to_start_point
+                            );
+
                         }
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Заказ снят/Поиск авто (nal cost calc, card canceled)', [
-                            'action' => $action,
-                            'closeReason' => $closeReason,
-                            'response' => $response
-                        ]);
-                        break;
 
-                    case 'CostCalculation|CostCalculation':
-                        $closeReasonNal = $nalOrder['close_reason'] ?? -1;
-                        $closeReasonCard = $cardOrder['close_reason'] ?? -1;
-                        if ($closeReasonNal != -1 && $closeReasonCard != -1) {
+
+                        $action = 'Поиск авто';
+                        switch ($orderweb->closeReason) {
+
+                            // Block 2: Состояния "Авто найдено"
+                            case '101':
+                                $action = 'Авто найдено';
+
+                                Log::info('Switch: Авто найдено', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case '102':
+                                $action = 'На месте';
+                                Log::info('Switch: На месте', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case '103':
+                                $action = 'В пути';
+                                Log::info('Switch: В пути', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case '104':
+                                $action = "Заказ выполнен";
+                                Log::info('Switch: Заказ выполнен', ['action' => $action, 'response' => $response]);
+                                break;
+                        }
+
+                        Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
+
+                        $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+                        Log::info('Added action to response', ['response' => $response, 'action' => $action]);
+
+
+
+                        Log::info('Exiting function', ['response' => $response]);
+                        return $response;
+                    } else {
+                        if ($uid_history->cancel == "1") {
+                            $response = $cardOrderInput; // БЕЗНАЛ
                             $action = 'Заказ снят';
-                            $orderweb->closeReason = "1";
-                        } else {
-                            $action = 'Поиск авто';
-                            $orderweb->auto = null;
-                            $orderweb->closeReason = "-1";
+                            $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+                            Log::info('Order canceled', [
+                                'action' => $action,
+                                'response' => $response,
+                                'dispatching_order_uid' => $dispatching_order_uid
+                            ]);
+                            Log::info('Exiting function due to cancel', ['response' => $response]);
+                            return $response;
                         }
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Заказ снят/Поиск авто (both cost calc)', [
-                            'action' => $action,
-                            'closeReasonNal' => $closeReasonNal,
-                            'closeReasonCard' => $closeReasonCard,
-                            'response' => $response
-                        ]);
-                        break;
+                        $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
+                        Log::debug('Set orderweb auto initially', ['auto' => $orderweb->auto]);
 
-                    case 'Canceled|Canceled':
-                        $closeReasonNal = $nalOrder['close_reason'] ?? -1;
-                        $closeReasonCard = $cardOrder['close_reason'] ?? -1;
-                        if ($closeReasonNal != -1 && $closeReasonCard != -1) {
-                            $action = 'Заказ снят';
-                            $orderweb->closeReason = "1";
-                        } else {
-                            $action = 'Поиск авто';
-                            $orderweb->auto = null;
-                            $orderweb->closeReason = "-1";
-                        }
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        Log::info('Switch: Заказ снят/Поиск авто (both canceled)', [
-                            'action' => $action,
-                            'closeReasonNal' => $closeReasonNal,
-                            'closeReasonCard' => $closeReasonCard,
-                            'response' => $response
-                        ]);
-                        break;
+                        // Combine nalState and cardState as a key for switch
+                        $stateKey = $nalState . '|' . $cardState;
+                        Log::debug('Generated state key for switch', ['stateKey' => $stateKey]);
 
-                    default:
-                        $action = 'Поиск авто';
-                        $orderweb->auto = null;
                         $orderweb->closeReason = "-1";
-                        $response = $nalOrderInput;
-                        Log::info('Switch: Default - Поиск авто', ['action' => $action, 'response' => $response]);
-                        break;
-                }
+                        $orderweb->auto = null;
 
-                Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
-                $orderweb->save();
+                        switch ($stateKey) {
+                            // Block 1: Состояния "Поиск авто"
+                            case 'SearchesForCar|SearchesForCar':
+                            case 'SearchesForCar|WaitingCarSearch':
+                            case 'WaitingCarSearch|SearchesForCar':
+                            case 'WaitingCarSearch|WaitingCarSearch':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Поиск авто (both searching/waiting)', ['action' => $action, 'response' => $response]);
+                                break;
 
-                $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
-                Log::info('Added action to response', ['response' => $response, 'action' => $action]);
+                            case 'SearchesForCar|CostCalculation':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Поиск авто (nal searching, card cost calc)', ['action' => $action, 'response' => $response]);
+                                break;
 
-                $response_arr = json_decode($response, true);
-                Log::debug('Decoded final response', ['response_arr' => $response_arr]);
+                            case 'CostCalculation|SearchesForCar':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Поиск авто (nal cost calc, card searching)', ['action' => $action, 'response' => $response]);
+                                break;
 
-                if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
-                    $orderweb->auto = $response_arr["order_car_info"];
-                    $orderweb->closeReason = -1;
-                    Log::info('Updated orderweb auto from response', ['auto' => $orderweb->auto]);
-                } else if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
-                    $orderweb->closeReason = 1;
-                    Log::info('Set closeReason to 1 for canceled order');
+                            case 'Canceled|SearchesForCar':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Поиск авто (nal canceled, card searching)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'SearchesForCar|Canceled':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Поиск авто (nal searching, card canceled)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'Canceled|WaitingCarSearch':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Поиск авто (nal canceled, card waiting)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'WaitingCarSearch|Canceled':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Поиск авто (nal waiting, card canceled)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CostCalculation|WaitingCarSearch':
+                            case 'CostCalculation|SearchesForCar':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Поиск авто (nal cost calc, card searching/waiting)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'SearchesForCar|CostCalculation':
+                            case 'WaitingCarSearch|CostCalculation':
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Поиск авто (nal searching/waiting, card cost calc)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            // Block 2: Состояния "Авто найдено"
+                            case 'SearchesForCar|CarFound':
+                            case 'SearchesForCar|Running':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Авто найдено (nal searching, card found/running)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CarFound|SearchesForCar':
+                            case 'Running|SearchesForCar':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Авто найдено (nal found/running, card searching)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'WaitingCarSearch|CarFound':
+                            case 'WaitingCarSearch|Running':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Авто найдено (nal waiting, card found/running)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CarFound|WaitingCarSearch':
+                            case 'Running|WaitingCarSearch':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Авто найдено (nal found/running, card waiting)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CarFound|CarFound':
+                            case 'CarFound|Running':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Авто найдено (nal found, card found/running)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'Running|CarFound':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Авто найдено (nal running, card found)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'Running|Running':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Авто найдено (both running)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'Canceled|CarFound':
+                            case 'Canceled|Running':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Авто найдено (nal canceled, card found/running)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CarFound|Canceled':
+                            case 'Running|Canceled':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Авто найдено (nal found/running, card canceled)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CostCalculation|CarFound':
+                            case 'CostCalculation|Running':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Авто найдено (nal cost calc, card found/running)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CarFound|CostCalculation':
+                            case 'Running|CostCalculation':
+                                $action = 'Авто найдено';
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Авто найдено (nal found/running, card cost calc)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            // Block 3: Состояния "Заказ выполнен"
+                            case 'Executed|SearchesForCar':
+                            case 'Executed|WaitingCarSearch':
+                            case 'Executed|CarFound':
+                            case 'Executed|Running':
+                                $action = 'Заказ выполнен';
+                                $orderweb->closeReason = "0";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Заказ выполнен (nal executed, card various)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'SearchesForCar|Executed':
+                            case 'WaitingCarSearch|Executed':
+                            case 'CarFound|Executed':
+                            case 'Running|Executed':
+                                $action = 'Заказ выполнен';
+                                $orderweb->closeReason = "0";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Заказ выполнен (nal various, card executed)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'Executed|CostCalculation':
+                                $action = 'Заказ выполнен';
+                                $orderweb->closeReason = "0";
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Заказ выполнен (nal executed, card cost calc)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            case 'CostCalculation|Executed':
+                                $action = 'Заказ выполнен';
+                                $orderweb->closeReason = "0";
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Заказ выполнен (nal cost calc, card executed)', ['action' => $action, 'response' => $response]);
+                                break;
+
+                            // Block 4: Состояния "Заказ снят" с проверкой close_reason
+                            case 'Canceled|CostCalculation':
+                                $closeReason = $nalOrder['close_reason'] ?? -1;
+                                $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                                $orderweb->closeReason = $closeReason;
+                                if ($closeReason == "-1") {
+                                    $orderweb->auto = null;
+                                }
+                                $response = $nalOrderInput; // НАЛ
+                                Log::info('Switch: Заказ снят/Поиск авто (nal canceled, card cost calc)', [
+                                    'action' => $action,
+                                    'closeReason' => $closeReason,
+                                    'response' => $response
+                                ]);
+                                break;
+
+                            case 'CostCalculation|Canceled':
+                                $closeReason = $cardOrder['close_reason'] ?? -1;
+                                $action = $closeReason != -1 ? 'Заказ снят' : 'Поиск авто';
+                                $orderweb->closeReason = $closeReason;
+                                if ($closeReason == "-1") {
+                                    $orderweb->auto = null;
+                                }
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Заказ снят/Поиск авто (nal cost calc, card canceled)', [
+                                    'action' => $action,
+                                    'closeReason' => $closeReason,
+                                    'response' => $response
+                                ]);
+                                break;
+
+                            case 'CostCalculation|CostCalculation':
+                                $closeReasonNal = $nalOrder['close_reason'] ?? -1;
+                                $closeReasonCard = $cardOrder['close_reason'] ?? -1;
+                                if ($closeReasonNal != -1 && $closeReasonCard != -1) {
+                                    $action = 'Заказ снят';
+                                    $orderweb->closeReason = "1";
+                                } else {
+                                    $action = 'Поиск авто';
+                                    $orderweb->auto = null;
+                                    $orderweb->closeReason = "-1";
+                                }
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Заказ снят/Поиск авто (both cost calc)', [
+                                    'action' => $action,
+                                    'closeReasonNal' => $closeReasonNal,
+                                    'closeReasonCard' => $closeReasonCard,
+                                    'response' => $response
+                                ]);
+                                break;
+
+                            case 'Canceled|Canceled':
+                                $closeReasonNal = $nalOrder['close_reason'] ?? -1;
+                                $closeReasonCard = $cardOrder['close_reason'] ?? -1;
+                                if ($closeReasonNal != -1 && $closeReasonCard != -1) {
+                                    $action = 'Заказ снят';
+                                    $orderweb->closeReason = "1";
+                                } else {
+                                    $action = 'Поиск авто';
+                                    $orderweb->auto = null;
+                                    $orderweb->closeReason = "-1";
+                                }
+                                $response = $cardOrderInput; // БЕЗНАЛ
+                                Log::info('Switch: Заказ снят/Поиск авто (both canceled)', [
+                                    'action' => $action,
+                                    'closeReasonNal' => $closeReasonNal,
+                                    'closeReasonCard' => $closeReasonCard,
+                                    'response' => $response
+                                ]);
+                                break;
+
+                            default:
+                                $action = 'Поиск авто';
+                                $orderweb->auto = null;
+                                $orderweb->closeReason = "-1";
+                                $response = $nalOrderInput;
+                                Log::info('Switch: Default - Поиск авто', ['action' => $action, 'response' => $response]);
+                                break;
+                        }
+
+                        Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
+                        $orderweb->save();
+
+                        $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+                        Log::info('Added action to response', ['response' => $response, 'action' => $action]);
+
+                        $response_arr = json_decode($response, true);
+                        Log::debug('Decoded final response', ['response_arr' => $response_arr]);
+
+                        if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
+                            $orderweb->auto = $response_arr["order_car_info"];
+                            $orderweb->closeReason = -1;
+                            Log::info('Updated orderweb auto from response', ['auto' => $orderweb->auto]);
+                        } else if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
+                            $orderweb->closeReason = 1;
+                            Log::info('Set closeReason to 1 for canceled order');
+                        } else {
+                            $orderweb->closeReason = $response_arr["close_reason"] ?? -1;
+                            Log::info('Set closeReason from response', ['closeReason' => $orderweb->closeReason]);
+                        }
+
+                        Log::debug('Saving orderweb final', ['orderweb' => $orderweb->toArray()]);
+                        $orderweb->save();
+
+                        Log::info('Exiting function', ['response' => $response]);
+                        return $response;
+                    }
+
+
                 } else {
-                    $orderweb->closeReason = $response_arr["close_reason"] ?? -1;
-                    Log::info('Set closeReason from response', ['closeReason' => $orderweb->closeReason]);
+                    Log::warning('No orderweb found for dispatching_order_uid', ['dispatching_order_uid' => $dispatching_order_uid]);
                 }
-
-                Log::debug('Saving orderweb final', ['orderweb' => $orderweb->toArray()]);
-                $orderweb->save();
-
-                Log::info('Exiting function', ['response' => $response]);
-                return $response;
             } else {
-                Log::warning('No orderweb found for dispatching_order_uid', ['dispatching_order_uid' => $dispatching_order_uid]);
+                Log::warning('No uid_history found after timeout');
             }
-        } else {
-            Log::warning('No uid_history found after timeout');
-        }
 
-        Log::info('Exiting function without response');
-        return null;
+            Log::info('Exiting function without response');
+            return null;
+
+
     }
 
 
@@ -1871,8 +2050,51 @@ class OrderStatusController extends Controller
         return json_encode($data);  // Возвращаем результат в виде JSON
     }
 
+    public function addCarInfoToResponseUid(
+        $response,
+        $order_car_info,
+        $driver_phone,
+        $time_to_start_point
+    ) {
+        if (is_object($response)) {
+            $data = $response->json();
+        } else {
+            // Если $response - это строка или массив
+            $data = json_decode($response, true); // Преобразуем в массив
+        }
+        $data['order_car_info'] = $order_car_info;
+        $data['driver_phone'] = $driver_phone;
+        $data['time_to_start_point'] = $time_to_start_point;
 
+        return json_encode($data);  // Возвращаем результат в виде JSON
+    }
 
+    public function replaceFieldValueInResponse($response, $field, $newValue)
+    {
+        // Проверяем, что $response не null и содержит данные
+        if (is_null($response)) {
+            // Если $response null, возвращаем JSON с новым полем
+            return json_encode([$field => $newValue]);
+        }
+
+        if (is_object($response)) {
+            $data = $response->json();
+        } else {
+            // Если $response - строка, пытаемся декодировать в массив
+            $data = is_string($response) ? json_decode($response, true) : $response;
+        }
+
+        // Проверяем, удалось ли получить массив
+        if (!is_array($data)) {
+            // Если $data не массив (например, некорректный JSON), возвращаем JSON с новым полем
+            return json_encode([$field => $newValue]);
+        }
+
+        // Заменяем значение указанного поля
+        $data[$field] = $newValue;
+
+        return json_encode($data); // Возвращаем результат в виде JSON
+    }
 // Пример вызова теста с реальными данными
     public function runTestWithRealData()
     {

@@ -7650,7 +7650,8 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
-        if ($params["payment_type"] != 1 && !$params["route_undefined"]) {
+//        if ($params["payment_type"] != 1 && !$params["route_undefined"]) {
+        if (!$params["route_undefined"]) {
             (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
         }
 
