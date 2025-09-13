@@ -11061,15 +11061,21 @@ class UniversalAndroidFunctionController extends Controller
                         'distance' => $distance,
                     ]);
 
-                    // Если расстояние меньше 3 км и ближе предыдущего, обновляем ближайшего водителя
-                    if ($distance !== null && $distance < 3000 && $distance < $nearestDistance) {
-                        $nearestDriver = $value;
-                        $nearestDistance = $distance;
-                        Log::info("findDriverInSector: Found closer driver.", [
-                            'driver_id' => $value['driver_uid'],
-                            'new_nearest_distance' => $nearestDistance,
-                        ]);
+                    $uidDriver = $value['driver_uid'];
+                    $driverKarmaValue = (new DriverKarmaController)->driverKarma($uidDriver);
+
+                    if($driverKarmaValue >= config("app.driver_block_50"))  {
+                        // Если расстояние меньше 3 км и ближе предыдущего, обновляем ближайшего водителя
+                        if ($distance !== null && $distance < 3000 && $distance < $nearestDistance) {
+                            $nearestDriver = $value;
+                            $nearestDistance = $distance;
+                            Log::info("findDriverInSector: Found closer driver.", [
+                                'driver_id' => $value['driver_uid'],
+                                'new_nearest_distance' => $nearestDistance,
+                            ]);
+                        }
                     }
+
                 }
             }
         }

@@ -346,4 +346,10 @@ return [
      * Время работы вилки
      */
     'exec_time' => env('EXEC_TIME', 60),
+
+    /**
+     *
+     */
+    'driver_block_25' => env('DRIVER_BLOCK_25', 0),
+    'driver_block_50' => env('DRIVER_BLOCK_50', 0),
 ];

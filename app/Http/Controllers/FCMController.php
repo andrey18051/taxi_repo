@@ -815,6 +815,40 @@ class FCMController extends Controller
         }
     }
 
+    public function writeDocumentToBlockUserFirestore($uidDriver)
+    {
+        try {
+            // Получите экземпляр клиента Firestore из сервис-провайдера
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Получите ссылку на коллекцию и документ
+            $collection = $firestore->collection('users');
+            $document = $collection->document($uidDriver);
+
+            // Получите снимок документа
+            $snapshot = $document->snapshot();
+
+            if ($snapshot->exists()) {
+                // Получите данные из документа
+                $data = $snapshot->data();
+                $data['blocked'] = true;
+                // Запишите данные в документ
+                $document->set($data);
+
+                Log::info("Document writeDocumentToBlockUserFirestore  successfully written!");
+                return "Document successfully written!";
+            } else {
+                Log::error("Error writeDocumentToBlockUserFirestore writing document to Firestore: ");
+                return "Error writeDocumentToBlockUserFirestore  document to Firestore.";
+            }
+        } catch (\Exception $e) {
+            Log::error("31 Error writing document to Firestore: " . $e->getMessage());
+            return "Error writeDocumentToBlockUserFirestore writing document to Firestore.";
+        }
+    }
+
     public function writeDocumentToVerifyCarFirestore($carId)
     {
         try {

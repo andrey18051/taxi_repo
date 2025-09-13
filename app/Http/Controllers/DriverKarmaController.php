@@ -56,6 +56,12 @@ class DriverKarmaController extends Controller
         // Создание новой записи
         $driverKarma = DriverKarma::create($data);
 
+        $driverKarmaValue = $this->driverKarma($uidDriver);
+
+        if($driverKarmaValue <= config("app.driver_block_25"))  {
+            (new FCMController)->writeDocumentToBlockUserFirestore($uidDriver);
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Driver karma created successfully',
@@ -214,5 +220,13 @@ class DriverKarmaController extends Controller
                 'counts' => $counts
             ]
         ], 200);
+    }
+
+    public function driverKarma($uidDriver)
+    {
+        $response = $this->countByAction($uidDriver);
+        $data = $response->getData(true); // Get the response as an array
+        $karma = $data['data']['karma'] ?? null;
+        return $karma; // Use the karma value
     }
 }
