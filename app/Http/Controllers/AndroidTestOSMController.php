@@ -10473,6 +10473,9 @@ class AndroidTestOSMController extends Controller
 //    }
 
 
+    /**
+     * @throws \Exception
+     */
     public function webordersCancelDouble(
         $uid,
         $uid_Double,
@@ -10502,9 +10505,13 @@ class AndroidTestOSMController extends Controller
         }
         if ($orderweb) {
             self::updateTimestamp($orderweb->id);
-//            $orderweb->auto = null;
-//            $orderweb->closeReason = "1";
-//            $orderweb->save();
+            (new FCMController)->deleteDocumentFromFirestore($uid);
+            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+            $orderweb->auto = null;
+            $orderweb->closeReason = "1";
+            $orderweb->save();
 
             $email = $orderweb->email;
             $app = $application;
@@ -10561,6 +10568,62 @@ class AndroidTestOSMController extends Controller
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function webordersCancelVod($uid) {
+        // Log the start of the function with the provided UID
+        Log::info('webordersCancelVod started', ['uid' => $uid]);
+
+        try {
+            // Fetch the order UID from MemoryOrderChangeController
+            $uid = (new MemoryOrderChangeController)->show($uid);
+            Log::debug('Fetched UID from MemoryOrderChangeController', ['uid' => $uid]);
+
+            // Query the Orderweb model for the order
+            $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+            Log::debug('Orderweb query result', ['uid' => $uid, 'order_found' => !is_null($orderweb)]);
+
+            if ($orderweb) {
+                (new FCMController)->deleteDocumentFromFirestore($uid);
+                (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+                (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+                (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+
+                // Log before updating the order
+                Log::info('Updating orderweb', ['order_id' => $orderweb->id, 'uid' => $uid]);
+                self::updateTimestamp($orderweb->id);
+                $orderweb->auto = null;
+                $orderweb->closeReason = "1";
+                $orderweb->save();
+                Log::info('Orderweb updated and saved', ['order_id' => $orderweb->id, 'uid' => $uid]);
+
+                $resp_answer = "Замовлення $uid отменено";
+                Log::info('Order cancellation successful', ['response' => $resp_answer]);
+
+                return [
+                    'response' => $resp_answer,
+                ];
+            } else {
+                $resp_answer = "Замовлення $uid не вдалося скасувати. 2";
+                Log::warning('Order cancellation failed - order not found', ['uid' => $uid, 'response' => $resp_answer]);
+                (new MessageSentController)->sentMessageAdmin($resp_answer);
+                Log::debug('Sent message to admin', ['message' => $resp_answer]);
+            }
+
+            return [
+                'response' => $resp_answer,
+            ];
+        } catch (\Exception $e) {
+            // Log any exceptions that occur
+            Log::error('Error in webordersCancelVod', [
+                'uid' => $uid,
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            throw $e; // Re-throw the exception to maintain original behavior
+        }
+    }
 
 //    public function webordersCancelAndRestorDouble(
 //        $uid,

@@ -6583,32 +6583,40 @@ class UniversalAndroidFunctionController extends Controller
                 Log::info("Fork canceled: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");
 
                 try {
+
                     $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
-                    (new AndroidTestOSMController)->updateTimestamp($orderweb->id);
-                    $orderweb->auto = null;
-                    $orderweb->closeReason = "1";
-                    $orderweb->save();
+                    if (!in_array($orderweb->closeReason,  ['101', '102', '103', '104']) ) {
+                        $uid = $uid_bonusOrderHold;
+                        (new FCMController)->deleteDocumentFromFirestore($uid);
+                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+                        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+                        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 
-                    $email = $orderweb->email;
+                        (new AndroidTestOSMController)->updateTimestamp($orderweb->id);
+                        $orderweb->auto = null;
+                        $orderweb->closeReason = "1";
+                        $orderweb->save();
 
-                    switch ($orderweb->comment) {
-                        case "taxi_easy_ua_pas1":
-                            $app = "PAS1";
-                            break;
-                        case "taxi_easy_ua_pas2":
-                            $app = "PAS2";
-                            break;
-                        default:
-                            $app = "PAS4";
+                        $email = $orderweb->email;
+
+                        switch ($orderweb->comment) {
+                            case "taxi_easy_ua_pas1":
+                                $app = "PAS1";
+                                break;
+                            case "taxi_easy_ua_pas2":
+                                $app = "PAS2";
+                                break;
+                            default:
+                                $app = "PAS4";
+                        }
+
+                        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+                        (new PusherController)->sentCanceledStatus(
+                            $app,
+                            $email,
+                            $dispatching_order_uid
+                        );
                     }
-
-                    $dispatching_order_uid = $orderweb->dispatching_order_uid;
-                    (new PusherController)->sentCanceledStatus(
-                        $app,
-                        $email,
-                        $dispatching_order_uid
-                    );
-
                     return true; // Изменено с "exit" на true для консистентности возвращаемого типа
                 } catch (\Exception  $e) {
                     Log::error("\Exception  in canceledFinish: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder, error=" . $e->getMessage());
