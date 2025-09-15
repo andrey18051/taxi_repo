@@ -1205,6 +1205,9 @@ class OrderStatusController extends Controller
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getOrderStatusMessageResultPush($dispatching_order_uid)
     {
         Log::info('Entering getOrderStatusMessageResultPush', ['dispatching_order_uid' => $dispatching_order_uid]);
@@ -1654,6 +1657,16 @@ class OrderStatusController extends Controller
                             break;
                     }
 
+                    if($action == 'Авто найдено') {
+                        $uid = $dispatching_order_uid;
+                        (new FCMController)->deleteDocumentFromFirestore($uid);
+                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+                        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+                        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+
+                    }
+
+
                     Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
                     $orderweb->save();
 
@@ -1703,33 +1716,96 @@ class OrderStatusController extends Controller
     public function getOrderStatusMessageResultPushOnPasInBackground($dispatching_order_uid)
     {
 
-        $startTime = time(); // Запоминаем начальное время
-
-        do {
             // Попробуем найти запись
             $dispatching_order_uid = (new MemoryOrderChangeController)->show($dispatching_order_uid);
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
+
+        Log::debug('Updated dispatching_order_uid from MemoryOrderChangeController', ['dispatching_order_uid' => $dispatching_order_uid]);
+
+        $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
+        Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
+
+        if ($orderweb) {
+            if (in_array($orderweb->closeReason, ['101', '102', '103', '104'])) {
+
+                $responseArr = [
+                    'close_reason' => $orderweb->closeReason
+                ];
+
+                $responseArr['uid'] = $dispatching_order_uid;
+
+
+                $storedData = $orderweb->auto ?? null;
+                Log::debug('Set orderweb auto initially', ['auto' => $storedData]);
+                if ($storedData != null) {
+                    $dataDriver = json_decode($storedData, true);
+//            $name = $dataDriver["name"];
+                    $color = $dataDriver["color"];
+                    $brand = $dataDriver["brand"];
+                    $model = $dataDriver["model"];
+                    $number = $dataDriver["number"];
+                    $phoneNumber = $dataDriver["phoneNumber"];
+
+                    $auto = "$number, цвет $color  $brand $model. ";
+
+
+                    // Обновление полей
+                    $responseArr['order_car_info'] = $auto;
+                    $responseArr['driver_phone'] = $phoneNumber;
+                    $responseArr['time_to_start_point'] = $orderweb->time_to_start_point;
+
+                }
+
+                $action = 'Поиск авто';
+                switch ($orderweb->closeReason) {
+                    // Block 2: Состояния "Авто найдено"
+                    case '101':
+                        $action = 'Авто найдено';
+                        Log::info('Switch: Авто найдено', ['action' => $action]);
+                        break;
+                    case '102':
+                        $action = 'На месте';
+                        Log::info('Switch: На месте', ['action' => $action]);
+                        break;
+
+                    case '103':
+                        $action = 'В пути';
+                        Log::info('Switch: В пути', ['action' => $action]);
+                        break;
+
+                    case '104':
+                        $action = "Заказ выполнен";
+                        Log::info('Switch: Заказ выполнен', ['action' => $action]);
+                        break;
+                }
+
+                Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
+                $responseArr['action'] = $action;
+
+                Log::info('Exiting function',  $responseArr);
+                return response()->json( $responseArr);
+            }
+        } else {
+            $action = 'Поиск авто';
+            $responseArr['action'] = $action;
+            response()->json( $responseArr);
+        }
+
+        $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
+
+        if ($uid_history) {
+            // Если запись найдена, выходим из цикла
+            $nalOrderInput = $uid_history->double_status;
+            $cardOrderInput = $uid_history->bonus_status;
+        } else {
+            $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
 
             if ($uid_history) {
                 // Если запись найдена, выходим из цикла
                 $nalOrderInput = $uid_history->double_status;
                 $cardOrderInput = $uid_history->bonus_status;
-                break;
-            } else {
-                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
-
-                if ($uid_history) {
-                    // Если запись найдена, выходим из цикла
-                    $nalOrderInput = $uid_history->double_status;
-                    $cardOrderInput = $uid_history->bonus_status;
-                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                    break;
-                }
+                $dispatching_order_uid = $uid_history->uid_bonusOrder;
             }
-
-            // Ждём одну секунду перед следующим проверочным циклом
-            sleep(1);
-        } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+        }
 
         if ($uid_history) {
             $messageAdmin = "getOrderStatusMessageResultPush: nal: $nalOrderInput, card: $cardOrderInput";
@@ -1991,18 +2067,12 @@ class OrderStatusController extends Controller
 //                (new PusherController)->sendDoubleStatus($response, $app, $email, "2222 getOrderStatusMessageResult ");
                 return $response;
             }
+        } else {
+            Log::warning('No uid_history found after timeout');
+            return response()->json([
+                'action' => "Поиск авто"
+            ]);
         }
-
-
-
-
-
-
-
-
-
-
-
     }
 
     public function addActionToResponse($response, $action)

@@ -11529,7 +11529,7 @@ class UniversalAndroidFunctionController extends Controller
                 $this->searchAutoOrderService($order->dispatching_order_uid, $mes_info);
             } else {
                 (new OrderStatusController)
-                    ->getOrderStatusMessageResultPushOnPasInBackground($order->dispatching_order_uid);
+                    ->getOrderStatusMessageResultPush($order->dispatching_order_uid);
             }
 
             $orderNumbers[] = [
