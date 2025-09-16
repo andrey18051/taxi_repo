@@ -1656,14 +1656,19 @@ class OrderStatusController extends Controller
                             Log::info('Switch: Default - Поиск авто', ['action' => $action, 'response' => $response]);
                             break;
                     }
+                    $issetOrderInFB = (new FCMController)->checkDocumentExists($orderweb->id);
 
-                    if($action == 'Авто найдено') {
+                    if($action == 'Авто найдено' && $issetOrderInFB) {
                         if($orderweb->auto != null) {
                             $uid = $dispatching_order_uid;
                             (new FCMController)->deleteDocumentFromFirestore($uid);
                             (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
                             (new FCMController)->deleteDocumentFromSectorFirestore($uid);
                             (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+                        }
+                    } else {
+                        if(!$issetOrderInFB) {
+                            (new FCMController)->writeDocumentToFirestore($dispatching_order_uid);
                         }
                     }
 

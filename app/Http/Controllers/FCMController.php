@@ -13,6 +13,7 @@ use App\Models\UserTokenFmsS;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
+use Google\Cloud\Core\Exception\GoogleException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -403,6 +404,35 @@ class FCMController extends Controller
         }
     }
 
+    function checkDocumentExists(string $documentId): bool
+    {
+        try {
+            // Получаем Firestore
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            // Берем документ по id
+            $document = $firestore->collection('orders')->document($documentId);
+
+            // Проверка
+            $snapshot = $document->snapshot();
+            if ($snapshot->exists()) {
+                Log::info("Документ {$documentId} существует.");
+                return true;
+            } else {
+                Log::info("Документ {$documentId} не найден.");
+                return false;
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка проверки документа Firestore: " . $e->getMessage());
+            return false;
+        } catch (GoogleException $e) {
+            Log::error("Firestore GoogleException: " . $e->getMessage());
+            return false;
+        }
+    }
     public function writeDocumentToOrdersPersonalDriverToFirestore($order, $driver_uid)
     {
         // Получаем все атрибуты модели в виде массива
