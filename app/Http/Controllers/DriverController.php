@@ -533,7 +533,12 @@ class DriverController extends Controller
         $status = "orderUnTaking";
         (new DriverKarmaController)->store($uidDriver, $orderweb->id, $status);
 
-        self::createNewOrder($uid);
+        if ($orderweb->pay_system == "nal_payment") {
+            $this->createNewOrder($uid);
+        } else {
+            $this->creatNewDobleOrderAfterUnttakingOrderDriver ($uid);
+        }
+
 
         // Вернуть JSON с сообщением об успехе
         return response()->json([
@@ -699,6 +704,7 @@ class DriverController extends Controller
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
 
+
         $authorization = $orderMemory->authorization;
         $identificationId= $orderMemory->identificationId;
         $apiVersion = $orderMemory->apiVersion;
@@ -749,7 +755,6 @@ class DriverController extends Controller
 
                     dispatch((new SearchAutoOrderJob($order_new_uid))->onQueue('medium'));
 
-
                     return $order;
                 } else {
                     // Логируем ошибки в случае неудачного запроса
@@ -764,6 +769,62 @@ class DriverController extends Controller
             }
             sleep(5);
         } while (!$result && time() - $startTime < $maxExecutionTime);
+    }
+
+
+    public function creatNewDobleOrderAfterUnttakingOrderDriver ($uid)
+    {
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        try {
+
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+                $pay_method = "wfp_payment";
+                $orderReference = $order->wfp_order_id;
+                $city= $order->city;
+            // Определение города
+//            switch ($order->city) {
+//                case "city_kiev": $city = "Kyiv City"; break;
+//                case "city_cherkassy": $city = "Cherkasy Oblast"; break;
+//                case "city_odessa":
+//                    $city = $order->server == "http://188.190.245.102:7303" ? "OdessaTest" : "Odessa";
+//                    break;
+//                case "city_zaporizhzhia": $city = "Zaporizhzhia"; break;
+//                case "city_dnipro": $city = "Dnipropetrovsk Oblast"; break;
+//                case "city_lviv": $city = "Lviv"; break;
+//                case "city_ivano_frankivsk": $city = "Ivano_frankivsk"; break;
+//                case "city_vinnytsia": $city = "Vinnytsia"; break;
+//                case "city_poltava": $city = "Poltava"; break;
+//                case "city_sumy": $city = "Sumy"; break;
+//                case "city_kharkiv": $city = "Kharkiv"; break;
+//                case "city_chernihiv": $city = "Chernihiv"; break;
+//                case "city_rivne": $city = "Rivne"; break;
+//                case "city_ternopil": $city = "Ternopil"; break;
+//                case "city_khmelnytskyi": $city = "Khmelnytskyi"; break;
+//                case "city_zakarpattya": $city = "Zakarpattya"; break;
+//                case "city_zhytomyr": $city = "Zhytomyr"; break;
+//                case "city_kropyvnytskyi": $city = "Kropyvnytskyi"; break;
+//                case "city_mykolaiv": $city = "Mykolaiv"; break;
+//                case "city_chernivtsi": $city = "Chernivtsi"; break;
+//                case "city_lutsk": $city = "Lutsk"; break;
+//                default: $city = "all";
+//            }
+            $amount= 0;
+                if ($uid_history) {
+                    $uid_Double = $uid_history->uid_doubleOrder;
+                    (new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
+                        $uid,
+                        $uid_Double,
+                        $pay_method,
+                        $orderReference,
+                        $city,
+                        $amount
+                    );
+                }
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка в sentStatusWfp для orderReference: $orderReference: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function uidDriver($uid)

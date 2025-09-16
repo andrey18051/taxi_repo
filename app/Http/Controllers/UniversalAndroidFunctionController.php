@@ -11019,6 +11019,9 @@ class UniversalAndroidFunctionController extends Controller
 
                     dispatch((new StartNewProcessExecution($doubleOrder->id))->onQueue('high'));
                     Log::info("Запущена задача StartNewProcessExecution с doubleOrder->id='{$doubleOrder->id}'.");
+
+                    (new FCMController)->writeDocumentToFirestore($order_new_uid);
+
                 }
 
                 return response()->json(["response" => "200"], 200);

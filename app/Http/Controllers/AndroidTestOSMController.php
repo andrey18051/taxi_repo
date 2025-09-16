@@ -10792,6 +10792,7 @@ class AndroidTestOSMController extends Controller
         $application,
         $order
     ) {
+
         $payment_type = "wfp_payment";
         $this->webordersCancelDouble(
             $uid,

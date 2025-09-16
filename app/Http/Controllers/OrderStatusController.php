@@ -1658,12 +1658,13 @@ class OrderStatusController extends Controller
                     }
 
                     if($action == 'Авто найдено') {
-                        $uid = $dispatching_order_uid;
-                        (new FCMController)->deleteDocumentFromFirestore($uid);
-                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-                        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-                        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-
+                        if($orderweb->auto != null) {
+                            $uid = $dispatching_order_uid;
+                            (new FCMController)->deleteDocumentFromFirestore($uid);
+                            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+                            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+                            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+                        }
                     }
 
 
