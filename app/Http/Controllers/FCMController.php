@@ -394,8 +394,8 @@ class FCMController extends Controller
 
                 // Запишите данные в документ
                 $document->set($data);
+                Log::info('[writeDocumentToFirestore] Документ успешно создан в Firestore', ['documentId' => $documentId]);
 
-                Log::info("Document successfully written!");
                 return "Document successfully written!";
             } catch (\Exception $e) {
                 Log::error("1 Error writing document to Firestore: " . $e->getMessage());
@@ -404,8 +404,11 @@ class FCMController extends Controller
         }
     }
 
-    function checkDocumentExists(string $documentId): bool
+    function checkOrderExists(string $documentId): bool
     {
+//        $order = Orderweb::find($documentId);
+//
+//        $uid = (new MemoryOrderChangeController)->show($uid);
         try {
             // Получаем Firestore
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
@@ -428,11 +431,155 @@ class FCMController extends Controller
         } catch (\Exception $e) {
             Log::error("Ошибка проверки документа Firestore: " . $e->getMessage());
             return false;
-        } catch (GoogleException $e) {
-            Log::error("Firestore GoogleException: " . $e->getMessage());
+        }
+    }
+
+    function checkOrdersTaking(string $documentId): bool
+    {
+        try {
+            // Получаем Firestore
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+
+            $collection = $firestore->collection('orders_taking');
+            $document   = $collection->document($documentId);
+            $snapshot   = $document->snapshot();
+
+            if (!$snapshot->exists()) {
+                Log::info("[checkOrdersTaking] Документ не найден", [
+                    'documentId' => $documentId
+                ]);
+                return false;
+            }
+
+            $data = $snapshot->data();
+            $uid  = $data['uid'] ?? null;
+
+            if ($uid === null) {
+                Log::warning("[checkOrdersTaking] Документ найден, но поле uid отсутствует", [
+                    'documentId' => $documentId
+                ]);
+                return false;
+            }
+
+            if ($uid === $documentId) {
+                Log::info("[checkOrdersTaking] Документ найден, поле uid совпадает с ID", [
+                    'documentId' => $documentId,
+                    'uid' => $uid
+                ]);
+                return true;
+            } else {
+                Log::info("[checkOrdersTaking] Документ найден, но uid НЕ совпадает с ID", [
+                    'documentId' => $documentId,
+                    'uid' => $uid
+                ]);
+                return false;
+            }
+
+        } catch (\Exception $e) {
+            Log::error("[checkOrdersTaking] Ошибка проверки документа Firestore: " . $e->getMessage(), [
+                'documentId' => $documentId
+            ]);
             return false;
         }
     }
+
+    public function checkOrdersSector($uid): bool
+    {
+        Log::info('[checkOrdersSector] start', ['dispatching_order_uid' => $uid]);
+
+        // 1) Находим локальный Orderweb по dispatching_order_uid
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        if (!$order) {
+            Log::warning('[checkOrdersSector] Orderweb не найден по dispatching_order_uid', [
+                'dispatching_order_uid' => $uid
+            ]);
+            return false;
+        }
+
+        $documentId = (string) $order->id;
+        Log::info('[checkOrdersSector] Найден Orderweb', [
+            'dispatching_order_uid' => $uid,
+            'order_id' => $documentId
+        ]);
+
+        try {
+            // 2) Проверяем наличие переменной окружения (не логируем её содержимое)
+            $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
+            if (empty($serviceAccountPath)) {
+                Log::error('[checkOrdersSector] FIREBASE_CREDENTIALS_DRIVER_TAXI не установлен', [
+                    'dispatching_order_uid' => $uid,
+                    'order_id' => $documentId
+                ]);
+                return false;
+            }
+            Log::info('[checkOrdersSector] Есть значение для service account (не раскрываем путь)', [
+                'has_service_account' => true
+            ]);
+
+            // 3) Подключаемся к Firestore и берем документ
+            $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
+            $firestore = $firebase->createFirestore()->database();
+            $collection = $firestore->collection('orders_personal');
+
+            Log::info('[checkOrdersSector] Запрос документа в Firestore', [
+                'collection' => 'orders_personal',
+                'documentId' => $documentId
+            ]);
+
+            $document = $collection->document($documentId);
+            $snapshot = $document->snapshot();
+
+            if (!$snapshot->exists()) {
+                Log::info('[checkOrdersSector] Документ в Firestore не найден', [
+                    'collection' => 'orders_personal',
+                    'documentId' => $documentId
+                ]);
+                return false;
+            }
+
+            // 4) Документ найден — логируем ключи (чтобы не сливать данные)
+            $data = $snapshot->data();
+            Log::info('[checkOrdersSector] Документ найден в Firestore', [
+                'collection' => 'orders_personal',
+                'documentId' => $documentId,
+                'data_keys' => is_array($data) ? array_keys($data) : []
+            ]);
+
+//            // 5) Доп. проверка поля uid внутри документа — логируем совпадение
+//            $docUid = $data['uid'] ?? null;
+//            if ($docUid === null) {
+//                Log::warning('[checkOrdersSector] В документе отсутствует поле uid', [
+//                    'documentId' => $documentId
+//                ]);
+//            } else {
+//                $matches = ($docUid === $uid);
+//                Log::info('[checkOrdersSector] Поле uid в документе', [
+//                    'documentId' => $documentId,
+//                    // не рекомендуется логировать полное содержимое uid в prod, но здесь для отладки оставляю:
+//                    'doc_uid' => $docUid,
+//                    'dispatching_order_uid' => $uid,
+//                    'uid_matches' => $matches
+//                ]);
+//            }
+
+            // Поведение сохраняем прежним: возвращаем true если документ существует
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('[checkOrdersSector] Ошибка при обращении к Firestore', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'documentId' => $documentId,
+                'dispatching_order_uid' => $uid
+            ]);
+            return false;
+        }
+    }
+
+
     public function writeDocumentToOrdersPersonalDriverToFirestore($order, $driver_uid)
     {
         // Получаем все атрибуты модели в виде массива
@@ -471,7 +618,7 @@ class FCMController extends Controller
             // Запишите данные в документ
             $document->set($data);
 
-            sleep(40);
+            sleep(20);
             (new FCMController)->deleteOrderPersonalDocumentFromFirestore($order->dispatching_order_uid, $driver_uid);
 
             Log::info("Document successfully written!");
@@ -615,6 +762,7 @@ class FCMController extends Controller
     public function deleteDocumentFromFirestore($uid)
     {
         // Найти запись в базе данных по $uid
+        $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("Attempting to delete order with ID {$uid}");
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
@@ -655,7 +803,7 @@ class FCMController extends Controller
     {
         // Найти запись в базе данных по $uid
         Log::info("Attempting to deleteDocumentFromSectorFirestore order with ID {$uid}");
-
+        $uid = (new MemoryOrderChangeController)->show($uid);
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
         if (!$order) {
@@ -689,6 +837,7 @@ class FCMController extends Controller
     public function deleteDocumentFromFirestoreOrdersTakingCancel($uid)
     {
         // Найти запись в базе данных по $uid
+//        $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("Attempting to delete order with ID {$uid}");
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
@@ -1142,6 +1291,7 @@ class FCMController extends Controller
     public function writeDocumentToHistoryFirestore($uid, $status)
     {
         // Найти запись в базе данных по $orderId
+//        $uid = (new MemoryOrderChangeController)->show($uid);
         Log::info("Order with ID {$uid} ");
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 

@@ -263,25 +263,6 @@ class DriverController extends Controller
 
             $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
             $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-//            $response = Http::withHeaders([
-//                "Authorization" => $authorization,
-//                "X-WO-API-APP-ID" =>(new  AndroidTestOSMController)->identificationId($application),
-//                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-//            ])->put($url);
-//
-//            $json_arrWeb = json_decode($response, true);
-//
-//            Log::debug("json_arrWeb_bonus", $json_arrWeb);
-//            if ($json_arrWeb["order_client_cancel_result"] != 1) {
-//                AndroidTestOSMController::repeatCancel(
-//                    $url,
-//                    $authorization,
-//                    $application,
-//                    $city,
-//                    $connectAPI,
-//                    $uid
-//                );
-//            }
 
             $dataDriver = (new FCMController)->readDriverInfoFromFirestore($uidDriver);
 
@@ -341,6 +322,7 @@ class DriverController extends Controller
                     // Ждём одну секунду перед следующим проверочным циклом
                     sleep(1);
                 } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+
                 $uid_history->cancel = "1";
                 $uid_history->save();
                 $resp_answer = "Замовлення $uid отправлено в вилку на отмену";

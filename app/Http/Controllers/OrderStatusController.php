@@ -1213,10 +1213,10 @@ class OrderStatusController extends Controller
         Log::info('Entering getOrderStatusMessageResultPush', ['dispatching_order_uid' => $dispatching_order_uid]);
 
         // Попробуем найти запись
-        $dispatching_order_uid = (new MemoryOrderChangeController)->show($dispatching_order_uid);
+        $uid = (new MemoryOrderChangeController)->show($dispatching_order_uid);
         Log::debug('Updated dispatching_order_uid from MemoryOrderChangeController', ['dispatching_order_uid' => $dispatching_order_uid]);
 
-        $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
         if ($orderweb) {
@@ -1226,7 +1226,8 @@ class OrderStatusController extends Controller
                     'close_reason' => $orderweb->closeReason
                 ];
 
-                $responseArr['uid'] = $dispatching_order_uid;
+                $responseArr['dispatching_order_uid'] = $uid;
+                $responseArr['uid'] = $uid;
 
 
                 $storedData = $orderweb->auto ?? null;
@@ -1284,57 +1285,112 @@ class OrderStatusController extends Controller
             $responseArr['action'] = $action;
             response()->json( $responseArr);
         }
+        $startTime = time(); // Запоминаем начальное время
 
-        $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
-        Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
-
-        if ($uid_history) {
-            // Если запись найдена, выходим из цикла
-            $nalOrderInput = $uid_history->double_status;
-            $cardOrderInput = $uid_history->bonus_status;
-            Log::info('Found uid_history by uid_bonusOrderHold', [
-                'nalOrderInput' => $nalOrderInput,
-                'cardOrderInput' => $cardOrderInput
-            ]);
-        } else {
-            $uid_history = Uid_history::where("uid_bonusOrder", $dispatching_order_uid)->first();
-            Log::debug('Searched Uid_history by uid_bonusOrder', ['found' => !is_null($uid_history)]);
+        do {
+            // Попробуем найти запись
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+            Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
 
             if ($uid_history) {
                 // Если запись найдена, выходим из цикла
                 $nalOrderInput = $uid_history->double_status;
                 $cardOrderInput = $uid_history->bonus_status;
-                $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                Log::info('Found uid_history by uid_bonusOrder', [
+                Log::info('Found uid_history by uid_bonusOrderHold', [
                     'nalOrderInput' => $nalOrderInput,
-                    'cardOrderInput' => $cardOrderInput,
-                    'updated_dispatching_order_uid' => $dispatching_order_uid
+                    'cardOrderInput' => $cardOrderInput
                 ]);
+                if($cardOrderInput != null) {
+                    break;
+                }
             } else {
-                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
-                Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
-
+                $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
 
                 if ($uid_history) {
                     // Если запись найдена, выходим из цикла
                     $nalOrderInput = $uid_history->double_status;
                     $cardOrderInput = $uid_history->bonus_status;
                     $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                    Log::info('Found uid_history by uid_doubleOrder', [
+                    Log::info('Found uid_history by uid_bonusOrder', [
                         'nalOrderInput' => $nalOrderInput,
                         'cardOrderInput' => $cardOrderInput,
                         'updated_dispatching_order_uid' => $dispatching_order_uid
                     ]);
+                    if($cardOrderInput != null) {
+                        break;
+                    }
                 }
             }
-        }
+
+            $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+            Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
+
+            if ($uid_history) {
+                // Если запись найдена, выходим из цикла
+                $nalOrderInput = $uid_history->double_status;
+                $cardOrderInput = $uid_history->bonus_status;
+                $dispatching_order_uid = $uid_history->uid_bonusOrder;
+                Log::info('Found uid_history by uid_doubleOrder', [
+                    'nalOrderInput' => $nalOrderInput,
+                    'cardOrderInput' => $cardOrderInput,
+                    'updated_dispatching_order_uid' => $dispatching_order_uid
+                ]);
+                if($cardOrderInput != null) {
+                    break;
+                }
+            }
+
+                // Ждём одну секунду перед следующим проверочным циклом
+            sleep(1);
+        } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+//        $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
+//        Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
+//
+//        if ($uid_history) {
+//            // Если запись найдена, выходим из цикла
+//            $nalOrderInput = $uid_history->double_status;
+//            $cardOrderInput = $uid_history->bonus_status;
+//            Log::info('Found uid_history by uid_bonusOrderHold', [
+//                'nalOrderInput' => $nalOrderInput,
+//                'cardOrderInput' => $cardOrderInput
+//            ]);
+//        } else {
+//            $uid_history = Uid_history::where("uid_bonusOrder", $dispatching_order_uid)->first();
+//            Log::debug('Searched Uid_history by uid_bonusOrder', ['found' => !is_null($uid_history)]);
+//
+//            if ($uid_history) {
+//                // Если запись найдена, выходим из цикла
+//                $nalOrderInput = $uid_history->double_status;
+//                $cardOrderInput = $uid_history->bonus_status;
+//                $dispatching_order_uid = $uid_history->uid_bonusOrder;
+//                Log::info('Found uid_history by uid_bonusOrder', [
+//                    'nalOrderInput' => $nalOrderInput,
+//                    'cardOrderInput' => $cardOrderInput,
+//                    'updated_dispatching_order_uid' => $dispatching_order_uid
+//                ]);
+//            } else {
+//                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
+//                Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
+//
+//
+//                if ($uid_history) {
+//                    // Если запись найдена, выходим из цикла
+//                    $nalOrderInput = $uid_history->double_status;
+//                    $cardOrderInput = $uid_history->bonus_status;
+//                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
+//                    Log::info('Found uid_history by uid_doubleOrder', [
+//                        'nalOrderInput' => $nalOrderInput,
+//                        'cardOrderInput' => $cardOrderInput,
+//                        'updated_dispatching_order_uid' => $dispatching_order_uid
+//                    ]);
+//                }
+//            }
+//        }
 
         Log::debug('Exited loop', ['found_uid_history' => !is_null($uid_history ?? null)]);
 
         if ($uid_history) {
             Log::info('Processing uid_history', ['nalOrderInput' => $nalOrderInput, 'cardOrderInput' => $cardOrderInput]);
-
-
 
             $nalOrder = json_decode($nalOrderInput, true);
             $cardOrder = json_decode($cardOrderInput, true);
@@ -1354,29 +1410,29 @@ class OrderStatusController extends Controller
             $autoInfoCard = $cardOrder['order_car_info'] ?? null;
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
-                    if ($uid_history->cancel == "1") {
-                        $response = $cardOrderInput; // БЕЗНАЛ
-                        $action = 'Заказ снят';
-                        $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
-                        Log::info('Order canceled', [
-                            'action' => $action,
-                            'response' => $response,
-                            'dispatching_order_uid' => $dispatching_order_uid
-                        ]);
-                        Log::info('Exiting function due to cancel', ['response' => $response]);
-                        return $response;
-                    }
-                    $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
-                    Log::debug('Set orderweb auto initially', ['auto' => $orderweb->auto]);
+            if ($uid_history->cancel == "1") {
+                $response = $cardOrderInput; // БЕЗНАЛ
+                $action = 'Заказ снят';
+                $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+                Log::info('Order canceled', [
+                    'action' => $action,
+                    'response' => $response,
+                    'dispatching_order_uid' => $dispatching_order_uid
+                ]);
+                Log::info('Exiting function due to cancel', ['response' => $response]);
+                return $response;
+            }
+            $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
+            Log::debug('Set orderweb auto initially', ['auto' => $orderweb->auto]);
 
-                    // Combine nalState and cardState as a key for switch
-                    $stateKey = $nalState . '|' . $cardState;
-                    Log::debug('Generated state key for switch', ['stateKey' => $stateKey]);
+            // Combine nalState and cardState as a key for switch
+            $stateKey = $nalState . '|' . $cardState;
+            Log::debug('Generated state key for switch', ['stateKey' => $stateKey]);
 
-                    $orderweb->closeReason = "-1";
-                    $orderweb->auto = null;
+            $orderweb->closeReason = "-1";
+            $orderweb->auto = null;
 
-                    switch ($stateKey) {
+            switch ($stateKey) {
                         // Block 1: Состояния "Поиск авто"
                         case 'SearchesForCar|SearchesForCar':
                         case 'SearchesForCar|WaitingCarSearch':
@@ -1656,24 +1712,71 @@ class OrderStatusController extends Controller
                             Log::info('Switch: Default - Поиск авто', ['action' => $action, 'response' => $response]);
                             break;
                     }
-                    $issetOrderInFB = (new FCMController)->checkDocumentExists($orderweb->id);
 
-                    if($action == 'Авто найдено' && $issetOrderInFB) {
-                        if($orderweb->auto != null) {
-                            $uid = $dispatching_order_uid;
-                            (new FCMController)->deleteDocumentFromFirestore($uid);
-                            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-                            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-                            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-                        }
-                    } else {
-                        if(!$issetOrderInFB) {
-                            (new FCMController)->writeDocumentToFirestore($dispatching_order_uid);
-                        }
-                    }
+            $issetCheckOrderExists = (new FCMController)->checkOrderExists($orderweb->id);
+            $issetCheckOrdersTaking = (new FCMController)->checkOrdersTaking($dispatching_order_uid);
+            $issetCheckOrdersSector = (new FCMController)->checkOrdersSector($dispatching_order_uid);
+
+            Log::info('[OrderSync] Проверка существования документа в Firestore', [
+                'order_id' => $orderweb->id,
+                'issetCheckOrderExists' => $issetCheckOrderExists,
+                'issetCheckOrdersTaking' => $issetCheckOrdersTaking,
+                'action' => $action,
+                'dispatching_order_uid' => $dispatching_order_uid ?? null,
+            ]);
+
+//            if ($action == 'Авто найдено' && ($issetCheckOrderExists || $issetCheckOrdersTaking|| $issetCheckOrdersSector)) {
+            if ($action == 'Авто найдено') {
+
+            Log::info('[OrderSync] Условие: Авто найдено и документ существует', [
+                    'order_id' => $orderweb->id,
+                    'auto' => $orderweb->auto,
+                ]);
+
+//                if ($orderweb->auto != null) {
+                    $uid = $dispatching_order_uid;
+
+                    Log::info('[OrderSync] Удаляем документ из Firestore', ['uid' => $uid]);
+                    (new FCMController)->deleteDocumentFromFirestore($uid);
 
 
-                    Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
+//                } else {
+//                    Log::warning('[OrderSync] Авто найдено, но поле auto пустое', [
+//                        'order_id' => $orderweb->id,
+//                    ]);
+//                }
+            } else {
+                Log::info('[OrderSync] Условие: Поиск авто и документа ещё нет. Создаём новый документ.', [
+                    'order_id' => $orderweb->id,
+                    'uid' => $dispatching_order_uid,
+                    'issetCheckOrderExists' => $issetCheckOrderExists,
+                    'issetCheckOrdersTaking' => $issetCheckOrdersTaking,
+                    'issetCheckOrdersSector' => $issetCheckOrdersSector,
+                ]);
+                if ($action == 'Поиск авто' && !$issetCheckOrderExists && !$issetCheckOrdersTaking&& !$issetCheckOrdersSector) {
+                    Log::info('[OrderSync] Условие: Поиск авто и документа ещё нет. Создаём новый документ.', [
+                        'order_id' => $orderweb->id,
+                        'uid' => $dispatching_order_uid
+                    ]);
+
+//                    (new FCMController)->writeDocumentToFirestore($dispatching_order_uid);
+                    dispatch(
+                        (new \App\Jobs\WriteDocumentToFirestore($dispatching_order_uid))
+                            ->onQueue('high')
+                    );
+
+                } else {
+                    Log::info('[OrderSync] Условие не выполнено', [
+                        'order_id' => $orderweb->id,
+                        'action' => $action,
+                        'issetCheckOrderExists' => $issetCheckOrderExists,
+                        'issetCheckOrdersTaking' => $issetCheckOrdersTaking
+                    ]);
+                }
+            }
+
+
+            Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
                     $orderweb->save();
 
                     $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);

@@ -10568,6 +10568,82 @@ class AndroidTestOSMController extends Controller
         ];
     }
 
+    public function webordersCancelUidHistory($uid) {
+
+        $uid = (new MemoryOrderChangeController)->show($uid);
+
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+        if (!$orderweb) {
+            $startTime = time();
+            do {
+                // Попробуем найти запись
+                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+                if ($orderweb) {
+                    // Если запись найдена, выходим из цикла
+                    break;
+                }
+
+                // Ждём одну секунду перед следующим проверочным циклом
+                sleep(1);
+            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+        }
+        if ($orderweb) {
+            self::updateTimestamp($orderweb->id);
+            (new FCMController)->deleteDocumentFromFirestore($uid);
+            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+            $orderweb->auto = null;
+            $orderweb->closeReason = "-1";
+            $orderweb->save();
+
+            $startTime = time(); // Запоминаем начальное время
+
+            do {
+                // Попробуем найти запись
+                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    break;
+                } else {
+                    $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+
+                    if ($uid_history) {
+                        // Если запись найдена, выходим из цикла
+                        break;
+                    }
+                }
+
+                $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
+
+                if ($uid_history) {
+                    // Если запись найдена, выходим из цикла
+                    break;
+                }
+
+                // Ждём одну секунду перед следующим проверочным циклом
+                sleep(1);
+            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+            $uid_history->cancel = "1";
+            $uid_history->save();
+            $resp_answer = "Замовлення $uid отправлено в влику на отмену";
+            return [
+                'response' => $resp_answer,
+            ];
+
+        } else {
+            $resp_answer = "Замовлення $uid не вдалося скасувати. 2";
+            (new MessageSentController)->sentMessageAdmin($resp_answer);
+        }
+
+
+        return [
+            'response' => $resp_answer,
+        ];
+    }
     /**
      * @throws \Exception
      */

@@ -1076,7 +1076,8 @@ class UIDController extends Controller
 
         try {
             // Получение записей для обработки
-            $orderwebs = Orderweb::whereIn('closeReason', ['-1', '101', '102'])
+//            $orderwebs = Orderweb::whereIn('closeReason', ['-1', '101', '102'])
+            $orderwebs = Orderweb::whereIn('closeReason', ['-1'])
                 ->whereNotNull('server')
                 ->whereNotNull('comment')
                 ->get();

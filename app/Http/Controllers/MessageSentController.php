@@ -567,9 +567,9 @@ class MessageSentController extends Controller
     public function sentDriverNoDelCommission($uid)
     {
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-
-        $orderweb->closeReason = "1";
-        $orderweb->save();
+//
+//        $orderweb->closeReason = "1";
+//        $orderweb->save();
 
 
         $user_full_name = $orderweb->user_full_name;

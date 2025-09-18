@@ -6582,46 +6582,47 @@ class UniversalAndroidFunctionController extends Controller
             if ($orderCanceledBonus && $orderCanceledDouble) {
                 Log::info("Fork canceled: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");
 
-                try {
-
-                    $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
-                    if (!in_array($orderweb->closeReason,  ['101', '102', '103', '104']) ) {
-                        $uid = $uid_bonusOrderHold;
-                        (new FCMController)->deleteDocumentFromFirestore($uid);
-                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-                        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-                        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-
-                        (new AndroidTestOSMController)->updateTimestamp($orderweb->id);
-                        $orderweb->auto = null;
-                        $orderweb->closeReason = "1";
-                        $orderweb->save();
-
-                        $email = $orderweb->email;
-
-                        switch ($orderweb->comment) {
-                            case "taxi_easy_ua_pas1":
-                                $app = "PAS1";
-                                break;
-                            case "taxi_easy_ua_pas2":
-                                $app = "PAS2";
-                                break;
-                            default:
-                                $app = "PAS4";
-                        }
-
-                        $dispatching_order_uid = $orderweb->dispatching_order_uid;
-                        (new PusherController)->sentCanceledStatus(
-                            $app,
-                            $email,
-                            $dispatching_order_uid
-                        );
-                    }
-                    return true; // Изменено с "exit" на true для консистентности возвращаемого типа
-                } catch (\Exception  $e) {
-                    Log::error("\Exception  in canceledFinish: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder, error=" . $e->getMessage());
-                    return false; // Возвращаем false в случае ошибки для консистентности
-                }
+//                try {
+//
+//                    $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
+//                    if (!in_array($orderweb->closeReason,  ['101', '102', '103', '104']) ) {
+//                        $uid = $uid_bonusOrderHold;
+//                        (new FCMController)->deleteDocumentFromFirestore($uid);
+//                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+//                        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+//                        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+//
+////                        (new AndroidTestOSMController)->updateTimestamp($orderweb->id);
+////                        $orderweb->auto = null;
+////                        $orderweb->closeReason = "1";
+////                        $orderweb->save();
+//
+//                        $email = $orderweb->email;
+//
+//                        switch ($orderweb->comment) {
+//                            case "taxi_easy_ua_pas1":
+//                                $app = "PAS1";
+//                                break;
+//                            case "taxi_easy_ua_pas2":
+//                                $app = "PAS2";
+//                                break;
+//                            default:
+//                                $app = "PAS4";
+//                        }
+//
+//                        $dispatching_order_uid = $orderweb->dispatching_order_uid;
+//                        (new PusherController)->sentCanceledStatus(
+//                            $app,
+//                            $email,
+//                            $dispatching_order_uid
+//                        );
+//                    }
+//                    return true; // Изменено с "exit" на true для консистентности возвращаемого типа
+//                } catch (\Exception  $e) {
+//                    Log::error("\Exception  in canceledFinish: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder, error=" . $e->getMessage());
+//                    return false; // Возвращаем false в случае ошибки для консистентности
+//                }
+                return true;
             } else {
                 Log::warning("Failed to cancel fork: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");
                 return false;
@@ -6721,6 +6722,9 @@ class UniversalAndroidFunctionController extends Controller
 //        }
 //    }
 
+    /**
+     * @throws \Exception
+     */
     private function canceledOneMinute($uid): bool
     {
         Log::debug("Entering canceledOneMinute: uid=$uid");
@@ -6732,6 +6736,8 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("Order not found with UID: $uid");
             return false;
         }
+
+
 
         $created_at = $order->created_at;
         Log::debug("canceledOneMinute: order created_at=$created_at");
@@ -6762,6 +6768,13 @@ class UniversalAndroidFunctionController extends Controller
             $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
             if ($invoice && ($invoice->transactionStatus == null || $invoice->transactionStatus != "WaitingAuthComplete")) {
                 Log::info("Order canceled due to invoice status: uid=$uid, orderReference=$orderReference, transactionStatus=" . ($invoice->transactionStatus ?? 'null'));
+                if (($current_time_timestamp - $created_at_timestamp) >= 50) {
+                    (new FCMController)->deleteDocumentFromFirestore($uid);
+                    (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+                    (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+                    (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+                }
+
                 return true;
             }
 
@@ -7660,7 +7673,12 @@ class UniversalAndroidFunctionController extends Controller
 
 //        if ($params["payment_type"] != 1 && !$params["route_undefined"]) {
         if (!$params["route_undefined"]) {
-            (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
+//            (new FCMController)->writeDocumentToFirestore($params['dispatching_order_uid']);
+            dispatch(
+                (new \App\Jobs\WriteDocumentToFirestore($params['dispatching_order_uid']))
+                    ->onQueue('high')
+            );
+
         }
 
 //        if ($params["payment_type"] == 1) {
@@ -10942,7 +10960,9 @@ class UniversalAndroidFunctionController extends Controller
                 // Запуск задачи отмены и восстановления
 //                dispatch(new WebordersCancelAndRestorDoubleJob($uid, $uid_Double, $city, $application, $order))->onQueue('high');
                 Log::info("Запущена отмена webordersCancelAndRestorDouble для uid='$uid', uid_Double='$uid_Double', city='$city', application='$application'.");
-                (new AndroidTestOSMController)->webordersCancelAndRestorDouble($uid, $uid_Double, $city, $application, $order);
+//                (new AndroidTestOSMController)->webordersCancelAndRestorDouble($uid, $uid_Double, $city, $application, $order);
+
+                (new AndroidTestOSMController)->webordersCancelUidHistory($uid);
 
 
                 // Сохранение нового заказа
