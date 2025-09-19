@@ -1746,6 +1746,10 @@ class OrderStatusController extends Controller
 //                    ]);
 //                }
             } else {
+                if ($action == 'Заказ снят') {
+                    Log::info('[OrderSync] 111 Удаляем документ из Firestore', ['uid' => $uid]);
+                    (new FCMController)->deleteDocumentFromFirestore($uid);
+                }
                 Log::info('[OrderSync] Условие: Поиск авто и документа ещё нет. Создаём новый документ.', [
                     'order_id' => $orderweb->id,
                     'uid' => $dispatching_order_uid,
