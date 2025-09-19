@@ -41,6 +41,7 @@ use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\TestKafkaController;
 use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
@@ -1570,3 +1571,9 @@ Route::get('/logs/view', [LogController::class, 'viewLog'])
     ->name('logs.view');
 
 Route::get('/logs/clear', [LogController::class, 'clearLogs'])->name('logs.clear');
+
+/*
+ * Test Kafka
+ */
+Route::get('/test-kafka/{orderId}/{status}', [TestKafkaController::class, 'sendMessage']);
+Route::get('/consume-kafka', [TestKafkaController::class, 'getMessages']);
