@@ -59,18 +59,13 @@ class UniversalAndroidFunctionController extends Controller
 
         // Создаем уникальный ключ для запроса
         $requestKey = md5($url . json_encode($parameter));
-        $retryAfter = $this->isDuplicateRequest($requestKey);
 
-        if ($retryAfter !== null) {
-            return json_encode([
-                'Message' => 'Повторный запрос',
-                'retry_after_seconds' => $retryAfter
-            ], JSON_UNESCAPED_UNICODE);
+        // Проверяем есть ли кэш
+        $cachedData = $this->getCachedRequestResult($requestKey);
+        if ($cachedData !== null) {
+            Log::debug("[postRequestHTTP] Повторный запрос — возвращаем кэшированные данные.");
+            return $cachedData; // возвращаем предыдущий результат
         }
-
-
-        // Логируем успешную запись в кэш
-        Log::debug("[postRequestHTTP] Ключ {$requestKey} успешно записан в кэш с TTL 60 сек.");
 
         try {
             $this->logRequestInput($url, $parameter, $authorization, $identificationId, $apiVersion);
@@ -79,7 +74,13 @@ class UniversalAndroidFunctionController extends Controller
 
             $response = $this->sendHttpPost($url, $parameter, $authorization, $identificationId, $apiVersion);
 
-            return $this->handleHttpResponse($response);
+            $result = $this->handleHttpResponse($response);
+
+            // Сохраняем результат запроса в кэш на 60 секунд
+            $this->cacheRequestResult($requestKey, $result, 60);
+            Log::debug("[postRequestHTTP] Ключ {$requestKey} успешно записан в кэш с результатом запроса.");
+
+            return $result;
         } catch (\Exception $e) {
             Log::critical("[postRequestHTTP] Исключение при выполнении запроса: " . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -92,6 +93,16 @@ class UniversalAndroidFunctionController extends Controller
                 '\Exception ' => true
             ], JSON_UNESCAPED_UNICODE);
         }
+    }
+
+    protected function cacheRequestResult(string $key, string $result, int $ttlSeconds)
+    {
+        Cache::put($key, $result, $ttlSeconds);
+    }
+
+    protected function getCachedRequestResult(string $key): ?string
+    {
+        return Cache::get($key);
     }
 
 

@@ -47,6 +47,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/inf.php'));
 
+            Route::prefix('kafka')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/kafka.php'));
+
             Route::prefix('android_set')
                 ->middleware('api')
                 ->namespace($this->namespace)
