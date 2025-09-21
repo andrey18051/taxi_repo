@@ -37,34 +37,36 @@ class KafkaConsumeCommand extends Command
 
                     // Тут можно вызывать бизнес-логику, например:
 
-//                    (new \App\Http\Controllers\AndroidTestOSMController)->costSearchMarkersTime(
-//                        $value['originLatitude'] ?? null,
-//                        $value['originLongitude'] ?? null,
-//                        $value['toLatitude'] ?? null,
-//                        $value['toLongitude'] ?? null,
-//                        $value['tarif'] ?? null,        // tariff
-//                        $value['phone'] ?? null,
-//                        $value['user'] ?? null,
-//                        $value['time'] ?? null,         // time
-//                        $value['date'] ?? null,         // date
-//                        $value['services'] ?? null,     // services
-//                        $value['city'] ?? null,         // city
-//                        $value['application'] ?? null   // application
-//                    );
-                    ProcessCostSearchMarkersTime::dispatch([
-                        'originLatitude' => $value['originLatitude'] ?? null,
-                        'originLongitude' => $value['originLongitude'] ?? null,
-                        'toLatitude' => $value['toLatitude'] ?? null,
-                        'toLongitude' => $value['toLongitude'] ?? null,
-                        'tarif' => $value['tarif'] ?? null,
-                        'phone' => $value['phone'] ?? null,
-                        'user' => $value['user'] ?? null,
-                        'time' => $value['time'] ?? null,
-                        'date' => $value['date'] ?? null,
-                        'services' => $value['services'] ?? null,
-                        'city' => $value['city'] ?? null,
-                        'application' => $value['application'] ?? null
-                    ])->onQueue('high'); // можно указать очередь
+                    (new \App\Http\Controllers\AndroidTestOSMController)->costSearchMarkersTime(
+                        $value['originLatitude'] ?? null,
+                        $value['originLongitude'] ?? null,
+                        $value['toLatitude'] ?? null,
+                        $value['toLongitude'] ?? null,
+                        $value['tarif'] ?? null,        // tariff
+                        $value['phone'] ?? null,
+                        $value['user'] ?? null,
+                        $value['time'] ?? null,         // time
+                        $value['date'] ?? null,         // date
+                        $value['services'] ?? null,     // services
+                        $value['city'] ?? null,         // city
+                        $value['application'] ?? null   // application
+                    );
+
+
+//                    ProcessCostSearchMarkersTime::dispatch([
+//                        'originLatitude' => $value['originLatitude'] ?? null,
+//                        'originLongitude' => $value['originLongitude'] ?? null,
+//                        'toLatitude' => $value['toLatitude'] ?? null,
+//                        'toLongitude' => $value['toLongitude'] ?? null,
+//                        'tarif' => $value['tarif'] ?? null,
+//                        'phone' => $value['phone'] ?? null,
+//                        'user' => $value['user'] ?? null,
+//                        'time' => $value['time'] ?? null,
+//                        'date' => $value['date'] ?? null,
+//                        'services' => $value['services'] ?? null,
+//                        'city' => $value['city'] ?? null,
+//                        'application' => $value['application'] ?? null
+//                    ])->onQueue('high'); // можно указать очередь
                 }
             }
 
