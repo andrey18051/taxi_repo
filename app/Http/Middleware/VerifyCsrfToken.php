@@ -19,6 +19,7 @@ class VerifyCsrfToken extends Middleware
         '/server-callback',
         '/serviceUrl',
         '/serviceUrl/verify',
+        'upload-log',
     ];
 
     protected function tokensMatch($request)

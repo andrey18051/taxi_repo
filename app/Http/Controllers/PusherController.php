@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\OrderStatusUpdated;
 use App\Models\DoubleOrder;
 use App\Models\Orderweb;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Pusher\Pusher;
@@ -548,6 +549,10 @@ class PusherController extends Controller
         $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' =>  $order_cost]);
         $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $app: " . $order_cost;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
+
+        $user = User::where("email", $email) ->first();
+
+        (new FCMController)->sendNotificationOrderCost($order_cost, $app, $user->id);
 
         return response()->json(['result' => 'ok']);
     }

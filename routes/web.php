@@ -28,6 +28,7 @@ use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\LogUploadController;
 use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
 use App\Http\Controllers\OrderStatusController;
@@ -1558,6 +1559,9 @@ Route::get('/findUser/{email}', [UserController::class, 'findUser'])->name('find
  * My tests
  */
 Route::get('/sendNotificationAuto/{body}/{app}/{user_id}/{uid}', [FCMController::class, 'sendNotificationAuto'])->name('sendNotificationAuto');
+
+Route::get('/sendNotificationOrderCost/{orderCost}/{app}/{user_id}', [FCMController::class, 'sendNotificationOrderCost'])->name('sendNotificationOrderCost');
+
 Route::get('/checkEmailInAllFirestoreBlackLists/{email}', [FCMController::class, 'checkEmailInAllFirestoreBlackLists'])->name('checkEmailInAllFirestoreBlackLists');
 Route::get('/geo/city/{lat}/{lon}', [UniversalAndroidFunctionController::class, 'detectCity']);
 
@@ -1573,3 +1577,4 @@ Route::get('/logs/view', [LogController::class, 'viewLog'])
 Route::get('/logs/clear', [LogController::class, 'clearLogs'])->name('logs.clear');
 
 
+Route::post('/upload-log', [LogUploadController::class, 'upload']);

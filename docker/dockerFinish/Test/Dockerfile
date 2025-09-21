@@ -123,6 +123,19 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
+
+# Рабочая директория
+WORKDIR /usr/share/nginx/html/taxi/
+
+# Создаём папку для хранения логов
+RUN mkdir -p storage/app/public/logs \
+    && chmod -R 775 storage/app/public/logs \
+    && chown -R root:root storage/app/public/logs
+
+
+# Создаём символическую ссылку storage → public/storage
+RUN php artisan storage:link
+
 # Миграции
 #RUN cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate
 #cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_05_27_125407_create_audits_table.php
