@@ -212,53 +212,115 @@ class CityPas2Controller extends Controller
     }
 
 
+//    /**
+//     * @throws \Exception
+//     */
+//    public function checkDomain($domain): bool
+//    {
+//
+//        $domainFull = "http://" . $domain . "/api/version";
+//        Log::debug("checkDomain: " . $domainFull);
+////        $curlInit = curl_init($domainFull);
+////        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
+////        curl_setopt($curlInit, CURLOPT_HEADER, true);
+////        curl_setopt($curlInit, CURLOPT_NOBODY, true);
+////        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
+////
+////        $response = curl_exec($curlInit);
+//
+//        $curlInit = curl_init($domainFull);
+//        curl_setopt_array($curlInit, array(
+//            CURLOPT_CONNECTTIMEOUT => 2,
+//            CURLOPT_RETURNTRANSFER => true,
+//            CURLOPT_SSL_VERIFYPEER => false,
+//            CURLOPT_SSL_VERIFYHOST => false
+//        ));
+//        $response = curl_exec($curlInit);
+////dd($domainFull);
+//        $city = City_PAS2::where('address', $domain)->first();
+//        if (curl_errno($curlInit)) {
+//
+//            return false;
+//        } else {
+//
+//            return true;
+//        }
+//
+//        curl_close($curlInit);
+////        if ($response) {
+////            $city = City_PAS2::where('address', $domain)->first();
+////            $city->online = "true";
+////            $city->save();
+////            return true;
+////        } else {
+////            $city = City_PAS2::where('address', $domain)->first();
+////            $city->online = "false";
+////            $city->save();
+////            return false;
+////        }
+//    }
+
+
     /**
      * @throws \Exception
      */
     public function checkDomain($domain): bool
     {
-
         $domainFull = "http://" . $domain . "/api/version";
-        Log::debug("checkDomain: " . $domainFull);
-//        $curlInit = curl_init($domainFull);
-//        curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 2);
-//        curl_setopt($curlInit, CURLOPT_HEADER, true);
-//        curl_setopt($curlInit, CURLOPT_NOBODY, true);
-//        curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
-//
-//        $response = curl_exec($curlInit);
+        Log::debug("checkDomain: Начинаем проверку домена - " . $domainFull);
 
-        $curlInit = curl_init($domainFull);
-        curl_setopt_array($curlInit, array(
-            CURLOPT_CONNECTTIMEOUT => 2,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false
-        ));
-        $response = curl_exec($curlInit);
-//dd($domainFull);
-        $city = City_PAS2::where('address', $domain)->first();
-        if (curl_errno($curlInit)) {
+        $maxRetries = 3; // Максимальное количество попыток
+        $retryDelay = 1; // Задержка между попытками в секундах
+        $success = false;
 
-            return false;
-        } else {
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            Log::debug("checkDomain: Попытка #$attempt из $maxRetries для " . $domainFull);
 
-            return true;
+            $curlInit = curl_init($domainFull);
+            curl_setopt_array($curlInit, array(
+                CURLOPT_CONNECTTIMEOUT => 2, // Таймаут подключения
+                CURLOPT_TIMEOUT => 5, // Общий таймаут запроса
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_FAILONERROR => true, // Считать HTTP-коды >= 400 как ошибку
+            ));
+
+            $response = curl_exec($curlInit);
+            $error = curl_error($curlInit);
+            $errno = curl_errno($curlInit);
+            $httpCode = curl_getinfo($curlInit, CURLINFO_HTTP_CODE);
+
+            if ($errno) {
+                Log::error("checkDomain: Ошибка cURL на попытке #$attempt: " . $error . " (код ошибки: $errno)");
+            } else {
+                Log::debug("checkDomain: Успешное подключение на попытке #$attempt. HTTP-код: $httpCode");
+                if ($httpCode >= 200 && $httpCode < 300) {
+                    Log::debug("checkDomain: Сервер ответил успешно (HTTP $httpCode). Ответ: " . substr($response, 0, 200) . "...");
+                    $success = true;
+                    break; // Успех - выходим из цикла
+                } else {
+                    Log::warning("checkDomain: Сервер ответил с ошибочным HTTP-кодом $httpCode на попытке #$attempt. Ответ: " . substr($response, 0, 200) . "...");
+                }
+            }
+
+            curl_close($curlInit);
+
+            if ($attempt < $maxRetries) {
+                Log::debug("checkDomain: Задержка $retryDelay сек перед следующей попыткой");
+                sleep($retryDelay);
+            }
         }
 
-        curl_close($curlInit);
-//        if ($response) {
-//            $city = City_PAS2::where('address', $domain)->first();
-//            $city->online = "true";
-//            $city->save();
-//            return true;
-//        } else {
-//            $city = City_PAS2::where('address', $domain)->first();
-//            $city->online = "false";
-//            $city->save();
-//            return false;
-//        }
+        if (!$success) {
+            Log::error("checkDomain: Проверка домена $domainFull завершилась неудачей после $maxRetries попыток");
+        } else {
+            Log::info("checkDomain: Проверка домена $domainFull успешна");
+        }
+
+        return $success;
     }
+
 
     public function checkDomains()
     {

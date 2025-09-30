@@ -147,38 +147,106 @@ class CityAppOrderService
      * @param string $domain Доменное имя для проверки
      * @return bool true, если домен доступен (HTTP 200-399 и нет ошибок cURL)
      */
+//    protected function checkDomain(string $domain): bool
+//    {
+//        $startTime = microtime(true);
+//        $cacheKey = "domain_check_{$domain}";
+//        $cacheTTL = config('services.city_app_order.cache_ttl', 300);
+//
+//        $result = Cache::remember($cacheKey, $cacheTTL, function () use ($domain) {
+//            $url = "http://{$domain}/api/version";
+//            Log::debug("🔍 Проверка домена: {$url}");
+//
+//            $curl = curl_init($url);
+//            curl_setopt_array($curl, [
+//                CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 6),
+//                CURLOPT_RETURNTRANSFER => true,
+//                CURLOPT_SSL_VERIFYPEER => false,
+//                CURLOPT_SSL_VERIFYHOST => false,
+//                CURLOPT_HEADER => true,
+//                CURLOPT_NOBODY => false,
+//            ]);
+//
+//            curl_exec($curl);
+//            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+//            $error = curl_errno($curl);
+//            $errorMessage = curl_error($curl);
+//            curl_close($curl);
+//
+//            Log::debug("📶 HTTP код: {$httpCode}, ошибка: {$error}, сообщение: {$errorMessage}");
+//            return $error === 0 && $httpCode >= 200 && $httpCode < 400;
+//        });
+//
+//        $elapsedTime = (microtime(true) - $startTime) * 1000;
+//        Log::info("⏱ Проверка домена {$domain} выполнена за {$elapsedTime} мс");
+//        return $result;
+//    }
+
+
+    /**
+     * Проверяет доступность домена по HTTP.
+     *
+     * @param string $domain Домен для проверки
+     * @return bool Результат проверки (true - доступен, false - недоступен)
+     * @throws \Exception
+     */
     protected function checkDomain(string $domain): bool
     {
         $startTime = microtime(true);
         $cacheKey = "domain_check_{$domain}";
         $cacheTTL = config('services.city_app_order.cache_ttl', 300);
+        $maxRetries = 3;
+        $retryDelay = 1;
 
-        $result = Cache::remember($cacheKey, $cacheTTL, function () use ($domain) {
+        Log::info("🚀 Начало проверки домена: {$domain}, ключ кэша: {$cacheKey}, TTL: {$cacheTTL} сек");
+        $result = Cache::remember($cacheKey, $cacheTTL, function () use ($domain, $maxRetries, $retryDelay) {
             $url = "http://{$domain}/api/version";
             Log::debug("🔍 Проверка домена: {$url}");
 
-            $curl = curl_init($url);
-            curl_setopt_array($curl, [
-                CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 6),
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => false,
-                CURLOPT_HEADER => true,
-                CURLOPT_NOBODY => false,
-            ]);
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                Log::debug("🔄 Попытка #$attempt из $maxRetries для {$url}");
 
-            curl_exec($curl);
-            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $error = curl_errno($curl);
-            $errorMessage = curl_error($curl);
-            curl_close($curl);
+                $curl = curl_init($url);
+                curl_setopt_array($curl, [
+                    CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 6),
+                    CURLOPT_TIMEOUT => 10,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FAILONERROR => true,
+                ]);
 
-            Log::debug("📶 HTTP код: {$httpCode}, ошибка: {$error}, сообщение: {$errorMessage}");
-            return $error === 0 && $httpCode >= 200 && $httpCode < 400;
+                $attemptStartTime = microtime(true);
+                $response = curl_exec($curl);
+                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $error = curl_errno($curl);
+                $errorMessage = curl_error($curl);
+                $attemptElapsedTime = (microtime(true) - $attemptStartTime) * 1000;
+                curl_close($curl);
+
+                Log::debug("📶 Результат попытки #$attempt: HTTP код: {$httpCode}, ошибка: {$error}, сообщение: {$errorMessage}, время: {$attemptElapsedTime} мс");
+                if ($error === 0 && $httpCode >= 200 && $httpCode < 300) {
+                    Log::debug("✅ Сервер ответил успешно (HTTP $httpCode). Ответ: " . substr($response, 0, 200) . "...");
+                    Log::info("🎉 Успешная проверка домена {$url} на попытке #$attempt");
+                    return true;
+                }
+
+                Log::warning("⚠️ Неуспешная попытка #$attempt: HTTP код {$httpCode}, ответ: " . substr($response, 0, 200) . "...");
+                if ($attempt < $maxRetries) {
+                    Log::debug("⏳ Задержка {$retryDelay} сек перед следующей попыткой");
+                    sleep($retryDelay);
+                }
+            }
+
+            Log::error("❌ Проверка домена {$url} завершилась неудачей после {$maxRetries} попыток");
+            return false;
         });
 
         $elapsedTime = (microtime(true) - $startTime) * 1000;
-        Log::info("⏱ Проверка домена {$domain} выполнена за {$elapsedTime} мс");
+        Log::info("⏱ Проверка домена {$domain} завершена за {$elapsedTime} мс, результат: " . ($result ? 'успех' : 'неудача'));
+        if (!$result) {
+            Log::warning("🗑 Очистка кэша для {$cacheKey} из-за неудачной проверки");
+            Cache::forget($cacheKey);
+        }
+
         return $result;
     }
 
