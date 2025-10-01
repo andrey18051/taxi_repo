@@ -20,6 +20,7 @@ class VerifyCsrfToken extends Middleware
         '/serviceUrl',
         '/serviceUrl/verify',
         'upload-log',
+        '/taxi-ai/parse',
     ];
 
     protected function tokensMatch($request)

@@ -38,6 +38,11 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
+            Route::prefix('api_ai')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/api_ai.php'));
+
             Route::prefix('driver')
                 ->middleware('api')
                 ->namespace($this->namespace)
