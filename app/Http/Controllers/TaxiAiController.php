@@ -16,14 +16,10 @@ class TaxiAiController extends Controller
         $this->baseUrl = "http://172.17.0.1:8001";
     }
 
-    /**
-     * Отправка текста на распознавание сущностей с логированием
-     */
     public function parseRequest(Request $request)
     {
         $text = $request->input('text');
 
-        // Логируем входящий запрос
         Log::info('[TaxiAi] Incoming text request', [
             'text' => $text,
             'ip' => $request->ip(),
@@ -42,13 +38,22 @@ class TaxiAiController extends Controller
 
             $responseData = $response->json();
 
-            // Логируем ответ FastAPI
             Log::info('[TaxiAi] FastAPI response', [
                 'text' => $text,
                 'response' => $responseData,
             ]);
 
-            return response()->json($responseData);
+            // Преобразуем ответ под модель Kotlin
+            $aiResponse = [
+                'text' => $responseData['text'] ?? $text,
+                'response' => [
+                    'text' => $responseData['text'] ?? $text,
+                    'entities_spacy' => $responseData['response']['entities_spacy'] ?? [],
+                    'entities_hf' => $responseData['response']['entities_hf'] ?? [],
+                ],
+            ];
+
+            return response()->json($aiResponse);
         } catch (\Exception $e) {
             Log::error('[TaxiAi] Cannot connect to Taxi AI service', [
                 'text' => $text,
@@ -61,4 +66,5 @@ class TaxiAiController extends Controller
             ], 500);
         }
     }
+
 }
