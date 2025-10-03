@@ -1,6 +1,7 @@
-fastapi==0.105.0
-uvicorn==0.23.2
-transformers==4.36.2
-torch==2.2.0
-pydantic==2.5.3
-numpy<2
+fastapi==0.115.2
+uvicorn==0.32.0
+natasha==1.6.0
+regex==2024.9.11
+pymorphy3==2.0.2
+pymorphy3-dicts-uk==2.4.1.1.1663094765
+langdetect==1.0.9
