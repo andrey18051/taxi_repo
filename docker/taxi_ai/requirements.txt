@@ -1,7 +1,6 @@
 fastapi==0.105.0
-uvicorn[standard]==0.23.2
-transformers==4.56.2
+uvicorn==0.23.2
+transformers==4.36.2
 torch==2.2.0
-sentencepiece==0.1.99
-numpy==1.26.4
-spacy==3.7.6
+pydantic==2.5.3
+numpy<2

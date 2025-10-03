@@ -1,8 +1,7 @@
 import logging
 from fastapi import FastAPI
 from pydantic import BaseModel
-import spacy
-from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -10,56 +9,90 @@ logger = logging.getLogger("TaxiAi")
 
 app = FastAPI()
 
-# ====== Загрузка spaCy ======
+# Загрузка модели NER
+MODEL_PATH = "/app/model/bert-base-multilingual-cased-ner-hrl"
 try:
-    nlp = spacy.load("ru_core_news_sm")
-    logger.info("✅ spaCy model loaded successfully")
+    logger.info("Loading tokenizer from %s", MODEL_PATH)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+    logger.info("Loading model from %s", MODEL_PATH)
+    model = AutoModelForTokenClassification.from_pretrained(MODEL_PATH)
+    logger.info("Creating NER pipeline")
+    ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+    logger.info("✅ Multilingual NER model loaded successfully from %s", MODEL_PATH)
 except Exception as e:
-    logger.error("❌ Failed to load spaCy model: %s", str(e))
-    nlp = None  # чтобы сервер всё равно поднялся
-
-
-# ====== Загрузка HuggingFace модели ======
-HF_MODEL_PATH = "/app/model/distilbert-base-multilingual-cased"
-
-try:
-    tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_PATH)
-    model = AutoModelForTokenClassification.from_pretrained(HF_MODEL_PATH)
-    logger.info("✅ HuggingFace model loaded successfully from %s", HF_MODEL_PATH)
-except Exception as e:
-    logger.error("❌ Failed to load HuggingFace model: %s", str(e))
-    tokenizer = None
-    model = None
-
+    logger.error("❌ Failed to load NER model: %s", str(e))
+    ner_pipeline = None
 
 class TextRequest(BaseModel):
     text: str
 
+class SpacyEntity(BaseModel):
+    text: str
+    label: str
 
-@app.post("/parse")
+class AiInnerResponse(BaseModel):
+    entities_hf: list[dict[str, str]] = []
+    entities_spacy: list[SpacyEntity] = []
+    origin: str | None = None
+    destination: str | None = None
+    details: list[str] = []
+
+class AiResponse(BaseModel):
+    text: str
+    response: AiInnerResponse
+
+@app.post("/parse", response_model=AiResponse)
 async def process_text(request: TextRequest):
     logger.info("📩 Received request with text: %s", request.text)
+    response = AiResponse(
+        text=request.text,
+        response=AiInnerResponse(entities_hf=[], entities_spacy=[], origin=None, destination=None, details=[])
+    )
 
-    response = {"text": request.text, "entities_spacy": [], "entities_hf": []}
+    if ner_pipeline is None:
+        logger.error("NER pipeline is not initialized")
+        return response
 
-    # spaCy обработка
-    if nlp:
-        try:
-            doc = nlp(request.text)
-            response["entities_spacy"] = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
-            logger.info("spaCy entities: %s", response["entities_spacy"])
-        except Exception as e:
-            logger.error("Error in spaCy processing: %s", str(e))
+    try:
+        logger.info("Running NER pipeline on text: %s", request.text)
+        entities = ner_pipeline(request.text)
+        logger.info("NER pipeline returned: %s", entities)
+        response.response.entities_hf = [
+            {"text": ent["word"], "label": ent["entity_group"]} for ent in entities
+        ]
 
-    # Hugging Face обработка (пока только токенизация для теста)
-    if tokenizer and model:
-        try:
-            inputs = tokenizer(request.text, return_tensors="pt")
-            outputs = model(**inputs)
-            logger.info("HF model inference successful")
-            # Для упрощения пока не декодируем метки
-            response["entities_hf"] = outputs.logits.shape  # debug info
-        except Exception as e:
-            logger.error("Error in HuggingFace processing: %s", str(e))
+        # Извлечение ORIGIN и DESTINATION на основе контекста
+        origins = []
+        destinations = []
+        for i, ent in enumerate(entities):
+            if ent["entity_group"] == "LOC":
+                # Расширяем окно анализа до 5 слов
+                preceding_text = request.text[:ent["start"]].lower().split()[-5:]
+                logger.info("Processing entity: %s, preceding text: %s", ent["word"], preceding_text)
+                if any(prep in preceding_text for prep in ["с", "из", "from", "з", "від", "зі", "with"]):
+                    origins.append(ent["word"])
+                elif any(prep in preceding_text for prep in ["в", "до", "to", "на", "у", "into", "towards"]):
+                    destinations.append(ent["word"])
+                else:
+                    # Если предлог не найден, считаем вторую локацию destination
+                    if len(origins) > 0 and not destinations:
+                        destinations.append(ent["word"])
+
+        response.response.origin = origins[0] if origins else None
+        response.response.destination = destinations[0] if destinations else None
+
+        # Извлечение дополнительных опций
+        details = []
+        text_lower = request.text.lower()
+        if any(word in text_lower for word in ["завтра", "tomorrow"]):
+            details.append("tomorrow")
+        if any(word in text_lower for word in ["большой чемодан", "large luggage", "велика валіза"]):
+            details.append("large luggage")
+        response.response.details = details
+
+        logger.info("Extracted: origin=%s, destination=%s, details=%s",
+                   response.response.origin, response.response.destination, details)
+    except Exception as e:
+        logger.error("Error in NER processing: %s", str(e))
 
     return response

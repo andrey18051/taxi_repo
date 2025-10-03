@@ -36,6 +36,18 @@ class TaxiAiController extends Controller
                 'text' => $text,
             ]);
 
+            if (!$response->successful()) {
+                Log::error('[TaxiAi] FastAPI request failed', [
+                    'text' => $text,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return response()->json([
+                    'error' => 'Failed to connect to Taxi AI service',
+                    'details' => 'HTTP ' . $response->status(),
+                ], $response->status());
+            }
+
             $responseData = $response->json();
 
             Log::info('[TaxiAi] FastAPI response', [
@@ -50,6 +62,9 @@ class TaxiAiController extends Controller
                     'text' => $responseData['text'] ?? $text,
                     'entities_spacy' => $responseData['response']['entities_spacy'] ?? [],
                     'entities_hf' => $responseData['response']['entities_hf'] ?? [],
+                    'origin' => $responseData['response']['origin'] ?? null,
+                    'destination' => $responseData['response']['destination'] ?? null,
+                    'details' => $responseData['response']['details'] ?? [],
                 ],
             ];
 
@@ -66,5 +81,4 @@ class TaxiAiController extends Controller
             ], 500);
         }
     }
-
 }
