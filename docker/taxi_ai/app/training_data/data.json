@@ -1,0 +1,50 @@
+[
+    {
+        "text": "Потрібно їхати з вул. Сумська, 12, Харків до просп. Науки, 45, Київ завтра з великою валізою і кондиціонером",
+        "expected": {
+            "origin": "вул. Сумська, 12, Харків",
+            "destination": "просп. Науки, 45, Київ",
+            "details": ["завтра", "велика валіза", "кондиціонер"]
+        }
+    },
+    {
+        "text": "Заказати таксі з Києва, вул. Хрещатик, 10 до Львова, просп. Свободи, 15 з кондиціонером",
+        "expected": {
+            "origin": "Києва, вул. Хрещатик, 10",
+            "destination": "Львова, просп. Свободи, 15",
+            "details": ["кондиціонер"]
+        }
+    },
+    {
+        "text": "Нужно поехать из Подола, ул. Владимирская, 5 в аэропорт, ул. Жулянская, 3 сегодня с багажом",
+        "expected": {
+            "origin": "Подола, ул. Владимирская, 5",
+            "destination": "аэропорт, ул. Жулянская, 3",
+            "details": ["сегодня", "с багажом"]
+        }
+    },
+    {
+        "text": "Закажи такси из Киева, ул. Леси Украинки, 20 до Одессы, ул. Дерибасовская, 10 с кондиционером",
+        "expected": {
+            "origin": "Киева, ул. Леси Украинки, 20",
+            "destination": "Одессы, ул. Дерибасовская, 10",
+            "details": ["кондиционер"]
+        }
+    },
+    {
+        "text": "I need to go from Podil, 12 Shevchenko St. to the airport, 45 Kyiv Ave tomorrow with luggage and a baby seat",
+        "expected": {
+            "origin": "Podil, 12 Shevchenko St.",
+            "destination": "the airport, 45 Kyiv Ave",
+            "details": ["tomorrow", "with luggage", "Baby seat"]
+        }
+    },
+    {
+        "text": "Order a taxi from Kyiv, 10 Khreshchatyk St. to Lviv, 15 Svobody Ave with conditioner and Carbon loading",
+        "expected": {
+            "origin": "Kyiv, 10 Khreshchatyk St.",
+            "destination": "Lviv, 15 Svobody Ave",
+            "details": ["conditioner", "Carbon loading"]
+        }
+    }
+]

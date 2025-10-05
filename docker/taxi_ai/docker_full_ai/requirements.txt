@@ -1,0 +1,14 @@
+fastapi==0.115.2
+uvicorn==0.32.0
+spacy==3.7.6
+pymorphy3==2.0.2
+pymorphy3-dicts-uk==2.4.1.1.1663094765
+langdetect==1.0.9
+regex==2024.9.11
+
+# Модели spaCy (ставятся как wheel-пакеты)
+https://github.com/explosion/spacy-models/releases/download/uk_core_news_lg-3.7.0/uk_core_news_lg-3.7.0-py3-none-any.whl
+https://github.com/explosion/spacy-models/releases/download/ru_core_news_lg-3.7.0/ru_core_news_lg-3.7.0-py3-none-any.whl
+https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.0/en_core_web_lg-3.7.0-py3-none-any.whl
+
+

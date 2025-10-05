@@ -1,0 +1,28 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Устанавливаем системные зависимости
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libstdc++6 libgomp1 curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Обновляем pip
+RUN pip install --no-cache-dir --upgrade pip
+
+# Копируем и устанавливаем Python зависимости
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Устанавливаем spaCy модели и lookup таблицы
+RUN pip install --no-cache-dir \
+    spacy-lookups-data \
+    https://github.com/explosion/spacy-models/releases/download/uk_core_news_lg-3.7.0/uk_core_news_lg-3.7.0-py3-none-any.whl \
+    https://github.com/explosion/spacy-models/releases/download/ru_core_news_lg-3.7.0/ru_core_news_lg-3.7.0-py3-none-any.whl \
+    https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.0/en_core_web_lg-3.7.0-py3-none-any.whl
+
+# Создаём лог-файл
+RUN touch /app/app.log && chmod 666 /app/app.log
+
+# Этот образ — только база, он ничего не запускает
+# docker build -f Dockerfile.base -t taxi_ai_base:latest .
