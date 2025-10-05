@@ -552,7 +552,7 @@ class PusherController extends Controller
 
         $user = User::where("email", $email) ->first();
 
-        (new FCMController)->sendNotificationOrderCost($order_cost, $app, $user->id);
+//        (new FCMController)->sendNotificationOrderCost($order_cost, $app, $user->id);
 
         return response()->json(['result' => 'ok']);
     }

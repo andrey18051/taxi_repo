@@ -269,7 +269,7 @@ class FCMController extends Controller
             'user_id'    => $user_id
         ]);
 
-        // Получаем токен пользователя
+        // 🔹 Получаем токен пользователя
         $userToken = UserTokenFmsS::where("user_id", $user_id)->first();
 
         if ($userToken === null) {
@@ -279,44 +279,50 @@ class FCMController extends Controller
 
         Log::info("Найден UserTokenFmsS", ['user_id' => $user_id]);
 
-        // Определяем токен и firebaseMessaging
+        // 🔹 Определяем токен и FirebaseMessaging
         $to = null;
         $firebaseMessaging = null;
+        $tokenField = null;
 
         switch ($app) {
             case "PAS1":
                 $to = $userToken->token_app_pas_1;
                 $firebaseMessaging = app('firebase.messaging')['app1'] ?? null;
+                $tokenField = 'token_app_pas_1';
                 Log::info("Выбран PAS1", ['token' => $to]);
                 break;
+
             case "PAS2":
                 $to = $userToken->token_app_pas_2;
                 $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
+                $tokenField = 'token_app_pas_2';
                 Log::info("Выбран PAS2", ['token' => $to]);
                 break;
+
             default:
                 $to = $userToken->token_app_pas_4;
                 $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
+                $tokenField = 'token_app_pas_4';
                 Log::info("Выбран PAS4 (default)", ['token' => $to]);
                 break;
         }
 
-        // Проверяем токен
+        // 🔹 Проверяем наличие токена
         if (empty($to)) {
-            Log::error("Токен пустой для пользователя", [
+            Log::warning("Пустой токен для пользователя", [
                 'user_id' => $user_id,
                 'app'     => $app
             ]);
             return response()->json(['message' => 'Empty token for user'], 400);
         }
 
-        // Проверяем конфигурацию firebase.messaging
+        // 🔹 Проверяем конфигурацию FirebaseMessaging
         if ($firebaseMessaging === null) {
             Log::error("FirebaseMessaging не настроен для приложения", ['app' => $app]);
             return response()->json(['message' => 'Firebase messaging config not found'], 500);
         }
 
-        // Формируем сообщение
+        // 🔹 Формируем сообщение
         $dataPayload = [
             'order_cost' => (string)$orderCost,
         ];
@@ -327,25 +333,47 @@ class FCMController extends Controller
             $message = CloudMessage::withTarget('token', $to)
                 ->withData($dataPayload);
 
-            // Отправляем уведомление
+            // 🔹 Отправляем уведомление
             $firebaseMessaging->send($message);
+
             Log::info("Уведомление успешно отправлено", [
-                'token' => $to,
+                'user_id' => $user_id,
+                'token'   => $to,
             ]);
 
             return response()->json(['message' => 'Notification sent']);
+
+        } catch (\Kreait\Firebase\Exception\Messaging\NotFound $e) {
+            // 🔸 Невалидный токен (удален, устарел, другой проект)
+            Log::warning("Невалидный Firebase токен", [
+                'user_id' => $user_id,
+                'app'     => $app,
+                'token'   => $to,
+                'reason'  => $e->getMessage(),
+            ]);
+
+            // 🔹 Очищаем токен в базе, чтобы не использовать его повторно
+            $userToken->update([$tokenField => null]);
+
+            return response()->json([
+                'message' => 'Invalid or expired Firebase token cleared',
+            ], 410);
+
         } catch (\Exception $e) {
             Log::error("Ошибка при отправке уведомления", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'token' => $to
             ]);
+
             return response()->json([
                 'message' => 'Failed to send notification',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
+
+
 
     public function readDocumentFromUsersFirestore($uidDriver)
     {
