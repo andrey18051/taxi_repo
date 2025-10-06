@@ -49,6 +49,79 @@ class CityAppOrderService
      * @param string $modelClass Класс модели
      * @return object|null Найденный сервер или null
      */
+//    protected function findOrUnlockServer(string $city, string $modelClass): ?object
+//    {
+//        Log::info("🔓 findOrUnlockServer: {$city}");
+//        Log::info("🔓 findOrUnlockServer: {$modelClass}");
+//
+//        $lock = Cache::lock("server_check_{$city}", 10);
+//        if ($lock->get()) {
+//            try {
+//                Log::info("🔓 Блокировка получена для города: {$city}");
+//                // Поиск offline-серверов
+//                $servers = $modelClass::where('name', $city)
+//                    ->where('online', 'false')
+//                    ->get();
+//                if ($servers) {
+//                    Log::info("📃 Найдено offline-серверов: " . $servers->count());
+//
+//                    foreach ($servers as $server) {
+//                        Log::debug("🕓 Проверка времени обновления сервера: {$server->address}
+//                         (updated_at: {$server->updated_at})");
+//
+//                        if ($this->hasPassedFiveMinutes($server->updated_at)) {
+//                            Log::info("⏱ Прошло 5+ минут с обновления сервера: {$server->address},
+//                             проверка доступности...");
+//
+//                            if ($this->checkDomain($server->address)) {
+//                                $server->online = 'true';
+//                                $server->save();
+//                                Log::info("🔓 Сервер разблокирован и установлен в online=true: {$server->address}");
+//                                return $server;
+//                            } else {
+//                                Log::warning("❌ Сервер недоступен (не разблокирован): {$server->address}");
+//                            }
+//                        } else {
+//                            Log::info("⏳ Менее 5 минут с обновления сервера: {$server->address}");
+//                        }
+//                    }
+//                }
+//                // Пытаемся найти активный сервер
+//
+//                $servers = $modelClass::where('name', $city)
+//                    ->where('online', 'true')
+//                    ->get();
+//                if ($servers) {
+//                    foreach ($servers as $server) {
+//                        if ($this->checkDomain($server->address)) {
+//                            $server->online = 'true';
+//                            $server->save();
+//                            Log::info("🔓 Сервер разблокирован и установлен в online=true: {$server->address}");
+//                            return $server;
+//                        } else {
+//                            $server->online = 'false';
+//                            $server->save();
+//                            Log::warning("❌ Сервер недоступен (заблокирован): {$server->address}");
+//                        }
+//                    }
+//                } else {
+//                    Log::info("ℹ️ Нет активных серверов с online=true");
+//                }
+//                Log::info("🚫 Не найден доступный сервер ни в online, ни в offline списках.");
+//                return null;
+//            } catch (\Throwable $e) {
+//                Log::error("🔥 Исключение при поиске сервера: {$e->getMessage()}");
+//                return null;
+//            } finally {
+//                $lock->release();
+//                Log::info("🔒 Блокировка снята для города: {$city}");
+//            }
+//        }
+//
+//        Log::warning("🔐 Не удалось получить блокировку для города: {$city} (уже используется)");
+//        return null;
+//    }
+
     protected function findOrUnlockServer(string $city, string $modelClass): ?object
     {
         Log::info("🔓 findOrUnlockServer: {$city}");
@@ -58,57 +131,59 @@ class CityAppOrderService
         if ($lock->get()) {
             try {
                 Log::info("🔓 Блокировка получена для города: {$city}");
-                // Поиск offline-серверов
-                $servers = $modelClass::where('name', $city)
+
+                // 1. Сначала проверяем уже онлайн серверы (самый быстрый путь)
+                $onlineServers = $modelClass::where('name', $city)
+                    ->where('online', 'true')
+                    ->get();
+
+                if ($onlineServers->isNotEmpty()) {
+                    Log::info("📃 Проверка онлайн-серверов: " . $onlineServers->count());
+
+                    foreach ($onlineServers as $server) {
+                        if ($this->checkDomain($server->address)) {
+                            Log::info("✅ Найден доступный онлайн-сервер: {$server->address}");
+                            return $server; // Возвращаем первый доступный
+                        } else {
+                            $server->online = 'false';
+                            $server->save();
+                            Log::warning("❌ Онлайн-сервер недоступен (заблокирован): {$server->address}");
+                        }
+                    }
+                }
+
+                // 2. Если онлайн серверов нет, проверяем оффлайн серверы
+                $offlineServers = $modelClass::where('name', $city)
                     ->where('online', 'false')
                     ->get();
-                if ($servers) {
-                    Log::info("📃 Найдено offline-серверов: " . $servers->count());
 
-                    foreach ($servers as $server) {
-                        Log::debug("🕓 Проверка времени обновления сервера: {$server->address}
-                         (updated_at: {$server->updated_at})");
+                if ($offlineServers->isNotEmpty()) {
+                    Log::info("📃 Проверка оффлайн-серверов: " . $offlineServers->count());
+
+                    foreach ($offlineServers as $server) {
+                        Log::debug("🕓 Проверка времени обновления сервера: {$server->address} (updated_at: {$server->updated_at})");
 
                         if ($this->hasPassedFiveMinutes($server->updated_at)) {
-                            Log::info("⏱ Прошло 5+ минут с обновления сервера: {$server->address},
-                             проверка доступности...");
+                            Log::info("⏱ Прошло 5+ минут с обновления сервера: {$server->address}, проверка доступности...");
 
                             if ($this->checkDomain($server->address)) {
                                 $server->online = 'true';
                                 $server->save();
                                 Log::info("🔓 Сервер разблокирован и установлен в online=true: {$server->address}");
-                                return $server;
+                                return $server; // Возвращаем первый разблокированный
                             } else {
-                                Log::warning("❌ Сервер недоступен (не разблокирован): {$server->address}");
+                                Log::warning("❌ Оффлайн-сервер недоступен: {$server->address}");
                             }
                         } else {
-                            Log::info("⏳ Менее 5 минут с обновления сервера: {$server->address}");
+                            Log::info("⏳ Менее 5 минут с обновления сервера: {$server->address} - пропускаем");
                         }
                     }
                 }
-                // Пытаемся найти активный сервер
 
-                $servers = $modelClass::where('name', $city)
-                    ->where('online', 'true')
-                    ->get();
-                if ($servers) {
-                    foreach ($servers as $server) {
-                        if ($this->checkDomain($server->address)) {
-                            $server->online = 'true';
-                            $server->save();
-                            Log::info("🔓 Сервер разблокирован и установлен в online=true: {$server->address}");
-                            return $server;
-                        } else {
-                            $server->online = 'false';
-                            $server->save();
-                            Log::warning("❌ Сервер недоступен (заблокирован): {$server->address}");
-                        }
-                    }
-                } else {
-                    Log::info("ℹ️ Нет активных серверов с online=true");
-                }
-                Log::info("🚫 Не найден доступный сервер ни в online, ни в offline списках.");
+                // 3. Если ничего не найдено
+                Log::warning("🚫 Не найден ни один доступный сервер для города: {$city}");
                 return null;
+
             } catch (\Throwable $e) {
                 Log::error("🔥 Исключение при поиске сервера: {$e->getMessage()}");
                 return null;
@@ -121,8 +196,6 @@ class CityAppOrderService
         Log::warning("🔐 Не удалось получить блокировку для города: {$city} (уже используется)");
         return null;
     }
-
-
     /**
      * Проверка, прошло ли 5 минут с момента обновления
      *
