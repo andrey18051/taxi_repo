@@ -265,7 +265,10 @@ class AndroidTestOSMController extends Controller
 
     public function connectAPIAppOrder(string $city, $app): string
     {
-        return self::onlineAPIAppOrder($city, $app);
+        $service = new CityAppOrderService();
+        $connectAPI = $service->cityOnlineOrder($city, $app);
+     //   return self::onlineAPIAppOrder($city, $app);
+        return $connectAPI;
     }
 
     /**

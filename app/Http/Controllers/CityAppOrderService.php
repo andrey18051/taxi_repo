@@ -207,7 +207,8 @@ class CityAppOrderService
         try {
             $last = new DateTimeImmutable((string) $updatedAt);
             $now = new DateTimeImmutable();
-            return ($now->getTimestamp() - $last->getTimestamp()) >= 300;
+         //   return ($now->getTimestamp() - $last->getTimestamp()) >= 300;
+            return ($now->getTimestamp() - $last->getTimestamp()) >= 0;
         } catch (\Exception $e) {
             Log::error("✗ Ошибка проверки времени: {$e->getMessage()}");
             return false;
@@ -267,7 +268,7 @@ class CityAppOrderService
     {
         $startTime = microtime(true);
         $cacheKey = "domain_check_{$domain}";
-        $cacheTTL = config('services.city_app_order.cache_ttl', 300);
+        $cacheTTL = config('services.city_app_order.cache_ttl', 5);
         $maxRetries = 3;
         $retryDelay = 1;
 
@@ -281,7 +282,7 @@ class CityAppOrderService
 
                 $curl = curl_init($url);
                 curl_setopt_array($curl, [
-                    CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 6),
+                    CURLOPT_CONNECTTIMEOUT => config('services.city_app_order.curl_timeout', 5),
                     CURLOPT_TIMEOUT => 10,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_FAILONERROR => true,
