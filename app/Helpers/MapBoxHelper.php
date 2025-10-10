@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Helpers;
 
 use GuzzleHttp\Client;
@@ -15,18 +16,12 @@ class MapBoxHelper
         $this->accessToken = config('app.keyMapbox');
         $this->client = new Client([
             'base_uri' => 'https://api.mapbox.com/',
-            'timeout'  => 10.0,
+            'timeout' => 10.0,
         ]);
     }
 
     /**
      * Получить расстояние между двумя точками через MapBox Directions API.
-     *
-     * @param float $startLat Широта начальной точки
-     * @param float $startLon Долгота начальной точки
-     * @param float $endLat Широта конечной точки
-     * @param float $endLon Долгота конечной точки
-     * @return float|null Возвращает расстояние в метрах или null в случае ошибки
      */
     public function getRouteDistance(float $startLat, float $startLon, float $endLat, float $endLon): ?float
     {
@@ -40,39 +35,82 @@ class MapBoxHelper
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            // Проверяем, что маршрут существует
             if (isset($data['routes'][0]['distance'])) {
                 return $data['routes'][0]['distance'];
             }
 
             return null;
         } catch (RequestException $e) {
-            // Логируем ошибку, если произошел сбой
             Log::error("Error fetching route from MapBox: " . $e->getMessage());
             return null;
         }
     }
 
-    public function getCoordinatesByPlaceName(string $placeName): ?array
+    /**
+     * Получить координаты по адресу через MapBox Geocoding API с fallback на Nominatim.
+     */
+    public function getCoordinatesByPlaceName(string $placeName, string $lang = 'uk'): ?array
     {
         try {
-            // Отправляем запрос к Nominatim для получения координат по названию места
-            $response = $this->client->get("https://nominatim.openstreetmap.org/search", [
+            // Запрос к MapBox Geocoding API
+            $response = $this->client->get("geocoding/v5/mapbox.places/" . urlencode($placeName) . ".json", [
                 'query' => [
-                    'q' => $placeName,
-                    'format' => 'json',
-                    'addressdetails' => 1,
-                    'limit' => 1, // Получаем только одно совпадение
+                    'access_token' => $this->accessToken,
+                    'language' => $lang,
+                    'limit' => 1,
+                    'types' => 'address,place',
                 ],
-                'timeout' => 5.0,
                 'headers' => [
-                    'User-Agent' => 'YourAppName/1.0 (your-email@example.com)', // Укажите название вашего приложения и контактный email
+                    'User-Agent' => 'TaxiEasyUa/1.0 (taxi.easy.ua.sup@gmail.com)',
                 ],
             ]);
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            // Проверяем, что координаты были найдены
+            if (!empty($data['features'][0]['center'])) {
+                return [
+                    'longitude' => $data['features'][0]['center'][0],
+                    'latitude' => $data['features'][0]['center'][1],
+                ];
+            }
+
+            // Fallback на Nominatim
+            Log::info('[MapBoxHelper] Fallback to Nominatim', ['placeName' => $placeName]);
+            return $this->getNominatimCoordinates($placeName, $lang);
+
+        } catch (RequestException $e) {
+            Log::error('[MapBoxHelper] Error fetching coordinates from MapBox', [
+                'placeName' => $placeName,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Fallback на Nominatim
+            return $this->getNominatimCoordinates($placeName, $lang);
+        }
+    }
+
+    /**
+     * Вспомогательный метод для получения координат через Nominatim
+     */
+    protected function getNominatimCoordinates(string $placeName, string $lang): ?array
+    {
+        try {
+            $response = $this->client->get("https://nominatim.openstreetmap.org/search", [
+                'query' => [
+                    'q' => $placeName,
+                    'format' => 'json',
+                    'addressdetails' => 1,
+                    'limit' => 1,
+                    'accept-language' => $lang,
+                ],
+                'timeout' => 5.0,
+                'headers' => [
+                    'User-Agent' => 'TaxiEasyUa/1.0 (taxi.easy.ua.sup@gmail.com)',
+                ],
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
             if (!empty($data[0]['lon']) && !empty($data[0]['lat'])) {
                 return [
                     'longitude' => $data[0]['lon'],
@@ -80,21 +118,13 @@ class MapBoxHelper
                 ];
             }
 
-            // Если координаты не найдены
             return null;
         } catch (RequestException $e) {
-            // Логируем ошибку, если произошел сбой
-            Log::error("Error fetching coordinates from Nominatim: " . $e->getMessage());
+            Log::error('[MapBoxHelper] Error fetching coordinates from Nominatim', [
+                'placeName' => $placeName,
+                'error' => $e->getMessage(),
+            ]);
             return null;
         }
     }
-
 }
-
-
-//Основные отличия от реализации с OSRM:
-//1. Вместо `https://router.project-osrm.org/` используется `https://api.mapbox.com/`.
-//2. Вместо `route/v1/driving/` используется `directions/v5/mapbox/driving/`.
-//3. Требуется передача `access_token` в качестве параметра запроса.
-//
-//Остальная логика аналогична: функция `getRouteDistance` принимает координаты начальной и конечной точки, делает запрос к MapBox Directions API, получает расстояние маршрута и возвращает его. В случае ошибки возвращается `null`.

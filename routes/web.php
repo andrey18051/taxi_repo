@@ -40,6 +40,7 @@ use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\TaxiAiTestController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\KafkaController;
@@ -109,6 +110,11 @@ Route::get('/test', function () {
     $finduser = User::where('viber_id', $user_id)->first();
     dd($finduser);
 })->name('test');
+
+
+
+Route::get('/taxi-ai-test', [App\Http\Controllers\TaxiAiTestController::class, 'runTest']);
+
 
 
 /**

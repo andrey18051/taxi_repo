@@ -7,10 +7,11 @@ PREPOSITIONS = {
     },
     "uk": {
         "origin": r"(?:з|із)\s+([А-ЯЇІҐЄа-яїіґє\s\d,\.]+?)(?=\s+до\b)",
-        "destination": r"(?:до)\s+([А-ЯЇІҐЄа-яїіґє\s\d,\.]+?)(?=\s|$)"
+        "destination": r"(?:до)\s+([А-ЯЇІҐЄа-яїіґє\s\d,\.]+)"
     },
     "en": {
         "origin": r"from\s+([A-Za-z\s\d,]+?)(?=\s+to\b)",
         "destination": r"to\s+([A-Za-z\s\d,]+?)(?=\s|$)"
     }
 }
+
