@@ -20,4 +20,4 @@ use Illuminate\Support\Facades\RateLimiter;
 |
 */
 
-Route::post('/taxi-ai/parse', [TaxiAiController::class, 'parseRequest']);
+Route::post('/taxi-ai/parse', [TaxiAiController::class, 'parse']);

@@ -17,6 +17,8 @@ ENV MODEL_DIR_EN=/app/models/custom_ner_en
 
 
 RUN mkdir -p /app/models
+RUN pip install --no-cache-dir spacy aiofiles
+
 # Запускаем train.py для дообучения моделей при сборке образа
 # Если train.py сохраняет модели в /app/models/custom_ner_*
 RUN python train.py

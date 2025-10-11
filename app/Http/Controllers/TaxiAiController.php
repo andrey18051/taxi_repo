@@ -17,254 +17,169 @@ class TaxiAiController extends Controller
     }
 
     /**
-     * Очищает адрес от служебных слов и названий города для геокодирования
+     * Определяет язык текста на основе символов
      */
-    protected function cleanAddress(string $address, string $lang = 'uk', bool $isDestination = false, array &$details = []): string
+    public function detectLanguage(string $text): string
     {
-        $prepositions = [
-            'uk' => ['з', 'без', 'для', 'до'],
-            'ru' => ['с', 'без', 'для', 'до'],
-            'en' => ['from', 'to', 'for', 'with'],
-        ];
-
-        $cityPrefixes = [
-            'uk' => ['Києва', 'Київ', 'Києві'],
-            'ru' => ['Киева', 'Киев', 'Киеве'],
-            'en' => ['Kyiv'],
-        ];
-
-        $words = $prepositions[$lang] ?? $prepositions['uk'];
-        $cityPattern = implode('|', array_map('preg_quote', $cityPrefixes[$lang] ?? $cityPrefixes['uk']));
-        $prepositionPattern = implode('|', array_map('preg_quote', $words));
-
-        // Убираем название города в любом месте строки
-        $address = preg_replace("/\b($cityPattern)\b[,\s]*/iu", '', $address);
-
-        if ($isDestination) {
-            // Отделяем адрес до номера дома и детали
-            if (preg_match('/(.+?\d+[,\s]*[а-яА-Яa-zA-Z0-9]*)(.*)/u', $address, $matches)) {
-                $cleaned = trim($matches[1], " ,");
-                $detailsText = trim($matches[2], " ,");
-                if (!empty($detailsText)) {
-                    // Удаляем предлоги из detailsText
-                    $detailsText = preg_replace("/\b($prepositionPattern)\b\s*/iu", '', $detailsText);
-                    if ($lang === 'en' && mb_stripos($detailsText, 'air conditioning') !== false) {
-                        $details[] = 'air conditioning';
-                    } else {
-                        $parts = preg_split('/[\s,]+/u', $detailsText, -1, PREG_SPLIT_NO_EMPTY);
-                        $existingLower = array_map('mb_strtolower', $details);
-                        $baseForms = [
-                            'uk' => ['кондиціонером' => 'кондиціонер'],
-                            'ru' => ['кондиционером' => 'кондиционер', 'Кондиционером' => 'кондиционер'],
-                            'en' => [],
-                        ];
-                        foreach ($parts as $part) {
-                            $partLower = mb_strtolower($part);
-                            $basePart = $baseForms[$lang][$part] ?? $partLower;
-                            if (!in_array($basePart, $existingLower)) {
-                                $details[] = $part;
-                                $existingLower[] = $basePart;
-                            }
-                        }
-                    }
-                    // Добавляем предлоги в детали
-                    foreach ($words as $word) {
-                        if (mb_stripos($matches[2], $word) !== false && !in_array(mb_strtolower($word), array_map('mb_strtolower', $details))) {
-                            $details[] = $word;
-                        }
-                    }
-                }
-            } else {
-                $cleaned = preg_replace("/\b($prepositionPattern)\b\s*/iu", '', $address);
-            }
-        } else {
-            // Для origin убираем всё после предлога
-            $cleaned = preg_replace("/\b($prepositionPattern)\b.*$/iu", '', $address);
+        // Проверяем наличие украинских символов
+        if (preg_match('/[їіґє]/u', $text)) {
+            return 'uk';
         }
-
-        return trim($cleaned, " ,");
+        // Проверяем наличие русских символов
+        if (preg_match('/[ёйыэ]/u', $text)) {
+            return 'ru';
+        }
+        // Проверяем, является ли текст ASCII (английский)
+        if (mb_check_encoding($text, 'ASCII')) {
+            return 'en';
+        }
+        // По умолчанию украинский
+        return 'uk';
     }
 
     /**
-     * Извлекает destination из текста запроса
+     * Очищает адрес от лишних деталей такси (кондиционер, багаж и т.д.)
      */
-    protected function extractDestination(string $text, string $lang): ?array
+    protected function cleanTaxiDetails(string $address): string
     {
-        $destination = null;
-        $details = [];
+        $patternsToRemove = [
+            // Кондиционер
+            '/\s*(з|с|with)\s+(кондиціонером|кондиционером|air conditioning).*/ui',
+            // Водитель
+            '/\s*(без|without)\s+(водія|водителя|driver).*/ui',
+            // Время
+            '/\s*(завтра|сьогодні|tomorrow|today|післязавтра|послезавтра).*/ui',
+            '/\s*\d{1,2}:\d{2}.*/ui',
+            // Багаж
+            '/\s*(з|с|with)\s+(валізою|багажем|luggage).*/ui',
+            // Животные
+            '/\s*(з|с|with)\s+(твариною|собакою|animal|pet).*/ui',
+            // Дети
+            '/\s*(з|с|with)\s+(дитиною|child).*/ui',
+            // Срочность
+            '/\s*терміново.*/ui',
+            '/\s*срочно.*/ui',
+            '/\s*urgently.*/ui',
+            // Курение
+            '/\s*я буду курити.*/ui',
+            '/\s*я буду курить.*/ui',
+            '/\s*i will smoke.*/ui',
+            // Чек
+            '/\s*чек.*/ui',
+            '/\s*check.*/ui'
+        ];
 
-        if ($lang === 'en') {
-            // Для английского: извлекаем всё после "to" и до "with"
-            if (preg_match('/to\s+(.+?)(?:\s+with\s+(.+))?$/iu', $text, $matches)) {
-                $destination = trim($matches[1], " ,");
-                if (!empty($matches[2])) {
-                    $detailsText = trim($matches[2], " ,");
-                    if (mb_stripos($detailsText, 'air conditioning') !== false) {
-                        $details = ['air conditioning'];
-                    } else {
-                        $details = preg_split('/[\s,]+/u', $detailsText, -1, PREG_SPLIT_NO_EMPTY);
-                    }
-                }
-            }
-        } else {
-            // Для uk и ru
-            $pattern = $lang === 'uk'
-                ? '/до\s+(.+?)(?:\s+з\s+(.+))?$/iu'
-                : '/до\s+(.+?)(?:\s+с\s+(.+))?$/iu';
-            if (preg_match($pattern, $text, $matches)) {
-                $destination = trim($matches[1], " ,");
-                if (!empty($matches[2])) {
-                    $detailsText = trim($matches[2], " ,");
-                    $details = preg_split('/[\s,]+/u', $detailsText, -1, PREG_SPLIT_NO_EMPTY);
-                }
-            }
+        $cleaned = $address;
+        foreach ($patternsToRemove as $pattern) {
+            $cleaned = preg_replace($pattern, '', $cleaned);
         }
 
-        // Нормализуем детали, удаляя дубликаты и склонения
-        $detailsLower = [];
-        $uniqueDetails = [];
-        $baseForms = [
-            'uk' => ['кондиціонером' => 'кондиціонер'],
-            'ru' => ['кондиционером' => 'кондиционер', 'Кондиционером' => 'кондиционер'],
-            'en' => [],
-        ];
-        foreach ($details as $detail) {
-            $detailLower = mb_strtolower($detail);
-            $baseDetail = $baseForms[$lang][$detail] ?? $detailLower;
-            if (!in_array($baseDetail, $detailsLower)) {
-                $uniqueDetails[] = $detail;
-                $detailsLower[] = $baseDetail;
-            }
-        }
-
-        return [
-            'destination' => $destination,
-            'details' => $uniqueDetails,
-        ];
+        return trim($cleaned, " ,.");
     }
 
     /**
-     * Основной метод обработки запроса
+     * Обрабатывает запрос к Taxi AI
      */
-    public function parseRequest(Request $request)
+    public function parse(Request $request)
     {
         $text = $request->input('text');
-
-        Log::info('[TaxiAi] Incoming text request', [
-            'text' => $text,
-            'lang' => $request->input('lang', 'uk'),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        if (!$text) {
+        if (empty($text)) {
             return response()->json(['error' => 'Text is required'], 400);
         }
 
         try {
-            // Всегда автоопределяем язык
-            if (preg_match('/\b(from|to|with)\b/i', $text)) {
-                $lang = 'en';
-            } elseif (preg_match('/\b(з|до|із)\b/u', $text)) {
-                $lang = 'uk';
-            } elseif (preg_match('/\b(из|до|с)\b/u', $text)) {
-                $lang = 'ru';
-            } else {
-                $lang = 'uk'; // Дефолтный язык
+            // Определяем язык: из запроса или автоматически
+            $lang = $request->input('lang') ?: $this->detectLanguage($text);
+            $defaultCity = $lang === 'uk' ? 'Київ' : ($lang === 'ru' ? 'Киев' : 'Kyiv');
+
+            Log::info('[TaxiAi] Detected language', ['text' => $text, 'lang' => $lang]);
+
+            // Запрос к AI модели
+            $response = Http::timeout(30)->post("{$this->baseUrl}/parse", [
+                'text' => $text,
+                'lang' => $lang
+            ]);
+
+            if ($response->failed()) {
+                Log::error('[TaxiAi] Failed to get response from Taxi AI service', [
+                    'text' => $text,
+                    'lang' => $lang,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return response()->json([
+                    'error' => 'Failed to connect to Taxi AI service',
+                    'details' => $response->body(),
+                ], 500);
             }
 
-            Log::info('[TaxiAi] Auto-detected language', ['lang' => $lang]);
+            $aiResponse = $response->json();
+            Log::info('[TaxiAi] Raw AI response', ['aiResponse' => $aiResponse]);
 
-            $response = Http::post("{$this->baseUrl}/parse", ['text' => $text]);
-            $responseData = $response->json();
+            // Проверяем структуру ответа - НОВАЯ СТРУКТУРА!
+            if (!isset($aiResponse['response']) || !is_array($aiResponse['response'])) {
+                Log::error('[TaxiAi] Invalid response structure', ['aiResponse' => $aiResponse]);
+                return response()->json(['error' => 'Invalid AI response structure'], 500);
+            }
 
-            $aiResponse = [
-                'text' => $responseData['text'] ?? $text,
-                'response' => [
-                    'text' => $responseData['text'] ?? $text,
-                    'entities_spacy' => $responseData['response']['entities_spacy'] ?? [],
-                    'entities_hf' => $responseData['response']['entities_hf'] ?? [],
-                    'origin' => $responseData['response']['origin'] ?? null,
-                    'destination' => $responseData['response']['destination'] ?? null,
-                    'details' => $responseData['response']['details'] ?? [],
-                ],
-            ];
-
+            $responseData = $aiResponse['response'];
             $geoHelper = new OpenStreetMapHelper();
-            $defaultCity = $lang === 'en' ? 'Kyiv' : ($lang === 'ru' ? 'Киев' : 'Київ');
 
-            // Извлекаем destination + details
-            $extracted = $this->extractDestination($text, $lang);
-            if (!empty($extracted['destination'])) {
-                $aiResponse['response']['destination'] = $extracted['destination'];
-            }
-            if (!empty($extracted['details'])) {
-                $existingDetailsLower = array_map('mb_strtolower', $aiResponse['response']['details']);
-                $newDetails = [];
-                $baseForms = [
-                    'uk' => ['кондиціонером' => 'кондиціонер'],
-                    'ru' => ['кондиционером' => 'кондиционер', 'Кондиционером' => 'кондиционер'],
-                    'en' => [],
-                ];
-                foreach ($extracted['details'] as $detail) {
-                    $detailLower = mb_strtolower($detail);
-                    $baseDetail = $baseForms[$lang][$detail] ?? $detailLower;
-                    if (!in_array($baseDetail, $existingDetailsLower)) {
-                        $newDetails[] = $detail;
-                        $existingDetailsLower[] = $baseDetail;
-                    }
-                }
-                $aiResponse['response']['details'] = array_merge($aiResponse['response']['details'], $newDetails);
-            }
-
-            // Обработка координат
+            // Обрабатываем адреса с новой логикой очистки
             foreach (['origin', 'destination'] as $key) {
-                $address = $aiResponse['response'][$key] ?? null;
+                $address = $responseData[$key] ?? null;
                 if (!empty($address)) {
-                    $details = $key === 'destination' ? $aiResponse['response']['details'] : [];
-                    $cleanAddress = $this->cleanAddress($address, $lang, $key === 'destination', $details);
+                    // Python модель УЖЕ очистила адреса, поэтому просто используем как есть
+                    $cleanedAddress = $address; // Убираем cleanTaxiDetails!
 
-                    // Формируем full_address
-                    $fullAddress = $defaultCity . ', ' . $cleanAddress;
+                    // Добавляем город если нужно
+                    $hasCity = preg_match('/(Київ|Киев|Kyiv)/ui', $cleanedAddress);
+                    $fullAddress = $hasCity ? $cleanedAddress : $defaultCity . ', ' . $cleanedAddress;
+
                     Log::info("[TaxiAi] Forming full address for {$key}", [
                         'original' => $address,
-                        'cleaned' => $cleanAddress,
                         'full_address' => $fullAddress,
                     ]);
 
                     $coords = $geoHelper->getCoordinatesByPlaceName($fullAddress, $lang);
 
                     if ($coords) {
-                        $aiResponse['response'][$key . '_coordinates'] = $coords;
-                        // Проверка на координаты центра города
-                        $cityCenter = ['latitude' => '50.4500336', 'longitude' => '30.5241361'];
-                        if (abs(floatval($coords['latitude']) - floatval($cityCenter['latitude'])) < 0.01 &&
-                            abs(floatval($coords['longitude']) - floatval($cityCenter['longitude'])) < 0.01) {
-                            Log::warning("[TaxiAi] Possible generic city center coordinates for {$key}", [
-                                'address' => $fullAddress,
-                                'coords' => $coords,
-                            ]);
-                        }
+                        $responseData[$key . '_coordinates'] = $coords;
                     } else {
                         Log::warning("[TaxiAi] {$key} coordinates not found", ['address' => $fullAddress]);
                     }
 
-                    $aiResponse['response'][$key . '_cleaned'] = $cleanAddress;
-                    if ($key === 'destination') {
-                        $aiResponse['response']['details'] = $details;
-                    }
+                    $responseData[$key . '_cleaned'] = $fullAddress;
                 }
             }
 
             // Проверка совпадения координат
-            if (isset($aiResponse['response']['origin_coordinates'], $aiResponse['response']['destination_coordinates']) &&
-                $aiResponse['response']['origin_coordinates'] === $aiResponse['response']['destination_coordinates']) {
+            if (isset($responseData['origin_coordinates'], $responseData['destination_coordinates']) &&
+                $responseData['origin_coordinates'] === $responseData['destination_coordinates']) {
                 Log::warning("[TaxiAi] Origin and destination coordinates are identical", [
-                    'origin' => $aiResponse['response']['origin'],
-                    'destination' => $aiResponse['response']['destination'],
-                    'coords' => $aiResponse['response']['origin_coordinates'],
+                    'origin' => $responseData['origin'],
+                    'destination' => $responseData['destination'],
+                    'coords' => $responseData['origin_coordinates'],
                 ]);
             }
+
+            // НОВАЯ ЛОГИКА: Детали теперь приходят как массив, а не строка с *
+            $details = $responseData['details'] ?? [];
+            if (!is_array($details)) {
+                // На случай если все еще приходит строка (бэкап)
+                $details = !empty($details) ? explode('*', $details) : [];
+            }
+
+            // Объединяем с временными деталями если нужно
+            $timeDetails = $responseData['time_details'] ?? [];
+            if (!empty($timeDetails) && is_array($timeDetails)) {
+                $details = array_merge($details, $timeDetails);
+            }
+
+            $responseData['details'] = array_values(array_unique($details));
+
+            // Обновляем основной ответ
+            $aiResponse['response'] = $responseData;
 
             Log::info('[TaxiAi] Final AI response prepared', ['aiResponse' => $aiResponse]);
 

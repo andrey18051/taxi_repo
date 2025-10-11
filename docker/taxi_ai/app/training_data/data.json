@@ -1,50 +1,1973 @@
 [
     {
-        "text": "Потрібно їхати з вул. Сумська, 12, Харків до просп. Науки, 45, Київ завтра з великою валізою і кондиціонером",
+        "text": "Потрібно їхати з вул. Сумська 12 Харків до просп. Науки 45 Київ завтра з великою валізою і кондиціонером",
         "expected": {
-            "origin": "вул. Сумська, 12, Харків",
-            "destination": "просп. Науки, 45, Київ",
-            "details": ["завтра", "велика валіза", "кондиціонер"]
-        }
+            "origin": "вул. Сумська 12 Харків",
+            "destination": "просп. Науки 45 Київ",
+            "details": [
+                "завтра",
+                "велика валіза",
+                "кондиціонер"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 39,
+                "label": "LOC"
+            },
+            {
+                "start": 43,
+                "end": 63,
+                "label": "LOC"
+            },
+            {
+                "start": 71,
+                "end": 86,
+                "label": "BAGGAGE"
+            },
+            {
+                "start": 89,
+                "end": 102,
+                "label": "CONDIT"
+            }
+        ]
     },
     {
-        "text": "Заказати таксі з Києва, вул. Хрещатик, 10 до Львова, просп. Свободи, 15 з кондиціонером",
+        "text": "Замовити таксі з Києва вул. Хрещатик 10 до Львова просп. Свободи 15 з кондиціонером",
         "expected": {
-            "origin": "Києва, вул. Хрещатик, 10",
-            "destination": "Львова, просп. Свободи, 15",
-            "details": ["кондиціонер"]
-        }
+            "origin": "Києва вул. Хрещатик 10",
+            "destination": "Львова просп. Свободи 15",
+            "details": [
+                "кондиціонер"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 39,
+                "label": "LOC"
+            },
+            {
+                "start": 43,
+                "end": 67,
+                "label": "LOC"
+            },
+            {
+                "start": 69,
+                "end": 82,
+                "label": "CONDIT"
+            }
+        ]
+    },
+    {
+        "text": "Хочу таксі з пл. Конституції 1 до вул. Грушевського 5 сьогодні з дитиною",
+        "expected": {
+            "origin": "пл. Конституції 1",
+            "destination": "вул. Грушевського 5",
+            "details": [
+                "сьогодні",
+                "з дитиною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 13,
+                "end": 29,
+                "label": "LOC"
+            },
+            {
+                "start": 33,
+                "end": 51,
+                "label": "LOC"
+            },
+            {
+                "start": 61,
+                "end": 70,
+                "label": "BABY_SEAT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно з вул. Дерибасівська 1 до вул. Богдана Хмельницького 10 терміново з багажем",
+        "expected": {
+            "origin": "вул. Дерибасівська 1",
+            "destination": "вул. Богдана Хмельницького 10",
+            "details": [
+                "терміново",
+                "з багажем"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 31,
+                "label": "LOC"
+            },
+            {
+                "start": 35,
+                "end": 65,
+                "label": "LOC"
+            },
+            {
+                "start": 75,
+                "end": 84,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Замов таксі із просп. Московський 20 до вул. Короленка 3 з твариною",
+        "expected": {
+            "origin": "просп. Московський 20",
+            "destination": "вул. Короленка 3",
+            "details": [
+                "з твариною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 15,
+                "end": 36,
+                "label": "LOC"
+            },
+            {
+                "start": 40,
+                "end": 56,
+                "label": "LOC"
+            },
+            {
+                "start": 58,
+                "end": 68,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": " Їхати з пл. Ринок 1 до вул. Незалежності 4 ввечері з валізою",
+        "expected": {
+            "origin": "пл. Ринок 1",
+            "destination": "вул. Незалежності 4",
+            "details": [
+                "ввечері",
+                "з валізою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 19,
+                "label": "LOC"
+            },
+            {
+                "start": 23,
+                "end": 42,
+                "label": "LOC"
+            },
+            {
+                "start": 52,
+                "end": 61,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з бульв. Шевченка 30 до вул. Київська 21 з кондиціонером і чек",
+        "expected": {
+            "origin": "бульв. Шевченка 30",
+            "destination": "вул. Київська 21",
+            "details": [
+                "кондиціонер",
+                "чек"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 26,
+                "label": "LOC"
+            },
+            {
+                "start": 30,
+                "end": 46,
+                "label": "LOC"
+            },
+            {
+                "start": 48,
+                "end": 61,
+                "label": "CONDIT"
+            },
+            {
+                "start": 64,
+                "end": 67,
+                "label": "CHECK_OUT"
+            }
+        ]
+    },
+    {
+        "text": "З вул. Соборності 45 до вул. Воскресенська 12 з собакою",
+        "expected": {
+            "origin": "вул. Соборності 45",
+            "destination": "вул. Воскресенська 12",
+            "details": [
+                "з собакою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 19,
+                "label": "LOC"
+            },
+            {
+                "start": 23,
+                "end": 44,
+                "label": "LOC"
+            },
+            {
+                "start": 46,
+                "end": 55,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно їхати із вул. Головна 100 до бульв. Шевченка 5 терміново",
+        "expected": {
+            "origin": "вул. Головна 100",
+            "destination": "бульв. Шевченка 5",
+            "details": [
+                "терміново"
+            ]
+        },
+        "entities": [
+            {
+                "start": 18,
+                "end": 34,
+                "label": "LOC"
+            },
+            {
+                "start": 38,
+                "end": 56,
+                "label": "LOC"
+            }
+        ]
+    },
+    {
+        "text": "Замовити з вул. Соборна 50 до вул. Проскурівська 40 з дитиною і багажем",
+        "expected": {
+            "origin": "вул. Соборна 50",
+            "destination": "вул. Проскурівська 40",
+            "details": [
+                "з дитиною",
+                "багажем"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 26,
+                "label": "LOC"
+            },
+            {
+                "start": 30,
+                "end": 51,
+                "label": "LOC"
+            },
+            {
+                "start": 53,
+                "end": 62,
+                "label": "BABY_SEAT"
+            },
+            {
+                "start": 65,
+                "end": 72,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з майдан Незалежності 1 до просп. Волі 13 ввечері",
+        "expected": {
+            "origin": "майдан Незалежності 1",
+            "destination": "просп. Волі 13",
+            "details": [
+                "ввечері"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 28,
+                "label": "LOC"
+            },
+            {
+                "start": 32,
+                "end": 46,
+                "label": "LOC"
+            }
+        ]
+    },
+    {
+        "text": "З пл. Поштова 3 до вул. Миру 17 з кондиціонером",
+        "expected": {
+            "origin": "пл. Поштова 3",
+            "destination": "вул. Миру 17",
+            "details": [
+                "кондиціонером"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 15,
+                "label": "LOC"
+            },
+            {
+                "start": 19,
+                "end": 31,
+                "label": "LOC"
+            },
+            {
+                "start": 33,
+                "end": 46,
+                "label": "CONDIT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно з просп. Соборний 150 до вул. Грушевського 20 з валізою",
+        "expected": {
+            "origin": "просп. Соборний 150",
+            "destination": "вул. Грушевського 20",
+            "details": [
+                "з валізою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 30,
+                "label": "LOC"
+            },
+            {
+                "start": 34,
+                "end": 54,
+                "label": "LOC"
+            },
+            {
+                "start": 56,
+                "end": 65,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Замов таксі із вул. Ушакова 25 до вул. Соборна 12 сьогодні",
+        "expected": {
+            "origin": "вул. Ушакова 25",
+            "destination": "вул. Соборна 12",
+            "details": [
+                "сьогодні"
+            ]
+        },
+        "entities": [
+            {
+                "start": 15,
+                "end": 30,
+                "label": "LOC"
+            },
+            {
+                "start": 34,
+                "end": 49,
+                "label": "LOC"
+            }
+        ]
+    },
+    {
+        "text": "З вул. Велика Перспективна 40 до бульв. Шевченка 205 з багажем",
+        "expected": {
+            "origin": "вул. Велика Перспективна 40",
+            "destination": "бульв. Шевченка 205",
+            "details": [
+                "з багажем"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 29,
+                "label": "LOC"
+            },
+            {
+                "start": 33,
+                "end": 53,
+                "label": "LOC"
+            },
+            {
+                "start": 55,
+                "end": 64,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно таксі з майдан Незалежності до бульв. Тараса Шевченка 10 з дитиною і я буду курити",
+        "expected": {
+            "origin": "майдан Незалежності",
+            "destination": "бульв. Тараса Шевченка 10",
+            "details": [
+                "з дитиною",
+                "я буду курити"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 36,
+                "label": "LOC"
+            },
+            {
+                "start": 40,
+                "end": 66,
+                "label": "LOC"
+            },
+            {
+                "start": 68,
+                "end": 77,
+                "label": "BABY_SEAT"
+            },
+            {
+                "start": 80,
+                "end": 93,
+                "label": "SMOKE"
+            }
+        ]
+    },
+    {
+        "text": "Замовити з наб. Дніпровська до шосе Брест-Литовське 5 терміново з твариною",
+        "expected": {
+            "origin": "наб. Дніпровська",
+            "destination": "шосе Брест-Литовське 5",
+            "details": [
+                "терміново",
+                "з твариною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 27,
+                "label": "LOC"
+            },
+            {
+                "start": 31,
+                "end": 53,
+                "label": "LOC"
+            },
+            {
+                "start": 64,
+                "end": 74,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "Таксі із тупик Залізничний 3 до пров. Михайлівський з кондиціонером і чек",
+        "expected": {
+            "origin": "тупик Залізничний 3",
+            "destination": "пров. Михайлівський",
+            "details": [
+                "кондиціонер",
+                "чек"
+            ]
+        },
+        "entities": [
+            {
+                "start": 9,
+                "end": 28,
+                "label": "LOC"
+            },
+            {
+                "start": 32,
+                "end": 51,
+                "label": "LOC"
+            },
+            {
+                "start": 53,
+                "end": 66,
+                "label": "CONDIT"
+            },
+            {
+                "start": 69,
+                "end": 72,
+                "label": "CHECK_OUT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно їхати з вул. Сагайдачного 25 до пл. Контрактова з собакою ввечері",
+        "expected": {
+            "origin": "вул. Сагайдачного 25",
+            "destination": "пл. Контрактова",
+            "details": [
+                "з собакою",
+                "ввечері"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 37,
+                "label": "LOC"
+            },
+            {
+                "start": 41,
+                "end": 56,
+                "label": "LOC"
+            },
+            {
+                "start": 58,
+                "end": 67,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "Замов таксі з просп. Перемоги до вул. Велика Васильківська 100 з великою валізою",
+        "expected": {
+            "origin": "просп. Перемоги",
+            "destination": "вул. Велика Васильківська 100",
+            "details": [
+                "велика валіза"
+            ]
+        },
+        "entities": [
+            {
+                "start": 13,
+                "end": 28,
+                "label": "LOC"
+            },
+            {
+                "start": 32,
+                "end": 61,
+                "label": "LOC"
+            },
+            {
+                "start": 63,
+                "end": 78,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "З наб. Русанівська 12 до шосе Столичне з зустріч з табличкою терміново",
+        "expected": {
+            "origin": "наб. Русанівська 12",
+            "destination": "шосе Столичне",
+            "details": [
+                "зустріч з табличкою",
+                "терміново"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 21,
+                "label": "LOC"
+            },
+            {
+                "start": 25,
+                "end": 38,
+                "label": "LOC"
+            },
+            {
+                "start": 40,
+                "end": 60,
+                "label": "MEET"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно з вул. Інститутська до бульв. Лесі Українки 5 з некурящим водієм і англійським водієм",
+        "expected": {
+            "origin": "вул. Інститутська",
+            "destination": "бульв. Лесі Українки 5",
+            "details": [
+                "некурящий водій",
+                "англомовний водій"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 28,
+                "label": "LOC"
+            },
+            {
+                "start": 32,
+                "end": 55,
+                "label": "LOC"
+            },
+            {
+                "start": 57,
+                "end": 72,
+                "label": "NO_SMOKE"
+            },
+            {
+                "start": 75,
+                "end": 92,
+                "label": "ENGLISH"
+            }
+        ]
+    },
+    {
+        "text": "Замовити таксі з пров. Киянівський 7 до майдан Софійський з дитячим кріслом і тросом",
+        "expected": {
+            "origin": "пров. Киянівський 7",
+            "destination": "майдан Софійський",
+            "details": [
+                "детское кресло",
+                "трос"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 36,
+                "label": "LOC"
+            },
+            {
+                "start": 40,
+                "end": 57,
+                "label": "LOC"
+            },
+            {
+                "start": 59,
+                "end": 73,
+                "label": "BABY_SEAT"
+            },
+            {
+                "start": 76,
+                "end": 80,
+                "label": "CABLE"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з тупик Подільський до вул. Воздвиженська 18 з підвіз палива і проводом",
+        "expected": {
+            "origin": "тупик Подільський",
+            "destination": "вул. Воздвиженська 18",
+            "details": [
+                "підвіз палива",
+                "провід"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 25,
+                "label": "LOC"
+            },
+            {
+                "start": 29,
+                "end": 50,
+                "label": "LOC"
+            },
+            {
+                "start": 52,
+                "end": 65,
+                "label": "FUEL"
+            },
+            {
+                "start": 68,
+                "end": 74,
+                "label": "WIRES"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно їхати з пл. Львівська брама до наб. Харківська з кур'єрською доставкою і терміналом",
+        "expected": {
+            "origin": "пл. Львівська брама",
+            "destination": "наб. Харківська",
+            "details": [
+                "курьер. доставка",
+                "терминал"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 35,
+                "label": "LOC"
+            },
+            {
+                "start": 39,
+                "end": 54,
+                "label": "LOC"
+            },
+            {
+                "start": 56,
+                "end": 72,
+                "label": "COURIER"
+            },
+            {
+                "start": 75,
+                "end": 83,
+                "label": "CHECK_OUT"
+            }
+        ]
     },
     {
         "text": "Нужно поехать из Подола, ул. Владимирская, 5 в аэропорт, ул. Жулянская, 3 сегодня с багажом",
         "expected": {
             "origin": "Подола, ул. Владимирская, 5",
             "destination": "аэропорт, ул. Жулянская, 3",
-            "details": ["сегодня", "с багажом"]
-        }
+            "details": [
+                "сегодня",
+                "с багажом"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 44,
+                "label": "LOC"
+            },
+            {
+                "start": 47,
+                "end": 73,
+                "label": "LOC"
+            },
+            {
+                "start": 82,
+                "end": 91,
+                "label": "BAGGAGE"
+            }
+        ]
     },
     {
         "text": "Закажи такси из Киева, ул. Леси Украинки, 20 до Одессы, ул. Дерибасовская, 10 с кондиционером",
         "expected": {
             "origin": "Киева, ул. Леси Украинки, 20",
             "destination": "Одессы, ул. Дерибасовская, 10",
-            "details": ["кондиционер"]
-        }
+            "details": [
+                "кондиционер"
+            ]
+        },
+        "entities": [
+            {
+                "start": 16,
+                "end": 44,
+                "label": "LOC"
+            },
+            {
+                "start": 48,
+                "end": 77,
+                "label": "LOC"
+            },
+            {
+                "start": 79,
+                "end": 91,
+                "label": "CONDIT"
+            }
+        ]
     },
     {
         "text": "I need to go from Podil, 12 Shevchenko St. to the airport, 45 Kyiv Ave tomorrow with luggage and a baby seat",
         "expected": {
             "origin": "Podil, 12 Shevchenko St.",
             "destination": "the airport, 45 Kyiv Ave",
-            "details": ["tomorrow", "with luggage", "Baby seat"]
-        }
+            "details": [
+                "tomorrow",
+                "with luggage",
+                "Baby seat"
+            ]
+        },
+        "entities": [
+            {
+                "start": 18,
+                "end": 42,
+                "label": "LOC"
+            },
+            {
+                "start": 46,
+                "end": 70,
+                "label": "LOC"
+            },
+            {
+                "start": 79,
+                "end": 91,
+                "label": "BAGGAGE"
+            },
+            {
+                "start": 96,
+                "end": 105,
+                "label": "BABY_SEAT"
+            }
+        ]
     },
     {
         "text": "Order a taxi from Kyiv, 10 Khreshchatyk St. to Lviv, 15 Svobody Ave with conditioner and Carbon loading",
         "expected": {
             "origin": "Kyiv, 10 Khreshchatyk St.",
             "destination": "Lviv, 15 Svobody Ave",
-            "details": ["conditioner", "Carbon loading"]
-        }
+            "details": [
+                "conditioner",
+                "Carbon loading"
+            ]
+        },
+        "entities": [
+            {
+                "start": 18,
+                "end": 43,
+                "label": "LOC"
+            },
+            {
+                "start": 47,
+                "end": 67,
+                "label": "LOC"
+            },
+            {
+                "start": 73,
+                "end": 84,
+                "label": "CONDIT"
+            },
+            {
+                "start": 89,
+                "end": 103,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно таксі з узвіз Андріївський до сквер Хрещатий з кур'єрською доставкою",
+        "expected": {
+            "origin": "узвіз Андріївський",
+            "destination": "сквер Хрещатий",
+            "details": [
+                "курьер. доставка"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 35,
+                "label": "LOC"
+            },
+            {
+                "start": 39,
+                "end": 53,
+                "label": "LOC"
+            },
+            {
+                "start": 55,
+                "end": 71,
+                "label": "COURIER"
+            }
+        ]
+    },
+    {
+        "text": "Замовити з вул. Золотоворітська до наб. Лівобережна 7 з англійським водієм терміново",
+        "expected": {
+            "origin": "вул. Золотоворітська",
+            "destination": "наб. Лівобережна 7",
+            "details": [
+                "англомовний водій",
+                "терміново"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 31,
+                "label": "LOC"
+            },
+            {
+                "start": 35,
+                "end": 54,
+                "label": "LOC"
+            },
+            {
+                "start": 56,
+                "end": 73,
+                "label": "ENGLISH"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з пров. Музейний 10 до вул. Франка з некурящим водієм і валізою",
+        "expected": {
+            "origin": "пров. Музейний 10",
+            "destination": "вул. Франка",
+            "details": [
+                "некурящий водій",
+                "з валізою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 25,
+                "label": "LOC"
+            },
+            {
+                "start": 29,
+                "end": 40,
+                "label": "LOC"
+            },
+            {
+                "start": 42,
+                "end": 57,
+                "label": "NO_SMOKE"
+            },
+            {
+                "start": 60,
+                "end": 69,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "З шосе Хмельницьке до майдан Зоряний з дитячим кріслом і я буду курити",
+        "expected": {
+            "origin": "шосе Хмельницьке",
+            "destination": "майдан Зоряний",
+            "details": [
+                "детское кресло",
+                "я буду курити"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 18,
+                "label": "LOC"
+            },
+            {
+                "start": 22,
+                "end": 36,
+                "label": "LOC"
+            },
+            {
+                "start": 38,
+                "end": 52,
+                "label": "BABY_SEAT"
+            },
+            {
+                "start": 55,
+                "end": 68,
+                "label": "SMOKE"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно їхати з вул. Січових Стрільців до бульв. Дружби Народів з підвіз палива ввечері",
+        "expected": {
+            "origin": "вул. Січових Стрільців",
+            "destination": "бульв. Дружби Народів",
+            "details": [
+                "підвіз палива",
+                "ввечері"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 39,
+                "label": "LOC"
+            },
+            {
+                "start": 43,
+                "end": 65,
+                "label": "LOC"
+            },
+            {
+                "start": 67,
+                "end": 80,
+                "label": "FUEL"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно таксі з вул. Лесі Українки 1 до вул. Вокзальна 5 завтра о 17:30 з валізою",
+        "expected": {
+            "origin": "вул. Лесі Українки 1",
+            "destination": "вул. Вокзальна 5",
+            "details": [
+                "завтра",
+                "о 17:30",
+                "з валізою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 38,
+                "label": "LOC"
+            },
+            {
+                "start": 42,
+                "end": 58,
+                "label": "LOC"
+            },
+            {
+                "start": 59,
+                "end": 65,
+                "label": "TIME"
+            },
+            {
+                "start": 66,
+                "end": 73,
+                "label": "TIME"
+            },
+            {
+                "start": 74,
+                "end": 83,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Замов таксі з майдан Незалежності до бульв. Шевченка послезавтра через 2 дні з дитиною",
+        "expected": {
+            "origin": "майдан Незалежності",
+            "destination": "бульв. Шевченка",
+            "details": [
+                "послезавтра",
+                "через 2 дні",
+                "з дитиною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 13,
+                "end": 32,
+                "label": "LOC"
+            },
+            {
+                "start": 36,
+                "end": 52,
+                "label": "LOC"
+            },
+            {
+                "start": 53,
+                "end": 64,
+                "label": "TIME"
+            },
+            {
+                "start": 65,
+                "end": 76,
+                "label": "TIME"
+            },
+            {
+                "start": 77,
+                "end": 86,
+                "label": "BABY_SEAT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно їхати з вул. Хрещатик до просп. Перемоги срочно на 11 жовтня о 15 годин",
+        "expected": {
+            "origin": "вул. Хрещатик",
+            "destination": "просп. Перемоги",
+            "details": [
+                "срочно",
+                "на 11 жовтня",
+                "о 15 годин"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 30,
+                "label": "LOC"
+            },
+            {
+                "start": 34,
+                "end": 49,
+                "label": "LOC"
+            },
+            {
+                "start": 50,
+                "end": 56,
+                "label": "TIME"
+            },
+            {
+                "start": 57,
+                "end": 69,
+                "label": "TIME"
+            },
+            {
+                "start": 70,
+                "end": 80,
+                "label": "TIME"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з пл. Софійська до вул. Володимирська сьогодні терміново з кондиціонером",
+        "expected": {
+            "origin": "пл. Софійська",
+            "destination": "вул. Володимирська",
+            "details": [
+                "сьогодні",
+                "терміново",
+                "кондиціонер"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 21,
+                "label": "LOC"
+            },
+            {
+                "start": 25,
+                "end": 43,
+                "label": "LOC"
+            },
+            {
+                "start": 44,
+                "end": 52,
+                "label": "TIME"
+            },
+            {
+                "start": 53,
+                "end": 62,
+                "label": "TIME"
+            },
+            {
+                "start": 63,
+                "end": 76,
+                "label": "CONDIT"
+            }
+        ]
+    },
+    {
+        "text": "Замовити з бульв. Лесі Українки до вул. Басейна через 5 днів о 18:45 з багажем",
+        "expected": {
+            "origin": "бульв. Лесі Українки",
+            "destination": "вул. Басейна",
+            "details": [
+                "через 5 днів",
+                "о 18:45",
+                "з багажем"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 32,
+                "label": "LOC"
+            },
+            {
+                "start": 36,
+                "end": 48,
+                "label": "LOC"
+            },
+            {
+                "start": 49,
+                "end": 61,
+                "label": "TIME"
+            },
+            {
+                "start": 62,
+                "end": 69,
+                "label": "TIME"
+            },
+            {
+                "start": 70,
+                "end": 79,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно таксі з вул. Велика Васильківська до наб. Дніпровська післязавтра з собакою",
+        "expected": {
+            "origin": "вул. Велика Васильківська",
+            "destination": "наб. Дніпровська",
+            "details": [
+                "післязавтра",
+                "з собакою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 42,
+                "label": "LOC"
+            },
+            {
+                "start": 46,
+                "end": 62,
+                "label": "LOC"
+            },
+            {
+                "start": 63,
+                "end": 75,
+                "label": "TIME"
+            },
+            {
+                "start": 76,
+                "end": 85,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "З пров. Киянівський до майдан Соборний на 12 жовтня о 10:00 терміново",
+        "expected": {
+            "origin": "пров. Киянівський",
+            "destination": "майдан Соборний",
+            "details": [
+                "на 12 жовтня",
+                "о 10:00",
+                "терміново"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 19,
+                "label": "LOC"
+            },
+            {
+                "start": 23,
+                "end": 38,
+                "label": "LOC"
+            },
+            {
+                "start": 39,
+                "end": 51,
+                "label": "TIME"
+            },
+            {
+                "start": 52,
+                "end": 59,
+                "label": "TIME"
+            },
+            {
+                "start": 60,
+                "end": 69,
+                "label": "TIME"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з шосе Столичне до вул. Грушевського сьогодні в 20 годин 15 хвилин з чек",
+        "expected": {
+            "origin": "шосе Столичне",
+            "destination": "вул. Грушевського",
+            "details": [
+                "сьогодні",
+                "в 20 годин 15 хвилин",
+                "чек"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 21,
+                "label": "LOC"
+            },
+            {
+                "start": 25,
+                "end": 42,
+                "label": "LOC"
+            },
+            {
+                "start": 43,
+                "end": 51,
+                "label": "TIME"
+            },
+            {
+                "start": 52,
+                "end": 72,
+                "label": "TIME"
+            },
+            {
+                "start": 73,
+                "end": 76,
+                "label": "CHECK_OUT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно з вул. Богдана Хмельницького до просп. Науки послезавтра о 9:00 з твариною",
+        "expected": {
+            "origin": "вул. Богдана Хмельницького",
+            "destination": "просп. Науки",
+            "details": [
+                "послезавтра",
+                "о 9:00",
+                "з твариною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 37,
+                "label": "LOC"
+            },
+            {
+                "start": 41,
+                "end": 54,
+                "label": "LOC"
+            },
+            {
+                "start": 55,
+                "end": 66,
+                "label": "TIME"
+            },
+            {
+                "start": 67,
+                "end": 73,
+                "label": "TIME"
+            },
+            {
+                "start": 74,
+                "end": 84,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "Замов таксі з бульв. Дружби Народів до вул. Січових Стрільців через 4 дні на 15 жовтня з кондиціонером",
+        "expected": {
+            "origin": "бульв. Дружби Народів",
+            "destination": "вул. Січових Стрільців",
+            "details": [
+                "через 4 дні",
+                "на 15 жовтня",
+                "кондиціонер"
+            ]
+        },
+        "entities": [
+            {
+                "start": 13,
+                "end": 34,
+                "label": "LOC"
+            },
+            {
+                "start": 38,
+                "end": 60,
+                "label": "LOC"
+            },
+            {
+                "start": 61,
+                "end": 72,
+                "label": "TIME"
+            },
+            {
+                "start": 73,
+                "end": 85,
+                "label": "TIME"
+            },
+            {
+                "start": 86,
+                "end": 99,
+                "label": "CONDIT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно таксі з вул. Інститутська 20 до пл. Майдан Незалежності 1 післязавтра о 12:00 з дитиною",
+        "expected": {
+            "origin": "вул. Інститутська 20",
+            "destination": "пл. Майдан Незалежності 1",
+            "details": [
+                "післязавтра",
+                "о 12:00",
+                "з дитиною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 37,
+                "label": "LOC"
+            },
+            {
+                "start": 41,
+                "end": 66,
+                "label": "LOC"
+            },
+            {
+                "start": 67,
+                "end": 79,
+                "label": "TIME"
+            },
+            {
+                "start": 80,
+                "end": 87,
+                "label": "TIME"
+            },
+            {
+                "start": 88,
+                "end": 97,
+                "label": "BABY_SEAT"
+            }
+        ]
+    },
+    {
+        "text": "Замов таксі з бульв. Тараса Шевченка до вул. Сагайдачного срочно на 13 жовтня в 16 годин 30 хвилин",
+        "expected": {
+            "origin": "бульв. Тараса Шевченка",
+            "destination": "вул. Сагайдачного",
+            "details": [
+                "срочно",
+                "на 13 жовтня",
+                "в 16 годин 30 хвилин"
+            ]
+        },
+        "entities": [
+            {
+                "start": 13,
+                "end": 36,
+                "label": "LOC"
+            },
+            {
+                "start": 40,
+                "end": 57,
+                "label": "LOC"
+            },
+            {
+                "start": 58,
+                "end": 64,
+                "label": "TIME"
+            },
+            {
+                "start": 65,
+                "end": 77,
+                "label": "TIME"
+            },
+            {
+                "start": 78,
+                "end": 98,
+                "label": "TIME"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з пров. Михайлівський до наб. Русанівська через 5 днів о 19:45 з валізою",
+        "expected": {
+            "origin": "пров. Михайлівський",
+            "destination": "наб. Русанівська",
+            "details": [
+                "через 5 днів",
+                "о 19:45",
+                "з валізою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 27,
+                "label": "LOC"
+            },
+            {
+                "start": 31,
+                "end": 47,
+                "label": "LOC"
+            },
+            {
+                "start": 48,
+                "end": 60,
+                "label": "TIME"
+            },
+            {
+                "start": 61,
+                "end": 68,
+                "label": "TIME"
+            },
+            {
+                "start": 69,
+                "end": 78,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно їхати з вул. Воздвиженська 18 до шосе Брест-Литовське сьогодні терміново з твариною",
+        "expected": {
+            "origin": "вул. Воздвиженська 18",
+            "destination": "шосе Брест-Литовське",
+            "details": [
+                "сьогодні",
+                "терміново",
+                "з твариною"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 38,
+                "label": "LOC"
+            },
+            {
+                "start": 42,
+                "end": 62,
+                "label": "LOC"
+            },
+            {
+                "start": 63,
+                "end": 71,
+                "label": "TIME"
+            },
+            {
+                "start": 72,
+                "end": 81,
+                "label": "TIME"
+            },
+            {
+                "start": 82,
+                "end": 92,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "Замовити таксі з майдан Софійський до тупик Подільський послезавтра в 11 годин з чек",
+        "expected": {
+            "origin": "майдан Софійський",
+            "destination": "тупик Подільський",
+            "details": [
+                "послезавтра",
+                "в 11 годин",
+                "чек"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 34,
+                "label": "LOC"
+            },
+            {
+                "start": 38,
+                "end": 55,
+                "label": "LOC"
+            },
+            {
+                "start": 56,
+                "end": 67,
+                "label": "TIME"
+            },
+            {
+                "start": 68,
+                "end": 78,
+                "label": "TIME"
+            },
+            {
+                "start": 79,
+                "end": 82,
+                "label": "CHECK_OUT"
+            }
+        ]
+    },
+    {
+        "text": "Таксі з вул. Франка до пров. Киянівський 5 на 16 жовтня о 13:15 з кондиціонером",
+        "expected": {
+            "origin": "вул. Франка",
+            "destination": "пров. Киянівський 5",
+            "details": [
+                "на 16 жовтня",
+                "о 13:15",
+                "кондиціонер"
+            ]
+        },
+        "entities": [
+            {
+                "start": 8,
+                "end": 19,
+                "label": "LOC"
+            },
+            {
+                "start": 23,
+                "end": 42,
+                "label": "LOC"
+            },
+            {
+                "start": 43,
+                "end": 55,
+                "label": "TIME"
+            },
+            {
+                "start": 56,
+                "end": 63,
+                "label": "TIME"
+            },
+            {
+                "start": 64,
+                "end": 77,
+                "label": "CONDIT"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно з бульв. Дружби Народів до вул. Велика Васильківська через 1 день в 9 годин 20 хвилин",
+        "expected": {
+            "origin": "бульв. Дружби Народів",
+            "destination": "вул. Велика Васильківська",
+            "details": [
+                "через 1 день",
+                "в 9 годин 20 хвилин"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 32,
+                "label": "LOC"
+            },
+            {
+                "start": 36,
+                "end": 61,
+                "label": "LOC"
+            },
+            {
+                "start": 62,
+                "end": 74,
+                "label": "TIME"
+            },
+            {
+                "start": 75,
+                "end": 95,
+                "label": "TIME"
+            }
+        ]
+    },
+    {
+        "text": "З наб. Лівобережна до шосе Столичне 10 послезавтра терміново з собакою",
+        "expected": {
+            "origin": "наб. Лівобережна",
+            "destination": "шосе Столичне 10",
+            "details": [
+                "послезавтра",
+                "терміново",
+                "з собакою"
+            ]
+        },
+        "entities": [
+            {
+                "start": 2,
+                "end": 18,
+                "label": "LOC"
+            },
+            {
+                "start": 22,
+                "end": 38,
+                "label": "LOC"
+            },
+            {
+                "start": 39,
+                "end": 50,
+                "label": "TIME"
+            },
+            {
+                "start": 51,
+                "end": 60,
+                "label": "TIME"
+            },
+            {
+                "start": 61,
+                "end": 70,
+                "label": "ANIMAL"
+            }
+        ]
+    },
+    {
+        "text": "Потрібно таксі з вул. Грушевського до пл. Контрактова на 20 жовтня о 22:00 з багажем",
+        "expected": {
+            "origin": "вул. Грушевського",
+            "destination": "пл. Контрактова",
+            "details": [
+                "на 20 жовтня",
+                "о 22:00",
+                "з багажем"
+            ]
+        },
+        "entities": [
+            {
+                "start": 17,
+                "end": 34,
+                "label": "LOC"
+            },
+            {
+                "start": 38,
+                "end": 53,
+                "label": "LOC"
+            },
+            {
+                "start": 54,
+                "end": 66,
+                "label": "TIME"
+            },
+            {
+                "start": 67,
+                "end": 74,
+                "label": "TIME"
+            },
+            {
+                "start": 75,
+                "end": 84,
+                "label": "BAGGAGE"
+            }
+        ]
+    },
+    {
+        "text": "Замовити з вул. Володимирська до бульв. Лесі Українки сьогодні в 8 годин 0 хвилин з чек",
+        "expected": {
+            "origin": "вул. Володимирська",
+            "destination": "бульв. Лесі Українки",
+            "details": [
+                "сьогодні",
+                "в 8 годин 0 хвилин",
+                "чек"
+            ]
+        },
+        "entities": [
+            {
+                "start": 11,
+                "end": 29,
+                "label": "LOC"
+            },
+            {
+                "start": 33,
+                "end": 54,
+                "label": "LOC"
+            },
+            {
+                "start": 55,
+                "end": 63,
+                "label": "TIME"
+            },
+            {
+                "start": 64,
+                "end": 82,
+                "label": "TIME"
+            },
+            {
+                "start": 83,
+                "end": 86,
+                "label": "CHECK_OUT"
+            }
+        ]
+    },
+
+        {
+            "text": "Потрібно їхати з вул. Сумська 12 Харків до просп. Науки 45 Київ завтра з великою валізою і кондиціонером",
+            "expected": {
+                "origin": "вул. Сумська 12 Харків",
+                "destination": "просп. Науки 45 Київ",
+                "details": ["завтра", "велика валіза", "кондиціонер"]
+            },
+            "entities": [
+                {
+                    "start": 16,
+                    "end": 38,
+                    "label": "LOC"
+                },
+                {
+                    "start": 41,
+                    "end": 61,
+                    "label": "LOC"
+                },
+                {
+                    "start": 62,
+                    "end": 68,
+                    "label": "TIME"
+                },
+                {
+                    "start": 69,
+                    "end": 86,
+                    "label": "BAGGAGE"
+                },
+                {
+                    "start": 87,
+                    "end": 100,
+                    "label": "CONDIT"
+                }
+            ]
+        },
+        {
+            "text": "Замовити таксі з Києва вул. Хрещатик 10 до Львова просп. Свободи 15 з кондиціонером",
+            "expected": {
+                "origin": "Києва вул. Хрещатик 10",
+                "destination": "Львова просп. Свободи 15",
+                "details": ["кондиціонер"]
+            },
+            "entities": [
+                {
+                    "start": 15,
+                    "end": 37,
+                    "label": "LOC"
+                },
+                {
+                    "start": 40,
+                    "end": 64,
+                    "label": "LOC"
+                },
+                {
+                    "start": 65,
+                    "end": 78,
+                    "label": "CONDIT"
+                }
+            ]
+        },
+        {
+            "text": "Хочу таксі з пл. Конституції 1 до вул. Грушевського 5 сьогодні з дитиною",
+            "expected": {
+                "origin": "пл. Конституції 1",
+                "destination": "вул. Грушевського 5",
+                "details": ["сьогодні", "з дитиною"]
+            },
+            "entities": [
+                {
+                    "start": 12,
+                    "end": 28,
+                    "label": "LOC"
+                },
+                {
+                    "start": 31,
+                    "end": 49,
+                    "label": "LOC"
+                },
+                {
+                    "start": 50,
+                    "end": 58,
+                    "label": "TIME"
+                },
+                {
+                    "start": 59,
+                    "end": 68,
+                    "label": "BABY_SEAT"
+                }
+            ]
+        },
+        {
+            "text": "Потрібно з вул. Дерибасівська 1 до вул. Богдана Хмельницького 10 терміново з багажем",
+            "expected": {
+                "origin": "вул. Дерибасівська 1",
+                "destination": "вул. Богдана Хмельницького 10",
+                "details": ["терміново", "з багажем"]
+            },
+            "entities": [
+                {
+                    "start": 10,
+                    "end": 28,
+                    "label": "LOC"
+                },
+                {
+                    "start": 31,
+                    "end": 60,
+                    "label": "LOC"
+                },
+                {
+                    "start": 61,
+                    "end": 70,
+                    "label": "TIME"
+                },
+                {
+                    "start": 71,
+                    "end": 80,
+                    "label": "BAGGAGE"
+                }
+            ]
+        },
+        {
+            "text": "Потрібно таксі з вул. Грушевського до пл. Контрактова на 20 жовтня о 22:00 з багажем",
+            "expected": {
+                "origin": "вул. Грушевського",
+                "destination": "пл. Контрактова",
+                "details": ["на 20 жовтня", "о 22:00", "з багажем"]
+            },
+            "entities": [
+                {
+                    "start": 16,
+                    "end": 33,
+                    "label": "LOC"
+                },
+                {
+                    "start": 36,
+                    "end": 51,
+                    "label": "LOC"
+                },
+                {
+                    "start": 52,
+                    "end": 64,
+                    "label": "TIME"
+                },
+                {
+                    "start": 65,
+                    "end": 72,
+                    "label": "TIME"
+                },
+                {
+                    "start": 73,
+                    "end": 82,
+                    "label": "BAGGAGE"
+                }
+            ]
+        },
+        {
+            "text": "Замовити з вул. Володимирська до бульв. Лесі Українки сьогодні в 8 годин 0 хвилин з чек",
+            "expected": {
+                "origin": "вул. Володимирська",
+                "destination": "бульв. Лесі Українки",
+                "details": ["сьогодні", "в 8 годин 0 хвилин", "чек"]
+            },
+            "entities": [
+                {
+                    "start": 10,
+                    "end": 27,
+                    "label": "LOC"
+                },
+                {
+                    "start": 30,
+                    "end": 51,
+                    "label": "LOC"
+                },
+                {
+                    "start": 52,
+                    "end": 60,
+                    "label": "TIME"
+                },
+                {
+                    "start": 61,
+                    "end": 78,
+                    "label": "TIME"
+                },
+                {
+                    "start": 79,
+                    "end": 82,
+                    "label": "CHECK_OUT"
+                }
+            ]
+        },
+
+    {
+        "text": "Order taxi from Kyiv, Lesi Ukrainky Street 20 to Lviv, Svobody Avenue 15 with conditioner",
+        "entities": [
+            {"start": 18, "end": 22, "label": "GPE"},
+            {"start": 24, "end": 47, "label": "LOC"},
+            {"start": 51, "end": 55, "label": "GPE"},
+            {"start": 57, "end": 78, "label": "LOC"},
+            {"start": 85, "end": 95, "label": "CONDIT"}
+        ]
+    },
+    {
+        "text": "Need taxi from Khreshchatyk Street 5 to Boryspil Airport with pet",
+        "entities": [
+            {"start": 15, "end": 37, "label": "LOC"},
+            {"start": 41, "end": 57, "label": "LOC"},
+            {"start": 63, "end": 66, "label": "ANIMAL"}
+        ]
     }
+
 ]
