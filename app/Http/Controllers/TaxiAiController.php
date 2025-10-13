@@ -176,6 +176,99 @@ class TaxiAiController extends Controller
                 $details = array_merge($details, $timeDetails);
             }
 
+            if (isset(
+                $responseData['origin_coordinates']['latitude'],
+                $responseData['origin_coordinates']['longitude'],
+                $responseData['destination_coordinates']['latitude'],
+                $responseData['destination_coordinates']['longitude']
+            )) {
+                try {
+                    $costParams = $this->prepareCostParameters($responseData);
+// Логирование перед вызовом costValueExecute
+                    Log::info('=== Параметры для costValueExecute ===', $costParams);
+
+// Вызов метода с распакованными параметрами
+                    $costResultArr = $this->costValueExecute(
+                        $costParams['originLatitude'],
+                        $costParams['originLongitude'],
+                        $costParams['toLatitude'],
+                        $costParams['toLongitude'],
+                        $costParams['tariff'],
+                        $costParams['phone'],
+                        $costParams['user'],
+                        $costParams['time'],
+                        $costParams['date'],
+                        $costParams['services'],
+                        $costParams['city'],
+                        $costParams['application']
+                    );
+
+                    // Логирование результата costValueExecute
+                    Log::info('=== Результат costValueExecute ===', [
+                        'costResultArr' => $costResultArr,
+                        'type' => gettype($costResultArr),
+                        'is_empty' => empty($costResultArr),
+                        'is_array' => is_array($costResultArr)
+                    ]);
+
+// ИСПРАВЛЕНИЕ: Обрабатываем Response объект
+                    if ($costResultArr instanceof \Illuminate\Http\Response) {
+                        Log::info('Извлекаем данные из Response объекта');
+
+                        $content = $costResultArr->getContent();
+                        $responseArr = json_decode($content, true);
+
+                        Log::info('Данные из Response', [
+                            'content' => $content,
+                            'decoded_data' => $responseArr
+                        ]);
+
+                        if (is_array($responseArr) && !empty($responseArr)) {
+                            // Создаем массив с нужными данными для объединения
+                            $costData = [
+                                'order_cost' => $responseArr['order_cost'] ?? 0,
+                                'dispatching_order_uid' => $responseArr['dispatching_order_uid'] ?? ''
+                            ];
+
+                            Log::info('costData', [
+                                'costData' => $costData
+                            ]);
+                            $responseData['costData'] = $costData;
+
+                        } else {
+                            Log::warning('Не удалось извлечь данные из Response');
+                        }
+                    } elseif (!empty($costResultArr) && is_array($costResultArr)) {
+                        Log::info('Объединяем details с costResultArr', [
+                            'costResultArr' => $costResultArr
+                        ]);
+                        $costData = [
+                            'order_cost' => $costResultArr['order_cost'] ?? 0,
+                            'dispatching_order_uid' => $costResultArr['dispatching_order_uid'] ?? '',
+                        ];
+                        $responseData['costData'] = $costData;
+
+                    } else {
+                        Log::warning('costResultArr пустой или не массив, объединение не выполнено');
+                    }
+
+                } catch (\Exception $e) {
+                    Log::error('Ошибка при расчете стоимости такси', [
+                        'error' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+
+                    // Продолжаем выполнение, не прерывая весь метод
+                    Log::info('Продолжаем выполнение после ошибки расчета стоимости');
+                }
+            }
+// Логирование перед array_unique
+            Log::info('=== Перед array_unique ===', [
+                'current_details' => $details
+            ]);
+
             $responseData['details'] = array_values(array_unique($details));
 
             // Обновляем основной ответ
@@ -196,6 +289,98 @@ class TaxiAiController extends Controller
                 'error' => 'Cannot connect to Taxi AI service',
                 'details' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+
+    /**
+     * Подготавливает параметры для costValueExecute из данных ответа
+     */
+    private function prepareCostParameters(array $responseData): array
+    {
+
+        // Обязательные параметры из responseData
+        $originLatitude = $responseData['origin_coordinates']['latitude'] ?? null;
+        $originLongitude = $responseData['origin_coordinates']['longitude'] ?? null;
+        $toLatitude = $responseData['destination_coordinates']['latitude'] ?? null;
+        $toLongitude = $responseData['destination_coordinates']['longitude'] ?? null;
+
+        // Проверяем обязательные поля
+        if ($originLatitude === null || $originLongitude === null ||
+            $toLatitude === null || $toLongitude === null) {
+            Log::error("Missing required coordinates in response data");
+            return [];
+        }
+
+        $tariff = $responseData['tariff'] ?? " ";
+        $phone = $responseData['phone'] ?? ' ';
+        $user = $responseData["user"] ?? "username (2.1756) *andrey18051@gmail.com*nal_payment";
+        $time = $responseData["time"] ?? "no_time";
+        $date = $responseData["date"] ?? "no_date";
+
+        $city = $responseData["city"] ?? 'OdessaTest';
+        $application = $responseData ["application"] ?? "PAS2";
+
+
+        // Параметры со значениями по умолчанию
+        $services = !empty($responseData["details"]) ? implode('*', $responseData["details"]) : 'no_extra_charge_codes';
+
+        // Возвращаем все параметры в виде массива
+        return [
+            'originLatitude' => $originLatitude,
+            'originLongitude' => $originLongitude,
+            'toLatitude' => $toLatitude,
+            'toLongitude' => $toLongitude,
+            'tariff' => $tariff,
+            'phone' => $phone,
+            'user' => $user,
+            'time' => $time,
+            'date' => $date,
+            'services' => $services,
+            'city' => $city,
+            'application' => $application
+        ];
+    }
+    /**
+     * @throws \Exception
+     */
+    public function costValueExecute(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $user,
+        $time,
+        $date,
+        $services,
+        $city,
+        $application
+    )
+    {
+        try {
+            $controller = new AndroidTestOSMController();
+            return $controller->costSearchMarkersTime(
+                $originLatitude,
+                $originLongitude,
+                $toLatitude,
+                $toLongitude,
+                $tariff,
+                $phone,
+                $user,
+                $time,
+                $date,
+                $services,
+                $city,
+                $application
+            );
+        } catch (\Exception $e) {
+            Log::error('Ошибка в costValueExecute', [
+                'error' => $e->getMessage(),
+                'params' => compact('originLatitude', 'originLongitude', 'toLatitude', 'toLongitude', 'services')
+            ]);
+            return []; // Возвращаем пустой массив вместо ошибки
         }
     }
 }

@@ -184,62 +184,48 @@ class TaxiAiTestController extends Controller
                 'errors' => []
             ];
 
-            // Сравниваем с ожидаемыми результатами, если есть
+// Сравниваем с ожидаемыми результатами, если есть
             if (isset($testData['expected'])) {
                 $responseData = $resultData['response'] ?? [];
 
-                // Проверяем origin
-                if (isset($testData['expected']['origin']) &&
-                    ($responseData['origin'] ?? '') !== $testData['expected']['origin']) {
-                    $testResult['pass'] = false;
-                    $testResult['errors'][] = "Origin mismatch: expected '{$testData['expected']['origin']}', got '{$responseData['origin']}'";
-                }
+                // Проверка строковых полей
+                $stringFields = ['origin', 'destination'];
+                foreach ($stringFields as $field) {
+                    if (isset($testData['expected'][$field])) {
+                        $expected = $testData['expected'][$field];
+                        $actual = $responseData[$field] ?? '';
 
-                // Проверяем destination
-                if (isset($testData['expected']['destination']) &&
-                    ($responseData['destination'] ?? '') !== $testData['expected']['destination']) {
-                    $testResult['pass'] = false;
-                    $testResult['errors'][] = "Destination mismatch: expected '{$testData['expected']['destination']}', got '{$responseData['destination']}'";
-                }
-
-                // Проверяем details - ТЕПЕРЬ МАССИВ
-                if (isset($testData['expected']['details'])) {
-                    $responseDetails = $responseData['details'] ?? [];
-                    $expectedDetails = $testData['expected']['details'];
-
-                    // Сортируем для сравнения
-                    $responseSorted = $responseDetails;
-                    $expectedSorted = $expectedDetails;
-                    sort($responseSorted);
-                    sort($expectedSorted);
-
-                    if ($responseSorted !== $expectedSorted) {
-                        $testResult['pass'] = false;
-                        $testResult['errors'][] = "Details mismatch: expected " . json_encode($expectedDetails) . ", got " . json_encode($responseDetails);
+                        if ($actual !== $expected) {
+                            $testResult['pass'] = false;
+                            $testResult['errors'][] = ucfirst($field) . " mismatch: expected '{$expected}', got '{$actual}'";
+                        }
                     }
                 }
 
-                // Проверяем time_details
-                if (isset($testData['expected']['time_details'])) {
-                    $responseTimeDetails = $responseData['time_details'] ?? [];
-                    $expectedTimeDetails = $testData['expected']['time_details'];
-                    sort($responseTimeDetails);
-                    sort($expectedTimeDetails);
-                    if ($responseTimeDetails !== $expectedTimeDetails) {
-                        $testResult['pass'] = false;
-                        $testResult['errors'][] = "Time details mismatch: expected " . json_encode($expectedTimeDetails) . ", got " . json_encode($responseTimeDetails);
-                    }
-                }
+                // Проверка массивов с сортировкой
+                $arrayFields = ['details', 'time_details', 'normalized_time_details'];
+                foreach ($arrayFields as $field) {
+                    if (isset($testData['expected'][$field])) {
+                        $expectedArray = $testData['expected'][$field];
+                        $actualArray = $responseData[$field] ?? [];
 
-                // Проверяем normalized_time_details
-                if (isset($testData['expected']['normalized_time_details'])) {
-                    $responseNormalized = $responseData['normalized_time_details'] ?? [];
-                    $expectedNormalized = $testData['expected']['normalized_time_details'];
-                    sort($responseNormalized);
-                    sort($expectedNormalized);
-                    if ($responseNormalized !== $expectedNormalized) {
-                        $testResult['pass'] = false;
-                        $testResult['errors'][] = "Normalized time details mismatch: expected " . json_encode($expectedNormalized) . ", got " . json_encode($responseNormalized);
+                        // Проверяем что оба значения являются массивами
+                        if (!is_array($expectedArray) || !is_array($actualArray)) {
+                            $testResult['pass'] = false;
+                            $testResult['errors'][] = ucfirst($field) . " type mismatch: expected array";
+                            continue;
+                        }
+
+                        $expectedSorted = $expectedArray;
+                        $actualSorted = $actualArray;
+                        sort($expectedSorted);
+                        sort($actualSorted);
+
+                        if ($actualSorted !== $expectedSorted) {
+                            $testResult['pass'] = false;
+                            $testResult['errors'][] = ucfirst($field) . " mismatch: expected " .
+                                json_encode($expectedArray) . ", got " . json_encode($actualArray);
+                        }
                     }
                 }
             }
