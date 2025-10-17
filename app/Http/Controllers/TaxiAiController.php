@@ -405,6 +405,7 @@ class TaxiAiController extends Controller
             'timestamp' => now()->toISOString()
         ]);
 
+
         $categories = [
             'Kyiv City' => ['київ', 'kyiv', 'kiev', 'киев'],
             'Dnipropetrovsk Oblast' => ['дніпро', 'dnipro', 'днепр'],
