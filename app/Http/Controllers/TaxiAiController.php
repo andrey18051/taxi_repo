@@ -6,6 +6,7 @@ use App\Helpers\OpenStreetMapHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class TaxiAiController extends Controller
 {
@@ -129,6 +130,8 @@ class TaxiAiController extends Controller
             }
 
             $responseData = $aiResponse['response'];
+            $responseData["city"] = $selectedCity;
+
             $geoHelper = new OpenStreetMapHelper();
 
             // Обрабатываем адреса с новой логикой очистки
@@ -322,7 +325,8 @@ class TaxiAiController extends Controller
         $time = $responseData["time"] ?? "no_time";
         $date = $responseData["date"] ?? "no_date";
 
-        $city = $responseData["city"] ?? 'OdessaTest';
+        $city = $this->getCityCategory($responseData["city"]) ?? 'OdessaTest';
+
         $application = $responseData ["application"] ?? "PAS2";
 
 
@@ -385,6 +389,65 @@ class TaxiAiController extends Controller
                 'params' => compact('originLatitude', 'originLongitude', 'toLatitude', 'toLongitude', 'services')
             ]);
             return []; // Возвращаем пустой массив вместо ошибки
+        } catch (InvalidArgumentException $e) {
         }
+    }
+
+
+
+    public function getCityCategory(string $city): string
+    {
+        $normalizedCity = mb_strtolower(trim($city));
+
+        Log::debug('[CityCategory] 🏙️ Начало определения категории города', [
+            'input' => $city,
+            'normalized' => $normalizedCity,
+            'timestamp' => now()->toISOString()
+        ]);
+
+        $categories = [
+            'Kyiv City' => ['київ', 'kyiv', 'kiev', 'киев'],
+            'Dnipropetrovsk Oblast' => ['дніпро', 'dnipro', 'днепр'],
+            'Zaporizhzhia' => ['запоріжжя', 'zaporizhzhia', 'запорожье'],
+            'Cherkasy Oblast' => ['черкаси', 'cherkasy', 'черкассы'],
+            'Odessa' => ['одеса', 'odessa', 'одесса'],
+            'OdessaTest' => [
+                'львів', 'lviv', 'львов',
+                'івано-франківськ', 'ivano-frankivsk', 'ивано-франковск',
+                'вінниця', 'vinnytsia', 'винница',
+                'полтава', 'poltava',
+                'суми', 'sumy', 'суммы',
+                'харків', 'kharkiv', 'харьков',
+                'чернігів', 'chernihiv', 'чернигов',
+                'рівне', 'rivne', 'ровно',
+                'тернопіль', 'ternopil', 'тернополь',
+                'хмельницький', 'khmelnytskyi', 'хмельницкий',
+                'ужгород', 'uzhgorod',
+                'житомир', 'zhytomyr',
+                'кропивницький', 'kropyvnytskyi', 'кропивницкий',
+                'миколаїв', 'mykolaiv', 'николаев',
+                'чернівці', 'chernivtsi', 'черновцы',
+                'луцьк', 'lutsk', 'луцк'
+            ]
+        ];
+
+        foreach ($categories as $category => $variants) {
+            if (in_array($normalizedCity, $variants)) {
+                Log::info("[CityCategory] ✅ Категория определена: $category", [
+                    'city' => $city,
+                    'normalized' => $normalizedCity,
+                    'category' => $category
+                ]);
+                return $category;
+            }
+        }
+
+        Log::warning('[CityCategory] ⚠️ Город не распознан, используется OdessaTest', [
+            'city' => $city,
+            'normalized' => $normalizedCity,
+            'available_categories' => array_keys($categories)
+        ]);
+
+        return 'OdessaTest';
     }
 }
