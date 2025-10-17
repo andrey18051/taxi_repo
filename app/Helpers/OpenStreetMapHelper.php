@@ -100,7 +100,11 @@ class OpenStreetMapHelper
     /**
      * Улучшенное геокодирование с правильными приоритетами
      */
-    public function getCoordinatesByPlaceName(string $placeName, string $lang = 'uk'): ?array
+    public function getCoordinatesByPlaceName(
+        string $placeName,
+        string $lang = 'uk',
+        string $selectedCity
+    ): ?array
     {
         $logContext = [
             'placeName' => $placeName,

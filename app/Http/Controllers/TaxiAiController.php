@@ -92,6 +92,12 @@ class TaxiAiController extends Controller
             $lang = $request->input('lang') ?: $this->detectLanguage($text);
             $defaultCity = $lang === 'uk' ? 'Київ' : ($lang === 'ru' ? 'Киев' : 'Kyiv');
 
+            $displayName = $request->input('displayName');
+            $userEmail = $request->input('userEmail');
+            $userId = $request->input('userId');
+            $selectedCity = $request->input('selectedCity');
+
+
             Log::info('[TaxiAi] Detected language', ['text' => $text, 'lang' => $lang]);
 
             // Запрос к AI модели
@@ -129,27 +135,25 @@ class TaxiAiController extends Controller
             foreach (['origin', 'destination'] as $key) {
                 $address = $responseData[$key] ?? null;
                 if (!empty($address)) {
-                    // Python модель УЖЕ очистила адреса, поэтому просто используем как есть
-                    $cleanedAddress = $address; // Убираем cleanTaxiDetails!
-
-                    // Добавляем город если нужно
-                    $hasCity = preg_match('/(Київ|Киев|Kyiv)/ui', $cleanedAddress);
-                    $fullAddress = $hasCity ? $cleanedAddress : $defaultCity . ', ' . $cleanedAddress;
 
                     Log::info("[TaxiAi] Forming full address for {$key}", [
                         'original' => $address,
-                        'full_address' => $fullAddress,
+                        'selectedCity' => $selectedCity,
                     ]);
 
-                    $coords = $geoHelper->getCoordinatesByPlaceName($fullAddress, $lang);
+                    $coords = $geoHelper->getCoordinatesByPlaceName(
+                        $address,
+                        $lang,
+                        $selectedCity
+                    );
 
                     if ($coords) {
                         $responseData[$key . '_coordinates'] = $coords;
                     } else {
-                        Log::warning("[TaxiAi] {$key} coordinates not found", ['address' => $fullAddress]);
+                        Log::warning("[TaxiAi] {$key} coordinates not found", ['address' => $address]);
                     }
 
-                    $responseData[$key . '_cleaned'] = $fullAddress;
+                    $responseData[$key . '_cleaned'] = $address;
                 }
             }
 
