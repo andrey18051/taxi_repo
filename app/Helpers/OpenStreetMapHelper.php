@@ -98,68 +98,74 @@ class OpenStreetMapHelper
     }
 
     /**
-     * Улучшенное геокодирование с правильными приоритетами
+     * Улучшенное геокодирование с использованием переданного города
      */
     public function getCoordinatesByPlaceName(
         string $placeName,
-        string $lang = 'uk',
+        string $lang,
         string $selectedCity
     ): ?array
     {
         $logContext = [
             'placeName' => $placeName,
             'lang' => $lang,
+            'selectedCity' => $selectedCity,
             'timestamp' => now()->toISOString()
         ];
 
-        Log::info('[OpenStreetMapHelper] 🔍 Начало геокодирования', $logContext);
+        Log::info('[OpenStreetMapHelper] 🔍 Начало геокодирования с городом', $logContext);
 
         try {
-            $cacheKey = 'coordinates_v3_' . md5($placeName . '_' . $lang);
+            $cacheKey = 'coordinates_v4_' . md5($placeName . '_' . $lang . '_' . $selectedCity);
 
-            return Cache::remember($cacheKey, now()->addHours(24), function () use ($placeName, $lang, $logContext) {
-                Log::info('[OpenStreetMapHelper] 🗺️ Обработка запроса (не из кэша)', $logContext);
+            return Cache::remember($cacheKey, now()->addHours(24), function () use ($placeName, $lang, $selectedCity, $logContext) {
+                Log::info('[OpenStreetMapHelper] 🗺️ Обработка запроса с городом (не из кэша)', $logContext);
 
-                // 1. Сначала пытаемся найти точный адрес через Nominatim
-                $nominatimCoords = $this->getNominatimCoordinates($placeName, $lang);
+                // 1. Сначала пытаемся найти точный адрес через Nominatim с указанным городом
+                $nominatimCoords = $this->getNominatimCoordinates($placeName, $lang, $selectedCity);
                 if ($nominatimCoords) {
-                    Log::info('[OpenStreetMapHelper] ✅ Координаты найдены через Nominatim', [
+                    Log::info('[OpenStreetMapHelper] ✅ Координаты найдены через Nominatim с городом', [
                         'address' => $placeName,
+                        'city' => $selectedCity,
                         'coords' => $nominatimCoords
                     ]);
                     return $nominatimCoords;
                 }
 
-                Log::warning('[OpenStreetMapHelper] ⚠️ Nominatim не нашел координаты для полного адреса', [
-                    'address' => $placeName
+                Log::warning('[OpenStreetMapHelper] ⚠️ Nominatim не нашел координаты для адреса с городом', [
+                    'address' => $placeName,
+                    'city' => $selectedCity
                 ]);
 
-                // 2. Fallback на MapBox
-                $mapboxCoords = $this->mapBoxHelper->getCoordinatesByPlaceName($placeName, $lang);
+                // 2. Fallback на MapBox с указанным городом
+                $mapboxCoords = $this->mapBoxHelper->getCoordinatesByPlaceName($placeName, $lang, $selectedCity);
                 if ($mapboxCoords) {
-                    Log::info('[OpenStreetMapHelper] ✅ Координаты найдены через MapBox (fallback)', [
+                    Log::info('[OpenStreetMapHelper] ✅ Координаты найдены через MapBox с городом (fallback)', [
                         'address' => $placeName,
+                        'city' => $selectedCity,
                         'coords' => $mapboxCoords
                     ]);
                     return $mapboxCoords;
                 }
 
-                Log::warning('[OpenStreetMapHelper] ⚠️ MapBox не нашел координаты', [
-                    'address' => $placeName
+                Log::warning('[OpenStreetMapHelper] ⚠️ MapBox не нашел координаты с городом', [
+                    'address' => $placeName,
+                    'city' => $selectedCity
                 ]);
 
-                // 3. Только если оба сервиса не нашли адрес, проверяем на город
-                $cityMatch = $this->findCityOnlyMatch($placeName, $lang);
-                if ($cityMatch) {
-                    Log::info('[OpenStreetMapHelper] 🏙️ Использованы координаты города (fallback)', [
-                        'city' => $cityMatch['city'],
-                        'coords' => $cityMatch['coords']
+                // 3. Используем координаты указанного города как fallback
+                $cityCoords = $this->getCityCoordinates($selectedCity, $lang);
+                if ($cityCoords) {
+                    Log::info('[OpenStreetMapHelper] 🏙️ Использованы координаты указанного города (fallback)', [
+                        'city' => $selectedCity,
+                        'coords' => $cityCoords
                     ]);
-                    return $cityMatch['coords'];
+                    return $cityCoords;
                 }
 
                 Log::error('[OpenStreetMapHelper] ❌ Все методы геокодирования failed', [
-                    'address' => $placeName
+                    'address' => $placeName,
+                    'city' => $selectedCity
                 ]);
 
                 return null;
@@ -168,28 +174,40 @@ class OpenStreetMapHelper
         } catch (\Exception $e) {
             Log::error('[OpenStreetMapHelper] 💥 Критическая ошибка при геокодировании', [
                 'placeName' => $placeName,
+                'selectedCity' => $selectedCity,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            // Аварийный fallback на поиск города
-            return $this->findCityOnlyMatch($placeName, $lang)['coords'] ?? null;
+            // Аварийный fallback на координаты указанного города
+            return $this->getCityCoordinates($selectedCity, $lang);
         }
     }
 
     /**
-     * Поиск через Nominatim с улучшенной обработкой
+     * Поиск через Nominatim с учетом города
      */
-    private function getNominatimCoordinates(string $placeName, string $lang): ?array
+    private function getNominatimCoordinates(string $placeName, string $lang, ?string $city = null): ?array
     {
         try {
-            Log::debug('[OpenStreetMapHelper] 🗺️ Запрос к Nominatim', ['address' => $placeName]);
+            $query = $placeName;
+
+            // Если указан город, добавляем его к запросу для повышения точности
+            if ($city && !empty(trim($city))) {
+                $query = $placeName . ', ' . $city;
+            }
+
+            Log::debug('[OpenStreetMapHelper] 🗺️ Запрос к Nominatim с городом', [
+                'address' => $placeName,
+                'city' => $city,
+                'full_query' => $query
+            ]);
 
             $client = new Client(['timeout' => 8]);
 
             $response = $client->get('https://nominatim.openstreetmap.org/search', [
                 'query' => [
-                    'q' => $placeName,
+                    'q' => $query,
                     'format' => 'json',
                     'addressdetails' => 1,
                     'limit' => 5,
@@ -210,7 +228,7 @@ class OpenStreetMapHelper
             }
 
             // Выбираем лучший результат
-            $bestResult = $this->selectBestNominatimResult($data, $placeName);
+            $bestResult = $this->selectBestNominatimResult($data, $query);
 
             if ($bestResult && !empty($bestResult['lon']) && !empty($bestResult['lat'])) {
                 $coords = [
@@ -220,8 +238,8 @@ class OpenStreetMapHelper
 
                 // Валидация координат
                 if ($this->validateUkrainianCoordinates($coords)) {
-                    Log::debug('[OpenStreetMapHelper] 🎯 Выбран результат Nominatim', [
-                        'address' => $bestResult['display_name'] ?? $placeName,
+                    Log::debug('[OpenStreetMapHelper] 🎯 Выбран результат Nominatim с городом', [
+                        'address' => $bestResult['display_name'] ?? $query,
                         'coords' => $coords,
                         'importance' => $bestResult['importance'] ?? 'unknown'
                     ]);
@@ -232,12 +250,42 @@ class OpenStreetMapHelper
             return null;
 
         } catch (RequestException $e) {
-            Log::error('[OpenStreetMapHelper] ❌ Ошибка Nominatim', [
+            Log::error('[OpenStreetMapHelper] ❌ Ошибка Nominatim с городом', [
                 'address' => $placeName,
+                'city' => $city,
                 'error' => $e->getMessage()
             ]);
             return null;
         }
+    }
+
+    /**
+     * Получить координаты города из фиксированного списка
+     */
+    private function getCityCoordinates(string $city, string $lang): ?array
+    {
+        $cleanCity = trim($city);
+
+        // Ищем город в фиксированных координатах
+        foreach ($this->fixedCoordinates as $langCode => $cities) {
+            foreach ($cities as $cityName => $coords) {
+                if (mb_strtolower($cleanCity) === mb_strtolower($cityName)) {
+                    Log::debug('[OpenStreetMapHelper] 🏙️ Найдены координаты города из фиксированного списка', [
+                        'city' => $cityName,
+                        'lang' => $langCode,
+                        'coords' => $coords
+                    ]);
+                    return $coords;
+                }
+            }
+        }
+
+        Log::warning('[OpenStreetMapHelper] 🏙️ Город не найден в фиксированном списке', [
+            'city' => $city,
+            'lang' => $lang
+        ]);
+
+        return null;
     }
 
     /**
@@ -283,38 +331,6 @@ class OpenStreetMapHelper
 
         // Если ничего не найдено в Украине, возвращаем лучший результат
         return $bestResult;
-    }
-
-    /**
-     * Поиск только города (без конкретного адреса)
-     */
-    private function findCityOnlyMatch(string $placeName, string $lang): ?array
-    {
-        $cleanPlaceName = mb_strtolower(trim($placeName));
-
-        // Проверяем, является ли запрос только названием города
-        foreach ($this->fixedCoordinates[$lang] as $city => $coords) {
-            $cleanCity = mb_strtolower(trim($city));
-
-            // Точное совпадение (только название города)
-            if ($cleanPlaceName === $cleanCity) {
-                return [
-                    'city' => $city,
-                    'coords' => $coords
-                ];
-            }
-
-            // Совпадение с удалением лишних пробелов и запятых
-            $pattern = '/^[\s,\-]*' . preg_quote($cleanCity, '/') . '[\s,\-]*$/iu';
-            if (preg_match($pattern, $cleanPlaceName)) {
-                return [
-                    'city' => $city,
-                    'coords' => $coords
-                ];
-            }
-        }
-
-        return null;
     }
 
     /**
