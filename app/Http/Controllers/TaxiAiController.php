@@ -451,4 +451,97 @@ class TaxiAiController extends Controller
 
         return 'OdessaTest';
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function createOrder(Request $request)
+    {
+         Log::info('Create Order Request:', [
+            'headers' => $request->headers->all(),
+            'all_data' => $request->all(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl()
+        ]);
+
+
+        $routeFrom = $request->input('routefrom', 'ул. Аркадийское плато (Гагаринское плато), д.5|2, город Одесса');
+        $routeTo = $request->input('routeto', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
+        $orderUid = $request->input('dispatching_order_uid', '8c3634f4470e4236bc305e0359579372');
+
+        $response = [
+            "comment_info"=> "",
+            "currency" => $request->input('currency', 'грн.'),
+            "dispatching_order_uid" => $orderUid,
+            "extra_charge_codes" => "",
+            "from_lat" => $request->input('originLatitude', '46.4311896709615'),
+            "from_lng" => $request->input('originLongitude', '30.7634880146577'),
+            "lat" => $request->input('toLatitude', '46.3890993667171'),
+            "lng" => $request->input('toLongitude', '30.7504999628167'),
+            "order_cost" => $request->input('order_cost', '86'),
+            "routefrom" => $routeFrom,
+            "routefromnumber" => $request->input('routefromnumber', ''),
+            "routeto" => $routeTo,
+            "to_number" => $request->input('to_number', ' '),
+            "required_time" =>  '01.01.1970 00:00',
+            "flexible_tariff_name" => $request->input('tariff', 'Start'),
+        ];
+
+        return response()->json($response);
+
+
+//        (new AndroidTestOSMController)->orderClientCost(
+//            $originLatitude,
+//            $originLongitude,
+//            $toLatitude,
+//            $toLongitude,
+//            $tariff,
+//            $phone,
+//            $clientCost,
+//            $user,
+//            $add_cost,
+//            $time,
+//            $comment,
+//            $date,
+//            $start,
+//            $finish,
+//            $wfpInvoice,
+//            $services,
+//            $city,
+//            $application
+//        );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function cancelOrder(Request $request) {
+        Log::info('Cancel Order Request:', [
+            'headers' => $request->headers->all(),
+            'all_data' => $request->all(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl()
+        ]);
+
+        $dispatching_order_uid = $request->input('dispatching_order_uid', '');
+        $city = $request->input('city', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
+        $application = $request->input('application', 'PAS2');
+
+        if($dispatching_order_uid != '') {
+            $response= (new AndroidTestOSMController)->webordersCancel(
+                $dispatching_order_uid,
+                $city,
+                $application
+            );
+        } else {
+            $response= [
+                'response' => "Замовлення скасовано 111",
+            ];
+        }
+
+
+        return response()->json($response);
+    }
 }
