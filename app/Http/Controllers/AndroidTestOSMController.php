@@ -8831,7 +8831,7 @@ class AndroidTestOSMController extends Controller
                     );
                 }
                 return response($response_ok, 200)
-                    ->header('Content-Type', 'json');
+                    ->header('Content-Type', 'application/json');
             } else {
                 $response_arr = json_decode($response, true);
 

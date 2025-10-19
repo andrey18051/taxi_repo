@@ -139,6 +139,21 @@ class TaxiAiController extends Controller
                 $address = $responseData[$key] ?? null;
                 if (!empty($address)) {
 
+
+
+                    if($selectedCity == "OdessaTest") {
+                        switch ($lang) {
+                            case "ru":
+                                $selectedCity = "Одесса";
+                                break;
+                            case "en":
+                                $selectedCity = "Odessa";
+                                break;
+                            default:
+                                $selectedCity = "Одеса";
+                        }
+                    }
+
                     Log::info("[TaxiAi] Forming full address for {$key}", [
                         'original' => $address,
                         'selectedCity' => $selectedCity,
@@ -466,51 +481,153 @@ class TaxiAiController extends Controller
         ]);
 
 
-        $routeFrom = $request->input('routefrom', 'ул. Аркадийское плато (Гагаринское плато), д.5|2, город Одесса');
-        $routeTo = $request->input('routeto', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
-        $orderUid = $request->input('dispatching_order_uid', '8c3634f4470e4236bc305e0359579372');
+//        $routeFrom = $request->input('routefrom', 'ул. Аркадийское плато (Гагаринское плато), д.5|2, город Одесса');
+//        $routeTo = $request->input('routeto', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
+//        $orderUid = $request->input('dispatching_order_uid', '8c3634f4470e4236bc305e0359579372');
+//
+//        $response = [
+//            "comment_info"=> "",
+//            "currency" => $request->input('currency', 'грн.'),
+//            "dispatching_order_uid" => $orderUid,
+//            "extra_charge_codes" => "",
+//            "from_lat" => $request->input('originLatitude', '46.4311896709615'),
+//            "from_lng" => $request->input('originLongitude', '30.7634880146577'),
+//            "lat" => $request->input('toLatitude', '46.3890993667171'),
+//            "lng" => $request->input('toLongitude', '30.7504999628167'),
+//            "order_cost" => $request->input('order_cost', '86'),
+//            "routefrom" => $routeFrom,
+//            "routefromnumber" => $request->input('routefromnumber', ''),
+//            "routeto" => $routeTo,
+//            "to_number" => $request->input('to_number', ' '),
+//            "required_time" =>  '01.01.1970 00:00',
+//            "flexible_tariff_name" => $request->input('tariff', 'Start'),
+//        ];
 
-        $response = [
-            "comment_info"=> "",
-            "currency" => $request->input('currency', 'грн.'),
-            "dispatching_order_uid" => $orderUid,
-            "extra_charge_codes" => "",
-            "from_lat" => $request->input('originLatitude', '46.4311896709615'),
-            "from_lng" => $request->input('originLongitude', '30.7634880146577'),
-            "lat" => $request->input('toLatitude', '46.3890993667171'),
-            "lng" => $request->input('toLongitude', '30.7504999628167'),
-            "order_cost" => $request->input('order_cost', '86'),
-            "routefrom" => $routeFrom,
-            "routefromnumber" => $request->input('routefromnumber', ''),
-            "routeto" => $routeTo,
-            "to_number" => $request->input('to_number', ' '),
-            "required_time" =>  '01.01.1970 00:00',
-            "flexible_tariff_name" => $request->input('tariff', 'Start'),
-        ];
+//        return response()->json($response);
 
-        return response()->json($response);
+        // Логируем входящие данные запроса
+        Log::info('📦 CREATE ORDER REQUEST DATA:', [
+            'origin_coordinates' => [
+                'latitude' => $request->input('originLatitude', '46.4311896709615'),
+                'longitude' => $request->input('originLongitude', '30.7634880146577')
+            ],
+            'destination_coordinates' => [
+                'latitude' => $request->input('toLatitude', '46.3890993667171'),
+                'longitude' => $request->input('toLongitude', '30.7504999628167')
+            ],
+            'route' => [
+                'start' => $request->input('routefrom', 'ул. Аркадийское плато (Гагаринское плато), д.5|2, город Одесса'),
+                'finish' => $request->input('routeto', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса')
+            ],
+            'user_info' => [
+                'display_name' => $request->input('displayName', 'username'),
+                'email' => $request->input('userEmail', 'andrey18051@gmail.com'),
+                'phone' => $request->input('phone', '+380936734488'),
+                'version_app' => $request->input('versionApp', 'last_version')
+            ],
+            'order_details' => [
+                'tariff' => $request->input('tariff', 'Start'),
+                'payment_type' => $request->input('payment_type', 'nal_payment'),
+                'client_cost' => $request->input('clientCost', '+380936734488'),
+                'additional_cost' => $request->input('add_cost', '0'),
+                'required_time' => $request->input('required_time', '01.01.1970 00:00'),
+                'comment' => $request->input('comment', 'no_comment'),
+                'date' => $request->input('date', 'no_date')
+            ],
+            'system_info' => [
+                'city' => $request->input('city', 'OdessaTest'),
+                'application' => $request->input('application', 'PAS2'),
+                'wfp_invoice' => $request->input('wfpInvoice', ''),
+                'services' => $request->input('services', '')
+            ]
+        ]);
 
 
-//        (new AndroidTestOSMController)->orderClientCost(
-//            $originLatitude,
-//            $originLongitude,
-//            $toLatitude,
-//            $toLongitude,
-//            $tariff,
-//            $phone,
-//            $clientCost,
-//            $user,
-//            $add_cost,
-//            $time,
-//            $comment,
-//            $date,
-//            $start,
-//            $finish,
-//            $wfpInvoice,
-//            $services,
-//            $city,
-//            $application
-//        );
+        $originLatitude = $request->input('originLatitude', '46.4311896709615');
+        $originLongitude =  $request->input('originLongitude', '30.7634880146577');
+        $toLatitude = $request->input('toLatitude', '46.3890993667171');
+        $toLongitude = $request->input('toLongitude', '30.7504999628167');
+        $tariff = $request->input('tariff', ' ');
+        $phone = $request->input('phone', '+380936734488');
+        $clientCost = $request->input('clientCost', 72);
+        $displayName = $request->input('displayName', 'username');
+        $versionApp = $request->input('versionApp', 'last_version');
+        $userEmail = $request->input('userEmail', 'andrey18051@gmail.com');
+        $payment_type = $request->input('payment_type', 'nal_payment');
+        $user = $displayName  . $versionApp . "*" . $userEmail . "*" . $payment_type;
+//            $request->input('user', 'username (2.1758) *andrey18051@gmail.com*nal_payment');
+        $add_cost = $request->input('add_cost', 0);
+        $time = $request->input('required_time', 'no_time');
+        $comment = $request->input('comment', 'no_comment');
+        $date = $request->input('date', 'no_date');
+        $start = $request->input('routefrom', 'ул. Аркадийское плато (Гагаринское плато), д.5|2, город Одесса');
+        $finish = $request->input('routeto', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
+        $wfpInvoice = $request->input('wfpInvoice', "*");
+        $services = $request->input('services', 'no_extra_charge_codes');
+        $city = $request->input('city', 'OdessaTest');
+        $application =  $request->input('application', 'PAS2');
+
+        // Логируем входящие данные запроса с результатами присваивания
+        Log::info('📦 CREATE ORDER REQUEST DATA:', [
+            'origin_coordinates' => [
+                'latitude' => $originLatitude,
+                'longitude' => $originLongitude
+            ],
+            'destination_coordinates' => [
+                'latitude' => $toLatitude,
+                'longitude' => $toLongitude
+            ],
+            'route' => [
+                'start' => $start,
+                'finish' => $finish
+            ],
+            'user_info' => [
+                'display_name' => $displayName,
+                'email' => $userEmail,
+                'phone' => $phone,
+                'version_app' => $versionApp,
+                'user_string' => $user,
+                'payment_type' => $payment_type
+            ],
+            'order_details' => [
+                'tariff' => $tariff,
+                'client_cost' => $clientCost,
+                'additional_cost' => $add_cost,
+                'required_time' => $time,
+                'comment' => $comment,
+                'date' => $date
+            ],
+            'system_info' => [
+                'city' => $city,
+                'application' => $application,
+                'wfp_invoice' => $wfpInvoice,
+                'services' => $services
+            ]
+        ]);
+
+        $response = (new AndroidTestOSMController)->orderClientCost(
+            $originLatitude,
+            $originLongitude,
+            $toLatitude,
+            $toLongitude,
+            $tariff,
+            $phone,
+            $clientCost,
+            $user,
+            $add_cost,
+            $time,
+            $comment,
+            $date,
+            $start,
+            $finish,
+            $wfpInvoice,
+            $services,
+            $city,
+            $application
+        );
+        Log::info('📤 Ответ Android API: ' . json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        return  $response;
     }
 
     /**
