@@ -661,4 +661,9 @@ class TaxiAiController extends Controller
 
         return response()->json($response);
     }
+
+    public function historyOrdersAi ($email, $city, $app): array
+    {
+        return (new UIDController)->UIDStatusShowEmailCityApp($email, $city, $app);
+    }
 }

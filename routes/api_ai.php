@@ -23,4 +23,5 @@ use Illuminate\Support\Facades\RateLimiter;
 Route::post('/taxi-ai/parse', [TaxiAiController::class, 'parse']);
 Route::post('/taxi-ai/create-order', [TaxiAiController::class, 'createOrder']);
 Route::post('/taxi-ai/cancel-order', [TaxiAiController::class, 'cancelOrder']);
+Route::get('/taxi-ai/historyOrdersAi/{email}/{city}/{app}', [TaxiAiController::class, 'historyOrdersAi']);
 
