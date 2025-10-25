@@ -29,7 +29,6 @@ class CheckInactiveServers extends Command
         $modelClass = $this->applications[$baseApp];
 
         if (!class_exists($modelClass)) {
-            $this->error("✗ Модель не существует: {$modelClass}");
             Log::error("Модель не существует: {$modelClass}");
             return Command::FAILURE;
         }
@@ -41,13 +40,6 @@ class CheckInactiveServers extends Command
         Log::debug("📋 Города для {$baseApp}: ", $cities->toArray());
 
         foreach ($cities as $city) {
-            // Пропускаем тестовые города
-            if (stripos($city, 'Test') !== false && $city !== 'OdessaTest') {
-                Log::debug("⏭ Пропуск тестового города: {$city}");
-                continue;
-            }
-
-
             $this->info("🏙 Проверка города: {$city}");
             $result = $this->checkCityServers($city, $modelClass, $baseApp);
 
@@ -55,17 +47,14 @@ class CheckInactiveServers extends Command
             $totalReactivated += $result['reactivated'];
             $totalDeactivated += $result['deactivated'];
 
-            // Собираем оффлайн IP без дублей
-            foreach ($result['offline_list'] as $addr) {
-                $offlineList[] = trim($addr);
-            }
+            $offlineList = array_merge($offlineList, $result['offline_list']);
         }
 
-        // Удаляем дубликаты и сортируем для красоты
-        $offlineList = array_values(array_unique($offlineList));
+        // Убираем дубликаты
+        $offlineList = array_values(array_unique(array_map('trim', $offlineList)));
         sort($offlineList);
 
-        // Синхронизация PAS2 и PAS4
+        // Полная синхронизация всех приложений
         $this->syncOtherApplications($offlineList);
 
         Log::info("📊 Результаты проверки", [
@@ -75,111 +64,139 @@ class CheckInactiveServers extends Command
             'offline_count' => count($offlineList),
         ]);
 
-        // внутри handle()
+        // Работа с кэшем Redis
+        $cacheFinal = 'last_inactive_hash_final';
+        $redis = Cache::getRedis();
+        $hashFinal = Cache::get($cacheFinal);
+
+        $ttlFinal = $redis->ttl(Cache::getPrefix() . $cacheFinal);
+        $existsFinal = $redis->exists(Cache::getPrefix() . $cacheFinal);
+
+        Log::debug("📦 Состояние Redis перед сравнением:", [
+            'exists_final' => $existsFinal,
+            'ttl_final' => $ttlFinal,
+            'hash_final' => $hashFinal,
+        ]);
 
         if (count($offlineList) > 0) {
-            sort($offlineList);
             $offlineHash = md5(json_encode($offlineList));
+            Log::debug("🔍 Текущий offlineHash: {$offlineHash}");
 
-            $cacheFinal = 'last_inactive_hash_final';
-            $cacheTemp  = 'last_inactive_hash_temp';
-
-            $hashFinal = Cache::get($cacheFinal);
-            $hashTemp  = Cache::get($cacheTemp);
-
-            // если текущий хэш совпадает с временным 2 раза подряд — подтверждаем оффлайн
-            if ($hashTemp === $offlineHash && $hashFinal !== $offlineHash) {
+            // Проверяем: хэш изменился — значит новый состав offline
+            if ($hashFinal !== $offlineHash) {
+                // Новый оффлайн-набор — сохраняем и уведомляем
                 Cache::put($cacheFinal, $offlineHash, now()->addMinutes(30));
-                Log::debug("💾 Подтверждён оффлайн и кэш обновлён: {$cacheFinal} = {$offlineHash}");
+                Log::info("💾 Новый оффлайн-хэш сохранён: {$offlineHash}");
 
-                Cache::forget($cacheTemp);
+                $message = "🚨 Обнаружено " . count($offlineList) . " неработающих серверов!\n\n"
+                    . implode("\n", $offlineList);
 
-                $messageAdmin = "🚨 Обнаружено " . count($offlineList) .
-                    " неработающих серверов!\n\n" . implode("\n", $offlineList);
+                // Отправляем уведомления
+                $this->notifyAdmins($message, $offlineList);
 
-                try {
-                    Notification::route('mail', 'taxi.easy.ua.sup@gmail.com')
-                        ->notify(new InactiveServersAlert($offlineList));
-                    Log::info("📧 Email notification sent");
-                } catch (\Exception $e) {
-                    Log::error("❌ Email error: {$e->getMessage()}");
-                }
-
-                try {
-                    (new TelegramController())->sendMeMessage($messageAdmin);
-                    (new TelegramController())->sendAlarmMessage($messageAdmin);
-                    Log::info("📨 Telegram message sent");
-                } catch (\Exception $e) {
-                    Log::error("❌ Telegram error: {$e->getMessage()}");
-                }
-
-            } elseif ($hashTemp !== $offlineHash) {
-                // сохраняем первый раз как временный
-                Cache::put($cacheTemp, $offlineHash, now()->addMinutes(10));
-                Log::debug("🧠 Кэш сохранён: {$cacheTemp} = {$offlineHash}");
-                Log::info("⏳ Первый оффлайн-результат сохранён, ждём подтверждения на следующей проверке.");
             } else {
-                Log::debug("ℹ️ Оффлайн список без изменений — уведомления не отправлены.");
+                Log::debug("ℹ️ Оффлайн-хэш не изменился. Новых уведомлений не требуется.");
             }
         } else {
-            Cache::forget('last_inactive_hash_temp');
-            Cache::forget('last_inactive_hash_final');
-            Log::info("✅ Все сервера активны");
+            // Все сервера активны — очищаем кэш
+            Cache::forget($cacheFinal);
+            Log::info("✅ Все сервера активны. Кэш очищен.");
         }
 
 
         return Command::SUCCESS;
     }
 
+
+    protected function notifyAdmins(string $message, array $offlineList = [])
+    {
+        try {
+            Notification::route('mail', 'taxi.easy.ua.sup@gmail.com')
+                ->notify(new InactiveServersAlert($offlineList));
+            Log::info("📧 Email notification sent successfully");
+        } catch (\Throwable $e) {
+            Log::error("❌ Email error: {$e->getMessage()}");
+        }
+
+        try {
+            $telegram = new TelegramController();
+            $telegram->sendMeMessage($message);
+            $telegram->sendAlarmMessage($message);
+            Log::info("📨 Telegram message sent successfully");
+        } catch (\Throwable $e) {
+            Log::error("❌ Telegram error: {$e->getMessage()}");
+        }
+    }
+
+
     protected function checkCityServers(string $city, string $modelClass, string $appName): array
     {
-        $lock = Cache::lock("inactive_check_{$appName}_{$city}", 10);
+        $lockKey = "inactive_check_{$appName}_{$city}";
+        $lock = Cache::lock($lockKey, 5);
+
         if (!$lock->get()) {
             Log::warning("🔐 Не удалось получить блокировку для {$appName}/{$city}");
-            return ['checked' => 0, 'reactivated' => 0, 'deactivated' => 0, 'offline_list' => []];
+            return [
+                'checked' => 0,
+                'reactivated' => 0,
+                'deactivated' => 0,
+                'offline_list' => [],
+            ];
         }
 
         try {
             $checked = $reactivated = $deactivated = 0;
             $offlineList = [];
 
-            $offlineServers = $modelClass::where('name', $city)
-                ->where('online', false)->get();
+            // Ключ для кэша проверенных серверов
+            $cacheKey = "checked_servers_{$city}";
+            $checkedServers = Cache::get($cacheKey, []);
 
-            foreach ($offlineServers as $server) {
+            $servers = $modelClass::where('name', $city)->get();
+
+            foreach ($servers as $server) {
+                // Если сервер уже проверялся — используем предыдущий результат
+                if (isset($checkedServers[$server->address])) {
+                    $isOnline = $checkedServers[$server->address];
+                    Log::debug("⏩ Пропуск повторной проверки {$server->address} (кэш: " . ($isOnline ? 'online' : 'offline') . ")");
+                } else {
+                    $isOnline = $this->checkDomain($server->address);
+                    $checkedServers[$server->address] = $isOnline;
+                }
+
                 $checked++;
-                if ($this->checkDomain($server->address)) {
-                    $server->online = true;
+
+                if ($isOnline && $server->online !== "true") {
+                    $server->online = "true";
                     $server->save();
                     $reactivated++;
-                } else {
-                    $offlineList[] = $server->address;
-                }
-            }
-
-            $onlineServers = $modelClass::where('name', $city)
-                ->where('online', true)->get();
-
-            foreach ($onlineServers as $server) {
-                $checked++;
-                if (!$this->checkDomain($server->address)) {
-                    $server->online = false;
+                    Log::info("🟢 Сервер {$server->address} снова online");
+                } elseif (!$isOnline && $server->online !== "false") {
+                    $server->online = "false";
                     $server->save();
                     $deactivated++;
                     $offlineList[] = $server->address;
+                    Log::warning("🔴 Сервер {$server->address} ушёл в оффлайн");
+                } elseif (!$isOnline && $server->online === "false") {
+                    $offlineList[] = $server->address;
                 }
             }
+
+            // Сохраняем обновлённые результаты проверки в кэш
+            Cache::put($cacheKey, $checkedServers, now()->addMinutes(10));
 
             return [
                 'checked' => $checked,
                 'reactivated' => $reactivated,
                 'deactivated' => $deactivated,
-                'offline_list' => $offlineList
+                'offline_list' => $offlineList,
             ];
         } finally {
             $lock->release();
         }
     }
+
+
 
     protected function checkDomain(string $domain): bool
     {
@@ -191,12 +208,12 @@ class CheckInactiveServers extends Command
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_TIMEOUT => 8,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FAILONERROR => true,
+            CURLOPT_FAILONERROR => false,
         ]);
 
-        $response = curl_exec($curl);
+        curl_exec($curl);
         $http = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $err = curl_errno($curl);
+        $err  = curl_errno($curl);
         $elapsed = round((microtime(true) - $start) * 1000, 2);
         curl_close($curl);
 
@@ -211,30 +228,58 @@ class CheckInactiveServers extends Command
 
     protected function syncOtherApplications(array $offlineList)
     {
-        if (empty($offlineList)) {
-            Log::debug("🟢 Нет оффлайн-серверов для синхронизации");
+        // Получаем все адреса серверов из PAS1
+        $pas1Model = $this->applications['PAS1'];
+        if (!class_exists($pas1Model)) {
+            Log::error("❌ Модель PAS1 не найдена, синхронизация невозможна");
             return;
         }
 
+        $allServers = $pas1Model::pluck('address')->toArray();
+        $onlineList = array_diff($allServers, $offlineList);
+
+        Log::debug("🔁 Начало полной синхронизации", [
+            'offline_count' => count($offlineList),
+            'online_count' => count($onlineList)
+        ]);
+
         foreach (['PAS2', 'PAS4'] as $app) {
             if (!isset($this->applications[$app])) continue;
+
             $model = $this->applications[$app];
-            if (!class_exists($model)) continue;
+            if (!class_exists($model)) {
+                Log::warning("⚠️ Модель {$app} отсутствует, пропускаем");
+                continue;
+            }
 
             try {
-                // Массовое обновление — быстрее, чем проход по каждому адресу
-                $updatedCount = $model::whereIn('address', $offlineList)
-                    ->update(['online' => false]);
-
-                if ($updatedCount > 0) {
-                    Log::warning("🔄 {$app}: синхронизировано оффлайн-серверов — {$updatedCount}");
-                } else {
-                    Log::debug("ℹ️ {$app}: оффлайн-сервера для синхронизации не найдены");
+                // 🔴 Обновляем оффлайн
+                $offlineUpdated = 0;
+                if (!empty($offlineList)) {
+                    $offlineUpdated = $model::whereIn('address', $offlineList)
+                        ->update(['online' => 'false']);
                 }
+
+                // 🟢 Обновляем онлайн
+                $onlineUpdated = 0;
+                if (!empty($onlineList)) {
+                    $onlineUpdated = $model::whereIn('address', $onlineList)
+                        ->update(['online' => 'true']);
+                }
+
+                // 🧹 (опционально) чистим лишние записи, если их нет в PAS1
+                $deleted = $model::whereNotIn('address', $allServers)->delete();
+
+                Log::info("🔄 {$app}: синхронизация завершена", [
+                    'offline_updated' => $offlineUpdated,
+                    'online_updated' => $onlineUpdated,
+                    'deleted' => $deleted,
+                ]);
             } catch (\Throwable $e) {
                 Log::error("❌ Ошибка при синхронизации {$app}: {$e->getMessage()}");
             }
         }
     }
+
 
 }
