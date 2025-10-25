@@ -132,10 +132,10 @@ class CheckInactiveServers extends Command
     protected function checkCityServers(string $city, string $modelClass, string $appName): array
     {
         $lockKey = "inactive_check_{$appName}_{$city}";
-        $lock = Cache::lock($lockKey, 5);
+        $lock = Cache::lock($lockKey, 10); // 10 секунд на проверку города
 
         if (!$lock->get()) {
-            Log::warning("🔐 Не удалось получить блокировку для {$appName}/{$city}");
+            Log::warning("Не удалось получить блокировку для {$appName}/{$city}. Пропускаем.");
             return [
                 'checked' => 0,
                 'reactivated' => 0,
@@ -148,48 +148,91 @@ class CheckInactiveServers extends Command
             $checked = $reactivated = $deactivated = 0;
             $offlineList = [];
 
-            // Ключ для кэша проверенных серверов
-            $cacheKey = "checked_servers_{$city}";
-            $checkedServers = Cache::get($cacheKey, []);
+            // ГЛОБАЛЬНЫЙ КЭШ: статус всех серверов по address
+            $globalCacheKey = 'server_status_global';
+            $globalChecked = Cache::get($globalCacheKey, []);
 
+            // Получаем все сервера города
             $servers = $modelClass::where('name', $city)->get();
 
-            foreach ($servers as $server) {
-                // Если сервер уже проверялся — используем предыдущий результат
-                if (isset($checkedServers[$server->address])) {
-                    $isOnline = $checkedServers[$server->address];
-                    Log::debug("⏩ Пропуск повторной проверки {$server->address} (кэш: " . ($isOnline ? 'online' : 'offline') . ")");
-                } else {
-                    $isOnline = $this->checkDomain($server->address);
-                    $checkedServers[$server->address] = $isOnline;
-                }
-
-                $checked++;
-
-                if ($isOnline && $server->online !== "true") {
-                    $server->online = "true";
-                    $server->save();
-                    $reactivated++;
-                    Log::info("🟢 Сервер {$server->address} снова online");
-                } elseif (!$isOnline && $server->online !== "false") {
-                    $server->online = "false";
-                    $server->save();
-                    $deactivated++;
-                    $offlineList[] = $server->address;
-                    Log::warning("🔴 Сервер {$server->address} ушёл в оффлайн");
-                } elseif (!$isOnline && $server->online === "false") {
-                    $offlineList[] = $server->address;
-                }
+            if ($servers->isEmpty()) {
+                Log::debug("Нет серверов в городе: {$city}");
+                return [
+                    'checked' => 0,
+                    'reactivated' => 0,
+                    'deactivated' => 0,
+                    'offline_list' => [],
+                ];
             }
 
-            // Сохраняем обновлённые результаты проверки в кэш
-            Cache::put($cacheKey, $checkedServers, now()->addMinutes(10));
+            foreach ($servers as $server) {
+                $address = trim($server->address);
+
+                if (empty($address)) {
+                    Log::warning("Пустой address у сервера в городе {$city}, ID: {$server->id}");
+                    continue;
+                }
+
+            // Используем ГЛОБАЛЬНЫЙ кэш
+            if (isset($globalChecked[$address])) {
+                $isOnline = $globalChecked[$address];
+                Log::debug("КЭШ: {$address} → " . ($isOnline ? 'ONLINE' : 'OFFLINE') . " (город: {$city})");
+            } else {
+                // Первая проверка — делаем HTTP-запрос
+                $isOnline = $this->checkDomain($address);
+                $globalChecked[$address] = $isOnline;
+                Log::info("ПРОВЕРКА: {$address} → " . ($isOnline ? 'ONLINE' : 'OFFLINE') . " (город: {$city})");
+            }
+
+            $checked++;
+
+            // Обновляем статус в базе
+            $currentStatus = $server->online;
+
+            if ($isOnline && $currentStatus !== "true") {
+                $server->online = "true";
+                $server->save();
+                $reactivated++;
+                Log::info("ВКЛЮЧЁН: {$address} (город: {$city})");
+            } elseif (!$isOnline && $currentStatus !== "false") {
+                $server->online = "false";
+                $server->save();
+                $deactivated++;
+                $offlineList[] = $address;
+                Log::warning("ВЫКЛЮЧЕН: {$address} (город: {$city})");
+            } elseif (!$isOnline && $currentStatus === "false") {
+                $offlineList[] = $address;
+            }
+            // Если online и уже "true" — ничего не делаем
+        }
+
+            // Сохраняем обновлённый глобальный кэш (на 10 минут)
+            Cache::put($globalCacheKey, $globalChecked, now()->addMinutes(10));
+
+            Log::debug("Проверка города {$city} завершена", [
+                'checked' => $checked,
+                'reactivated' => $reactivated,
+                'deactivated' => $deactivated,
+                'offline' => $offlineList,
+            ]);
 
             return [
                 'checked' => $checked,
                 'reactivated' => $reactivated,
                 'deactivated' => $deactivated,
                 'offline_list' => $offlineList,
+            ];
+
+        } catch (\Throwable $e) {
+            Log::error("Ошибка при проверке города {$city}: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'checked' => 0,
+                'reactivated' => 0,
+                'deactivated' => 0,
+                'offline_list' => [],
             ];
         } finally {
             $lock->release();
