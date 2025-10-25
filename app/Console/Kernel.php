@@ -29,10 +29,10 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('logs:send')->dailyAt('22:00');
         $schedule->command('queue:monitor-failed')->everyFiveMinutes();
 
-        $schedule->command('check-inactive:run')
-            ->everyFiveMinutes()
-            ->withoutOverlapping()
-            ->appendOutputTo(storage_path('logs/server-check.log'));
+//        $schedule->command('check-inactive:run')
+//            ->everyFiveMinutes()
+//            ->withoutOverlapping()
+//            ->appendOutputTo(storage_path('logs/server-check.log'));
     }
 
 

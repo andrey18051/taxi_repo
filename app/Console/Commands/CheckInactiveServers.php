@@ -22,51 +22,73 @@ class CheckInactiveServers extends Command
 
     public function handle()
     {
-        $this->info('Старт проверки серверов (только PAS1)...');
-        Log::info('Старт проверки серверов (только PAS1)');
-
-        // Принудительная очистка кэша
-        if ($this->option('force')) {
-            Cache::forget('server_status_global');
-            Log::info('Принудительная проверка: кэш сброшен');
+        // ГЛОБАЛЬНЫЙ LOCK — ОДИН ЗАПУСК В ОДИН МОМЕНТ
+        $globalLock = Cache::lock('check_inactive_global', 60); // 60 сек
+        if (!$globalLock->get()) {
+            Log::info('Команда уже выполняется. Пропускаем этот запуск.');
+            return Command::SUCCESS;
         }
 
-        $baseApp = 'PAS1';
-        $modelClass = $this->applications[$baseApp];
+        try {
+            $this->info('Старт проверки серверов (только PAS1)...');
+            Log::info('Старт проверки серверов (только PAS1)');
 
-        if (!class_exists($modelClass)) {
-            Log::error("Модель не существует: {$modelClass}");
-            return Command::FAILURE;
+            // Принудительная очистка кэша
+            if ($this->option('force')) {
+                Cache::forget('server_status_global');
+                Log::info('Принудительная проверка: кэш сброшен');
+            }
+
+            $baseApp = 'PAS1';
+            $modelClass = $this->applications[$baseApp];
+
+            if (!class_exists($modelClass)) {
+                Log::error("Модель не существует: {$modelClass}");
+                return Command::FAILURE;
+            }
+
+            $totalChecked = $totalReactivated = $totalDeactivated = 0;
+            $offlineList = [];
+            $globalChecked = Cache::get('server_status_global', []); // Один кэш на всю команду
+
+            $cities = $modelClass::distinct()->pluck('name');
+            Log::debug("Города для {$baseApp}: ", $cities->toArray());
+
+            foreach ($cities as $city) {
+                $result = $this->checkCityServers($city, $modelClass, $baseApp, $globalChecked);
+                $totalChecked += $result['checked'];
+                $totalReactivated += $result['reactivated'];
+                $totalDeactivated += $result['deactivated'];
+                $offlineList = array_merge($offlineList, $result['offline_list']);
+                $globalChecked = $result['global_checked']; // Обновляем кэш
+            }
+
+            // Убираем дубликаты
+            $offlineList = array_values(array_unique(array_map('trim', $offlineList)));
+            sort($offlineList);
+
+            // Обновляем кэш ОДИН РАЗ в конце
+            Cache::put('server_status_global', $globalChecked, now()->addMinutes(3));
+
+            $this->syncOtherApplications($offlineList);
+
+            Log::info("Результаты проверки", [
+                'checked' => $totalChecked,
+                'reactivated' => $totalReactivated,
+                'deactivated' => $totalDeactivated,
+                'offline_count' => count($offlineList),
+            ]);
+
+            $this->handleNotifications($offlineList);
+
+            return Command::SUCCESS;
+        } finally {
+            $globalLock->release();
         }
+    }
 
-        $totalChecked = $totalReactivated = $totalDeactivated = 0;
-        $offlineList = [];
-
-        $cities = $modelClass::distinct()->pluck('name');
-        Log::debug("Города для {$baseApp}: ", $cities->toArray());
-
-        foreach ($cities as $city) {
-            $this->info("Проверка города: {$city}");
-            $result = $this->checkCityServers($city, $modelClass, $baseApp);
-
-            $totalChecked += $result['checked'];
-            $totalReactivated += $result['reactivated'];
-            $totalDeactivated += $result['deactivated'];
-            $offlineList = array_merge($offlineList, $result['offline_list']);
-        }
-
-        $offlineList = array_values(array_unique(array_map('trim', $offlineList)));
-        sort($offlineList);
-
-        $this->syncOtherApplications($offlineList);
-
-        Log::info("Результаты проверки", [
-            ' checked' => $totalChecked,
-            ' reactivated' => $totalReactivated,
-            ' deactivated' => $totalDeactivated,
-            ' offline_count' => count($offlineList),
-        ]);
-
+    protected function handleNotifications(array $offlineList)
+    {
         $cacheFinal = 'last_inactive_hash_final';
         $hashFinal = Cache::get($cacheFinal);
 
@@ -87,8 +109,6 @@ class CheckInactiveServers extends Command
             Cache::forget($cacheFinal);
             Log::info("Все сервера активны. Кэш очищен.");
         }
-
-        return Command::SUCCESS;
     }
 
     protected function buildGroupedMessage(array $offlineList): string
@@ -126,26 +146,35 @@ class CheckInactiveServers extends Command
         }
     }
 
-    protected function checkCityServers(string $city, string $modelClass, string $appName): array
+    protected function checkCityServers(string $city, string $modelClass, string $appName, array &$globalChecked): array
     {
         $lockKey = "inactive_check_{$appName}_{$city}";
         $lock = Cache::lock($lockKey, 10);
 
         if (!$lock->get()) {
             Log::warning("Не удалось получить блокировку для {$appName}/{$city}. Пропускаем.");
-            return ['checked' => 0, 'reactivated' => 0, 'deactivated' => 0, 'offline_list' => []];
+            return [
+                'checked' => 0,
+                'reactivated' => 0,
+                'deactivated' => 0,
+                'offline_list' => [],
+                'global_checked' => $globalChecked,
+            ];
         }
 
         try {
             $checked = $reactivated = $deactivated = 0;
             $offlineList = [];
 
-            $globalCacheKey = 'server_status_global';
-            $globalChecked = Cache::get($globalCacheKey, []);
-
             $servers = $modelClass::where('name', $city)->get();
             if ($servers->isEmpty()) {
-                return ['checked' => 0, 'reactivated' => 0, 'deactivated' => 0, 'offline_list' => []];
+                return [
+                    'checked' => 0,
+                    'reactivated' => 0,
+                    'deactivated' => 0,
+                    'offline_list' => [],
+                    'global_checked' => $globalChecked,
+                ];
             }
 
             foreach ($servers as $server) {
@@ -164,8 +193,7 @@ class CheckInactiveServers extends Command
 
                 $checked++;
 
-                // Приводим к строке "true"/"false"
-                $currentStatus = $server->online === 'true' || $server->online === true || $server->online === '1' ? 'true' : 'false';
+                $currentStatus = in_array($server->online, ['true', true, '1', 1]) ? 'true' : 'false';
 
                 if ($isOnline && $currentStatus !== 'true') {
                     $server->online = 'true';
@@ -183,18 +211,22 @@ class CheckInactiveServers extends Command
                 }
             }
 
-            // КЭШ: 3 минуты
-            Cache::put($globalCacheKey, $globalChecked, now()->addMinutes(3));
-
             return [
                 'checked' => $checked,
                 'reactivated' => $reactivated,
                 'deactivated' => $deactivated,
                 'offline_list' => $offlineList,
+                'global_checked' => $globalChecked,
             ];
         } catch (\Throwable $e) {
             Log::error("Ошибка при проверке города {$city}: " . $e->getMessage());
-            return ['checked' => 0, 'reactivated' => 0, 'deactivated' => 0, 'offline_list' => []];
+            return [
+                'checked' => 0,
+                'reactivated' => 0,
+                'deactivated' => 0,
+                'offline_list' => [],
+                'global_checked' => $globalChecked,
+            ];
         } finally {
             $lock->release();
         }
@@ -207,14 +239,16 @@ class CheckInactiveServers extends Command
 
         $curl = curl_init($url);
         curl_setopt_array($curl, [
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 10,  // увеличено
+            CURLOPT_TIMEOUT => 15,         // увеличено
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FAILONERROR => false,
             CURLOPT_NOBODY => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
         ]);
 
-        $response = curl_exec($curl);
+        curl_exec($curl);
         $http = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $err = curl_errno($curl);
         $errorMsg = curl_error($curl);
