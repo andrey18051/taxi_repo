@@ -42,10 +42,11 @@ class CheckInactiveServers extends Command
 
         foreach ($cities as $city) {
             // Пропускаем тестовые города
-            if (stripos($city, 'Test') !== false) {
+            if (stripos($city, 'Test') !== false && $city !== 'OdessaTest') {
                 Log::debug("⏭ Пропуск тестового города: {$city}");
                 continue;
             }
+
 
             $this->info("🏙 Проверка города: {$city}");
             $result = $this->checkCityServers($city, $modelClass, $baseApp);
@@ -74,13 +75,24 @@ class CheckInactiveServers extends Command
             'offline_count' => count($offlineList),
         ]);
 
-        // Уведомление, если есть оффлайн
-        if (count($offlineList) > 0) {
-            $cacheKey = 'last_inactive_servers';
-            $cachedOffline = Cache::get($cacheKey, []);
+        // внутри handle()
 
-            if ($cachedOffline !== $offlineList) {
-                Cache::put($cacheKey, $offlineList, now()->addMinutes(30));
+        if (count($offlineList) > 0) {
+            sort($offlineList);
+            $offlineHash = md5(json_encode($offlineList));
+
+            $cacheFinal = 'last_inactive_hash_final';
+            $cacheTemp  = 'last_inactive_hash_temp';
+
+            $hashFinal = Cache::get($cacheFinal);
+            $hashTemp  = Cache::get($cacheTemp);
+
+            // если текущий хэш совпадает с временным 2 раза подряд — подтверждаем оффлайн
+            if ($hashTemp === $offlineHash && $hashFinal !== $offlineHash) {
+                Cache::put($cacheFinal, $offlineHash, now()->addMinutes(30));
+                Log::debug("💾 Подтверждён оффлайн и кэш обновлён: {$cacheFinal} = {$offlineHash}");
+
+                Cache::forget($cacheTemp);
 
                 $messageAdmin = "🚨 Обнаружено " . count($offlineList) .
                     " неработающих серверов!\n\n" . implode("\n", $offlineList);
@@ -100,12 +112,21 @@ class CheckInactiveServers extends Command
                 } catch (\Exception $e) {
                     Log::error("❌ Telegram error: {$e->getMessage()}");
                 }
+
+            } elseif ($hashTemp !== $offlineHash) {
+                // сохраняем первый раз как временный
+                Cache::put($cacheTemp, $offlineHash, now()->addMinutes(10));
+                Log::debug("🧠 Кэш сохранён: {$cacheTemp} = {$offlineHash}");
+                Log::info("⏳ Первый оффлайн-результат сохранён, ждём подтверждения на следующей проверке.");
             } else {
-                Log::debug("ℹ️ Offline list unchanged, skip notifications");
+                Log::debug("ℹ️ Оффлайн список без изменений — уведомления не отправлены.");
             }
         } else {
+            Cache::forget('last_inactive_hash_temp');
+            Cache::forget('last_inactive_hash_final');
             Log::info("✅ Все сервера активны");
         }
+
 
         return Command::SUCCESS;
     }
@@ -190,19 +211,30 @@ class CheckInactiveServers extends Command
 
     protected function syncOtherApplications(array $offlineList)
     {
+        if (empty($offlineList)) {
+            Log::debug("🟢 Нет оффлайн-серверов для синхронизации");
+            return;
+        }
+
         foreach (['PAS2', 'PAS4'] as $app) {
             if (!isset($this->applications[$app])) continue;
             $model = $this->applications[$app];
             if (!class_exists($model)) continue;
 
-            foreach ($offlineList as $address) {
-                $server = $model::where('address', $address)->first();
-                if ($server) {
-                    $server->online = false;
-                    $server->save();
-                    Log::warning("🔄 Синхронизирован оффлайн-сервер {$address} в {$app}");
+            try {
+                // Массовое обновление — быстрее, чем проход по каждому адресу
+                $updatedCount = $model::whereIn('address', $offlineList)
+                    ->update(['online' => false]);
+
+                if ($updatedCount > 0) {
+                    Log::warning("🔄 {$app}: синхронизировано оффлайн-серверов — {$updatedCount}");
+                } else {
+                    Log::debug("ℹ️ {$app}: оффлайн-сервера для синхронизации не найдены");
                 }
+            } catch (\Throwable $e) {
+                Log::error("❌ Ошибка при синхронизации {$app}: {$e->getMessage()}");
             }
         }
     }
+
 }
