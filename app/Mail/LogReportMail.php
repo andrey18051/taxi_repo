@@ -10,27 +10,17 @@ use Illuminate\Queue\SerializesModels;
 class LogReportMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $filePath;
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct($filePath)
+    public $logUrl;
+
+    public function __construct($logUrl)
     {
-        $this->filePath = $filePath;
+        $this->logUrl = $logUrl;
     }
 
-    /**
-     * Build the message.
-     */
     public function build()
     {
-        return $this->subject('Laravel Log Report')
-            ->markdown('emails.log_report')
-            ->attach($this->filePath, [
-                'as' => 'laravel.log',
-                'mime' => 'text/plain',
-            ]);
+        return $this->subject('Отчёт логов Laravel')
+            ->view('emails.log_report')
+            ->with(['logUrl' => $this->logUrl]);
     }
 }

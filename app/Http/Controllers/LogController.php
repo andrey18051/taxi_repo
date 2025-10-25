@@ -72,6 +72,7 @@ class LogController extends Controller
 
     public function clearLogs(): \Illuminate\Http\JsonResponse
     {
+        $logsDir = '/usr/share/nginx/html/laravel_logs';
         $filePath = '/usr/share/nginx/html/laravel_logs/laravel.log';
 
         if (!file_exists($filePath)) {
@@ -79,10 +80,22 @@ class LogController extends Controller
         }
 
         try {
-            // Очищаем файл логов (оставляем пустой)
+            // 🔹 1. Очистить основной активный лог
             file_put_contents($filePath, '');
 
-            return response()->json(['message' => 'Логи успешно очищены.']);
+            // 🔹 2. Удалить все архивные логи (которые были отправлены по почте)
+            $deletedCount = 0;
+            foreach (glob($logsDir . '/laravel_log_*.log') as $oldFile) {
+                if (is_file($oldFile)) {
+                    unlink($oldFile);
+                    $deletedCount++;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Логи успешно очищены.',
+                'deleted_archives' => $deletedCount
+            ]);
         } catch (\Exception $e) {
             Log::error('Ошибка при очистке логов: ' . $e->getMessage());
             return response()->json(['message' => 'Ошибка: ' . $e->getMessage()], 500);
