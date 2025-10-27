@@ -87,6 +87,30 @@ class CheckInactiveServers extends Command
         }
     }
 
+//    protected function handleNotifications(array $offlineList)
+//    {
+//        $cacheFinal = 'last_inactive_hash_final';
+//        $hashFinal = Cache::get($cacheFinal);
+//
+//        if (count($offlineList) > 0) {
+//            $offlineHash = md5(json_encode($offlineList));
+//            Log::debug("Текущий offlineHash: {$offlineHash}");
+//
+//            if ($hashFinal !== $offlineHash) {
+//                Cache::put($cacheFinal, $offlineHash, now()->addMinutes(30));
+//                Log::info("Новый оффлайн-хэш сохранён: {$offlineHash}");
+//
+//                $message = $this->buildGroupedMessage($offlineList);
+//                $this->notifyAdmins($message, $offlineList);
+//            } else {
+//                Log::debug("Оффлайн-хэш не изменился. Новых уведомлений не требуется.");
+//            }
+//        } else {
+//            Cache::forget($cacheFinal);
+//            Log::info("Все сервера активны. Кэш очищен.");
+//        }
+//    }
+
     protected function handleNotifications(array $offlineList)
     {
         $cacheFinal = 'last_inactive_hash_final';
@@ -100,8 +124,51 @@ class CheckInactiveServers extends Command
                 Cache::put($cacheFinal, $offlineHash, now()->addMinutes(30));
                 Log::info("Новый оффлайн-хэш сохранён: {$offlineHash}");
 
-                $message = $this->buildGroupedMessage($offlineList);
-                $this->notifyAdmins($message, $offlineList);
+                // 🔹 Серверы с ограничением уведомлений 1 раз в сутки
+                $dailyServers = [
+                    '91.205.17.153:7201',
+                    '91.205.17.153:7208',
+                ];
+
+                // Разделение списков
+                $dailyList = [];
+                $normalList = [];
+                foreach ($offlineList as $srv) {
+                    if (in_array($srv, $dailyServers)) {
+                        $dailyList[] = $srv;
+                    } else {
+                        $normalList[] = $srv;
+                    }
+                }
+
+                // 🔹 Проверка частоты уведомлений
+                $dailyKey = 'last_notify_daily_91.205.17.153';
+                $lastDaily = Cache::get($dailyKey);
+                $canNotifyDaily = !$lastDaily || now()->diffInHours($lastDaily) >= 24;
+
+                $normalKey = 'last_notify_normal_servers';
+                $lastNormal = Cache::get($normalKey);
+                $canNotifyNormal = !$lastNormal || now()->diffInMinutes($lastNormal) >= 30;
+
+                // 🔹 1. Уведомление о 91.205.17.153 (раз в сутки)
+                if ($canNotifyDaily && !empty($dailyList)) {
+                    $msgDaily = $this->buildGroupedMessage($dailyList);
+                    $this->notifyAdmins("📅 [Раз в сутки]\n" . $msgDaily, $dailyList);
+                    Cache::put($dailyKey, now(), now()->addHours(24));
+                    Log::info("Отправлено ежедневное уведомление о 91.205.17.153");
+                }
+
+                // 🔹 2. Уведомление раз в 30 мин — только если есть другие сервера
+                if (!empty($normalList) && $canNotifyNormal) {
+                    // добавляем все оффлайн в сообщение (включая 91.205.17.153)
+                    $msgNormal = $this->buildGroupedMessage($offlineList);
+                    $this->notifyAdmins("⏱ [Раз в 30 минут]\n" . $msgNormal, $offlineList);
+                    Cache::put($normalKey, now(), now()->addMinutes(30));
+                    Log::info("Отправлено общее уведомление (30 мин) обо всех оффлайн-серверах");
+                } else {
+                    Log::debug("⏱ 30-минутное уведомление не требуется (только 91.205.17.153)");
+                }
+
             } else {
                 Log::debug("Оффлайн-хэш не изменился. Новых уведомлений не требуется.");
             }
