@@ -71,7 +71,7 @@ class KafkaConsumeCommand extends Command
             }
 
             // Небольшая задержка, чтобы не перегружать REST Proxy
-            sleep(1);
+            sleep(10);
         }
     }
 }

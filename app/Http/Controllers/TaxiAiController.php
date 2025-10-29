@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Models\Orderweb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -549,7 +550,7 @@ class TaxiAiController extends Controller
         $toLongitude = $request->input('toLongitude', '30.7504999628167');
         $tariff = $request->input('tariff', ' ');
         $phone = $request->input('phone', '+380936734488');
-        $clientCost = $request->input('clientCost', 72);
+        $clientCost = $request->input('clientCost', 100);
         $displayName = $request->input('displayName', 'username');
         $versionApp = $request->input('versionApp', 'last_version');
         $userEmail = $request->input('userEmail', 'andrey18051@gmail.com');
@@ -665,5 +666,17 @@ class TaxiAiController extends Controller
     public function historyOrdersAi ($email, $city, $app): array
     {
         return (new UIDController)->UIDStatusShowEmailCityApp($email, $city, $app);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function currentStatusOrderAi ($uid, $city, $application): array
+    {
+        return (new AndroidTestOSMController())->historyUIDStatusNew(
+            $uid,
+            $city,
+            $application
+        );
     }
 }
