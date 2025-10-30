@@ -671,7 +671,7 @@ class TaxiAiController extends Controller
     /**
      * @throws \Exception
      */
-    public function currentStatusOrderAi ($uid, $city, $application): array
+    public function currentStatusOrderAi ($uid, $city, $application)
     {
         return (new AndroidTestOSMController())->historyUIDStatusNew(
             $uid,
