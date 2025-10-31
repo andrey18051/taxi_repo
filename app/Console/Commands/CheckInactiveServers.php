@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\InactiveServersAlert;
 use App\Http\Controllers\TelegramController;
+use Carbon\Carbon;
 
 class CheckInactiveServers extends Command
 {
@@ -193,12 +194,27 @@ class CheckInactiveServers extends Command
         return $message;
     }
 
+
+
     protected function notifyAdmins(string $message, array $offlineList = [])
     {
         try {
+            // Проверяем текущее время в киевской зоне
+            $now = Carbon::now('Europe/Kiev');
+            $start = Carbon::createFromFormat('H:i', config('app.start_time'), 'Europe/Kiev');
+            $end = Carbon::createFromFormat('H:i', config('app.end_time'), 'Europe/Kiev');
+
+            // Если сейчас комендантское время — просто выходим
+            if ($now->between($start, $end)) {
+                Log::info("Уведомления не отправлены: комендантское время ({$start->format('H:i')}–{$end->format('H:i')})");
+                return;
+            }
+
+            // Отправка email
             Notification::route('mail', 'taxi.easy.ua.sup@gmail.com')
                 ->notify(new InactiveServersAlert($offlineList));
             Log::info("Email notification sent successfully");
+
         } catch (\Throwable $e) {
             Log::error("Email error: {$e->getMessage()}");
         }
@@ -212,6 +228,7 @@ class CheckInactiveServers extends Command
             Log::error("Telegram error: {$e->getMessage()}");
         }
     }
+
 
     protected function checkCityServers(string $city, string $modelClass, string $appName, array &$globalChecked): array
     {
