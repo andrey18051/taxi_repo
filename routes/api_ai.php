@@ -5,6 +5,7 @@ use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\TaxiAiController;
+use App\Http\Controllers\TaxiAiMapController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
@@ -25,4 +26,9 @@ Route::post('/taxi-ai/create-order', [TaxiAiController::class, 'createOrder']);
 Route::post('/taxi-ai/cancel-order', [TaxiAiController::class, 'cancelOrder']);
 Route::get('/taxi-ai/historyOrdersAi/{email}/{city}/{app}', [TaxiAiController::class, 'historyOrdersAi']);
 Route::get('/taxi-ai/currentStatusOrderAi/{email}/{city}/{app}', [TaxiAiController::class, 'currentStatusOrderAi']);
+
+/**
+ * Map
+ */
+Route::post('/taxi-ai-map/costMapExecute', [TaxiAiMapController::class, 'costMapExecute']);
 

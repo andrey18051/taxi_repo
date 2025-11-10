@@ -23,6 +23,7 @@ class VerifyCsrfToken extends Middleware
         '/taxi-ai/parse',
         '/taxi-ai/create-order',
         '/taxi-ai/cancel-order',
+        '/taxi-ai-map/costMapExecute',
     ];
 
     protected function tokensMatch($request)
