@@ -37,6 +37,7 @@ use App\Http\Controllers\PartnerEmailController;
 use App\Http\Controllers\PartnerGroupController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PromoController;
+use App\Http\Controllers\PusherController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServicesController;
@@ -1570,6 +1571,8 @@ Route::get('/sendNotificationOrderCost/{orderCost}/{app}/{user_id}', [FCMControl
 
 Route::get('/checkEmailInAllFirestoreBlackLists/{email}', [FCMController::class, 'checkEmailInAllFirestoreBlackLists'])->name('checkEmailInAllFirestoreBlackLists');
 Route::get('/geo/city/{lat}/{lon}', [UniversalAndroidFunctionController::class, 'detectCity']);
+Route::get('/wfp/transaction-status/{transactionStatus}/{uid}/{app}/{email}', [PusherController::class, 'sentStatusWfp']);
+// https://t.easy-order-taxi.site/wfp/transaction-status/Declined/uid/PAS2/andrey18051@gmail.com
 
 /**
  * Logs

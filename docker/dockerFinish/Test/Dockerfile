@@ -29,8 +29,8 @@ RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 COPY docker/nginx_test.conf /etc/nginx/nginx.conf
 COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-order-taxi-site.crt
 COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
-COPY docker/certs/nginx/test-taxi.kyiv.ua.crt /etc/ssl/certs/nginx/test-taxi.kyiv.ua.crt
-COPY docker/certs/nginx/test-taxi.kyiv.ua.key /etc/ssl/certs/nginx/test-taxi.kyiv.ua.key
+COPY docker/certs/nginx/t-easy-order-taxi-site.crt /etc/ssl/certs/nginx/t-easy-order-taxi-site.crt
+COPY docker/certs/nginx/t-easy-order-taxi-site.key /etc/ssl/certs/nginx/t-easy-order-taxi-site.key
 
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

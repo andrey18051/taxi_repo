@@ -78,6 +78,9 @@ class TaxiAiMapController extends Controller
         $city = $request->input('city', 'OdessaTest');
         $application =  $request->input('application', 'PAS2');
 
+        if($city == "kyiv city") {
+            $city = "Kyiv City";
+        }
         // Логируем входящие данные запроса с результатами присваивания
         Log::info('📦 CREATE ORDER REQUEST DATA:', [
             'origin_coordinates' => [

@@ -98,7 +98,7 @@ class TaxiAiController extends Controller
             $userEmail = $request->input('userEmail');
             $userId = $request->input('userId');
             $selectedCity = $request->input('selectedCity');
-
+            $payment_type = $request->input('payment_type');
 
             Log::info('[TaxiAi] Detected language', ['text' => $text, 'lang' => $lang]);
 
@@ -132,6 +132,7 @@ class TaxiAiController extends Controller
 
             $responseData = $aiResponse['response'];
             $responseData["city"] = $selectedCity;
+            $responseData["payment_type"] = $payment_type;
 
             $geoHelper = new OpenStreetMapHelper();
 
@@ -327,6 +328,7 @@ class TaxiAiController extends Controller
         $originLongitude = $responseData['origin_coordinates']['longitude'] ?? null;
         $toLatitude = $responseData['destination_coordinates']['latitude'] ?? null;
         $toLongitude = $responseData['destination_coordinates']['longitude'] ?? null;
+        $payment_type = $responseData['payment_type'] ?? "nal_payment";
 
         // Проверяем обязательные поля
         if ($originLatitude === null || $originLongitude === null ||
@@ -337,7 +339,7 @@ class TaxiAiController extends Controller
 
         $tariff = $responseData['tariff'] ?? " ";
         $phone = $responseData['phone'] ?? ' ';
-        $user = $responseData["user"] ?? "username (2.1756) *andrey18051@gmail.com*nal_payment";
+        $user = $responseData["user"] ?? "username (2.1756) *andrey18051@gmail.com*$payment_type";
         $time = $responseData["time"] ?? "no_time";
         $date = $responseData["date"] ?? "no_date";
 
@@ -527,7 +529,7 @@ class TaxiAiController extends Controller
                 'version_app' => $request->input('versionApp', 'last_version')
             ],
             'order_details' => [
-                'tariff' => $request->input('tariff', 'Start'),
+                'tariff' => $request->input('tariff', ' '),
                 'payment_type' => $request->input('payment_type', 'nal_payment'),
                 'client_cost' => $request->input('clientCost', '+380936734488'),
                 'additional_cost' => $request->input('add_cost', '0'),
@@ -647,12 +649,26 @@ class TaxiAiController extends Controller
         $city = $request->input('city', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
         $application = $request->input('application', 'PAS2');
 
+        $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid);
+        $pay_system = $orderweb->pay_system;
+
         if($dispatching_order_uid != '') {
-            $response= (new AndroidTestOSMController)->webordersCancel(
-                $dispatching_order_uid,
-                $city,
-                $application
-            );
+            if($pay_system == "nal_payment") {
+                $response= (new AndroidTestOSMController)->webordersCancel(
+                    $dispatching_order_uid,
+                    $city,
+                    $application
+                );
+            } else {
+                $response= (new AndroidTestOSMController)->webordersCancelDouble(
+                    $dispatching_order_uid,
+                    "",
+                    "",
+                    $city,
+                    $application
+                );
+            }
+
         } else {
             $response= [
                 'response' => "Замовлення скасовано 111",

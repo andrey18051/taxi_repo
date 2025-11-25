@@ -11078,7 +11078,7 @@ class AndroidTestOSMController extends Controller
             } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
             $uid_history->cancel = "1";
             $uid_history->save();
-            $resp_answer = "Замовлення $uid отправлено в влику на отмену";
+            $resp_answer = "Замовлення $uid отправлено на отмену";
             return [
                 'response' => $resp_answer,
             ];
