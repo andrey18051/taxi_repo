@@ -3,11 +3,14 @@
     <div class="container-fluid" style="overflow-x: auto;">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 
-                <h1 class="display-5">City</h1>
+            <h1 class="display-5">City</h1>
 
         </div>
         <button class="btn btn-outline-primary" @click="newCityButton()" style="margin-left: 5px">
             Добавить сервер
+        </button>
+        <button class="btn btn-outline-primary" @click="cityTariffsButton()" style="margin-left: 5px">
+            Тарифы
         </button>
         <button class="btn btn-outline-primary" @click="cityPas1Button()" style="margin-left: 5px">
             PAS 1
@@ -86,11 +89,11 @@
                 </tbody>
             </v-table>
         </div>
-            <smart-pagination
-                :currentPage.sync="currentPage"
-                :totalPages="totalPages"
-                :maxPageLinks="maxPageLinks"
-            />
+        <smart-pagination
+            :currentPage.sync="currentPage"
+            :totalPages="totalPages"
+            :maxPageLinks="maxPageLinks"
+        />
 
     </div>
 
@@ -160,6 +163,9 @@ export default {
                 });
             this.getCities()
 
+        },
+        cityTariffsButton() {
+            this.$router.push('/admin/city-tariffs');
         },
         cityPas1Button() {
             this.$router.push('/admin/city-pas1');

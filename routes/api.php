@@ -4,6 +4,7 @@ use App\Http\Controllers\AndroidController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\CityTariffController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
@@ -94,3 +95,11 @@ Route::get('/test-rate-limit', function (Request $request) {
 });
 
 
+/*
+ * Тарифі по городам
+ */
+Route::apiResource('tariffs', CityTariffController::class);
+
+// Дополнительные маршруты
+Route::get('tariffs/city/{city}', [CityTariffController::class, 'getByCity']);
+Route::post('tariffs/{city}/calculate', [CityTariffController::class, 'calculatePrice']);

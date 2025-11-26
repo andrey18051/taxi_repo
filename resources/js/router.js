@@ -25,6 +25,7 @@ import PartnerEmail from "./views/partners/PartnerEmail";
 import NewPartnerEmail from "./views/partners/NewPartnerEmail";
 import PartnerGroup from "./views/partners/PartnerGroup";
 import WfpHome from "./views/wfp/WfpHome";
+import CityTariffs from "./views/city/CityTariffs";
 
 const  routes = [
     {
@@ -139,7 +140,10 @@ const  routes = [
         path: "/admin/partner_group",
         component: PartnerGroup
     },
-
+    {
+        path: "/admin/city-tariffs",
+        component: CityTariffs
+    },
     ];
 
     export default new vueRouter({

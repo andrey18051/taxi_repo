@@ -5616,6 +5616,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityComponent",
@@ -5705,6 +5708,9 @@ __webpack_require__.r(__webpack_exports__);
         console.error("Ошибка при загрузке данных о новом партнере:", error);
       });
       this.getCities();
+    },
+    cityTariffsButton: function cityTariffsButton() {
+      this.$router.push('/admin/city-tariffs');
     },
     cityPas1Button: function cityPas1Button() {
       this.$router.push('/admin/city-pas1');
@@ -6384,6 +6390,223 @@ __webpack_require__.r(__webpack_exports__);
     },
     cityPas4Button: function cityPas4Button() {
       this.$router.push('/admin/city-pas4');
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: "CityTariffs",
+  data: function data() {
+    return {
+      loading: true,
+      tariffs: [],
+      currentPage: 1,
+      totalPages: 0,
+      maxPageLinks: 25,
+      filters: {
+        id: {
+          value: "",
+          keys: ["id"]
+        },
+        city: {
+          value: "",
+          keys: ["city"]
+        },
+        base_price: {
+          value: "",
+          keys: ["base_price"]
+        },
+        base_distance: {
+          value: "",
+          keys: ["base_distance"]
+        },
+        price_per_km: {
+          value: "",
+          keys: ["price_per_km"]
+        },
+        is_test: {
+          value: "",
+          keys: ["is_test"]
+        }
+      }
+    };
+  },
+  mounted: function mounted() {
+    this.getTariffs();
+  },
+  methods: {
+    getTariffs: function getTariffs() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/api/tariffs').then(function (res) {
+        _this.tariffs = res.data.data;
+        _this.loading = false;
+      })["catch"](function (error) {
+        console.error("Ошибка при загрузке тарифов:", error);
+        window.alert("Ошибка при загрузке тарифов");
+      });
+    },
+    deleteTariff: function deleteTariff(id) {
+      var _this2 = this;
+
+      if (confirm("Вы уверены, что хотите удалить этот тариф?")) {
+        axios__WEBPACK_IMPORTED_MODULE_0___default()["delete"]("/api/tariffs/".concat(id)).then(function (response) {
+          var i = _this2.tariffs.map(function (data) {
+            return data.id;
+          }).indexOf(id);
+
+          _this2.tariffs.splice(i, 1);
+
+          window.alert("Тариф удален");
+        })["catch"](function (error) {
+          console.error("Ошибка при удалении тарифа:", error);
+          window.alert("Ошибка при удалении тарифа");
+        });
+      }
+    },
+    updateTariff: function updateTariff(tariff) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().put("/api/tariffs/".concat(tariff.id), {
+        city: tariff.city,
+        base_price: tariff.base_price,
+        base_distance: tariff.base_distance,
+        price_per_km: tariff.price_per_km,
+        is_test: tariff.is_test
+      }).then(function (response) {
+        window.alert("Тариф обновлен");
+      })["catch"](function (error) {
+        console.error("Ошибка при обновлении тарифа:", error);
+        window.alert("Ошибка при обновлении тарифа");
+      });
+    },
+    newTariffButton: function newTariffButton() {
+      var _this3 = this;
+
+      var newTariff = {
+        city: 'New City',
+        base_price: 100.00,
+        base_distance: 3,
+        price_per_km: 13.00,
+        is_test: false
+      };
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post('/api/tariffs', newTariff).then(function (response) {
+        _this3.tariffs.push(response.data.data);
+
+        window.alert("Новый тариф добавлен");
+      })["catch"](function (error) {
+        console.error("Ошибка при создании тарифа:", error);
+        window.alert("Ошибка при создании тарифа");
+      });
     }
   }
 });
@@ -9962,9 +10185,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./views/partners/NewPartnerEmail */ "./resources/js/views/partners/NewPartnerEmail.vue");
 /* harmony import */ var _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./views/partners/PartnerGroup */ "./resources/js/views/partners/PartnerGroup.vue");
 /* harmony import */ var _views_wfp_WfpHome__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./views/wfp/WfpHome */ "./resources/js/views/wfp/WfpHome.vue");
+/* harmony import */ var _views_city_CityTariffs__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./views/city/CityTariffs */ "./resources/js/views/city/CityTariffs.vue");
 
 
 vue__WEBPACK_IMPORTED_MODULE_0__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
 
 
 
@@ -10068,6 +10293,9 @@ var routes = [{
 }, {
   path: "/admin/partner_group",
   component: _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_22__["default"]
+}, {
+  path: "/admin/city-tariffs",
+  component: _views_city_CityTariffs__WEBPACK_IMPORTED_MODULE_24__["default"]
 }];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: "history",
@@ -15372,6 +15600,30 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, "\n.vt-sort[data-v-ef19c1f6] {\n  cursor: pointer;\n}\n", ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css&":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
+// Imports
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.form-control[data-v-1be0ea1f] {\n    border: 1px solid #ced4da;\n    border-radius: 0.25rem;\n    padding: 0.375rem 0.75rem;\n}\n.btn[data-v-1be0ea1f] {\n    margin: 2px;\n}\n.table-striped tbody tr[data-v-1be0ea1f]:nth-of-type(odd) {\n    background-color: rgba(0, 0, 0, 0.05);\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -32963,6 +33215,36 @@ var update = _style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMP
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_style_index_0_id_1be0ea1f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css& */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css&");
+
+            
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_style_index_0_id_1be0ea1f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__["default"], options);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_style_index_0_id_1be0ea1f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js":
 /*!****************************************************************************!*\
   !*** ./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js ***!
@@ -34316,6 +34598,47 @@ component.options.__file = "resources/js/views/city/CityHome_PAS_4.vue"
 
 /***/ }),
 
+/***/ "./resources/js/views/city/CityTariffs.vue":
+/*!*************************************************!*\
+  !*** ./resources/js/views/city/CityTariffs.vue ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _CityTariffs_vue_vue_type_template_id_1be0ea1f_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true& */ "./resources/js/views/city/CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true&");
+/* harmony import */ var _CityTariffs_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CityTariffs.vue?vue&type=script&lang=js& */ "./resources/js/views/city/CityTariffs.vue?vue&type=script&lang=js&");
+/* harmony import */ var _CityTariffs_vue_vue_type_style_index_0_id_1be0ea1f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css& */ "./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _CityTariffs_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _CityTariffs_vue_vue_type_template_id_1be0ea1f_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
+  _CityTariffs_vue_vue_type_template_id_1be0ea1f_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "1be0ea1f",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/views/city/CityTariffs.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/views/close_reason/CloseReasonHome.vue":
 /*!*************************************************************!*\
   !*** ./resources/js/views/close_reason/CloseReasonHome.vue ***!
@@ -35130,6 +35453,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/views/city/CityTariffs.vue?vue&type=script&lang=js&":
+/*!**************************************************************************!*\
+  !*** ./resources/js/views/city/CityTariffs.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./CityTariffs.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
 /***/ "./resources/js/views/close_reason/CloseReasonHome.vue?vue&type=script&lang=js&":
 /*!**************************************************************************************!*\
   !*** ./resources/js/views/close_reason/CloseReasonHome.vue?vue&type=script&lang=js& ***!
@@ -35444,6 +35783,19 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css&":
+/*!**********************************************************************************************************!*\
+  !*** ./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css& ***!
+  \**********************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_style_index_0_id_1be0ea1f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/style-loader/dist/cjs.js!../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=style&index=0&id=1be0ea1f&scoped=true&lang=css&");
+
+
+/***/ }),
+
 /***/ "./node_modules/vuejs-smart-table/src/SmartPagination.vue?vue&type=script&lang=js&":
 /*!*****************************************************************************************!*\
   !*** ./node_modules/vuejs-smart-table/src/SmartPagination.vue?vue&type=script&lang=js& ***!
@@ -35691,6 +36043,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CityHome_PAS_4_vue_vue_type_template_id_01c45537_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CityHome_PAS_4_vue_vue_type_template_id_01c45537_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./CityHome_PAS_4.vue?vue&type=template&id=01c45537&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityHome_PAS_4.vue?vue&type=template&id=01c45537&scoped=true&");
+
+
+/***/ }),
+
+/***/ "./resources/js/views/city/CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/views/city/CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true& ***!
+  \********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_template_id_1be0ea1f_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_template_id_1be0ea1f_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CityTariffs_vue_vue_type_template_id_1be0ea1f_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true&");
 
 
 /***/ }),
@@ -36912,6 +37281,20 @@ var render = function () {
           },
         },
         [_vm._v("\n        Добавить сервер\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.cityTariffsButton()
+            },
+          },
+        },
+        [_vm._v("\n        Тарифы\n    ")]
       ),
       _vm._v(" "),
       _c(
@@ -40180,6 +40563,649 @@ var staticRenderFns = [
           "pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center",
       },
       [_c("h1", { staticClass: "display-5" }, [_vm._v("City PAS 4")])]
+    )
+  },
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true&":
+/*!***********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/views/city/CityTariffs.vue?vue&type=template&id=1be0ea1f&scoped=true& ***!
+  \***********************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function () {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "container-fluid", staticStyle: { "overflow-x": "auto" } },
+    [
+      _vm._m(0),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.newTariffButton()
+            },
+          },
+        },
+        [_vm._v("\n        Добавить тариф\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "container-fluid" },
+        [
+          _c(
+            "v-table",
+            {
+              staticClass: "my-2 table table-striped",
+              attrs: {
+                data: _vm.tariffs,
+                filters: _vm.filters,
+                hideSortIcons: true,
+                currentPage: _vm.currentPage,
+                pageSize: 10,
+              },
+              on: {
+                "update:currentPage": function ($event) {
+                  _vm.currentPage = $event
+                },
+                "update:current-page": function ($event) {
+                  _vm.currentPage = $event
+                },
+                totalPagesChanged: function ($event) {
+                  _vm.totalPages = $event
+                },
+              },
+              scopedSlots: _vm._u([
+                {
+                  key: "body",
+                  fn: function (ref) {
+                    var displayData = ref.displayData
+                    return _c(
+                      "tbody",
+                      {},
+                      [
+                        _c("tr", [
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.id.value,
+                                  expression: "filters.id.value",
+                                },
+                              ],
+                              staticClass: "form-input input-sm",
+                              staticStyle: { width: "30px" },
+                              domProps: { value: _vm.filters.id.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.id,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.city.value,
+                                  expression: "filters.city.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "200px" },
+                              attrs: { placeholder: "Filter by city" },
+                              domProps: { value: _vm.filters.city.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.city,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.base_price.value,
+                                  expression: "filters.base_price.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Filter by price" },
+                              domProps: { value: _vm.filters.base_price.value },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.base_price,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.base_distance.value,
+                                  expression: "filters.base_distance.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Filter by distance" },
+                              domProps: {
+                                value: _vm.filters.base_distance.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.base_distance,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.price_per_km.value,
+                                  expression: "filters.price_per_km.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Filter by km price" },
+                              domProps: {
+                                value: _vm.filters.price_per_km.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.price_per_km,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _c(
+                              "select",
+                              {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.filters.is_test.value,
+                                    expression: "filters.is_test.value",
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "120px" },
+                                on: {
+                                  change: function ($event) {
+                                    var $$selectedVal = Array.prototype.filter
+                                      .call(
+                                        $event.target.options,
+                                        function (o) {
+                                          return o.selected
+                                        }
+                                      )
+                                      .map(function (o) {
+                                        var val =
+                                          "_value" in o ? o._value : o.value
+                                        return val
+                                      })
+                                    _vm.$set(
+                                      _vm.filters.is_test,
+                                      "value",
+                                      $event.target.multiple
+                                        ? $$selectedVal
+                                        : $$selectedVal[0]
+                                    )
+                                  },
+                                },
+                              },
+                              [
+                                _c("option", { attrs: { value: "" } }, [
+                                  _vm._v("All"),
+                                ]),
+                                _vm._v(" "),
+                                _c("option", { attrs: { value: "true" } }, [
+                                  _vm._v("Test"),
+                                ]),
+                                _vm._v(" "),
+                                _c("option", { attrs: { value: "false" } }, [
+                                  _vm._v("Regular"),
+                                ]),
+                              ]
+                            ),
+                          ]),
+                          _vm._v(" "),
+                          _c("td"),
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(displayData, function (row) {
+                          return _c("tr", { key: row.id }, [
+                            _c("td", { staticStyle: { width: "30px" } }, [
+                              _vm._v(_vm._s(row.id)),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: row.city,
+                                    expression: "row.city",
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "200px" },
+                                attrs: { required: "" },
+                                domProps: { value: row.city },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(row, "city", $event.target.value)
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.number",
+                                    value: row.base_price,
+                                    expression: "row.base_price",
+                                    modifiers: { number: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "100px" },
+                                attrs: {
+                                  type: "number",
+                                  step: "0.01",
+                                  min: "0",
+                                  required: "",
+                                },
+                                domProps: { value: row.base_price },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "base_price",
+                                      _vm._n($event.target.value)
+                                    )
+                                  },
+                                  blur: function ($event) {
+                                    return _vm.$forceUpdate()
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.number",
+                                    value: row.base_distance,
+                                    expression: "row.base_distance",
+                                    modifiers: { number: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "100px" },
+                                attrs: {
+                                  type: "number",
+                                  min: "1",
+                                  required: "",
+                                },
+                                domProps: { value: row.base_distance },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "base_distance",
+                                      _vm._n($event.target.value)
+                                    )
+                                  },
+                                  blur: function ($event) {
+                                    return _vm.$forceUpdate()
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model.number",
+                                    value: row.price_per_km,
+                                    expression: "row.price_per_km",
+                                    modifiers: { number: true },
+                                  },
+                                ],
+                                staticClass: "form-control",
+                                staticStyle: { width: "100px" },
+                                attrs: {
+                                  type: "number",
+                                  step: "0.01",
+                                  min: "0",
+                                  required: "",
+                                },
+                                domProps: { value: row.price_per_km },
+                                on: {
+                                  input: function ($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      row,
+                                      "price_per_km",
+                                      _vm._n($event.target.value)
+                                    )
+                                  },
+                                  blur: function ($event) {
+                                    return _vm.$forceUpdate()
+                                  },
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.is_test,
+                                      expression: "row.is_test",
+                                    },
+                                  ],
+                                  staticClass: "form-control",
+                                  staticStyle: { width: "120px" },
+                                  attrs: { required: "" },
+                                  on: {
+                                    change: function ($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call(
+                                          $event.target.options,
+                                          function (o) {
+                                            return o.selected
+                                          }
+                                        )
+                                        .map(function (o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        row,
+                                        "is_test",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    },
+                                  },
+                                },
+                                [
+                                  _c("option", { domProps: { value: true } }, [
+                                    _vm._v("Test"),
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("option", { domProps: { value: false } }, [
+                                    _vm._v("Regular"),
+                                  ]),
+                                ]
+                              ),
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _c(
+                                "div",
+                                {
+                                  staticClass: "btn-group",
+                                  attrs: { role: "group" },
+                                },
+                                [
+                                  _c(
+                                    "button",
+                                    {
+                                      staticClass: "btn btn-success",
+                                      staticStyle: { "margin-left": "5px" },
+                                      on: {
+                                        click: function ($event) {
+                                          return _vm.updateTariff(row)
+                                        },
+                                      },
+                                    },
+                                    [
+                                      _c(
+                                        "svg",
+                                        {
+                                          staticClass: "bi bi-save2",
+                                          attrs: {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "16",
+                                            height: "16",
+                                            fill: "currentColor",
+                                            viewBox: "0 0 16 16",
+                                          },
+                                        },
+                                        [
+                                          _c("path", {
+                                            attrs: {
+                                              d: "M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z",
+                                            },
+                                          }),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "button",
+                                    {
+                                      staticClass: "btn btn-danger",
+                                      staticStyle: { "margin-left": "5px" },
+                                      on: {
+                                        click: function ($event) {
+                                          return _vm.deleteTariff(row.id)
+                                        },
+                                      },
+                                    },
+                                    [
+                                      _c(
+                                        "svg",
+                                        {
+                                          staticClass: "bi bi-trash",
+                                          attrs: {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "16",
+                                            height: "16",
+                                            fill: "currentColor",
+                                            viewBox: "0 0 16 16",
+                                          },
+                                        },
+                                        [
+                                          _c("path", {
+                                            attrs: {
+                                              d: "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z",
+                                            },
+                                          }),
+                                          _vm._v(" "),
+                                          _c("path", {
+                                            attrs: {
+                                              "fill-rule": "evenodd",
+                                              d: "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                                            },
+                                          }),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                ]
+                              ),
+                            ]),
+                          ])
+                        }),
+                      ],
+                      2
+                    )
+                  },
+                },
+              ]),
+            },
+            [
+              _c(
+                "thead",
+                { attrs: { slot: "head" }, slot: "head" },
+                [
+                  _c("v-th", { attrs: { sortKey: "id" } }, [_vm._v("#")]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "city" } }, [_vm._v("City")]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "base_price" } }, [
+                    _vm._v("Base Price"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "base_distance" } }, [
+                    _vm._v("Base Distance"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "price_per_km" } }, [
+                    _vm._v("Price per km"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", { attrs: { sortKey: "is_test" } }, [
+                    _vm._v("Test Mode"),
+                  ]),
+                  _vm._v(" "),
+                  _c("v-th", [_vm._v("Actions")]),
+                ],
+                1
+              ),
+            ]
+          ),
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c("smart-pagination", {
+        attrs: {
+          currentPage: _vm.currentPage,
+          totalPages: _vm.totalPages,
+          maxPageLinks: _vm.maxPageLinks,
+        },
+        on: {
+          "update:currentPage": function ($event) {
+            _vm.currentPage = $event
+          },
+          "update:current-page": function ($event) {
+            _vm.currentPage = $event
+          },
+        },
+      }),
+    ],
+    1
+  )
+}
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass:
+          "pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center",
+      },
+      [_c("h1", { staticClass: "display-5" }, [_vm._v("City Tariffs")])]
     )
   },
 ]
