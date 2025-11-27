@@ -13,3 +13,4 @@ Route::get('/consume-kafka', [KafkaController::class, 'getMessages']);
  * Cost
  */
 Route::post('/sendCostMessage', [KafkaController::class, 'sendCostMessage']);
+Route::post('/sendCostMessageMyApi', [KafkaController::class, 'sendCostMessageMyApi']);

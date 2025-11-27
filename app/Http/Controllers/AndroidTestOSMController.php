@@ -4113,192 +4113,356 @@ class AndroidTestOSMController extends Controller
         ], 200)->header('Content-Type', 'json');
     }
 
-//    /**
-//     * @throws \Psr\SimpleCache\InvalidArgumentException
-//     * @throws \Exception
-//     */
-//    public function costSearchMarkersTime(
-//        $originLatitude,
-//        $originLongitude,
-//        $toLatitude,
-//        $toLongitude,
-//        $tariff,
-//        $phone,
-//        $user,
-//        $time,
-//        $date,
-//        $services,
-//        $city,
-//        $application
-//    ) {
-//        // === 1. Коррекция названия города ===
-//        switch ($city) {
-//            case "Lviv": case "Ivano_frankivsk": case "Vinnytsia": case "Poltava":
-//            case "Sumy": case "Kharkiv": case "Chernihiv": case "Rivne":
-//            case "Ternopil": case "Khmelnytskyi": case "Zakarpattya": case "Zhytomyr":
-//            case "Kropyvnytskyi": case "Mykolaiv": case "Chernivtsi": case "Lutsk":
-//            $city = "OdessaTest";
-//            break;
-//            case "foreign countries":
-//                $city = "Kyiv City";
-//                break;
-//        }
-//
-//        // === 2. Подключение к API города ===
-//        $service = new CityAppOrderService();
-//        $connectAPI = $service->cityOnlineOrder($city, $application);
-//        Log::debug("2 connectAPI $connectAPI");
-//
-//        if ($connectAPI == 400) {
-//            return [
-//                "order_cost" => 0,
-//                "Message" => "ErrorMessage"
-//            ];
-//        }
-//
-//        // === 3. Проверка блокировки API ===
-//        $cacheKeyBlock = "blocked_api_" . md5($connectAPI);
-//        if (cache()->has($cacheKeyBlock)) {
-//            Log::warning("[costSearchMarkersTime] API {$connectAPI} заблокирован. Используем резервный сервер.");
-//
-//            return self::tryConnectToCity(
-//                $city,
-//                $application,
-//                preg_split("/[*]+/", $user),
-//                null,
-//                [], // parameter заполнится внутри
-//                [],
-//                $originLatitude,
-//                $originLongitude,
-//                $toLatitude,
-//                $toLongitude,
-//                false
-//            );
-//        }
-//
-//        // === 4. Подготовка данных ===
-//        if (trim($tariff) === "") {
-//            $tariff = null;
-//        }
-//
-//        $userArr = preg_split("/[*]+/", $user);
-//        $params['user_full_name'] = $userArr[0] ?? 'no_name';
-//        $params['email'] = $userArr[1] ?? '';
-//        $email = $params['email'];
-//
-//        $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2] ?? '', $city, $connectAPI, $application);
-//        $payment_type = $authorizationChoiceArr["payment_type"];
-//
-//        $route_undefined = false;
-//        $required_time = null;
-//        $reservation = false;
-//
-//        if ($time !== "no_time") {
-//            $todayDate = date("Y-m-d", strtotime($date));
-//            [$hours, $minutes] = explode(":", $time);
-//            $required_time = "{$todayDate}T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
-//            $reservation = true;
-//        }
-//
-//        $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
-//        $params['to'] = $osmAddress;
-//
-//        $parameter = [
-//            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']),
-//            'user_phone' => $phone,
-//            'client_sub_card' => null,
-//            'required_time' => $required_time,
-//            'reservation' => $reservation,
-//            'route_address_entrance_from' => null,
-//            'comment' => "",
-//            'add_cost' => 0,
-//            'wagon' => 0,
-//            'minibus' => 0,
-//            'premium' => 0,
-//            'flexible_tariff_name' => $tariff,
-//            'route_undefined' => $route_undefined,
-//            'route' => [
-//                ['name' => "from", 'lat' => $originLatitude, 'lng' => $originLongitude],
-//                ['name' => "to", 'lat' => $toLatitude, 'lng' => $toLongitude],
-//            ],
-//            'taxiColumnId' => config('app.taxiColumnId'),
-//            'payment_type' => $payment_type,
-//            'extra_charge_codes' => $services === "no_extra_charge_codes"
-//                ? [] : preg_split("/[*]+/", $services),
-//        ];
-//
-//        $url = "{$connectAPI}/api/weborders/cost";
-//
-//        $authorization = $payment_type == 0
-//            ? $authorizationChoiceArr["authorization"]
-//            : $authorizationChoiceArr["authorizationBonus"];
-//
-//        $identificationId = self::identificationId($application);
-//        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
-//
-//        // === 5. Выполнение запроса ===
-//        $response = (new UniversalAndroidFunctionController)->postRequestCostHTTP(
-//            $url,
-//            $parameter,
-//            $authorization,
-//            $identificationId,
-//            $apiVersion
-//        );
-//
-//        $responseArr = json_decode($response, true);
-//
-//        // === 6. Обработка ошибок API ===
-//        if (
-//            isset($responseArr["Id"]) && $responseArr["Id"] == -6 ||
-//            (isset($responseArr["Message"]) &&
-//                str_contains($responseArr["Message"], 'Не удалось рассчитать стоимость'))
-//        ) {
-//            // 🔒 Блокируем текущий API на 1 минуту
-//            cache()->put($cacheKeyBlock, true, now()->addMinutes(1));
-//            Log::warning("[costSearchMarkersTime] Блокировка API {$connectAPI} на 1 минуту из-за ошибки расчета.");
-//
-//            // Переход на резервный сервер
-//            return self::tryConnectToCity(
-//                $city,
-//                $application,
-//                $userArr,
-//                $payment_type,
-//                $parameter,
-//                $params,
-//                $originLatitude,
-//                $originLongitude,
-//                $toLatitude,
-//                $toLongitude,
-//                $route_undefined
-//            );
-//        }
-//
-//        // === 7. Если расчёт успешный ===
-//        if (isset($responseArr["order_cost"])) {
-//            $order_cost = $responseArr["order_cost"];
-//            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
-//
-//            return response(
-//                self::buildSuccessfulResponse(
-//                    $responseArr,
-//                    $params,
-//                    $originLatitude,
-//                    $originLongitude,
-//                    $toLatitude,
-//                    $toLongitude,
-//                    $route_undefined
-//                ),
-//                200
-//            )->header('Content-Type', 'json');
-//        }
-//
-//        // === 8. Если после всего ошибка ===
-//        return response([
-//            "order_cost" => 0,
-//            "Message" => "Ошибка создания заказа"
-//        ], 200)->header('Content-Type', 'json');
-//    }
+    /**
+     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function costSearchMarkersTimeMyApi(
+        $originLatitude,
+        $originLongitude,
+        $toLatitude,
+        $toLongitude,
+        $tariff,
+        $phone,
+        $user,
+        $time,
+        $date,
+        $services,
+        $city,
+        $application
+    ) {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                $city = "OdessaTest";
+                break;
+            case "foreign countries":
+                $city = "Kyiv City";
+                break;
+        }
 
+
+        $service = new CityAppOrderService();
+        $connectAPI = $service->cityOnlineOrder($city, $application);
+        Log::debug("2 connectAPI $connectAPI");
+
+
+//        if ($connectAPI == 400) {
+//            $response_error["order_cost"] = 0;
+//            $response_error["Message"] = "ErrorMessage";
+//
+//            return $response_error;
+//        }
+
+        // === 3. Проверка блокировки API ===
+        $cacheKeyBlock = "blocked_api_" . md5($connectAPI);
+
+        if (cache()->has($cacheKeyBlock)) {
+            Log::warning("[costSearchMarkersTime] API {$connectAPI} заблокирован. Используем резервный сервер.");
+
+            return self::tryConnectToCity(
+                $city,
+                $application,
+                preg_split("/[*]+/", $user),
+                null,
+                [], // parameter заполнится внутри
+                [],
+                $originLatitude,
+                $originLongitude,
+                $toLatitude,
+                $toLongitude,
+                false
+            );
+        }
+
+
+        if ($tariff == " ") {
+            $tariff = null;
+        }
+
+        $userArr = preg_split("/[*]+/", $user);
+
+        $params['user_full_name'] = $userArr[0];
+        if (count($userArr) >= 2) {
+            $params['email'] = $userArr[1];
+            $email = $params['email'];
+        } else {
+            $email = "";
+        }
+
+        $authorizationChoiceArr = self::authorizationChoiceApp($userArr[2], $city, $connectAPI, $application);
+        $payment_type = $authorizationChoiceArr["payment_type"];
+
+        $params['required_time'] = null; //Время подачи предварительного заказа
+        $params['reservation'] = false; //Обязательный. Признак предварительного заказа: True, False
+
+        $params['route_undefined'] = false; //По городу: True, False
+
+        $taxiColumnId = config('app.taxiColumnId');
+
+        if ($originLatitude == $toLatitude) {
+            $params['to'] = 'по місту';
+        } else {
+            $route_undefined = false;
+
+            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
+
+            $params['to'] = $osmAddress;
+            $params['to_number'] = " ";
+
+        }
+        $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
+            ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
+            ['name' => "name", 'lat' => $toLatitude, 'lng' => $toLongitude]
+        ];
+
+        $route_undefined = false;
+        $required_time = null; //Время подачи предварительного заказа
+        $reservation = false; //Обязательный. Признак предварительного заказа: True, False
+        if ($time != "no_time") {
+            $todayDate = strtotime($date);
+            $todayDate = date("Y-m-d", $todayDate);
+            list($hours, $minutes) = explode(":", $time);
+            $required_time = $todayDate . "T" . str_pad($hours, 2, '0', STR_PAD_LEFT) . ":" . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ":00";
+            $reservation = true; //Обязательный. Признак предварительного заказа: True, False
+        }
+
+        $url = $connectAPI . '/api/weborders/cost';
+
+        $extra_charge_codes = preg_split("/[*]+/", $services);
+        if ($extra_charge_codes[0] == "no_extra_charge_codes") {
+            $extra_charge_codes = [];
+        };
+        $parameter = [
+            'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']),
+            'user_phone' => $phone, //Телефон пользователя
+            'client_sub_card' => null,
+            'required_time' => $required_time, //Время подачи предварительного заказа
+            'reservation' => $reservation, //Обязательный. Признак предварительного заказа: True, False
+            'route_address_entrance_from' => null,
+            'comment' => "", //Комментарий к заказу
+            'add_cost' => 0,
+            'wagon' => 0, //Универсал: True, False
+            'minibus' => 0, //Микроавтобус: True, False
+            'premium' => 0, //Машина премиум-класса: True, False
+            'flexible_tariff_name' => $tariff, //Гибкий тариф
+            'route_undefined' => $route_undefined, //По городу: True, False
+            'route' => $rout,
+            'taxiColumnId' => $taxiColumnId, //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
+            'payment_type' => $payment_type, //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+            'extra_charge_codes' => $extra_charge_codes,
+            //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
+//            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
+        ];
+        if ($connectAPI == 400) {
+            Log::info('Переключение на MyTaxi API', [
+                'city' => $city,
+                'connectAPI' => $connectAPI,
+                'reason' => 'Сервер не найден для города'
+            ]);
+            return (new MyTaxiApiController)->costMyApiTaxi(
+                $parameter,
+                $city,
+                $application,
+                $email
+            );
+        }
+
+        Log::debug("parameter ", $parameter);
+        Log::debug("payment_type  $payment_type");
+        if ($payment_type == 0) {
+            $authorization = $authorizationChoiceArr["authorization"];
+            Log::debug("authorization $authorization");
+        } else {
+            $authorization = $authorizationChoiceArr["authorizationBonus"];
+            Log::debug("authorizationBonus $authorization");
+        }
+        Log::debug("____________________________________");
+        Log::debug("authorization  $authorization");
+
+        $identificationId = self::identificationId($application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
+
+        $messageAdmin = "111 costSearchMarkersTime " .
+            "url $url " .
+            "Authorization $authorization," .
+            "X-WO-API-APP-ID $identificationId," .
+            "X-API-VERSION  $apiVersion" .
+            "costSearchMarkersTime параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+
+
+        $response = (new UniversalAndroidFunctionController)->postRequestCostHTTP(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion
+        );
+        $responseArr = json_decode($response, true);
+
+        $messageAdmin = "costSearchMarkersTime  ответ сервера" .
+            json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
+        // === 6. Обработка ошибок API ===
+
+        if (
+            isset($responseArr["Id"]) && $responseArr["Id"] == -6 ||
+            (isset($responseArr["Message"]) &&
+                str_contains($responseArr["Message"], 'Не удалось рассчитать стоимость'))
+        ) {
+            // 🔒 Блокируем текущий API на 1 минуту
+            cache()->put($cacheKeyBlock, true, now()->addMinutes(1));
+            Log::warning("[costSearchMarkersTime] Блокировка API {$connectAPI} на 1 минуту из-за ошибки расчета.");
+
+            // Переход на резервный сервер
+            return self::tryConnectToCity(
+                $city,
+                $application,
+                $userArr,
+                $payment_type,
+                $parameter,
+                $params,
+                $originLatitude,
+                $originLongitude,
+                $toLatitude,
+                $toLongitude,
+                $route_undefined
+            );
+        }
+
+
+
+        if (isset($responseArr["order_cost"])) {
+            $order_cost = $responseArr["order_cost"];
+            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
+            return response(
+                self::buildSuccessfulResponse(
+                    $responseArr,
+                    $params,
+                    $originLatitude,
+                    $originLongitude,
+                    $toLatitude,
+                    $toLongitude,
+                    $route_undefined
+                ),200)
+                ->header('Content-Type', 'json');
+        }
+        switch ($application) {
+            case "PAS1":
+                $city_count = City_PAS1::where('name', $city)->count();
+                break;
+            case "PAS2":
+                $city_count = City_PAS2::where('name', $city)->count();
+                break;
+            //case "PAS4":
+            default:
+                $city_count = City_PAS4::where('name', $city)->count();
+                break;
+        }
+        Log::debug("city_count: " . $city_count);
+
+        if ($response === null || (isset($responseArr["Message"]) && $city_count >= 1)) {
+            // Проверяем, был ли повторный запрос
+            if (!empty($responseArr["Message"]) && $responseArr["Message"] === 'Повторный запрос') {
+                $retryAfter = $responseArr["retry_after_seconds"] ?? 60;
+                Log::info("[postRequestHTTP] Повторный запрос. Ожидание {$retryAfter} сек. перед повторной попыткой.");
+                return response([
+                    "order_cost" => 0,
+                    "Message" => "Повторный запрос"
+                ], 200)->header('Content-Type', 'json');
+            }
+
+            $attempt = 1;
+
+            do {
+                // Получаем адрес API для текущей попытки
+                $connectAPI = $params[$attempt - 1]['connect_api'] ?? null;
+
+                if (!$connectAPI) {
+                    Log::warning("[costSearchMarkersTime] connectAPI не найден для попытки #{$attempt}");
+                    $attempt++;
+                    continue;
+                }
+
+                // Ключ для блокировки
+                $cacheKeyBlock = "blocked_api_" . md5($connectAPI);
+
+                // Проверяем, заблокирован ли сервер
+                if (cache()->has($cacheKeyBlock)) {
+                    Log::warning("[costSearchMarkersTime] API {$connectAPI} заблокирован. Пропускаем попытку #{$attempt}.");
+                    $attempt++;
+                    continue;
+                }
+
+                // Пробуем подключиться
+                $responseArr = self::tryConnectToCity(
+                    $city,
+                    $application,
+                    $userArr,
+                    $payment_type,
+                    $parameter,
+                    $params,
+                    $originLatitude,
+                    $originLongitude,
+                    $toLatitude,
+                    $toLongitude,
+                    $route_undefined
+                );
+
+                // Безопасное логирование
+                Log::debug('[ResponseType] Попытка #' . $attempt, [
+                    'type' => is_object($responseArr) ? get_class($responseArr) : gettype($responseArr),
+                    'response' => is_object($responseArr) && method_exists($responseArr, 'getContent')
+                        ? $responseArr->getContent()
+                        : $responseArr
+                ]);
+
+                // Проверяем успешный ответ
+                if (is_array($responseArr) && isset($responseArr["order_cost"]) && $responseArr["order_cost"] > 0) {
+                    Log::info("[costSearchMarkersTime] Успешный ответ с {$connectAPI} на попытке #{$attempt}");
+                    return $responseArr;
+                }
+
+                // Если ответ неуспешный — блокируем сервер
+                if (
+                    is_array($responseArr) && (
+                        (isset($responseArr["Id"]) && $responseArr["Id"] == -6) ||
+                        (isset($responseArr["Message"]) &&
+                            str_contains($responseArr["Message"], 'Не удалось рассчитать стоимость'))
+                    )
+                ) {
+                    cache()->put($cacheKeyBlock, true, now()->addMinutes(1));
+                    Log::warning("[costSearchMarkersTime] Блокировка API {$connectAPI} на 1 минуту из-за ошибки расчета.");
+                }
+
+                $attempt++;
+
+            } while ($attempt <= $city_count);
+
+        }
+        // Если после всех попыток не удалось получить стоимость — возвращаем заглушку
+
+
+        return response([
+            "order_cost" => 0,
+            "Message" => "Ошибка создания заказа"
+        ], 200)->header('Content-Type', 'json');
+    }
 
     private static function getCityServer($application, $address)
     {

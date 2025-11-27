@@ -97,5 +97,13 @@ class KafkaController extends Controller
 
         return response()->json($result);
     }
+    public function sendCostMessageMyApi(Request $request): JsonResponse
+    {
+        $data = $request->all();
+
+        $result = $this->kafka->send('cost-topic-my-api', $data);
+
+        return response()->json($result);
+    }
 
 }

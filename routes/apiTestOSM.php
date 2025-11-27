@@ -96,8 +96,12 @@ Route::get('/android/verifyBlackListUser/{email}', [AndroidTestOSMController::cl
 
 Route::get('/android/costSearchMarkers/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/{city}/{application}/', [AndroidTestOSMController::class, 'costSearchMarkers'])
     ->name('costSearchMarkers');
+
 Route::get('/android/costSearchMarkersTime/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{time}/{date}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'costSearchMarkersTime'])
     ->name('costSearchMarkersTime');
+
+Route::get('/android/costSearchMarkersTimeMyApi/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{time}/{date}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'costSearchMarkersTimeMyApi'])
+    ->name('costSearchMarkersTimeMyApi');
 
 Route::get('/android/costSearchMarkersLocal/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{user}/{services}/{city}/{application}/{local}', [AndroidTestOSMController::class, 'costSearchMarkersLocal'])
     ->name('costSearchMarkersLocal');
