@@ -7575,9 +7575,9 @@ class UniversalAndroidFunctionController extends Controller
         /**
          * Сохранние расчетов в базе
          */
-
+        $remoteAddr = (new IPController)->getClientIp();
         $order = new Order();
-        $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+        $order->IP_ADDR = $remoteAddr ;//IP пользователя
         $order->user_full_name = $params['user_full_name'];//Полное имя пользователя
         $order->user_phone = $params['user_phone'];//Телефон пользователя
         $order->client_sub_card = null;

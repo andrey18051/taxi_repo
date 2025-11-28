@@ -167,7 +167,8 @@ class WebOrderController extends Controller
      *
      */
     public function getIP () {
-        $IP_ADDR = getenv("REMOTE_ADDR") ;
+        $remoteAddr = (new IPController)->getClientIp();
+        $IP_ADDR = $remoteAddr;
         return $IP_ADDR;
     }
 
@@ -886,8 +887,9 @@ class WebOrderController extends Controller
                     /**
                      * Сохранние расчетов в базе
                      */
+                    $remoteAddr = (new IPController)->getClientIp();
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+                    $order->IP_ADDR = $remoteAddr;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -1112,8 +1114,9 @@ class WebOrderController extends Controller
                     /**
                      * Сохранние расчетов в базе
                      */
+                    $remoteAddr = (new IPController)->getClientIp();
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+                    $order->IP_ADDR = $remoteAddr;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -1425,8 +1428,9 @@ class WebOrderController extends Controller
                     /**
                      * Сохранние расчетов в базе
                      */
+                    $remoteAddr = (new IPController)->getClientIp();
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;;//IP пользователя
+                    $order->IP_ADDR = $remoteAddr;;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -1648,8 +1652,9 @@ class WebOrderController extends Controller
                     /**
                      * Сохранние расчетов в базе
                      */
+                    $remoteAddr = (new IPController)->getClientIp();
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+                    $order->IP_ADDR = $remoteAddr;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -1913,8 +1918,9 @@ class WebOrderController extends Controller
                     /**
                      * Сохранние расчетов в базе
                      */
+                    $remoteAddr = (new IPController)->getClientIp();
                     $order = new Order();
-                    $order->IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+                    $order->IP_ADDR = $remoteAddr;//IP пользователя
                     $order->user_full_name = $user_full_name;//Полное имя пользователя
                     $order->user_phone = $user_phone;//Телефон пользователя
                     $order->client_sub_card = null;
@@ -2853,8 +2859,8 @@ class WebOrderController extends Controller
                     ];
 
                 Mail::to($email)->send(new Driver($params));
-
-                $IP_ADDR = getenv("REMOTE_ADDR") ;//IP пользователя
+                $remoteAddr = (new IPController)->getClientIp();
+                $IP_ADDR = $remoteAddr;//IP пользователя
                 $subject = 'Новий кандидат у водії.';
                 $messageAdmin = "ОПЕРАТОР! Зв'яжіться з новим кандидатом-водієм на ім'я $user_full_name. Йому потрібна робота.
                             Водійський стаж: $time_work років. Анкету надіслано йому на пошту: $email. IP кандидата: $IP_ADDR.

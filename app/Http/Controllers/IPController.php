@@ -16,19 +16,33 @@ class IPController extends Controller
 
     public function getIP($page)
     {
-           /* IP::where('IP_ADDR', '31.202.139.47')->delete();*/
-        if (getenv("REMOTE_ADDR") !== '31.202.139.47') {
-            $IP =  new IP();
-            $IP->IP_ADDR = getenv("REMOTE_ADDR");
-//            $IP->page = 'https://m.easy-order-taxi.site' . $page;
+        // Если это Kafka consumer - не логируем IP
+        if (!isset($_SERVER['REMOTE_ADDR'])) {
+            return;
+        }
+
+        /* IP::where('IP_ADDR', '31.202.139.47')->delete();*/
+        $remoteAddr = self::getClientIp();
+
+        if ($remoteAddr !== '31.202.139.47') {
+            $IP = new IP();
+            $IP->IP_ADDR = $remoteAddr;
             $IP->page = 'https://m.easy-order-taxi.site' . $page;
             $IP->save();
         }
     }
+    public function getClientIp(): string
+    {
+        if (php_sapi_name() === 'cli' || !isset($_SERVER['REMOTE_ADDR'])) {
+            return 'kafka-consumer-' . (gethostname() ?: 'unknown');
+        }
 
+        return $_SERVER['REMOTE_ADDR'];
+    }
     public function ipCity(): \Illuminate\Http\JsonResponse
     {
-        $LocationData = Location::get(getenv("REMOTE_ADDR"));
+        $remoteAddr = self::getClientIp();
+        $LocationData = Location::get($remoteAddr);
 //        $LocationData = Location::get("94.158.152.248"); //Odessa
 //        $LocationData = Location::get("185.237.74.247"); //Kyiv City
 //        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
@@ -61,8 +75,8 @@ class IPController extends Controller
     }
     public function ipCityPush()
     {
-        $ip = getenv("REMOTE_ADDR");
-        $LocationData = Location::get($ip);
+        $remoteAddr = self::getClientIp();
+        $LocationData = Location::get($remoteAddr);
 //        dd($LocationData);
 //        $url = "//api.ip2location.io/?key=" . config('app.keyIP2Location') . '&ip=' . $ip;
 //        https://api.ip2whois.com/v2?key=F9B017964A5A721A183DAFEDAE47F94E&ip=37.73.155.251
@@ -97,7 +111,8 @@ class IPController extends Controller
 
     public function address(): \Illuminate\Http\JsonResponse
     {
-        $LocationData = Location::get(getenv("REMOTE_ADDR"));
+        $remoteAddr = self::getClientIp();
+        $LocationData = Location::get($remoteAddr);
 //                $LocationData = Location::get("94.158.152.248"); //Odessa
 //        $LocationData = Location::get("146.158.30.190"); //Dnipropetrovsk Oblast
 //                $LocationData = Location::get("185.237.74.247"); //Kyiv City
