@@ -358,17 +358,47 @@ class OpenStreetMapHelper
     }
 
     /**
-     * Получить расстояние через OSRM
+     * Получить расстояние через OSRM (с кешированием + нормализацией координат)
      */
     public function getRouteDistance(float $startLat, float $startLon, float $endLat, float $endLon): ?float
     {
+        // ---- 📌 НОРМАЛИЗАЦИЯ КООРДИНАТ ----
+        // до 5 знаков после запятой (~1 метр)
+        $startLat = round($startLat, 5);
+        $startLon = round($startLon, 5);
+        $endLat   = round($endLat, 5);
+        $endLon   = round($endLon, 5);
+
+        // ---- 📌 КЛЮЧ ДЛЯ КЕША ----
+        $cacheKey = sprintf(
+            'route_distance_%s_%s_%s_%s',
+            $startLat,
+            $startLon,
+            $endLat,
+            $endLon
+        );
+
+        // ---- 📌 Проверяем кеш ----
+        if (Cache::has($cacheKey)) {
+            $cached = Cache::get($cacheKey);
+            Log::info('[OpenStreetMapHelper] 🗄️ Расстояние взято из кеша', [
+                'distance' => $cached,
+                'distance_km' => round($cached / 1000, 2),
+                'cache_key' => $cacheKey,
+            ]);
+            return $cached;
+        }
+
+        // ---- 📌 ЛОГИ ----
         $logContext = [
             'start' => [$startLat, $startLon],
-            'end' => [$endLat, $endLon]
+            'end'   => [$endLat, $endLon],
+            'cache_key' => $cacheKey
         ];
 
         Log::info('[OpenStreetMapHelper] 🚗 Расчет расстояния маршрута', $logContext);
 
+        // ---- 📌 OSRM попытка ----
         try {
             $response = $this->client->get("route/v1/driving/{$startLon},{$startLat};{$endLon},{$endLat}", [
                 'query' => ['overview' => 'false'],
@@ -378,10 +408,16 @@ class OpenStreetMapHelper
 
             if (isset($data['routes'][0]['distance'])) {
                 $distance = $data['routes'][0]['distance'];
+
+                // Сохраняем в кеш на 90 дней
+                Cache::put($cacheKey, $distance, now()->addDays(90));
+
                 Log::info('[OpenStreetMapHelper] ✅ Расстояние найдено через OSRM', [
                     'distance' => $distance,
-                    'distance_km' => round($distance / 1000, 2)
+                    'distance_km' => round($distance / 1000, 2),
+                    'cache_key' => $cacheKey,
                 ]);
+
                 return $distance;
             }
 
@@ -394,12 +430,16 @@ class OpenStreetMapHelper
             ]);
         }
 
-        // Fallback на MapBox
+        // ---- 📌 Fallback на MapBox ----
         $mapboxDistance = $this->mapBoxHelper->getRouteDistance($startLat, $startLon, $endLat, $endLon);
+
         if ($mapboxDistance) {
+            Cache::put($cacheKey, $mapboxDistance, now()->addDays(90));
+
             Log::info('[OpenStreetMapHelper] ✅ Расстояние найдено через MapBox (fallback)', [
                 'distance' => $mapboxDistance,
-                'distance_km' => round($mapboxDistance / 1000, 2)
+                'distance_km' => round($mapboxDistance / 1000, 2),
+                'cache_key' => $cacheKey,
             ]);
         } else {
             Log::error('[OpenStreetMapHelper] ❌ Все методы расчета расстояния failed', $logContext);
@@ -407,4 +447,5 @@ class OpenStreetMapHelper
 
         return $mapboxDistance;
     }
+
 }

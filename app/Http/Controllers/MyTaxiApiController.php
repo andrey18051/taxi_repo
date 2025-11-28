@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\OpenStreetMapHelper;
 use App\Models\CityTariff;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class MyTaxiApiController extends Controller
@@ -40,8 +41,30 @@ class MyTaxiApiController extends Controller
             return $this->buildErrorResponse('Не все координаты маршрута указаны');
         }
 
-        // Получаем расстояние (может быть 0 если точки совпадают)
-        $routeDistanceKm = $this->calculateRouteDistance($startLat, $startLng, $endLat, $endLng);
+        // Создаем ключ для кеширования на основе координат и города
+        $cacheKey = "taxi_cost:" . md5("{$city}:{$startLat}:{$startLng}:{$endLat}:{$endLng}");
+        $cacheDuration = 24*60; // сутки
+
+        // Пробуем получить результат из кеша используя фасад Cache
+        $cachedResult = Cache::get($cacheKey);
+        if ($cachedResult !== null) {
+            Log::info('Используем кешированную стоимость такси', [
+                'city' => $city,
+                'cache_key' => $cacheKey
+            ]);
+
+            // Обновляем email в кешированном результате
+            $cachedResult['cached'] = true;
+            (new PusherController)->sentCostAppEmail($cachedResult['order_cost'], $application, $email);
+
+            return $cachedResult;
+        }
+
+        // Кешируем расчет расстояния используя фасад Cache
+        $distanceCacheKey = "route_distance:" . md5("{$startLat}:{$startLng}:{$endLat}:{$endLng}");
+        $routeDistanceKm = Cache::remember($distanceCacheKey, 3600, function() use ($startLat, $startLng, $endLat, $endLng) {
+            return $this->calculateRouteDistance($startLat, $startLng, $endLat, $endLng);
+        });
 
         // distance может быть 0 - это нормально (точки совпадают)
         if ($routeDistanceKm < 0) {
@@ -55,8 +78,20 @@ class MyTaxiApiController extends Controller
         }
 
         // Формируем успешный ответ
-        return $this->buildSuccessResponse($price, $startLat, $startLng, $endLat, $endLng,  $application,
-            $email);
+        $result = $this->buildSuccessResponse($price, $startLat, $startLng, $endLat, $endLng, $application, $email);
+        $result['cached'] = false;
+
+        // Кешируем финальный результат используя фасад Cache
+        Cache::put($cacheKey, $result, $cacheDuration);
+
+        Log::info('Стоимость такси рассчитана и закеширована', [
+            'city' => $city,
+            'distance_km' => $routeDistanceKm,
+            'price' => $price,
+            'cache_duration' => $cacheDuration
+        ]);
+
+        return $result;
     }
 
     /**
@@ -146,31 +181,76 @@ class MyTaxiApiController extends Controller
     private function calculatePrice(string $city, float $distance): ?float
     {
         try {
-            Log::info('Расчет стоимости', ['city' => $city, 'distance_km' => $distance]);
+            // Создаем ключ для кеширования
+            $cacheKey = "tariff_price:{$city}:" . round($distance, 2);
+            $cacheDuration = 3600; // 1 час
+
+            Log::info('Начало расчета стоимости тарифа', [
+                'city' => $city,
+                'distance_km' => $distance,
+                'cache_key' => $cacheKey
+            ]);
+
+            // Пробуем получить из кеша
+            $cachedPrice = Cache::get($cacheKey);
+            if ($cachedPrice !== null) {
+                Log::info('Использована кешированная стоимость тарифа', [
+                    'city' => $city,
+                    'distance_km' => $distance,
+                    'price' => $cachedPrice,
+                    'cache_key' => $cacheKey
+                ]);
+                return $cachedPrice;
+            }
+
+            Log::info('Расчет стоимости тарифа (кеш не найден)', [
+                'city' => $city,
+                'distance_km' => $distance
+            ]);
 
             $tariffController = new CityTariffController();
             $request = new Request(['distance' => $distance]);
 
+            $startTime = microtime(true);
             $priceResponse = $tariffController->calculatePrice($request, $city);
+            $calculationTime = round((microtime(true) - $startTime) * 1000, 2); // время в ms
+
             $responseData = $priceResponse->getData();
 
             if (!$responseData->success) {
-                Log::warning('Ошибка расчета стоимости', [
+                Log::warning('Ошибка расчета стоимости тарифа', [
                     'city' => $city,
-                    'response' => $responseData
+                    'distance_km' => $distance,
+                    'response' => $responseData,
+                    'calculation_time_ms' => $calculationTime
                 ]);
                 return null;
             }
 
             $price = $responseData->data->price;
-            Log::info('Стоимость рассчитана', ['price' => $price]);
+
+            // Кешируем результат
+            Cache::put($cacheKey, $price, $cacheDuration);
+
+            Log::info('Стоимость тарифа рассчитана и закеширована', [
+                'city' => $city,
+                'distance_km' => $distance,
+                'price' => $price,
+                'calculation_time_ms' => $calculationTime,
+                'cache_duration_seconds' => $cacheDuration,
+                'cache_key' => $cacheKey
+            ]);
 
             return $price;
 
         } catch (\Exception $e) {
-            Log::error('Ошибка расчета стоимости', [
+            Log::error('Критическая ошибка расчета стоимости тарифа', [
                 'city' => $city,
-                'error' => $e->getMessage()
+                'distance_km' => $distance,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'exception_trace' => $e->getTraceAsString()
             ]);
             return null;
         }
