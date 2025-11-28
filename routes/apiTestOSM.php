@@ -128,6 +128,9 @@ Route::get('/android/orderSearchMarkersVisicomWfpInvoiceChannel/{originLatitude}
 Route::get('/android/orderClientCost/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{clientCost}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{wfpInvoice}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'orderClientCost'])
     ->name('orderClientCost');
 
+Route::get('/android/orderClientCostMyApi/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{clientCost}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{wfpInvoice}/{services}/{city}/{application}', [AndroidTestOSMController::class, 'orderClientCostMyApi'])
+    ->name('orderClientCostMyApi');
+
 Route::get('/android/orderCacheReorder/{originLatitude}/{originLongitude}/{toLatitude}/{toLongitude}/{tarif}/{phone}/{clientCost}/{user}/{add_cost}/{time}/{comment}/{date}/{start}/{finish}/{wfpInvoice}/{services}/{city}/{application}/{uid}', [AndroidTestOSMController::class, 'orderCacheReorder'])
     ->name('orderCacheReorder');
 

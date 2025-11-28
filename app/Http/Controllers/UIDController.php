@@ -726,7 +726,7 @@ class UIDController extends Controller
         }
 
         $order = Orderweb:: where("email", $email)
-            ->whereIn('closeReason', ['-1', '101', '102'])
+            ->whereIn('closeReason', ['-1', '100', '101', '102'])
             ->where("comment", $application)
             ->where("city", $city)
             ->orderBy("created_at", "desc")
@@ -741,7 +741,10 @@ class UIDController extends Controller
         Log::debug("UIDStatusShowEmailCancelApp order", $order->toArray());
 
         if (!$order->isEmpty()) {
-            self::UIDStatusReview($order);
+
+                self::UIDStatusReview($order);
+
+
 //            $orderHistory = Orderweb::where("email", $email)
 //                ->whereIn('closeReason', ['-1', '101', '102', '103'])
 //
@@ -754,7 +757,7 @@ class UIDController extends Controller
 //                ->orderBy("created_at", "desc")
 //                ->get();
             $orderHistory = Orderweb::where("email", $email)
-                ->whereIn('closeReason', ['-1', '101', '102', '103'])
+                ->whereIn('closeReason', ['-1', '100', '101', '102', '103'])
                 ->where("city", $city)
 //                ->whereNotNull("startLat")
 //                ->whereNotNull("startLan")
@@ -1154,7 +1157,7 @@ class UIDController extends Controller
             if ($uid_history) {
                 self::UIDStatusReviewCard($uid);
             } else {
-              if (!in_array($value['closeReason'],  ['101', '102', '103', '104'] )) {
+              if (!in_array($value['closeReason'],  ['100', '101', '102', '103', '104'] )) {
 
                   $timeElapsed = $currentTime - strtotime($value["updated_at"]);
                   $timeElapsed5 = $currentTime - strtotime($value["updated_at"]) - 5 * 60;
