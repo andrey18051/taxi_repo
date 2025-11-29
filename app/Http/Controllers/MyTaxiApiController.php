@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Jobs\WebordersCancelAndRestorNalJob;
 use App\Models\CityTariff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -445,7 +446,7 @@ class MyTaxiApiController extends Controller
             "to_number" => " ",
             "to_lat" => $endLat,
             "to_lng" => $endLng,
-            "comment_info" => $parameter['user_full_name'] ?? null,
+            "comment_info" => $parameter['comment_info'] ?? null,
             "extra_charge_codes" => $extraChargeCodes,
             "taxiColumnId" => $parameter['taxiColumnId'] ?? 0,
             "payment_type" => $parameter['payment_type'] ?? 0,
@@ -535,33 +536,191 @@ class MyTaxiApiController extends Controller
         return $response;
     }
 
-    /**
-     * Вспомогательная функция для гарантированного преобразования в строку
-     */
-    private function ensureString($value): string
+
+    public function startAddCostMyApi(
+        $order,
+        $application,
+        $email,
+        $addCost
+    ): \Illuminate\Http\JsonResponse
     {
-        if (is_array($value)) {
-            Log::warning('🔄 Обнаружен массив, преобразование в строку', ['array' => $value]);
-            return implode(',', $value);
+        Log::info('🟢 НАЧАЛО startAddCostMyApi', [
+            'order_uid' => $order->dispatching_order_uid ?? 'unknown',
+            'application' => $application,
+            'email' => $email,
+            'addCost' => $addCost,
+            'order_id' => $order->id ?? 'unknown'
+        ]);
+
+        // Генерация нового UID для заказа
+        $orderNew = $this->generateOrderUid();
+        Log::debug('🔑 Сгенерирован новый UID', [
+            'new_order_uid' => $orderNew,
+            'old_order_uid' => $order->dispatching_order_uid ?? 'unknown'
+        ]);
+
+        // Отправка email уведомления
+        Log::info('📧 Отправка email уведомления...');
+        try {
+            (new PusherController)->sentUidAppEmailPayType(
+                $orderNew,
+                $application,
+                $email,
+                "nal_payment"
+            );
+            Log::info('✅ Уведомление отправлено успешно');
+        } catch (\Exception $e) {
+            Log::error('❌ Ошибка отправки уведомления', [
+                'error' => $e->getMessage(),
+                'new_uid' => $orderNew
+            ]);
         }
 
-        if (is_bool($value)) {
-            return $value ? '1' : '0';
+        Log::debug("📝 Создан новый заказ с UID: " . $orderNew);
+
+        $order_old_uid = $order->dispatching_order_uid;
+        $order_new_uid = $orderNew;
+
+        Log::debug('🔄 Подготовка к замене UID', [
+            'old_uid' => $order_old_uid,
+            'new_uid' => $order_new_uid
+        ]);
+
+        // Сохранение в истории изменений
+        try {
+            (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+            Log::info('✅ История изменений UID сохранена');
+        } catch (\Exception $e) {
+            Log::error('❌ Ошибка сохранения истории изменений UID', [
+                'error' => $e->getMessage(),
+                'old_uid' => $order_old_uid,
+                'new_uid' => $order_new_uid
+            ]);
         }
 
-        if (is_null($value)) {
-            return '';
+        // Обновление заказа с новыми данными
+        Log::debug('🔄 Обновление заказа с новым UID и расчетами стоимости');
+
+        $currentWebCost = $order->client_cost;
+        $currentAttempt20 = $order->attempt_20;
+        $currentAddCost = $order->add_cost;
+        $newWebCost = $currentWebCost + (int) $currentAttempt20 + (int) $currentAddCost + (int)$addCost;
+
+        Log::debug('💰 Расчет стоимости', [
+            'current_web_cost' => $currentWebCost,
+            'current_attempt_20' => $currentAttempt20,
+            'current_add_cost' => $currentAddCost,
+            'new_add_cost' => $addCost,
+            'total_new_web_cost' => $newWebCost
+        ]);
+
+        $order->dispatching_order_uid = $order_new_uid;
+        $order->auto = null;
+        $order->web_cost = $newWebCost;
+        $order->closeReason = "100";
+        $order->closeReasonI = "0";
+        $order->attempt_20 += $addCost;
+
+        Log::debug('📋 Данные для сохранения', [
+            'new_uid' => $order_new_uid,
+            'auto' => 'null',
+            'web_cost' => $newWebCost,
+            'closeReason' => '-1',
+            'closeReasonI' => '0',
+            'new_attempt_20' => $order->attempt_20
+        ]);
+
+        $order->save();
+        Log::info("✅ Заказ обновлен с новым UID: " . $order_new_uid);
+
+        // Запись в Firestore
+        if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
+            Log::debug('🔥 Проверка условий для Firestore', [
+                'pay_system' => $order->pay_system,
+                'route_undefined' => $order->route_undefined,
+                'meets_conditions' => ($order->pay_system == "nal_payment" && $order->route_undefined == "0")
+            ]);
+
+            try {
+                $controller = new FCMController();
+
+                Log::debug('🔥 Начало операций с Firestore', [
+                    'old_uid' => $order_old_uid,
+                    'new_uid' => $order_new_uid
+                ]);
+
+                // 1. Удаление старого документа из основного Firestore
+                Log::debug('🗑️ Удаление старого документа из Firestore...');
+                $controller->deleteDocumentFromFirestore($order_old_uid);
+                Log::info('✅ Старый документ удален из Firestore', ['uid' => $order_old_uid]);
+
+                // 2. Удаление из коллекции отмененных заказов
+                Log::debug('🗑️ Удаление из коллекции отмененных заказов...');
+                $controller->deleteDocumentFromFirestoreOrdersTakingCancel($order_old_uid);
+                Log::info('✅ Удален из коллекции отмененных заказов', ['uid' => $order_old_uid]);
+
+                // 3. Удаление из секторного Firestore
+                Log::debug('🗑️ Удаление из секторного Firestore...');
+                $controller->deleteDocumentFromSectorFirestore($order_old_uid);
+                Log::info('✅ Удален из секторного Firestore', ['uid' => $order_old_uid]);
+
+                // 4. Запись в историю как отмененного
+                Log::debug('📝 Запись в историю как отмененного...');
+                $controller->writeDocumentToHistoryFirestore($order_old_uid, "cancelled");
+                Log::info('✅ Запись в историю выполнена', [
+                    'uid' => $order_old_uid,
+                    'status' => 'cancelled'
+                ]);
+
+                // 5. Создание нового документа с новым UID
+                Log::debug('📄 Создание нового документа с новым UID...');
+                $controller->writeDocumentToFirestore($order_new_uid);
+                Log::info('✅ Новый документ создан в Firestore', ['uid' => $order_new_uid]);
+
+                Log::info('🎯 Все операции Firestore выполнены успешно', [
+                    'old_uid' => $order_old_uid,
+                    'new_uid' => $order_new_uid
+                ]);
+
+            } catch (\Exception $e) {
+                Log::error('❌ Ошибка операций с Firestore', [
+                    'error' => $e->getMessage(),
+                    'old_uid' => $order_old_uid,
+                    'new_uid' => $order_new_uid,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        } else {
+            Log::debug('⏭️ Запись в Firestore пропущена - условия не выполнены', [
+                'pay_system' => $order->pay_system,
+                'route_undefined' => $order->route_undefined
+            ]);
         }
 
-        if (is_object($value) && method_exists($value, '__toString')) {
-            return (string) $value;
+        // Отправка сообщения о восстановлении машины
+        Log::info('🚗 Отправка сообщения о восстановлении машины...');
+        try {
+            (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
+            Log::info("✅ Сообщение о восстановлении заказа отправлено.");
+        } catch (\Exception $e) {
+            Log::error('❌ Ошибка отправки сообщения о восстановлении заказа', [
+                'error' => $e->getMessage()
+            ]);
         }
 
-        if (is_object($value)) {
-            Log::warning('🔄 Обнаружен объект, преобразование через json_encode', ['object' => get_class($value)]);
-            return json_encode($value);
-        }
+        Log::info('🎯 ЗАВЕРШЕНИЕ startAddCostMyApi - УСПЕХ', [
+            'old_uid' => $order_old_uid,
+            'new_uid' => $order_new_uid,
+            'total_cost' => $order->web_cost,
+            'added_cost' => $addCost
+        ]);
 
-        return (string) $value;
+        return response()->json([
+            "response" => "200",
+            "new_order_uid" => $order_new_uid,
+            "total_cost" => $order->web_cost
+        ], 200);
     }
 }

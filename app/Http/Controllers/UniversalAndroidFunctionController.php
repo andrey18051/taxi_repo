@@ -9820,17 +9820,13 @@ class UniversalAndroidFunctionController extends Controller
         $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
         Log::debug("Найден orderMemory с UID: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null'));
 
-        // Проверяем существование заказа
-        if (!$order || !$orderMemory) {
-            Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
-            return null;
-        }
+
 
         $email = $order->email;
-
-
+        Log::info("email заказа: " . $email);
         $city = $order->city;
         Log::info("Город заказа: " . $city);
+
 
         // Выбор приложения по комментарию
         switch ($order->comment) {
@@ -9845,7 +9841,21 @@ class UniversalAndroidFunctionController extends Controller
                 break;
         }
         Log::info("Приложение выбрано: " . $application);
+        if($order->server == 'my_server_api') {
+            Log::debug("Найден order с $order->server");
 
+            return  (new MyTaxiApiController)->startAddCostMyApi(
+                $order,
+                $application,
+                $email,
+                $addCost
+            );
+        }
+        // Проверяем существование заказа
+        if (!$order || !$orderMemory) {
+            Log::error("Не удалось найти order или orderMemory с UID: " . $uid);
+            return null;
+        }
         // Переписываем город для определенных случаев
         $originalCity = $city;
         switch ($originalCity) {
@@ -9868,50 +9878,20 @@ class UniversalAndroidFunctionController extends Controller
                 $city = "Dnipropetrovsk Oblast";
                 break;
             case "city_lviv":
-                $city = "OdessaTest";
-                break;
             case "city_ivano_frankivsk":
-                $city = "OdessaTest";
-                break;
             case "city_vinnytsia":
-                $city = "OdessaTest";
-                break;
             case "city_poltava":
-                $city = "OdessaTest";
-                break;
             case "city_sumy":
-                $city = "OdessaTest";
-                break;
             case "city_kharkiv":
-                $city = "OdessaTest";
-                break;
             case "city_chernihiv":
-                $city = "OdessaTest";
-                break;
             case "city_rivne":
-                $city = "OdessaTest";
-                break;
             case "city_ternopil":
-                $city = "OdessaTest";
-                break;
             case "city_khmelnytskyi":
-                $city = "OdessaTest";
-                break;
             case "city_zakarpattya":
-                $city = "OdessaTest";
-                break;
             case "city_zhytomyr":
-                $city = "OdessaTest";
-                break;
             case "city_kropyvnytskyi":
-                $city = "OdessaTest";
-                break;
             case "city_mykolaiv":
-                $city = "OdessaTest";
-                break;
             case "city_chernivtsi":
-                $city = "OdessaTest";
-                break;
             case "city_lutsk":
                 $city = "OdessaTest";
                 break;

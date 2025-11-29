@@ -9301,6 +9301,7 @@ class AndroidTestOSMController extends Controller
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $parameter['pay_system'] = $userArr[2];
         if ($connectAPI == 400) {
+            $parameter['comment_info'] = $comment;
             return (new MyTaxiApiController)->orderMyApiTaxi(
                 $parameter,
                 $clientCost,
@@ -11449,11 +11450,56 @@ class AndroidTestOSMController extends Controller
                 break;
         }
 
-        (new FCMController)->deleteDocumentFromFirestore($uid);
-        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+//        (new FCMController)->deleteDocumentFromFirestore($uid);
+//        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+//        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+//        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
 
+        try {
+            $controller = new FCMController();
+
+            Log::debug('🔥 Начало операций с Firestore', [
+                '$uid' => $uid,
+            ]);
+
+            // 1. Удаление старого документа из основного Firestore
+            Log::debug('🗑️ Удаление старого документа из Firestore...');
+            $controller->deleteDocumentFromFirestore($uid);
+            Log::info('✅ Старый документ удален из Firestore', ['uid' => $uid]);
+
+            // 2. Удаление из коллекции отмененных заказов
+            Log::debug('🗑️ Удаление из коллекции отмененных заказов...');
+            $controller->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            Log::info('✅ Удален из коллекции отмененных заказов', ['uid' => $uid]);
+
+            // 3. Удаление из секторного Firestore
+            Log::debug('🗑️ Удаление из секторного Firestore...');
+            $controller->deleteDocumentFromSectorFirestore($uid);
+            Log::info('✅ Удален из секторного Firestore', ['uid' => $uid]);
+
+            // 4. Запись в историю как отмененного
+            Log::debug('📝 Запись в историю как отмененного...');
+            $controller->writeDocumentToHistoryFirestore($uid, "cancelled");
+            Log::info('✅ Запись в историю выполнена', [
+                'uid' => $uid,
+                'status' => 'cancelled'
+            ]);
+
+
+            Log::info('🎯 Все операции Firestore выполнены успешно', [
+                '$uid' => $uid,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Ошибка операций с Firestore', [
+                'error' => $e->getMessage(),
+                '$uid' => $uid,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+        }
         $connectAPI = $orderweb->server;
         if($connectAPI == "my_server_api") {
             return [
@@ -13129,7 +13175,9 @@ class AndroidTestOSMController extends Controller
                 $messageAdmin = "Метод historyUIDStatus my_server_api $uid  close_reason $close_reason  execution_status $execution_status" ;
                 (new MessageSentController)->sentMessageAdmin($messageAdmin);
                 return response()->json([
+                    'dispatching_order_uid' => $orderweb_uid->dispatching_order_uid,
                     'close_reason' => $close_reason,
+                    'required_time' => $orderweb_uid->required_time,
                     'execution_status' => $execution_status,
                 ]);
             }

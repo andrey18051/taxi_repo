@@ -93,18 +93,6 @@ class MemoryOrderChangeController extends Controller
         return $chain; // Возвращаем массив номеров
     }
 
-    public function getFilteredOrders($orders)
-    {
-        $uniqueOrders = [];
-        foreach ($orders as $order) {
-            $currentUid = $this->findLatestOrderUid($order->uid); // Используем вашу функцию поиска последнего UID
-            if (!isset($uniqueOrders[$currentUid])) {
-                $uniqueOrders[$currentUid] = $order;
-            }
-        }
-
-        return collect($uniqueOrders);
-    }
 
     public function findLatestOrderUid(string $uid)
     {

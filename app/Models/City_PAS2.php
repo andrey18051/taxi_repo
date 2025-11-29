@@ -4,41 +4,111 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class City_PAS2 extends Model
+class City_PAS2 extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'city_pas_2_s';
+
     /**
-     * @var mixed
+     * Атрибуты, которые можно массово назначать.
+     *
+     * @var array
      */
-    private $name;
+    protected $fillable = [
+        'name',
+        'address',
+        'login',
+        'password',
+        'online',
+        'wfp_merchantAccount',
+        'wfp_merchantSecretKey',
+        'merchant_fondy',
+        'fondy_key_storage',
+        'versionApi',
+        'cost_correction',
+        'card_max_pay',
+        'bonus_max_pay',
+        'black_list'
+    ];
+
     /**
-     * @var mixed
+     * Настройки аудита
+     *
+     * @var array
      */
-    private $address;
+    protected $auditInclude = [
+        'name',
+        'address',
+        'login',
+        'password',
+        'online',
+        'wfp_merchantAccount',
+        'wfp_merchantSecretKey',
+        'merchant_fondy',
+        'fondy_key_storage',
+        'versionApi',
+        'cost_correction',
+        'card_max_pay',
+        'bonus_max_pay',
+        'black_list'
+    ];
+
     /**
-     * @var mixed
+     * Преобразования типов
+     *
+     * @var array
      */
-    private $login;
+    protected $casts = [
+        'cost_correction' => 'float',
+        'card_max_pay' => 'integer',
+        'bonus_max_pay' => 'integer',
+        'online' => 'boolean',
+    ];
+
     /**
-     * @var mixed
+     * Настройка событий аудита
+     *
+     * @var array
      */
-    private $password;
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored'
+    ];
+
     /**
-     * @var mixed|string
+     * Дополнительные данные для аудита
+     *
+     * @return array
      */
-    private $online;
+    public function transformAudit(array $data): array
+    {
+        // Добавляем IP адрес и User Agent
+        $data['ip_address'] = request()->ip();
+        $data['user_agent'] = request()->userAgent();
+        $data['url'] = request()->fullUrl();
+
+        return $data;
+    }
+
     /**
-     * @var mixed|string
+     * Мутатор для поля online
      */
-    private $wfp_merchantAccount;
+    public function setOnlineAttribute($value)
+    {
+        $this->attributes['online'] = $value === 'true' || $value === true || $value === '1' ? 'true' : 'false';
+    }
+
     /**
-     * @var mixed|string
+     * Аксессор для поля online
      */
-    private $wfp_merchantSecretKey;
-    /**
-     * @var mixed|string
-     */
-    private $black_list;
+    public function getOnlineAttribute($value)
+    {
+        return $value === 'true' || $value === true || $value === '1' ? 'true' : 'false';
+    }
 }

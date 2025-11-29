@@ -260,9 +260,11 @@ class DriverController extends Controller
             }
 
             $connectAPI = $orderweb->server;
+            if($connectAPI != "my_server_api" ) {
+                $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
+                $url = $connectAPI . '/api/weborders/cancel/' . $uid;
 
-            $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
-            $url = $connectAPI . '/api/weborders/cancel/' . $uid;
+            }
 
             $dataDriver = (new FCMController)->readDriverInfoFromFirestore($uidDriver);
 
@@ -281,52 +283,53 @@ class DriverController extends Controller
             (new FCMController)->ordersTakingStatus($uid, $status);
             (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
             Log::debug('orderTaking orderweb ', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
+            if($connectAPI != "my_server_api" ) {
+                if ($orderweb->pay_system == "nal_payment") {
+                    try {
+                        AndroidTestOSMController::repeatCancel(
+                            $url,
+                            $authorization,
+                            $application,
+                            $city,
+                            $connectAPI,
+                            $uid
+                        );
+                    } catch (\Exception $e) {
+                    }
+                } else {
+                    $startTime = time(); // Запоминаем начальное время
+                    do {
+                        // Попробуем найти запись
+                        $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
-            if($orderweb->pay_system == "nal_payment") {
-                try {
-                    AndroidTestOSMController::repeatCancel(
-                        $url,
-                        $authorization,
-                        $application,
-                        $city,
-                        $connectAPI,
-                        $uid
-                    );
-                } catch (\Exception $e) {
-                }
-            } else {
-                $startTime = time(); // Запоминаем начальное время
-                do {
-                    // Попробуем найти запись
-                    $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+                        if ($uid_history) {
+                            // Если запись найдена, выходим из цикла
+                            break;
+                        } else {
+                            $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
 
-                    if ($uid_history) {
-                        // Если запись найдена, выходим из цикла
-                        break;
-                    } else {
-                        $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+                            if ($uid_history) {
+                                // Если запись найдена, выходим из цикла
+                                break;
+                            }
+                        }
+
+                        $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
 
                         if ($uid_history) {
                             // Если запись найдена, выходим из цикла
                             break;
                         }
-                    }
 
-                    $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
+                        // Ждём одну секунду перед следующим проверочным циклом
+                        sleep(1);
+                    } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
 
-                    if ($uid_history) {
-                        // Если запись найдена, выходим из цикла
-                        break;
-                    }
-
-                    // Ждём одну секунду перед следующим проверочным циклом
-                    sleep(1);
-                } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
-
-                $uid_history->cancel = "1";
-                $uid_history->save();
-                $resp_answer = "Замовлення $uid отправлено в вилку на отмену";
-                Log::info( $resp_answer);
+                    $uid_history->cancel = "1";
+                    $uid_history->save();
+                    $resp_answer = "Замовлення $uid отправлено в вилку на отмену";
+                    Log::info($resp_answer);
+                }
             }
 
             // Вернуть JSON с сообщением об успехе

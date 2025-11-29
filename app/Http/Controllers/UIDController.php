@@ -258,6 +258,14 @@ class UIDController extends Controller
 
     public function getServerArray($city, $app): array
     {
+        Log::info('🟢 НАЧАЛО getServerArray', [
+            'input_city' => $city,
+            'input_app' => $app
+        ]);
+
+        $originalCity = $city;
+
+        // Логируем преобразование города
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
@@ -276,30 +284,99 @@ class UIDController extends Controller
             case "Chernivtsi":
             case "Lutsk":
                 $city = "OdessaTest";
+                Log::debug('🏙️ Город преобразован в OdessaTest', [
+                    'original_city' => $originalCity,
+                    'new_city' => $city
+                ]);
                 break;
             case "foreign countries":
                 $city = "Kyiv City";
+                Log::debug('🏙️ Иностранные страны преобразованы в Kyiv City', [
+                    'original_city' => $originalCity,
+                    'new_city' => $city
+                ]);
                 break;
+            default:
+                Log::debug('🏙️ Город не требует преобразования', [
+                    'city' => $city
+                ]);
         }
 
+        // Логируем выбор таблицы по приложению
+        Log::debug('📱 Выбор таблицы серверов по приложению', [
+            'app' => $app,
+            'city' => $city
+        ]);
 
         switch ($app) {
             case "PAS1":
                 $serverInfo = City_PAS1::where("name", $city)->get();
+                Log::debug('🔍 Поиск серверов в City_PAS1', [
+                    'table' => 'City_PAS1',
+                    'city' => $city,
+                    'query' => "name = $city"
+                ]);
                 break;
             case "PAS2":
                 $serverInfo = City_PAS2::where("name", $city)->get();
+                Log::debug('🔍 Поиск серверов в City_PAS2', [
+                    'table' => 'City_PAS2',
+                    'city' => $city,
+                    'query' => "name = $city"
+                ]);
                 break;
             //case "PAS4":
             default:
                 $serverInfo = City_PAS4::where("name", $city)->get();
+                Log::debug('🔍 Поиск серверов в City_PAS4 (по умолчанию)', [
+                    'table' => 'City_PAS4',
+                    'city' => $city,
+                    'query' => "name = $city"
+                ]);
         }
+
+        // Логируем результаты поиска серверов
+        Log::debug('📊 Результаты поиска серверов', [
+            'found_servers_count' => $serverInfo->count(),
+            'servers' => $serverInfo->pluck('address')->toArray(),
+            'servers_full' => $serverInfo->toArray()
+        ]);
+
         $serverArray = [];
-        if ($serverInfo != null) {
-            foreach ($serverInfo as $value) {
-                $serverArray[] = 'http://' .$value->address;
+
+        if ($serverInfo->isNotEmpty()) {
+            Log::info('✅ Серверы найдены, формируем массив адресов');
+            foreach ($serverInfo as $index => $value) {
+                $serverAddress = 'http://' . $value->address;
+                $serverArray[] = $serverAddress;
+                Log::debug("🔗 Добавлен сервер в массив", [
+                    'index' => $index,
+                    'original_address' => $value->address,
+                    'full_address' => $serverAddress,
+                    'server_id' => $value->id ?? 'unknown'
+                ]);
             }
+            // Добавляем my_server_api в конец массива
+            $serverArray[] = 'my_server_api';
+            Log::debug("➕ Добавлен my_server_api в массив серверов", [
+                'total_servers_count' => count($serverArray),
+                'added_server' => 'my_server_api'
+            ]);
+        } else {
+            Log::warning('⚠️ Серверы не найдены для указанных параметров', [
+                'city' => $city,
+                'app' => $app,
+                'original_city' => $originalCity
+            ]);
         }
+
+        Log::info('🎯 ЗАВЕРШЕНИЕ getServerArray', [
+            'input_city' => $originalCity,
+            'processed_city' => $city,
+            'app' => $app,
+            'server_array_count' => count($serverArray),
+            'server_array' => $serverArray
+        ]);
 
         return $serverArray;
     }
@@ -325,10 +402,25 @@ class UIDController extends Controller
 
     public function UIDStatusShowEmailCityApp($email, $city, $app)
     {
+        Log::info('🟢 НАЧАЛО UIDStatusShowEmailCityApp', [
+            'email' => $email,
+            'city' => $city,
+            'app' => $app
+        ]);
+
         $serverArray = self::getServerArray($city, $app);
         $app_name = self::getAppName($app);
 
+        Log::debug('📡 Получены сервер и приложение', [
+            'serverArray' => $serverArray,
+            'app_name' => $app_name
+        ]);
+
         if ($serverArray != null) {
+            Log::debug('✅ Сервер доступен, продолжаем обработку');
+
+            // Логируем преобразование города
+            $originalCity = $city;
             switch ($city) {
                 case "Kyiv City":
                     $city = "city_kiev";
@@ -397,116 +489,182 @@ class UIDController extends Controller
                 default:
                     $city = "all";
             }
+            Log::debug('🏙️ Преобразование города', [
+                'original_city' => $originalCity,
+                'db_city' => $city
+            ]);
 
-            $order = Orderweb:: where("email", $email)
-                ->whereIn('closeReason', ['-1', '101', '102'])
+            // Поиск активных заказов
+            Log::info('🔍 Поиск активных заказов...', [
+                'email' => $email,
+                'closeReasons' => ['-1', '100', '101', '102'],
+                'app_name' => $app_name,
+                'city' => $city
+            ]);
+
+            $order = Orderweb::where("email", $email)
+                ->whereIn('closeReason', ['-1', '100', '101', '102'])
                 ->where("comment", $app_name)
                 ->where("city", $city)
                 ->orderBy("created_at", "desc")
                 ->get();
 
-//            $order = Orderweb:: where("email", $email)
-//                ->whereIn('closeReason', ['-1'])
-////                ->whereIn("server", $serverArray)
-////                ->where("comment", $app_name)
-////                ->orderBy("created_at", "desc")
-//                ->get();
-            Log::debug("UIDStatusShowEmail order 2", $order->toArray());
+            Log::debug('📊 Результат поиска активных заказов', [
+                'found_records' => $order->count(),
+                'order_ids' => $order->pluck('id')->toArray(),
+                'closeReasons' => $order->pluck('closeReason')->toArray()
+            ]);
+
             $response = null;
             if (!$order->isEmpty()) {
+                Log::info('🔄 Запуск UIDStatusReview для активных заказов', [
+                    'order_count' => $order->count()
+                ]);
                 self::UIDStatusReview($order);
+            } else {
+                Log::info('ℹ️ Активных заказов не найдено');
             }
-//            $orderHistory = Orderweb::where("email", $email)
-//
-//                ->whereNotIn('closeReason', ['-1', '101', '102'])
-//                -> whereIn("server", $serverArray)
-//                -> where("startLat", "!=", null)
-//                -> where("startLan", "!=", null)
-//                -> where("to_lat", "!=", null)
-//                -> where("to_lng", "!=", null)
-//                -> where("comment", $app_name)
-//                -> orderBy("created_at", "desc")
-//                -> get();
+
+            // Поиск истории заказов
+            Log::info('🔍 Поиск истории заказов...', [
+                'email' => $email,
+                'excluded_closeReasons' => ['-1', '100', '101', '102'],
+                'serverArray' => $serverArray,
+                'app_name' => $app_name,
+                'city' => $city,
+                'limit' => 10
+            ]);
+
             $orderHistory = Orderweb::where("email", $email)
-                ->whereNotIn('closeReason', ['-1', '101', '102'])
+                ->whereNotIn('closeReason', ['-1', '100', '101', '102'])
                 ->whereIn("server", $serverArray)
-//                ->whereNotNull("startLat")
-//                ->whereNotNull("startLan")
-//                ->whereNotNull("to_lat")
-//                ->whereNotNull("to_lng")
                 ->where("comment", $app_name)
                 ->where("city", $city)
                 ->orderBy("created_at", "desc")
                 ->get()
                 ->take(10);
 
-            if ($orderHistory) {
-                $i=0;
+            Log::debug('📊 Результат поиска истории заказов', [
+                'found_records' => $orderHistory->count(),
+                'order_ids' => $orderHistory->pluck('id')->toArray(),
+                'closeReasons' => $orderHistory->pluck('closeReason')->toArray()
+            ]);
+
+            if ($orderHistory->isNotEmpty()) {
+                Log::info('📝 Формирование ответа с историей заказов', [
+                    'records_count' => $orderHistory->count()
+                ]);
+
+                $i = 0;
                 $orderUpdate = $orderHistory->toArray();
-                Log::debug("UIDStatusShowEmail orderUpdate", $orderUpdate);
+
+                Log::debug('📋 Данные истории заказов для обработки', [
+                    'total_records' => count($orderUpdate),
+                    'first_record' => $orderUpdate[0] ?? 'empty'
+                ]);
+
                 date_default_timezone_set('Europe/Kiev');
 
-                foreach ($orderUpdate as $value) {
-                    $storedData = $value["auto"];
+                foreach ($orderUpdate as $index => $value) {
+                    Log::debug("🔧 Обработка заказа #{$index}", [
+                        'order_id' => $value['id'] ?? 'unknown',
+                        'closeReason' => $value['closeReason'] ?? 'unknown',
+                        'auto_data' => $value['auto'] ?? 'empty'
+                    ]);
 
+                    $storedData = $value["auto"] ?? '';
                     $dataDriver = json_decode($storedData, true);
 
-                    if ($dataDriver["uid"] != null) {
-//                        $name = $dataDriver["name"];
-                        $color = $dataDriver["color"];
-                        $brand = $dataDriver["brand"];
-                        $model = $dataDriver["model"];
-                        $number = $dataDriver["number"];
-                        $auto = "Авто $number, цвет $color  $brand $model";
+                    if ($dataDriver && isset($dataDriver["uid"]) && $dataDriver["uid"] != null) {
+                        $color = $dataDriver["color"] ?? '';
+                        $brand = $dataDriver["brand"] ?? '';
+                        $model = $dataDriver["model"] ?? '';
+                        $number = $dataDriver["number"] ?? '';
+                        $auto = "Авто $number, цвет $color $brand $model";
+                        Log::debug("🚗 Данные водителя из JSON", [
+                            'number' => $number,
+                            'color' => $color,
+                            'brand' => $brand,
+                            'model' => $model
+                        ]);
                     } else {
-                        $auto =  $value["auto"];
+                        $auto = $value["auto"] ?? '';
+                        Log::debug("📄 Данные водителя из прямого поля", ['auto' => $auto]);
                     }
+
+                    // Расчет стоимости
+                    $cost = $value["web_cost"] ?? 0;
+                    if (!empty($value["client_cost"])) {
+                        $cost = $value["client_cost"] + ($value["attempt_20"] ?? 0);
+                        Log::debug('💰 Расчет стоимости с client_cost', [
+                            'client_cost' => $value["client_cost"],
+                            'attempt_20' => $value["attempt_20"] ?? 0,
+                            'total_cost' => $cost
+                        ]);
+                    }
+                    if (!empty($value["finish_cost"])) {
+                        $cost = $value["finish_cost"];
+                        Log::debug('💰 Использована finish_cost', ['finish_cost' => $cost]);
+                    }
+
+                    // Форматирование дат
+                    $requiredTime = !empty($value["required_time"]) ? date('d.m.Y H:i', strtotime($value["required_time"])) : '';
+                    $createdAt = !empty($value["created_at"]) ? date('d.m.Y H:i:s', strtotime($value["created_at"])) : '';
+
                     if ($i < 10) {
-                        $cost = $value["web_cost"];
-                        if($value["client_cost"] !=null) {
-                            $cost = $value["client_cost"]+ $value["attempt_20"];
-                        }
-                        if ($value["finish_cost"] !=null) {
-                            $cost = $value["finish_cost"];
-                        }
                         $response[] = [
-                            'routefrom' => $value["routefrom"],
-                            'routefromnumber' => $value["routefromnumber"],
-                            'startLat' => $value["startLat"],
-                            'startLan' => $value["startLan"],
-                            'routeto' => $value["routeto"],
-                            'routetonumber' => $value["routetonumber"],
-                            'to_lat' => $value["to_lat"],
-                            'to_lng' => $value["to_lng"],
+                            'routefrom' => $value["routefrom"] ?? '',
+                            'routefromnumber' => $value["routefromnumber"] ?? '',
+                            'startLat' => $value["startLat"] ?? '',
+                            'startLan' => $value["startLan"] ?? '',
+                            'routeto' => $value["routeto"] ?? '',
+                            'routetonumber' => $value["routetonumber"] ?? '',
+                            'to_lat' => $value["to_lat"] ?? '',
+                            'to_lng' => $value["to_lng"] ?? '',
                             'web_cost' => $cost,
-                            'closeReason' => $value["closeReason"],
+                            'closeReason' => $value["closeReason"] ?? '',
                             'auto' => $auto,
-                            'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
-                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                            'required_time' => $requiredTime,
+                            'created_at' => $createdAt,
                         ];
+                        Log::debug("✅ Добавлен заказ в ответ (i < 10)", ['index' => $i]);
                     } else {
-//                    if ($value["closeReason"] == "0" ) {
-                        if ($value["closeReason"] == 0 || $value["closeReason"] == 8 ||$value["closeReason"] == 9) {
+                        if (in_array($value["closeReason"] ?? '', [0, 8, 9])) {
                             $response[] = [
-                                'routefrom' => $value["routefrom"],
-                                'routefromnumber' => $value["routefromnumber"],
-                                'startLat' => $value["startLat"],
-                                'startLan' => $value["startLan"],
-                                'routeto' => $value["routeto"],
-                                'routetonumber' => $value["routetonumber"],
-                                'to_lat' => $value["to_lat"],
-                                'to_lng' => $value["to_lng"],
-                                'web_cost' => $value["web_cost"],
-                                'closeReason' => $value["closeReason"],
+                                'routefrom' => $value["routefrom"] ?? '',
+                                'routefromnumber' => $value["routefromnumber"] ?? '',
+                                'startLat' => $value["startLat"] ?? '',
+                                'startLan' => $value["startLan"] ?? '',
+                                'routeto' => $value["routeto"] ?? '',
+                                'routetonumber' => $value["routetonumber"] ?? '',
+                                'to_lat' => $value["to_lat"] ?? '',
+                                'to_lng' => $value["to_lng"] ?? '',
+                                'web_cost' => $value["web_cost"] ?? 0,
+                                'closeReason' => $value["closeReason"] ?? '',
                                 'auto' => $auto,
-                                'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
-                                'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                                'required_time' => $requiredTime,
+                                'created_at' => $createdAt,
                             ];
+                            Log::debug("✅ Добавлен заказ в ответ (closeReason 0,8,9)", [
+                                'index' => $i,
+                                'closeReason' => $value["closeReason"] ?? ''
+                            ]);
+                        } else {
+                            Log::debug("❌ Заказ пропущен (closeReason не 0,8,9)", [
+                                'index' => $i,
+                                'closeReason' => $value["closeReason"] ?? ''
+                            ]);
                         }
                     }
                     $i++;
                 }
+
+                Log::info('📤 Ответ с историей заказов сформирован', [
+                    'total_records_in_response' => count($response ?? [])
+                ]);
+
             } else {
+                Log::warning('⚠️ История заказов не найдена, создаем заглушку');
                 $response = null;
                 $response[] = [
                     'routefrom' => "*",
@@ -519,8 +677,19 @@ class UIDController extends Controller
                     'created_at' => "*",
                 ];
             }
-//        Log::debug("UIDStatusShowEmail response", $response);
+
+            Log::info('🎯 ЗАВЕРШЕНИЕ UIDStatusShowEmailCityApp', [
+                'email' => $email,
+                'total_response_records' => count($response ?? [])
+            ]);
+
             return $response;
+        } else {
+            Log::error('❌ Сервер не доступен, прерываем выполнение', [
+                'city' => $city,
+                'app' => $app
+            ]);
+            return null;
         }
     }
 

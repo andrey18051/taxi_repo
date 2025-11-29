@@ -7,7 +7,7 @@ use App\Mail\Check;
 use App\Models\City_PAS2;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -63,9 +63,96 @@ class CityPas2Controller extends Controller
         return response()->json($city);
     }
 
+
+
     public function destroy($id)
     {
-        City_PAS2::find($id)->delete();
+        try {
+            $city = City_PAS2::find($id);
+
+            if (!$city) {
+                Log::warning('Attempt to archive non-existent city', [
+                    'city_id' => $id,
+                    'user_id' => auth()->id(),
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'url' => request()->fullUrl()
+                ]);
+
+                return response()->json(['error' => 'City not found'], 404);
+            }
+
+            // Получаем причину архивации из запроса
+            $reason = request()->input('reason', 'Archived from Laravel application by user');
+
+            // Логируем попытку архивации
+            Log::info('City archiving initiated', [
+                'city_id' => $city->id,
+                'city_name' => $city->name,
+                'reason' => $reason,
+                'archived_by_user_id' => auth()->id(),
+                'archived_by_user_name' => auth()->user()->name ?? 'Unknown',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'url' => request()->fullUrl(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            // Архивируем через безопасную процедуру
+            DB::statement('CALL archive_city_safely(?, ?)', [$id, $reason]);
+
+            // Обновляем модель чтобы отразить изменения
+            $city->refresh();
+
+            Log::info('City archived successfully', [
+                'city_id' => $city->id,
+                'city_name' => $city->name,
+                'new_status' => $city->online
+            ]);
+
+            return response()->json([
+                'message' => 'City archived successfully',
+                'city' => [
+                    'id' => $city->id,
+                    'name' => $city->name,
+                    'online' => $city->online,
+                    'status' => 'archived',
+                    'archived_at' => now()->toDateTimeString()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+
+            // Если это ошибка блокировки от триггера
+            if (str_contains($errorMessage, 'DELETE operations are blocked')) {
+                Log::warning('Delete operation blocked by database trigger', [
+                    'city_id' => $id,
+                    'error_message' => $errorMessage,
+                    'user_id' => auth()->id(),
+                    'ip' => request()->ip()
+                ]);
+
+                return response()->json([
+                    'error' => 'Delete operations are disabled for cities. Use archive instead.'
+                ], 423); // 423 Locked
+            }
+
+            // Другие ошибки
+            Log::error('Error archiving city', [
+                'city_id' => $id,
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'ip' => request()->ip(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to archive city',
+                'details' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     public function cityCreat(Request $req)
