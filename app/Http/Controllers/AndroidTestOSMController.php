@@ -9070,6 +9070,7 @@ class AndroidTestOSMController extends Controller
     /**
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException
+     * @throws \Exception
      */
     public function orderClientCostMyApi(
         $originLatitude,
@@ -9306,7 +9307,9 @@ class AndroidTestOSMController extends Controller
                 $parameter,
                 $clientCost,
                 $application,
-                $email
+                $email,
+                $wfpInvoice,
+                $city
             );
         }
         $responseDoubleArr = null;

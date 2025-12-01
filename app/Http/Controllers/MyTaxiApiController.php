@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
-use App\Jobs\WebordersCancelAndRestorNalJob;
-use App\Models\CityTariff;
+use App\Jobs\CheckAndCancelOrderJob;
+use App\Models\Orderweb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -36,32 +36,46 @@ class MyTaxiApiController extends Controller
         $startLng = $startPoint['lng'] ?? null;
         $endLat = $endPoint['lat'] ?? null;
         $endLng = $endPoint['lng'] ?? null;
+        $payment_type = $parameter['payment_type'] ?? 0;
 
         // Проверка координат
         if (!$this->validateCoordinates($startLat, $startLng, $endLat, $endLng)) {
             return $this->buildErrorResponse('Не все координаты маршрута указаны');
         }
 
-        // Создаем ключ для кеширования на основе координат и города
-        $cacheKey = "taxi_cost:" . md5("{$city}:{$startLat}:{$startLng}:{$endLat}:{$endLng}");
-        $cacheDuration = 24*60; // сутки
+        // Создаем ключ для кеширования на основе координат, города и типа оплаты
+        $cacheKey = "taxi_cost:" . md5("{$city}:{$startLat}:{$startLng}:{$endLat}:{$endLng}:{$payment_type}");
+        $cacheDuration = 24 * 60; // сутки
 
-        // Пробуем получить результат из кеша используя фасад Cache
+        // Пробуем получить результат из кеша
         $cachedResult = Cache::get($cacheKey);
+
         if ($cachedResult !== null) {
-            Log::info('Используем кешированную стоимость такси', [
-                'city' => $city,
-                'cache_key' => $cacheKey
-            ]);
+            // Проверяем, что кешированный результат - это массив
+            if (is_array($cachedResult)) {
+                Log::info('Используем кешированную стоимость такси', [
+                    'city' => $city,
+                    'cache_key' => $cacheKey
+                ]);
 
-            // Обновляем email в кешированном результате
-            $cachedResult['cached'] = true;
-            (new PusherController)->sentCostAppEmail($cachedResult['order_cost'], $application, $email);
+                // Отправляем email с кешированной стоимостью
+                if (isset($cachedResult['order_cost'])) {
+                    (new PusherController)->sentCostAppEmail($cachedResult['order_cost'], $application, $email);
+                }
 
-            return $cachedResult;
+                // Возвращаем кешированный результат
+                return $cachedResult;
+            } else {
+                // Если в кеше не массив, очищаем и продолжаем расчет
+                Log::warning('Некорректный формат кешированных данных', [
+                    'type' => gettype($cachedResult),
+                    'cache_key' => $cacheKey
+                ]);
+                Cache::forget($cacheKey);
+            }
         }
 
-        // Кешируем расчет расстояния используя фасад Cache
+        // Кешируем расчет расстояния
         $distanceCacheKey = "route_distance:" . md5("{$startLat}:{$startLng}:{$endLat}:{$endLng}");
         $routeDistanceKm = Cache::remember($distanceCacheKey, 3600, function() use ($startLat, $startLng, $endLat, $endLng) {
             return $this->calculateRouteDistance($startLat, $startLng, $endLat, $endLng);
@@ -72,28 +86,51 @@ class MyTaxiApiController extends Controller
             return $this->buildErrorResponse('Не удалось рассчитать расстояние маршрута');
         }
 
-        // Рассчитываем стоимость (расстояние может быть 0)
-        $price = $this->calculatePrice($city, $routeDistanceKm);
-        if ($price === null) {
+        // Рассчитываем базовую стоимость
+        $basePrice = $this->calculatePrice($city, $routeDistanceKm, $payment_type);
+        if ($basePrice === null) {
             return $this->buildErrorResponse('Не удалось рассчитать стоимость поездки');
         }
 
-        // Формируем успешный ответ
-        $result = $this->buildSuccessResponse($price, $startLat, $startLng, $endLat, $endLng, $application, $email);
-        $result['cached'] = false;
+        // Применяем наценку 10% для безналичной оплаты
+        $finalPrice = $basePrice;
+        if ($payment_type != 0) {
+            $finalPrice = $basePrice * 1.1;
+            Log::info('Применена наценка для безналичной оплаты', [
+                'base_price' => $basePrice,
+                'final_price' => $finalPrice,
+                'payment_type' => $payment_type
+            ]);
+        }
 
-        // Кешируем финальный результат используя фасад Cache
+        // Формируем успешный ответ
+        $result = $this->buildSuccessResponse($finalPrice, $startLat, $startLng, $endLat, $endLng, $application, $email);
+
+        // Добавляем флаг кеширования
+        $result['cached'] = false;
+        $result['payment_type'] = $payment_type;
+        $result['distance_km'] = $routeDistanceKm;
+        $result['base_price'] = $basePrice;
+
+        // Отправляем email с рассчитанной стоимостью
+        (new PusherController)->sentCostAppEmail($result['order_cost'], $application, $email);
+
+        // Кешируем финальный результат
         Cache::put($cacheKey, $result, $cacheDuration);
 
         Log::info('Стоимость такси рассчитана и закеширована', [
             'city' => $city,
             'distance_km' => $routeDistanceKm,
-            'price' => $price,
-            'cache_duration' => $cacheDuration
+            'base_price' => $basePrice,
+            'final_price' => $finalPrice,
+            'payment_type' => $payment_type,
+            'cache_duration' => $cacheDuration,
+            'cache_key' => $cacheKey
         ]);
 
         return $result;
     }
+
 
     /**
      * Валидация координат
@@ -179,11 +216,11 @@ class MyTaxiApiController extends Controller
     /**
      * Расчет стоимости через CityTariffController
      */
-    private function calculatePrice(string $city, float $distance): ?float
+    private function calculatePrice(string $city, float $distance, $payment_type): ?float
     {
         try {
             // Создаем ключ для кеширования
-            $cacheKey = "tariff_price:{$city}:" . round($distance, 2);
+            $cacheKey = "tariff_price:{$city}:{$payment_type}" . round($distance, 2);
             $cacheDuration = 3600; // 1 час
 
             Log::info('Начало расчета стоимости тарифа', [
@@ -319,7 +356,9 @@ class MyTaxiApiController extends Controller
         $parameter,
         $clientCost,
         $application,
-        $email
+        $email,
+        $wfpInvoice,
+        $city
     ): array
     {
         Log::info('🟢 НАЧАЛО создания заказа такси', [
@@ -472,8 +511,52 @@ class MyTaxiApiController extends Controller
         try {
             // Сохраняем заказ
             Log::info('💾 Сохранение заказа в базу...');
-            (new UniversalAndroidFunctionController)->saveOrder($params, $identificationId);
+            $order_id = (new UniversalAndroidFunctionController)->saveOrder($params, $identificationId);
             Log::info('✅ Заказ успешно сохранен в базу');
+
+            if($wfpInvoice != "*") {
+                $orderReference = $wfpInvoice;
+                $amount = $clientCost;
+                $productName = "Інша допоміжна діяльність у сфері транспорту";
+                $clientEmail = $params['email'];
+                $clientPhone = $params["user_phone"];
+                $pay_system = $params['pay_system'];
+
+                (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
+                (new WfpController)->chargeActiveToken(
+                    $application,
+                    $city,
+                    $orderReference,
+                    $amount,
+                    $productName,
+                    $clientEmail,
+                    $clientPhone
+                );
+                (new WfpController)->checkStatus(
+                    $application,
+                    $city,
+                    $orderReference
+                );
+
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                if ($order) {
+                    if ($order->wfp_status_pay != "WaitingAuthComplete"
+                        || $order->wfp_status_pay != "Approved") {
+                        // проверка оплаты с автоотменой
+                        CheckAndCancelOrderJob::dispatch(
+                            $dispatching_order_uid,
+                            $application,
+                            $email
+                        )
+                            ->delay(now()->addSeconds(50))
+                            ->onQueue('high');
+                    }
+                }
+
+            }
+
+
+
         } catch (\Exception $e) {
             Log::error('❌ Ошибка сохранения заказа в базу', [
                 'error' => $e->getMessage(),

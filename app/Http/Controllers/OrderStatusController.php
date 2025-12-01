@@ -1220,7 +1220,7 @@ class OrderStatusController extends Controller
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
         if ($orderweb) {
-            if (in_array($orderweb->closeReason, ['101', '102', '103', '104'])) {
+            if (in_array($orderweb->closeReason, ['100', '101', '102', '103', '104'])) {
 
                 $responseArr = [
                     'close_reason' => $orderweb->closeReason
@@ -1256,22 +1256,25 @@ class OrderStatusController extends Controller
                     // Block 2: Состояния "Авто найдено"
                     case '101':
                         $action = 'Авто найдено';
-                        Log::info('Switch: Авто найдено', ['action' => $action]);
+                        Log::info('Switch: 101', ['action' => $action]);
                         break;
                     case '102':
                         $action = 'На месте';
-                        Log::info('Switch: На месте', ['action' => $action]);
+                        Log::info('Switch: 102', ['action' => $action]);
                         break;
 
                     case '103':
                         $action = 'В пути';
-                        Log::info('Switch: В пути', ['action' => $action]);
+                        Log::info('Switch: 103', ['action' => $action]);
                         break;
 
                     case '104':
                         $action = "Заказ выполнен";
-                        Log::info('Switch: Заказ выполнен', ['action' => $action]);
+                        Log::info('Switch: 104', ['action' => $action]);
                         break;
+                    default:
+                        $action = 'Поиск авто';
+                        Log::info('Switch: default', ['action' => $action]);
                 }
 
                 Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
