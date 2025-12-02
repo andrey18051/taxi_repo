@@ -576,7 +576,7 @@ class PusherController extends Controller
         );
 
         // Отправка события на канал
-        Log::info("Pusher отправляет событие: order-status-updated-" . $app . " в канал teal-towel-48");
+        Log::info("Pusher отправляет событие: transactionStatus-" . $app . " в канал teal-towel-48");
 
         $data = [
             'transactionStatus' =>  $transactionStatus,

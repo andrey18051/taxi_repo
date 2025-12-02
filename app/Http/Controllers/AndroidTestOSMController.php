@@ -8229,6 +8229,31 @@ class AndroidTestOSMController extends Controller
         $application,
         $uid
     ) {
+
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $clientCost = $order->client_cost;
+        if ($order->server == "my_server_api" ) {
+            return self::orderClientCostMyApi(
+                $originLatitude,
+                $originLongitude,
+                $toLatitude,
+                $toLongitude,
+                $tariff,
+                $phone,
+                $clientCost,
+                $user,
+                $add_cost,
+                $time,
+                $comment,
+                $date,
+                $start,
+                $finish,
+                $wfpInvoice,
+                $services,
+                $city,
+                $application
+            );
+        }
         $startTime = time();
         do {
             $response = (new OrderStatusController)->getOrderStatusMessageResultPush($uid);
@@ -8241,7 +8266,9 @@ class AndroidTestOSMController extends Controller
 // Access the "action" value
             $action_value = $response['action'];
 
+
             if( $action_value == "Заказ снят" ) {
+
                 return self::orderClientCost(
                     $originLatitude,
                     $originLongitude,
@@ -12052,10 +12079,11 @@ class AndroidTestOSMController extends Controller
         }
         if ($orderweb) {
             self::updateTimestamp($orderweb->id);
-            (new FCMController)->deleteDocumentFromFirestore($uid);
-            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-            (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+            $fcmController  = (new FCMController);
+            $fcmController->deleteDocumentFromFirestore($uid);
+            $fcmController->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            $fcmController->deleteDocumentFromSectorFirestore($uid);
+            $fcmController->writeDocumentToHistoryFirestore($uid, "cancelled");
             $orderweb->auto = null;
             $orderweb->closeReason = "1";
             $orderweb->save();
@@ -12069,36 +12097,39 @@ class AndroidTestOSMController extends Controller
 //                $email,
 //                $dispatching_order_uid
 //            );
-            $startTime = time(); // Запоминаем начальное время
 
-            do {
-                // Попробуем найти запись
-                $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+            if($orderweb->server != "my_server_api") {
+                $startTime = time(); // Запоминаем начальное время
+                do {
+                    // Попробуем найти запись
+                    $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
 
-                if ($uid_history) {
-                    // Если запись найдена, выходим из цикла
-                    break;
-                } else {
-                    $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+                    if ($uid_history) {
+                        // Если запись найдена, выходим из цикла
+                        break;
+                    } else {
+                        $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
+
+                        if ($uid_history) {
+                            // Если запись найдена, выходим из цикла
+                            break;
+                        }
+                    }
+
+                    $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
 
                     if ($uid_history) {
                         // Если запись найдена, выходим из цикла
                         break;
                     }
-                }
 
-                $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
+                    // Ждём одну секунду перед следующим проверочным циклом
+                    sleep(1);
+                } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+                $uid_history->cancel = "1";
+                $uid_history->save();
+            }
 
-                if ($uid_history) {
-                    // Если запись найдена, выходим из цикла
-                    break;
-                }
-
-                // Ждём одну секунду перед следующим проверочным циклом
-                sleep(1);
-            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
-            $uid_history->cancel = "1";
-            $uid_history->save();
             $resp_answer = "Замовлення $uid отправлено на отмену";
             return [
                 'response' => $resp_answer,

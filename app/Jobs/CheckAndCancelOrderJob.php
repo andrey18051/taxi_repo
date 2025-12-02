@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\PusherController;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -163,6 +165,7 @@ class CheckAndCancelOrderJob implements ShouldQueue
             Log::debug("📝 Запись отменены заказа в таблицу заказов");
 
             $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+            $order->cancel_timestamp = Carbon::now();
             $order->closeReason = "1";
             $order->save();
             //Пуш об отмене заказа

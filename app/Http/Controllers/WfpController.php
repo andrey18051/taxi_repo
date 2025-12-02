@@ -2330,7 +2330,8 @@ class WfpController extends Controller
         $productName,
         $clientEmail,
         $clientPhone
-    ) {
+    ): Response
+    {
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":

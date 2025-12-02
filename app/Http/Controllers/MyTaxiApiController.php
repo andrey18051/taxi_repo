@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
 use App\Jobs\CheckAndCancelOrderJob;
+use App\Jobs\SimplePollStatusJob;
 use App\Models\Orderweb;
+use App\Models\WfpInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -532,27 +534,23 @@ class MyTaxiApiController extends Controller
                     $clientEmail,
                     $clientPhone
                 );
-                (new WfpController)->checkStatus(
+
+                Log::debug("🔍 Поиск информации о транзакции в таблице WfpInvoice");
+
+                // Первый запуск - без пятого параметра (по умолчанию 0)
+
+                SimplePollStatusJob::dispatch(
+                    $orderReference,
+                    $dispatching_order_uid,
                     $application,
-                    $city,
-                    $orderReference
-                );
+                    $email
+                )->onQueue('high');
 
-                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
-                if ($order) {
-                    if ($order->wfp_status_pay != "WaitingAuthComplete"
-                        || $order->wfp_status_pay != "Approved") {
-                        // проверка оплаты с автоотменой
-                        CheckAndCancelOrderJob::dispatch(
-                            $dispatching_order_uid,
-                            $application,
-                            $email
-                        )
-                            ->delay(now()->addSeconds(50))
-                            ->onQueue('high');
-                    }
-                }
-
+                CheckAndCancelOrderJob::dispatch(
+                    $dispatching_order_uid,
+                    $application,
+                    $email
+                )->onQueue('high')->delay(now()->addSeconds(50));
             }
 
 
