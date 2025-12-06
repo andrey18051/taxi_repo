@@ -7,6 +7,7 @@ use App\Helpers\OpenStreetMapHelper;
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Jobs\WebordersCancelAndRestorNalJob;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\StartAddCostCardCreat;
@@ -10695,7 +10696,17 @@ class UniversalAndroidFunctionController extends Controller
         Log::info("Поиск заказа по UID '$uid': " . ($order ? "найден, dispatching_order_uid='{$order->dispatching_order_uid}'" : 'не найден.'));
         $messageAdmin = "Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null');
         Log::info($messageAdmin);
+        if($order->server == 'my_server_api') {
+            Log::debug("Найден order с $order->server");
 
+            return  $this->startAddCostCardBottomCreatMyApi(
+                $uid,
+                $pay_method,
+                $orderReference,
+                $city,
+                $addCost
+            );
+        }
         // Ищем данные в Uid_history
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
         if (!$uid_history) {

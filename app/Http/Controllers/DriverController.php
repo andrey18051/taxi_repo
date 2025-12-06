@@ -757,15 +757,46 @@ class DriverController extends Controller
     }
 
 
-    public function creatNewDobleOrderAfterUnttakingOrderDriver ($uid)
+    public function creatNewDobleOrderAfterUnttakingOrderDriver ($uid): \Illuminate\Http\JsonResponse
     {
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderReference = $order->wfp_order_id;
+        $city= $order->city;
+        $pay_method = "wfp_payment";
+        $amount= 0;
+        $email = $order->email;
+        switch ($order->comment) {
+            case "taxi_easy_ua_pas1":
+                $application = "PAS1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $application = "PAS2";
+                break;
+            default:
+                $application = "PAS4";
+                break;
+        }
+        if($order->server == 'my_server_api') {
+            Log::debug("Найден order с $order->server");
+            $response = (new WfpController)->checkStatus(
+                $application,
+                $city,
+                $orderReference
+            );
+
+            return  (new MyTaxiApiController)->startAddCostMyApi(
+                $order,
+                $application,
+                $email,
+                $amount,
+                $response
+            );
+        }
         try {
 
                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-                $pay_method = "wfp_payment";
-                $orderReference = $order->wfp_order_id;
-                $city= $order->city;
+
+
             // Определение города
 //            switch ($order->city) {
 //                case "city_kiev": $city = "Kyiv City"; break;

@@ -2290,6 +2290,34 @@ class WfpController extends Controller
                                 $clientEmail
                             );
                             if ($transactionStatus == "Approved" || $transactionStatus == "WaitingAuthComplete") {
+
+                                $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+
+                                $email = $order->email;
+                                switch ($order->comment) {
+                                    case "taxi_easy_ua_pas1":
+                                        $application = "PAS1";
+                                        break;
+                                    case "taxi_easy_ua_pas2":
+                                        $application = "PAS2";
+                                        break;
+                                    default:
+                                        $application = "PAS4";
+                                        break;
+                                }
+                                if($order->server == 'my_server_api') {
+                                    Log::debug("Найден order с $order->server");
+
+                                    return  (new MyTaxiApiController)->startAddCostMyApi(
+                                        $order,
+                                        $application,
+                                        $email,
+                                        $amount,
+                                        $response
+                                    );
+                                }
+
+
                                 $pay_method = "wfp_payment";
 
                                 $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();

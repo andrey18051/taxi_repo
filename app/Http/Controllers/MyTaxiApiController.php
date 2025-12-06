@@ -622,9 +622,9 @@ class MyTaxiApiController extends Controller
         $order,
         $application,
         $email,
-        $addCost
-    ): \Illuminate\Http\JsonResponse
-    {
+        $addCost,
+        $response
+    )  {
         Log::info('🟢 НАЧАЛО startAddCostMyApi', [
             'order_uid' => $order->dispatching_order_uid ?? 'unknown',
             'application' => $application,
@@ -671,6 +671,17 @@ class MyTaxiApiController extends Controller
         try {
             (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
             Log::info('✅ История изменений UID сохранена');
+            // Обновление WfpInvoice
+            $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $order_old_uid)->get();
+            if ($wfpInvoices->isNotEmpty()) {
+                foreach ($wfpInvoices as $wfpInvoice) {
+                    $wfpInvoice->dispatching_order_uid = $order_new_uid;
+                    $wfpInvoice->save();
+                    Log::info("Обновлен WfpInvoice с dispatching_order_uid='$order_new_uid'.");
+                }
+            } else {
+                Log::info("WfpInvoice для dispatching_order_uid='$order_old_uid' не найдены.");
+            }
         } catch (\Exception $e) {
             Log::error('❌ Ошибка сохранения истории изменений UID', [
                 'error' => $e->getMessage(),
@@ -684,13 +695,11 @@ class MyTaxiApiController extends Controller
 
         $currentWebCost = $order->client_cost;
         $currentAttempt20 = $order->attempt_20;
-        $currentAddCost = $order->add_cost;
-        $newWebCost = $currentWebCost + (int) $currentAttempt20 + (int) $currentAddCost + (int)$addCost;
+        $newWebCost = $currentWebCost + (int) $currentAttempt20 + (int)$addCost;
 
         Log::debug('💰 Расчет стоимости', [
             'current_web_cost' => $currentWebCost,
             'current_attempt_20' => $currentAttempt20,
-            'current_add_cost' => $currentAddCost,
             'new_add_cost' => $addCost,
             'total_new_web_cost' => $newWebCost
         ]);
@@ -715,7 +724,7 @@ class MyTaxiApiController extends Controller
         Log::info("✅ Заказ обновлен с новым UID: " . $order_new_uid);
 
         // Запись в Firestore
-        if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
+        if ($order->route_undefined == "0") {
             Log::debug('🔥 Проверка условий для Firestore', [
                 'pay_system' => $order->pay_system,
                 'route_undefined' => $order->route_undefined,
@@ -797,11 +806,7 @@ class MyTaxiApiController extends Controller
             'total_cost' => $order->web_cost,
             'added_cost' => $addCost
         ]);
-
-        return response()->json([
-            "response" => "200",
-            "new_order_uid" => $order_new_uid,
-            "total_cost" => $order->web_cost
-        ], 200);
+        Log::debug("purchase startAddCostMyApi: ", ['response' => $response->body()]);
+        return $response;
     }
 }
