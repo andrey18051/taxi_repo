@@ -9451,7 +9451,17 @@ class AndroidTestOSMController extends Controller
                         $cityArr = (new CityController)->maxPayValueApp($city, $application);
                         $response_error["Message"] = $cityArr["black_list"];
                     } else {
+
                         Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
+                        $parameter['comment_info'] = $comment;
+                        return (new MyTaxiApiController)->orderMyApiTaxi(
+                            $parameter,
+                            $clientCost,
+                            $application,
+                            $email,
+                            $wfpInvoice,
+                            $city
+                        );
                     }
 
 
@@ -9899,6 +9909,15 @@ class AndroidTestOSMController extends Controller
             } else {
                 Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
                 $response_error["Message"] = $response_arr["Message"];
+                $parameter['comment_info'] = $comment;
+                return (new MyTaxiApiController)->orderMyApiTaxi(
+                    $parameter,
+                    $clientCost,
+                    $application,
+                    $email,
+                    $wfpInvoice,
+                    $city
+                );
             }
 
             $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr, JSON_UNESCAPED_UNICODE);
