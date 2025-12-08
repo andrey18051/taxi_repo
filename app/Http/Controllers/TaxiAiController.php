@@ -387,7 +387,7 @@ class TaxiAiController extends Controller
     {
         try {
             $controller = new AndroidTestOSMController();
-            return $controller->costSearchMarkersTime(
+            return $controller->costSearchMarkersTimeMyApi(
                 $originLatitude,
                 $originLongitude,
                 $toLatitude,
@@ -482,31 +482,6 @@ class TaxiAiController extends Controller
             'user_agent' => $request->userAgent(),
             'url' => $request->fullUrl()
         ]);
-
-
-//        $routeFrom = $request->input('routefrom', 'ул. Аркадийское плато (Гагаринское плато), д.5|2, город Одесса');
-//        $routeTo = $request->input('routeto', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
-//        $orderUid = $request->input('dispatching_order_uid', '8c3634f4470e4236bc305e0359579372');
-//
-//        $response = [
-//            "comment_info"=> "",
-//            "currency" => $request->input('currency', 'грн.'),
-//            "dispatching_order_uid" => $orderUid,
-//            "extra_charge_codes" => "",
-//            "from_lat" => $request->input('originLatitude', '46.4311896709615'),
-//            "from_lng" => $request->input('originLongitude', '30.7634880146577'),
-//            "lat" => $request->input('toLatitude', '46.3890993667171'),
-//            "lng" => $request->input('toLongitude', '30.7504999628167'),
-//            "order_cost" => $request->input('order_cost', '86'),
-//            "routefrom" => $routeFrom,
-//            "routefromnumber" => $request->input('routefromnumber', ''),
-//            "routeto" => $routeTo,
-//            "to_number" => $request->input('to_number', ' '),
-//            "required_time" =>  '01.01.1970 00:00',
-//            "flexible_tariff_name" => $request->input('tariff', 'Start'),
-//        ];
-
-//        return response()->json($response);
 
         // Логируем входящие данные запроса
         Log::info('📦 CREATE ORDER REQUEST DATA:', [
@@ -608,7 +583,7 @@ class TaxiAiController extends Controller
             ]
         ]);
 
-        $response = (new AndroidTestOSMController)->orderClientCost(
+        $response = (new AndroidTestOSMController)->orderClientCostMyApi(
             $originLatitude,
             $originLongitude,
             $toLatitude,
@@ -649,7 +624,7 @@ class TaxiAiController extends Controller
         $city = $request->input('city', 'ул. 16-я станция Большого Фонтана пляж, д.27|24, город Одесса');
         $application = $request->input('application', 'PAS2');
 
-        $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid);
+        $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
         $pay_system = $orderweb->pay_system;
 
         if($dispatching_order_uid != '') {

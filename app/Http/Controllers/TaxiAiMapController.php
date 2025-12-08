@@ -117,7 +117,7 @@ class TaxiAiMapController extends Controller
             ]
         ]);
         $controller = new AndroidTestOSMController();
-        $response = $controller->costSearchMarkersTime(
+        $response = $controller->costSearchMarkersTimeMyApi(
             $originLatitude,
             $originLongitude,
             $toLatitude,
