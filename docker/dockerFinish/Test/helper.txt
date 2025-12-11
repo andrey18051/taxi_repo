@@ -1,6 +1,6 @@
 https://github.com/settings/tokens
 
-docker login ghcr.io -u andrey18051 -p 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
+docker login ghcr.io -u andrey18051 -p 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
 
 
 echo "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" | docker login ghcr.io -u andrey18051 --password-stdin

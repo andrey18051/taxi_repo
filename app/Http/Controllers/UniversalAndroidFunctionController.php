@@ -9803,7 +9803,7 @@ class UniversalAndroidFunctionController extends Controller
      *
      * @throws \\Exception
      */
-    public function startAddCostWithAddBottomUpdate($uid, $addCost): ?\Illuminate\Http\JsonResponse
+    public function startAddCostWithAddBottomUpdate($uid, $addCost)
     {
         Log::info("Метод startAddCostWithAddBottomUpdate вызван с UID: " . $uid);
 
@@ -9849,7 +9849,8 @@ class UniversalAndroidFunctionController extends Controller
                 $order,
                 $application,
                 $email,
-                $addCost
+                $addCost,
+                ""
             );
         }
         // Проверяем существование заказа

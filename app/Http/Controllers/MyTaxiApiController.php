@@ -804,9 +804,26 @@ class MyTaxiApiController extends Controller
             'old_uid' => $order_old_uid,
             'new_uid' => $order_new_uid,
             'total_cost' => $order->web_cost,
-            'added_cost' => $addCost
+            'added_cost' => $addCost,
+            'pay_system' => $order->pay_system
         ]);
-        Log::debug("purchase startAddCostMyApi: ", ['response' => $response->body()]);
+        $response =  [
+            'uid' => $order_new_uid,
+            'web_cost' => $order->web_cost,
+            'routefrom' => $order->routefrom,
+            'startLat' => $order->startLat,
+            'startLan' => $order->startLan,
+            'routeto' => $order->routeto,
+            'to_lat' => $order->to_lat,
+            'to_lng' => $order->to_lng,
+            'pay_system' => $order->pay_system,
+            "status" => "WaitingAuthComplete"
+        ];
+        if (is_object($response) && method_exists($response, 'body')) {
+            Log::debug("purchase startAddCostMyApi: ", ['response' => $response->body()]);
+        } else {
+            Log::debug("purchase startAddCostMyApi: ", ['response' => $response]);
+        }
         return $response;
     }
 }

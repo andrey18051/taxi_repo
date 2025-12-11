@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
 use App\Models\Orderweb;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -669,5 +670,102 @@ class TaxiAiController extends Controller
             $city,
             $application
         );
+    }
+
+    /**
+     * @throws \Pusher\PusherException
+     * @throws \Pusher\ApiErrorException
+     */
+    public function addCostOrderAi ($uid, $addCost)
+    {
+        // Получаем UID из MemoryOrderChangeController
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        Log::info("MemoryOrderChangeController возвращает UID: " . $uid);
+
+        // Ищем заказ
+        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
+        if($order->pay_system == "nal_payment")  {
+            return (new UniversalAndroidFunctionController)->startAddCostWithAddBottomUpdate($uid, $addCost);
+        } else {
+            switch ($order->comment) {
+                case "taxi_easy_ua_pas1":
+                    $application = "PAS1";
+                    break;
+                case "taxi_easy_ua_pas2":
+                    $application = "PAS2";
+                    break;
+                default:
+                    $application = "PAS4";
+                    break;
+            }
+            $originalCity = $order->city;
+            switch ($originalCity) {
+                case "city_kiev":
+                    $city = "Kyiv City";
+                    break;
+                case "city_cherkassy":
+                    $city = "Cherkasy Oblast";
+                    break;
+                case "city_odessa":
+                    $city = "Odessa";
+                    if($order->server == "http://188.190.245.102:7303") {
+                        $city = "OdessaTest  ";
+                    }
+                    break;
+                case "city_zaporizhzhia":
+                    $city = "Zaporizhzhia";
+                    break;
+                case "city_dnipro":
+                    $city = "Dnipropetrovsk Oblast";
+                    break;
+                case "city_lviv":
+                case "city_ivano_frankivsk":
+                case "city_vinnytsia":
+                case "city_poltava":
+                case "city_sumy":
+                case "city_kharkiv":
+                case "city_chernihiv":
+                case "city_rivne":
+                case "city_ternopil":
+                case "city_khmelnytskyi":
+                case "city_zakarpattya":
+                case "city_zhytomyr":
+                case "city_kropyvnytskyi":
+                case "city_mykolaiv":
+                case "city_chernivtsi":
+                case "city_lutsk":
+                    $city = "OdessaTest";
+                    break;
+                default:
+                    $city = "OdessaTest";
+            }
+            $orderReference = self::generateInvoiceNumber();
+            $amount = $addCost;
+            $productName = "Інша допоміжна діяльність у сфері транспорту";
+            $clientEmail = $order->email;
+            $clientPhone = $order->user_phone;
+            return (new WfpController)->chargeActiveTokenAddCost(
+                $application,
+                $city,
+                $orderReference,
+                $amount,
+                $productName,
+                $clientEmail,
+                $clientPhone
+            );
+        }
+
+    }
+    /**
+     * Вариант с префиксом из конфига
+     */
+    public static function generateInvoiceNumber(): string
+    {
+        $prefix = config('app.invoice_prefix', 'INV');
+        $timestamp = Carbon::now()->format('YmdHisv');
+        $randomValue = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+
+        return "{$prefix}_{$timestamp}_{$randomValue}";
     }
 }
