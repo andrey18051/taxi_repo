@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ViberCustoms::class, function ($app) {
             return new ViberCustoms(new Http(), config('bots.botViberCustoms'));
         });
+
     }
 
     /**

@@ -38,7 +38,7 @@ class KafkaConsumeCommand extends Command
         // Бесконечный цикл для постоянного наблюдения
         while (true) {
             $iteration++;
-            $this->info("🔍 Итерация #{$iteration} - Проверка топиков: " . date('Y-m-d H:i:s'));
+            $this->info("\n🔍 Итерация #{$iteration} - " . date('Y-m-d H:i:s'));
 
             foreach ($topics as $topic) {
                 try {
@@ -50,40 +50,108 @@ class KafkaConsumeCommand extends Command
             }
 
             // Пауза между итерациями проверки
-            $this->comment("⏳ Ожидание 10 секунд до следующей проверки...");
+            $this->comment("⏳ Ожидание 3 секунд до следующей проверки...");
             sleep(3);
         }
     }
 
     protected function processTopic($topic, $timeout)
     {
-        $this->line("📭 Проверка топика: {$topic}");
+        $this->line("📭 Проверка топика: <fg=cyan>{$topic}</>");
 
-        // Передаем таймаут в KafkaService
-        $messages = $this->kafka->consumeMessages('my_consumer', 'instance1', $topic, $timeout);
+        // Получаем сообщения из Kafka
+        $result = $this->kafka->consumeMessages($topic, (int)$timeout, 50);
 
-        if ($messages['status'] === 'ok') {
-            $messageCount = count($messages['messages'] ?? []);
+        if ($result['status'] === 'success') {
+            $messageCount = $result['message_count'] ?? 0;
 
             if ($messageCount > 0) {
                 $this->info("✅ Получено {$messageCount} сообщений из топика: {$topic}");
 
-                foreach ($messages['messages'] as $index => $msg) {
-                    $value = $msg['value'] ?? [];
-                    Log::info("📨 Сообщение из топика {$topic}", $value);
-                    $this->routeMessage($topic, $value);
-                    $this->line("✔️ Обработано сообщение #" . ($index + 1));
+                // ⚠️ ИСПРАВЛЕНИЕ: сообщения находятся в $result['messages'], а не $result['data']
+                $messages = $result['messages'] ?? [];
+
+                foreach ($messages as $index => $msg) {
+                    // Извлекаем значение сообщения
+                    $value = $this->extractMessageValue($msg);
+
+                    if ($value) {
+                        $this->info("📨 Обработка сообщения #" . ($index + 1));
+                        Log::info("📨 Сообщение из топика {$topic}", is_array($value) ? $value : ['message' => $value]);
+
+                        // Маршрутизируем сообщение
+                        $this->routeMessage($topic, $value);
+                        $this->line("✔️ Сообщение #" . ($index + 1) . " обработано");
+                    } else {
+                        $this->warn("⚠️ Не удалось извлечь значение из сообщения #" . ($index + 1));
+                        Log::warning("Не удалось извлечь значение из сообщения Kafka", ['raw_message' => $msg]);
+                    }
                 }
+
+                $this->line("🎯 Обработано сообщений: {$messageCount}");
             } else {
                 $this->line("📭 В топике {$topic} нет новых сообщений");
+                Log::debug("Топик {$topic} пуст или нет новых сообщений");
             }
         } else {
-            $this->error("❌ Ошибка при чтении топика {$topic}: " . ($messages['message'] ?? 'Unknown error'));
+            $errorMsg = $result['message'] ?? 'Unknown error';
+            $this->error("❌ Ошибка при чтении топика {$topic}: " . $errorMsg);
+
+            // Логируем для отладки
+            Log::error("Ошибка при чтении топика Kafka", [
+                'topic' => $topic,
+                'error' => $errorMsg,
+                'result' => $result
+            ]);
         }
+    }
+
+    /**
+     * Извлекает значение из сообщения Kafka
+     * Поддерживает разные форматы сообщений
+     */
+    protected function extractMessageValue(array $msg)
+    {
+        // Формат 1: значение напрямую в поле 'value'
+        if (isset($msg['value']) && is_array($msg['value'])) {
+            return $msg['value'];
+        }
+
+        // Формат 2: значение как строковый JSON в поле 'value'
+        if (isset($msg['value']) && is_string($msg['value'])) {
+            $decoded = json_decode($msg['value'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
+            return ['raw' => $msg['value']];
+        }
+
+        // Формат 3: сообщение само является массивом данных
+        if (isset($msg['payload'])) {
+            return $msg['payload'];
+        }
+
+        // Формат 4: весь массив и есть сообщение (исключаем служебные поля)
+        $excludeFields = ['topic', 'partition', 'offset', 'key'];
+        $filtered = array_diff_key($msg, array_flip($excludeFields));
+
+        if (!empty($filtered)) {
+            return $filtered;
+        }
+
+        return null;
     }
 
     protected function routeMessage($topic, $value)
     {
+        if (!is_array($value)) {
+            Log::warning("Сообщение из топика {$topic} не является массивом", ['value' => $value]);
+            $this->warn("⚠️ Сообщение из топика {$topic} не является массивом");
+            return;
+        }
+
+        $this->info("🔄 Маршрутизация сообщения из топика: {$topic}");
+
         switch ($topic) {
             case 'cost-topic':
                 $this->processCostTopic($value);
@@ -100,46 +168,64 @@ class KafkaConsumeCommand extends Command
 
     protected function processCostTopic($value)
     {
-        // Существующая логика для cost-topic
-        (new AndroidTestOSMController)->costSearchMarkersTime(
-            $value['originLatitude'] ?? null,
-            $value['originLongitude'] ?? null,
-            $value['toLatitude'] ?? null,
-            $value['toLongitude'] ?? null,
-            $value['tarif'] ?? null,
-            $value['phone'] ?? null,
-            $value['user'] ?? null,
-            $value['time'] ?? null,
-            $value['date'] ?? null,
-            $value['services'] ?? null,
-            $value['city'] ?? null,
-            $value['application'] ?? null
-        );
+        try {
+            $this->info("🎯 Обработка сообщения из cost-topic");
 
-        $this->info("🎯 Обработано сообщение из cost-topic");
+            // Вызываем контроллер с извлеченными данными
+            (new AndroidTestOSMController)->costSearchMarkersTime(
+                $value['origin_lat'] ?? $value['originLatitude'] ?? null,
+                $value['origin_lng'] ?? $value['originLongitude'] ?? null,
+                $value['to_lat'] ?? $value['toLatitude'] ?? null,
+                $value['to_lng'] ?? $value['toLongitude'] ?? null,
+                $value['tarif'] ?? null,
+                $value['phone'] ?? null,
+                $value['user'] ?? null,
+                $value['time'] ?? null,
+                $value['date'] ?? null,
+                $value['services'] ?? null,
+                $value['city'] ?? null,
+                $value['application'] ?? null
+            );
+
+            Log::info("✅ Сообщение из cost-topic успешно обработано");
+        } catch (\Exception $e) {
+            Log::error("❌ Ошибка обработки сообщения из cost-topic: " . $e->getMessage(), [
+                'value' => $value,
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->error("❌ Ошибка обработки сообщения из cost-topic: " . $e->getMessage());
+        }
     }
 
     protected function processCostTopicMyApi($value)
     {
-        // Логика для cost-topic-my-api
-        Log::info("🔔 Обработка сообщения из cost-topic-my-api", $value);
+        try {
+            $this->info("🎯 Обработка сообщения из cost-topic-my-api");
 
-        // Можно использовать ту же логику или добавить специфичную
-        (new AndroidTestOSMController)->costSearchMarkersTimeMyApi(
-            $value['originLatitude'] ?? null,
-            $value['originLongitude'] ?? null,
-            $value['toLatitude'] ?? null,
-            $value['toLongitude'] ?? null,
-            $value['tarif'] ?? null,
-            $value['phone'] ?? null,
-            $value['user'] ?? null,
-            $value['time'] ?? null,
-            $value['date'] ?? null,
-            $value['services'] ?? null,
-            $value['city'] ?? null,
-            $value['application'] ?? null
-        );
+            Log::info("🔔 Обработка сообщения из cost-topic-my-api", $value);
 
-        $this->info("🎯 Обработано сообщение из cost-topic-my-api");
+            (new AndroidTestOSMController)->costSearchMarkersTimeMyApi(
+                $value['origin_lat'] ?? $value['originLatitude'] ?? null,
+                $value['origin_lng'] ?? $value['originLongitude'] ?? null,
+                $value['to_lat'] ?? $value['toLatitude'] ?? null,
+                $value['to_lng'] ?? $value['toLongitude'] ?? null,
+                $value['tarif'] ?? null,
+                $value['phone'] ?? null,
+                $value['user'] ?? null,
+                $value['time'] ?? null,
+                $value['date'] ?? null,
+                $value['services'] ?? null,
+                $value['city'] ?? null,
+                $value['application'] ?? null
+            );
+
+            Log::info("✅ Сообщение из cost-topic-my-api успешно обработано");
+        } catch (\Exception $e) {
+            Log::error("❌ Ошибка обработки сообщения из cost-topic-my-api: " . $e->getMessage(), [
+                'value' => $value,
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->error("❌ Ошибка обработки сообщения из cost-topic-my-api: " . $e->getMessage());
+        }
     }
 }

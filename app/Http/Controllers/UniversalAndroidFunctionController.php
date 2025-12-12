@@ -10013,11 +10013,20 @@ class UniversalAndroidFunctionController extends Controller
 
                 (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
                 Log::info("Сообщение о восстановлении машины отправлено.");
+                $response =  [
+                    'uid' => $order_new_uid,
+                    'web_cost' => $order->web_cost,
+                    'routefrom' => $order->routefrom,
+                    'startLat' => $order->startLat,
+                    'startLan' => $order->startLan,
+                    'routeto' => $order->routeto,
+                    'to_lat' => $order->to_lat,
+                    'to_lng' => $order->to_lng,
+                    'pay_system' => $order->pay_system,
+                    "transactionStatus" => "WaitingAuthComplete"
+                ];
 
-
-                return response()->json([
-                    "response" => "200"
-                ], 200);
+                return response()->json($response, 200);
             } else {
 
                 Log::error("Неудачный запрос: статус " . $response->status());

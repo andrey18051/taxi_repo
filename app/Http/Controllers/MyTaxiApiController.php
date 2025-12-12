@@ -817,7 +817,7 @@ class MyTaxiApiController extends Controller
             'to_lat' => $order->to_lat,
             'to_lng' => $order->to_lng,
             'pay_system' => $order->pay_system,
-            "status" => "WaitingAuthComplete"
+            "transactionStatus" => "WaitingAuthComplete"
         ];
         if (is_object($response) && method_exists($response, 'body')) {
             Log::debug("purchase startAddCostMyApi: ", ['response' => $response->body()]);

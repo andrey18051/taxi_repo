@@ -1,0 +1,57 @@
+Bash# 1. Перезапускаем Zookeeper в --network host
+docker stop root-zookeeper-1 && docker rm root-zookeeper-1
+
+docker run -d --restart unless-stopped --name root-zookeeper-1 --network host \
+  -e ZOOKEEPER_CLIENT_PORT=2181 \
+  -e ZOOKEEPER_TICK_TIME=2000 \
+  confluentinc/cp-zookeeper:7.3.0
+Bash# 2. Перезапускаем брокер (теперь он увидит Zookeeper)
+docker stop kafka-fixed && docker rm kafka-fixed
+
+docker run -d --restart unless-stopped --name kafka-fixed --network host \
+  -e KAFKA_BROKER_ID=1 \
+  -e KAFKA_ZOOKEEPER_CONNECT=127.0.0.1:2181 \
+  -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092 \
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+  confluentinc/cp-kafka:7.3.0
+Bash# 3. Перезапускаем REST Proxy
+docker stop kafka-rest && docker rm kafka-rest
+
+docker run -d --restart unless-stopped --name kafka-rest --network host \
+  -e KAFKA_REST_HOST_NAME=localhost \
+  -e KAFKA_REST_LISTENERS=http://0.0.0.0:8082 \
+  -e KAFKA_REST_BOOTSTRAP_SERVERS=127.0.0.1:9092 \
+  -e KAFKA_REST_CONSUMER_ENABLE=true \
+  confluentinc/cp-kafka-rest:7.6.0
+
+  Проверка
+➜  ~ curl -s http://127.0.0.1:8082/topics
+["cost-topic-my-api","cost-topic"]#
+
+➜  ~ docker exec taxi_test php artisan kafka:consume --timeout=10
+🔄 Запущено постоянное наблюдение за топиками: cost-topic, cost-topic-my-api
+⏱️ Таймаут установлен: 10 секунд
+
+🔍 Итерация #1 - 2025-12-12 15:45:55
+📭 Проверка топика: cost-topic
+📭 В топике cost-topic нет новых сообщений
+📭 Проверка топика: cost-topic-my-api
+📭 В топике cost-topic-my-api нет новых сообщений
+⏳ Ожидание 3 секунд до следующей проверки...
+
+🔍 Итерация #2 - 2025-12-12 15:46:04
+📭 Проверка топика: cost-topic
+📭 В топике cost-topic нет новых сообщений
+📭 Проверка топика: cost-topic-my-api
+
+CONTAINER ID   IMAGE                               COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+3c45504b6037   confluentinc/cp-kafka-rest:7.6.0    "/etc/confluent/dock…"   7 minutes ago    Up 7 minutes                                                kafka-rest
+18c556b56c5b   confluentinc/cp-kafka:7.3.0         "/etc/confluent/dock…"   8 minutes ago    Up 8 minutes                                                kafka-fixed
+78659930fb0b   confluentinc/cp-zookeeper:7.3.0     "/etc/confluent/dock…"   8 minutes ago    Up 8 minutes                                                root-zookeeper-1
+a2903ff19049   ghcr.io/andrey18051/taxi_test:1.0   "/usr/bin/supervisor…"   30 minutes ago   Up 30 minutes                                               taxi_test
+7409f08687f1   ghcr.io/andrey18051/taxi_work:1.0   "/usr/bin/supervisor…"   4 days ago       Up 56 minutes                                               taxi_work
+f1ca19aeacac   ghcr.io/andrey18051/taxi_ai:1.0     "uvicorn main:app --…"   12 days ago      Up 12 days      0.0.0.0:8001->8001/tcp, :::8001->8001/tcp   taxi_ai
+7d9d2b4a19eb   ghcr.io/andrey18051/office:1.0      "/entrypoint /usr/bi…"   5 weeks ago      Up 12 days                                                  office
+3eeccb7cd185   redis:alpine                        "docker-entrypoint.s…"   4 months ago     Up 12 days      0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   redis_server
+15f35a0ad7d8   ghcr.io/andrey18051/omp:1.0         "/usr/bin/supervisor…"   9 months ago     Up 12 days                                                  omp
