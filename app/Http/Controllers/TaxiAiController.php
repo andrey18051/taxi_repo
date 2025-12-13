@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
 use App\Models\Orderweb;
+use App\Models\WfpInvoice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -675,6 +676,7 @@ class TaxiAiController extends Controller
     /**
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException
+     * @throws \Exception
      */
     public function addCostOrderAi ($uid, $addCost)
     {
@@ -685,9 +687,16 @@ class TaxiAiController extends Controller
         // Ищем заказ
         $order = Orderweb::where("dispatching_order_uid", $uid)->first();
         Log::debug("Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null'));
+        Log::info('Processing add cost payment', [
+            'order_id' => $order->id ?? null,
+            'user_id' => $order->user_id ?? null,
+            'pay_system' => $order->pay_system?? null,
+            'add_cost' => $addCost
+        ]);
         if($order->pay_system == "nal_payment")  {
             return (new UniversalAndroidFunctionController)->startAddCostWithAddBottomUpdate($uid, $addCost);
         } else {
+
             switch ($order->comment) {
                 case "taxi_easy_ua_pas1":
                     $application = "PAS1";
@@ -699,6 +708,13 @@ class TaxiAiController extends Controller
                     $application = "PAS4";
                     break;
             }
+
+            Log::info('Application determined', [
+                'order_id' => $order->id ?? null,
+                'comment' => $order->comment ?? null,
+                'application' => $application
+            ]);
+
             $originalCity = $order->city;
             switch ($originalCity) {
                 case "city_kiev":
@@ -709,7 +725,7 @@ class TaxiAiController extends Controller
                     break;
                 case "city_odessa":
                     $city = "Odessa";
-                    if($order->server == "http://188.190.245.102:7303") {
+                    if($order->server == "http://188.190.245.102:7303"|| $order->server == "my_server_api") {
                         $city = "OdessaTest  ";
                     }
                     break;
@@ -740,20 +756,90 @@ class TaxiAiController extends Controller
                 default:
                     $city = "OdessaTest";
             }
+
+            Log::info('City determined', [
+                'order_id' => $order->id ?? null,
+                'original_city' => $originalCity ?? null,
+                'server' => $order->server ?? null,
+                'determined_city' => $city
+            ]);
+
             $orderReference = self::generateInvoiceNumber();
             $amount = $addCost;
             $productName = "Інша допоміжна діяльність у сфері транспорту";
             $clientEmail = $order->email;
             $clientPhone = $order->user_phone;
-            return (new WfpController)->chargeActiveTokenAddCost(
-                $application,
-                $city,
-                $orderReference,
-                $amount,
-                $productName,
-                $clientEmail,
-                $clientPhone
-            );
+
+            Log::info('Payment request prepared', [
+                'order_id' => $order->id ?? null,
+                'order_reference' => $orderReference,
+                'amount' => $amount,
+                'application' => $application,
+                'city' => $city,
+                'product_name' => $productName,
+                'client_email' => $clientEmail,
+                'client_phone' => $clientPhone
+            ]);
+
+            try {
+                Log::info('Creating new WfpInvoice record', [
+                    'order_reference' => $orderReference,
+                    'reason' => 'Invoice not found, creating new record'
+                ]);
+
+
+                $wfpInvoices = new WfpInvoice();
+                $wfpInvoices->orderReference = $orderReference;
+                $wfpInvoices->amount = $amount;
+                $wfpInvoices->dispatching_order_uid = $uid ?? null;
+                $wfpInvoices->save();
+
+                Log::info('New WfpInvoice created successfully', [
+                    'order_reference' => $orderReference,
+                    'dispatching_order_uid' => $uid,
+                    'invoice_id' => $wfpInvoices->id?? null,
+                    'created_at' => $wfpInvoices->created_at ?? null,
+                ]);
+
+            } catch (\Exception $e) {
+                Log::error('Failed to create WfpInvoice', [
+                    'order_reference' => $orderReference,
+                    'error_message' => $e->getMessage(),
+                    'error_trace' => $e->getTraceAsString(),
+                ]);
+                throw new \Exception("Failed to create invoice record: " . $e->getMessage());
+            }
+
+            try {
+                $result = (new WfpController)->chargeActiveTokenAddCost(
+                    $application,
+                    $city,
+                    $orderReference,
+                    $amount,
+                    $productName,
+                    $clientEmail,
+                    $clientPhone
+                );
+
+                Log::info('Payment request successful', [
+                    'order_id' => $order->id ?? null,
+                    'order_reference' => $orderReference,
+                    'result' => $result
+                ]);
+
+                return $result;
+
+            } catch (\Exception $e) {
+                Log::error('Payment request failed', [
+                    'order_id' => $order->id ?? null,
+                    'order_reference' => $orderReference,
+                    'error_message' => $e->getMessage(),
+                    'error_trace' => $e->getTraceAsString()
+                ]);
+
+                throw $e; // или обработайте ошибку по-другому
+            }
+
         }
 
     }

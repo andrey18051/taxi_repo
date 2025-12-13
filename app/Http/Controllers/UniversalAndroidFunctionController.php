@@ -10706,17 +10706,7 @@ class UniversalAndroidFunctionController extends Controller
         Log::info("Поиск заказа по UID '$uid': " . ($order ? "найден, dispatching_order_uid='{$order->dispatching_order_uid}'" : 'не найден.'));
         $messageAdmin = "Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null');
         Log::info($messageAdmin);
-        if($order->server == 'my_server_api') {
-            Log::debug("Найден order с $order->server");
 
-            return  $this->startAddCostCardBottomCreatMyApi(
-                $uid,
-                $pay_method,
-                $orderReference,
-                $city,
-                $addCost
-            );
-        }
         // Ищем данные в Uid_history
         $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
         if (!$uid_history) {
@@ -10985,12 +10975,15 @@ class UniversalAndroidFunctionController extends Controller
 
                 $messageAdmin = "Создан новый заказ: " . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 Log::info($messageAdmin);
-                Log::info($messageAdmin);
 
                 // Обновление orderMemory
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
                 Log::info("Обновлен orderMemory с новым UID: '$order_new_uid'.");
+                $response = json_decode($response, true);
+
+
+
 
                 // Обновление WfpInvoice
                 $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $order_old_uid)->get();
@@ -11015,6 +11008,24 @@ class UniversalAndroidFunctionController extends Controller
                 $order->save();
                 Log::info("Обновлен order с новым UID: '$order_new_uid', web_cost='{$responseArr['order_cost']}', attempt_20='{$order->attempt_20}'.");
 
+                $response =  [
+                    'uid' => $order_new_uid,
+                    'web_cost' => $order->web_cost,
+                    'routefrom' => $order->routefrom,
+                    'startLat' => $order->startLat,
+                    'startLan' => $order->startLan,
+                    'routeto' => $order->routeto,
+                    'to_lat' => $order->to_lat,
+                    'to_lng' => $order->to_lng,
+                    'pay_system' => $order->pay_system,
+                    "transactionStatus" => "WaitingAuthComplete"
+                ];
+
+                if (is_object($response) && method_exists($response, 'body')) {
+                    Log::debug("purchase startAddCostMyApi: ", ['response' => $response->body()]);
+                } else {
+                    Log::debug("purchase startAddCostMyApi: ", ['response' => $response]);
+                }
                 // Запуск вилки
                 if (!empty($responseBonusArr) && isset($responseBonusArr["dispatching_order_uid"]) && !empty($responseDoubleArr) && isset($responseDoubleArr["dispatching_order_uid"])) {
                     Log::info("Запуск вилки для responseBonusArr и responseDoubleArr.");
@@ -11056,7 +11067,7 @@ class UniversalAndroidFunctionController extends Controller
 
                 }
 
-                return response()->json(["response" => "200"], 200);
+                return response()->json($response, 200);
             } else {
                 Log::error("Неудачный запрос API: " . json_encode($responseArr, JSON_UNESCAPED_UNICODE));
                 return response()->json(["response" => "400"], 200);

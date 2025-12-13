@@ -824,6 +824,6 @@ class MyTaxiApiController extends Controller
         } else {
             Log::debug("purchase startAddCostMyApi: ", ['response' => $response]);
         }
-        return $response;
+        return response()->json($response, 200);
     }
 }
