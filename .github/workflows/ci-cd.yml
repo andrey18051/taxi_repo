@@ -1,0 +1,91 @@
+name: CI/CD Laravel Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push TEST image
+        id: build_test
+        run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          docker build --file Dockerfile.test --tag ghcr.io/andrey18051/taxi_test:$TAG --tag ghcr.io/andrey18051/taxi_test:latest --push .
+          echo "image_tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Deploy to TEST server
+        env:
+          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
+          SSH_USER: ${{ secrets.TEST_SSH_USER }}
+          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
+            docker pull ghcr.io/andrey18051/taxi_test:${{ steps.build_test.outputs.image_tag }}
+            docker stop taxi_test || true
+            docker rm taxi_test || true
+            docker run --name taxi_test -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_test:${{ steps.build_test.outputs.image_tag }}
+            echo "TEST deployed!"
+          EOF
+
+  build-work:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push WORK image
+        id: build_work
+        run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          docker build --file Dockerfile.work --tag ghcr.io/andrey18051/taxi_work:$TAG --tag ghcr.io/andrey18051/taxi_work:latest --push .
+          echo "image_tag=$TAG" >> $GITHUB_OUTPUT
+
+  deploy-work:
+    needs: build-work
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy to WORK server
+        env:
+          SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
+          SSH_USER: ${{ secrets.WORK_SSH_USER }}
+          SSH_KEY: ${{ secrets.WORK_SSH_PRIVATE_KEY }}
+        run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
+            docker pull ghcr.io/andrey18051/taxi_work:$TAG
+            docker stop taxi_work || true
+            docker rm taxi_work || true
+            docker run --name taxi_work -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_work:$TAG
+            echo "PRODUCTION deployed!"
+          EOF
