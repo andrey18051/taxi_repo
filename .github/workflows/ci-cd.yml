@@ -42,13 +42,15 @@ jobs:
             docker pull ghcr.io/andrey18051/taxi_test:${{ steps.build_test.outputs.image_tag }}
             docker stop taxi_test || true
             docker rm taxi_test || true
-            docker run --name taxi_test -d --network host --restart unless-stopped \
+
+            # Запускаем с правильным .env файлом
+            docker run --name taxi_test -d \
+              --network host \
+              --restart unless-stopped \
+              -e APP_ENVIRONMENT=test \
               ghcr.io/andrey18051/taxi_test:${{ steps.build_test.outputs.image_tag }}
 
-            # Создаём символическую ссылку внутри контейнера
-            docker exec taxi_test php artisan storage:link || echo "storage:link already exists or failed (ignore)"
-
-            echo "TEST deployed and storage:link created!"
+            echo "TEST deployed!"
           EOF
 
   build-work:
@@ -92,10 +94,13 @@ jobs:
             docker pull ghcr.io/andrey18051/taxi_work:$TAG
             docker stop taxi_work || true
             docker rm taxi_work || true
-            docker run --name taxi_work -d --network host --restart unless-stopped ghcr.io/andrey18051/taxi_work:$TAG
 
-          # Создаём символическую ссылку внутри контейнера
-            docker exec taxi_test php artisan storage:link || echo "storage:link already exists or failed (ignore)"
+            # Запускаем с правильным .env файлом
+            docker run --name taxi_work -d \
+              --network host \
+              --restart unless-stopped \
+              -e APP_ENVIRONMENT=work \
+              ghcr.io/andrey18051/taxi_work:$TAG
 
             echo "PRODUCTION deployed!"
           EOF
