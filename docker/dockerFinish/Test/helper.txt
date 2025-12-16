@@ -1,9 +1,8 @@
 https://github.com/settings/tokens
+GHCR push for taxi2012
+docker login ghcr.io -u andrey18051 -p ghp_2blO5biSta8i1HQlQ
 
-docker login ghcr.io -u andrey18051 -p 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
-
-
-echo "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" | docker login ghcr.io -u andrey18051 --password-stdin
+echo "ghp_2blO5biSta8i1HQ " | docker login ghcr.io -u andrey18051 --password-stdin
 
 Базовый образ
 cd C:\OpenServer\domains\taxi2012\docker\baseImageTest
