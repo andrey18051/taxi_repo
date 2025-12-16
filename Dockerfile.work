@@ -98,8 +98,27 @@ RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 #    composer install --no-dev --optimize-autoloader && \
 #    composer require predis/predis
 
-# Создаём директорию для логов и устанавливаем права
-RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
+WORKDIR /usr/share/nginx/html/taxi/
+
+
+# Создаём необходимые директории Laravel
+RUN mkdir -p storage/app/public \
+    && mkdir -p storage/app/public/logs \
+    && mkdir -p storage/framework/cache/data \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p storage/logs \
+    && mkdir -p tmp \
+
+    # Твоя рабочая настройка для логов
+    && chown -R root:root storage/app/public/logs \
+    && chmod -R 775 storage/app/public/logs \
+
+    # Для остальных папок storage и tmp — даём права www-data (стандартно и безопасно)
+    && chown -R www-data:www-data storage \
+    && chown -R www-data:www-data tmp \
+    && chmod -R 775 storage \
+    && chmod -R 775 tmp
 
 # Настраиваем Cron
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
