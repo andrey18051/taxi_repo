@@ -52,9 +52,9 @@ COPY ./docker /usr/share/nginx/html/taxi/docker
 COPY ./public /usr/share/nginx/html/taxi/public
 COPY ./resources /usr/share/nginx/html/taxi/resources
 COPY ./routes /usr/share/nginx/html/taxi/routes
-# COPY ./storage /usr/share/nginx/html/taxi/storage
-# COPY ./tests /usr/share/nginx/html/taxi/tests
-# COPY ./tmp /usr/share/nginx/html/taxi/tmp
+COPY ./storage /usr/share/nginx/html/taxi/storage
+COPY ./tests /usr/share/nginx/html/taxi/tests
+COPY ./tmp /usr/share/nginx/html/taxi/tmp
 COPY ./vendor /usr/share/nginx/html/taxi/vendor
 
 # Заменяем WorkCommand.php на оригинальный из Laravel 8.83.29
@@ -62,7 +62,7 @@ COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/fr
 
 
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
-COPY .env.work /usr/share/nginx/html/taxi/.env
+COPY ../../../app/env/work/.env /usr/share/nginx/html/taxi/
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
 COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
@@ -93,32 +93,13 @@ RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 
 
 # Устанавливаем зависимости Laravel
-# RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \#
+#RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
 #    rm -rf vendor composer.lock && \
 #    composer install --no-dev --optimize-autoloader && \
 #    composer require predis/predis
 
-WORKDIR /usr/share/nginx/html/taxi/
-
-
-# Создаём необходимые директории Laravel
-RUN mkdir -p storage/app/public \
-    && mkdir -p storage/app/public/logs \
-    && mkdir -p storage/framework/cache/data \
-    && mkdir -p storage/framework/sessions \
-    && mkdir -p storage/framework/views \
-    && mkdir -p storage/logs \
-    && mkdir -p tmp \
-
-    # Твоя рабочая настройка для логов
-    && chown -R root:root storage/app/public/logs \
-    && chmod -R 775 storage/app/public/logs \
-
-    # Для остальных папок storage и tmp — даём права www-data (стандартно и безопасно)
-    && chown -R www-data:www-data storage \
-    && chown -R www-data:www-data tmp \
-    && chmod -R 775 storage \
-    && chmod -R 775 tmp
+# Создаём директорию для логов и устанавливаем права
+RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
 
 # Настраиваем Cron
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
