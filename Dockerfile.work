@@ -54,8 +54,8 @@ COPY ./resources /usr/share/nginx/html/taxi/resources
 COPY ./routes /usr/share/nginx/html/taxi/routes
 COPY ./storage /usr/share/nginx/html/taxi/storage
 COPY ./tests /usr/share/nginx/html/taxi/tests
-COPY ./tmp /usr/share/nginx/html/taxi/tmp
-COPY ./vendor /usr/share/nginx/html/taxi/vendor
+# COPY ./tmp /usr/share/nginx/html/taxi/tmp
+# COPY ./vendor /usr/share/nginx/html/taxi/vendor
 
 # Заменяем WorkCommand.php на оригинальный из Laravel 8.83.29
 COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/framework/src/Illuminate/Queue/Console/WorkCommand.php
@@ -93,10 +93,10 @@ RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 
 
 # Устанавливаем зависимости Laravel
-#RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
-#    rm -rf vendor composer.lock && \
-#    composer install --no-dev --optimize-autoloader && \
-#    composer require predis/predis
+RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
+    rm -rf vendor composer.lock && \
+    composer install --no-dev --optimize-autoloader && \
+    composer require predis/predis
 
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
