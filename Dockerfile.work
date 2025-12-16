@@ -52,9 +52,9 @@ COPY ./docker /usr/share/nginx/html/taxi/docker
 COPY ./public /usr/share/nginx/html/taxi/public
 COPY ./resources /usr/share/nginx/html/taxi/resources
 COPY ./routes /usr/share/nginx/html/taxi/routes
-COPY ./storage /usr/share/nginx/html/taxi/storage
-COPY ./tests /usr/share/nginx/html/taxi/tests
-COPY ./tmp /usr/share/nginx/html/taxi/tmp
+# COPY ./storage /usr/share/nginx/html/taxi/storage
+# COPY ./tests /usr/share/nginx/html/taxi/tests
+# COPY ./tmp /usr/share/nginx/html/taxi/tmp
 COPY ./vendor /usr/share/nginx/html/taxi/vendor
 
 # Заменяем WorkCommand.php на оригинальный из Laravel 8.83.29
