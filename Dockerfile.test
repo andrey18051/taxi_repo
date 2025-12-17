@@ -68,7 +68,7 @@ COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
 COPY ./composer.json /usr/share/nginx/html/taxi/
 COPY ./composer.lock /usr/share/nginx/html/taxi/
-COPY ./vendor /usr/share/nginx/html/taxi/vendor
+# COPY ./vendor /usr/share/nginx/html/taxi/vendor
 COPY ./google48a0497e525302d5.html /usr/share/nginx/html/taxi/
 COPY ./mariadb_repo_setup /usr/share/nginx/html/taxi/
 COPY ./package.json /usr/share/nginx/html/taxi/
@@ -80,8 +80,17 @@ COPY ./README.md /usr/share/nginx/html/taxi/
 COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
-# RUN cd /usr/share/nginx/html/taxi && \
-#     composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+# Устанавливаем все зависимости свежими из lock-файла
+RUN cd /usr/share/nginx/html/taxi && \
+    composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+RUN cd /usr/share/nginx/html/taxi && \
+    composer dump-autoload -o && \
+    php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
+    rm -rf bootstrap/cache/*
 
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord_test.conf /etc/supervisor/supervisord.conf && \
