@@ -128,7 +128,7 @@ RUN mkdir -p /usr/share/nginx/html/laravel_logs && \
     chmod 775 /usr/share/nginx/html/laravel_logs
 
 # Создаём символическую ссылку storage → public/storage
-RUN php artisan storage:link || echo "storage:link command completed"
+# RUN php artisan storage:link || echo "storage:link command completed"
 
 # Устанавливаем окончательные права для всего проекта
 RUN chown -R www-data:www-data /usr/share/nginx/html/taxi && \
@@ -137,5 +137,14 @@ RUN chown -R www-data:www-data /usr/share/nginx/html/taxi && \
     chown -R www-data:www-data /usr/share/nginx/html/laravel_logs && \
     chmod -R 775 /usr/share/nginx/html/laravel_logs
 
-# Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+# Копируем entrypoint скрипт
+COPY docker/entrypoint.sh /entrypoint.sh
+
+# Делаем его исполняемым
+RUN chmod +x /entrypoint.sh
+
+# Указываем entrypoint — скрипт запустится и внутри себя запустит supervisord
+ENTRYPOINT ["/entrypoint.sh"]
+
+# CMD не нужен вообще — удаляем или комментируем старую строку
+# CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
