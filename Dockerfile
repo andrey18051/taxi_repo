@@ -145,10 +145,11 @@ COPY docker/entrypoint.sh /entrypoint.sh
 
 # Делаем его исполняемым
 RUN chmod +x /entrypoint.sh
+# Устанавливаем права доступа ко всем файлам проекта
+RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
 ENTRYPOINT ["/entrypoint.sh"]
 
-# Устанавливаем права доступа ко всем файлам проекта
-RUN chmod -R 777 /usr/share/nginx/html/taxi/
+
 
