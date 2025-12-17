@@ -4,6 +4,7 @@
 /storage/*.key
 /bootstrap/cache/*.php
 !/bootstrap/cache/.gitignore
+vendor/
 .env
 .env.backup
 .phpunit.result.cache
