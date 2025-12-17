@@ -122,8 +122,6 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
         rm /tmp/cronfile
 
 
-# Устанавливаем права доступа ко всем файлам проекта
-RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
 
 # Рабочая директория
@@ -136,15 +134,21 @@ RUN mkdir -p storage/app/public/logs \
 
 
 # Создаём символическую ссылку storage → public/storage
-RUN php artisan storage:link
+#  RUN php artisan storage:link
 
 # Миграции
 #RUN cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate
 #cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_05_27_125407_create_audits_table.php
 
+# Копируем entrypoint скрипт
+COPY docker/entrypoint.sh /entrypoint.sh
 
-
+# Делаем его исполняемым
+RUN chmod +x /entrypoint.sh
 
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Устанавливаем права доступа ко всем файлам проекта
+RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
