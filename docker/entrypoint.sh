@@ -11,7 +11,7 @@ if [ ! -L public/storage ]; then
     echo "Создаём symlink storage → public/storage"
     php artisan config:clear
     php artisan cache:clear
-    php artisan storage:link
+#    php artisan storage:link
 else
     echo "Storage link уже существует"
 fi
