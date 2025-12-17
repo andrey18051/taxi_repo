@@ -140,8 +140,7 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
         rm /tmp/cronfile
 
 
-# Устанавливаем права доступа ко всем файлам проекта
-RUN chmod -R 777 /usr/share/nginx/html/taxi/
+
 
 
 # Рабочая директория
@@ -169,3 +168,5 @@ RUN chmod +x /entrypoint.sh
 # Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
 ENTRYPOINT ["/entrypoint.sh"]
 
+# Устанавливаем права доступа ко всем файлам проекта
+RUN chmod -R 777 /usr/share/nginx/html/taxi/
