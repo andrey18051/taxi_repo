@@ -82,9 +82,7 @@ COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
 # Устанавливаем все зависимости свежими из lock-файла
 RUN cd /usr/share/nginx/html/taxi && \
-   composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# RUN cd /usr/share/nginx/html/taxi && composer require predis/predis --no-interaction
+    composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Очистка кэша Laravel, игнорируя ошибки Redis (Redis недоступен на build)
 RUN cd /usr/share/nginx/html/taxi && \
@@ -94,7 +92,6 @@ RUN cd /usr/share/nginx/html/taxi && \
     php artisan route:clear || true && \
     php artisan view:clear || true && \
     rm -rf bootstrap/cache/* || true
-
 
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord_test.conf /etc/supervisor/supervisord.conf && \
@@ -115,6 +112,11 @@ RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 COPY ./docker/wait-for-redis-then-restart-task.sh /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 
+# Устанавливаем зависимости Laravel
+#  RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
+#     rm -rf vendor composer.lock && \
+#     composer install --no-dev --optimize-autoloader && \
+#     composer require predis/predis
 
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
