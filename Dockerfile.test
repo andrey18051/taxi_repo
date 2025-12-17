@@ -169,21 +169,5 @@ RUN chmod +x /entrypoint.sh
 
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
-# Правильные права только на нужные директории
-# Правильные права на все директории, куда Laravel пишет на runtime
-RUN mkdir -p /usr/share/nginx/html/taxi/storage/framework/views \
-    /usr/share/nginx/html/taxi/storage/framework/cache/data \
-    /usr/share/nginx/html/taxi/storage/framework/sessions \
-    /usr/share/nginx/html/taxi/bootstrap/cache \
-    /usr/share/nginx/html/laravel_logs && \
-    chown -R www-data:www-data /usr/share/nginx/html/taxi/storage \
-    /usr/share/nginx/html/taxi/bootstrap/cache \
-    /usr/share/nginx/html/laravel_logs && \
-    chmod -R 775 /usr/share/nginx/html/taxi/storage \
-    /usr/share/nginx/html/taxi/bootstrap/cache \
-    /usr/share/nginx/html/laravel_logs && \
-    touch /usr/share/nginx/html/laravel_logs/laravel.log && \
-    chown www-data:www-data /usr/share/nginx/html/laravel_logs/laravel.log && \
-    chmod 666 /usr/share/nginx/html/laravel_logs/laravel.log
 
 ENTRYPOINT ["/entrypoint.sh"]
