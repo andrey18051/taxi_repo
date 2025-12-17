@@ -93,6 +93,7 @@ RUN cd /usr/share/nginx/html/taxi && \
     php artisan view:clear || true && \
     rm -rf bootstrap/cache/* || true
 
+
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord_test.conf /etc/supervisor/supervisord.conf && \
     cp /usr/share/nginx/html/taxi/docker/nginx_test.conf /etc/nginx/nginx.conf && \
