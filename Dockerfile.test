@@ -84,7 +84,7 @@ COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 RUN cd /usr/share/nginx/html/taxi && \
    composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-RUN cd /usr/share/nginx/html/taxi && composer require predis/predis --no-interaction
+# RUN cd /usr/share/nginx/html/taxi && composer require predis/predis --no-interaction
 
 # Очистка кэша Laravel, игнорируя ошибки Redis (Redis недоступен на build)
 RUN cd /usr/share/nginx/html/taxi && \
