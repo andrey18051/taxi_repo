@@ -68,7 +68,7 @@ COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
 COPY ./composer.json /usr/share/nginx/html/taxi/
 COPY ./composer.lock /usr/share/nginx/html/taxi/
-# COPY ./vendor /usr/share/nginx/html/taxi/vendor
+COPY ./vendor /usr/share/nginx/html/taxi/vendor
 COPY ./google48a0497e525302d5.html /usr/share/nginx/html/taxi/
 COPY ./mariadb_repo_setup /usr/share/nginx/html/taxi/
 COPY ./package.json /usr/share/nginx/html/taxi/
@@ -81,8 +81,8 @@ COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
 # Устанавливаем все зависимости свежими из lock-файла
-RUN cd /usr/share/nginx/html/taxi && \
-    composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+#RUN cd /usr/share/nginx/html/taxi && \
+ #   composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Очистка кэша Laravel, игнорируя ошибки Redis (Redis недоступен на build)
 RUN cd /usr/share/nginx/html/taxi && \
