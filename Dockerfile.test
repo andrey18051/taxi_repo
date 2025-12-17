@@ -56,7 +56,7 @@ COPY ./routes /usr/share/nginx/html/taxi/routes
 COPY ./storage /usr/share/nginx/html/taxi/storage
 COPY ./tests /usr/share/nginx/html/taxi/tests
 # COPY ./tmp /usr/share/nginx/html/taxi/tmp
-
+COPY ./vendor /usr/share/nginx/html/taxi/vendor
 
 # Заменяем WorkCommand.php на оригинальный из Laravel 8.83.29
 COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/framework/src/Illuminate/Queue/Console/WorkCommand.php
@@ -68,7 +68,6 @@ COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
 COPY ./composer.json /usr/share/nginx/html/taxi/
 COPY ./composer.lock /usr/share/nginx/html/taxi/
-COPY ./vendor /usr/share/nginx/html/taxi/vendor
 COPY ./google48a0497e525302d5.html /usr/share/nginx/html/taxi/
 COPY ./mariadb_repo_setup /usr/share/nginx/html/taxi/
 COPY ./package.json /usr/share/nginx/html/taxi/
