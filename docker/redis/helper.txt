@@ -18,13 +18,15 @@ docker run -d \
   redis:alpine \
   redis-server --save 900 1 --appendonly yes
 
+
+
 docker run -d \
   --name redis_server \
   --restart unless-stopped \
   -p 127.0.0.1:6379:6379 \
   -v redis_data:/data \
   redis:alpine \
-  redis-server --save 900 1 --appendonly yes
+  redis-server --requirepass "18And051971" --save 900 1 --appendonly yes
 
 docker volume inspect redis_data
 docker exec -it redis_server /bin/sh
