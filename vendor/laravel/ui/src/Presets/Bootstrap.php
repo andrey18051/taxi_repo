@@ -29,10 +29,11 @@ class Bootstrap extends Preset
     protected static function updatePackageArray(array $packages)
     {
         return [
-            'bootstrap' => '^5.1.3',
-            '@popperjs/core' => '^2.10.2',
-            'sass' => '^1.32.11',
-            'sass-loader' => '^11.0.1',
+            'bootstrap' => '^4.0.0',
+            'jquery' => '^3.2',
+            'popper.js' => '^1.12',
+            'sass' => '^1.15.2',
+            'sass-loader' => '^8.0.0',
         ] + $packages;
     }
 

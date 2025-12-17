@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -41,7 +42,7 @@ trait ThrottlesLogins
      * Redirect the user after determining they are locked out.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return void
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -52,7 +53,7 @@ trait ThrottlesLogins
         );
 
         throw ValidationException::withMessages([
-            $this->username() => [trans('auth.throttle', [
+            $this->username() => [Lang::get('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ])],
@@ -89,7 +90,7 @@ trait ThrottlesLogins
      */
     protected function throttleKey(Request $request)
     {
-        return Str::transliterate(Str::lower($request->input($this->username())).'|'.$request->ip());
+        return Str::lower($request->input($this->username())).'|'.$request->ip();
     }
 
     /**
