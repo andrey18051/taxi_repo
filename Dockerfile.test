@@ -24,12 +24,12 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
 RUN mkdir -p /var/log/nginx /run/nginx /etc/ssl/certs/nginx /var/log/supervisor
 
 # Создаём директорию для логов Laravel и устанавливаем правильные права СРАЗУ
-RUN mkdir -p /usr/share/nginx/html/laravel_logs && \
-    chown -R www-data:www-data /usr/share/nginx/html/laravel_logs && \
-    chmod -R 775 /usr/share/nginx/html/laravel_logs && \
-    touch /usr/share/nginx/html/laravel_logs/laravel.log && \
-    chown www-data:www-data /usr/share/nginx/html/laravel_logs/laravel.log && \
-    chmod 666 /usr/share/nginx/html/laravel_logs/laravel.log
+# RUN mkdir -p /usr/share/nginx/html/laravel_logs && \
+#     chown -R www-data:www-data /usr/share/nginx/html/laravel_logs && \
+#     chmod -R 775 /usr/share/nginx/html/laravel_logs && \
+#     touch /usr/share/nginx/html/laravel_logs/laravel.log && \
+#     chown www-data:www-data /usr/share/nginx/html/laravel_logs/laravel.log && \
+#     chmod 666 /usr/share/nginx/html/laravel_logs/laravel.log
 
 # Копируем конфигурационные файлы
 COPY docker/nginx_test.conf /etc/nginx/nginx.conf
@@ -119,6 +119,13 @@ WORKDIR /usr/share/nginx/html/taxi/
 RUN mkdir -p storage/app/public/logs \
     && chmod -R 775 storage/app/public/logs \
     && chown -R root:root storage/app/public/logs
+
+# ГАРАНТИРУЕМ, что файл лога существует и доступен для записи даже от root (на этапе build)
+RUN mkdir -p /usr/share/nginx/html/laravel_logs && \
+    touch /usr/share/nginx/html/laravel_logs/laravel.log && \
+    chown www-data:www-data /usr/share/nginx/html/laravel_logs/laravel.log && \
+    chmod 666 /usr/share/nginx/html/laravel_logs/laravel.log && \
+    chmod 775 /usr/share/nginx/html/laravel_logs
 
 # Создаём символическую ссылку storage → public/storage
 RUN php artisan storage:link || echo "storage:link command completed"
