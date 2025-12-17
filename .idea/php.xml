@@ -22,7 +22,6 @@
       <path value="$PROJECT_DIR$/vendor/graham-campbell/result-type" />
       <path value="$PROJECT_DIR$/vendor/socialiteproviders/manager" />
       <path value="$PROJECT_DIR$/vendor/socialiteproviders/telegram" />
-      <path value="$PROJECT_DIR$/vendor/composer" />
       <path value="$PROJECT_DIR$/vendor/fig/http-message-util" />
       <path value="$PROJECT_DIR$/vendor/psr/cache" />
       <path value="$PROJECT_DIR$/vendor/psr/clock" />
@@ -176,6 +175,7 @@
       <path value="$PROJECT_DIR$/vendor/webmozart/assert" />
       <path value="$PROJECT_DIR$/vendor/beyondcode/laravel-websockets" />
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/guzzle" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.3" />

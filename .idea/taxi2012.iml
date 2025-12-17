@@ -24,7 +24,6 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/graham-campbell/result-type" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/socialiteproviders/manager" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/socialiteproviders/telegram" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/fig/http-message-util" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/psr/cache" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/psr/clock" />
@@ -178,6 +177,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/beyondcode/laravel-websockets" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/guzzlehttp/guzzle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
