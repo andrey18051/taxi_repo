@@ -11551,11 +11551,11 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         Log::info("Выбран comment: {$comment}");
-
+        $closeReasons = ['-1', '100', '101', '102', '103'];
         // Получаем все заказы
         $orders = Orderweb::where('email', $email)
             ->where('comment', $comment)
-            ->where('closeReason', "-1")
+            ->whereIn('closeReason', $closeReasons)
 //            ->where('pay_system', "nal_payment")
             ->get();
 
@@ -11641,6 +11641,7 @@ class UniversalAndroidFunctionController extends Controller
             (new UIDController())->UIDStatusReviewService($orderweb);
 
             if ($orderweb->closeReason == "-1"
+                || $orderweb->closeReason == "100"
                 || $orderweb->closeReason == "101"
                 || $orderweb->closeReason == "102"
                 || $orderweb->closeReason == "103"

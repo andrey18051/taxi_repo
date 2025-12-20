@@ -102,3 +102,13 @@ jobs:
 #
 #            echo "PRODUCTION deployed!"
 #          EOF
+
+#  Congratulations! Installed successfully!
+#  ==================================================================
+#aaPanel Internet Address: https://91.219.60.148:34487/1df9b39c
+#aaPanel Internal Address: https://91.219.60.148:34487/1df9b39c
+#username: qek1fqio
+#password: a42d9406
+#Warning:
+#  If you cannot access the panel,
+#  release the following port (34487|888|80|443|20|21) in the security group
