@@ -62,7 +62,7 @@ COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/fr
 
 
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
-COPY ../../../app/env/work/.env /usr/share/nginx/html/taxi/
+COPY .env.work /usr/share/nginx/html/taxi/.env
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
 COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
@@ -79,6 +79,16 @@ COPY ./README.md /usr/share/nginx/html/taxi/
 COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
+# Очистка кэша Laravel, игнорируя ошибки Redis (Redis недоступен на build)
+RUN cd /usr/share/nginx/html/taxi && \
+    composer dump-autoload -o && \
+    php artisan config:clear || true && \
+    php artisan cache:clear || true && \
+    php artisan route:clear || true && \
+    php artisan view:clear || true && \
+    rm -rf bootstrap/cache/* || true
+
+
 # Копируем конфигурации и службы
 RUN cp /usr/share/nginx/html/taxi/docker/supervisord_work.conf /etc/supervisor/supervisord.conf && \
     cp /usr/share/nginx/html/taxi/docker/nginx_work.conf /etc/nginx/nginx.conf && \
@@ -87,16 +97,16 @@ RUN cp /usr/share/nginx/html/taxi/docker/supervisord_work.conf /etc/supervisor/s
     cp /usr/share/nginx/html/taxi/docker/watch_log.service /etc/systemd/system/watch_log.service && \
     cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
 
+RUN mkdir -p /usr/share/nginx/html/taxi/tmp && \
+    chmod 777 /usr/share/nginx/html/taxi/tmp
+
 # Преобразуем окончания строк уже в контейнере
 RUN apt-get update && apt-get install -y dos2unix
 RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 
-
-# Устанавливаем зависимости Laravel
-#RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
-#    rm -rf vendor composer.lock && \
-#    composer install --no-dev --optimize-autoloader && \
-#    composer require predis/predis
+ # Копируем скрипт ожидания Redis и запуска artisan-команды
+ COPY ./docker/wait-for-redis-then-restart-task.sh /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
+ RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
@@ -110,9 +120,20 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
     crontab -u root /tmp/cronfile && \
     rm /tmp/cronfile
 
+# Рабочая директория
+WORKDIR /usr/share/nginx/html/taxi/
+
+# Создаём папку для хранения логов
+RUN mkdir -p storage/app/public/logs \
+    && chmod -R 775 storage/app/public/logs \
+    && chown -R root:root storage/app/public/logs
+
+
 # Устанавливаем права доступа ко всем файлам проекта
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
 
+# Копируем entrypoint скрипт
+COPY docker/entrypoint.sh /entrypoint.sh
 
-# Запускаем supervisord, который управляет всеми процессами (nginx, php-fpm, cron)
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+# Делаем его исполняемым
+RUN chmod +x /entrypoint.sh

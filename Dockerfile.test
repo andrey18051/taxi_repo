@@ -31,7 +31,6 @@ COPY docker/certs/nginx/m-easy-order-taxi-site.crt /etc/ssl/certs/nginx/m-easy-o
 COPY docker/certs/nginx/m-easy-order-taxi-site.key /etc/ssl/certs/nginx/m-easy-order-taxi-site.key
 COPY docker/certs/nginx/t-easy-order-taxi-site.crt /etc/ssl/certs/nginx/t-easy-order-taxi-site.crt
 COPY docker/certs/nginx/t-easy-order-taxi-site.key /etc/ssl/certs/nginx/t-easy-order-taxi-site.key
-
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Устанавливаем права и владельцев для необходимых файлов и директорий
@@ -79,9 +78,6 @@ COPY ./README.md /usr/share/nginx/html/taxi/
 COPY ./server.php /usr/share/nginx/html/taxi/
 COPY ./webpack.mix.js /usr/share/nginx/html/taxi/
 
-# Устанавливаем все зависимости свежими из lock-файла
-#RUN cd /usr/share/nginx/html/taxi && \
- #   composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Очистка кэша Laravel, игнорируя ошибки Redis (Redis недоступен на build)
 RUN cd /usr/share/nginx/html/taxi && \
@@ -111,11 +107,7 @@ RUN dos2unix /usr/share/nginx/html/laravel_logs/watch_log.sh
 COPY ./docker/wait-for-redis-then-restart-task.sh /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 RUN chmod +x /usr/share/nginx/html/taxi/wait-for-redis-then-restart-task.sh
 
-# Устанавливаем зависимости Laravel
-#  RUN cd /usr/share/nginx/html/taxi/ && composer clear-cache && \
-#     rm -rf vendor composer.lock && \
-#     composer install --no-dev --optimize-autoloader && \
-#     composer require predis/predis
+
 
 # Создаём директорию для логов и устанавливаем права
 RUN mkdir -p /usr/share/nginx/html/laravel_logs && chmod 777 /usr/share/nginx/html/laravel_logs
@@ -151,12 +143,6 @@ RUN mkdir -p storage/app/public/logs \
     && chown -R root:root storage/app/public/logs
 
 
-# Создаём символическую ссылку storage → public/storage
-# RUN php artisan storage:link
-
-# Миграции
-#RUN cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate
-#cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan migrate --path=database/migrations/2025_05_27_125407_create_audits_table.php
 
 # Копируем entrypoint скрипт
 COPY docker/entrypoint.sh /entrypoint.sh
