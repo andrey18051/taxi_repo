@@ -16,6 +16,8 @@ else
     echo "Storage link уже существует"
 fi
 
+chmod 777 /usr/share/nginx/html/laravel_logs/laravel.log
+
 # Опционально: другие команды при старте
 # php artisan config:cache
 # php artisan route:cache
