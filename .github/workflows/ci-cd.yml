@@ -278,7 +278,7 @@ jobs:
     runs-on: ubuntu-22.04
     environment: production
     steps:
-       - name: Prepare Firebase credentials (PROD)
+        - name: Prepare Firebase credentials (PROD)
         env:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
           SSH_USER: ${{ secrets.WORK_SSH_USER }}
