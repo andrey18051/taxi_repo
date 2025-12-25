@@ -108,35 +108,35 @@ jobs:
           LOG_REPORT_EMAIL="${{ vars.TEST_LOG_REPORT_EMAIL }}"
           EOF
       - name: Prepare Firebase credentials (TEST)
-      env:
-          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
-          SSH_USER: ${{ secrets.TEST_SSH_USER }}
-          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
-      run: |
-        echo "$SSH_KEY" > key.pem
-        chmod 600 key.pem
+        env:
+            SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
+            SSH_USER: ${{ secrets.TEST_SSH_USER }}
+            SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
 
-        ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
-        mkdir -p /opt/secrets/firebase/test
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
+          mkdir -p /opt/secrets/firebase/test
 
-         cat << 'EOP' > /opt/secrets/firebase/test/pas_1.json
-         ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
-         EOP
+           cat << 'EOP' > /opt/secrets/firebase/test/pas_1.json
+           ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
+           EOP
 
-         cat << 'EOP' > /opt/secrets/firebase/test/pas_2.json
-         ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
-         EOP
+           cat << 'EOP' > /opt/secrets/firebase/test/pas_2.json
+           ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
+           EOP
 
-         cat << 'EOP' > /opt/secrets/firebase/test/pas_4.json
-         ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
-         EOP
+           cat << 'EOP' > /opt/secrets/firebase/test/pas_4.json
+           ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
+           EOP
 
-         cat << 'EOP' > /opt/secrets/firebase/test/driver.json
-         ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
-         EOP
+           cat << 'EOP' > /opt/secrets/firebase/test/driver.json
+           ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
+           EOP
 
-         chmod 600 /opt/secrets/firebase/test/*.json
-        EOF
+           chmod 600 /opt/secrets/firebase/test/*.json
+          EOF
 
       - name: Build and push TEST image
         id: build_test
