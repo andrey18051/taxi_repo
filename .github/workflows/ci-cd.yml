@@ -278,7 +278,7 @@ jobs:
     runs-on: ubuntu-22.04
     environment: production
     steps:
-        - name: Prepare Firebase credentials (PROD)
+      - name: Prepare Firebase credentials (PROD)
         env:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
           SSH_USER: ${{ secrets.WORK_SSH_USER }}
@@ -308,6 +308,7 @@ jobs:
 
           # Устанавливаем права
           ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 600 /opt/secrets/firebase/prod/*.json"
+
       - name: Deploy to WORK server
         env:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
