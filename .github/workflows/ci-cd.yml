@@ -141,6 +141,7 @@ jobs:
 
   build-work:
     runs-on: ubuntu-22.04
+    environment: production
     outputs:
       image_tag: ${{ steps.build_work.outputs.image_tag }}
     steps:
