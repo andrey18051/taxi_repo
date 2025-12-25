@@ -134,7 +134,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
 
           # Устанавливаем права
-          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 600 /opt/secrets/firebase/test/*.json"
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 644 /opt/secrets/firebase/test/*.json"
       - name: Build and push TEST image
         id: build_test
         run: |
@@ -160,6 +160,7 @@ jobs:
             docker run --name taxi_test -d \
               --network host \
               --restart unless-stopped \
+              --user 0:0 \
               -v /opt/secrets/firebase/test:/run/secrets/firebase:ro \
               ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
 
@@ -307,7 +308,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
 
           # Устанавливаем права
-          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 600 /opt/secrets/firebase/prod/*.json"
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 644 /opt/secrets/firebase/prod/*.json"
 
       - name: Deploy to WORK server
         env:
@@ -327,6 +328,7 @@ jobs:
             docker run --name taxi_work -d \
               --network host \
               --restart unless-stopped \
+              --user 0:0 \
               -v /opt/secrets/firebase/prod:/run/secrets/firebase:ro \
               ghcr.io/andrey18051/taxi_work:$IMAGE_TAG
 
