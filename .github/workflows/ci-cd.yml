@@ -22,6 +22,91 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      - name: Create .env.test
+        run: |
+          cat <<EOF > .env.test
+          APP_NAME="${{ vars.TEST_APP_NAME }}"
+          APP_NAME_SES="${{ vars.TEST_APP_NAME_SES }}"
+          APP_ENV="${{ vars.TEST_APP_ENV }}"
+          APP_KEY="${{ secrets.TEST_APP_KEY }}"
+          APP_DEBUG="${{ vars.TEST_APP_DEBUG }}"
+          APP_URL="${{ vars.TEST_APP_URL }}"
+
+          LOG_CHANNEL="${{ vars.TEST_LOG_CHANNEL }}"
+          LOG_DEPRECATIONS_CHANNEL="${{ vars.TEST_LOG_DEPRECATIONS_CHANNEL }}"
+          LOG_LEVEL="${{ vars.TEST_LOG_LEVEL }}"
+
+          DB_CONNECTION="${{ vars.TEST_DB_CONNECTION }}"
+          DB_HOST="${{ vars.TEST_DB_HOST }}"
+          DB_PORT="${{ vars.TEST_DB_PORT }}"
+          DB_DATABASE="${{ vars.TEST_DB_DATABASE }}"
+          DB_USERNAME="${{ vars.TEST_DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.TEST_DB_PASSWORD }}"
+
+          BROADCAST_DRIVER="${{ vars.TEST_BROADCAST_DRIVER }}"
+          CACHE_DRIVER="${{ vars.TEST_CACHE_DRIVER }}"
+          FILESYSTEM_DRIVER="${{ vars.TEST_FILESYSTEM_DRIVER }}"
+          QUEUE_CONNECTION="${{ vars.TEST_QUEUE_CONNECTION }}"
+          SESSION_DRIVER="${{ vars.TEST_SESSION_DRIVER }}"
+          SESSION_LIFETIME="${{ vars.TEST_SESSION_LIFETIME }}"
+          SESSION_COOKIE="${{ vars.TEST_SESSION_COOKIE }}"
+          SESSION_SECURE_COOKIE="${{ vars.TEST_SESSION_SECURE_COOKIE }}"
+
+          MEMCACHED_HOST="${{ vars.TEST_MEMCACHED_HOST }}"
+
+          REDIS_HOST="${{ vars.TEST_REDIS_HOST }}"
+          REDIS_PASSWORD="${{ secrets.TEST_REDIS_PASSWORD }}"
+          REDIS_PORT="${{ vars.TEST_REDIS_PORT }}"
+          REDIS_CLIENT="${{ vars.TEST_REDIS_CLIENT }}"
+
+          TELEGRAM_BOT_NAME="${{ vars.TEST_TELEGRAM_BOT_NAME }}"
+          TELEGRAM_TOKEN="${{ secrets.TEST_TELEGRAM_TOKEN }}"
+          TELEGRAM_REDIRECT_URI="${{ vars.TEST_TELEGRAM_REDIRECT_URI }}"
+
+          MAIL_MAILER="${{ vars.TEST_MAIL_MAILER }}"
+          MAIL_HOST="${{ vars.TEST_MAIL_HOST }}"
+          MAIL_PORT="${{ vars.TEST_MAIL_PORT }}"
+          MAIL_USERNAME="${{ vars.TEST_MAIL_USERNAME }}"
+          MAIL_PASSWORD="${{ secrets.TEST_MAIL_PASSWORD }}"
+          MAIL_ENCRYPTION="${{ vars.TEST_MAIL_ENCRYPTION }}"
+          MAIL_FROM_ADDRESS="${{ vars.TEST_MAIL_FROM_ADDRESS }}"
+          MAIL_FROM_NAME="${{ vars.TEST_APP_NAME }}"
+          MAIL_SWIFTMAILER_TEMP_PATH="${{ vars.MAIL_SWIFTMAILER_TEMP_PATH }}"
+
+          AWS_ACCESS_KEY_ID="${{ vars.TEST_AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY="${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION="${{ vars.TEST_AWS_DEFAULT_REGION }}"
+          AWS_BUCKET="${{ vars.TEST_AWS_BUCKET }}"
+          AWS_USE_PATH_STYLE_ENDPOINT="${{ vars.TEST_AWS_USE_PATH_STYLE_ENDPOINT }}"
+
+          PUSHER_APP_ID="${{ vars.TEST_PUSHER_APP_ID }}"
+          PUSHER_APP_KEY="${{ secrets.TEST_PUSHER_APP_KEY }}"
+          PUSHER_APP_SECRET="${{ secrets.TEST_PUSHER_APP_SECRET }}"
+          PUSHER_APP_CLUSTER="${{ vars.TEST_PUSHER_APP_CLUSTER }}"
+
+          MIX_PUSHER_APP_KEY="${{ secrets.TEST_PUSHER_APP_KEY }}"
+          MIX_PUSHER_APP_CLUSTER="${{ vars.TEST_PUSHER_APP_CLUSTER }}"
+
+          APP_KEY_VISICOM="${{ secrets.TEST_APP_KEY_VISICOM }}"
+          APP_KEY_VISICOM_MY="${{ secrets.TEST_APP_KEY_VISICOM_MY }}"
+          APP_KEY_MAPBOX="${{ secrets.TEST_APP_KEY_MAPBOX }}"
+          APP_KEY_IP2Location="${{ secrets.TEST_APP_KEY_IP2Location }}"
+
+          FIREBASE_CREDENTIALS_PAS_1=/run/secrets/firebase/pas_1.json
+          FIREBASE_CREDENTIALS_PAS_2=/run/secrets/firebase/pas_2.json
+          FIREBASE_CREDENTIALS_PAS_4=/run/secrets/firebase/pas_4.json
+          FIREBASE_CREDENTIALS_DRIVER_TAXI=/run/secrets/firebase/driver.json
+
+          EXEC_TIME="${{ vars.TEST_EXEC_TIME }}"
+          AUTO_CANCEL_DELAY_MINUTES="${{ vars.TEST_AUTO_CANCEL_DELAY_MINUTES }}"
+          APP_Time_Sleep_For_Status_Update="${{ vars.TEST_APP_Time_Sleep_For_Status_Update }}"
+          HORIZON_SLACK_WEBHOOK_URL="${{ vars.TEST_HORIZON_SLACK_WEBHOOK_URL }}"
+
+          DRIVER_BLOCK_25="${{ vars.TEST_DRIVER_BLOCK_25 }}"
+          DRIVER_BLOCK_50="${{ vars.TEST_DRIVER_BLOCK_50 }}"
+          LOG_REPORT_EMAIL="${{ vars.TEST_LOG_REPORT_EMAIL }}"
+          EOF
+
       - name: Build and push TEST image
         id: build_test
         run: |
@@ -34,26 +119,29 @@ jobs:
           SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
           SSH_USER: ${{ secrets.TEST_SSH_USER }}
           SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          IMAGE_TAG: ${{ steps.build_test.outputs.image_tag }}
         run: |
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
 
           ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
-            docker pull ghcr.io/andrey18051/taxi_test:${{ steps.build_test.outputs.image_tag }}
+            docker pull ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
             docker stop taxi_test || true
             docker rm taxi_test || true
 
-            # Запускаем с правильным .env файлом
             docker run --name taxi_test -d \
               --network host \
               --restart unless-stopped \
-              ghcr.io/andrey18051/taxi_test:${{ steps.build_test.outputs.image_tag }}
+              -v /opt/secrets/firebase/test:/run/secrets/firebase:ro \
+              ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
 
             echo "TEST deployed!"
           EOF
 
   build-work:
     runs-on: ubuntu-22.04
+    outputs:
+      image_tag: ${{ steps.build_work.outputs.image_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,6 +156,87 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      - name: Create .env.work
+        run: |
+          cat <<EOF > .env.work
+          APP_NAME="${{ vars.WORK_APP_NAME }}"
+          APP_ENV=production
+          APP_KEY="${{ secrets.WORK_APP_KEY }}"
+          APP_DEBUG=false
+          APP_URL="${{ vars.WORK_APP_URL }}"
+
+          LOG_CHANNEL="${{ vars.WORK_LOG_CHANNEL }}"
+          LOG_DEPRECATIONS_CHANNEL="${{ vars.WORK_LOG_DEPRECATIONS_CHANNEL }}"
+          LOG_LEVEL="${{ vars.WORK_LOG_LEVEL }}"
+
+          DB_CONNECTION="${{ vars.WORK_DB_CONNECTION }}"
+          DB_HOST="${{ vars.WORK_DB_HOST }}"
+          DB_PORT="${{ vars.WORK_DB_PORT }}"
+          DB_DATABASE="${{ vars.WORK_DB_DATABASE }}"
+          DB_USERNAME="${{ vars.WORK_DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.WORK_DB_PASSWORD }}"
+
+          BROADCAST_DRIVER="${{ vars.WORK_BROADCAST_DRIVER }}"
+          CACHE_DRIVER="${{ vars.WORK_CACHE_DRIVER }}"
+          FILESYSTEM_DRIVER="${{ vars.WORK_FILESYSTEM_DRIVER }}"
+          QUEUE_CONNECTION="${{ vars.WORK_QUEUE_CONNECTION }}"
+          SESSION_DRIVER="${{ vars.WORK_SESSION_DRIVER }}"
+          SESSION_LIFETIME="${{ vars.WORK_SESSION_LIFETIME }}"
+
+          REDIS_HOST="${{ vars.WORK_REDIS_HOST }}"
+          REDIS_PASSWORD="${{ secrets.WORK_REDIS_PASSWORD }}"
+          REDIS_PORT="${{ vars.WORK_REDIS_PORT }}"
+          REDIS_CLIENT="${{ vars.WORK_REDIS_CLIENT }}"
+
+          TELEGRAM_BOT_NAME="${{ vars.WORK_TELEGRAM_BOT_NAME }}"
+          TELEGRAM_TOKEN="${{ secrets.WORK_TELEGRAM_TOKEN }}"
+
+          MAIL_MAILER="${{ vars.WORK_MAIL_MAILER }}"
+          MAIL_HOST="${{ vars.WORK_MAIL_HOST }}"
+          MAIL_PORT="${{ vars.WORK_MAIL_PORT }}"
+          MAIL_USERNAME="${{ vars.WORK_MAIL_USERNAME }}"
+          MAIL_PASSWORD="${{ secrets.WORK_MAIL_PASSWORD }}"
+          MAIL_ENCRYPTION="${{ vars.WORK_MAIL_ENCRYPTION }}"
+          MAIL_FROM_ADDRESS="${{ vars.WORK_MAIL_FROM_ADDRESS }}"
+          MAIL_FROM_NAME="${{ vars.WORK_APP_NAME }}"
+
+          AWS_ACCESS_KEY_ID="${{ vars.WORK_AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY="${{ secrets.WORK_AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION="${{ vars.WORK_AWS_DEFAULT_REGION }}"
+          AWS_BUCKET="${{ vars.WORK_AWS_BUCKET }}"
+
+          PUSHER_APP_ID="${{ vars.WORK_PUSHER_APP_ID }}"
+          PUSHER_APP_KEY="${{ secrets.WORK_PUSHER_APP_KEY }}"
+          PUSHER_APP_SECRET="${{ secrets.WORK_PUSHER_APP_SECRET }}"
+          PUSHER_APP_CLUSTER="${{ vars.WORK_PUSHER_APP_CLUSTER }}"
+
+          APP_KEY_VISICOM="${{ secrets.WORK_APP_KEY_VISICOM }}"
+          APP_KEY_VISICOM_MY="${{ secrets.WORK_APP_KEY_VISICOM_MY }}"
+          APP_KEY_MAPBOX="${{ secrets.WORK_APP_KEY_MAPBOX }}"
+          APP_KEY_IP2Location="${{ secrets.WORK_APP_KEY_IP2Location }}"
+
+          FIREBASE_CREDENTIALS_PAS_1=/run/secrets/firebase/pas_1.json
+          FIREBASE_CREDENTIALS_PAS_2=/run/secrets/firebase/pas_2.json
+          FIREBASE_CREDENTIALS_PAS_4=/run/secrets/firebase/pas_4.json
+          FIREBASE_CREDENTIALS_DRIVER_TAXI=/run/secrets/firebase/driver.json
+
+          APP_KEY_MERCHANT_ACCOUNT_VOD="${{ vars.WORK_APP_KEY_MERCHANT_ACCOUNT_VOD }}"
+          APP_KEY_MERCHANT_SECRET_KEY_VOD="${{ secrets.WORK_APP_KEY_MERCHANT_SECRET_KEY_VOD }}"
+
+          APP_KEY_MERCHANT_ACCOUNT="${{ vars.WORK_APP_KEY_MERCHANT_ACCOUNT }}"
+          APP_KEY_MERCHANT_SECRET_KEY="${{ secrets.WORK_APP_KEY_MERCHANT_SECRET_KEY }}"
+
+          EXEC_TIME="${{ vars.WORK_EXEC_TIME }}"
+          AUTO_CANCEL_DELAY_MINUTES="${{ vars.WORK_AUTO_CANCEL_DELAY_MINUTES }}"
+          APP_Time_Sleep_For_Status_Update="${{ vars.WORK_APP_Time_Sleep_For_Status_Update }}"
+          HORIZON_SLACK_WEBHOOK_URL="${{ vars.WORK_HORIZON_SLACK_WEBHOOK_URL }}"
+
+          DRIVER_BLOCK_25="${{ vars.WORK_DRIVER_BLOCK_25 }}"
+          DRIVER_BLOCK_50="${{ vars.WORK_DRIVER_BLOCK_50 }}"
+          LOG_REPORT_EMAIL="${{ vars.WORK_LOG_REPORT_EMAIL }}"
+
+          EOF
+
       - name: Build and push WORK image
         id: build_work
         run: |
@@ -80,35 +249,57 @@ jobs:
     runs-on: ubuntu-22.04
     environment: production
     steps:
-      - name: Deploy to WORK server
+      - name: Prepare Firebase credentials (PROD)
         env:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
           SSH_USER: ${{ secrets.WORK_SSH_USER }}
           SSH_KEY: ${{ secrets.WORK_SSH_PRIVATE_KEY }}
         run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
+
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << 'EOF'
+            mkdir -p /opt/secrets/firebase/prod
+
+            cat << 'EOP' > /opt/secrets/firebase/prod/pas_1.json
+            ${{ secrets.WORK_FIREBASE_PAS_1_JSON }}
+            EOP
+
+            cat << 'EOP' > /opt/secrets/firebase/prod/pas_2.json
+            ${{ secrets.WORK_FIREBASE_PAS_2_JSON }}
+            EOP
+
+            cat << 'EOP' > /opt/secrets/firebase/prod/pas_4.json
+            ${{ secrets.WORK_FIREBASE_PAS_4_JSON }}
+            EOP
+
+            cat << 'EOP' > /opt/secrets/firebase/prod/driver.json
+            ${{ secrets.WORK_FIREBASE_DRIVER_JSON }}
+            EOP
+
+            chmod 600 /opt/secrets/firebase/prod/*.json
+          EOF
+
+      - name: Deploy to WORK server
+        env:
+          SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
+          SSH_USER: ${{ secrets.WORK_SSH_USER }}
+          SSH_KEY: ${{ secrets.WORK_SSH_PRIVATE_KEY }}
+          IMAGE_TAG: ${{ needs.build-work.outputs.image_tag }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+
           ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
-            docker pull ghcr.io/andrey18051/taxi_work:$TAG
+            docker pull ghcr.io/andrey18051/taxi_work:$IMAGE_TAG
             docker stop taxi_work || true
             docker rm taxi_work || true
 
-            # Запускаем с правильным .env файлом
             docker run --name taxi_work -d \
               --network host \
               --restart unless-stopped \
-              ghcr.io/andrey18051/taxi_work:$TAG
+              -v /opt/secrets/firebase/prod:/run/secrets/firebase:ro \
+              ghcr.io/andrey18051/taxi_work:$IMAGE_TAG
 
             echo "PRODUCTION deployed!"
           EOF
-
-#  Congratulations! Installed successfully!
-#  ==================================================================
-#aaPanel Internet Address: https://91.219.60.148:34487/1df9b39c
-#aaPanel Internal Address: https://91.219.60.148:34487/1df9b39c
-#username: qek1fqio
-#password: a42d9406
-#Warning:
-#  If you cannot access the panel,
-#  release the following port (34487|888|80|443|20|21) in the security group
