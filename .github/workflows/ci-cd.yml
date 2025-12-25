@@ -107,37 +107,34 @@ jobs:
           DRIVER_BLOCK_50="${{ vars.TEST_DRIVER_BLOCK_50 }}"
           LOG_REPORT_EMAIL="${{ vars.TEST_LOG_REPORT_EMAIL }}"
           EOF
+
       - name: Prepare Firebase credentials (TEST)
         env:
-            SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
-            SSH_USER: ${{ secrets.TEST_SSH_USER }}
-            SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
+          SSH_USER: ${{ secrets.TEST_SSH_USER }}
+          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          FIREBASE_PAS_1_JSON: ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
+          FIREBASE_PAS_2_JSON: ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
+          FIREBASE_PAS_4_JSON: ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
+          FIREBASE_DRIVER_JSON: ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
         run: |
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
 
-          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
-          mkdir -p /opt/secrets/firebase/test
+          # Создаем локальные файлы
+          echo "$FIREBASE_PAS_1_JSON" > pas_1.json
+          echo "$FIREBASE_PAS_2_JSON" > pas_2.json
+          echo "$FIREBASE_PAS_4_JSON" > pas_4.json
+          echo "$FIREBASE_DRIVER_JSON" > driver.json
 
-           cat << 'EOP' > /opt/secrets/firebase/test/pas_1.json
-           ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
-           EOP
+          # Копируем на сервер
+          scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
 
-           cat << 'EOP' > /opt/secrets/firebase/test/pas_2.json
-           ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
-           EOP
-
-           cat << 'EOP' > /opt/secrets/firebase/test/pas_4.json
-           ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
-           EOP
-
-           cat << 'EOP' > /opt/secrets/firebase/test/driver.json
-           ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
-           EOP
-
-           chmod 600 /opt/secrets/firebase/test/*.json
-          EOF
-
+          # Устанавливаем права
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 600 /opt/secrets/firebase/test/*.json"
       - name: Build and push TEST image
         id: build_test
         run: |
@@ -281,37 +278,36 @@ jobs:
     runs-on: ubuntu-22.04
     environment: production
     steps:
-      - name: Prepare Firebase credentials (PROD)
+       - name: Prepare Firebase credentials (PROD)
         env:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
           SSH_USER: ${{ secrets.WORK_SSH_USER }}
           SSH_KEY: ${{ secrets.WORK_SSH_PRIVATE_KEY }}
+          FIREBASE_PAS_1_JSON: ${{ secrets.WORK_FIREBASE_PAS_1_JSON }}
+          FIREBASE_PAS_2_JSON: ${{ secrets.WORK_FIREBASE_PAS_2_JSON }}
+          FIREBASE_PAS_4_JSON: ${{ secrets.WORK_FIREBASE_PAS_4_JSON }}
+          FIREBASE_DRIVER_JSON: ${{ secrets.WORK_FIREBASE_DRIVER_JSON }}
         run: |
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
 
-          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
-            mkdir -p /opt/secrets/firebase/prod
+          # Создаем локальные файлы
+          echo "$FIREBASE_PAS_1_JSON" > pas_1.json
+          echo "$FIREBASE_PAS_2_JSON" > pas_2.json
+          echo "$FIREBASE_PAS_4_JSON" > pas_4.json
+          echo "$FIREBASE_DRIVER_JSON" > driver.json
 
-            cat << 'EOP' > /opt/secrets/firebase/prod/pas_1.json
-            ${{ secrets.WORK_FIREBASE_PAS_1_JSON }}
-            EOP
+          # Создаем директорию на сервере
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "mkdir -p /opt/secrets/firebase/prod"
 
-            cat << 'EOP' > /opt/secrets/firebase/prod/pas_2.json
-            ${{ secrets.WORK_FIREBASE_PAS_2_JSON }}
-            EOP
+          # Копируем на сервер
+          scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
+          scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
 
-            cat << 'EOP' > /opt/secrets/firebase/prod/pas_4.json
-            ${{ secrets.WORK_FIREBASE_PAS_4_JSON }}
-            EOP
-
-            cat << 'EOP' > /opt/secrets/firebase/prod/driver.json
-            ${{ secrets.WORK_FIREBASE_DRIVER_JSON }}
-            EOP
-
-            chmod 600 /opt/secrets/firebase/prod/*.json
-          EOF
-
+          # Устанавливаем права
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 600 /opt/secrets/firebase/prod/*.json"
       - name: Deploy to WORK server
         env:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
