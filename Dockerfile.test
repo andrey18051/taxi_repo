@@ -150,31 +150,20 @@ COPY docker/entrypoint.sh /entrypoint.sh
 # Делаем его исполняемым
 RUN chmod +x /entrypoint.sh
 
-# Установка curl для HEALTHCHECK
+# Установка curl для HEALTHCHECK (если ещё не установлено)
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Финальная безопасная настройка прав доступа (УДАЛИТЬ ВСЕ chmod -R 777!)
-RUN chown -R www-data:www-data \
-        /usr/share/nginx/html/taxi/storage \
-        /usr/share/nginx/html/taxi/bootstrap/cache \
-        /usr/share/nginx/html/taxi/tmp \
-        /usr/share/nginx/html/laravel_logs \
-        /usr/share/nginx/html/taxi/storage/app/public && \
-    chmod -R 775 \
-        /usr/share/nginx/html/taxi/storage \
-        /usr/share/nginx/html/taxi/bootstrap/cache \
-        /usr/share/nginx/html/taxi/tmp \
-        /usr/share/nginx/html/laravel_logs \
-        /usr/share/nginx/html/taxi/storage/app/public && \
-    find /usr/share/nginx/html/taxi -type f -exec chmod 644 {} \; && \
-    find /usr/share/nginx/html/taxi -type d -exec chmod 755 {} \;
+# Создаём необходимые директории для Laravel и даём правильные права
+RUN mkdir -p /usr/share/nginx/html/taxi/storage/framework/{views,cache/data,sessions} \
+    && mkdir -p /usr/share/nginx/html/taxi/storage/logs \
+    && mkdir -p /usr/share/nginx/html/taxi/bootstrap/cache \
+    && chown -R www-data:www-data /usr/share/nginx/html/taxi/storage \
+    && chown -R www-data:www-data /usr/share/nginx/html/taxi/bootstrap/cache \
+    && chmod -R 775 /usr/share/nginx/html/taxi/storage \
+    && chmod -R 775 /usr/share/nginx/html/taxi/bootstrap/cache
 
-# Healthcheck с большим запасом на старт Laravel
+# Healthcheck с запасом времени
 HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=6 \
   CMD curl -f http://localhost/api/check || exit 1
-
-# Копируем entrypoint скрипт
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

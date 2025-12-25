@@ -10,7 +10,6 @@ echo "Проверка и создание storage link..."
 if [ ! -L public/storage ]; then
     echo "Создаём symlink storage → public/storage"
     php artisan config:clear
-    php artisan cache:clear
     php artisan storage:link
 else
     echo "Storage link уже существует"
@@ -18,11 +17,6 @@ fi
 
 chmod 777 /usr/share/nginx/html/laravel_logs/laravel.log
 
-# Опционально: другие команды при старте
-# php artisan config:cache
-# php artisan route:cache
-# php artisan view:cache
-# php artisan migrate --force
 
 echo "Запуск supervisord..."
 
