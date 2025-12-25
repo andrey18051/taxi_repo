@@ -246,7 +246,6 @@ jobs:
           TAG=$(echo ${{ github.sha }} | cut -c1-7)
           docker build --file Dockerfile.work --tag ghcr.io/andrey18051/taxi_work:$TAG --tag ghcr.io/andrey18051/taxi_work:latest --push .
           echo "image_tag=$TAG" >> $GITHUB_OUTPUT
-
   deploy-work:
     needs: build-work
     runs-on: ubuntu-22.04
