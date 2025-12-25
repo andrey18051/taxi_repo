@@ -17,6 +17,7 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
     sudo \
     systemd \
     netcat-traditional \
+    jq\
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -137,12 +138,15 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
 # Рабочая директория
 WORKDIR /usr/share/nginx/html/taxi/
 
-# Создаём папку для хранения логов
+# Создаём все необходимые папки Laravel
 RUN mkdir -p storage/app/public/logs \
-    && chmod -R 775 storage/app/public/logs \
-    && chown -R root:root storage/app/public/logs
-
-
+    storage/app/public/reports \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    && chmod -R 777 storage \
+    && chown -R www-data:www-data storage \
+    && php artisan storage:link || true
 
 # Копируем entrypoint скрипт
 COPY docker/entrypoint.sh /entrypoint.sh

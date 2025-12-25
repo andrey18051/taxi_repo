@@ -1,6 +1,15 @@
 #!/bin/bash
-
 set -e  # Останавливать скрипт при ошибке
+
+mkdir -p /usr/share/nginx/html/taxi/storage/app/public/logs
+mkdir -p /usr/share/nginx/html/taxi/storage/app/public/reports
+mkdir -p /usr/share/nginx/html/taxi/storage/framework/cache
+mkdir -p /usr/share/nginx/html/taxi/storage/framework/sessions
+mkdir -p /usr/share/nginx/html/taxi/storage/framework/views
+# Устанавливаем права
+chmod -R 777 /usr/share/nginx/html/taxi/storage
+chown -R www-data:www-data /usr/share/nginx/html/taxi/storage
+
 
 cd /usr/share/nginx/html/taxi
 
