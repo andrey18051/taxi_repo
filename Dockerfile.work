@@ -120,7 +120,7 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
     echo "0 20 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan clean-task:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
     crontab -u root /tmp/cronfile && \
     rm /tmp/cronfile
-
+cd /usr/share/nginx/html/taxi && /opt/bitnami/php /tmp/test_firebase_full.php
 # Рабочая директория
 WORKDIR /usr/share/nginx/html/taxi/
 
