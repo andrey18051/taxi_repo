@@ -107,7 +107,7 @@ jobs:
           DRIVER_BLOCK_50="${{ vars.TEST_DRIVER_BLOCK_50 }}"
           LOG_REPORT_EMAIL="${{ vars.TEST_LOG_REPORT_EMAIL }}"
           EOF
-  - name: Prepare Firebase credentials (PROD)
+      - name: Prepare Firebase credentials (TEST)
       env:
           SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
           SSH_USER: ${{ secrets.TEST_SSH_USER }}
