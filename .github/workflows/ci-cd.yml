@@ -163,9 +163,9 @@ jobs:
         run: |
           cat <<EOF > .env.work
           APP_NAME="${{ vars.WORK_APP_NAME }}"
-          APP_ENV=production
+          APP_ENV="${{ vars.WORK_APP_ENV }}"
           APP_KEY="${{ secrets.WORK_APP_KEY }}"
-          APP_DEBUG=false
+          APP_DEBUG="${{ secrets.WORK_APP_DEBUG }}"
           APP_URL="${{ vars.WORK_APP_URL }}"
 
           LOG_CHANNEL="${{ vars.WORK_LOG_CHANNEL }}"
