@@ -61,7 +61,7 @@ COPY ./vendor /usr/share/nginx/html/taxi/vendor
 COPY docker/patches/WorkCommand.php /usr/share/nginx/html/taxi/vendor/laravel/framework/src/Illuminate/Queue/Console/WorkCommand.php
 
 COPY ./.editorconfig /usr/share/nginx/html/taxi/
-COPY .env.test /usr/share/nginx/html/taxi/.env
+# COPY .env.test /usr/share/nginx/html/taxi/.env
 COPY ./.styleci.yml /usr/share/nginx/html/taxi/
 COPY ./anceta.docx /usr/share/nginx/html/taxi/
 COPY ./artisan /usr/share/nginx/html/taxi/
