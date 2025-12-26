@@ -39,6 +39,12 @@ class SimplePollStatusJob implements ShouldQueue
         $this->attempts = $attempts; // Устанавливаем счетчик
 
         Log::info("📡 Задача опроса статуса #{$this->attempts} запущена для: {$orderReference}");
+        Log::info("📡 SimplePollStatusJob конструктор вызван", [
+            'orderReference' => $orderReference,
+            'attempts' => $attempts,
+            'file' => __FILE__,
+            'line' => __LINE__
+        ]);
     }
 
     /**
@@ -62,7 +68,10 @@ class SimplePollStatusJob implements ShouldQueue
         }
 
         $transactionStatus = $invoice->transactionStatus;
-
+         if(!$transactionStatus) {
+             Log::warning("transactionStatus не найден");
+             return;
+         }
         switch ($transactionStatus) {
             case 'Declined':
                 Log::warning("❌ Платеж отклонен");
@@ -104,10 +113,15 @@ class SimplePollStatusJob implements ShouldQueue
      * @throws \Pusher\ApiErrorException
      */
     private function sendPushNotification(
-        $transactionStatus
+        $transactionStatus = null  // Делаем необязательным
     ): void
     {
-        // Ваш код отправки пуша
+        // Для отладки
+        if ($transactionStatus === null) {
+            Log::error("sendPushNotification вызван без аргумента!");
+            $transactionStatus = 'Unknown';
+        }
+
         Log::info("📲 Отправлен пуш об отклоненном платеже");
         (new PusherController)->sentStatusWfp(
             $transactionStatus,
