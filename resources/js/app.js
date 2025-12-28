@@ -39,6 +39,7 @@ Vue.component('city-component', require('./views/city/CityHome.vue').default);
 Vue.component('city-pas1-component', require('./views/city/CityHome_PAS_1.vue').default);
 Vue.component('city-pas2-component', require('./views/city/CityHome_PAS_2.vue').default);
 Vue.component('city-pas4-component', require('./views/city/CityHome_PAS_4.vue').default);
+Vue.component('city-pas5-component', require('./views/city/CityHome_PAS_5.vue').default);
 Vue.component('closeReason-component', require('./views/close_reason/CloseReasonHome.vue').default);
 Vue.component('bonuses-component', require('./views/bonuses/BonusHome.vue').default);
 Vue.component('fondy-component', require('./views/fondy/FondyHome.vue').default);
