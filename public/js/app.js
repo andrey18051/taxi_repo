@@ -41806,7 +41806,7 @@ var staticRenderFns = [
         staticClass:
           "pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center",
       },
-      [_c("h1", { staticClass: "display-5" }, [_vm._v("City PAS 4")])]
+      [_c("h1", { staticClass: "display-5" }, [_vm._v("City PAS 5")])]
     )
   },
 ]
