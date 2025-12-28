@@ -5619,6 +5619,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "CityComponent",
@@ -5720,6 +5723,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     cityPas4Button: function cityPas4Button() {
       this.$router.push('/admin/city-pas4');
+    },
+    cityPas5Button: function cityPas5Button() {
+      this.$router.push('/admin/city-pas5');
     }
   }
 });
@@ -5739,6 +5745,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
 //
 //
 //
@@ -5918,7 +5927,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas2/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas1/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -5943,6 +5952,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     cityPas4Button: function cityPas4Button() {
       this.$router.push('/admin/city-pas4');
+    },
+    cityPas5Button: function cityPas5Button() {
+      this.$router.push('/admin/city-pas5');
     }
   }
 });
@@ -5962,6 +5974,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
 //
 //
 //
@@ -6167,6 +6182,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     cityPas4Button: function cityPas4Button() {
       this.$router.push('/admin/city-pas4');
+    },
+    cityPas5Button: function cityPas5Button() {
+      this.$router.push('/admin/city-pas5');
     }
   }
 });
@@ -6186,6 +6204,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
 //
 //
 //
@@ -6365,7 +6386,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     editCities: function editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas2/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/pas4/city/edit/' + id + '/' + name + '/' + address + '/' + login + '/' + password + '/' + online + '/' + card_max_pay + '/' + bonus_max_pay + '/' + black_list).then(function (ret) {
         console.log(ret.data); // document.location.reload();
 
         window.alert("Данные обновлены");
@@ -6390,6 +6411,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     cityPas4Button: function cityPas4Button() {
       this.$router.push('/admin/city-pas4');
+    },
+    cityPas5Button: function cityPas5Button() {
+      this.$router.push('/admin/city-pas5');
     }
   }
 });
@@ -10251,6 +10275,9 @@ var routes = [{
 }, {
   path: "/admin/city-pas4",
   component: _views_city_CityHome_PAS_4__WEBPACK_IMPORTED_MODULE_11__["default"]
+}, {
+  path: "/admin/city-pas5",
+  component: CityHomePas5
 }, {
   path: "/admin/fondy",
   component: _views_fondy_FondyHome__WEBPACK_IMPORTED_MODULE_14__["default"]
@@ -37340,6 +37367,20 @@ var render = function () {
       ),
       _vm._v(" "),
       _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.cityPas5Button()
+            },
+          },
+        },
+        [_vm._v("\n        PAS 5\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
         "div",
         { staticClass: "container-fluid" },
         [
@@ -38096,6 +38137,20 @@ var render = function () {
           },
         },
         [_vm._v("\n        PAS 4\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.cityPas5Button()
+            },
+          },
+        },
+        [_vm._v("\n        PAS 5\n    ")]
       ),
       _vm._v(" "),
       _c(
@@ -38945,6 +39000,20 @@ var render = function () {
       ),
       _vm._v(" "),
       _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.cityPas5Button()
+            },
+          },
+        },
+        [_vm._v("\n        PAS 5\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
         "div",
         { staticClass: "container-fluid" },
         [
@@ -39788,6 +39857,20 @@ var render = function () {
           },
         },
         [_vm._v("\n        PAS 2\n    ")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-primary",
+          staticStyle: { "margin-left": "5px" },
+          on: {
+            click: function ($event) {
+              return _vm.cityPas5Button()
+            },
+          },
+        },
+        [_vm._v("\n        PAS 5\n    ")]
       ),
       _vm._v(" "),
       _c(

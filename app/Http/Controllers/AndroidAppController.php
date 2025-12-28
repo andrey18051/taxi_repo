@@ -11,6 +11,7 @@ use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\City_PAS5;
 use App\Models\Combo;
 use App\Models\ComboTest;
 use App\Models\Config;
@@ -55,6 +56,9 @@ class AndroidAppController extends Controller
                 break;
             case "PAS4":
                 $applicationId = config("app.X-WO-API-APP-ID-PAS4");
+                break;
+            case "PAS5":
+                $applicationId = config("app.X-WO-API-APP-ID-PAS5");
                 break;
         }
         return $applicationId;
@@ -2343,6 +2347,9 @@ class AndroidAppController extends Controller
                 break;
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
+                break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
                 break;
         }
 

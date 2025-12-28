@@ -45,6 +45,9 @@ class MessageSentController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -111,6 +114,9 @@ class MessageSentController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -172,6 +178,9 @@ class MessageSentController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -231,6 +240,9 @@ class MessageSentController extends Controller
                 break;
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
+                break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
                 break;
         }
 
@@ -306,6 +318,9 @@ class MessageSentController extends Controller
                 break;
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
+                break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
                 break;
         }
 
@@ -383,6 +398,9 @@ class MessageSentController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -459,6 +477,9 @@ class MessageSentController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -530,6 +551,9 @@ class MessageSentController extends Controller
                 break;
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
+                break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
                 break;
         }
 
@@ -605,6 +629,9 @@ class MessageSentController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         $kievTimeZone = new DateTimeZone('Europe/Kiev');
@@ -668,6 +695,9 @@ class MessageSentController extends Controller
                 break;
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
+                break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
                 break;
         }
 

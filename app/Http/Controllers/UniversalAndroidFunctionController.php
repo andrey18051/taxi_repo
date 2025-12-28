@@ -22,6 +22,7 @@ use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\City_PAS5;
 use App\Models\DoubleOrder;
 use App\Models\DriverMemoryOrder;
 use App\Models\DriverPosition;
@@ -7710,6 +7711,9 @@ class UniversalAndroidFunctionController extends Controller
             case "taxi_easy_ua_pas4":
                 $pas = "ПАС_4";
                 break;
+            case "taxi_easy_ua_pas5":
+                $pas = "ПАС_5";
+                break;
         }
 
         /**
@@ -11235,9 +11239,12 @@ class UniversalAndroidFunctionController extends Controller
             case "PAS2":
                 $app_order = "taxi_easy_ua_pas2";
                 break;
-            //case "PAS4":
-            default:
+            case "PAS4":
                 $app_order = "taxi_easy_ua_pas4";
+                break;
+            //case "PAS5":
+            default:
+                $app_order = "taxi_easy_ua_pas5";
 
 
         }

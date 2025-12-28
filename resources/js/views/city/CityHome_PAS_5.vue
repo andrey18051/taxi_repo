@@ -3,7 +3,7 @@
     <div class="container-fluid" style="overflow-x: auto;">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 
-                <h1 class="display-5">City  PAS 2</h1>
+                <h1 class="display-5">City PAS 4</h1>
 
         </div>
         <button class="btn btn-outline-primary" @click="newCityButton()" style="margin-left: 5px">
@@ -12,11 +12,11 @@
         <button class="btn btn-outline-primary" @click="cityPas1Button()" style="margin-left: 5px">
             PAS 1
         </button>
+        <button class="btn btn-outline-primary" @click="cityPas2Button()" style="margin-left: 5px">
+            PAS 2
+        </button>
         <button class="btn btn-outline-primary" @click="cityPas4Button()" style="margin-left: 5px">
             PAS 4
-        </button>
-        <button class="btn btn-outline-primary" @click="cityPas5Button()" style="margin-left: 5px">
-            PAS 5
         </button>
         <div class="container-fluid">
             <v-table
@@ -67,14 +67,13 @@
                             <option value="false">no_online</option>
                         </select>
                     </td>
+
                     <td>
                         <select id="black_list" class="form-control" style="width: 120px" v-model="row.black_list" required>
                             <option value="cards only">cards only</option>
                             <option value="cash">cash</option>
                         </select>
                     </td>
-
-
                     <td>
                         <div class="btn-group" role="group">
                             <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password, row.online, row.card_max_pay, row.bonus_max_pay, row.black_list)" style="margin-left: 5px">
@@ -107,7 +106,7 @@
 <script>
 import axios from 'axios';
 export default {
-    name: "CityHomePas2",
+    name: "CityHomePas5",
     data: () => ({
         loading: true,
         cities: [],
@@ -131,7 +130,7 @@ export default {
     },
     methods: {
         getCities() {
-            axios.get('/pas2/city/all')
+            axios.get('/pas5/city/all')
                 .then(
                     res => {
                         this.cities = res.data;
@@ -142,7 +141,7 @@ export default {
 
         deleteCities(id) {
 
-            axios.get('/pas2/city/destroy/'+ id)
+            axios.get('/pas5/city/destroy/'+ id)
                 .then(response => {
                     let i = this.cities.map(data => data.id).indexOf(id);
                     this.cities.splice(i, 1);
@@ -151,7 +150,7 @@ export default {
                 });
         },
         editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
-            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list)
+            axios.get('/pas5/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list)
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();
@@ -159,7 +158,7 @@ export default {
                 })
         },
         newCityButton() {
-            axios.get('/pas2/city/newCityCreat')
+            axios.get('/pas5/city/newCityCreat')
                 .then(res => {
                     this.partners = res.data;
                     this.loading = false;
@@ -180,10 +179,6 @@ export default {
         },
         cityPas4Button() {
             this.$router.push('/admin/city-pas4');
-
-        },
-        cityPas5Button() {
-            this.$router.push('/admin/city-pas5');
 
         },
 

@@ -17,6 +17,7 @@ use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\City_PAS5;
 use App\Models\Combo;
 use App\Models\ComboTest;
 use App\Models\Config;
@@ -239,6 +240,9 @@ class AndroidTestOSMController extends Controller
                 break;
             case "PAS4":
                 $applicationId = config("app.X-WO-API-APP-ID-PAS4");
+                break;
+            case "PAS5":
+                $applicationId = config("app.X-WO-API-APP-ID-PAS5");
                 break;
         }
         return $applicationId;
@@ -509,9 +513,12 @@ class AndroidTestOSMController extends Controller
             case "PAS2":
                 $city_count = City_PAS2::where('name', $city)->count();
                 break;
-            //case "PAS4":
-            default:
+            case "PAS4":
                 $city_count = City_PAS4::where('name', $city)->count();
+                break;
+            //case "PAS5":
+            default:
+                $city_count = City_PAS5::where('name', $city)->count();
                 break;
         }
         if (isset($response_arr["Message"]) && $city_count > 1) {
@@ -523,9 +530,12 @@ class AndroidTestOSMController extends Controller
                 case "PAS2":
                     $cityServer = City_PAS2::where('address', $connectAPI)->first();
                     break;
-                //case "PAS4":
-                default:
+                case "PAS4":
                     $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                    break;
+                //case "PAS5":
+                default:
+                    $cityServer = City_PAS5::where('address', $connectAPI)->first();
                     break;
             }
             $cityServer->online = "false";
@@ -572,9 +582,12 @@ class AndroidTestOSMController extends Controller
                         case "PAS2":
                             $cityServer = City_PAS2::where('address', $connectAPI)->first();
                             break;
-                        //case "PAS4":
-                        default:
+                        case "PAS4":
                             $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                            break;
+                        //case "PAS5":
+                        default:
+                            $cityServer = City_PAS5::where('address', $connectAPI)->first();
                             break;
                     }
                     $cityServer->online = "false";
@@ -589,9 +602,12 @@ class AndroidTestOSMController extends Controller
                         case "PAS2":
                             $cityServer = City_PAS2::where('address', $connectAPI)->first();
                             break;
-                        //case "PAS4":
-                        default:
+                        case "PAS4":
                             $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                            break;
+                        //case "PAS5":
+                        default:
+                            $cityServer = City_PAS5::where('address', $connectAPI)->first();
                             break;
                     }
                     (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
@@ -635,9 +651,12 @@ class AndroidTestOSMController extends Controller
             case "PAS2":
                 $city_count = City_PAS2::where('name', $city)->count();
                 break;
-            //case "PAS4":
-            default:
+            case "PAS4":
                 $city_count = City_PAS4::where('name', $city)->count();
+                break;
+            //case "PAS5":
+            default:
+                $city_count = City_PAS5::where('name', $city)->count();
                 break;
         }
         Log::debug("city_count: " . $city_count);
@@ -652,9 +671,12 @@ class AndroidTestOSMController extends Controller
                     case "PAS2":
                         $cityServer = City_PAS2::where('address', $connectAPI)->first();
                         break;
-                    //case "PAS4":
-                    default:
+                    case "PAS4":
                         $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS5":
+                    default:
+                        $cityServer = City_PAS5::where('address', $connectAPI)->first();
                         break;
                 }
 
@@ -701,9 +723,12 @@ class AndroidTestOSMController extends Controller
                             case "PAS2":
                                 $cityServer = City_PAS2::where('address', $connectAPI)->first();
                                 break;
-                            //case "PAS4":
-                            default:
+                            case "PAS4":
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS5":
+                            default:
+                                $cityServer = City_PAS5::where('address', $connectAPI)->first();
                                 break;
                         }
                         $cityServer->online = "false";
@@ -718,9 +743,12 @@ class AndroidTestOSMController extends Controller
                             case "PAS2":
                                 $cityServer = City_PAS2::where('address', $connectAPI)->first();
                                 break;
-                            //case "PAS4":
-                            default:
+                            case "PAS4":
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS5":
+                            default:
+                                $cityServer = City_PAS5::where('address', $connectAPI)->first();
                                 break;
                         }
                         (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);
@@ -749,8 +777,12 @@ class AndroidTestOSMController extends Controller
                         $cityServer = City_PAS2::where('address', $connectAPI)->first();
                         break;
                     //case "PAS4":
-                    default:
+                    case "PAS4":
                         $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS5":
+                    default:
+                        $cityServer = City_PAS5::where('address', $connectAPI)->first();
                         break;
                 }
 
@@ -776,9 +808,12 @@ class AndroidTestOSMController extends Controller
                     case "PAS2":
                         $cityServer = City_PAS2::where('address', $connectAPI)->first();
                         break;
-                    //case "PAS4":
-                    default:
+                    case "PAS4":
                         $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                        break;
+                    //case "PAS5":
+                    default:
+                        $cityServer = City_PAS5::where('address', $connectAPI)->first();
                         break;
                 }
 
@@ -825,9 +860,12 @@ class AndroidTestOSMController extends Controller
                             case "PAS2":
                                 $cityServer = City_PAS2::where('address', $connectAPI)->first();
                                 break;
-                            //case "PAS4":
-                            default:
+                            case "PAS4":
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS5":
+                            default:
+                                $cityServer = City_PAS5::where('address', $connectAPI)->first();
                                 break;
                         }
                         $cityServer->online = "false";
@@ -842,9 +880,12 @@ class AndroidTestOSMController extends Controller
                             case "PAS2":
                                 $cityServer = City_PAS2::where('address', $connectAPI)->first();
                                 break;
-                            //case "PAS4":
-                            default:
+                            case "PAS4":
                                 $cityServer = City_PAS4::where('address', $connectAPI)->first();
+                                break;
+                            //case "PAS5":
+                            default:
+                                $cityServer = City_PAS5::where('address', $connectAPI)->first();
                                 break;
                         }
                         (new UniversalAndroidFunctionController)->cityNoOnlineMessage($cityServer->id, $application);

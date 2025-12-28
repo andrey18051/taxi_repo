@@ -15,6 +15,9 @@
         <button class="btn btn-outline-primary" @click="cityPas2Button()" style="margin-left: 5px">
             PAS 2
         </button>
+        <button class="btn btn-outline-primary" @click="cityPas5Button()" style="margin-left: 5px">
+            PAS 5
+        </button>
         <div class="container-fluid">
             <v-table
                 :data="cities"
@@ -147,7 +150,7 @@ export default {
                 });
         },
         editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
-            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list)
+            axios.get('/pas4/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list)
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();
@@ -176,6 +179,10 @@ export default {
         },
         cityPas4Button() {
             this.$router.push('/admin/city-pas4');
+
+        },
+        cityPas5Button() {
+            this.$router.push('/admin/city-pas5');
 
         },
 

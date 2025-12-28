@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\City_PAS5;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -454,9 +455,12 @@ class CityController extends Controller
             case "PAS2":
                 $city = City_PAS2::where('name', $city)->first()->toArray();
                 break;
-            //case "PAS4":
+            case "PAS4":
+                $city = City_PAS2::where('name', $city)->first()->toArray();
+                break;
+            //case "PAS5":
             default:
-                $city = City_PAS4::where('name', $city)->first()->toArray();
+                $city = City_PAS5::where('name', $city)->first()->toArray();
                 break;
         }
         return [
@@ -473,6 +477,9 @@ class CityController extends Controller
                 break;
             case "PAS2":
                 $city = City_PAS2::where('name', $city)->first()->toArray();
+                break;
+            case "PAS5":
+                $city = City_PAS4::where('name', $city)->first()->toArray();
                 break;
             //case "PAS4":
             default:

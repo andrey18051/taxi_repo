@@ -704,8 +704,11 @@ class TaxiAiController extends Controller
                 case "taxi_easy_ua_pas2":
                     $application = "PAS2";
                     break;
-                default:
+                case "taxi_easy_ua_pas4":
                     $application = "PAS4";
+                    break;
+                default:
+                    $application = "PAS5";
                     break;
             }
 

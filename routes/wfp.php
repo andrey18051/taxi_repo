@@ -41,6 +41,7 @@ Route::post('/serviceUrl', [WfpController::class, 'serviceUrl'])->name('serviceU
 Route::post('/serviceUrl/PAS1', [WfpController::class, 'serviceUrl_PAS1_app'])->name('serviceUrl_PAS1');
 Route::post('/serviceUrl/PAS2', [WfpController::class, 'serviceUrl_PAS2_app'])->name('serviceUrl_PAS2');
 Route::post('/serviceUrl/PAS4', [WfpController::class, 'serviceUrl_PAS4_app'])->name('serviceUrl_PAS4');
+Route::post('/serviceUrl/PAS5', [WfpController::class, 'serviceUrl_PAS5_app'])->name('serviceUrl_PAS5');
 Route::post('/serviceUrl/VOD', [WfpController::class, 'serviceUrl_VOD_app'])->name('serviceUrl_VOD');
 
 Route::post('/serviceUrl/verify', [WfpController::class, 'serviceUrlVerify'])->name('serviceUrl');

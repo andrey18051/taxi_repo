@@ -95,7 +95,8 @@ jobs:
 
           FIREBASE_CREDENTIALS_PAS_1=/run/secrets/firebase/pas_1.json
           FIREBASE_CREDENTIALS_PAS_2=/run/secrets/firebase/pas_2.json
-          FIREBASE_CREDENTIALS_PAS_4=/run/secrets/firebase/pas_4.json
+          FIREBASE_CREDENTIALS_exit=/run/secrets/firebase/pas_4.json
+          FIREBASE_CREDENTIALS_PAS_5=/run/secrets/firebase/pas_5.json
           FIREBASE_CREDENTIALS_DRIVER_TAXI=/run/secrets/firebase/driver.json
 
           EXEC_TIME="${{ vars.TEST_EXEC_TIME }}"
@@ -116,6 +117,7 @@ jobs:
           FIREBASE_PAS_1_JSON: ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
           FIREBASE_PAS_2_JSON: ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
           FIREBASE_PAS_4_JSON: ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
+          FIREBASE_PAS_5_JSON: ${{ secrets.TEST_FIREBASE_PAS_5_JSON }}
           FIREBASE_DRIVER_JSON: ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
         run: |
           echo "$SSH_KEY" > key.pem
@@ -125,12 +127,14 @@ jobs:
           echo "$FIREBASE_PAS_1_JSON" > pas_1.json
           echo "$FIREBASE_PAS_2_JSON" > pas_2.json
           echo "$FIREBASE_PAS_4_JSON" > pas_4.json
+          echo "$FIREBASE_PAS_5_JSON" > pas_5.json
           echo "$FIREBASE_DRIVER_JSON" > driver.json
 
           # Копируем на сервер
           scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
           scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
           scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_5.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
           scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
 
           # Устанавливаем права
@@ -249,6 +253,7 @@ jobs:
           FIREBASE_CREDENTIALS_PAS_1=/run/secrets/firebase/pas_1.json
           FIREBASE_CREDENTIALS_PAS_2=/run/secrets/firebase/pas_2.json
           FIREBASE_CREDENTIALS_PAS_4=/run/secrets/firebase/pas_4.json
+          FIREBASE_CREDENTIALS_PAS_5=/run/secrets/firebase/pas_5.json
           FIREBASE_CREDENTIALS_DRIVER_TAXI=/run/secrets/firebase/driver.json
 
           APP_KEY_MERCHANT_ACCOUNT_VOD="${{ vars.WORK_APP_KEY_MERCHANT_ACCOUNT_VOD }}"
@@ -287,6 +292,7 @@ jobs:
           FIREBASE_PAS_1_JSON: ${{ secrets.WORK_FIREBASE_PAS_1_JSON }}
           FIREBASE_PAS_2_JSON: ${{ secrets.WORK_FIREBASE_PAS_2_JSON }}
           FIREBASE_PAS_4_JSON: ${{ secrets.WORK_FIREBASE_PAS_4_JSON }}
+          FIREBASE_PAS_5_JSON: ${{ secrets.WORK_FIREBASE_PAS_5_JSON }}
           FIREBASE_DRIVER_JSON: ${{ secrets.WORK_FIREBASE_DRIVER_JSON }}
         run: |
           echo "$SSH_KEY" > key.pem
@@ -296,6 +302,7 @@ jobs:
           echo "$FIREBASE_PAS_1_JSON" > pas_1.json
           echo "$FIREBASE_PAS_2_JSON" > pas_2.json
           echo "$FIREBASE_PAS_4_JSON" > pas_4.json
+          echo "$FIREBASE_PAS_5_JSON" > pas_5.json
           echo "$FIREBASE_DRIVER_JSON" > driver.json
 
           # Создаем директорию на сервере
@@ -305,6 +312,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_5.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
 
           # Устанавливаем права

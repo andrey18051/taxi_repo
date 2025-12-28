@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\City_PAS5;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use Carbon\Carbon;
@@ -326,10 +327,19 @@ class UIDController extends Controller
                 ]);
                 break;
             //case "PAS4":
-            default:
+            case "PAS4":
                 $serverInfo = City_PAS4::where("name", $city)->get();
-                Log::debug('🔍 Поиск серверов в City_PAS4 (по умолчанию)', [
+                Log::debug('🔍 Поиск серверов в City_PAS4', [
                     'table' => 'City_PAS4',
+                    'city' => $city,
+                    'query' => "name = $city"
+                ]);
+                break;
+            //case "PAS5":
+            default:
+                $serverInfo = City_PAS5::where("name", $city)->get();
+                Log::debug('🔍 Поиск серверов в City_PAS5 (по умолчанию)', [
+                    'table' => 'City_PAS5',
                     'city' => $city,
                     'query' => "name = $city"
                 ]);
@@ -391,9 +401,12 @@ class UIDController extends Controller
             case "PAS2":
                 $result  = "taxi_easy_ua_pas2";
                 break;
-            //case "PAS4":
-            default:
+            case "PAS4":
                 $result  = "taxi_easy_ua_pas4";
+                break;
+            //case "PAS5":
+            default:
+                $result  = "taxi_easy_ua_pas5";
         }
 
 
@@ -819,9 +832,12 @@ class UIDController extends Controller
             case "PAS2":
                 $application = "taxi_easy_ua_pas2";
                 break;
-            //case "PAS4":
+            case "PAS4":
+                $result  = "taxi_easy_ua_pas4";
+                break;
+            //case "PAS5":
             default:
-                $application = "taxi_easy_ua_pas4";
+                $result  = "taxi_easy_ua_pas5";
         }
 
 

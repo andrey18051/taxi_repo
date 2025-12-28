@@ -23,6 +23,7 @@ return [
     'X-WO-API-APP-ID-PAS2' => 'taxi_easy_ua_pas2',
     'X-WO-API-APP-ID-PAS3' => 'taxi_easy_ua_pas3',
     'X-WO-API-APP-ID-PAS4' => 'taxi_easy_ua_pas4',
+    'X-WO-API-APP-ID-PAS5' => 'taxi_easy_ua_pas5',
 
     'X-WO-API-APP-ID-TEST' => 'taxi_easy_ua_TEST',
 
@@ -35,6 +36,7 @@ return [
     'name-PAS1' => 'Таксі Доставка: легкий заказ',
     'name-PAS2' => 'Попутчик таксі Україна дешево',
     'name-PAS4' => 'Таксі Дюк Попутник',
+    'name-PAS5' => 'Чат Такси AI',
 
     /*
     |--------------------------------------------------------------------------

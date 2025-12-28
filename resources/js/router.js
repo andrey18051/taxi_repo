@@ -80,6 +80,10 @@ const  routes = [
         path: "/admin/city-pas4",
         component: CityHomePas4
     },
+    {
+        path: "/admin/city-pas5",
+        component: CityHomePas5
+    },
 
     {
         path: "/admin/fondy",

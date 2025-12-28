@@ -21,6 +21,9 @@
         <button class="btn btn-outline-primary" @click="cityPas4Button()" style="margin-left: 5px">
             PAS 4
         </button>
+        <button class="btn btn-outline-primary" @click="cityPas5Button()" style="margin-left: 5px">
+            PAS 5
+        </button>
         <div class="container-fluid">
             <v-table
                 :data="cities"
@@ -177,6 +180,10 @@ export default {
         },
         cityPas4Button() {
             this.$router.push('/admin/city-pas4');
+
+        },
+        cityPas5Button() {
+            this.$router.push('/admin/city-pas5');
 
         },
 

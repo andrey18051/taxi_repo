@@ -11,6 +11,7 @@ use App\Models\City;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
+use App\Models\City_PAS5;
 use App\Models\Orderweb;
 use App\Models\Transaction;
 use App\Models\Uid_history;
@@ -497,6 +498,66 @@ class WfpController extends Controller
             "signature" =>  $signature
         ];
     }
+
+    public function serviceUrl_PAS5(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
+                (new CardsController)->setActiveFirstCard($data['email'], $card->id);
+            }
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS5::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
     public function serviceUrl_PAS4_app(Request $request)
     {
         Log::debug("serviceUrl " . $request);
@@ -547,6 +608,67 @@ class WfpController extends Controller
         ];
         $city = "OdessaTest";
         $merchant = City_PAS4::where("name", $city)->first();
+        $secretKey = $merchant->wfp_merchantSecretKey;
+
+        $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        return [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time,
+            "signature" =>  $signature
+        ];
+    }
+    public function serviceUrl_PAS5_app(Request $request)
+    {
+        Log::debug("serviceUrl " . $request);
+
+        $data = json_decode($request->getContent(), true);
+        Log::debug($data['email']);
+        Log::debug($data['recToken']);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+            $cardType = $data['cardType'];
+            if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
+                $bankName = $data['issuerBankName'];
+            } else {
+                $bankName = " ";
+            }
+            $rectoken = (new CardsController)->encryptToken($data['recToken']);
+            $card = Card::where('pay_system', 'wfp')
+                ->where('user_id', $user->id)
+                ->where('merchant', $data['merchantAccount'])
+                ->where('app', "PAS5")
+                ->where('masked_card', $data['cardPan'])
+                ->first();
+
+            if (!$card) {
+                $card = new Card();
+                $card->user_id = $user->id;
+                $card->pay_system = 'wfp';
+                $card->app = 'PAS5';
+                $card->masked_card = $data['cardPan'];
+                $card->card_type = $cardType;
+                $card->bank_name = $bankName;
+                $card->rectoken =  $rectoken;
+                $card->merchant = $data['merchantAccount'];
+//                $card->rectoken_lifetime = $data['rectoken_lifetime'];
+                $card->save();
+                (new CardsController)->setActiveFirstCardApp($data['email'], $card->id, 'PAS5');
+            }
+        }
+
+        $time = strtotime(date('Y-m-d H:i:s'));
+
+        $params = [
+            "orderReference" => $request->orderReference,
+            "status" => "accept",
+            "time" => $time
+        ];
+        $city = "OdessaTest";
+        $merchant = City_PAS5::where("name", $city)->first();
         $secretKey = $merchant->wfp_merchantSecretKey;
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
@@ -745,8 +867,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
         if ($city != "OdessaTest") {
@@ -848,8 +973,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
         if ($city != "OdessaTest") {
@@ -932,8 +1060,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
         if ($city != "OdessaTest") {
@@ -1037,8 +1168,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
 
@@ -1136,8 +1270,11 @@ class WfpController extends Controller
             case "taxi_easy_ua_pas2":
                 $application = "PAS2";
                 break;
-            default:
+            case "taxi_easy_ua_pas4":
                 $application = "PAS4";
+                break;
+            default:
+                $application = "PAS5";
         }
 
         switch ($order->server) {
@@ -1171,8 +1308,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                  break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         };
         if (isset($merchant)) {
             $merchantAccount = $merchant->wfp_merchantAccount;
@@ -1230,8 +1370,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
 
@@ -1387,9 +1530,16 @@ class WfpController extends Controller
                     'merchant_found' => $merchant !== null
                 ]);
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
-                Log::info('Merchant query for PAS4 (default)', [
+                Log::info('Merchant query for PAS4', [
+                    'city' => $city,
+                    'merchant_found' => $merchant !== null
+                ]);
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
+                Log::info('Merchant query for PAS5 (default)', [
                     'city' => $city,
                     'merchant_found' => $merchant !== null
                 ]);
@@ -1793,8 +1943,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
 
@@ -1882,8 +2035,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
         if ($city != "OdessaTest") {
@@ -1979,8 +2135,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
         if (isset($merchant)) {
@@ -2077,8 +2236,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
         if (isset($merchant)) {
@@ -2255,9 +2417,13 @@ class WfpController extends Controller
                 $merchant = City_PAS2::where("name", $city)->first();
                 $model = 'City_PAS2';
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
                 $model = 'City_PAS4';
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
+                $model = 'City_PAS5';
         }
 
         Log::debug('Merchant query executed', [
@@ -2467,13 +2633,16 @@ class WfpController extends Controller
                                     $email = $order->email ?? null;
 
                                     // Определение приложения из комментария заказа
-                                    $applicationFromComment = "PAS4"; // дефолтное значение
+                                    $applicationFromComment = "PAS5"; // дефолтное значение
                                     switch ($order->comment ?? null) {
                                         case "taxi_easy_ua_pas1":
                                             $applicationFromComment = "PAS1";
                                             break;
                                         case "taxi_easy_ua_pas2":
                                             $applicationFromComment = "PAS2";
+                                            break;
+                                        case "taxi_easy_ua_pas4":
+                                            $applicationFromComment = "PAS4";
                                             break;
                                     }
 
@@ -2622,7 +2791,7 @@ class WfpController extends Controller
                 'order_reference' => $orderReference,
                 'amount' => $amount,
                 'client_email' => $clientEmail,
-                'models_checked' => ['City_PAS1', 'City_PAS2', 'City_PAS4'],
+                'models_checked' => ['City_PAS1', 'City_PAS2', 'City_PAS4', 'City_PAS5'],
             ]);
             throw new \Exception("Merchant not found for application: $application, city: $city");
         }
@@ -2668,8 +2837,11 @@ class WfpController extends Controller
             case "PAS2":
                 $merchant = City_PAS2::where("name", $city)->first();
                 break;
-            default:
+            case "PAS4":
                 $merchant = City_PAS4::where("name", $city)->first();
+                break;
+            default:
+                $merchant = City_PAS5::where("name", $city)->first();
         }
 
 
@@ -2868,15 +3040,19 @@ class WfpController extends Controller
         switch ($orderweb->comment) {
             case "taxi_easy_ua_pas1":
                 $application = "PAS1";
-                $identificationId = config('app.version-PAS1');
+                $identificationId = config('app.X-WO-API-APP-ID-PAS1');
                 break;
             case "taxi_easy_ua_pas2":
                 $application = "PAS2";
-                $identificationId = config('app.version-PAS2');
+                $identificationId = config('app.X-WO-API-APP-ID-PAS2');
+                break;
+            case "taxi_easy_ua_pas4":
+                $application = "PAS4";
+                $identificationId = config('app.X-WO-API-APP-ID-PAS4');
                 break;
             default:
-                $application = "PAS4";
-                $identificationId = config('app.version-PAS4');
+                $application = "PAS5";
+                $identificationId = config('app.X-WO-API-APP-ID-PAS5');
         }
         switch ($orderweb->server) {
             case "http://188.190.245.102:7303 ":
@@ -2979,8 +3155,11 @@ class WfpController extends Controller
             case "taxi_easy_ua_pas2":
                 $application = "PAS2";
                 break;
-            default:
+            case "taxi_easy_ua_pas4":
                 $application = "PAS4";
+                break;
+            default:
+                $application = "PAS5";
         }
         switch ($order->server) {
             case "http://188.190.245.102:7303 ":
@@ -3313,8 +3492,11 @@ class WfpController extends Controller
             case "taxi_easy_ua_pas2":
                 $application = "PAS2";
                 break;
-            default:
+            case "taxi_easy_ua_pas4":
                 $application = "PAS4";
+                break;
+            default:
+                $application = "PAS5";
         }
         Log::info("Application determined: $application");
 
@@ -3685,8 +3867,11 @@ class WfpController extends Controller
             case "taxi_easy_ua_pas2":
                 $application = "PAS2";
                 break;
-            default:
+            case "taxi_easy_ua_pas4":
                 $application = "PAS4";
+                break;
+            default:
+                $application = "PAS5";
         }
         switch ($orderweb->server) {
             case "http://188.190.245.102:7303 ":

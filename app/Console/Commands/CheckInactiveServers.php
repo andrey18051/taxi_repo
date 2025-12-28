@@ -19,6 +19,7 @@ class CheckInactiveServers extends Command
         'PAS1' => 'App\Models\City_PAS1',
         'PAS2' => 'App\Models\City_PAS2',
         'PAS4' => 'App\Models\City_PAS4',
+        'PAS5' => 'App\Models\City_PAS5',
     ];
 
     public function handle()
@@ -369,7 +370,7 @@ class CheckInactiveServers extends Command
             'online_count' => count($onlineList),
         ]);
 
-        foreach (['PAS2', 'PAS4'] as $app) {
+        foreach (['PAS2', 'PAS4', 'PAS5'] as $app) {
             $model = $this->applications[$app] ?? null;
             if (!$model || !class_exists($model)) continue;
 
