@@ -10424,22 +10424,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _views_city_CityHome_PAS_1__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./views/city/CityHome_PAS_1 */ "./resources/js/views/city/CityHome_PAS_1.vue");
 /* harmony import */ var _views_city_CityHome_PAS_2__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./views/city/CityHome_PAS_2 */ "./resources/js/views/city/CityHome_PAS_2.vue");
 /* harmony import */ var _views_city_CityHome_PAS_4__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./views/city/CityHome_PAS_4 */ "./resources/js/views/city/CityHome_PAS_4.vue");
-/* harmony import */ var _views_close_reason_CloseReasonHome__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./views/close_reason/CloseReasonHome */ "./resources/js/views/close_reason/CloseReasonHome.vue");
-/* harmony import */ var _views_bonuses_BonusHome__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./views/bonuses/BonusHome */ "./resources/js/views/bonuses/BonusHome.vue");
-/* harmony import */ var _views_fondy_FondyHome__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./views/fondy/FondyHome */ "./resources/js/views/fondy/FondyHome.vue");
-/* harmony import */ var _views_user_UserMessages__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./views/user/UserMessages */ "./resources/js/views/user/UserMessages.vue");
-/* harmony import */ var _views_user_NewMessage__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./views/user/NewMessage */ "./resources/js/views/user/NewMessage.vue");
-/* harmony import */ var _views_user_UserMessagesEmail__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./views/user/UserMessagesEmail */ "./resources/js/views/user/UserMessagesEmail.vue");
-/* harmony import */ var _views_user_NewMessageEmail__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./views/user/NewMessageEmail */ "./resources/js/views/user/NewMessageEmail.vue");
-/* harmony import */ var _views_partners_PartnerHome__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./views/partners/PartnerHome */ "./resources/js/views/partners/PartnerHome.vue");
-/* harmony import */ var _views_partners_PartnerEmail__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./views/partners/PartnerEmail */ "./resources/js/views/partners/PartnerEmail.vue");
-/* harmony import */ var _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./views/partners/NewPartnerEmail */ "./resources/js/views/partners/NewPartnerEmail.vue");
-/* harmony import */ var _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./views/partners/PartnerGroup */ "./resources/js/views/partners/PartnerGroup.vue");
-/* harmony import */ var _views_wfp_WfpHome__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./views/wfp/WfpHome */ "./resources/js/views/wfp/WfpHome.vue");
-/* harmony import */ var _views_city_CityTariffs__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./views/city/CityTariffs */ "./resources/js/views/city/CityTariffs.vue");
+/* harmony import */ var _views_city_CityHome_PAS_5__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./views/city/CityHome_PAS_5 */ "./resources/js/views/city/CityHome_PAS_5.vue");
+/* harmony import */ var _views_close_reason_CloseReasonHome__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./views/close_reason/CloseReasonHome */ "./resources/js/views/close_reason/CloseReasonHome.vue");
+/* harmony import */ var _views_bonuses_BonusHome__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./views/bonuses/BonusHome */ "./resources/js/views/bonuses/BonusHome.vue");
+/* harmony import */ var _views_fondy_FondyHome__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./views/fondy/FondyHome */ "./resources/js/views/fondy/FondyHome.vue");
+/* harmony import */ var _views_user_UserMessages__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./views/user/UserMessages */ "./resources/js/views/user/UserMessages.vue");
+/* harmony import */ var _views_user_NewMessage__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./views/user/NewMessage */ "./resources/js/views/user/NewMessage.vue");
+/* harmony import */ var _views_user_UserMessagesEmail__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./views/user/UserMessagesEmail */ "./resources/js/views/user/UserMessagesEmail.vue");
+/* harmony import */ var _views_user_NewMessageEmail__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./views/user/NewMessageEmail */ "./resources/js/views/user/NewMessageEmail.vue");
+/* harmony import */ var _views_partners_PartnerHome__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./views/partners/PartnerHome */ "./resources/js/views/partners/PartnerHome.vue");
+/* harmony import */ var _views_partners_PartnerEmail__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./views/partners/PartnerEmail */ "./resources/js/views/partners/PartnerEmail.vue");
+/* harmony import */ var _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./views/partners/NewPartnerEmail */ "./resources/js/views/partners/NewPartnerEmail.vue");
+/* harmony import */ var _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./views/partners/PartnerGroup */ "./resources/js/views/partners/PartnerGroup.vue");
+/* harmony import */ var _views_wfp_WfpHome__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./views/wfp/WfpHome */ "./resources/js/views/wfp/WfpHome.vue");
+/* harmony import */ var _views_city_CityTariffs__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./views/city/CityTariffs */ "./resources/js/views/city/CityTariffs.vue");
 
 
 vue__WEBPACK_IMPORTED_MODULE_0__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
 
 
 
@@ -10477,16 +10479,16 @@ var routes = [{
   component: _views_user_UserHome__WEBPACK_IMPORTED_MODULE_4__["default"]
 }, {
   path: "/admin/user_messages",
-  component: _views_user_UserMessages__WEBPACK_IMPORTED_MODULE_15__["default"]
+  component: _views_user_UserMessages__WEBPACK_IMPORTED_MODULE_16__["default"]
 }, {
   path: "/admin/new_message",
-  component: _views_user_NewMessage__WEBPACK_IMPORTED_MODULE_16__["default"]
+  component: _views_user_NewMessage__WEBPACK_IMPORTED_MODULE_17__["default"]
 }, {
   path: "/admin/user_messages_email",
-  component: _views_user_UserMessagesEmail__WEBPACK_IMPORTED_MODULE_17__["default"]
+  component: _views_user_UserMessagesEmail__WEBPACK_IMPORTED_MODULE_18__["default"]
 }, {
   path: "/admin/new_message_email",
-  component: _views_user_NewMessageEmail__WEBPACK_IMPORTED_MODULE_18__["default"]
+  component: _views_user_NewMessageEmail__WEBPACK_IMPORTED_MODULE_19__["default"]
 }, {
   path: "/admin/services",
   component: _views_service_ServiceHome__WEBPACK_IMPORTED_MODULE_5__["default"]
@@ -10504,16 +10506,16 @@ var routes = [{
   component: _views_city_CityHome_PAS_4__WEBPACK_IMPORTED_MODULE_11__["default"]
 }, {
   path: "/admin/city-pas5",
-  component: CityHomePas5
+  component: _views_city_CityHome_PAS_5__WEBPACK_IMPORTED_MODULE_12__["default"]
 }, {
   path: "/admin/fondy",
-  component: _views_fondy_FondyHome__WEBPACK_IMPORTED_MODULE_14__["default"]
+  component: _views_fondy_FondyHome__WEBPACK_IMPORTED_MODULE_15__["default"]
 }, {
   path: "/admin/wfp",
-  component: _views_wfp_WfpHome__WEBPACK_IMPORTED_MODULE_23__["default"]
+  component: _views_wfp_WfpHome__WEBPACK_IMPORTED_MODULE_24__["default"]
 }, {
   path: "/admin/bonus",
-  component: _views_bonuses_BonusHome__WEBPACK_IMPORTED_MODULE_13__["default"]
+  component: _views_bonuses_BonusHome__WEBPACK_IMPORTED_MODULE_14__["default"]
 }, {
   name: 'UserEdit',
   path: "/admin/users/edit/:id",
@@ -10528,7 +10530,7 @@ var routes = [{
 }, {
   name: 'closeReason',
   path: "/admin/closeReason",
-  component: _views_close_reason_CloseReasonHome__WEBPACK_IMPORTED_MODULE_12__["default"]
+  component: _views_close_reason_CloseReasonHome__WEBPACK_IMPORTED_MODULE_13__["default"]
 }, {
   name: 'destroyOrder',
   path: "/costhistory/orders/destroy/:id/:authorization"
@@ -10537,19 +10539,19 @@ var routes = [{
   path: "/breakingNews/:id/"
 }, {
   path: "/admin/partners",
-  component: _views_partners_PartnerHome__WEBPACK_IMPORTED_MODULE_19__["default"]
+  component: _views_partners_PartnerHome__WEBPACK_IMPORTED_MODULE_20__["default"]
 }, {
   path: "/admin/partner_email",
-  component: _views_partners_PartnerEmail__WEBPACK_IMPORTED_MODULE_20__["default"]
+  component: _views_partners_PartnerEmail__WEBPACK_IMPORTED_MODULE_21__["default"]
 }, {
   path: "/admin/new-partner-email",
-  component: _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_21__["default"]
+  component: _views_partners_NewPartnerEmail__WEBPACK_IMPORTED_MODULE_22__["default"]
 }, {
   path: "/admin/partner_group",
-  component: _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_22__["default"]
+  component: _views_partners_PartnerGroup__WEBPACK_IMPORTED_MODULE_23__["default"]
 }, {
   path: "/admin/city-tariffs",
-  component: _views_city_CityTariffs__WEBPACK_IMPORTED_MODULE_24__["default"]
+  component: _views_city_CityTariffs__WEBPACK_IMPORTED_MODULE_25__["default"]
 }];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: "history",

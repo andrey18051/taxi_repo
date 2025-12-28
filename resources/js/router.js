@@ -13,6 +13,7 @@ import CityHome from "./views/city/CityHome";
 import CityHomePas1 from "./views/city/CityHome_PAS_1";
 import CityHomePas2 from "./views/city/CityHome_PAS_2";
 import CityHomePas4 from "./views/city/CityHome_PAS_4";
+import CityHomePas5 from "./views/city/CityHome_PAS_5";
 import CloseReasonHome from "./views/close_reason/CloseReasonHome";
 import BonusHome from "./views/bonuses/BonusHome";
 import FondyHome from "./views/fondy/FondyHome";
