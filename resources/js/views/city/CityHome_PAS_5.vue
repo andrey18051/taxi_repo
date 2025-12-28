@@ -3,7 +3,7 @@
     <div class="container-fluid" style="overflow-x: auto;">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 
-                <h1 class="display-5">City PAS 4</h1>
+                <h1 class="display-5">City PAS 5</h1>
 
         </div>
         <button class="btn btn-outline-primary" @click="newCityButton()" style="margin-left: 5px">
