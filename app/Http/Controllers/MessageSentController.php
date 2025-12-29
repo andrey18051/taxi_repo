@@ -830,7 +830,7 @@ class MessageSentController extends Controller
                     $paramsCheck = [
                         'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
                         'message' => $messageAdmin,
-                        'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$uidDriver",
+                        'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateInfo/$uidDriver",
 
                     ];
 
