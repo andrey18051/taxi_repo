@@ -812,47 +812,71 @@ class MessageSentController extends Controller
                     $name = $dataDriver['name'] ?? 'Unknown';
                     $phoneNumber = $dataDriver['phoneNumber'] ?? 'Unknown';
 
-
                     $currentDateTime = Carbon::now();
                     $kievTimeZone = new DateTimeZone('Europe/Kiev');
                     $dateTime = new DateTime($currentDateTime);
                     $dateTime->setTimezone($kievTimeZone);
                     $formattedTime = $dateTime->format('d.m.Y H:i:s');
 
-                    $subject = "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения.
-Проверьте:
-ФИО $name
-телефон $phoneNumber
-Время обновления $formattedTime
-Подтвердить данные https://m.easy-order-taxi.site/driver/verifyDriverUpdateInfo/$uidDriver";
+                    // Формируем текст сообщения БЕЗ ссылки
+                    $messageText = "🚖 *Водитель обновил данные* 🚖\n\n"
+                        . "🆔 ID: `{$uidDriver}`\n"
+                        . "👤 ФИО: *{$name}*\n"
+                        . "📞 Телефон: `{$phoneNumber}`\n"
+                        . "🕐 Время обновления: {$formattedTime}\n\n"
+                        . "_Требуется подтверждение данных_";
 
-                    $messageAdmin = "$subject. Время $formattedTime";
+                    // Ссылка для подтверждения
+                    $verificationUrl = "https://m.easy-order-taxi.site/driver/verifyDriverUpdateInfo/{$uidDriver}";
+
+                    // Отправляем email (оставляем как есть)
+                    $subject = "Водитель google_id: $uidDriver обновил свои данные";
+                    $messageAdmin = "Водитель обновил данные:\n"
+                        . "ФИО: $name\n"
+                        . "Телефон: $phoneNumber\n"
+                        . "Время: $formattedTime\n"
+                        . "Ссылка для подтверждения: $verificationUrl";
+
                     $paramsCheck = [
                         'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
                         'message' => $messageAdmin,
-                        'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateInfo/$uidDriver",
-
+                        'url' => $verificationUrl,
                     ];
 
                     Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
                     Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
 
-                    $alarmMessage = new TelegramController();
+                    // Отправляем в Telegram с кнопкой
+                    $telegramController = new TelegramController();
 
-                    try {
-                        $alarmMessage->sendMeMessage($messageAdmin);
-                    } catch (Exception $e) {
-                        Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
-                    }
-                    Log::debug("sentCancelInfo  $messageAdmin");
+// Подготовка текста без ссылки
+                    $telegramText = "🚖 *Водитель обновил данные* 🚖\n\n"
+                        . "🆔 ID: `{$uidDriver}`\n"
+                        . "👤 ФИО: *{$name}*\n"
+                        . "📞 Телефон: `{$phoneNumber}`\n"
+                        . "🕐 Время: {$formattedTime}\n\n"
+                        . "_Требуется подтверждение_";
+
+// Отправка с кнопкой
+                    $telegramController->sendMessageWithButton(
+                        $telegramText,
+                        '✅ Подтвердить данные',
+                        $verificationUrl
+                    );
+
+                    Log::info("sentDriverUpdateAccount успешно: $uidDriver - $name");
                 }
             } else {
-                Log::info("Document does not exist!");
+                Log::warning("Document does not exist for UID: $uidDriver");
                 return "Document does not exist!";
             }
+
+            return true;
+
         } catch (\Exception $e) {
-            Log::error("Error reading document from Firestore: " . $e->getMessage());
-            return "Error reading document from Firestore.";
+            Log::error("Error in sentDriverUpdateAccount: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return "Error: " . $e->getMessage();
         }
     }
 

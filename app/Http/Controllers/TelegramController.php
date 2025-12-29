@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Telegram;
 use App\Jobs\ClearFailedSendTelegramJobs;
 use App\Jobs\SendTelegramMessageJob;
+use App\Jobs\SendTelegramWithButtonJob;
 use App\Models\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
@@ -235,6 +236,27 @@ class TelegramController extends Controller
         return response()->json(['status' => 'Messages sent in background'], 200);
     }
 
+    public function sendMessageWithButton(string $telegramText, string $buttonText, string $buttonUrl)
+    {
+        $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        $chatId = 120352595;
+
+        Log::debug('sendMessageWithButton sending message with button via chain', [
+            'button_text' => $buttonText,
+            'button_url' => $buttonUrl
+        ]);
+
+        // Правильный chain со всеми параметрами
+        Bus::chain([
+            new SendTelegramWithButtonJob($bot, $chatId, $telegramText, $buttonText, $buttonUrl),
+            new ClearFailedSendTelegramJobs()
+        ])->onQueue('low')->dispatch();
+
+        Bus::chain([
+            new SendTelegramWithButtonJob($bot, config('app.chat_id_alarm'), $telegramText, $buttonText, $buttonUrl),
+            new ClearFailedSendTelegramJobs()
+        ])->onQueue('low')->dispatch();
+    }
 
 
 }
