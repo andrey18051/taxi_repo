@@ -238,25 +238,77 @@ class TelegramController extends Controller
 
     public function sendMessageWithButton(string $telegramText, string $buttonText, string $buttonUrl)
     {
-        $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
-        $chatId = 120352595;
+        $botToken = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        $mainChatId = 120352595;
+        $alarmChatId = config('app.chat_id_alarm', $mainChatId);
 
-        Log::debug('sendMessageWithButton sending message with button via chain', [
-            'button_text' => $buttonText,
-            'button_url' => $buttonUrl
+        Log::info('📤 Sending Telegram messages directly', [
+            'main_chat' => $mainChatId,
+            'alarm_chat' => $alarmChatId,
+            'button' => $buttonText
         ]);
 
-        // Правильный chain со всеми параметрами
-        Bus::chain([
-            new SendTelegramWithButtonJob($bot, $chatId, $telegramText, $buttonText, $buttonUrl),
-            new ClearFailedSendTelegramJobs()
-        ])->onQueue('low')->dispatch();
+        $results = [];
+        $chats = [
+            ['id' => $mainChatId, 'name' => 'main'],
+            ['id' => $alarmChatId, 'name' => 'alarm']
+        ];
 
-        Bus::chain([
-            new SendTelegramWithButtonJob($bot, config('app.chat_id_alarm'), $telegramText, $buttonText, $buttonUrl),
-            new ClearFailedSendTelegramJobs()
-        ])->onQueue('low')->dispatch();
+        foreach ($chats as $chat) {
+            if ($chat['id'] == $mainChatId || $chat['id'] != $mainChatId) { // Всегда отправляем в main, alarm только если отличается
+                try {
+                    $keyboard = [
+                        'inline_keyboard' => [
+                            [
+                                [
+                                    'text' => $buttonText,
+                                    'url' => $buttonUrl
+                                ]
+                            ]
+                        ]
+                    ];
+
+                    $response = \Illuminate\Support\Facades\Http::timeout(30)
+                        ->withOptions([
+                            'verify' => false, // временно отключаем SSL
+                        ])
+                        ->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                            'chat_id' => $chat['id'],
+                            'text' => $telegramText,
+                            'parse_mode' => 'Markdown',
+                            'reply_markup' => json_encode($keyboard, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                            'disable_web_page_preview' => true,
+                        ]);
+
+                    if ($response->successful()) {
+                        Log::info("✅ Telegram sent to {$chat['name']} chat", [
+                            'chat_id' => $chat['id'],
+                            'message_id' => $response->json()['result']['message_id'] ?? 'unknown'
+                        ]);
+                        $results[$chat['name']] = true;
+                    } else {
+                        Log::error("❌ Telegram failed for {$chat['name']} chat", [
+                            'chat_id' => $chat['id'],
+                            'status' => $response->status(),
+                            'error' => $response->body()
+                        ]);
+                        $results[$chat['name']] = false;
+                    }
+
+                } catch (\Exception $e) {
+                    Log::error("💥 Exception for {$chat['name']} chat", [
+                        'chat_id' => $chat['id'],
+                        'error' => $e->getMessage()
+                    ]);
+                    $results[$chat['name']] = false;
+                }
+
+                // Небольшая пауза между отправками
+                usleep(500000); // 0.5 секунды
+            }
+        }
+
+        return $results;
     }
-
 
 }
