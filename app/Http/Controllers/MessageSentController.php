@@ -883,91 +883,140 @@ class MessageSentController extends Controller
     public function sentDriverUpdateCar($uidDriver, $carId)
     {
         try {
-            // Получите экземпляр клиента Firestore из сервис-провайдера
+            // Получите экземпляр клиента Firestore
             $serviceAccountPath = env('FIREBASE_CREDENTIALS_DRIVER_TAXI');
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
-            // Получите ссылку на коллекцию и документ
-            $collection = $firestore->collection('users');
-            $document = $collection->document($uidDriver);
+            // Получаем данные водителя
+            $userDoc = $firestore->collection('users')->document($uidDriver);
+            $userSnapshot = $userDoc->snapshot();
 
-            // Получите снимок документа
-            $snapshot = $document->snapshot();
-
-            if ($snapshot->exists()) {
-                // Получите данные из документа
-                $dataDriver = $snapshot->data();
-
-                if (is_array($dataDriver)) {
-                    $name = $dataDriver['name'] ?? 'Unknown';
-                    $phoneNumber = $dataDriver['phoneNumber'] ?? 'Unknown';
-
-
-                    $currentDateTime = Carbon::now();
-                    $kievTimeZone = new DateTimeZone('Europe/Kiev');
-                    $dateTime = new DateTime($currentDateTime);
-                    $dateTime->setTimezone($kievTimeZone);
-                    $formattedTime = $dateTime->format('d.m.Y H:i:s');
-
-
-                    $collectionCar = $firestore->collection('cars');
-                    $documentCar = $collectionCar->document($carId);
-                    $snapshotCar = $documentCar->snapshot();
-                    if ($snapshotCar->exists()) {
-                        // Получите данные из документа
-                        $dataCar = $snapshotCar->data();
-
-                        $brand = $dataCar['brand'] ?? 'Unknown';
-                        $color = $dataCar['color'] ?? 'Unknown';
-                        $model = $dataCar['model'] ?? 'Unknown';
-                        $number = $dataCar['number'] ?? 'Unknown';
-                        $type = $dataCar['type'] ?? 'Unknown';
-                        $year = $dataCar['year'] ?? 'Unknown';
-
-                        $subject = "Водитель
-ФИО $name
-телефон $phoneNumber
-google_id: $uidDriver отправил данные авто и ожидает подтверждения
-Проверьте данные авто:
-Марка  $brand
-модель $model
-тип кузова $type
-цвет $color
-номер $number
-год $year
-Время обновления $formattedTime
-Подтвердить данные https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$carId";
-
-                        $messageAdmin = "$subject";
-
-                        $alarmMessage = new TelegramController();
-
-                        try {
-                            $alarmMessage->sendAlarmMessage($messageAdmin);
-                            $alarmMessage->sendMeMessage($messageAdmin);
-                            $paramsCheck = [
-                                'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
-                                'message' => $messageAdmin,
-                                'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$carId",
-
-                            ];
-
-                            Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
-                            Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
-                        } catch (Exception $e) {
-                            Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
-                        }
-                        Log::debug("sentCancelInfo  $messageAdmin");
-                    }
-                }
-            } else {
-                Log::info("Document does not exist!");
-                return "Document does not exist!";
+            if (!$userSnapshot->exists()) {
+                Log::warning("Водитель не найден: $uidDriver");
+                return "Водитель не найден!";
             }
+
+            $dataDriver = $userSnapshot->data();
+            if (!is_array($dataDriver)) {
+                Log::error("Неверный формат данных водителя: $uidDriver");
+                return "Ошибка данных водителя";
+            }
+
+            $name = $dataDriver['name'] ?? 'Не указано';
+            $phoneNumber = $dataDriver['phoneNumber'] ?? 'Не указано';
+
+            // Получаем данные автомобиля
+            $carDoc = $firestore->collection('cars')->document($carId);
+            $carSnapshot = $carDoc->snapshot();
+
+            if (!$carSnapshot->exists()) {
+                Log::warning("Автомобиль не найден: $carId");
+                return "Автомобиль не найден!";
+            }
+
+            $dataCar = $carSnapshot->data();
+            if (!is_array($dataCar)) {
+                Log::error("Неверный формат данных автомобиля: $carId");
+                return "Ошибка данных автомобиля";
+            }
+
+            $brand = $dataCar['brand'] ?? 'Не указана';
+            $color = $dataCar['color'] ?? 'Не указан';
+            $model = $dataCar['model'] ?? 'Не указана';
+            $number = $dataCar['number'] ?? 'Не указан';
+            $type = $dataCar['type'] ?? 'Не указан';
+            $year = $dataCar['year'] ?? 'Не указан';
+
+            // Форматируем время
+            $currentDateTime = Carbon::now('Europe/Kiev');
+            $formattedTime = $currentDateTime->format('d.m.Y H:i:s');
+
+            // Формируем текст для Telegram (БЕЗ ссылки!)
+            $telegramText = "🚗 *Водитель обновил данные автомобиля*\n\n"
+                . "👤 *Водитель:*\n"
+                . "   • ФИО: *{$name}*\n"
+                . "   • Телефон: `{$phoneNumber}`\n"
+                . "   • Google ID: `{$uidDriver}`\n\n"
+                . "🚘 *Автомобиль:*\n"
+                . "   • Марка: {$brand}\n"
+                . "   • Модель: {$model}\n"
+                . "   • Тип: {$type}\n"
+                . "   • Цвет: {$color}\n"
+                . "   • Номер: `{$number}`\n"
+                . "   • Год: {$year}\n\n"
+                . "🕐 *Время обновления:* {$formattedTime}\n\n"
+                . "_Требуется подтверждение данных автомобиля_";
+
+            // Ссылка для подтверждения
+            $verificationUrl = "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/{$carId}";
+            $buttonText = "✅ Подтвердить данные авто";
+
+            // Отправляем в Telegram через кнопку
+            $telegramController = new TelegramController();
+            $telegramResult = $telegramController->sendMessageWithButton(
+                $telegramText,
+                $buttonText,
+                $verificationUrl
+            );
+
+            // Отправляем email
+            $emailSubject = "Водитель обновил данные автомобиля";
+            $emailMessage = "Водитель обновил данные автомобиля:\n\n"
+                . "Водитель:\n"
+                . "ФИО: {$name}\n"
+                . "Телефон: {$phoneNumber}\n"
+                . "Google ID: {$uidDriver}\n\n"
+                . "Автомобиль:\n"
+                . "Марка: {$brand}\n"
+                . "Модель: {$model}\n"
+                . "Тип: {$type}\n"
+                . "Цвет: {$color}\n"
+                . "Номер: {$number}\n"
+                . "Год: {$year}\n\n"
+                . "Время обновления: {$formattedTime}\n\n"
+                . "Ссылка для подтверждения: {$verificationUrl}";
+
+            $paramsCheck = [
+                'subject' => $emailSubject,
+                'message' => $emailMessage,
+                'url' => $verificationUrl,
+            ];
+
+            try {
+                Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
+                Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
+                Log::info("Email отправлен для автомобиля: {$carId}");
+            } catch (\Exception $e) {
+                Log::error("Ошибка отправки email для автомобиля {$carId}: " . $e->getMessage());
+            }
+
+            Log::info("Уведомление обновления автомобиля отправлено", [
+                'driver_id' => $uidDriver,
+                'car_id' => $carId,
+                'driver_name' => $name,
+                'car_number' => $number,
+                'telegram_success' => $telegramResult
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Уведомления отправлены',
+                'driver' => $name,
+                'car' => "{$brand} {$model}",
+                'telegram_sent' => $telegramResult
+            ];
+
         } catch (\Exception $e) {
-            Log::error("Error reading document from Firestore: " . $e->getMessage());
-            return "Error reading document from Firestore.";
+            Log::error("Ошибка в sentDriverUpdateCar: " . $e->getMessage(), [
+                'driver_id' => $uidDriver ?? 'unknown',
+                'car_id' => $carId ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+            return [
+                'success' => false,
+                'error' => 'Ошибка отправки уведомлений: ' . $e->getMessage()
+            ];
         }
     }
 
