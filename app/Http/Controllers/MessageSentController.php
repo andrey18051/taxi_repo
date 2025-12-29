@@ -841,9 +841,6 @@ class MessageSentController extends Controller
 
                     try {
                         $alarmMessage->sendMeMessage($messageAdmin);
-
-
-
                     } catch (Exception $e) {
                         Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
                     }

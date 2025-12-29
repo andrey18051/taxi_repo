@@ -163,7 +163,7 @@ class TelegramController extends Controller
         Log::debug('sendAlarmMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
         Bus::chain([
-            (new SendTelegramMessageJob($bot, 120352595, $message))->onQueue('low'),
+            (new SendTelegramMessageJob($bot, config('app.chat_id_alarm'), $message))->onQueue('low'),
             (new ClearFailedSendTelegramJobs())->onQueue('low'),
         ])->dispatch();
         return response()->json(['status' => 'Message sent in background'], 200);

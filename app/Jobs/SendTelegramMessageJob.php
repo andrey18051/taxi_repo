@@ -32,7 +32,6 @@ class SendTelegramMessageJob implements ShouldQueue
         $this->bot = $bot;
         $this->chatId = $chatId;
         $this->message = $message;
-        $this->queue = 'telegram'; // Специальная очередь для Telegram
         $this->uniqueId = md5($chatId . $message . time()); // Уникальный ID для блокировки
     }
 
