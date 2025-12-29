@@ -827,22 +827,22 @@ class MessageSentController extends Controller
 Подтвердить данные https://m.easy-order-taxi.site/driver/verifyDriverUpdateInfo/$uidDriver";
 
                     $messageAdmin = "$subject. Время $formattedTime";
+                    $paramsCheck = [
+                        'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
+                        'message' => $messageAdmin,
+                        'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$uidDriver",
+
+                    ];
+
+                    Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
+                    Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
 
                     $alarmMessage = new TelegramController();
 
                     try {
-                        $alarmMessage->sendAlarmMessage($messageAdmin);
                         $alarmMessage->sendMeMessage($messageAdmin);
 
-                        $paramsCheck = [
-                            'subject' => "Водитель google_id: $uidDriver обновил свои данные и ожидает подтверждения",
-                            'message' => $messageAdmin,
-                            'url' => "https://m.easy-order-taxi.site/driver/verifyDriverUpdateCarInfo/$uidDriver",
 
-                        ];
-
-                        Mail::to('cartaxi4@gmail.com')->send(new CheckVod($paramsCheck));
-                        Mail::to('taxi.easy.ua.sup@gmail.com')->send(new CheckVod($paramsCheck));
 
                     } catch (Exception $e) {
                         Log::debug("sentCancelInfo Ошибка в телеграмм $messageAdmin");
