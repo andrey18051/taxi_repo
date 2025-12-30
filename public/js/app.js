@@ -9170,6 +9170,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "UserBlackListSetComponent",
@@ -9208,6 +9213,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         black_list_PAS4: {
           value: "",
           keys: ["black_list_PAS4"]
+        },
+        black_list_PAS5: {
+          value: "",
+          keys: ["black_list_PAS5"]
         }
       }
     };
@@ -9224,7 +9233,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           return _objectSpread(_objectSpread({}, user), {}, {
             black_list_PAS1: user.black_list_PAS1 === "true",
             black_list_PAS2: user.black_list_PAS2 === "true",
-            black_list_PAS4: user.black_list_PAS4 === "true"
+            black_list_PAS4: user.black_list_PAS4 === "true",
+            black_list_PAS5: user.black_list_PAS5 === "true"
           });
         });
         _this.loading = false;
@@ -9233,10 +9243,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         _this.loading = false;
       });
     },
-    editUser: function editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4) {
+    editUser: function editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4, black_list_PAS5) {
       var _this2 = this;
 
-      var url = "/users/blackListSet/".concat(id, "/").concat(black_list_PAS1.toString(), "/").concat(black_list_PAS2.toString(), "/").concat(black_list_PAS4.toString());
+      var url = "/users/blackListSet/".concat(id, "/").concat(black_list_PAS1.toString(), "/").concat(black_list_PAS2.toString(), "/").concat(black_list_PAS4.toString(), "/").concat(black_list_PAS5.toString());
       axios__WEBPACK_IMPORTED_MODULE_0___default().get(url).then(function (response) {
         console.log(response.data);
         window.alert("Данные обновлены: " + url); // Обновляем локальные данные, чтобы избежать перезагрузки страницы
@@ -9249,6 +9259,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           user.black_list_PAS1 = black_list_PAS1;
           user.black_list_PAS2 = black_list_PAS2;
           user.black_list_PAS4 = black_list_PAS4;
+          user.black_list_PAS5 = black_list_PAS5;
         }
       })["catch"](function (error) {
         console.error("Ошибка при обновлении пользователя:", error.response ? error.response.data : error.message);
@@ -48790,6 +48801,37 @@ var render = function () {
                             }),
                           ]),
                           _vm._v(" "),
+                          _c("td", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.filters.black_list_PAS5.value,
+                                  expression: "filters.black_list_PAS5.value",
+                                },
+                              ],
+                              staticClass: "form-input input-lg",
+                              staticStyle: { width: "100px" },
+                              attrs: { placeholder: "Select by black_list" },
+                              domProps: {
+                                value: _vm.filters.black_list_PAS5.value,
+                              },
+                              on: {
+                                input: function ($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.filters.black_list_PAS5,
+                                    "value",
+                                    $event.target.value
+                                  )
+                                },
+                              },
+                            }),
+                          ]),
+                          _vm._v(" "),
                           _c("td", { staticStyle: { width: "30px" } }),
                         ]),
                         _vm._v(" "),
@@ -49046,6 +49088,59 @@ var render = function () {
                               ]),
                               _vm._v(" "),
                               _c("td", [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: row.black_list_PAS5,
+                                      expression: "row.black_list_PAS5",
+                                    },
+                                  ],
+                                  staticStyle: { width: "30px" },
+                                  attrs: {
+                                    type: "checkbox",
+                                    id: "black_list_PAS5",
+                                  },
+                                  domProps: {
+                                    checked: Array.isArray(row.black_list_PAS5)
+                                      ? _vm._i(row.black_list_PAS5, null) > -1
+                                      : row.black_list_PAS5,
+                                  },
+                                  on: {
+                                    change: function ($event) {
+                                      var $$a = row.black_list_PAS5,
+                                        $$el = $event.target,
+                                        $$c = $$el.checked ? true : false
+                                      if (Array.isArray($$a)) {
+                                        var $$v = null,
+                                          $$i = _vm._i($$a, $$v)
+                                        if ($$el.checked) {
+                                          $$i < 0 &&
+                                            _vm.$set(
+                                              row,
+                                              "black_list_PAS5",
+                                              $$a.concat([$$v])
+                                            )
+                                        } else {
+                                          $$i > -1 &&
+                                            _vm.$set(
+                                              row,
+                                              "black_list_PAS5",
+                                              $$a
+                                                .slice(0, $$i)
+                                                .concat($$a.slice($$i + 1))
+                                            )
+                                        }
+                                      } else {
+                                        _vm.$set(row, "black_list_PAS5", $$c)
+                                      }
+                                    },
+                                  },
+                                }),
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
                                 _c(
                                   "div",
                                   {
@@ -49073,7 +49168,8 @@ var render = function () {
                                                   row.id,
                                                   row.black_list_PAS1,
                                                   row.black_list_PAS2,
-                                                  row.black_list_PAS4
+                                                  row.black_list_PAS4,
+                                                  row.black_list_PAS5
                                                 )
                                               },
                                             },
@@ -49183,6 +49279,15 @@ var render = function () {
                       attrs: { sortKey: "black_list" },
                     },
                     [_vm._v("PAS4")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-th",
+                    {
+                      staticStyle: { width: "30px" },
+                      attrs: { sortKey: "black_list" },
+                    },
+                    [_vm._v("PAS5")]
                   ),
                 ],
                 1

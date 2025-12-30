@@ -37,8 +37,11 @@ class FCMController extends Controller
             case "PAS2":
                 $firebaseAuth = app('firebase.auth')['app2'];
                 break;
-            default:
+            case "PAS4":
                 $firebaseAuth = app('firebase.auth')['app4'];
+                break;
+            default:
+                $firebaseAuth = app('firebase.auth')['app5'];
         }
         switch ($app) {
             case "PAS1":
@@ -47,8 +50,11 @@ class FCMController extends Controller
             case "PAS2":
                 $firebaseMessaging = app('firebase.messaging')['app2'];
                 break;
-            default:
+            case "PAS4":
                 $firebaseMessaging = app('firebase.messaging')['app4'];
+                break;
+            default:
+                $firebaseMessaging = app('firebase.messaging')['app5'];
         }
         try {
             $user = $firebaseAuth->getUserByEmail($email);
@@ -92,10 +98,15 @@ class FCMController extends Controller
                 $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
                 Log::info("Выбран PAS2", ['token' => $to]);
                 break;
-            default:
+            case "PAS4":
                 $to = $userToken->token_app_pas_4;
                 $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
-                Log::info("Выбран PAS4 (default)", ['token' => $to]);
+                Log::info("Выбран PAS4", ['token' => $to]);
+                break;
+            default:
+                $to = $userToken->token_app_pas_5;
+                $firebaseMessaging = app('firebase.messaging')['app5'] ?? null;
+                Log::info("Выбран PAS5 (default)", ['token' => $to]);
         }
 
         // Логируем все токены пользователя
@@ -103,6 +114,7 @@ class FCMController extends Controller
             'token_app_pas_1' => $userToken->token_app_pas_1,
             'token_app_pas_2' => $userToken->token_app_pas_2,
             'token_app_pas_4' => $userToken->token_app_pas_4,
+            'token_app_pas_5' => $userToken->token_app_pas_5,
         ]);
 
         // Проверяем токен
@@ -205,10 +217,15 @@ class FCMController extends Controller
                 $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
                 Log::info("Выбран PAS2", ['token' => $to]);
                 break;
-            default:
+            case "PAS4":
                 $to = $userToken->token_app_pas_4;
                 $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
-                Log::info("Выбран PAS4 (default)", ['token' => $to]);
+                Log::info("Выбран PAS4", ['token' => $to]);
+                break;
+            default:
+                $to = $userToken->token_app_pas_5;
+                $firebaseMessaging = app('firebase.messaging')['app5'] ?? null;
+                Log::info("Выбран PAS5 (default)", ['token' => $to]);
         }
 
         // Проверяем токен
@@ -299,11 +316,18 @@ class FCMController extends Controller
                 Log::info("Выбран PAS2", ['token' => $to]);
                 break;
 
-            default:
-                $to = $userToken->token_app_pas_4;
+            case "PAS4":
+                $to = $userToken->token_app_pas_2;
                 $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
                 $tokenField = 'token_app_pas_4';
-                Log::info("Выбран PAS4 (default)", ['token' => $to]);
+                Log::info("Выбран PAS4", ['token' => $to]);
+                break;
+
+            default:
+                $to = $userToken->token_app_pas_5;
+                $firebaseMessaging = app('firebase.messaging')['app5'] ?? null;
+                $tokenField = 'token_app_pas_5';
+                Log::info("Выбран PAS5 (default)", ['token' => $to]);
                 break;
         }
 
@@ -807,12 +831,14 @@ class FCMController extends Controller
                 'PAS1' => env('FIREBASE_CREDENTIALS_PAS_1'),
                 'PAS2' => env('FIREBASE_CREDENTIALS_PAS_2'),
                 'PAS4' => env('FIREBASE_CREDENTIALS_PAS_4'),
+                'PAS5' => env('FIREBASE_CREDENTIALS_PAS_5'),
             ];
 
             $fieldMap = [
                 'PAS1' => 'black_list_PAS1',
                 'PAS2' => 'black_list_PAS2',
                 'PAS4' => 'black_list_PAS4',
+                'PAS5' => 'black_list_PAS5',
             ];
 
             $normalizedEmail = strtolower(trim($email));

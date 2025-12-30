@@ -191,7 +191,7 @@ class UserController extends Controller
             return response()->json(['error' => 'Произошла ошибка при удалении пользователя'], 500);
         }
     }
-    public function blackListSet($id, $black_list_PAS1, $black_list_PAS2, $black_list_PAS4)
+    public function blackListSet($id, $black_list_PAS1, $black_list_PAS2, $black_list_PAS4, $black_list_PAS5)
     {
         try {
 
@@ -202,7 +202,8 @@ class UserController extends Controller
 
             $user->black_list_PAS1 = $black_list_PAS1;
             $user->black_list_PAS2 = $black_list_PAS2;
-            $user->black_list_PAS4 = $black_list_PAS4;
+            $user->black_list_PAS2 = $black_list_PAS4;
+            $user->black_list_PAS4 = $black_list_PAS5;
             $user->save();
             $email = $user->email;
 
@@ -223,6 +224,7 @@ class UserController extends Controller
                 'black_list_PAS1' => $black_list_PAS1,
                 'black_list_PAS2' => $black_list_PAS2,
                 'black_list_PAS4' => $black_list_PAS4,
+                'black_list_PAS5' => $black_list_PAS5,
             ]);
             return response()->json(['success' => false, 'message' => 'Внутренняя ошибка сервера.'], 500);
         }
@@ -270,10 +272,14 @@ class UserController extends Controller
         } elseif ($app === 'PAS2') {
             $user->black_list_PAS2 = $status;
             $fieldUpdated = 'black_list_PAS2';
-        } else {
+        } elseif ($app === 'PAS4') {
             $user->black_list_PAS4 = $status;
             $fieldUpdated = 'black_list_PAS4';
-            $app = 'PAS4'; // если не PAS1 и не PAS2 — считаем PAS4
+            $app = 'PAS4';
+        } else {
+            $user->black_list_PAS5 = $status;
+            $fieldUpdated = 'black_list_PAS5';
+            $app = 'PAS5';
         }
 
         try {

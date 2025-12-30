@@ -40,6 +40,7 @@ class VersionApiTask extends Command
     {
         (new DailyTaskController)->verifyVersionApiTaskPas1();
         (new DailyTaskController)->verifyVersionApiTaskPas2();
+        (new DailyTaskController)->verifyVersionApiTaskPas5();
         (new DailyTaskController)->verifyVersionApiTaskPas4();
         return 0;
     }

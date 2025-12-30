@@ -336,6 +336,7 @@ class CityAppOrderService
             'PAS1' => \App\Models\City_PAS1::class,
             'PAS2' => \App\Models\City_PAS2::class,
             'PAS4' => \App\Models\City_PAS4::class,
+            'PAS4' => \App\Models\City_PAS5::class,
         ];
 
         return $models[$application] ?? \App\Models\City_PAS5::class;

@@ -465,8 +465,11 @@ class PusherController extends Controller
                 case 'taxi_easy_ua_pas2':
                     $app = "PAS2";
                     break;
-                default:
+                case 'taxi_easy_ua_pas4':
                     $app = "PAS4";
+                    break;
+                default:
+                    $app = "PAS5";
             }
             try {
                 // Initialize Pusher or any other service

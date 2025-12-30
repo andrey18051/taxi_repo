@@ -23,6 +23,7 @@
                 <v-th sortKey="black_list" style="width: 30px">PAS1</v-th>
                 <v-th sortKey="black_list" style="width: 30px">PAS2</v-th>
                 <v-th sortKey="black_list" style="width: 30px">PAS4</v-th>
+                <v-th sortKey="black_list" style="width: 30px">PAS5</v-th>
                 </thead>
                 <tbody slot="body" slot-scope="{displayData}">
                 <tr>
@@ -33,6 +34,7 @@
                     <td><input class="form-input input-lg" style="width: 100px " v-model="filters.black_list_PAS1.value"  placeholder="Select by black_list"></td>
                     <td><input class="form-input input-lg" style="width: 100px" v-model="filters.black_list_PAS2.value"  placeholder="Select by black_list"></td>
                     <td><input class="form-input input-lg" style="width: 100px" v-model="filters.black_list_PAS4.value"  placeholder="Select by black_list"></td>
+                    <td><input class="form-input input-lg" style="width: 100px" v-model="filters.black_list_PAS5.value"  placeholder="Select by black_list"></td>
                     <td style="width: 30px"></td>
                 </tr>
                 <tr v-for="row in displayData" :key="row.id"  style="width: 30px" ><td>{{ row.id }}</td>
@@ -50,12 +52,15 @@
                     <td>
                         <input type="checkbox" id="black_list_PAS4" style="width: 30px" v-model="row.black_list_PAS4" >
                     </td>
+                    <td>
+                        <input type="checkbox" id="black_list_PAS5" style="width: 30px" v-model="row.black_list_PAS5" >
+                    </td>
 
 
                     <td>
                         <div  class="container-fluid" style="width:100px">
                             <div class="btn-group" role="group">
-                                <button class="btn btn-success" @click="editUser(row.id, row.black_list_PAS1, row.black_list_PAS2,  row.black_list_PAS4)" style="margin-left: 5px">
+                                <button class="btn btn-success" @click="editUser(row.id, row.black_list_PAS1, row.black_list_PAS2,  row.black_list_PAS4,  row.black_list_PAS5)" style="margin-left: 5px">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                         <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                                     </svg>
@@ -96,7 +101,8 @@ export default {
             user_phone: { value: "", keys: ["user_phone"] },
             black_list_PAS1: { value: "", keys: ["black_list_PAS1"] },
             black_list_PAS2: { value: "", keys: ["black_list_PAS2"] },
-            black_list_PAS4: { value: "", keys: ["black_list_PAS4"] }
+            black_list_PAS4: { value: "", keys: ["black_list_PAS4"] },
+            black_list_PAS5: { value: "", keys: ["black_list_PAS5"] },
         },
 
     }),
@@ -112,7 +118,8 @@ export default {
                         ...user,
                         black_list_PAS1: user.black_list_PAS1 === "true",
                         black_list_PAS2: user.black_list_PAS2 === "true",
-                        black_list_PAS4: user.black_list_PAS4 === "true"
+                        black_list_PAS4: user.black_list_PAS4 === "true",
+                        black_list_PAS5: user.black_list_PAS5 === "true",
                     }));
                     this.loading = false;
                 })
@@ -123,8 +130,8 @@ export default {
         },
 
 
-        editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4) {
-            const url = `/users/blackListSet/${id}/${black_list_PAS1.toString()}/${black_list_PAS2.toString()}/${black_list_PAS4.toString()}`;
+        editUser(id, black_list_PAS1, black_list_PAS2, black_list_PAS4, black_list_PAS5) {
+            const url = `/users/blackListSet/${id}/${black_list_PAS1.toString()}/${black_list_PAS2.toString()}/${black_list_PAS4.toString()}/${black_list_PAS5.toString()}`;
             axios.get(url)
                 .then(response => {
                     console.log(response.data);
@@ -135,6 +142,7 @@ export default {
                         user.black_list_PAS1 = black_list_PAS1;
                         user.black_list_PAS2 = black_list_PAS2;
                         user.black_list_PAS4 = black_list_PAS4;
+                        user.black_list_PAS5 = black_list_PAS5;
                     }
                 })
                 .catch(error => {

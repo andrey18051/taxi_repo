@@ -1168,9 +1168,12 @@ class AndroidTestOSMController extends Controller
             case "PAS2":
                 $city_count = City_PAS2::where('name', $city)->count();
                 break;
-            //case "PAS4":
-            default:
+            case "PAS4":
                 $city_count = City_PAS4::where('name', $city)->count();
+                break;
+            //case "PAS5":
+            default:
+                $city_count = City_PAS5::where('name', $city)->count();
                 break;
         }
         if (isset($response_arr["Message"]) && $city_count > 1) {

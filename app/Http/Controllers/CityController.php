@@ -456,7 +456,7 @@ class CityController extends Controller
                 $city = City_PAS2::where('name', $city)->first()->toArray();
                 break;
             case "PAS4":
-                $city = City_PAS2::where('name', $city)->first()->toArray();
+                $city = City_PAS4::where('name', $city)->first()->toArray();
                 break;
             //case "PAS5":
             default:

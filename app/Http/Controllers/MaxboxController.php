@@ -15,6 +15,7 @@ class MaxboxController extends Controller
 //                break;
             case "PAS1":
             case "PAS4":
+            case "PAS5":
                 $result = ["keyMapbox" => config("app.keyMapbox")];
                 break;
         }
