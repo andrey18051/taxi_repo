@@ -61,7 +61,7 @@ class UserTokenFmsController extends Controller
         }
     }
 
-    use Illuminate\Support\Facades\Log;
+
 
     public function storeLocal($email, $app, $token, $local)
     {
