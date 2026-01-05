@@ -32,19 +32,24 @@ class ConnectionErrorHandler
         }
         // Проверяем и фильтруем адрес в массиве
 
-        $blockedAddress = '167.235.113.231:7307';
+        // Список заблокированных IP (можно расширить, как в предыдущем совете)
+        $blockedIPs = [
+            '167.235.113.231',
+//            '134.249.181.173',  // если тоже хотите блокировать
+//            '91.205.17.153',
+            // добавьте другие по необходимости
+        ];
 
-        $value = array_filter($value, function ($item) use ($blockedAddress) {
-            if (isset($item['address']) && strpos($item['address'], $blockedAddress) !== false) {
-                Log::debug("Заблокированный адрес найден — элемент удалён: {$item['address']}");
+        $value = array_filter($value, function ($item) use ($blockedIPs) {
+            if (!empty($item['address']) && in_array($item['address'], $blockedIPs, true)) {
+                Log::debug("Заблокированный IP найден — элемент удалён: {$item['address']}");
                 return false; // удаляем элемент
             }
-
-            return !empty($item); // дополнительно убираем пустые элементы
+            return !empty($item);
         });
 
         if (empty($value)) {
-            Log::debug("После фильтрации массив пустой, обработка невозможна");
+            Log::debug("После фильтрации массив пустой — все сервисы заблокированы, алерм не отправляем");
             return;
         }
 
