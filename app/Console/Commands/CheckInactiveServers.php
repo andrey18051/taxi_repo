@@ -149,29 +149,36 @@ class CheckInactiveServers extends Command
         ];
 
         $blockedIPs = [
-            '167.235.113.231:7307',
+            '167.235.113.231',
             // '134.249.181.173',
             // '91.205.17.153',
         ];
 
-        // 🔹 Разделение списков
+        // 🔹 Разделение списков с фильтрацией
         $dailyList = [];
         $normalList = [];
 
-        foreach ($offlineList as $srv) {
-            // Проверка на заблокированный IP
-            if (!empty($srv['address']) && in_array($srv['address'], $blockedIPs, true)) {
-                Log::debug("Заблокированный IP найден — элемент пропущен: {$srv['address']}");
+        foreach ($offlineList as $serverAddress) {
+            $serverIP = explode(':', $serverAddress)[0];
+            // Проверка на заблокированный IP (полное совпадение адреса с портом)
+            if (in_array($serverIP, $blockedIPs, true)) {
+                Log::debug("Заблокированный IP найден — элемент пропущен: {$serverAddress}");
                 continue;
             }
 
             // Разделение по типу уведомлений
-            if (in_array($srv, $dailyServers)) {
-                $dailyList[] = $srv;
+            if (in_array($serverAddress, $dailyServers)) {
+                $dailyList[] = $serverAddress;
             } else {
-                $normalList[] = $srv;
+                $normalList[] = $serverAddress;
             }
         }
+
+        Log::debug("Результаты фильтрации:", [
+            'daily_servers' => $dailyList,
+            'normal_servers' => $normalList,
+            'blocked_servers' => array_values(array_intersect($offlineList, $blockedIPs))
+        ]);
 
         // 🔹 Проверка частоты уведомлений
         $dailyKey = 'last_notify_daily_91.205.17.153';
