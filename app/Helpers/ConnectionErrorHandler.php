@@ -42,6 +42,10 @@ class ConnectionErrorHandler
 
             Log::debug("Адрес удален/изменен из массива");
         }
+        if (empty($value)) {
+            Log::debug("Массив пустой, обработка невозможна");
+            return;
+        }
         // Установка статуса города как оффлайн
         $city->online = "false";
         $city->save();
