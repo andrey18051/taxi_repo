@@ -8724,10 +8724,21 @@ class UniversalAndroidFunctionController extends Controller
             case "PAS2":
                 $serverFalse = City_PAS2::find($id);
                 break;
-            //case "PAS4":
-            default:
+           case "PAS4":
                 $serverFalse = City_PAS4::find($id);
                 break;
+            //case "PAS5":
+            default:
+                $serverFalse = City_PAS5::find($id);
+                break;
+        }
+        // Проверяем, нужно ли блокировать этот адрес
+
+        $blockedAddress = '167.235.113.231:7307';
+
+        if ($serverFalse->address === $blockedAddress) {
+            Log::debug("Сообщение заблокировано для адреса: {$serverFalse->address}");
+            return; // Прекращаем выполнение
         }
 
         $alarmMessage = new TelegramController();
