@@ -33,15 +33,10 @@ class ConnectionErrorHandler
         // Проверяем и фильтруем адрес в массиве
         $blockedAddress = '167.235.113.231:7307';
 
-        // Если адрес содержит заблокированную строку, очищаем или заменяем адрес
-        if (isset($value['address']) && strpos($value['address'], $blockedAddress) !== false) {
-            Log::debug("Заблокированный адрес найден в массиве: {$value['address']}");
+        $value = array_filter($value, function ($item) {
+            return !empty($item);
+        });
 
-            // Вариант A: Удаляем адрес из массива
-            unset($value['address']);
-
-            Log::debug("Адрес удален/изменен из массива");
-        }
         if (empty($value)) {
             Log::debug("Массив пустой, обработка невозможна");
             return;
