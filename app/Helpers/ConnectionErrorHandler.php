@@ -61,7 +61,7 @@ class ConnectionErrorHandler
 
         // Нормализация имени города
         $cityName = $city->name ?? 'Unknown';
-        $messageAdmin = "Нет подключения к серверу города {$cityName} http://{$value['address']}. IP {$client_ip}";
+        $messageAdmin = "1 Нет подключения к серверу города {$cityName} http://{$value['address']}. IP {$client_ip}";
 
         // Логирование сообщения
         Log::debug($messageAdmin);

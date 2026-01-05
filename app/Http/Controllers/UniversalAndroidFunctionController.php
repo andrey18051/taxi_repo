@@ -8758,7 +8758,7 @@ class UniversalAndroidFunctionController extends Controller
 
         $alarmMessage = new TelegramController();
         $client_ip = $_SERVER['REMOTE_ADDR'];
-        $messageAdmin = "Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address
+        $messageAdmin = "2 Нет подключения к серверу города $serverFalse->name http://" . $serverFalse->address
             . ". Приложение $application. IP $client_ip";
         Log::debug("cityNoOnlineMessage $messageAdmin");
         $isCurrentTimeInRange = (new UniversalAndroidFunctionController)->isCurrentTimeInRange();
