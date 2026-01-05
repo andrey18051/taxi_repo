@@ -26,33 +26,60 @@ class ConnectionErrorHandler
     public function handleConnectionError($city, array $value, string $client_ip, bool $checking, string $online, bool $timeFive): void
     {
         // Проверка условий для обработки ошибки
-        if (($online === "true" && $checking) || ($online === "false" && !$timeFive) || $checking) {
+        // Отправляем уведомление только когда:
+        // 1. Сервер был онлайн ($online === "true")
+        // 2. Не в режиме проверки (!$checking)
+        // 3. Прошло более 5 минут с последней ошибки (!$timeFive)
+        if (!($online === "true" && !$checking && !$timeFive)) {
             Log::debug("Условия для обработки ошибки подключения не выполнены: online={$online}, checking={$checking}, timeFive={$timeFive}");
             return;
         }
-        // Проверяем и фильтруем адрес в массиве
 
-        // Список заблокированных IP (можно расширить, как в предыдущем совете)
-        $blockedIPs = [
-            '167.235.113.231',
-//            '134.249.181.173',  // если тоже хотите блокировать
-//            '91.205.17.153',
-            // добавьте другие по необходимости
-        ];
-
-        $value = array_filter($value, function ($item) use ($blockedIPs) {
-            if (!empty($item['address']) && in_array($item['address'], $blockedIPs, true)) {
-                Log::debug("Заблокированный IP найден — элемент удалён: {$item['address']}");
-                return false; // удаляем элемент
-            }
-            return !empty($item);
-        });
-
-        if (empty($value)) {
-            Log::debug("После фильтрации массив пустой — все сервисы заблокированы, алерм не отправляем");
+        // Проверяем наличие адреса в исходном массиве
+        if (empty($value['address'])) {
+            Log::debug("Адрес не найден в массиве value");
             return;
         }
 
+        $originalAddress = trim($value['address']);
+        Log::debug("Обрабатываем адрес: '{$originalAddress}'");
+
+        // Список заблокированных IP (без портов)
+        $blockedIPs = [
+            '167.235.113.231',
+            // '134.249.181.173',
+            // '91.205.17.153',
+        ];
+
+        // Список заблокированных полных адресов (с портами) - для точного совпадения
+        $blockedAddresses = [
+            '167.235.113.231:7307',
+            // '134.249.181.173:7208',
+            // '91.205.17.153:7201',
+        ];
+
+        // Извлекаем IP из адреса (убираем порт если есть)
+        $addressParts = explode(':', $originalAddress);
+        $ipOnly = $addressParts[0];
+
+        // Проверяем блокировку
+        $isBlocked = false;
+
+        // Проверка 1: Полный адрес с портом (точное совпадение)
+        if (in_array($originalAddress, $blockedAddresses, true)) {
+            Log::debug("Заблокированный полный адрес найден: {$originalAddress}");
+            $isBlocked = true;
+        }
+        // Проверка 2: Только IP (все порты этого IP)
+        elseif (in_array($ipOnly, $blockedIPs, true)) {
+            Log::debug("Заблокированный IP найден: {$ipOnly} (полный адрес: {$originalAddress})");
+            $isBlocked = true;
+        }
+
+        if ($isBlocked) {
+            Log::debug("Уведомление заблокировано для адреса: {$originalAddress}");
+            return;
+        }
 
         // Установка статуса города как оффлайн
         $city->online = "false";
@@ -61,7 +88,7 @@ class ConnectionErrorHandler
 
         // Нормализация имени города
         $cityName = $city->name ?? 'Unknown';
-        $messageAdmin = "1 Нет подключения к серверу города {$cityName} http://{$value['address']}. IP {$client_ip}";
+        $messageAdmin = "Нет подключения к серверу города {$cityName} http://{$originalAddress}. IP {$client_ip}";
 
         // Логирование сообщения
         Log::debug($messageAdmin);

@@ -8724,7 +8724,7 @@ class UniversalAndroidFunctionController extends Controller
             case "PAS2":
                 $serverFalse = City_PAS2::find($id);
                 break;
-           case "PAS4":
+            case "PAS4":
                 $serverFalse = City_PAS4::find($id);
                 break;
             //case "PAS5":
@@ -8732,27 +8732,27 @@ class UniversalAndroidFunctionController extends Controller
                 $serverFalse = City_PAS5::find($id);
                 break;
         }
-        // Проверяем, нужно ли блокировать этот адрес
 
         // Проверяем, нужно ли блокировать этот адрес
         $blockedAddresses = [
-//            '188.190.245.103:7303',
-//            '167.235.113.231:7306',
-//            '134.249.181.173:7208',
-//            '91.205.17.153:7208',
-//            '142.132.213.111:8071',
-//            '167.235.113.231:7308',
-//            '142.132.213.111:8072',
-//            '142.132.213.111:8073',
-//            '134.249.181.173:7201',
-//            '91.205.17.153:7201',
-//            '188.190.245.102:7303',
-            '167.235.113.231:7307',  // Этот был раньше единственным
+            '167.235.113.231:7307',
+            // Другие адреса...
         ];
-        $cleanAddress = preg_replace('#^https?://#i', '', rtrim($serverFalse->address, '.'));
-        Log::debug("Сравниваем address: '{$serverFalse->address}' с blocked: '{$cleanAddress}'");
+
+        // Получаем адрес из базы данных
+        $address = trim($serverFalse->address);
+
+        // Удаляем возможный протокол http:// или https:// (если есть)
+        $cleanAddress = preg_replace('#^https?://#i', '', $address);
+
+        // Удаляем возможную точку в конце (если есть)
+        $cleanAddress = rtrim($cleanAddress, '.');
+
+        Log::debug("Сравниваем address: '{$address}' с blocked: '{$cleanAddress}'");
+
+        // Проверяем блокировку
         if (in_array($cleanAddress, $blockedAddresses, true)) {
-            Log::debug("Сообщение заблокировано для адреса: {$serverFalse->address} (очищенный: {$cleanAddress})");
+            Log::debug("Сообщение заблокировано для адреса: {$address} (очищенный: {$cleanAddress})");
             return; // Прекращаем выполнение — не отправляем в Telegram
         }
 
@@ -8773,7 +8773,7 @@ class UniversalAndroidFunctionController extends Controller
                 } catch (\Exception  $e) {
                     $paramsCheck = [
                         'subject' => 'Ошибка в телеграмм',
-                        'message' => $e,
+                        'message' => $e->getMessage(),
                     ];
                     Mail::to('taxi.easy.ua.sup@gmail.com')->send(new Check($paramsCheck));
                 } finally {
