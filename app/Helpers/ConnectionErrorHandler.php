@@ -31,16 +31,24 @@ class ConnectionErrorHandler
             return;
         }
         // Проверяем и фильтруем адрес в массиве
+
         $blockedAddress = '167.235.113.231:7307';
 
-        $value = array_filter($value, function ($item) {
-            return !empty($item);
+        $value = array_filter($value, function ($item) use ($blockedAddress) {
+            if (isset($item['address']) && strpos($item['address'], $blockedAddress) !== false) {
+                Log::debug("Заблокированный адрес найден — элемент удалён: {$item['address']}");
+                return false; // удаляем элемент
+            }
+
+            return !empty($item); // дополнительно убираем пустые элементы
         });
 
         if (empty($value)) {
-            Log::debug("Массив пустой, обработка невозможна");
+            Log::debug("После фильтрации массив пустой, обработка невозможна");
             return;
         }
+
+
         // Установка статуса города как оффлайн
         $city->online = "false";
         $city->save();
