@@ -833,11 +833,11 @@ class UIDController extends Controller
                 $application = "taxi_easy_ua_pas2";
                 break;
             case "PAS4":
-                $result  = "taxi_easy_ua_pas4";
+                $application  = "taxi_easy_ua_pas4";
                 break;
             //case "PAS5":
             default:
-                $result  = "taxi_easy_ua_pas5";
+                $application  = "taxi_easy_ua_pas5";
         }
 
 
