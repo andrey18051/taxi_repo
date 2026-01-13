@@ -149,7 +149,7 @@ class CheckInactiveServers extends Command
         ];
 
         $blockedIPs = [
-            '167.235.113.231',
+            '167.235.113.231:7307',
             // '134.249.181.173',
             // '91.205.17.153',
         ];

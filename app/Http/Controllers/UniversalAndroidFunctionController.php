@@ -6871,7 +6871,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         switch ($order->server) {
-            case "http://167.235.113.231:7307":
+            case "http://188.40.143.61:7222":
             case "http://167.235.113.231:7306":
             case "http://134.249.181.173:7208":
             case "http://91.205.17.153:7208":
@@ -8735,7 +8735,7 @@ class UniversalAndroidFunctionController extends Controller
 
         // Проверяем, нужно ли блокировать этот адрес
         $blockedAddresses = [
-            '167.235.113.231:7307',
+            '188.40.143.61:7222',
             // Другие адреса...
         ];
 

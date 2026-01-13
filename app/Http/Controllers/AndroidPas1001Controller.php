@@ -266,7 +266,7 @@ class AndroidPas1001Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -283,7 +283,7 @@ class AndroidPas1001Controller extends Controller
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -491,7 +491,7 @@ class AndroidPas1001Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -712,7 +712,7 @@ class AndroidPas1001Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':

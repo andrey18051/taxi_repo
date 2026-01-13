@@ -37,7 +37,7 @@ class AndroidPas1700Controller extends Controller
             case 'http://188.190.245.102:7303':
                 $response_error["message"] = config('app.version-PAS2');
                 break;
-            case 'http://167.235.113.231:7307':
+            case 'http://188.40.143.61:7222':
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
@@ -54,7 +54,7 @@ class AndroidPas1700Controller extends Controller
             case 'http://188.190.245.102:7303':
                 $X_WO_API_APP_ID = config("app.X-WO-API-APP-ID-PAS2");
                 break;
-            case 'http://167.235.113.231:7307':
+            case 'http://188.40.143.61:7222':
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
@@ -92,7 +92,7 @@ class AndroidPas1700Controller extends Controller
             case 'http://188.190.245.102:7303':
                 IPController::getIP('/android/PAS2/startPage');
                 break;
-            case 'http://167.235.113.231:7307':
+            case 'http://188.40.143.61:7222':
             case 'http://167.235.113.231:7306':
             case 'http://134.249.181.173:7208':
             case 'http://91.205.17.153:7208':
@@ -166,7 +166,7 @@ class AndroidPas1700Controller extends Controller
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -331,7 +331,7 @@ class AndroidPas1700Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -348,7 +348,7 @@ class AndroidPas1700Controller extends Controller
                     $combos_from = ComboTest::select(['name'])->where('name', 'like', $from . '%')->first();
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -554,7 +554,7 @@ class AndroidPas1700Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -773,7 +773,7 @@ class AndroidPas1700Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos_to = ComboTest::select(['name'])->where('name', 'like', $to . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':
@@ -1829,7 +1829,7 @@ class AndroidPas1700Controller extends Controller
                 case 'http://188.190.245.102:7303':
                     $combos = ComboTest::where('name', 'like', $name . '%')->first();
                     break;
-                case 'http://167.235.113.231:7307':
+                case 'http://188.40.143.61:7222':
                 case 'http://167.235.113.231:7306':
                 case 'http://134.249.181.173:7208':
                 case 'http://91.205.17.153:7208':

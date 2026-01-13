@@ -14166,8 +14166,8 @@ class AndroidTestOSMController extends Controller
                     case "Kyiv City":
                         Log::info("Город: 'Kyiv City'. Проверка API.");
                         switch ($connectAPI) {
-                            case "http://167.235.113.231:7307":
-                                Log::info("API: 'http://167.235.113.231:7307'.");
+                            case "http://188.40.143.61:7222":
+                                Log::info("API: 'http://188.40.143.61:7222'.");
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Card_Pay", $connectAPI, $application);
                                 Log::info("Вызван authorizationApp('KyivCity_1_Card_Pay', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Double", $connectAPI, $application);
@@ -14230,8 +14230,8 @@ class AndroidTestOSMController extends Controller
                     case "Kyiv City":
                         Log::info("Город: 'Kyiv City'. Проверка API.");
                         switch ($connectAPI) {
-                            case "http://167.235.113.231:7307":
-                                Log::info("API: 'http://167.235.113.231:7307'.");
+                            case "http://188.40.143.61:7222":
+                                Log::info("API: 'http://188.40.143.61:7222'.");
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Bonus", $connectAPI, $application);
                                 Log::info("Вызван authorizationApp('KyivCity_1_Bonus', '$connectAPI', '$application'), результат в \$authorizationChoiceArr['authorizationBonus'].");
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Bonus_Double", $connectAPI, $application);
@@ -14319,7 +14319,7 @@ class AndroidTestOSMController extends Controller
                       break;
                     case "Kyiv City":
                         switch ($connectAPI) {
-                            case "http://167.235.113.231:7307":
+                            case "http://188.40.143.61:7222":
                                 $costCorrectionValue = (new UniversalAndroidFunctionController)->costCorrectionValue("KyivCity_1_Card_Pay", $connectAPI, $application);
                                 break;
                             case "http://167.235.113.231:7306":
@@ -14346,7 +14346,7 @@ class AndroidTestOSMController extends Controller
                           break;
                     case "Kyiv City":
                         switch ($connectAPI) {
-                            case "http://167.235.113.231:7307":
+                            case "http://188.40.143.61:7222":
                                 $costCorrectionValue = (new UniversalAndroidFunctionController)->costCorrectionValue("KyivCity_1_Bonus", $connectAPI, $application);
                                   break;
                             case "http://167.235.113.231:7306":

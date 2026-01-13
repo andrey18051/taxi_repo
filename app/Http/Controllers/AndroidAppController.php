@@ -2692,7 +2692,7 @@ class AndroidAppController extends Controller
                         break;
                     case "Kyiv City":
                         switch ($connectAPI) {
-                            case "http://167.235.113.231:7307":
+                            case "http://188.40.143.61:7222":
                                 $authorizationChoiceArr["authorizationBonus"] = (new UniversalAndroidFunctionController)->authorizationApp("KyivCity_1_Card_Pay", $connectAPI, $application);
                                 $authorizationChoiceArr["authorizationDouble"] = (new UniversalAndroidFunctionController)->authorization("KyivCity_1_Double", $connectAPI, $application);
                                 break;
