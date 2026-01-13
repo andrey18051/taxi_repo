@@ -135,6 +135,7 @@ class CityAppOrderService
                 // 1. Сначала проверяем уже онлайн серверы (самый быстрый путь)
                 $onlineServers = $modelClass::where('name', $city)
                     ->where('online', 'true')
+                    ->orderBy('id', 'asc')
                     ->get();
 
                 if ($onlineServers->isNotEmpty()) {
@@ -155,6 +156,7 @@ class CityAppOrderService
                 // 2. Если онлайн серверов нет, проверяем оффлайн серверы
                 $offlineServers = $modelClass::where('name', $city)
                     ->where('online', 'false')
+                    ->orderBy('id', 'asc')
                     ->get();
 
                 if ($offlineServers->isNotEmpty()) {
