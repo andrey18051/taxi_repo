@@ -178,6 +178,7 @@ jobs:
     outputs:
       image_tag: ${{ steps.build_work.outputs.image_tag }}
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 

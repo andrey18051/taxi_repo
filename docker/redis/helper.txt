@@ -31,3 +31,20 @@ docker run -d \
 docker volume inspect redis_data
 docker exec -it redis_server /bin/sh
 redis-cli -h 127.0.0.1 -p 6379 ping
+
+20-01-2026
+
+# 1. Остановить текущий Redis
+docker stop redis_server
+docker rm redis_server
+
+# 2. Запустить Redis в сети хоста (host network)
+docker run -d \
+  --name redis_server \
+  --network host \
+  --restart unless-stopped \
+  redis:alpine \
+  redis-server \
+  --requirepass "18And051971" \
+  --bind 0.0.0.0 \
+  --protected-mode no
