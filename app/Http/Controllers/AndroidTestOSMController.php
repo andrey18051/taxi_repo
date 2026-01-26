@@ -1535,10 +1535,7 @@ class AndroidTestOSMController extends Controller
 //
 //    }
 
-    use Illuminate\Support\Facades\Cache;
-    use Illuminate\Support\Facades\Log;
-
-    public function costSearchTime(
+     public function costSearchTime(
         $from,
         $from_number,
         $to,

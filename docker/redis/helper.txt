@@ -48,3 +48,4 @@ docker run -d \
   --requirepass "18And051971" \
   --bind 0.0.0.0 \
   --protected-mode no
+
