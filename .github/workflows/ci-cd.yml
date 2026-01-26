@@ -64,6 +64,8 @@ jobs:
           TELEGRAM_TOKEN="${{ secrets.TEST_TELEGRAM_TOKEN }}"
           TELEGRAM_REDIRECT_URI="${{ vars.TEST_TELEGRAM_REDIRECT_URI }}"
 
+          TAXI_LOG_LEVEL="${{ vars.TEST_TAXI_LOG_LEVEL }}"
+
           MAIL_MAILER="${{ vars.TEST_MAIL_MAILER }}"
           MAIL_HOST="${{ vars.TEST_MAIL_HOST }}"
           MAIL_PORT="${{ vars.TEST_MAIL_PORT }}"
@@ -250,6 +252,7 @@ jobs:
           APP_KEY_VISICOM_MY="${{ secrets.WORK_APP_KEY_VISICOM_MY }}"
           APP_KEY_MAPBOX="${{ secrets.WORK_APP_KEY_MAPBOX }}"
           APP_KEY_IP2Location="${{ secrets.WORK_APP_KEY_IP2Location }}"
+          TAXI_LOG_LEVEL="${{ vars.WORK_TAXI_LOG_LEVEL }}"
 
           FIREBASE_CREDENTIALS_PAS_1=/run/secrets/firebase/pas_1.json
           FIREBASE_CREDENTIALS_PAS_2=/run/secrets/firebase/pas_2.json

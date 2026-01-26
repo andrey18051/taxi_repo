@@ -8042,24 +8042,6 @@ class UniversalAndroidFunctionController extends Controller
                 }
             }
         }
-
-        if ($LatLng["lat"] == 0) {
-            $locationService = new OpenStreetMapHelper();
-
-// Название места для поиска
-            $placeName = $to . " " . $to_number;
-
-// Вызов метода для получения координат
-            $coordinates = $locationService->getCoordinatesByPlaceName($placeName);
-
-            if ($coordinates !== null) {
-                $LatLng["lat"] = $coordinates['latitude'];
-                $LatLng["lng"] = $coordinates['longitude'];
-            } else {
-                Log::error("Координаты для {$placeName} не найдены.");
-            }
-
-        }
         return $LatLng;
     }
 
@@ -8107,23 +8089,7 @@ class UniversalAndroidFunctionController extends Controller
             $LatLng["lat"] = $response_arr["geo_object"][0]["lat"];
             $LatLng["lng"] = $response_arr["geo_object"][0]["lng"];
         }
-        if ($LatLng["lat"] == 0) {
-            $locationService = new OpenStreetMapHelper();
 
-// Название места для поиска
-            $placeName = $to;
-
-// Вызов метода для получения координат
-            $coordinates = $locationService->getCoordinatesByPlaceName($placeName);
-
-            if ($coordinates !== null) {
-                $LatLng["lat"] = $coordinates['latitude'];
-                $LatLng["lng"] = $coordinates['longitude'];
-            } else {
-                Log::error("Координаты для {$placeName} не найдены.");
-            }
-
-        }
         return $LatLng;
     }
 
