@@ -214,6 +214,7 @@ jobs:
           DB_USERNAME="${{ vars.WORK_DB_USERNAME }}"
           DB_PASSWORD="${{ secrets.WORK_DB_PASSWORD }}"
 
+
           BROADCAST_DRIVER="${{ vars.WORK_BROADCAST_DRIVER }}"
           CACHE_DRIVER="${{ vars.WORK_CACHE_DRIVER }}"
           FILESYSTEM_DRIVER="${{ vars.WORK_FILESYSTEM_DRIVER }}"
