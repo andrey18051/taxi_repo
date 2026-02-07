@@ -1,0 +1,7 @@
+docker run -d \
+  --restart unless-stopped \
+  --name phpmyadmin \
+  -e PMA_HOST=91.219.60.148 \
+  -e PMA_PORT=3306 \
+  -p 91.219.60.148:8081:80 \
+  phpmyadmin/phpmyadmin

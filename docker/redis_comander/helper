@@ -1,0 +1,11 @@
+docker stop redis-commander
+docker rm redis-commander
+docker run -d \
+  --name redis-commander \
+  --restart unless-stopped \
+  -p 91.219.60.148:8083:8081 \
+  -e REDIS_HOST=91.219.60.148 \
+  -e REDIS_PORT=6379 \
+  -e REDIS_PASSWORD='18And051971' \
+  -e REDIS_DB=0 \
+  rediscommander/redis-commander:latest
