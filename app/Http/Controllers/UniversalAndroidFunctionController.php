@@ -9971,10 +9971,10 @@ class UniversalAndroidFunctionController extends Controller
 
 
 //                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
-//                (new AndroidTestOSMController)->webordersCancelRestorAddCostNal($uid, $city, $application, $order);
+                (new AndroidTestOSMController)->webordersCancelRestorAddCostNal($uid, $city, $application, $order);
 //                WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $order);
-                dispatch((new WebordersCancelAndRestorNalJob($uid, $city, $application, $order))
-                    ->onQueue('high'));
+//                dispatch((new WebordersCancelAndRestorNalJob($uid, $city, $application, $order))
+//                    ->onQueue('high'));
 
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
