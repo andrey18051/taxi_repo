@@ -92,9 +92,9 @@ use Stevebauman\Location\Facades\Location;
  * Api check
  */
 
-Route::get('/api/check', function () {
-    return response()->json(['status' => 'OK'], 200);
-});
+//Route::get('/api/check', function () {
+//    return response()->json(['status' => 'OK'], 200);
+//});
 
 /**
  * Generation text for news
