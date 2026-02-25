@@ -5,3 +5,90 @@ docker run -d \
   -e PMA_PORT=3306 \
   -p 91.219.60.148:8081:80 \
   phpmyadmin/phpmyadmin
+
+➜  ~ /www/server/mysql/bin/mysql -u root -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 63
+Server version: 10.11.10-MariaDB-log Source distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> SHOW VARIABLES LIKE 'bind_address';
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| bind_address  |       |
++---------------+-------+
+1 row in set (0.001 sec)
+
+MariaDB [(none)]> SHOW VARIABLES LIKE 'skip_networking';
++-----------------+-------+
+| Variable_name   | Value |
++-----------------+-------+
+| skip_networking | OFF   |
++-----------------+-------+
+1 row in set (0.001 sec)
+
+MariaDB [(none)]> SHOW PROCESSLIST;
++----+-------+-----------------+---------+---------+------+----------+------------------+----------+
+| Id | User  | Host            | db      | Command | Time | State    | Info             | Progress |
++----+-------+-----------------+---------+---------+------+----------+------------------+----------+
+|  5 | admin | localhost:39724 | db_taxi | Sleep   | 1388 |          | NULL             |    0.000 |
+| 63 | root  | localhost       | NULL    | Query   |    0 | starting | SHOW PROCESSLIST |    0.000 |
++----+-------+-----------------+---------+---------+------+----------+------------------+----------+
+2 rows in set (0.000 sec)
+
+MariaDB [(none)]> SHOW VARIABLES LIKE 'port';
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| port          | 3306  |
++---------------+-------+
+1 row in set (0.001 sec)
+
+MariaDB [(none)]> EXIT;
+Bye
+➜  ~ sudo iptables -L INPUT -n -v | grep 3306
+➜  ~ sudo iptables -L FORWARD -n -v | grep 3306
+➜  ~ sudo iptables -L OUTPUT -n -v | grep 3306
+➜  ~ sudo iptables -L DOCKER -n -v
+Chain DOCKER (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+   60  3232 ACCEPT     tcp  --  !docker0 docker0  0.0.0.0/0            172.17.0.2           tcp dpt:8081
+   95  5076 ACCEPT     tcp  --  !docker0 docker0  0.0.0.0/0            172.17.0.3           tcp dpt:8001
+    3   156 ACCEPT     tcp  --  !docker0 docker0  0.0.0.0/0            172.17.0.4           tcp dpt:80
+➜  ~ sudo iptables -t nat -L POSTROUTING -n -v
+Chain POSTROUTING (policy ACCEPT 169 packets, 10116 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+   36  2244 MASQUERADE  all  --  *      !docker0  172.17.0.0/16        0.0.0.0/0
+    0     0 MASQUERADE  tcp  --  *      *       172.17.0.2           172.17.0.2           tcp dpt:8081
+    0     0 MASQUERADE  tcp  --  *      *       172.17.0.3           172.17.0.3           tcp dpt:8001
+    0     0 MASQUERADE  tcp  --  *      *       172.17.0.4           172.17.0.4           tcp dpt:80
+➜  ~ sudo iptables -I INPUT 1 -p tcp --dport 3306 -j ACCEPT
+➜  ~ sudo iptables -I FORWARD 1 -p tcp --dport 3306 -j ACCEPT
+➜  ~ sudo iptables -I OUTPUT 1 -p tcp --sport 3306 -j ACCEPT
+➜  ~ sudo iptables -I INPUT 1 -s 172.17.0.0/16 -p tcp --dport 3306 -j ACCEPT
+➜  ~ sudo iptables -I FORWARD 1 -s 172.17.0.0/16 -p tcp --dport 3306 -j ACCEPT
+➜  ~ docker exec -it phpmyadmin telnet 172.17.0.1 3306
+Trying 172.17.0.1...
+Connected to 172.17.0.1.
+Escape character is '^]'.
+^
+5.5.5-10.11.10-MariaDB-logF]Q_ju/(v��-A|p>#3w~4%]%mysql_native_password18And051971
+!#08S01Got packets out of orderConnection closed by foreign host.
+➜  ~
+
+# Проверка статуса MariaDB
+sudo netstat -tlnp | grep 3306
+
+# Проверка прав пользователя
+mysql -u root -p -e "SELECT host, user FROM mysql.user WHERE user='admin_office'"
+
+# Проверка подключения из контейнера
+docker exec -it phpmyadmin telnet 172.17.0.1 3306
+
+# Просмотр логов MariaDB
+sudo tail -f /www/server/data/dedbybeR.netx.com.ua.err

@@ -154,7 +154,7 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['high', 'medium', 'low'],
+            'queue' => ['laravel_database_queues:high', 'laravel_database_queues:medium', 'laravel_database_queues:low'],
             'balance' => 'auto',
             'maxProcesses' => 20,
             'minProcesses' => 1,
@@ -168,7 +168,7 @@ return [
         'production' => [
             'supervisor-high' => [
                 'connection' => 'redis',
-                'queue' => ['high'],
+                'queue' => ['laravel_database_queues:high'],
                 'balance' => 'simple',
                 'maxProcesses' => 12, // Увеличено для приоритетной очереди
                 'minProcesses' => 2,
@@ -177,7 +177,7 @@ return [
             ],
             'supervisor-medium' => [
                 'connection' => 'redis',
-                'queue' => ['medium'],
+                'queue' => ['laravel_database_queues:medium'],
                 'balance' => 'simple',
                 'maxProcesses' => 6, // Увеличено для средней очереди
                 'minProcesses' => 1,
@@ -186,7 +186,7 @@ return [
             ],
             'supervisor-low' => [
                 'connection' => 'redis',
-                'queue' => ['low'],
+                'queue' => ['laravel_database_queues:low'],
                 'balance' => 'simple',
                 'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
                 'minProcesses' => 1,
@@ -197,7 +197,7 @@ return [
         'local' => [
             'supervisor-high' => [
                 'connection' => 'redis',
-                'queue' => ['high'],
+                'queue' => ['laravel_database_queues:high'],
                 'balance' => 'simple',
                 'maxProcesses' => 12, // Увеличено для приоритетной очереди
                 'minProcesses' => 2,
@@ -206,7 +206,7 @@ return [
             ],
             'supervisor-medium' => [
                 'connection' => 'redis',
-                'queue' => ['medium'],
+                'queue' => ['laravel_database_queues:medium'],
                 'balance' => 'simple',
                 'maxProcesses' => 6, // Увеличено для средней очереди
                 'minProcesses' => 1,
@@ -215,7 +215,7 @@ return [
             ],
             'supervisor-low' => [
                 'connection' => 'redis',
-                'queue' => ['low'],
+                'queue' => ['laravel_database_queues:low'],
                 'balance' => 'simple',
                 'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
                 'minProcesses' => 1,
