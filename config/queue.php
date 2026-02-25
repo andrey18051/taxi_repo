@@ -71,8 +71,7 @@ return [
             'queue' => env('REDIS_QUEUE', 'default'),
             'retry_after' => 259200,
             'block_for' => null,
-            'after_commit' => false,
-            'prefix' => 'laravel_database_queues:'
+            'after_commit' => false
         ],
 
     ],
