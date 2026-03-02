@@ -156,7 +156,7 @@ return [
             'connection' => 'redis',
             'queue' => ['high', 'medium', 'low'],
             'balance' => 'auto',
-            'maxProcesses' => 20,
+            'maxProcesses' => 5,
             'minProcesses' => 1,
             'tries' => 1,       // 1 повтор
             'nice' => 0,
