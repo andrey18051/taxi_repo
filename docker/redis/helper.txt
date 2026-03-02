@@ -58,3 +58,18 @@ docker run -d \
   --requirepass "18And051971" \
   --bind 0.0.0.0 \
   --protected-mode no
+
+
+docker run -d \
+  --name redis_work \
+  -p 6379:6379 \
+  --restart unless-stopped \
+  redis:alpine \
+  redis-server --requirepass "18And051971" --bind 0.0.0.0 --protected-mode no
+
+docker run -d \
+  --name redis_test \
+  -p 6380:6379 \
+  --restart unless-stopped \
+  redis:alpine \
+  redis-server --requirepass "18And051971" --bind 0.0.0.0 --protected-mode no
