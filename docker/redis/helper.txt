@@ -49,3 +49,12 @@ docker run -d \
   --bind 0.0.0.0 \
   --protected-mode no
 
+docker run -d \
+  --name redis_server \
+  --network host \
+  --restart unless-stopped \
+  redis:alpine \
+  redis-server-work \
+  --requirepass "18And051971" \
+  --bind 0.0.0.0 \
+  --protected-mode no

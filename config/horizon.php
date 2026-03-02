@@ -170,8 +170,8 @@ return [
                 'connection' => 'redis',
                 'queue' => ['high'],
                 'balance' => 'simple',
-                'maxProcesses' => 12, // Увеличено для приоритетной очереди
-                'minProcesses' => 2,
+                'maxProcesses' => 3, // Увеличено для приоритетной очереди
+                'minProcesses' => 1,
                 'tries' => 1,       // без повторов
                 'timeout' => 259200 // 3 дня в секундах
             ],
@@ -179,7 +179,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['medium'],
                 'balance' => 'simple',
-                'maxProcesses' => 6, // Увеличено для средней очереди
+                'maxProcesses' => 2, // Увеличено для средней очереди
                 'minProcesses' => 1,
                 'tries' => 1,       // без повторов
                 'timeout' => 1800,  // 30 минут
@@ -188,7 +188,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['low'],
                 'balance' => 'simple',
-                'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
+                'maxProcesses' => 1, // Оставлено без изменений для низкоприоритетной очереди
                 'minProcesses' => 1,
                 'tries' => 1,       // без повторов
                 'timeout' => 30,  // 1 минут
@@ -199,8 +199,8 @@ return [
                 'connection' => 'redis',
                 'queue' => ['high'],
                 'balance' => 'simple',
-                'maxProcesses' => 12, // Увеличено для приоритетной очереди
-                'minProcesses' => 2,
+                'maxProcesses' => 3, // Увеличено для приоритетной очереди
+                'minProcesses' => 1,
                 'tries' => 1,       // без повторов
                 'timeout' => 259200 // 3 дня в секундах
             ],
@@ -208,7 +208,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['medium'],
                 'balance' => 'simple',
-                'maxProcesses' => 6, // Увеличено для средней очереди
+                'maxProcesses' => 2, // Увеличено для средней очереди
                 'minProcesses' => 1,
                 'tries' => 1,       // без повторов
                 'timeout' => 1800,  // 30 минут
@@ -217,7 +217,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['low'],
                 'balance' => 'simple',
-                'maxProcesses' => 2, // Оставлено без изменений для низкоприоритетной очереди
+                'maxProcesses' => 1, // Оставлено без изменений для низкоприоритетной очереди
                 'minProcesses' => 1,
                 'tries' => 1,       // без повторов
                 'timeout' => 30,  // 1 минут
