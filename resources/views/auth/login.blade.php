@@ -94,9 +94,9 @@
                                     <img src="{{ asset('img/icons8-github-48.png') }}">
                                 </a>
 
-                                <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">
-                                    <img src="{{ asset('img/icons8-twitter-48.png') }}">
-                                </a>
+{{--                                <a href="{{ url('auth/twitter') }}" title="Авторизуватися через Twitter">--}}
+{{--                                    <img src="{{ asset('img/icons8-twitter-48.png') }}">--}}
+{{--                                </a>--}}
                                 <a type="button"   href="{{ url('auth/telegram') }}" title="Авторизуватися через Telegram">
                                     <img src="{{ asset('img/icons8-telegram-app-48.png') }}">
                                 </a>

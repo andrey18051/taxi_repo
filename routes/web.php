@@ -251,8 +251,8 @@ Route::get('register/telegram', [TelegramController::class, 'registerTelegram'])
 /**
  * Twitter
  */
-Route::get('auth/twitter', [TwitterController::class, 'redirectToTwitter']);
-Route::get('auth/twitter/callback', [TwitterController::class, 'handleTwitterCallback']);
+//Route::get('auth/twitter', [TwitterController::class, 'redirectToTwitter']);
+//Route::get('auth/twitter/callback', [TwitterController::class, 'handleTwitterCallback']);
 
 /**
  * Github

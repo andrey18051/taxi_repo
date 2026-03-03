@@ -1125,8 +1125,20 @@ class ReportController extends Controller
 
                 if (isset($driverData['driverNumber']) && isset($groupedBalanceRecords[$driverUid])) {
                     // Сортировка записей баланса по убыванию даты
+                    // Сортировка записей баланса по убыванию даты (более устойчивый вариант)
                     usort($groupedBalanceRecords[$driverUid], function ($a, $b) {
-                        return strtotime($b['created_at']) - strtotime($a['created_at']);
+                        $timeA = 0; // Значение по умолчанию (самая старая дата) для элементов без created_at
+                        $timeB = 0;
+
+                        if (isset($a['created_at']) && !empty($a['created_at'])) {
+                            $timeA = strtotime($a['created_at']);
+                        }
+                        if (isset($b['created_at']) && !empty($b['created_at'])) {
+                            $timeB = strtotime($b['created_at']);
+                        }
+
+                        // Сортировка по убыванию: чем больше timestamp, тем раньше в списке
+                        return $timeB - $timeA;
                     });
 
                     // Создаем новую вкладку для каждого водителя

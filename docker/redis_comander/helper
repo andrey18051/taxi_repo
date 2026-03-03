@@ -9,3 +9,25 @@ docker run -d \
   -e REDIS_PASSWORD='18And051971' \
   -e REDIS_DB=0 \
   rediscommander/redis-commander:latest
+
+# Удалить старый контейнер
+docker rm -f redis-commander-test
+
+# Запустить с IP контейнера redis_test
+docker run -d \
+  --name redis-commander-test \
+  --restart unless-stopped \
+  -p 8084:8081 \
+  -e REDIS_HOST=172.17.0.6 \
+  -e REDIS_PORT=6380 \
+  -e REDIS_PASSWORD='18And051971' \
+  -e REDIS_DB=0 \
+  rediscommander/redis-commander:latest
+
+# Запустить Redis Commander с двумя хостами
+docker run -d \
+  --name redis-commander-all \
+  --restart unless-stopped \
+  -p 8085:8081 \
+  -e REDIS_HOSTS="work:172.17.0.5:6379:0:18And051971,test:172.17.0.6:6380:0:18And051971" \
+  rediscommander/redis-commander:latest
