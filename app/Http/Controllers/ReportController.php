@@ -1243,28 +1243,30 @@ class ReportController extends Controller
 
                         $sheet->setCellValue('F' . $row, $balance['current_balance'] ?? '');
                         $status = '';
-                        switch ($balance['status']) {
-                            case "payment_nal":
-                                $status = 'Пополнение админом';
-                                break;
-                            case "holdDownReturnToBalance":
-                                $status = 'Отмена холда по заявке на вывод с баланса';
-                                break;
-                            case "holdDownComplete":
-                                $status = 'Выполнение заявки на вывод с баланса';
-                                break;
-                            case "holdDown":
-                                $status = 'Холд по заявке на вывод с баланса';
-                                break;
-                            case "hold":
-                                $status = 'Холд при взятии заказа';
-                                break;
-                            case "return":
-                                $status = 'Возврат холда при отказе от взятого заказа';
-                                break;
-                            case "delete":
-                                $status = 'Списание комиссии за взятый заказ';
-                                break;
+                        if (isset($balance['status'])) {
+                            switch ($balance['status']) {
+                                case "payment_nal":
+                                    $status = 'Пополнение админом';
+                                    break;
+                                case "holdDownReturnToBalance":
+                                    $status = 'Отмена холда по заявке на вывод с баланса';
+                                    break;
+                                case "holdDownComplete":
+                                    $status = 'Выполнение заявки на вывод с баланса';
+                                    break;
+                                case "holdDown":
+                                    $status = 'Холд по заявке на вывод с баланса';
+                                    break;
+                                case "hold":
+                                    $status = 'Холд при взятии заказа';
+                                    break;
+                                case "return":
+                                    $status = 'Возврат холда при отказе от взятого заказа';
+                                    break;
+                                case "delete":
+                                    $status = 'Списание комиссии за взятый заказ';
+                                    break;
+                            }
                         }
                         $sheet->setCellValue('G' . $row, $status ?? '');
                         $sheet->setCellValue('H' . $row, $balance['admin_name'] ?? '');
