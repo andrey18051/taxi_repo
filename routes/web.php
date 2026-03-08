@@ -1748,3 +1748,28 @@ Route::prefix('test-centrifugo')->group(function () {
 Route::get('/centrifugo-test', function () {
     return view('centrifugo');
 })->name('centrifugo.test');
+
+Route::get('/centrifugo-send-test', function () {
+    try {
+        $apiKey = '0oBHyGSqni09Pzk-Hx5bHxdhjWPI1cV8Or-1UFF0IRtSgumKHqBEHaBWLps6KHu9_1SE-ZCyCfCHnr3f8IhSmQ';
+
+        $response = Http::withHeaders([
+            'Authorization' => 'apikey ' . $apiKey,
+            'Content-Type' => 'application/json',
+        ])->post('http://91.219.60.148:8008/api/publish', [
+            'channel' => 'teal-towel-48',
+            'data' => [
+                'order_uid' => 'TEST-' . rand(1000, 9999),
+                'message' => 'Hello from Laravel!',
+                'time' => now()->toDateTimeString()
+            ]
+        ]);
+
+        return response()->json([
+            'success' => $response->successful(),
+            'response' => $response->json()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+})->name('centrifugo.send-test');
