@@ -1744,3 +1744,7 @@ Route::prefix('test-centrifugo')->group(function () {
     });
 
 });
+
+Route::get('/centrifugo-test', function () {
+    return view('centrifugo');
+})->name('centrifugo.test');

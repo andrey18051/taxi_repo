@@ -1,45 +1,32 @@
-# Останавливаем и удаляем контейнер
-docker stop centrifugo
-docker rm centrifugo
+➜  ~ ./centrifugo --config=config.json --http_server.port=8008
+2026-03-08 12:45:19 [INF] using config file path=/root/config.json
+2026-03-08 12:45:19 [INF] maxprocs: leaving gomaxprocs=4: cpu quota undefined
+2026-03-08 12:45:19 [INF] starting Centrifugo engine=memory gomaxprocs=4 pid=2733764 runtime=go1.25.7 version=6.6.2
+2026-03-08 12:45:19 [INF] initializing engine engine_type=memory
+2026-03-08 12:45:19 [INF] explicit broker not provided, using the one from engine
+2026-03-08 12:45:19 [INF] explicit presence manager not provided, using the one from engine
+2026-03-08 12:45:19 [INF] enabled JWT verifiers algorithms="HS256, HS384, HS512"
+2026-03-08 12:45:19 [INF] serving websocket, api, admin endpoints on :8008
+➜  ~ cat config.json
+{
+  "client": {
+    "token": {
+      "hmac_secret_key": "s-4DVSdaLcW_ZU9XF6utTSC_mvB-6i0Mq6OPt7hBl24hkygn2juCln65Iwmh4NZCVKGVT240PSD2euUg5DZMWg"
+    },
+    "allowed_origins": []
+  },
+  "admin": {
+    "enabled": true,
+    "password": "qB_xm2BvuAPRL5zCHI7CLg",
+    "secret": "bUQqCgNbb0F21XDkoKtvqCA7x6PsY11Ys8-R5CZLNopJIA2rpMwubFzjBowLdEJz9X4GaizeDIhc9t1CWpw5KQ"
+  },
+  "http_api": {
+    "key": "0oBHyGSqni09Pzk-Hx5bHxdhjWPI1cV8Or-1UFF0IRtSgumKHqBEHaBWLps6KHu9_1SE-ZCyCfCHnr3f8IhSmQ"
+  }
+}
 
-➜  ~ docker run -d \
-  --name centrifugo \
-  --memory="256m" \
-  -p 8008:8000 \
-  -e CENTRIFUGO_ENGINE_TYPE="memory" \
-  -e CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY="my-secret-key" \
-  -e CENTRIFUGO_ADMIN_ENABLED="true" \
-  -e CENTRIFUGO_ADMIN_PASSWORD="password" \
-  -e CENTRIFUGO_ADMIN_SECRET="secret" \
-  -e CENTRIFUGO_HTTP_API_KEY="my-api-key" \
-  -e CENTRIFUGO_CLIENT_ALLOWED_ORIGINS="*" \
-  centrifugo/centrifugo:v6
-2f929a5ee9b3a45aa8fc9dff57d48da560aff51973e79cebad6a37db4757c252
+➜  ~ ./centrifugo gentoken -u user123 -c config.json -t -1
+HMAC SHA-256 JWT for user "user123" without expiration:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiaWF0IjoxNzcyOTc0MTkyfQ.9XdoylEOqbewEMuXcPgdlTU4sQ_XVohuEHt3WLkKkdk
+➜  ~
 
-docker run -d \
-  --name centrifugo \
-  --memory="256m" \
-  --restart unless-stopped \
-  -p 8008:8000 \
-  -e CENTRIFUGO_ENGINE_TYPE="memory" \
-  -e CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY="my-secret-key" \
-  -e CENTRIFUGO_ADMIN_ENABLED="true" \
-  -e CENTRIFUGO_ADMIN_PASSWORD="password" \
-  -e CENTRIFUGO_ADMIN_SECRET="secret" \
-  -e CENTRIFUGO_HTTP_API_KEY="my-api-key" \
-  -e CENTRIFUGO_CLIENT_ALLOWED_ORIGINS="*" \
-  centrifugo/centrifugo:v6
-
-# Смотрим логи
-sleep 3
-docker logs centrifugo
-
- ~ echo "Откройте: http://$(curl -s ifconfig.me):8008"
-Откройте: http://91.219.60.148:8008
-
-
-CENTRIFUGO_API_URL=http://localhost:8008/api
-CENTRIFUGO_API_KEY=my-api-key
-CENTRIFUGO_SECRET=my-secret-key
-CENTRIFUGO_VERIFY_SSL=false
-CENTRIFUGO_TIMEOUT=5
