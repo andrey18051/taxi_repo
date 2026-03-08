@@ -45,7 +45,7 @@
 
     // Ваш токен из конфига
     const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiaWF0IjoxNzcyOTc0MTkyfQ.9XdoylEOqbewEMuXcPgdlTU4sQ_XVohuEHt3WLkKkdk";
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = 'ws:';
     const URL = `${protocol}//91.219.60.148:8008/connection/websocket`;
     const CHANNEL = "teal-towel-48";
 
