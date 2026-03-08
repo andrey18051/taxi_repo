@@ -11,6 +11,7 @@ use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\BonusBalanceController;
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\BredoGeneratorController;
+use App\Http\Controllers\CentrifugoController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CityPas1Controller;
 use App\Http\Controllers\CityPas2Controller;
@@ -1600,3 +1601,146 @@ Route::get('/logs/clear', [LogController::class, 'clearLogs'])->name('logs.clear
 
 
 Route::post('/upload-log', [LogUploadController::class, 'upload']);
+
+// =============================================
+// ТЕСТОВЫЕ РОУТЫ ДЛЯ CENTRIFUGO
+// =============================================
+
+Route::prefix('centrifugo')->group(function () {
+
+    /**
+     * @desc Тестовый метод - показывает настройки Centrifugo
+     * @route GET /centrifugo/test
+     */
+    Route::get('/test', [CentrifugoController::class, 'test']);
+
+    /**
+     * @desc Отправка UID заказа
+     * @route GET /centrifugo/sent-uid/{order_uid}
+     * @param string $order_uid - UID заказа
+     */
+    Route::get('/sent-uid/{order_uid}', [CentrifugoController::class, 'sentUid']);
+
+    /**
+     * @desc Отправка UID для конкретного приложения
+     * @route GET /centrifugo/sent-uid-app/{order_uid}/{app}
+     * @param string $order_uid - UID заказа
+     * @param string $app - приложение (PAS1, PAS2, PAS4, PAS5)
+     */
+    Route::get('/sent-uid-app/{order_uid}/{app}', [CentrifugoController::class, 'sentUidApp']);
+
+    /**
+     * @desc Отправка UID для приложения и email
+     * @route GET /centrifugo/sent-uid-app-email/{order_uid}/{app}/{email}
+     * @param string $order_uid - UID заказа
+     * @param string $app - приложение
+     * @param string $email - email пользователя
+     */
+    Route::get('/sent-uid-app-email/{order_uid}/{app}/{email}', [CentrifugoController::class, 'sentUidAppEmail']);
+
+    /**
+     * @desc Отправка UID с типом оплаты
+     * @route GET /centrifugo/sent-uid-app-email-paytype/{order_uid}/{app}/{email}/{pay_system}
+     * @param string $order_uid - UID заказа
+     * @param string $app - приложение
+     * @param string $email - email пользователя
+     * @param string $pay_system - платежная система
+     */
+    Route::get('/sent-uid-app-email-paytype/{order_uid}/{app}/{email}/{pay_system}',
+        [CentrifugoController::class, 'sentUidAppEmailPayType']);
+
+    /**
+     * @desc Отправка Double UID с типом оплаты
+     * @route GET /centrifugo/sent-uid-double-app-email-paytype/{order_uid}/{app}/{email}/{pay_system}
+     */
+    Route::get('/sent-uid-double-app-email-paytype/{order_uid}/{app}/{email}/{pay_system}',
+        [CentrifugoController::class, 'sentUidDoubleAppEmailPayType']);
+
+    /**
+     * @desc Отправка статуса черного списка
+     * @route GET /centrifugo/sent-activate-black-user/{active}/{email}
+     */
+    Route::get('/sent-activate-black-user/{active}/{email}',
+        [CentrifugoController::class, 'sentActivateBlackUser']);
+
+    /**
+     * @desc Отправка заказа (POST)
+     * @route POST /centrifugo/send-order/{app}/{email}
+     */
+    Route::post('/send-order/{app}/{email}', [CentrifugoController::class, 'sendOrder']);
+
+    /**
+     * @desc Отправка авто-заказа (POST)
+     * @route POST /centrifugo/send-auto-order/{app}/{email}
+     */
+    Route::post('/send-auto-order/{app}/{email}', [CentrifugoController::class, 'sendAutoOrder']);
+
+    /**
+     * @desc Отправка статуса стоимости
+     * @route GET /centrifugo/sent-cost-app-email/{order_cost}/{app}/{email}
+     */
+    Route::get('/sent-cost-app-email/{order_cost}/{app}/{email}',
+        [CentrifugoController::class, 'sentCostAppEmail']);
+
+    /**
+     * @desc Отправка статуса транзакции
+     * @route GET /centrifugo/sent-status-wfp/{transactionStatus}/{uid}/{app}/{email}
+     */
+    Route::get('/sent-status-wfp/{transactionStatus}/{uid}/{app}/{email}',
+        [CentrifugoController::class, 'sentStatusWfp']);
+
+    /**
+     * @desc Отправка статуса отмены
+     * @route GET /centrifugo/sent-canceled-status/{app}/{email}/{uid}
+     */
+    Route::get('/sent-canceled-status/{app}/{email}/{uid}',
+        [CentrifugoController::class, 'sentCanceledStatus']);
+
+    /**
+     * @desc Отправка старта выполнения заказа
+     * @route GET /centrifugo/send-order-start-execution/{doubleOrderId}
+     */
+    Route::get('/send-order-start-execution/{doubleOrderId}',
+        [CentrifugoController::class, 'sendOrderStartExecution']);
+
+});
+
+// =============================================
+// ТЕСТОВЫЕ GET-ЗАПРОСЫ (можно открыть в браузере)
+// =============================================
+
+Route::prefix('test-centrifugo')->group(function () {
+
+    /**
+     * http://t.easy-order-taxi.site/test-centrifugo/uid/12345
+     */
+    Route::get('/uid/{order_uid}', function ($order_uid) {
+        $controller = new CentrifugoController();
+        return $controller->sentUid($order_uid);
+    });
+
+    /**
+     * http://t.easy-order-taxi.site/test-centrifugo/uid-app/12345/PAS1
+     */
+    Route::get('/uid-app/{order_uid}/{app}', function ($order_uid, $app) {
+        $controller = new CentrifugoController();
+        return $controller->sentUidApp($order_uid, $app);
+    });
+
+    /**
+     * http://t.easy-order-taxi.site/test-centrifugo/uid-email/12345/PAS1/andrey18051@gmail.com
+     */
+    Route::get('/uid-email/{order_uid}/{app}/{email}', function ($order_uid, $app, $email) {
+        $controller = new CentrifugoController();
+        return $controller->sentUidAppEmail($order_uid, $app, $email);
+    });
+
+    /**
+     * http://t.easy-order-taxi.site/test-centrifugo/cost/250/PAS1/andrey18051@gmail.com
+     */
+    Route::get('/cost/{order_cost}/{app}/{email}', function ($order_cost, $app, $email) {
+        $controller = new CentrifugoController();
+        return $controller->sentCostAppEmail($order_cost, $app, $email);
+    });
+
+});

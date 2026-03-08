@@ -209,7 +209,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\FirebaseServiceProvider::class,
-
+        App\Providers\CentrifugoServiceProvider::class,
     ],
 
     /*
@@ -265,6 +265,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Location' => 'Stevebauman\Location\Facades\Location',
+        'Centrifugo' => App\Facades\Centrifugo::class,
 
     ],
 

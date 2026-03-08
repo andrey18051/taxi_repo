@@ -1,0 +1,45 @@
+# Останавливаем и удаляем контейнер
+docker stop centrifugo
+docker rm centrifugo
+
+➜  ~ docker run -d \
+  --name centrifugo \
+  --memory="256m" \
+  -p 8008:8000 \
+  -e CENTRIFUGO_ENGINE_TYPE="memory" \
+  -e CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY="my-secret-key" \
+  -e CENTRIFUGO_ADMIN_ENABLED="true" \
+  -e CENTRIFUGO_ADMIN_PASSWORD="password" \
+  -e CENTRIFUGO_ADMIN_SECRET="secret" \
+  -e CENTRIFUGO_HTTP_API_KEY="my-api-key" \
+  -e CENTRIFUGO_CLIENT_ALLOWED_ORIGINS="*" \
+  centrifugo/centrifugo:v6
+2f929a5ee9b3a45aa8fc9dff57d48da560aff51973e79cebad6a37db4757c252
+
+docker run -d \
+  --name centrifugo \
+  --memory="256m" \
+  --restart unless-stopped \
+  -p 8008:8000 \
+  -e CENTRIFUGO_ENGINE_TYPE="memory" \
+  -e CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY="my-secret-key" \
+  -e CENTRIFUGO_ADMIN_ENABLED="true" \
+  -e CENTRIFUGO_ADMIN_PASSWORD="password" \
+  -e CENTRIFUGO_ADMIN_SECRET="secret" \
+  -e CENTRIFUGO_HTTP_API_KEY="my-api-key" \
+  -e CENTRIFUGO_CLIENT_ALLOWED_ORIGINS="*" \
+  centrifugo/centrifugo:v6
+
+# Смотрим логи
+sleep 3
+docker logs centrifugo
+
+ ~ echo "Откройте: http://$(curl -s ifconfig.me):8008"
+Откройте: http://91.219.60.148:8008
+
+
+CENTRIFUGO_API_URL=http://localhost:8008/api
+CENTRIFUGO_API_KEY=my-api-key
+CENTRIFUGO_SECRET=my-secret-key
+CENTRIFUGO_VERIFY_SSL=false
+CENTRIFUGO_TIMEOUT=5
