@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\Log;
 
 class CentrifugoService
 {
-    protected string $apiUrl;
-    protected string $apiKey;
-    protected string $secret;
-    protected bool $verifySsl;
-    protected int $timeout;
+    protected $apiUrl;
+    protected $apiKey;
+    protected $secret;
+    protected $verifySsl;
+    protected $timeout;
 
     public function __construct()
     {

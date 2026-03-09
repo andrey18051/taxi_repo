@@ -19,9 +19,8 @@ class CentrifugoController extends Controller
 
     public function __construct()
     {
-        // Настройки Centrifugo из .env
         $this->apiUrl = 'http://localhost:8008/api';
-        $this->apiKey =  'my-api-key';
+        $this->apiKey = '0oBHyGSqni09Pzk-Hx5bHxdhjWPI1cV8Or-1UFF0IRtSgumKHqBEHaBWLps6KHu9_1SE-ZCyCfCHnr3f8IhSmQ';
         $this->channel = 'teal-towel-48';
     }
 
