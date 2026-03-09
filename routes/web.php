@@ -1712,7 +1712,7 @@ Route::prefix('centrifugo')->group(function () {
 Route::prefix('test-centrifugo')->group(function () {
 
     /**
-     * http://t.easy-order-taxi.site/test-centrifugo/uid/12345
+     * https://t.easy-order-taxi.site/test-centrifugo/uid/12345
      */
     Route::get('/uid/{order_uid}', function ($order_uid) {
         $controller = new CentrifugoController();
@@ -1720,7 +1720,7 @@ Route::prefix('test-centrifugo')->group(function () {
     });
 
     /**
-     * http://t.easy-order-taxi.site/test-centrifugo/uid-app/12345/PAS1
+     * https://t.easy-order-taxi.site/test-centrifugo/uid-app/12345/PAS2
      */
     Route::get('/uid-app/{order_uid}/{app}', function ($order_uid, $app) {
         $controller = new CentrifugoController();
@@ -1728,7 +1728,7 @@ Route::prefix('test-centrifugo')->group(function () {
     });
 
     /**
-     * http://t.easy-order-taxi.site/test-centrifugo/uid-email/12345/PAS1/andrey18051@gmail.com
+     * https://t.easy-order-taxi.site/test-centrifugo/uid-email/12345/PAS2/andrey18051@gmail.com
      */
     Route::get('/uid-email/{order_uid}/{app}/{email}', function ($order_uid, $app, $email) {
         $controller = new CentrifugoController();
@@ -1736,7 +1736,7 @@ Route::prefix('test-centrifugo')->group(function () {
     });
 
     /**
-     * http://t.easy-order-taxi.site/test-centrifugo/cost/250/PAS1/andrey18051@gmail.com
+     * https://t.easy-order-taxi.site/test-centrifugo/cost/250/PAS2/andrey18051@gmail.com
      */
     Route::get('/cost/{order_cost}/{app}/{email}', function ($order_cost, $app, $email) {
         $controller = new CentrifugoController();
