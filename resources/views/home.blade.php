@@ -37,9 +37,7 @@
             </button>
         </form>
 
-        <form action="{{ route('logs.clear') }}" method="post" style="display:inline;">
-            @csrf
-            @method('DELETE')
+        <form action="{{ route('logs.clear') }}" method="get" style="display:inline;">
             <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Вы уверены, что хотите очистить логи?')">
                 🗑 Очистить логи
             </button>
