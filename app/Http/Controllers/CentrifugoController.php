@@ -158,10 +158,10 @@ class CentrifugoController extends Controller
     public function sentUidAppEmailPayType(string $order_uid, string $app, string $email, string $pay_system): JsonResponse
     {
         try {
-            $event = 'order-status-updated-' . $app . "-" . $email;
+            $event = 'order_uid_new-' . $app . "-" . $email;
 
             $data = [
-                'order_uid' => $order_uid,
+                'order_uid_new' => $order_uid,
                 'app' => $app,
                 'email' => $email,
                 'paySystemStatus' => $pay_system
