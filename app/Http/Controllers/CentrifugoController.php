@@ -202,7 +202,7 @@ class CentrifugoController extends Controller
             $event = 'orderDouble-status-updated-' . $app . "-" . $email;
 
             $data = [
-                'order_uid' => $order_uid,
+                'orderDouble' => $order_uid,
                 'app' => $app,
                 'email' => $email,
                 'paySystemStatus' => $pay_system
