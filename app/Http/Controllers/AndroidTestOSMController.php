@@ -4689,6 +4689,7 @@ class AndroidTestOSMController extends Controller
         if (isset($responseArr["order_cost"])) {
             $order_cost = $responseArr["order_cost"];
             (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
+            (new CentrifugoController)->sentCostAppEmail($order_cost, $application, $email);
             return response(
                 self::buildSuccessfulResponse(
                     $responseArr,
@@ -5040,6 +5041,7 @@ class AndroidTestOSMController extends Controller
         if (isset($responseArr["order_cost"])) {
             $order_cost = $responseArr["order_cost"];
             (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
+            (new CentrifugoController)->sentCostAppEmail($order_cost, $application, $email);
             return response(
                 self::buildSuccessfulResponse(
                     $responseArr,
@@ -5241,7 +5243,8 @@ class AndroidTestOSMController extends Controller
 
         $response_arr = json_decode($response, true);
         if (isset($response_arr["order_cost"])) {
-            (new PusherController)->sentCostApp($response_arr["order_cost"], $application);
+            (new PusherController)->sentCostAppEmail($response_arr["order_cost"], $application, $userArr[1]);
+            (new CentrifugoController)->sentCostAppEmail($response_arr["order_cost"], $application, $userArr[1]);
             return response(self::buildSuccessfulResponse(
                 $response_arr,
                 $params,
@@ -8541,9 +8544,22 @@ class AndroidTestOSMController extends Controller
                     $email,
                     $params["pay_system"]
                 );
+                (new CentrifugoController)->sentUidAppEmailPayType(
+                    $response_arr['dispatching_order_uid'],
+                    $application,
+                    $email,
+                    $params["pay_system"]
+                );
+
                 if(isset($responseDoubleArr["dispatching_order_uid"])) {
                     $orderDoubleNew = $responseDoubleArr["dispatching_order_uid"];
                     (new PusherController)->sentUidDoubleAppEmailPayType(
+                        $orderDoubleNew,
+                        $application,
+                        $email,
+                        $params["pay_system"]
+                    );
+                    (new CentrifugoController)->sentUidDoubleAppEmailPayType(
                         $orderDoubleNew,
                         $application,
                         $email,
@@ -9401,9 +9417,21 @@ class AndroidTestOSMController extends Controller
                         $email,
                         $params["pay_system"]
                     );
+                    (new CentrifugoController)->sentUidAppEmailPayType(
+                        $response_arr['dispatching_order_uid'],
+                        $application,
+                        $email,
+                        $params["pay_system"]
+                    );
                     if(isset($responseDoubleArr["dispatching_order_uid"])) {
                         $orderDoubleNew = $responseDoubleArr["dispatching_order_uid"];
                         (new PusherController)->sentUidDoubleAppEmailPayType(
+                            $orderDoubleNew,
+                            $application,
+                            $email,
+                            $params["pay_system"]
+                        );
+                        (new CentrifugoController)->sentUidDoubleAppEmailPayType(
                             $orderDoubleNew,
                             $application,
                             $email,
@@ -10218,9 +10246,21 @@ class AndroidTestOSMController extends Controller
                         $email,
                         $params["pay_system"]
                     );
+                    (new CentrifugoController)->sentUidAppEmailPayType(
+                        $response_arr['dispatching_order_uid'],
+                        $application,
+                        $email,
+                        $params["pay_system"]
+                    );
                     if(isset($responseDoubleArr["dispatching_order_uid"])) {
                         $orderDoubleNew = $responseDoubleArr["dispatching_order_uid"];
                         (new PusherController)->sentUidDoubleAppEmailPayType(
+                            $orderDoubleNew,
+                            $application,
+                            $email,
+                            $params["pay_system"]
+                        );
+                        (new CentrifugoController)->sentUidDoubleAppEmailPayType(
                             $orderDoubleNew,
                             $application,
                             $email,
@@ -13278,6 +13318,11 @@ class AndroidTestOSMController extends Controller
                 $dispatching_order_uid = $orderweb->dispatching_order_uid;
 
                 (new PusherController)->sentCanceledStatus(
+                    $app,
+                    $email,
+                    $dispatching_order_uid
+                );
+                (new CentrifugoController)->sentCanceledStatus(
                     $app,
                     $email,
                     $dispatching_order_uid

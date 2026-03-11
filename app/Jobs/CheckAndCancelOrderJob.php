@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\AndroidTestOSMController;
+use App\Http\Controllers\CentrifugoController;
 use App\Http\Controllers\PusherController;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -170,6 +171,11 @@ class CheckAndCancelOrderJob implements ShouldQueue
             $order->save();
             //Пуш об отмене заказа
             (new PusherController)->sentCanceledStatus(
+                $this->app,
+                $this->email,
+                $uid
+            );
+            (new CentrifugoController)->sentCanceledStatus(
                 $this->app,
                 $this->email,
                 $uid

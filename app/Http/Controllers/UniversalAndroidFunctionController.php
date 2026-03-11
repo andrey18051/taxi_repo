@@ -9968,6 +9968,12 @@ class UniversalAndroidFunctionController extends Controller
                     $email,
                     "nal_payment"
                 );
+                (new CentrifugoController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    "nal_payment"
+                );
 
 
 //                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
@@ -10209,6 +10215,12 @@ class UniversalAndroidFunctionController extends Controller
 
 
                 (new PusherController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    "nal_payment"
+                );
+                (new CentrifugoController)->sentUidAppEmailPayType(
                     $orderNew,
                     $application,
                     $email,
@@ -10947,11 +10959,13 @@ class UniversalAndroidFunctionController extends Controller
 
                 // Отправка уведомлений
                 (new PusherController)->sentUidAppEmailPayType($orderNew, $application, $email, $pay_method);
+                (new CentrifugoController)->sentUidAppEmailPayType($orderNew, $application, $email, $pay_method);
                 Log::info("Отправлено уведомление sentUidAppEmailPayType для orderNew='$orderNew', application='$application', email='$email', pay_method='$pay_method'.");
 
                 if (isset($responseDoubleArr["dispatching_order_uid"])) {
                     $orderDoubleNew = $responseDoubleArr["dispatching_order_uid"];
                     (new PusherController)->sentUidDoubleAppEmailPayType($orderDoubleNew, $application, $email, $pay_method);
+                    (new CentrifugoController)->sentUidDoubleAppEmailPayType($orderDoubleNew, $application, $email, $pay_method);
                     Log::info("Отправлено уведомление sentUidDoubleAppEmailPayType для orderDoubleNew='$orderDoubleNew'.");
                 }
 
@@ -11360,6 +11374,8 @@ class UniversalAndroidFunctionController extends Controller
         }
 //dd($costMap);
         (new PusherController)->sendOrder($costMap, $app, $email);
+        (new CentrifugoController)->sendOrder($costMap, $app, $email);
+
         return $costMap;
 
     }
@@ -11938,6 +11954,7 @@ class UniversalAndroidFunctionController extends Controller
 
             // Отправка данных через PusherController
             (new PusherController)->sendAutoOrder($costMap, $app, $email);
+            (new CentrifugoController)->sendAutoOrder($costMap, $app, $email);
 
             // Отправка данных через FCMController
             $user = User::where("email", $orderweb->email)->first();
@@ -12059,7 +12076,7 @@ class UniversalAndroidFunctionController extends Controller
 
             // Отправка данных через PusherController
             (new PusherController)->sendAutoOrder($costMap, $app, $email);
-
+            (new CentrifugoController)->sendAutoOrder($costMap, $app, $email);
             // Отправка данных через FCMController
             $user = User::where("email", $orderweb->email)->first();
 //            if(isset ($user)) {

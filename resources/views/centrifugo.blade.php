@@ -44,7 +44,7 @@
     const messagesDiv = document.getElementById('messages');
 
     // Ваш токен из конфига
-    const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiaWF0IjoxNzcyOTc0MTkyfQ.9XdoylEOqbewEMuXcPgdlTU4sQ_XVohuEHt3WLkKkdk";
+    const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiaWF0IjoxNzczMTM2MTU2fQ.c89K0YoA3roqeYjVbm_oCEY87CDVMtgZ3knguGWr3sI";
     const protocol = 'ws:';
     const URL = `wss://t.easy-order-taxi.site/connection/websocket`;
     const CHANNEL = "teal-towel-48";

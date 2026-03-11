@@ -576,6 +576,12 @@ class MyTaxiApiController extends Controller
                 $email,
                 $parameter["pay_system"] ?? null
             );
+            (new CentrifugoController)->sentUidAppEmailPayType(
+                $dispatching_order_uid,
+                $application,
+                $email,
+                $parameter["pay_system"] ?? null
+            );
             Log::info('✅ Email уведомление отправлено');
         } catch (\Exception $e) {
             Log::warning('⚠️ Ошибка отправки email', [
@@ -644,6 +650,12 @@ class MyTaxiApiController extends Controller
         Log::info('📧 Отправка email уведомления...');
         try {
             (new PusherController)->sentUidAppEmailPayType(
+                $orderNew,
+                $application,
+                $email,
+                "nal_payment"
+            );
+            (new CentrifugoController)->sentUidAppEmailPayType(
                 $orderNew,
                 $application,
                 $email,

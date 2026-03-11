@@ -2315,6 +2315,12 @@ class WfpController extends Controller
                                 $application,
                                 $clientEmail
                             );
+                            (new CentrifugoController)->sentStatusWfp(
+                                $transactionStatus,
+                                $uid,
+                                $application,
+                                $clientEmail
+                            );
                         } catch (\Exception $e) {
                             Log::error("Ошибка в sentStatusWfp для orderReference: $orderReference: " . $e->getMessage());
                             throw $e;
@@ -2608,7 +2614,12 @@ class WfpController extends Controller
                                     $application,
                                     $clientEmail
                                 );
-
+                                (new CentrifugoController)->sentStatusWfp(
+                                    $transactionStatus,
+                                    $uid,
+                                    $application,
+                                    $clientEmail
+                                );
                                 Log::info('Pusher notification sent successfully', [
                                     'order_reference' => $orderReference,
                                     'status' => $transactionStatus,
@@ -2916,6 +2927,12 @@ class WfpController extends Controller
                             $transactionStatus = $data['transactionStatus'];
                             $uid = $wfpInvoices->dispatching_order_uid;
                             (new PusherController)->sentStatusWfp(
+                                $transactionStatus,
+                                $uid,
+                                $application,
+                                $clientEmail
+                            );
+                            (new CentrifugoController)->sentStatusWfp(
                                 $transactionStatus,
                                 $uid,
                                 $application,

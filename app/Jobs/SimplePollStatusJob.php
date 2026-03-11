@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\CentrifugoController;
 use App\Http\Controllers\PusherController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -124,6 +125,12 @@ class SimplePollStatusJob implements ShouldQueue
 
         Log::info("📲 Отправлен пуш об отклоненном платеже");
         (new PusherController)->sentStatusWfp(
+            $transactionStatus,
+            $this->dispatching_order_uid,
+            $this->application,
+            $this->email
+        );
+        (new CentrifugoController)->sentStatusWfp(
             $transactionStatus,
             $this->dispatching_order_uid,
             $this->application,
