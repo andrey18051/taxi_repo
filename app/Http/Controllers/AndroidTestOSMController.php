@@ -4960,7 +4960,7 @@ class AndroidTestOSMController extends Controller
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 
-        if ($connectAPI == 400 || $city= "foreign countries") {
+        if ($connectAPI == 400 || $city == "foreign countries") {
             Log::info('Переключение на MyTaxi API', [
                 'city' => $city,
                 'connectAPI' => $connectAPI,
@@ -10047,7 +10047,7 @@ class AndroidTestOSMController extends Controller
         orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $parameter['pay_system'] = $userArr[2];
-        if ($connectAPI == 400 || $city= "foreign countries") {
+        if ($connectAPI == 400 || $city == "foreign countries") {
             $parameter['comment_info'] = $comment;
             return (new MyTaxiApiController)->orderMyApiTaxi(
                 $parameter,
