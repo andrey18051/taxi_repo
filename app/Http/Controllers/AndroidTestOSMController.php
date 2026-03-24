@@ -4841,9 +4841,9 @@ class AndroidTestOSMController extends Controller
             case "Lutsk":
                 $city = "OdessaTest";
                 break;
-            case "foreign countries":
-                $city = "Kyiv City";
-                break;
+//            case "foreign countries":
+//                $city = "Kyiv City";
+//                break;
         }
 
 
@@ -4959,7 +4959,8 @@ class AndroidTestOSMController extends Controller
             //Список кодов доп. услуг (api/settings). Параметр доступен при X-API-VERSION >= 1.41.0. ["ENGLISH", "ANIMAL"]
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
-        if ($connectAPI == 400) {
+
+        if ($connectAPI == 400 || $city= "foreign countries") {
             Log::info('Переключение на MyTaxi API', [
                 'city' => $city,
                 'connectAPI' => $connectAPI,
@@ -9859,9 +9860,9 @@ class AndroidTestOSMController extends Controller
 
                 $city = "OdessaTest";
                 break;
-            case "foreign countries":
-                $city = "Kyiv City";
-                break;
+//            case "foreign countries":
+//                $city = "Kyiv City";
+//                break;
         }
 
         $service = new CityAppOrderService();
@@ -10046,7 +10047,7 @@ class AndroidTestOSMController extends Controller
         orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $parameter['pay_system'] = $userArr[2];
-        if ($connectAPI == 400) {
+        if ($connectAPI == 400 || $city= "foreign countries") {
             $parameter['comment_info'] = $comment;
             return (new MyTaxiApiController)->orderMyApiTaxi(
                 $parameter,
