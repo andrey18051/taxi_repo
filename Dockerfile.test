@@ -17,7 +17,8 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
     sudo \
     systemd \
     netcat-traditional \
-    jq\
+    jq \
+    mariadb-client \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
