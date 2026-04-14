@@ -26,7 +26,7 @@ class BackupDatabase extends Command
         // Массив получателей
         $recipients = [
             'taxi.easy.ua.sup@gmail.com',
-            'cartaxi4@gmail.com'
+//            'cartaxi4@gmail.com'
         ];
 
         if (!file_exists($backupDir)) {
