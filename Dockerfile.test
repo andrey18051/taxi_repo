@@ -124,12 +124,18 @@ RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true
 #   crontab -u root /tmp/cronfile && \
 #    rm /tmp/cronfile
 
+# Создаём директорию для бэкапов и устанавливаем права
+RUN mkdir -p /usr/share/nginx/html/taxi/public/backups && \
+    chmod -R 777 /usr/share/nginx/html/taxi/public/backups
+
+# Настраиваем Cron (исправленная версия)
 RUN crontab -u root -l > /tmp/cronfile 2>/dev/null || true && \
-        echo "*/5 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan check-inactive:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-        echo "* * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan schedule:run >> /dev/null 2>&1" >> /tmp/cronfile && \
-        echo "1 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
-        crontab -u root /tmp/cronfile && \
-        rm /tmp/cronfile
+    echo "*/5 * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan check-inactive:run >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "* * * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan schedule:run >> /dev/null 2>&1" >> /tmp/cronfile && \
+    echo "1 21 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan logs:send >> /var/log/cron_tasks.log 2>&1" >> /tmp/cronfile && \
+    echo "0 2 * * * cd /usr/share/nginx/html/taxi && /opt/bitnami/php/bin/php artisan db:backup >> /var/log/db_backup.log 2>&1" >> /tmp/cronfile && \
+    crontab -u root /tmp/cronfile && \
+    rm /tmp/cronfile
 
 
 
@@ -159,6 +165,9 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Создаём необходимые директории для Laravel и даём правильные права
 RUN chmod -R 777 /usr/share/nginx/html/taxi/
+
+# Создаем симлинк для backups в public директории
+RUN ln -sf /usr/share/nginx/html/taxi/public/backups /usr/share/nginx/html/taxi/public/backups
 
 # Healthcheck с запасом времени
 HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=6 \
