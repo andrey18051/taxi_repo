@@ -97,7 +97,7 @@ jobs:
 
           FIREBASE_CREDENTIALS_PAS_1=/run/secrets/firebase/pas_1.json
           FIREBASE_CREDENTIALS_PAS_2=/run/secrets/firebase/pas_2.json
-          FIREBASE_CREDENTIALS_exit=/run/secrets/firebase/pas_4.json
+          FIREBASE_CREDENTIALS_PAS_4=/run/secrets/firebase/pas_4.json
           FIREBASE_CREDENTIALS_PAS_5=/run/secrets/firebase/pas_5.json
           FIREBASE_CREDENTIALS_DRIVER_TAXI=/run/secrets/firebase/driver.json
 
