@@ -202,12 +202,12 @@ class UserController extends Controller
 
             $user->black_list_PAS1 = $black_list_PAS1;
             $user->black_list_PAS2 = $black_list_PAS2;
-            $user->black_list_PAS2 = $black_list_PAS4;
-            $user->black_list_PAS4 = $black_list_PAS5;
+            $user->black_list_PAS4 = $black_list_PAS4;
+            $user->black_list_PAS5 = $black_list_PAS5;
             $user->save();
             $email = $user->email;
 
-            $appCodes = ['PAS1', 'PAS2', 'PAS4'];
+            $appCodes = ['PAS1', 'PAS2', 'PAS4', 'PAS5'];
             foreach ($appCodes as $appCode) {
                 $field = "black_list_$appCode";
                 if ($user->$field == "true") {
