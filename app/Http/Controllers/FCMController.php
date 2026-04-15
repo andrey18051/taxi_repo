@@ -768,58 +768,180 @@ class FCMController extends Controller
 
     public function toggleFirestoreBlackListEmail(string $email, string $action, string $appCode): JsonResponse
     {
+        $tag = "toggleFirestoreBlackListEmail";
+
         try {
+            Log::info("[$tag] Method started", [
+                'email' => $email,
+                'action' => $action,
+                'appCode' => $appCode,
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
             // Выбор нужного файла учетных данных Firebase по коду приложения
             $credentialsMap = [
                 'PAS1' => env('FIREBASE_CREDENTIALS_PAS_1'),
                 'PAS2' => env('FIREBASE_CREDENTIALS_PAS_2'),
                 'PAS4' => env('FIREBASE_CREDENTIALS_PAS_4'),
+                'PAS5' => env('FIREBASE_CREDENTIALS_PAS_5'),
             ];
 
+            Log::info("[$tag] Available app codes: " . implode(', ', array_keys($credentialsMap)));
+
             if (!isset($credentialsMap[$appCode])) {
+                Log::warning("[$tag] Unknown app code provided", [
+                    'provided' => $appCode,
+                    'valid_codes' => array_keys($credentialsMap)
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => "Неизвестный код приложения: $appCode"
                 ], 400);
             }
 
+            Log::info("[$tag] App code validated successfully: $appCode");
+
             $serviceAccountPath = $credentialsMap[$appCode];
-            Log::info("Firebase credentials [$appCode]: $serviceAccountPath");
+
+            // Проверка существования файла
+            if (!file_exists($serviceAccountPath)) {
+                Log::error("[$tag] Service account file not found", [
+                    'path' => $serviceAccountPath,
+                    'appCode' => $appCode
+                ]);
+            } else {
+                Log::info("[$tag] Service account file found", [
+                    'path' => $serviceAccountPath,
+                    'size' => filesize($serviceAccountPath)
+                ]);
+            }
+
+            Log::info("[$tag] Initializing Firebase with credentials", [
+                'appCode' => $appCode,
+                'credential_path' => $serviceAccountPath
+            ]);
 
             $firebase = (new Factory)->withServiceAccount($serviceAccountPath);
             $firestore = $firebase->createFirestore()->database();
 
+            Log::info("[$tag] Firebase Firestore instance created successfully");
+
             $normalizedEmail = strtolower(trim($email));
-            $docId = md5($normalizedEmail); // безопасный ID (если email содержит спец. символы)
+            $docId = md5($normalizedEmail);
+
+            Log::info("[$tag] Email normalized and hashed", [
+                'original_email' => $email,
+                'normalized_email' => $normalizedEmail,
+                'doc_id' => $docId,
+                'hash_algorithm' => 'md5'
+            ]);
+
             $document = $firestore->collection('blackList')->document($docId);
+            Log::info("[$tag] Document reference created", [
+                'collection' => 'blackList',
+                'document_id' => $docId,
+                'full_path' => "blackList/{$docId}"
+            ]);
 
             if ($action === 'add') {
+                Log::info("[$tag] Processing ADD action");
+
+                // Проверяем, существует ли уже документ
+                $existingDoc = $document->snapshot();
+                if ($existingDoc->exists()) {
+                    Log::warning("[$tag] Email already exists in blackList", [
+                        'email' => $normalizedEmail,
+                        'doc_id' => $docId,
+                        'existing_data' => $existingDoc->data()
+                    ]);
+                } else {
+                    Log::info("[$tag] Email not found in blackList, proceeding with add");
+                }
+
                 $document->set([
                     'email' => $normalizedEmail,
                     'created_at' => now()->toDateTimeString()
                 ]);
-                Log::info("[$appCode] Email добавлен в blackList: $normalizedEmail");
 
-                return response()->json(['success' => true, 'message' => 'Email добавлен в черный список.']);
+                Log::info("[$tag] Email added to blackList successfully", [
+                    'appCode' => $appCode,
+                    'email' => $normalizedEmail,
+                    'created_at' => now()->toDateTimeString(),
+                    'document_id' => $docId
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email добавлен в черный список.',
+                    'data' => [
+                        'email' => $normalizedEmail,
+                        'doc_id' => $docId
+                    ]
+                ]);
             }
 
             if ($action === 'remove') {
-                $document->delete();
-                Log::info("[$appCode] Email удален из blackList: $normalizedEmail");
+                Log::info("[$tag] Processing REMOVE action");
 
-                return response()->json(['success' => true, 'message' => 'Email удален из черного списка.']);
+                // Проверяем, существует ли документ перед удалением
+                $existingDoc = $document->snapshot();
+                if (!$existingDoc->exists()) {
+                    Log::warning("[$tag] Email not found in blackList, nothing to remove", [
+                        'email' => $normalizedEmail,
+                        'doc_id' => $docId
+                    ]);
+                } else {
+                    Log::info("[$tag] Email found in blackList, proceeding with removal", [
+                        'existing_data' => $existingDoc->data()
+                    ]);
+                }
+
+                $document->delete();
+
+                Log::info("[$tag] Email removed from blackList successfully", [
+                    'appCode' => $appCode,
+                    'email' => $normalizedEmail,
+                    'document_id' => $docId,
+                    'deleted_at' => now()->toDateTimeString()
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email удален из черного списка.',
+                    'data' => [
+                        'email' => $normalizedEmail,
+                        'doc_id' => $docId
+                    ]
+                ]);
             }
+
+            Log::warning("[$tag] Invalid action provided", [
+                'action' => $action,
+                'allowed_actions' => ['add', 'remove']
+            ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Недопустимое действие. Разрешены: add, remove.'
             ], 400);
+
         } catch (\Exception $e) {
-            Log::error("Ошибка Firestore blackList [$appCode][$action]: " . $e->getMessage());
+            Log::error("[$tag] Exception caught", [
+                'appCode' => $appCode,
+                'action' => $action,
+                'email' => $email,
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Ошибка при работе с Firestore blackList.'
+                'message' => 'Ошибка при работе с Firestore blackList.',
+                'error_details' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }

@@ -193,40 +193,207 @@ class UserController extends Controller
     }
     public function blackListSet($id, $black_list_PAS1, $black_list_PAS2, $black_list_PAS4, $black_list_PAS5)
     {
+        $tag = "blackListSet";
+
         try {
-
-            $user = User::find($id);
-            if (!$user) {
-                return response()->json(['success' => false, 'message' => 'Пользователь не найден.'], 404);
-            }
-
-            $user->black_list_PAS1 = $black_list_PAS1;
-            $user->black_list_PAS2 = $black_list_PAS2;
-            $user->black_list_PAS4 = $black_list_PAS4;
-            $user->black_list_PAS5 = $black_list_PAS5;
-            $user->save();
-            $email = $user->email;
-
-            $appCodes = ['PAS1', 'PAS2', 'PAS4', 'PAS5'];
-            foreach ($appCodes as $appCode) {
-                $field = "black_list_$appCode";
-                if ($user->$field == "true") {
-                    (new FCMController())->toggleFirestoreBlackListEmail($email, 'add', $appCode);
-                } else {
-                    (new FCMController())->toggleFirestoreBlackListEmail($email, 'remove', $appCode);
-                }
-            }
-
-            return response()->json(['success' => true, 'message' => 'Данные успешно обновлены.']);
-        } catch (\Exception $e) {
-            \Log::error("Ошибка в blackListSet: " . $e->getMessage(), [
+            Log::info("[$tag] Method started", [
                 'id' => $id,
                 'black_list_PAS1' => $black_list_PAS1,
                 'black_list_PAS2' => $black_list_PAS2,
                 'black_list_PAS4' => $black_list_PAS4,
                 'black_list_PAS5' => $black_list_PAS5,
+                'timestamp' => now()->toDateTimeString(),
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
             ]);
-            return response()->json(['success' => false, 'message' => 'Внутренняя ошибка сервера.'], 500);
+
+            Log::info("[$tag] Searching for user with ID: $id");
+            $user = User::find($id);
+
+            if (!$user) {
+                Log::warning("[$tag] User not found", [
+                    'id' => $id,
+                    'search_params' => ['id' => $id]
+                ]);
+                return response()->json(['success' => false, 'message' => 'Пользователь не найден.'], 404);
+            }
+
+            Log::info("[$tag] User found", [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name ?? 'N/A',
+                'current_blacklist_status' => [
+                    'PAS1' => $user->black_list_PAS1,
+                    'PAS2' => $user->black_list_PAS2,
+                    'PAS4' => $user->black_list_PAS4,
+                    'PAS5' => $user->black_list_PAS5
+                ]
+            ]);
+
+            // Сохраняем старые значения для отслеживания изменений
+            $oldValues = [
+                'PAS1' => $user->black_list_PAS1,
+                'PAS2' => $user->black_list_PAS2,
+                'PAS4' => $user->black_list_PAS4,
+                'PAS5' => $user->black_list_PAS5
+            ];
+
+            Log::info("[$tag] Updating user blacklist settings", [
+                'old_values' => $oldValues,
+                'new_values' => [
+                    'PAS1' => $black_list_PAS1,
+                    'PAS2' => $black_list_PAS2,
+                    'PAS4' => $black_list_PAS4,
+                    'PAS5' => $black_list_PAS5
+                ]
+            ]);
+
+            $user->black_list_PAS1 = $black_list_PAS1;
+            $user->black_list_PAS2 = $black_list_PAS2;
+            $user->black_list_PAS4 = $black_list_PAS4;
+            $user->black_list_PAS5 = $black_list_PAS5;
+
+            Log::info("[$tag] Saving user to database");
+            $saveResult = $user->save();
+
+            if ($saveResult) {
+                Log::info("[$tag] User saved successfully", [
+                    'user_id' => $user->id,
+                    'affected_fields' => array_keys($oldValues)
+                ]);
+            } else {
+                Log::warning("[$tag] User save returned false", [
+                    'user_id' => $user->id,
+                    'changes' => [
+                        'PAS1' => ['old' => $oldValues['PAS1'], 'new' => $black_list_PAS1],
+                        'PAS2' => ['old' => $oldValues['PAS2'], 'new' => $black_list_PAS2],
+                        'PAS4' => ['old' => $oldValues['PAS4'], 'new' => $black_list_PAS4],
+                        'PAS5' => ['old' => $oldValues['PAS5'], 'new' => $black_list_PAS5]
+                    ]
+                ]);
+            }
+
+            $email = $user->email;
+            Log::info("[$tag] User email retrieved", [
+                'email' => $email,
+                'user_id' => $user->id
+            ]);
+
+            $appCodes = ['PAS1', 'PAS2', 'PAS4', 'PAS5'];
+            Log::info("[$tag] Processing Firestore sync for all app codes", [
+                'app_codes' => $appCodes,
+                'total_apps' => count($appCodes)
+            ]);
+
+            $syncResults = [];
+            foreach ($appCodes as $appCode) {
+                $field = "black_list_$appCode";
+                $newValue = $user->$field;
+                $oldValue = $oldValues[$appCode];
+
+                Log::info("[$tag] Processing app code: $appCode", [
+                    'field' => $field,
+                    'old_value' => $oldValue,
+                    'new_value' => $newValue,
+                    'email' => $email,
+                    'action_needed' => $newValue != $oldValue ? 'YES' : 'NO'
+                ]);
+
+                $action = $newValue == "true" ? 'add' : 'remove';
+                Log::info("[$tag] Determined action for $appCode", [
+                    'action' => $action,
+                    'value' => $newValue,
+                    'mapping' => '"true" -> add, else -> remove'
+                ]);
+
+                try {
+                    Log::info("[$tag] Calling toggleFirestoreBlackListEmail for $appCode", [
+                        'email' => $email,
+                        'action' => $action,
+                        'appCode' => $appCode
+                    ]);
+
+                    $controller = new FCMController();
+                    $result = $controller->toggleFirestoreBlackListEmail($email, $action, $appCode);
+
+                    $syncResults[$appCode] = [
+                        'action' => $action,
+                        'success' => $result->getData(true)['success'] ?? false,
+                        'status_code' => $result->getStatusCode()
+                    ];
+
+                    Log::info("[$tag] Firestore sync completed for $appCode", [
+                        'result' => $syncResults[$appCode],
+                        'response_body' => $result->getData(true)
+                    ]);
+
+                } catch (\Exception $e) {
+                    Log::error("[$tag] Failed to sync with Firestore for $appCode", [
+                        'email' => $email,
+                        'action' => $action,
+                        'appCode' => $appCode,
+                        'error_message' => $e->getMessage(),
+                        'error_code' => $e->getCode(),
+                        'error_file' => $e->getFile(),
+                        'error_line' => $e->getLine()
+                    ]);
+
+                    $syncResults[$appCode] = [
+                        'action' => $action,
+                        'success' => false,
+                        'error' => $e->getMessage()
+                    ];
+                }
+            }
+
+            Log::info("[$tag] All Firestore sync operations completed", [
+                'user_id' => $user->id,
+                'email' => $email,
+                'results_summary' => $syncResults,
+                'successful_syncs' => collect($syncResults)->where('success', true)->count(),
+                'failed_syncs' => collect($syncResults)->where('success', false)->count()
+            ]);
+
+            Log::info("[$tag] Method completed successfully", [
+                'user_id' => $id,
+                'email' => $email,
+                'final_status' => [
+                    'PAS1' => $user->black_list_PAS1,
+                    'PAS2' => $user->black_list_PAS2,
+                    'PAS4' => $user->black_list_PAS4,
+                    'PAS5' => $user->black_list_PAS5
+                ]
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Данные успешно обновлены.',
+                'data' => [
+                    'user_id' => $user->id,
+                    'sync_results' => $syncResults
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("[$tag] Exception caught", [
+                'id' => $id,
+                'black_list_PAS1' => $black_list_PAS1,
+                'black_list_PAS2' => $black_list_PAS2,
+                'black_list_PAS4' => $black_list_PAS4,
+                'black_list_PAS5' => $black_list_PAS5,
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Внутренняя ошибка сервера.',
+                'error_details' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
     }
 
