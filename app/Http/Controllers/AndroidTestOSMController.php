@@ -9893,6 +9893,20 @@ class AndroidTestOSMController extends Controller
         } else {
             $params['email'] = "no email";
         }
+        if ($userArr[2] == 'bonus_payment'
+            || $userArr[2] == 'fondy_payment'
+            || $userArr[2] == 'mono_payment'
+            || $userArr[2] == 'wfp_payment'
+        ) {
+            $address = str_replace("http://", "", $connectAPI);
+            $card_max_pay = CityController::cardPayServer($address, $application);
+            if($card_max_pay == 0) {
+                $response_error["order_cost"] = 0;
+                $response_error["Message"] = "ErrorCardPayment";
+
+                return $response_error;
+            }
+        }
 
         $email = $params['email'];
 
