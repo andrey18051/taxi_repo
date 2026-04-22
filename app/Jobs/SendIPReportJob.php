@@ -44,7 +44,7 @@ class SendIPReportJob implements ShouldQueue
                 ->get();
 
             if ($records->isEmpty()) {
-                \Log::info('Нет записей для отчета');
+                Log::info('Нет записей для отчета');
                 return;
             }
 
