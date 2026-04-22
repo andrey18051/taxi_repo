@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Jobs\SendIPReportJob;
+use App\Services\IPReportService;
 
 class SendIPReportCommand extends Command
 {
@@ -12,13 +12,17 @@ class SendIPReportCommand extends Command
 
     public function handle()
     {
-        $email = 'andrey18051@gmail.com'; // Замените на нужный email
-        $filter = 'PAS';
+        try {
+            $service = new IPReportService('andrey18051@gmail.com', 'PAS');
+            $service->send();
 
-        SendIPReportJob::dispatch($email, $filter);
+            $this->info("✅ IP report sent successfully at " . now());
 
-        $this->info("IP report job dispatched at " . now());
+            return Command::SUCCESS;
 
-        return Command::SUCCESS;
+        } catch (\Exception $e) {
+            $this->error("❌ Error: " . $e->getMessage());
+            return Command::FAILURE;
+        }
     }
 }
