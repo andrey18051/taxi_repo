@@ -1775,3 +1775,4 @@ Route::get('/centrifugo-send-test', function () {
 })->name('centrifugo.send-test');
 
 Route::get('/save-ip-with-email/{page}/{email}', [IPController::class, 'saveIPWithEmail']);
+Route::get('/debugCloudFlareHeaders', [IPController::class, 'debugCloudFlareHeaders']);

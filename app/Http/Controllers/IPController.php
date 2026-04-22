@@ -126,13 +126,17 @@ class IPController extends Controller
 
     public function saveIPWithEmail($page, $email)
     {
-        // Если это Kafka consumer - не логируем IP
         if (!isset($_SERVER['REMOTE_ADDR'])) {
             return response()->json(['error' => 'No remote address'], 400);
         }
 
-        // Получаем реальный IP из заголовков (минуя Docker gateway)
-        $remoteAddr = $this->getRealClientIp();
+        // Приоритет для CloudFlare
+        $remoteAddr = $_SERVER['HTTP_CF_CONNECTING_IP'] ??  // CloudFlare реальный IP
+            $_SERVER['HTTP_X_REAL_IP'] ??          // Nginx
+            ($_SERVER['HTTP_X_FORWARDED_FOR'] ? explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0] : null) ??
+            $_SERVER['REMOTE_ADDR'];
+
+        $remoteAddr = trim($remoteAddr);
 
         // Валидация формата email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -140,7 +144,7 @@ class IPController extends Controller
         }
 
         $IP = new IP();
-        $IP->IP_ADDR = $remoteAddr;
+        $IP->IP_ADDR = $remoteAddr;  // Теперь здесь будет реальный IP клиента
         $IP->email = $email;
         $IP->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
         $IP->page = $page;
@@ -151,7 +155,19 @@ class IPController extends Controller
 
         return response()->json(['error' => 'Failed to save data'], 500);
     }
+    public function debugCloudFlareHeaders()
+    {
+        $headers = [
+            'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null,  // Реальный IP клиента
+            'HTTP_CF_RAY' => $_SERVER['HTTP_CF_RAY'] ?? null,
+            'HTTP_CF_VISITOR' => $_SERVER['HTTP_CF_VISITOR'] ?? null,
+            'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
+            'HTTP_X_REAL_IP' => $_SERVER['HTTP_X_REAL_IP'] ?? null,
+        ];
 
+        return response()->json($headers);
+    }
     /**
      * Получить реальный IP клиента
      */
