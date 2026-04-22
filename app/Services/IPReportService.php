@@ -24,6 +24,7 @@ class IPReportService
             $records = DB::table('i_p_s')
                 ->where('page', 'like', '%' . $this->pageFilter . '%')
                 ->where('created_at', '>=', Carbon::now()->subDay())
+                ->where('page', 'not like', '%http%')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -122,7 +123,7 @@ class IPReportService
                         <th>IP Адрес</th>
                         <th>Email</th>
                         <th>User Agent</th>
-                        <th>Страница</th>
+                        <th>Приложение</th>
                         <th>Дата создания</th>
                     </tr>
                 </thead>
