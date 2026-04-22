@@ -27,6 +27,8 @@ class IPController extends Controller
         if ($remoteAddr !== '31.202.139.47') {
             $IP = new IP();
             $IP->IP_ADDR = $remoteAddr;
+            $IP->email = null;
+            $IP->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
             $IP->page = 'https://m.easy-order-taxi.site' . $page;
             $IP->save();
         }
@@ -119,5 +121,37 @@ class IPController extends Controller
 //                $LocationData = Location::get("81.90.230.250"); // Zaporizhzhia
 
         return response()->json(['response' => $LocationData->countryName]);
+    }
+
+
+    public function saveIPWithEmail($page, $email)
+    {
+        // Если это Kafka consumer - не логируем IP
+        if (!isset($_SERVER['REMOTE_ADDR'])) {
+            return response()->json(['error' => 'No remote address'], 400);
+        }
+
+        $remoteAddr = $_SERVER['REMOTE_ADDR'];
+
+        // Валидация формата email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json(['error' => 'Invalid email format'], 400);
+        }
+
+        if ($remoteAddr !== '31.202.139.47') {
+            $IP = new IP();
+            $IP->IP_ADDR = $remoteAddr;
+            $IP->email = $email;
+            $IP->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+            $IP->page =  $page;
+
+            if ($IP->save()) {
+                return response()->json(['success' => true, 'message' => 'Data saved successfully'], 200);
+            }
+
+            return response()->json(['error' => 'Failed to save data'], 500);
+        }
+
+        return response()->json(['error' => 'IP is blocked'], 403);
     }
 }

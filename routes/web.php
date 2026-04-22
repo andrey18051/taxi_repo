@@ -1773,3 +1773,5 @@ Route::get('/centrifugo-send-test', function () {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 })->name('centrifugo.send-test');
+
+Route::get('/save-ip-with-email/{page}/{email}', [IPController::class, 'saveIPWithEmail']);
