@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
@@ -59,10 +60,10 @@ class SendIPReportJob implements ShouldQueue
                     ]);
             });
 
-            \Log::info('Отчет отправлен на ' . $this->email . ' и cartaxi4@gmail.com, записей: ' . $records->count());
+            Log::info('Отчет отправлен на ' . $this->email . ' и cartaxi4@gmail.com, записей: ' . $records->count());
 
         } catch (\Exception $e) {
-            \Log::error('Ошибка при отправке отчета: ' . $e->getMessage());
+            Log::error('Ошибка при отправке отчета: ' . $e->getMessage());
         }
     }
 
