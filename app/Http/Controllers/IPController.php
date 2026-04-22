@@ -131,27 +131,59 @@ class IPController extends Controller
             return response()->json(['error' => 'No remote address'], 400);
         }
 
-        $remoteAddr = $_SERVER['REMOTE_ADDR'];
+        // Получаем реальный IP из заголовков (минуя Docker gateway)
+        $remoteAddr = $this->getRealClientIp();
 
         // Валидация формата email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['error' => 'Invalid email format'], 400);
         }
 
-//        if ($remoteAddr !== '31.202.139.47') {
-            $IP = new IP();
-            $IP->IP_ADDR = $remoteAddr;
-            $IP->email = $email;
-            $IP->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
-            $IP->page =  $page;
+        $IP = new IP();
+        $IP->IP_ADDR = $remoteAddr;
+        $IP->email = $email;
+        $IP->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+        $IP->page = $page;
 
-            if ($IP->save()) {
-                return response()->json(['success' => true, 'message' => 'Data saved successfully'], 200);
+        if ($IP->save()) {
+            return response()->json(['success' => true, 'message' => 'Data saved successfully'], 200);
+        }
+
+        return response()->json(['error' => 'Failed to save data'], 500);
+    }
+
+    /**
+     * Получить реальный IP клиента
+     */
+    private function getRealClientIp()
+    {
+        // Приоритет заголовков для получения реального IP
+        $headers = [
+            'HTTP_X_REAL_IP',        // Nginx proxy (самый надежный)
+            'HTTP_X_FORWARDED_FOR',  // Стандартный прокси
+            'HTTP_CF_CONNECTING_IP', // CloudFlare
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR'
+        ];
+
+        foreach ($headers as $header) {
+            if (!empty($_SERVER[$header])) {
+                $ip = $_SERVER[$header];
+
+                // Если в X-Forwarded-For несколько IP, берем первый (реальный клиент)
+                if (strpos($ip, ',') !== false) {
+                    $ips = explode(',', $ip);
+                    $ip = trim($ips[0]);
+                }
+
+                // Пропускаем Docker gateway IP (172.17.0.1)
+                if ($ip !== '172.17.0.1' && filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
             }
+        }
 
-//            return response()->json(['error' => 'Failed to save data'], 500);
-//        }
-
-        return response()->json(['error' => 'IP is blocked'], 403);
+        // Если все заголовки дали 172.17.0.1 - возвращаем его
+        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 }
