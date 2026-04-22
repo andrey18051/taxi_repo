@@ -138,7 +138,7 @@ class IPController extends Controller
             return response()->json(['error' => 'Invalid email format'], 400);
         }
 
-        if ($remoteAddr !== '31.202.139.47') {
+//        if ($remoteAddr !== '31.202.139.47') {
             $IP = new IP();
             $IP->IP_ADDR = $remoteAddr;
             $IP->email = $email;
@@ -149,8 +149,8 @@ class IPController extends Controller
                 return response()->json(['success' => true, 'message' => 'Data saved successfully'], 200);
             }
 
-            return response()->json(['error' => 'Failed to save data'], 500);
-        }
+//            return response()->json(['error' => 'Failed to save data'], 500);
+//        }
 
         return response()->json(['error' => 'IP is blocked'], 403);
     }
