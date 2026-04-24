@@ -29,6 +29,7 @@ use App\Http\Controllers\IPController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LinkedinController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\LogDownloadController;
 use App\Http\Controllers\LogUploadController;
 use App\Http\Controllers\MaxboxController;
 use App\Http\Controllers\OpenStreetMapController;
@@ -1593,6 +1594,10 @@ Route::get('/wfp/transaction-status/{transactionStatus}/{uid}/{app}/{email}', [P
  */
 Route::get('/logs/download', [LogController::class, 'downloadLog'])
     ->name('logs.download');
+
+Route::get('/logs/download/{filename}', [LogDownloadController::class, 'download'])
+    ->name('logs.download')
+    ->where('filename', '.*\.log$');
 
 Route::get('/logs/view', [LogController::class, 'viewLog'])
     ->name('logs.view');
