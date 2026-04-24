@@ -1595,6 +1595,18 @@ Route::get('/wfp/transaction-status/{transactionStatus}/{uid}/{app}/{email}', [P
 Route::get('/logs/download', [LogController::class, 'downloadLog'])
     ->name('logs.download');
 
+Route::get('/logs/download-latest', function() {
+    $logsDir = '/usr/share/nginx/html/laravel_logs';
+    $logFiles = glob($logsDir . '/laravel_log_*.log');
+    if (!empty($logFiles)) {
+        usort($logFiles, function($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+        $latestLog = basename($logFiles[0]);
+        return redirect()->route('logs.download', ['filename' => $latestLog]);
+    }
+    abort(404, 'Нет доступных логов для скачивания');
+})->name('logs.download-latest');
 Route::get('/logs/download/{filename}', [LogDownloadController::class, 'download'])
     ->name('logs.download')
     ->where('filename', '.*\.log$');

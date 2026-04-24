@@ -26,8 +26,8 @@
         <p class="lead">Quick selection of requests and reporting period</p>
 
         <form action="{{ route('logs.download') }}" method="get" style="display:inline;">
-            <button type="submit" class="btn btn-primary btn-lg">
-                📤 Скачать логи
+            <button href="{{ route('logs.download-latest') }}" class="btn btn-primary btn-lg">
+                📤 Скачать последний лог
             </button>
         </form>
 
