@@ -18,19 +18,23 @@ class LogReportMail extends Mailable
     {
         $this->logUrl = $logUrl;
         $this->deletedCount = $deletedCount;
+        $this->expiryDate = now()->addDays($this->expiryDays)->format('d.m.Y');
     }
 
     public function build()
     {
-        $expiryDate = now()->addDays($this->expiryDays)->format('d.m.Y');
-
-        return $this->subject('📊 Отчёт по логам Laravel')
-            ->markdown('emails.log-report')
+        // Для HTML-версии:
+        return $this->subject('📊 Отчёт по логам Laravel — ' . config('app.name'))
+            ->view('emails.log-report-html')
             ->with([
                 'logUrl' => $this->logUrl,
                 'expiryDays' => $this->expiryDays,
-                'expiryDate' => $expiryDate,
+                'expiryDate' => $this->expiryDate,
                 'deletedCount' => $this->deletedCount,
             ]);
+
+        // Или для Markdown-версии:
+        // return $this->subject('📊 Отчёт по логам Laravel')
+        //             ->markdown('emails.log-report');
     }
 }
