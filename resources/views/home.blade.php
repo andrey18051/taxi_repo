@@ -25,9 +25,9 @@
         <h1 class="display-4">Database reports</h1>
         <p class="lead">Quick selection of requests and reporting period</p>
 
-        <a href="{{ route('logs.download-latest') }}" class="btn btn-primary btn-lg">
-            📤 Скачать последний лог
-        </a>
+{{--        <a href="{{ route('logs.download-latest') }}" class="btn btn-primary btn-lg">--}}
+{{--            📤 Скачать последний лог--}}
+{{--        </a>--}}
 
         <a href="{{ route('logs.view') }}" class="btn btn-primary btn-lg">
             📜 Посмотреть логи
