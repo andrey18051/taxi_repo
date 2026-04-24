@@ -25,23 +25,18 @@
         <h1 class="display-4">Database reports</h1>
         <p class="lead">Quick selection of requests and reporting period</p>
 
-        <form action="{{ route('logs.download') }}" method="get" style="display:inline;">
-            <button href="{{ route('logs.download-latest') }}" class="btn btn-primary btn-lg">
-                📤 Скачать последний лог
-            </button>
-        </form>
+        <a href="{{ route('logs.download-latest') }}" class="btn btn-primary btn-lg">
+            📤 Скачать последний лог
+        </a>
 
-        <form action="{{ route('logs.view') }}" method="get" style="display:inline;">
-            <button type="submit" class="btn btn-primary btn-lg">
-                📜 Посмотреть логи
-            </button>
-        </form>
+        <a href="{{ route('logs.view') }}" class="btn btn-primary btn-lg">
+            📜 Посмотреть логи
+        </a>
 
-        <form action="{{ route('logs.clear') }}" method="get" style="display:inline;">
-            <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Вы уверены, что хотите очистить логи?')">
-                🗑 Очистить логи
-            </button>
-        </form>
+        <a href="{{ route('logs.clear') }}" class="btn btn-danger btn-lg"
+           onclick="return confirm('Вы уверены, что хотите очистить логи?')">
+            🗑 Очистить логи
+        </a>
     </div>
 
     <div class="container">
