@@ -59,32 +59,82 @@
 
 
                  <div class="container-fluid">
-                     <div class="row olderOne">
+                     <div class="row">
+                         <ul class="olderOne">
+                             <div class="container-fluid">
+                                 <div class="row">
+                                     <li class="col-lg-6 col-sm-12">
+                                         <a href="{{route('orderReklama')}}">
+                                             <h5 class="text-center"><b>Попереднє замовлення</b></h5>
+                                             <small style="text-align: left">
+                                                 Можливість оформити замовлення таксі на бажаний час та день.
+                                                 Зручно при поїздках до аеропортів та вокзалів Києва. Швидко, надійно та недорого.
+                                                 Розрахуйте точну вартість на сайті.
+                                             </small>
+                                         </a>
+                                     </li>
 
-                         <div class="col-lg-6 col-sm-12 mb-3">
-                             <article>
-                                 <a href="{{ route('orderReklama') }}" class="text-decoration-none text-dark">
-                                     <h2 class="h5 text-center"><b>Попереднє замовлення</b></h2>
-                                     <p>
-                                         Можливість оформити замовлення таксі на бажаний час та день.
-                                         Зручно при поїздках до аеропортів та вокзалів Києва.
-                                     </p>
-                                 </a>
-                             </article>
-                         </div>
+                                     <li class="col-lg-6 col-sm-12">
+                                         <a href="{{route('driverReklama')}}">
+                                             <h5 class="text-center"><b>Послуга "тверезий водій"</b></h5>
+                                             <small style="text-align: left">
+                                                 Професійний водій нашої служби акуратно та швидко пережене за вказаною адресою
+                                                 або на найближче паркування Ваш автомобіль. Замовити на сайті
+                                             </small>
+                                         </a>
+                                     </li>
+                                 </div>
+                             </div>
+                             <div class="container-fluid">
+                                 <div class="row">
+                                     <li class="col-lg-6 col-sm-12">
+                                         <a href="{{route('stationReklama')}}">
+                                             <h5 class="text-center"><b>Таксі на вокзал</b></h5>
+                                             <small style="text-align: left">
+                                                 Можливість оформити замовлення таксі на бажаний час та день при поїздках до
+                                                 вокзалів Києва  та області. Швидко, надійно та недорого. Розрахуйте точну вартість на сайті.
+                                             </small>
+                                         </a>
+                                     </li>
 
-                         <div class="col-lg-6 col-sm-12 mb-3">
-                             <article>
-                                 <a href="{{ route('driverReklama') }}" class="text-decoration-none text-dark">
-                                     <h2 class="h5 text-center"><b>Послуга "тверезий водій"</b></h2>
-                                     <p>
-                                         Професійний водій швидко та безпечно доставить Ваш автомобіль.
-                                     </p>
-                                 </a>
-                             </article>
-                         </div>
+                                     <li class="col-lg-6 col-sm-12">
+                                         <a href="{{route('airportReklama')}}">
+                                             <h5 class="text-center"><b>Таксі в аеропорти Бориспіль та Жуляни</b></h5>
+                                             <small style="text-align: left">
+                                                 Оцініть  найвигідніші ціни та якісний сервіс на поїздку в аеропорти міста Києва.
+                                                 Розрахуйте вартість онлайн.
+                                             </small>
+                                         </a>
+                                     </li>
+                                 </div>
+                             </div>
+                             <div class="container-fluid">
+                                 <div class="row">
+                                     <li class="col-lg-6 col-sm-12">
+                                         <a href="{{route('regionReklama')}}">
+                                             <h5 class="text-center"><b>Дешеве обласне міжміське таксі</b></h5>
+                                             <small style="text-align: left">
+                                                 Великий парк комфортабельних автомобілів для міжміських поїздок.
+                                                 Дізнайтесь на сайті.
+                                             </small>
+                                         </a>
+                                     </li>
+
+                                     <li class="col-lg-6 col-sm-12">
+                                         <a href="{{route('tableReklama')}}">
+                                             <h5 class="text-center"><b>Зустріч водієм таксі з табличкою</b></h5>
+                                             <small style="text-align: left">
+                                                 Водій зустріне вас з табличкою біля виходу з паспортного контролю
+                                                 або біля виходу з вагона на вокзалі.
+                                             </small>
+                                         </a>
+                                     </li>
+                                 </div>
+                             </div>
+                         </ul>
 
                      </div>
+
                  </div>
                  <div class="container-fluid" style="margin: 10px">
                      <a href="{{route('homeCombo')}}"
