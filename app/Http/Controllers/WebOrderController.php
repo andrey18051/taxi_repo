@@ -4784,9 +4784,16 @@ class WebOrderController extends Controller
         return config("app.X-WO-API-APP-ID-SITE");
     }
 
+    /**
+     * @throws Exception
+     */
     public function connectAPI(): string
     {
-        return self::onlineAPI();
+        $city = "Kyiv City";
+        $application ="PAS1";
+
+        return AndroidTestOSMController::connectAPIAppOrder($city, $application);
+//        return self::onlineAPI();
     }
 
     public function addUser($name, $email)
