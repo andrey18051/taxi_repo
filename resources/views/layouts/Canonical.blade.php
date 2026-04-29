@@ -11,7 +11,6 @@
         gtag('config', 'G-9KNVGMXW35');
     </script>
 
-    <div id = "fb-root" ></div> <script async defer crossorigin = "anonymous" src = "https://connect.facebook.net/uk_UA/sdk.js#xfbml=1&version=v16.0&appId= 2833492766947710&autoLogAppEvents=1" nonce = "SRFVr2ee" ></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="all" />
@@ -19,8 +18,18 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="facebook-domain-verification" content="p8dbwrrn8d9oraatsor7slc8pql5dv" />
-   <title>Служба Таксі &#128662 від 40 грн по місту (Києв та Київська область)</title>
-    <meta name="description" content="Швидкі та надійні поїздки &#129523.  Подання таксі &#128662 за 4-6 хвилин. Працюємо більше 10 років. Доступні низькі тарифи &#127974. Замовлення на сайті та у смартфоні &#128241 комфортного таксі &#128662.  Кур'єрська доставка документів &#128462 та посилок &#128230.">
+    <title>Таксі у Києві та області від 40 грн | Таксі Лайт Юа</title>
+    <meta name="description" content="Онлайн замовлення таксі у Києві та Київській області. Фіксовані тарифи від 40 грн, трансфери, міжміські поїздки та кур'єрська доставка.">
+    <meta property="og:title" content="Таксі у Києві та області від 40 грн">
+    <meta property="og:description" content="Онлайн замовлення таксі, трансфери та міжміські поїздки.">
+    <meta property="og:url" content="https://m.easy-order-taxi.site/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ asset('img/social-preview.jpg') }}">
+    <meta property="og:image:alt" content="Сервіс онлайн-замовлення таксі у Києві">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Таксі у Києві та області від 40 грн">
+    <meta name="twitter:description" content="Онлайн замовлення таксі та трансфери.">
+    <meta name="twitter:image" content="{{ asset('img/social-preview.jpg') }}">
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
 
@@ -55,11 +64,14 @@
         setInterval(function() {
             var cd = new Date();
             var clockdat = document.getElementById("clockdat");
-            clockdat.innerHTML = cd.toLocaleTimeString();
+
+            if (clockdat) {
+                clockdat.innerHTML = cd.toLocaleTimeString();
+            }
         }, 1000);
     </script>
     <script src="{{ asset('js/app.js') }}" defer></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
     <script type="text/javascript" src="{{ asset('js/jquery.cookie.js') }}"></script>
     <!-- Scripts copyPastAdd-->
@@ -105,9 +117,20 @@
     <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/base/jquery-ui.css">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TaxiService",
+          "name": "Таксі Лайт Юа",
+          "url": "https://m.easy-order-taxi.site/",
+          "areaServed": "Київ та Київська область",
+          "description": "Онлайн замовлення таксі, трансфери та міжміські поїздки."
+        }
+    </script>
 </head>
 <body>
 
+<div id = "fb-root" ></div> <script async defer crossorigin = "anonymous" src = "https://connect.facebook.net/uk_UA/sdk.js#xfbml=1&version=v16.0&appId= 2833492766947710&autoLogAppEvents=1" nonce = "SRFVr2ee" ></script>
 
 <div id="app">
 
@@ -135,7 +158,9 @@
        if ($.cookie('name') !== 'value' ) {
 
         var delay_popup = 10;
-        setTimeout("document.getElementById('overlay').style.display='block'", delay_popup);
+           setTimeout(() => {
+               document.getElementById('overlay').style.display = 'block';
+           }, delay_popup);
     }
     //создаем куки
     $.cookie('name', 'value', {

@@ -51,94 +51,44 @@
                  <div class="container-fluid">
                      <a href="{{route('homeCombo')}}"
                         style="text-decoration: none" onclick="sessionStorage.clear();">
-                         <h4 class="text-center text-primary gradient"> <b>Пропонуємо Вам найсучасніший
-                                 сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h4>
+                         <h1 class="text-center text-primary gradient"> <b>Пропонуємо Вам найсучасніший
+                                 сервіс організації поїздок на комфортабельних авто за доступними цінами.</b></h1>
                      </a>
 
                  </div>
 
 
                  <div class="container-fluid">
-                     <div class="row">
-                         <ul class="olderOne">
-                             <div class="container-fluid">
-                                 <div class="row">
-                                     <li class="col-lg-6 col-sm-12">
-                                         <a href="{{route('orderReklama')}}">
-                                             <h5 class="text-center"><b>Попереднє замовлення</b></h5>
-                                             <small style="text-align: left">
-                                                 Можливість оформити замовлення таксі на бажаний час та день.
-                                                 Зручно при поїздках до аеропортів та вокзалів Києва. Швидко, надійно та недорого.
-                                                 Розрахуйте точну вартість на сайті.
-                                             </small>
-                                         </a>
-                                     </li>
+                     <div class="row olderOne">
 
-                                     <li class="col-lg-6 col-sm-12">
-                                         <a href="{{route('driverReklama')}}">
-                                             <h5 class="text-center"><b>Послуга "тверезий водій"</b></h5>
-                                             <small style="text-align: left">
-                                                 Професійний водій нашої служби акуратно та швидко пережене за вказаною адресою
-                                                 або на найближче паркування Ваш автомобіль. Замовити на сайті
-                                             </small>
-                                         </a>
-                                     </li>
-                                 </div>
-                             </div>
-                             <div class="container-fluid">
-                                 <div class="row">
-                                     <li class="col-lg-6 col-sm-12">
-                                         <a href="{{route('stationReklama')}}">
-                                             <h5 class="text-center"><b>Таксі на вокзал</b></h5>
-                                             <small style="text-align: left">
-                                                 Можливість оформити замовлення таксі на бажаний час та день при поїздках до
-                                                 вокзалів Києва  та області. Швидко, надійно та недорого. Розрахуйте точну вартість на сайті.
-                                             </small>
-                                         </a>
-                                     </li>
+                         <div class="col-lg-6 col-sm-12 mb-3">
+                             <article>
+                                 <a href="{{ route('orderReklama') }}" class="text-decoration-none text-dark">
+                                     <h2 class="h5 text-center"><b>Попереднє замовлення</b></h2>
+                                     <p>
+                                         Можливість оформити замовлення таксі на бажаний час та день.
+                                         Зручно при поїздках до аеропортів та вокзалів Києва.
+                                     </p>
+                                 </a>
+                             </article>
+                         </div>
 
-                                     <li class="col-lg-6 col-sm-12">
-                                         <a href="{{route('airportReklama')}}">
-                                             <h5 class="text-center"><b>Таксі в аеропорти Бориспіль та Жуляни</b></h5>
-                                             <small style="text-align: left">
-                                                 Оцініть  найвигідніші ціни та якісний сервіс на поїздку в аеропорти міста Києва.
-                                                 Розрахуйте вартість онлайн.
-                                             </small>
-                                         </a>
-                                     </li>
-                                 </div>
-                             </div>
-                             <div class="container-fluid">
-                                 <div class="row">
-                                     <li class="col-lg-6 col-sm-12">
-                                         <a href="{{route('regionReklama')}}">
-                                             <h5 class="text-center"><b>Дешеве обласне міжміське таксі</b></h5>
-                                             <small style="text-align: left">
-                                                 Великий парк комфортабельних автомобілів для міжміських поїздок.
-                                                 Дізнайтесь на сайті.
-                                             </small>
-                                         </a>
-                                     </li>
-
-                                     <li class="col-lg-6 col-sm-12">
-                                         <a href="{{route('tableReklama')}}">
-                                             <h5 class="text-center"><b>Зустріч водієм таксі з табличкою</b></h5>
-                                             <small style="text-align: left">
-                                                 Водій зустріне вас з табличкою біля виходу з паспортного контролю
-                                                 або біля виходу з вагона на вокзалі.
-                                             </small>
-                                         </a>
-                                     </li>
-                                 </div>
-                             </div>
-                         </ul>
+                         <div class="col-lg-6 col-sm-12 mb-3">
+                             <article>
+                                 <a href="{{ route('driverReklama') }}" class="text-decoration-none text-dark">
+                                     <h2 class="h5 text-center"><b>Послуга "тверезий водій"</b></h2>
+                                     <p>
+                                         Професійний водій швидко та безпечно доставить Ваш автомобіль.
+                                     </p>
+                                 </a>
+                             </article>
+                         </div>
 
                      </div>
-
                  </div>
                  <div class="container-fluid" style="margin: 10px">
                      <a href="{{route('homeCombo')}}"
-                        target="_blank" style="text-decoration: none; color: black"
+                        target="_blank" class="text-decoration-none text-dark"
                         onclick="sessionStorage.clear();">
                          <h5 style="text-align: center; " class="gradient">
                              <b>Служба Таксі Лайт Юа – це завжди надійно, комфортно та вигідно. <br>
@@ -157,7 +107,7 @@
                          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
+                                    class="text-decoration-none text-dark" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Таксі Лайт Юа - це завжди найнижча онлайн ціна таксі
                                          Києва та області. Як викликати таксі у місті Києві? Замовити
@@ -183,7 +133,7 @@
                          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="#" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    class="text-decoration-none text-dark">
                                      <p style="text-align: justify">
                                          Служба Таксі Лайт Юа - це економ служба поїздок у Києві та по
                                          міжміську і це завжди швидко, доступно та недорого.
@@ -205,7 +155,7 @@
                          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
+                                    class="text-decoration-none text-dark" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Служба Таксі Лайт Юа - це найкращий вибір завжди дешевого таксі,
                                          онлайн розрахунок вартості послуг завжди можна зробити на сайті швидше,
@@ -224,7 +174,7 @@
                          <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
+                                    class="text-decoration-none text-dark" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Є періоди, коли через знижений попит на послугу перевізники
                                          ставлять мінімальні тарифи на поїздки до таксі. Це будні дні
@@ -245,7 +195,7 @@
                          <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
+                                    class="text-decoration-none text-dark" onclick="sessionStorage.clear();">
                                      <p style="text-align: justify">
                                          Служба Таксі Лайт Юа – це поїздки містом від 40 грн.
                                      </p>
@@ -262,7 +212,7 @@
                          <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('callBackForm')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    class="text-decoration-none text-dark">
                                      <p style="text-align: justify">
                                          У комендантську годину Ви можете залишити свій телефон на сайті
                                          служби Таксі Лайт Юа та наш оператор зв'яжеться з Вами у зручний для Вас час.
@@ -280,7 +230,7 @@
                          <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('homeCombo')}}" target="_blank"
-                                    style="text-decoration: none; color: black" onclick="sessionStorage.clear();">
+                                    class="text-decoration-none text-dark" onclick="sessionStorage.clear();">
                                      <p>
                                          За допомогою служби Таксі Лайт Юа
                                          Ви комфортно та швидко дістанетеся до будь-якої точки Києва та області.
@@ -312,7 +262,7 @@
                          <div id="collapseEight" class="accordion-collapse collapse" aria-labelledby="headingEight" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="#poslugy" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    class="text-decoration-none text-dark">
                                      <p style="text-align: justify">
                                          Таксі Лайт Юа - це замовлення таксі та трансферів в аеропорт, на залізничний
                                          вокзал та автовокзал, а також зустріч із табличкою. Втомилися від
@@ -333,7 +283,7 @@
                          <div id="collapseNine" class="accordion-collapse collapse" aria-labelledby="headingNine" data-bs-parent="#accordionExample">
                              <div class="accordion-body">
                                  <a href="{{route('callWorkForm')}}" target="_blank"
-                                    style="text-decoration: none; color: black">
+                                    class="text-decoration-none text-dark">
                                      <p style="text-align: justify">
                                          Залишіть телефон на сайті і зв'яжемося з Вами.
                                      </p>
@@ -359,24 +309,36 @@
 
     <script>
         let slideIndex = 0;
-        showSlides();
 
         function showSlides() {
-            let i;
-            let slides = document.getElementsByClassName("mySlides");
-            let dots = document.getElementsByClassName("dot");
-            for (i = 0; i < slides.length; i++) {
-                slides[i].style.display = "none";
+            const slides = document.getElementsByClassName("mySlides");
+            const dots = document.getElementsByClassName("dot");
+
+            if (!slides.length) return;
+
+            for (let slide of slides) {
+                slide.style.display = "none";
             }
+
             slideIndex++;
-            if (slideIndex > slides.length) {slideIndex = 1}
-            for (i = 0; i < dots.length; i++) {
-                dots[i].className = dots[i].className.replace(" active", "");
+            if (slideIndex > slides.length) {
+                slideIndex = 1;
             }
-            slides[slideIndex-1].style.display = "block";
-            dots[slideIndex-1].className += " active";
-            setTimeout(showSlides, 2000); // Change image every 5 seconds
+
+            for (let dot of dots) {
+                dot.classList.remove("active");
+            }
+
+            slides[slideIndex - 1].style.display = "block";
+
+            if (dots[slideIndex - 1]) {
+                dots[slideIndex - 1].classList.add("active");
+            }
+
+            setTimeout(showSlides, 5000);
         }
+
+        document.addEventListener("DOMContentLoaded", showSlides);
     </script>
 
 @endsection
