@@ -47,15 +47,30 @@ class AutoCancelJob implements ShouldQueue
             "city_mykolaiv", "city_chernivtsi", "city_lutsk", "all"
         ];
 
+        if ($order->server === "http://188.40.143.61:7222") {
+            // Киевский сервер - проверяем комендантский час
+            $kyivTime = now()->timezone('Europe/Kiev');
+            $currentTime = $kyivTime->format('H:i');
+
+            $startTime = config('app.start_time', '00:00');
+            $endTime = config('app.end_time', '05:00');
+
+            // Если сейчас НЕ комендантский час - выходим
+            if ($currentTime < $startTime || $currentTime > $endTime) {
+                Log::info("AutoCancelJob: киевский сервер, но текущее время {$currentTime} вне комендантского часа ({$startTime} - {$endTime}) - автоотмена не применяется");
+                return;
+            }
+
+            Log::info("AutoCancelJob: киевский сервер, время {$currentTime} в комендантском часе - применяем автоотмену");
+        }
+
+// Проверка города для всех серверов (или только для некиевских - смотрите по логике)
         if (!in_array($order->city, $autoCancelCities)) {
             Log::info("AutoCancelJob: автоотмена не применяется для города {$order->city}");
             return;
         }
 
-        if ($order->auto !== null) {
-            Log::info("AutoCancelJob: авто уже назначено, отмена не требуется (uid {$this->uid})");
-            return;
-        }
+// Дальше логика автоотмены...
 
         // Определяем приложение по комментарию
         switch ($order->comment) {
@@ -65,8 +80,11 @@ class AutoCancelJob implements ShouldQueue
             case 'taxi_easy_ua_pas2':
                 $application = config("app.X-WO-API-APP-ID-PAS2");
                 break;
-            default:
+            case 'taxi_easy_ua_pas4':
                 $application = config("app.X-WO-API-APP-ID-PAS4");
+                break;
+            default:
+                $application = config("app.X-WO-API-APP-ID-PAS5");
         }
 
         if ($order->city == "all") {

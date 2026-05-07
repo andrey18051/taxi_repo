@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Jobs\AutoCancelJob;
 use App\Jobs\CheckAndCancelOrderJob;
 use App\Jobs\SimplePollStatusJob;
 use App\Models\Orderweb;
@@ -551,6 +552,14 @@ class MyTaxiApiController extends Controller
                     $application,
                     $email
                 )->onQueue('high')->delay(now()->addSeconds(50));
+
+                $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
+                Log::debug("AutoCancelJob:  $delayMinutes  ");
+                dispatch(new AutoCancelJob($dispatching_order_uid))
+                    ->delay(now()->addMinutes($delayMinutes))
+                    ->onQueue('low');
+
+
             }
 
 
