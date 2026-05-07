@@ -62,13 +62,15 @@ class AutoCancelJob implements ShouldQueue
             }
 
             Log::info("AutoCancelJob: киевский сервер, время {$currentTime} в комендантском часе - применяем автоотмену");
+        } else {
+            // Проверка города для всех серверов (только для не 188.40.143.61:7222)
+            if (!in_array($order->city, $autoCancelCities)) {
+                Log::info("AutoCancelJob: автоотмена не применяется для города {$order->city}");
+                return;
+            }
         }
 
-// Проверка города для всех серверов (или только для некиевских - смотрите по логике)
-        if (!in_array($order->city, $autoCancelCities)) {
-            Log::info("AutoCancelJob: автоотмена не применяется для города {$order->city}");
-            return;
-        }
+
 
 // Дальше логика автоотмены...
 
