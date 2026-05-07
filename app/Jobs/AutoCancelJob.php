@@ -38,7 +38,7 @@ class AutoCancelJob implements ShouldQueue
             Log::warning("AutoCancelJob: заказ с uid {$uid} не найден.");
             return;
         }
-        if (!$order->required_time != null) {
+        if ($order->required_time != null) {
             Log::warning("AutoCancelJob: required_time {$uid} не null.");
             return;
         }
