@@ -516,7 +516,11 @@ class MyTaxiApiController extends Controller
             Log::info('💾 Сохранение заказа в базу...');
             $order_id = (new UniversalAndroidFunctionController)->saveOrder($params, $identificationId);
             Log::info('✅ Заказ успешно сохранен в базу');
-
+            $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
+            Log::debug("AutoCancelJob:  $delayMinutes  ");
+            dispatch(new AutoCancelJob($dispatching_order_uid))
+                ->delay(now()->addMinutes($delayMinutes))
+                ->onQueue('low');
             if($wfpInvoice != "*") {
                 $orderReference = $wfpInvoice;
                 $amount = $clientCost;
@@ -553,11 +557,7 @@ class MyTaxiApiController extends Controller
                     $email
                 )->onQueue('high')->delay(now()->addSeconds(50));
 
-                $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
-                Log::debug("AutoCancelJob:  $delayMinutes  ");
-                dispatch(new AutoCancelJob($dispatching_order_uid))
-                    ->delay(now()->addMinutes($delayMinutes))
-                    ->onQueue('low');
+
 
 
             }
