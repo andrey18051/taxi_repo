@@ -34,6 +34,7 @@ class BackupDatabase extends Command
         }
 
         $this->info("Создание дампа базы данных: {$dbName}");
+
         // Получаем список только таблиц (исключаем вьюхи)
         $tables = DB::select("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'");
         $tableNames = [];

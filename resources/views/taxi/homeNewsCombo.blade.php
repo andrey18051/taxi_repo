@@ -7,13 +7,17 @@
 
     $connection = new  WebOrderController();
     $quites = $connection->quites_all();
+    $quitesArr = [];
     $i = -1;
     foreach ($quites as $item) {
         $i++;
         $quitesArr[$i] =  $item['name'];
 
     }
-    $rand =  rand(0, $i);
+    $rand = 0;
+    if ($i >= 0) {
+        $rand = rand(0, $i);
+    }
     /**
     * Бегущая строка
     */
@@ -345,12 +349,14 @@
 
                  <news-component></news-component>
                  <div class="fb-comments" data-href="https://m.easy-order-taxi.site" data-width="auto" data-numposts="5"></div>
+                 @if($i >= 0)
                  <a  href="{{route('homeCombo')}}" target="_blank" style="text-decoration: none;" onclick="sessionStorage.clear();">
                      <blockquote class="blockquote-3">
                          <p> <?php echo $quitesArr[$rand] ?></p>
                          <cite>Цитата дня</cite>
                      </blockquote>
                  </a>
+                 @endif
             </div>
         </div>
 

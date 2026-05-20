@@ -11,16 +11,19 @@
         gtag('config', 'G-9KNVGMXW35');
     </script>
 
-    <div id = "fb-root" ></div> <script async defer crossorigin = "anonymous" src = "https://connect.facebook.net/uk_UA/sdk.js#xfbml=1&version=v16.0&appId= 2833492766947710&autoLogAppEvents=1" nonce = "SRFVr2ee" ></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="all" />
-    <link rel="canonical" href="https://m.easy-order-taxi.site/" />
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="facebook-domain-verification" content="p8dbwrrn8d9oraatsor7slc8pql5dv" />
    <title>Служба Таксі &#128662 від 40 грн по місту (Києв та Київська область)</title>
     <meta name="description" content="Швидкі та надійні поїздки &#129523. Убер послуги подання таксі &#128662 за 4-6 хвилин. Працюємо більше 10 років. Доступні низькі тарифи &#127974. Замовлення на сайті та у смартфоні &#128241 комфортного таксі &#128662.  Кур'єрська доставка документів &#128462 та посилок &#128230.">
+    @php
+        $seoTitle = 'Служба Таксі від 40 грн по місту (Київ та Київська область)';
+        $seoDescription = 'Швидке подання таксі за 4-6 хвилин. Замовлення на сайті та у смартфоні.';
+    @endphp
+    @include('layouts.partials.seo-head')
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
 
@@ -107,7 +110,7 @@
     <link href="{{ asset('css/appAdd.css') }}" rel="stylesheet">
 </head>
 <body>
-
+@include('layouts.partials.facebook-sdk')
 
 <div id="app">
 

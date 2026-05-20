@@ -124,6 +124,7 @@ class TypeaheadController extends Controller
 
     public function autocompleteSearchCombo()
     {
+        $data = [];
         $i = 0;
 
         $combos = Combo::all()->sortByDesc('name');

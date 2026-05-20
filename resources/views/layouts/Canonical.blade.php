@@ -14,22 +14,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="all" />
-    <link rel="canonical" href="https://m.easy-order-taxi.site/" />
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="facebook-domain-verification" content="p8dbwrrn8d9oraatsor7slc8pql5dv" />
     <title>Таксі у Києві та області від 40 грн | Таксі Лайт Юа</title>
     <meta name="description" content="Онлайн замовлення таксі у Києві та Київській області. Фіксовані тарифи від 40 грн, трансфери, міжміські поїздки та кур'єрська доставка.">
-    <meta property="og:title" content="Таксі у Києві та області від 40 грн">
-    <meta property="og:description" content="Онлайн замовлення таксі, трансфери та міжміські поїздки.">
-    <meta property="og:url" content="https://m.easy-order-taxi.site/">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="{{ asset('img/social-preview.jpg') }}">
-    <meta property="og:image:alt" content="Сервіс онлайн-замовлення таксі у Києві">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Таксі у Києві та області від 40 грн">
-    <meta name="twitter:description" content="Онлайн замовлення таксі та трансфери.">
-    <meta name="twitter:image" content="{{ asset('img/social-preview.jpg') }}">
+    @php
+        $seoTitle = 'Таксі у Києві та області від 40 грн | Таксі Лайт Юа';
+        $seoDescription = 'Онлайн замовлення таксі, трансфери та міжміські поїздки.';
+    @endphp
+    @include('layouts.partials.seo-head')
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
 
@@ -129,8 +123,7 @@
     </script>
 </head>
 <body>
-
-<div id = "fb-root" ></div> <script async defer crossorigin = "anonymous" src = "https://connect.facebook.net/uk_UA/sdk.js#xfbml=1&version=v16.0&appId= 2833492766947710&autoLogAppEvents=1" nonce = "SRFVr2ee" ></script>
+@include('layouts.partials.facebook-sdk')
 
 <div id="app">
 

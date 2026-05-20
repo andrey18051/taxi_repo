@@ -6,9 +6,13 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="google-site-verification" content="EvCZdtAnMAe93bc1OvK2SSBTfq0S3M1nI7qnWqHdyAQ" />
-    <link rel="canonical" href="https://m.easy-order-taxi.site/" />
     <title>{{ config('app.name') }}</title>
     <meta name="description" content="Швидкі та надійні поїздки &#129523.  Подання таксі &#128662 за 4-6 хвилин. Доступні низькі тарифи &#127974. Кур'єрська доставка документів &#128462 та посилок &#128230.">
+    @php
+        $seoTitle = config('app.name');
+        $seoDescription = 'Швидке подання таксі за 4-6 хвилин. Доступні низькі тарифи.';
+    @endphp
+    @include('layouts.partials.seo-head')
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" >
 
