@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Models\Orderweb;
-use App\Models\Uid_history;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -43,23 +42,21 @@ class AutoCancelJob implements ShouldQueue
             return;
         }
 
-        // Города, где разрешена автоотмена
-        $autoCancelCities = [
-            "city_lviv", "city_ivano_frankivsk", "city_vinnytsia", "city_poltava",
-            "city_sumy", "city_kharkiv", "city_chernihiv", "city_rivne", "city_ternopil",
-            "city_khmelnytskyi", "city_zakarpattya", "city_zhytomyr", "city_kropyvnytskyi",
-            "city_mykolaiv", "city_chernivtsi", "city_lutsk", "all"
-        ];
+        if ($order->auto !== null) {
+            Log::info("AutoCancelJob: авто уже назначено, отмена не требуется (uid {$uid})");
+            return;
+        }
 
-        if ($order->server === "http://188.40.143.61:7222") {
-            // Киевский сервер - проверяем комендантский час
+        if ($order->server === 'my_server_api') {
+            Log::info("AutoCancelJob: заказ my_server_api {$uid}, применяем автоотмену");
+        } elseif ($order->server === 'http://188.40.143.61:7222') {
+            // Киевский сервер — только в комендантский час
             $kyivTime = now()->timezone('Europe/Kiev');
             $currentTime = $kyivTime->format('H:i');
 
             $startTime = config('app.start_time', '00:00');
             $endTime = config('app.end_time', '05:00');
 
-            // Если сейчас НЕ комендантский час - выходим
             if ($currentTime < $startTime || $currentTime > $endTime) {
                 Log::info("AutoCancelJob: киевский сервер, но текущее время {$currentTime} вне комендантского часа ({$startTime} - {$endTime}) - автоотмена не применяется");
                 return;
@@ -67,8 +64,14 @@ class AutoCancelJob implements ShouldQueue
 
             Log::info("AutoCancelJob: киевский сервер, время {$currentTime} в комендантском часе - применяем автоотмену");
         } else {
-            // Проверка города для всех серверов (только для не 188.40.143.61:7222)
-            if (!in_array($order->city, $autoCancelCities)) {
+            $autoCancelCities = [
+                'city_lviv', 'city_ivano_frankivsk', 'city_vinnytsia', 'city_poltava',
+                'city_sumy', 'city_kharkiv', 'city_chernihiv', 'city_rivne', 'city_ternopil',
+                'city_khmelnytskyi', 'city_zakarpattya', 'city_zhytomyr', 'city_kropyvnytskyi',
+                'city_mykolaiv', 'city_chernivtsi', 'city_lutsk', 'all',
+            ];
+
+            if (!in_array($order->city, $autoCancelCities, true)) {
                 Log::info("AutoCancelJob: автоотмена не применяется для города {$order->city}");
                 return;
             }
@@ -93,11 +96,7 @@ class AutoCancelJob implements ShouldQueue
                 $application = config("app.X-WO-API-APP-ID-PAS5");
         }
 
-        if ($order->city == "all") {
-            $city = "Kyiv City";
-        } else {
-            $city = "OdessaTest";
-        }
+        $city = $this->resolveCancelCity($order);
 
         (new AndroidTestOSMController)->webordersCancel(
             $uid,
@@ -132,5 +131,24 @@ class AutoCancelJob implements ShouldQueue
 //        }
 
         Log::info("AutoCancelJob: заказ {$this->uid} автоматически отменён через отложенную задачу.");
+    }
+
+    /**
+     * Город для webordersCancel (для my_server_api внешний API не вызывается, но нужен для Firestore/логики).
+     */
+    private function resolveCancelCity(Orderweb $order): string
+    {
+        if ($order->city === 'all' || $order->city === 'city_kiev') {
+            return 'Kyiv City';
+        }
+
+        $cityMap = [
+            'city_odessa' => 'OdessaTest',
+            'city_cherkassy' => 'Cherkasy Oblast',
+            'city_zaporizhzhia' => 'Zaporizhzhia',
+            'city_dnipro' => 'DniproTest',
+        ];
+
+        return $cityMap[$order->city] ?? 'OdessaTest';
     }
 }
