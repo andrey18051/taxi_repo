@@ -114,6 +114,10 @@ Route::get('/test', function () {
     dd($finduser);
 })->name('test');
 
+/** Состояние Киева: комендантский час + РЭБ/тревога (City-Info, как PAS_4) */
+Route::get('/kyiv-state/check', [App\Http\Controllers\KyivStateController::class, 'check'])
+    ->name('kyiv-state.check');
+
 
 
 Route::get('/taxi-ai-test', [App\Http\Controllers\TaxiAiTestController::class, 'runTest']);

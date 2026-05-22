@@ -2,9 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Helpers\KyivStateHelper;
 use App\Http\Controllers\AndroidTestOSMController;
+use App\Http\Controllers\CentrifugoController;
+use App\Http\Controllers\FCMController;
 use App\Http\Controllers\MemoryOrderChangeController;
+use App\Http\Controllers\PusherController;
 use App\Models\Orderweb;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -51,18 +56,14 @@ class AutoCancelJob implements ShouldQueue
             Log::info("AutoCancelJob: заказ my_server_api {$uid}, применяем автоотмену");
         } elseif ($order->server === 'http://188.40.143.61:7222') {
             // Киевский сервер — только в комендантский час
-            $kyivTime = now()->timezone('Europe/Kiev');
-            $currentTime = $kyivTime->format('H:i');
+            $curfew = KyivStateHelper::getCurfewStatus();
 
-            $startTime = config('app.start_time', '00:00');
-            $endTime = config('app.end_time', '05:00');
-
-            if ($currentTime < $startTime || $currentTime > $endTime) {
-                Log::info("AutoCancelJob: киевский сервер, но текущее время {$currentTime} вне комендантского часа ({$startTime} - {$endTime}) - автоотмена не применяется");
+            if (!$curfew['curfew_active']) {
+                Log::info("AutoCancelJob: киевский сервер, но текущее время {$curfew['current_time']} вне комендантского часа ({$curfew['start_time']} - {$curfew['end_time']}) - автоотмена не применяется");
                 return;
             }
 
-            Log::info("AutoCancelJob: киевский сервер, время {$currentTime} в комендантском часе - применяем автоотмену");
+            Log::info("AutoCancelJob: киевский сервер, время {$curfew['current_time']} в комендантском часе - применяем автоотмену");
         } else {
             $autoCancelCities = [
                 'city_lviv', 'city_ivano_frankivsk', 'city_vinnytsia', 'city_poltava',
@@ -103,6 +104,8 @@ class AutoCancelJob implements ShouldQueue
             $city,
             $application
         );
+
+        $this->sendCancelNotification($order, $uid);
 
 
 //        $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
@@ -150,5 +153,69 @@ class AutoCancelJob implements ShouldQueue
         ];
 
         return $cityMap[$order->city] ?? 'OdessaTest';
+    }
+
+    private function sendCancelNotification(Orderweb $order, string $uid): void
+    {
+        if (empty($order->email) || $order->email === 'no email') {
+            Log::info("AutoCancelJob: push об отмене не отправлен — нет email (uid {$uid})");
+            return;
+        }
+
+        $user = User::where('email', $order->email)->first();
+        if (!$user) {
+            Log::warning("AutoCancelJob: пользователь не найден для push об отмене (email {$order->email}, uid {$uid})");
+            return;
+        }
+
+        $from = trim((string) ($order->routefrom ?? ''));
+        $to = trim((string) ($order->routeto ?? ''));
+        if ($from !== '' && $to !== '') {
+            $body = $from . ' — ' . $to;
+        } elseif ($from !== '') {
+            $body = $from;
+        } elseif ($to !== '') {
+            $body = $to;
+        } else {
+            $body = $uid;
+        }
+
+        $app = $this->resolvePasApp($order);
+
+        try {
+            (new FCMController)->sendNotificationCancel(
+                $body,
+                $app,
+                $user->id,
+                $uid
+            );
+            Log::info("AutoCancelJob: FCM push об отмене отправлен (uid {$uid})");
+        } catch (\Throwable $e) {
+            Log::error("AutoCancelJob: ошибка FCM push об отмене (uid {$uid}): " . $e->getMessage());
+        }
+
+        if (!empty($order->email) && $order->email !== 'no email') {
+            try {
+                (new PusherController)->sentCanceledStatus($app, $order->email, $uid);
+                (new CentrifugoController)->sentCanceledStatus($app, $order->email, $uid);
+                Log::info("AutoCancelJob: Pusher/Centrifugo canceled отправлен (uid {$uid})");
+            } catch (\Throwable $e) {
+                Log::error("AutoCancelJob: ошибка Pusher/Centrifugo (uid {$uid}): " . $e->getMessage());
+            }
+        }
+    }
+
+    private function resolvePasApp(Orderweb $order): string
+    {
+        switch ($order->comment) {
+            case 'taxi_easy_ua_pas1':
+                return 'PAS1';
+            case 'taxi_easy_ua_pas2':
+                return 'PAS2';
+            case 'taxi_easy_ua_pas4':
+                return 'PAS4';
+            default:
+                return 'PAS5';
+        }
     }
 }

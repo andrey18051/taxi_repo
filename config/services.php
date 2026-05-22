@@ -87,4 +87,11 @@ return [
         'cache_ttl' => 5, // Время жизни кэша в секундах
         'curl_timeout' => 5, // Таймаут подключения cURL в секундах
     ],
+
+    /** City-Info API (reb_active, air_alarm) — как CityInfoHelper в PAS_4 */
+    'city_info' => [
+        'base_url' => env('CITY_INFO_BASE_URL', 'https://city-info.utax.top/api/data/'),
+        'token' => env('UTAX_API_KEY'),
+        'timeout' => env('CITY_INFO_TIMEOUT', 5),
+    ],
 ];

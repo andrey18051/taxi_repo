@@ -278,6 +278,85 @@ class FCMController extends Controller
         }
     }
 
+    /**
+     * Push-уведомление об отмене заказа (аналог sendNotificationAuto для скасування).
+     */
+    public function sendNotificationCancel($body, $app, $user_id, $uid)
+    {
+        Log::info('=== Запуск sendNotificationCancel ===', [
+            'body'    => $body,
+            'app'     => $app,
+            'user_id' => $user_id,
+            'uid'     => $uid,
+        ]);
+
+        $userToken = UserTokenFmsS::where('user_id', $user_id)->first();
+
+        if ($userToken === null) {
+            Log::warning('UserTokenFmsS не найден', ['user_id' => $user_id]);
+            return response()->json(['message' => 'User token not found'], 404);
+        }
+
+        $to = null;
+        $firebaseMessaging = null;
+
+        switch ($app) {
+            case 'PAS1':
+                $to = $userToken->token_app_pas_1;
+                $firebaseMessaging = app('firebase.messaging')['app1'] ?? null;
+                break;
+            case 'PAS2':
+                $to = $userToken->token_app_pas_2;
+                $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
+                break;
+            case 'PAS4':
+                $to = $userToken->token_app_pas_4;
+                $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
+                break;
+            default:
+                $to = $userToken->token_app_pas_5;
+                $firebaseMessaging = app('firebase.messaging')['app5'] ?? null;
+        }
+
+        if (empty($to)) {
+            Log::error('Токен пустой для пользователя', ['user_id' => $user_id, 'app' => $app]);
+            return response()->json(['message' => 'Empty token for user'], 400);
+        }
+
+        if ($firebaseMessaging === null) {
+            Log::error('FirebaseMessaging не настроен для приложения', ['app' => $app]);
+            return response()->json(['message' => 'Firebase messaging config not found'], 500);
+        }
+
+        $detail = $body !== '' ? $body : $uid;
+        $dataPayload = [
+            'message_uk' => 'Замовлення скасовано: ' . $detail,
+            'message_en' => 'Order cancelled: ' . $detail,
+            'message_ru' => 'Заказ отменён: ' . $detail,
+            'uid'        => $uid,
+            'status'     => 'cancelled',
+        ];
+
+        try {
+            $message = CloudMessage::withTarget('token', $to)->withData($dataPayload);
+            $firebaseMessaging->send($message);
+            Log::info('sendNotificationCancel: уведомление отправлено', ['token' => $to, 'uid' => $uid]);
+
+            return response()->json(['message' => 'Notification sent']);
+        } catch (\Exception $e) {
+            Log::error('sendNotificationCancel: ошибка отправки', [
+                'error' => $e->getMessage(),
+                'token' => $to,
+                'uid'   => $uid,
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to send notification',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function sendNotificationOrderCost($orderCost, $app, $user_id)
     {
         Log::info("=== Запуск sendNotificationOrderCost ===", [
