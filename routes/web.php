@@ -47,7 +47,6 @@ use App\Http\Controllers\TaxiAiTestController;
 use App\Http\Controllers\TaxiController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\KafkaController;
-use App\Http\Controllers\KyivStateController;
 use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\TypeaheadController;
 use App\Http\Controllers\TypeaheadObjectController;
@@ -116,7 +115,7 @@ Route::get('/test', function () {
 })->name('test');
 
 /** Состояние Киева: комендантский час + РЭБ/тревога (City-Info, как PAS_4) */
-Route::get('/kyiv-state/check', [KyivStateController::class, 'check'])
+Route::get('/kyiv-state/check', [CityController::class, 'kyivStateCheck'])
     ->name('kyiv-state.check');
 
 

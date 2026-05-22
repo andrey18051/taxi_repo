@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Helpers\KyivStateHelper;
+use App\Helpers\TimeHelper;
 use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\CentrifugoController;
 use App\Http\Controllers\FCMController;
@@ -56,7 +56,7 @@ class AutoCancelJob implements ShouldQueue
             Log::info("AutoCancelJob: заказ my_server_api {$uid}, применяем автоотмену");
         } elseif ($order->server === 'http://188.40.143.61:7222') {
             // Киевский сервер — только в комендантский час
-            $curfew = KyivStateHelper::getCurfewStatus();
+            $curfew = TimeHelper::getCurfewStatus();
 
             if (!$curfew['curfew_active']) {
                 Log::info("AutoCancelJob: киевский сервер, но текущее время {$curfew['current_time']} вне комендантского часа ({$curfew['start_time']} - {$curfew['end_time']}) - автоотмена не применяется");

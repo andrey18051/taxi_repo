@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ConnectionErrorHandler;
+use App\Helpers\TimeHelper;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\City;
@@ -512,5 +513,43 @@ class CityController extends Controller
             'card_max_pay' => $city["card_max_pay"],
             'bonus_max_pay' => $city["bonus_max_pay"]
         ];
+    }
+
+    /**
+     * GET /kyiv-state/check — комендантский час + РЭБ/тревога (City-Info, как PAS_4).
+     */
+    public function kyivStateCheck(Request $request)
+    {
+        try {
+            $lang = $request->query('lang', 'uk');
+            $city = $request->query('city', 'kiev');
+            $fetchCityInfo = $request->query('city_info', '1') !== '0';
+
+            if (strtolower($city) === 'kiev' || $city === 'Kyiv City') {
+                $data = TimeHelper::getKyivState($lang, $fetchCityInfo);
+            } else {
+                $data = [
+                    'city' => $city,
+                    'city_slug' => TimeHelper::normalizeCitySlug($city),
+                    'curfew' => TimeHelper::getCurfewStatus(),
+                    'city_info' => $fetchCityInfo
+                        ? TimeHelper::fetchCityInfo($city, $lang)
+                        : ['ok' => false, 'skipped' => true],
+                ];
+                if ($fetchCityInfo && ($data['city_info']['ok'] ?? false)) {
+                    $data['reb_active'] = (bool) $data['city_info']['reb_active'];
+                    $data['air_alarm'] = (bool) $data['city_info']['air_alarm'];
+                }
+            }
+
+            return response()->json($data);
+        } catch (\Throwable $e) {
+            Log::error('kyivStateCheck failed', ['message' => $e->getMessage()]);
+
+            return response()->json([
+                'ok' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
