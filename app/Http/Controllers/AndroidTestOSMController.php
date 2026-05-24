@@ -4866,16 +4866,17 @@ class AndroidTestOSMController extends Controller
         Log::debug("2 connectAPI $connectAPI");
 
         if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "ErrorMessage";
-
-            return $response_error;
+            Log::info('Внешний сервер недоступен — переключение на my_server_api', [
+                'city' => $city,
+                'application' => $application,
+            ]);
+            $connectAPI = 'my_server_api';
         }
 
         // === 3. Проверка блокировки API ===
         $cacheKeyBlock = "blocked_api_" . md5($connectAPI);
 
-        if (cache()->has($cacheKeyBlock)) {
+        if ($connectAPI != 'my_server_api' && cache()->has($cacheKeyBlock)) {
             Log::warning("[costSearchMarkersTime] API {$connectAPI} заблокирован. Используем резервный сервер.");
 
             return self::tryConnectToCity(
@@ -4973,7 +4974,7 @@ class AndroidTestOSMController extends Controller
 //            'custom_extra_charges' => '20' //Список идентификаторов пользовательских доп. услуг (api/settings). Параметр добавлен в версии 1.46.0. 	[20, 12, 13]*/
         ];
 
-        if ($connectAPI == 400 || $city == "foreign countries") {
+        if ($connectAPI == 'my_server_api' || $city == "foreign countries") {
             Log::info('Переключение на MyTaxi API', [
                 'city' => $city,
                 'connectAPI' => $connectAPI,
@@ -9883,10 +9884,11 @@ class AndroidTestOSMController extends Controller
         Log::debug("6 connectAPI $connectAPI");
 
         if ($connectAPI == 400) {
-            $response_error["order_cost"] = 0;
-            $response_error["Message"] = "ErrorMessage";
-
-            return $response_error;
+            Log::info('Внешний сервер недоступен — переключение на my_server_api', [
+                'city' => $city,
+                'application' => $application,
+            ]);
+            $connectAPI = 'my_server_api';
         }
         $params["startLat"] = $originLatitude; //
         $params["startLan"] = $originLongitude; //
@@ -9906,10 +9908,11 @@ class AndroidTestOSMController extends Controller
         } else {
             $params['email'] = "no email";
         }
-        if ($userArr[2] == 'bonus_payment'
+        if ($connectAPI != 'my_server_api'
+            && ($userArr[2] == 'bonus_payment'
             || $userArr[2] == 'fondy_payment'
             || $userArr[2] == 'mono_payment'
-            || $userArr[2] == 'wfp_payment'
+            || $userArr[2] == 'wfp_payment')
         ) {
             $address = str_replace("http://", "", $connectAPI);
             $card_max_pay = CityController::cardPayServer($address, $application);
@@ -10074,7 +10077,7 @@ class AndroidTestOSMController extends Controller
         orderSearchMarkersVisicom параметры" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         (new MessageSentController)->sentMessageAdminLog($messageAdmin);
         $parameter['pay_system'] = $userArr[2];
-        if ($connectAPI == 400 || $city == "foreign countries") {
+        if ($connectAPI == 'my_server_api' || $city == "foreign countries") {
             $parameter['comment_info'] = $comment;
             return (new MyTaxiApiController)->orderMyApiTaxi(
                 $parameter,
