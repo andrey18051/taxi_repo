@@ -135,16 +135,36 @@ class KafkaService
                 'timeout' => 5,
             ]);
 
-            // 3. Читаем сообщения — ВОТ ГЛАВНОЕ ИСПРАВЛЕНИЕ
-            $response = $this->client->get("/consumers/{$consumerGroup}/instances/{$instance}/records", [
-                'headers' => [
-                    'Accept' => 'application/vnd.kafka.json.v2+json',
-                ],
-                'timeout'     => $timeout + 2,
-                'read_timeout' => $timeout + 2,
-            ]);
+            // Даём consumer group время на assign partitions (иначе первый poll часто пустой)
+            usleep(400000);
 
-            $messages = json_decode($response->getBody(), true) ?? [];
+            // 3. Читаем сообщения — несколько poll в пределах timeout
+            $messages = [];
+            $deadline = microtime(true) + max(2, $timeout);
+
+            while (microtime(true) < $deadline && count($messages) < $maxMessages) {
+                $remainingSec = max(1, (int) ceil($deadline - microtime(true)));
+                $pollTimeout = min($remainingSec + 1, 15);
+
+                $response = $this->client->get("/consumers/{$consumerGroup}/instances/{$instance}/records", [
+                    'headers' => [
+                        'Accept' => 'application/vnd.kafka.json.v2+json',
+                    ],
+                    'timeout'      => $pollTimeout,
+                    'read_timeout' => $pollTimeout,
+                ]);
+
+                $batch = json_decode($response->getBody(), true) ?? [];
+                if (!empty($batch)) {
+                    $messages = array_merge($messages, $batch);
+                } elseif (microtime(true) < $deadline) {
+                    usleep(400000);
+                }
+            }
+
+            if (count($messages) > $maxMessages) {
+                $messages = array_slice($messages, 0, $maxMessages);
+            }
 
             // 4. Удаляем consumer
             $this->client->delete("/consumers/{$consumerGroup}/instances/{$instance}", ['timeout' => 3]);
