@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -99,47 +100,30 @@ class KafkaService
     }
 
     /**
-     * Получение сообщений из Kafka топика через REST Proxy
-     */
-    /**
-     * Получение сообщений из Kafka топика через REST Proxy (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+     * Получение сообщений из Kafka топика через REST Proxy.
+     * Уникальный instance на вызов + очистка при 409 (taxi_work / taxi_test не конфликтуют).
      */
     public function consumeMessages(string $topic = 'test-topic', int $timeout = 10, int $maxMessages = 50): array
     {
         $startTime = microtime(true);
         $safeTopic = preg_replace('/[^a-zA-Z0-9_-]/', '_', $topic);
-        $consumerGroup = 'taxi_laravel_' . $safeTopic;
+        $hostSuffix = preg_replace('/[^a-zA-Z0-9_-]/', '_', gethostname() ?: 'php');
+        $appSuffix = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) env('APP_NAME', 'app'));
+        $consumerGroup = 'taxi_laravel_' . $safeTopic . '_' . $appSuffix . '_' . $hostSuffix;
+        $instanceName = 'php_' . getmypid() . '_' . bin2hex(random_bytes(4));
+        $instanceId = null;
 
         try {
-            // 1. Создаём consumer (стабильная group + commit — не читать весь топик с начала каждые 3 сек)
-            $response = $this->client->post("/consumers/{$consumerGroup}", [
-                'headers' => [
-                    'Content-Type' => 'application/vnd.kafka.v2+json',
-                    'Accept'       => 'application/vnd.kafka.v2+json',
-                ],
-                'json' => [
-                    'name'                  => 'php_consumer',
-                    'format'                => 'json',
-                    'auto.offset.reset'     => 'latest',
-                    'auto.commit.enable'    => 'true',
-                ],
-                'timeout' => 5,
-            ]);
+            $instanceId = $this->createConsumerInstance($consumerGroup, $instanceName);
 
-            $instance = json_decode($response->getBody(), true)['instance_id'] ?? null;
-            if (!$instance) throw new \Exception('No instance_id');
-
-            // 2. Подписываемся
-            $this->client->post("/consumers/{$consumerGroup}/instances/{$instance}/subscription", [
+            $this->client->post("/consumers/{$consumerGroup}/instances/{$instanceId}/subscription", [
                 'headers' => ['Content-Type' => 'application/vnd.kafka.v2+json'],
                 'json'    => ['topics' => [$topic]],
                 'timeout' => 5,
             ]);
 
-            // Даём consumer group время на assign partitions (иначе первый poll часто пустой)
             usleep(400000);
 
-            // 3. Читаем сообщения — несколько poll в пределах timeout
             $messages = [];
             $deadline = microtime(true) + max(2, $timeout);
 
@@ -147,7 +131,7 @@ class KafkaService
                 $remainingSec = max(1, (int) ceil($deadline - microtime(true)));
                 $pollTimeout = min($remainingSec + 1, 15);
 
-                $response = $this->client->get("/consumers/{$consumerGroup}/instances/{$instance}/records", [
+                $response = $this->client->get("/consumers/{$consumerGroup}/instances/{$instanceId}/records", [
                     'headers' => [
                         'Accept' => 'application/vnd.kafka.json.v2+json',
                     ],
@@ -167,22 +151,107 @@ class KafkaService
                 $messages = array_slice($messages, 0, $maxMessages);
             }
 
-            // 4. Удаляем consumer
-            $this->client->delete("/consumers/{$consumerGroup}/instances/{$instance}", ['timeout' => 3]);
-
             return [
-                'status'       => 'success',
-                'message_count'=> count($messages),
-                'messages'     => $messages,
-                'duration_ms'  => round((microtime(true) - $startTime) * 1000, 2),
+                'status'        => 'success',
+                'message_count' => count($messages),
+                'messages'      => $messages,
+                'consumer_group'=> $consumerGroup,
+                'duration_ms'   => round((microtime(true) - $startTime) * 1000, 2),
             ];
-
         } catch (\Exception $e) {
+            Log::error('Kafka consume error', [
+                'topic' => $topic,
+                'consumer_group' => $consumerGroup,
+                'error' => $e->getMessage(),
+            ]);
+
             return [
                 'status' => 'error',
                 'message' => $e->getMessage(),
+                'consumer_group' => $consumerGroup,
                 'duration_ms' => round((microtime(true) - $startTime) * 1000, 2),
             ];
+        } finally {
+            if ($instanceId !== null) {
+                $this->cleanupConsumer($consumerGroup, $instanceId);
+            }
+        }
+    }
+
+    /**
+     * Создать consumer instance; при 409 — удалить зависшие instances в группе и повторить.
+     */
+    private function createConsumerInstance(string $consumerGroup, string $instanceName): string
+    {
+        try {
+            return $this->postCreateConsumer($consumerGroup, $instanceName);
+        } catch (ClientException $e) {
+            $status = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+            if ($status !== 409) {
+                throw $e;
+            }
+            Log::warning('Kafka consumer 409 — purge group and retry', [
+                'consumer_group' => $consumerGroup,
+                'instance_name' => $instanceName,
+            ]);
+            $this->purgeConsumerGroupInstances($consumerGroup);
+            return $this->postCreateConsumer($consumerGroup, $instanceName);
+        }
+    }
+
+    private function postCreateConsumer(string $consumerGroup, string $instanceName): string
+    {
+        $response = $this->client->post("/consumers/{$consumerGroup}", [
+            'headers' => [
+                'Content-Type' => 'application/vnd.kafka.v2+json',
+                'Accept'       => 'application/vnd.kafka.v2+json',
+            ],
+            'json' => [
+                'name'               => $instanceName,
+                'format'             => 'json',
+                'auto.offset.reset'  => 'latest',
+                'auto.commit.enable' => 'true',
+            ],
+            'timeout' => 5,
+        ]);
+
+        $body = json_decode((string) $response->getBody(), true);
+        $instanceId = $body['instance_id'] ?? $body['name'] ?? $instanceName;
+        if (empty($instanceId)) {
+            throw new \RuntimeException('Kafka REST: no instance_id in create consumer response');
+        }
+
+        return $instanceId;
+    }
+
+    /**
+     * Удалить все instances в consumer group (зависшие после kill/crash).
+     */
+    private function purgeConsumerGroupInstances(string $consumerGroup): void
+    {
+        try {
+            $response = $this->client->get("/consumers/{$consumerGroup}/instances", [
+                'headers' => ['Accept' => 'application/vnd.kafka.v2+json'],
+                'timeout' => 3,
+            ]);
+            $instances = json_decode((string) $response->getBody(), true) ?? [];
+            if (!is_array($instances)) {
+                return;
+            }
+            foreach ($instances as $inst) {
+                $id = is_array($inst)
+                    ? ($inst['instance_id'] ?? $inst['name'] ?? null)
+                    : null;
+                if ($id) {
+                    $this->cleanupConsumer($consumerGroup, $id);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::debug('Kafka purge consumer group', [
+                'consumer_group' => $consumerGroup,
+                'error' => $e->getMessage(),
+            ]);
+            $this->cleanupConsumer($consumerGroup, 'php_consumer');
         }
     }
     /**
@@ -256,18 +325,18 @@ class KafkaService
     private function cleanupConsumer(string $consumerGroup, string $instanceName): void
     {
         try {
-            Http::timeout(2)
-                ->delete("{$this->host}/consumers/{$consumerGroup}/instances/{$instanceName}");
-
+            $this->client->delete("/consumers/{$consumerGroup}/instances/{$instanceName}", [
+                'timeout' => 3,
+            ]);
             Log::debug('Consumer cleaned up', [
                 'consumer_group' => $consumerGroup,
-                'instance' => $instanceName
+                'instance' => $instanceName,
             ]);
         } catch (\Exception $e) {
-            // Тихий fail - это нормально, consumer может уже не существовать
             Log::debug('Consumer cleanup failed (normal)', [
                 'consumer_group' => $consumerGroup,
-                'error' => $e->getMessage()
+                'instance' => $instanceName,
+                'error' => $e->getMessage(),
             ]);
         }
     }
