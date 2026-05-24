@@ -6,6 +6,8 @@ use App\Http\Controllers\AndroidTestOSMController;
 use App\Jobs\ProcessCostSearchMarkersTime;
 use Illuminate\Console\Command;
 use App\Services\KafkaService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class KafkaConsumeCommand extends Command
@@ -13,7 +15,7 @@ class KafkaConsumeCommand extends Command
     // Указываем топики по умолчанию через запятую
     protected $signature = 'kafka:consume
                             {topics=cost-topic,cost-topic-my-api : Список топиков через запятую}
-                            {--timeout=30 : Таймаут в секундах для запросов к Kafka}';
+                            {--timeout=8 : Таймаут в секундах для запросов к Kafka}';
 
     protected $description = 'Постоянное наблюдение за Kafka топиками и обработка сообщений';
 
@@ -60,7 +62,7 @@ class KafkaConsumeCommand extends Command
         $this->line("📭 Проверка топика: <fg=cyan>{$topic}</>");
 
         // Получаем сообщения из Kafka
-        $result = $this->kafka->consumeMessages($topic, (int)$timeout, 50);
+        $result = $this->kafka->consumeMessages($topic, (int)$timeout, 10);
 
         if ($result['status'] === 'success') {
             $messageCount = $result['message_count'] ?? 0;
@@ -76,6 +78,10 @@ class KafkaConsumeCommand extends Command
                     $value = $this->extractMessageValue($msg);
 
                     if ($value) {
+                        if ($this->shouldSkipKafkaMessage($topic, $value)) {
+                            $this->warn("⏭️ Пропуск устаревшего/дубликата Kafka #" . ($index + 1));
+                            continue;
+                        }
                         $this->info("📨 Обработка сообщения #" . ($index + 1));
                         Log::info("📨 Сообщение из топика {$topic}", is_array($value) ? $value : ['message' => $value]);
 
@@ -110,6 +116,32 @@ class KafkaConsumeCommand extends Command
      * Извлекает значение из сообщения Kafka
      * Поддерживает разные форматы сообщений
      */
+    /**
+     * Не обрабатывать старые и повторные сообщения (защита PHP-FPM от 504).
+     */
+    protected function shouldSkipKafkaMessage(string $topic, array $value): bool
+    {
+        $receivedAt = $value['_meta']['received_at'] ?? null;
+        if ($receivedAt) {
+            try {
+                if (Carbon::parse($receivedAt)->lt(now()->subMinutes(10))) {
+                    Log::info("Kafka skip stale message", ['topic' => $topic, 'received_at' => $receivedAt]);
+                    return true;
+                }
+            } catch (\Exception $e) {
+                // ignore parse errors
+            }
+        }
+
+        $dedupeKey = 'kafka_dedupe:' . $topic . ':' . md5(json_encode($value));
+        if (!Cache::add($dedupeKey, 1, 600)) {
+            Log::debug('Kafka skip duplicate', ['topic' => $topic, 'key' => $dedupeKey]);
+            return true;
+        }
+
+        return false;
+    }
+
     protected function extractMessageValue(array $msg)
     {
         // Формат 1: значение напрямую в поле 'value'

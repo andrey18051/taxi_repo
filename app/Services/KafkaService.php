@@ -107,10 +107,11 @@ class KafkaService
     public function consumeMessages(string $topic = 'test-topic', int $timeout = 10, int $maxMessages = 50): array
     {
         $startTime = microtime(true);
-        $consumerGroup = "php_consumer_" . uniqid();
+        $safeTopic = preg_replace('/[^a-zA-Z0-9_-]/', '_', $topic);
+        $consumerGroup = 'taxi_laravel_' . $safeTopic;
 
         try {
-            // 1. Создаём consumer
+            // 1. Создаём consumer (стабильная group + commit — не читать весь топик с начала каждые 3 сек)
             $response = $this->client->post("/consumers/{$consumerGroup}", [
                 'headers' => [
                     'Content-Type' => 'application/vnd.kafka.v2+json',
@@ -119,8 +120,8 @@ class KafkaService
                 'json' => [
                     'name'                  => 'php_consumer',
                     'format'                => 'json',
-                    'auto.offset.reset'     => 'earliest',
-                    'auto.commit.enable'    => 'false',
+                    'auto.offset.reset'     => 'latest',
+                    'auto.commit.enable'    => 'true',
                 ],
                 'timeout' => 5,
             ]);
