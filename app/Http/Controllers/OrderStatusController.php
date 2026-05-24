@@ -1206,6 +1206,35 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Один проход по Uid_history без ожидания на сервере.
+     *
+     * @return array{0: ?Uid_history, 1: ?string, 2: ?string, 3: string}
+     */
+    private function resolveUidHistoryForStatusPush(string $uid): array
+    {
+        $dispatching_order_uid = $uid;
+        $columns = ['uid_bonusOrderHold', 'uid_bonusOrder', 'uid_doubleOrder'];
+
+        foreach ($columns as $column) {
+            $row = Uid_history::where($column, $uid)->first();
+            if (!$row) {
+                continue;
+            }
+            $nalOrderInput = $row->double_status;
+            $cardOrderInput = $row->bonus_status;
+            if (!empty($row->uid_bonusOrder)) {
+                $dispatching_order_uid = $row->uid_bonusOrder;
+            }
+            if ($cardOrderInput !== null) {
+                Log::info('resolveUidHistoryForStatusPush: ready', ['column' => $column]);
+                return [$row, $nalOrderInput, $cardOrderInput, $dispatching_order_uid];
+            }
+        }
+
+        return [null, null, null, $dispatching_order_uid];
+    }
+
+    /**
      * @throws \Exception
      */
     public function getOrderStatusMessageResultPush($dispatching_order_uid)
@@ -1284,113 +1313,18 @@ class OrderStatusController extends Controller
                 return response()->json( $responseArr);
             }
         } else {
-            $action = 'Поиск авто';
-            $responseArr['action'] = $action;
-            response()->json( $responseArr);
+            return response()->json(['action' => 'Поиск авто']);
         }
-        $startTime = time(); // Запоминаем начальное время
 
-        do {
-            // Попробуем найти запись
-            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-            Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
+        // Без sleep(60): приложение опрашивает каждые ~5 с, блокировка PHP-FPM давала 504.
+        [$uid_history, $nalOrderInput, $cardOrderInput, $dispatching_order_uid] = $this->resolveUidHistoryForStatusPush($uid);
 
-            if ($uid_history) {
-                // Если запись найдена, выходим из цикла
-                $nalOrderInput = $uid_history->double_status;
-                $cardOrderInput = $uid_history->bonus_status;
-                Log::info('Found uid_history by uid_bonusOrderHold', [
-                    'nalOrderInput' => $nalOrderInput,
-                    'cardOrderInput' => $cardOrderInput
-                ]);
-                if($cardOrderInput != null) {
-                    break;
-                }
-            } else {
-                $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
+        Log::debug('Uid_history lookup (non-blocking)', ['found' => $uid_history !== null]);
 
-                if ($uid_history) {
-                    // Если запись найдена, выходим из цикла
-                    $nalOrderInput = $uid_history->double_status;
-                    $cardOrderInput = $uid_history->bonus_status;
-                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                    Log::info('Found uid_history by uid_bonusOrder', [
-                        'nalOrderInput' => $nalOrderInput,
-                        'cardOrderInput' => $cardOrderInput,
-                        'updated_dispatching_order_uid' => $dispatching_order_uid
-                    ]);
-                    if($cardOrderInput != null) {
-                        break;
-                    }
-                }
-            }
-
-            $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
-            Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
-
-            if ($uid_history) {
-                // Если запись найдена, выходим из цикла
-                $nalOrderInput = $uid_history->double_status;
-                $cardOrderInput = $uid_history->bonus_status;
-                $dispatching_order_uid = $uid_history->uid_bonusOrder;
-                Log::info('Found uid_history by uid_doubleOrder', [
-                    'nalOrderInput' => $nalOrderInput,
-                    'cardOrderInput' => $cardOrderInput,
-                    'updated_dispatching_order_uid' => $dispatching_order_uid
-                ]);
-                if($cardOrderInput != null) {
-                    break;
-                }
-            }
-
-                // Ждём одну секунду перед следующим проверочным циклом
-            sleep(1);
-        } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
-//        $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
-//        Log::debug('Searched Uid_history by uid_bonusOrderHold', ['found' => !is_null($uid_history)]);
-//
-//        if ($uid_history) {
-//            // Если запись найдена, выходим из цикла
-//            $nalOrderInput = $uid_history->double_status;
-//            $cardOrderInput = $uid_history->bonus_status;
-//            Log::info('Found uid_history by uid_bonusOrderHold', [
-//                'nalOrderInput' => $nalOrderInput,
-//                'cardOrderInput' => $cardOrderInput
-//            ]);
-//        } else {
-//            $uid_history = Uid_history::where("uid_bonusOrder", $dispatching_order_uid)->first();
-//            Log::debug('Searched Uid_history by uid_bonusOrder', ['found' => !is_null($uid_history)]);
-//
-//            if ($uid_history) {
-//                // Если запись найдена, выходим из цикла
-//                $nalOrderInput = $uid_history->double_status;
-//                $cardOrderInput = $uid_history->bonus_status;
-//                $dispatching_order_uid = $uid_history->uid_bonusOrder;
-//                Log::info('Found uid_history by uid_bonusOrder', [
-//                    'nalOrderInput' => $nalOrderInput,
-//                    'cardOrderInput' => $cardOrderInput,
-//                    'updated_dispatching_order_uid' => $dispatching_order_uid
-//                ]);
-//            } else {
-//                $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
-//                Log::debug('Searched Uid_history by uid_doubleOrder', ['found' => !is_null($uid_history)]);
-//
-//
-//                if ($uid_history) {
-//                    // Если запись найдена, выходим из цикла
-//                    $nalOrderInput = $uid_history->double_status;
-//                    $cardOrderInput = $uid_history->bonus_status;
-//                    $dispatching_order_uid = $uid_history->uid_bonusOrder;
-//                    Log::info('Found uid_history by uid_doubleOrder', [
-//                        'nalOrderInput' => $nalOrderInput,
-//                        'cardOrderInput' => $cardOrderInput,
-//                        'updated_dispatching_order_uid' => $dispatching_order_uid
-//                    ]);
-//                }
-//            }
-//        }
-
-        Log::debug('Exited loop', ['found_uid_history' => !is_null($uid_history ?? null)]);
+        if (!$uid_history || $cardOrderInput === null) {
+            Log::info('Uid_history not ready, fast response for poll', ['uid' => $uid]);
+            return response()->json(['action' => 'Поиск авто']);
+        }
 
         if ($uid_history) {
             Log::info('Processing uid_history', ['nalOrderInput' => $nalOrderInput, 'cardOrderInput' => $cardOrderInput]);
