@@ -42,6 +42,11 @@ class AutoCancelJob implements ShouldQueue
             Log::warning("AutoCancelJob: заказ с uid {$uid} не найден.");
             return;
         }
+
+        if ($this->shouldSkipAlreadyCancelledOrFinished($order)) {
+            return;
+        }
+
         if ($order->required_time != null) {
             Log::warning("AutoCancelJob: required_time {$uid} не null.");
             return;
@@ -134,6 +139,38 @@ class AutoCancelJob implements ShouldQueue
 //        }
 
         Log::info("AutoCancelJob: заказ {$this->uid} автоматически отменён через отложенную задачу.");
+    }
+
+    /**
+     * Не трогать заказы, уже отменённые (в т.ч. CheckAndCancelOrderJob) или с авто/завершённые.
+     */
+    private function shouldSkipAlreadyCancelledOrFinished(Orderweb $order): bool
+    {
+        $uid = $order->dispatching_order_uid;
+        $closeReason = (string) ($order->closeReason ?? '');
+
+        if ($closeReason === '1') {
+            Log::info("AutoCancelJob: заказ уже отменён (closeReason=1), uid {$uid}");
+            return true;
+        }
+
+        if ($order->cancel_timestamp !== null) {
+            Log::info("AutoCancelJob: cancel_timestamp задан, пропуск uid {$uid}");
+            return true;
+        }
+
+        if (in_array($closeReason, ['101', '102', '103', '104'], true)) {
+            Log::info("AutoCancelJob: заказ с авто/завершён (closeReason={$closeReason}), uid {$uid}");
+            return true;
+        }
+
+        // Автоотмена только для «поиск авто» (100); иные статусы — не перезаписываем
+        if ($closeReason !== '100' && $closeReason !== '' && $closeReason !== '-1') {
+            Log::info("AutoCancelJob: неактивный closeReason={$closeReason}, uid {$uid}");
+            return true;
+        }
+
+        return false;
     }
 
     /**
