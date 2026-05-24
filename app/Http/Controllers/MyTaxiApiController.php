@@ -311,7 +311,7 @@ class MyTaxiApiController extends Controller
     ): array
     {
         $response = [
-            'order_cost' => (string) $price,
+            'order_cost' => (string) (int) round($price),
             'from_lat' => $startLat,
             'from_lng' => $startLng,
             'lat' => $endLat,
@@ -323,8 +323,6 @@ class MyTaxiApiController extends Controller
             'routefrom' => $startLat,  // В примере это координата, а не название
             'routefromnumber' => ' '
         ];
-        (new PusherController)->sentCostAppEmail($price, $application, $email);
-
         Log::info('Успешный ответ сформирован', [
             'price' => $price,
             'order_uid' => $response['dispatching_order_uid']

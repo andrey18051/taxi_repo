@@ -549,7 +549,8 @@ class PusherController extends Controller
         // Отправка события на канал
         Log::info("Pusher отправляет событие: order-cost-" . $app . " в канал teal-towel-48");
 
-        $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' =>  $order_cost]);
+        $costForClient = (string) (int) round((float) $order_cost);
+        $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' => $costForClient]);
         $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $app: " . $order_cost;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 

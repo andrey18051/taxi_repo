@@ -349,8 +349,9 @@ class CentrifugoController extends Controller
     {
         $event = 'order-cost-' . $app . "-" . $email;
 
+        $costForClient = (string) (int) round((float) $order_cost);
         $result = $this->trigger($event, [
-            'order_cost' => $order_cost
+            'order_cost' => $costForClient,
         ]);
 
         $messageAdmin = "Отправлена стоимость нового заказа клиенту {$email} в {$app}: " . $order_cost;
