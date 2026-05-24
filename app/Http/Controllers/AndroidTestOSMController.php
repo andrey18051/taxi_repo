@@ -4865,13 +4865,12 @@ class AndroidTestOSMController extends Controller
         $connectAPI = $service->cityOnlineOrder($city, $application);
         Log::debug("2 connectAPI $connectAPI");
 
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "ErrorMessage";
 
-//        if ($connectAPI == 400) {
-//            $response_error["order_cost"] = 0;
-//            $response_error["Message"] = "ErrorMessage";
-//
-//            return $response_error;
-//        }
+            return $response_error;
+        }
 
         // === 3. Проверка блокировки API ===
         $cacheKeyBlock = "blocked_api_" . md5($connectAPI);
@@ -9883,12 +9882,12 @@ class AndroidTestOSMController extends Controller
         $connectAPI = $service->cityOnlineOrder($city, $application);
         Log::debug("6 connectAPI $connectAPI");
 
-//        if ($connectAPI == 400) {
-//            $response_error["order_cost"] = 0;
-//            $response_error["Message"] = "ErrorMessage";
-//
-//            return $response_error;
-//        }
+        if ($connectAPI == 400) {
+            $response_error["order_cost"] = 0;
+            $response_error["Message"] = "ErrorMessage";
+
+            return $response_error;
+        }
         $params["startLat"] = $originLatitude; //
         $params["startLan"] = $originLongitude; //
         $params["to_lat"] = $toLatitude; //

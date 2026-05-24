@@ -473,23 +473,33 @@ class CityController extends Controller
     public function cardPayServer($address, $app)
     {
         $address = str_replace("http://", "", $address);
+        if ($address === '' || $address === '400') {
+            Log::warning('cardPayServer: invalid server address', ['address' => $address, 'app' => $app]);
+            return 0;
+        }
+
         switch ($app) {
             case "PAS1":
-                $city = City_PAS1::where('address', $address)->first()->toArray();
+                $city = City_PAS1::where('address', $address)->first();
                 break;
             case "PAS2":
-                $city = City_PAS2::where('address', $address)->first()->toArray();
+                $city = City_PAS2::where('address', $address)->first();
                 break;
             case "PAS4":
-                $city = City_PAS4::where('address', $address)->first()->toArray();
+                $city = City_PAS4::where('address', $address)->first();
                 break;
             //case "PAS5":
             default:
-                $city = City_PAS5::where('address', $address)->first()->toArray();
+                $city = City_PAS5::where('address', $address)->first();
                 break;
         }
 
-        return $city["card_max_pay"];
+        if ($city === null) {
+            Log::warning('cardPayServer: city not found', ['address' => $address, 'app' => $app]);
+            return 0;
+        }
+
+        return $city->card_max_pay;
     }
     public function merchantFondyApp($city, $app): array
     {
