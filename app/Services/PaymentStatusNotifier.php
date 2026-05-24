@@ -7,6 +7,7 @@ use App\Http\Controllers\FCMController;
 use App\Http\Controllers\PusherController;
 use App\Models\Orderweb;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -53,6 +54,16 @@ class PaymentStatusNotifier
         string $email,
         string $transactionStatus = 'Declined'
     ): void {
+        $dedupeKey = 'payment_error_fcm:' . $app . ':' . $uid;
+        if (! Cache::add($dedupeKey, 1, now()->addMinutes(15))) {
+            Log::info('PaymentStatusNotifier: FCM payment error skipped (dedupe)', [
+                'uid' => $uid,
+                'app' => $app,
+            ]);
+
+            return;
+        }
+
         try {
             $user = User::where('email', $email)->first();
             if ($user === null) {
