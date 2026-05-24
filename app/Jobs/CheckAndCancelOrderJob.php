@@ -1,204 +1,226 @@
-<?php
-
-namespace App\Jobs;
-
-use App\Http\Controllers\AndroidTestOSMController;
-use App\Http\Controllers\CentrifugoController;
-use App\Http\Controllers\PusherController;
-use Carbon\Carbon;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use App\Models\Orderweb;
-use App\Http\Controllers\WfpController;
-use App\Models\WfpInvoice;
-use App\Http\Controllers\MemoryOrderChangeController;
-use App\Http\Controllers\FCMController;
-use App\Services\PaymentStatusNotifier;
-
-class CheckAndCancelOrderJob implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    protected $uid;
-    protected $app;
-    protected $email;
-
-    public function __construct($uid, $app, $email)
-    {
-        $this->uid = $uid;
-        $this->app = $app;
-        $this->email = $email;
-        Log::info("🔄 Задача отмены заказа создана. Входной UID: {$uid} app: {$app} email: {$email}");
-    }
-
-    public function handle()
-    {
-        Log::info("🚀 Начало обработки отмены заказа. UID: {$this->uid}");
-
-        try {
-            $this->processOrderCancellation();
-            Log::info("✅ Завершение обработки заказа. UID: {$this->uid}");
-
-        } catch (\Exception $e) {
-            Log::error("💥 Критическая ошибка при обработке заказа {$this->uid}: " . $e->getMessage());
-            Log::error("📋 Stack trace: " . $e->getTraceAsString());
-        }
-    }
-
-    private function processOrderCancellation(): void
-    {
-        // 1. Получаем order UID
-        Log::debug("📋 Получение order UID из MemoryOrderChangeController");
-        $uid = (new MemoryOrderChangeController)->show($this->uid);
-        Log::info("🔑 Получен order UID: {$uid}");
-
-        // 2. Ищем заказ в базе
-        Log::debug("🔍 Поиск заказа в базе данных по UID: {$uid}");
-        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-
-        if (is_null($order)) {
-            Log::error("❌ Заказ не найден в базе данных. UID: {$uid}");
-            return;
-        }
-
-        Log::info("✅ Заказ найден. ID: {$order->id}, создан: {$order->created_at}");
-
-        // 3. Проверяем merchant account
-        Log::debug("🏦 Проверка данных мерчанта");
-        $merchantInfo = (new WfpController)->checkMerchantInfo($order);
-
-        if (isset($merchantInfo["merchantAccount"]) && $merchantInfo["merchantAccount"] == "errorMerchantAccount") {
-            $order->transactionStatus = "errorMerchantAccount";
-            $order->save();
-
-            Log::warning("⚠️ Мерчант не найден для заказа {$uid}. Устанавливаем статус errorMerchantAccount");
-            $this->cleanupOrder($uid);
-            return;
-        }
-
-        Log::debug("✅ Данные мерчанта проверены");
-
-        // 4. Проверяем invoice статус
-        Log::debug("💰 Проверка статуса оплаты заказа");
-        $orderReference = $order->wfp_order_id;
-
-        // Если orderReference null - отменяем
-        if ($orderReference === null) {
-            Log::warning("⚠️ Номер транзакции (orderReference) отсутствует. Отменяем заказ {$uid}");
-            $this->cleanupOrder($uid);
-            return;
-        }
-
-        Log::info("💳 Номер транзакции заказа: {$orderReference}");
-
-        // Ищем invoice
-        Log::debug("🔍 Поиск информации о транзакции в таблице WfpInvoice");
-        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
-
-        // Если invoice не найден - отменяем
-        if (!$invoice) {
-            Log::warning("⚠️ Информация о транзакции не найдена в WfpInvoice для orderReference: {$orderReference}");
-            $this->cleanupOrder($uid);
-            return;
-        }
-
-        Log::debug("✅ Транзакция найдена. Invoice ID: {$invoice->id}");
-
-        // 5. Проверяем статус транзакции
-        $transactionStatus = $invoice->transactionStatus;
-        Log::info("📊 Текущий статус транзакции: " . ($transactionStatus ?? 'NULL'));
-
-        // Разрешенные статусы (НЕ отменяем)
-        $allowedStatuses = ['WaitingAuthComplete', 'Approved'];
-
-        if ($transactionStatus === null) {
-            Log::warning("⚠️ Статус транзакции не установлен (NULL). Отменяем заказ {$uid}");
-            $this->cleanupOrder($uid);
-            return;
-        }
-
-        // Проверяем разрешенные статусы
-        if (in_array($transactionStatus, $allowedStatuses)) {
-            Log::info("✅ Статус '{$transactionStatus}' разрешен. Заказ {$uid} сохраняется");
-            return;
-        }
-
-        // Проверяем отклоненные статусы
-        if ($transactionStatus === 'Declined') {
-            Log::warning("❌ Платеж отклонен (Declined). Отменяем заказ {$uid}");
-            PaymentStatusNotifier::notifyTransactionStatus(
-                $transactionStatus,
-                $uid,
-                $this->app,
-                $this->email
-            );
-        } else {
-            Log::warning("⚠️ Неразрешенный статус '{$transactionStatus}'. Отменяем заказ {$uid}");
-        }
-
-        $this->cleanupOrder($uid, $transactionStatus === 'Declined');
-    }
-
-    private function cleanupOrder(
-        $uid,
-        bool $paymentDeclined = false
-    ): void
-    {
-        Log::info("🧹 Начало очистки данных заказа {$uid}");
-
-        try {
-            $fcmController = new FCMController();
-
-            // Удаление из Firestore
-            Log::debug("🔥 Удаление документа из основного Firestore");
-            $result1 = $fcmController->deleteDocumentFromFirestore($uid);
-            Log::info(($result1 ? "✅" : "❌") . " Удаление из основного Firestore");
-
-            Log::debug("🔥 Удаление документа из Firestore OrdersTakingCancel");
-            $result2 = $fcmController->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-            Log::info(($result2 ? "✅" : "❌") . " Удаление из Firestore OrdersTakingCancel");
-
-            Log::debug("🔥 Удаление документа из Sector Firestore");
-            $result3 = $fcmController->deleteDocumentFromSectorFirestore($uid);
-            Log::info(($result3 ? "✅" : "❌") . " Удаление из Sector Firestore");
-
-            // Запись в историю
-            Log::debug("📝 Запись отмененного заказа в историю Firestore");
-            $result4 = $fcmController->writeDocumentToHistoryFirestore($uid, "cancelled");
-            Log::info(($result4 ? "✅" : "❌") . " Запись в историю Firestore");
-
-            Log::debug("📝 Запись отменены заказа в таблицу заказов");
-
-            $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-            $order->cancel_timestamp = Carbon::now();
-            $order->closeReason = "1";
-            $order->save();
-            // При Declined клиент уже получил payment_error; шлём cancel только для прочих причин
-            if (!$paymentDeclined) {
-                (new PusherController)->sentCanceledStatus(
-                    $this->app,
-                    $this->email,
-                    $uid
-                );
-                (new CentrifugoController)->sentCanceledStatus(
-                    $this->app,
-                    $this->email,
-                    $uid
-                );
-            }
-            Log::info("🧹 Очистка данных заказа {$uid} завершена");
-
-        } catch (\Exception $e) {
-            Log::error("💥 Ошибка при очистке данных заказа {$uid}: " . $e->getMessage());
-        }
-    }
-}
-
-// При создании заказа или в нужном месте
-//CheckAndCancelOrderJob::dispatch($uid)
-//    ->delay(now()->addSeconds(50))
-//    ->onQueue('high'); // Укажите очередь, если нужно
+<?php
+
+namespace App\Jobs;
+
+use App\Http\Controllers\AndroidTestOSMController;
+use App\Http\Controllers\CentrifugoController;
+use App\Http\Controllers\FCMController;
+use App\Http\Controllers\MemoryOrderChangeController;
+use App\Http\Controllers\PusherController;
+use App\Http\Controllers\WfpController;
+use App\Models\Orderweb;
+use App\Models\WfpInvoice;
+use App\Services\PaymentStatusNotifier;
+use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class CheckAndCancelOrderJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $uid;
+    protected $app;
+    protected $email;
+    protected $city;
+
+    public function __construct($uid, $app, $email, $city = 'OdessaTest')
+    {
+        $this->uid = $uid;
+        $this->app = $app;
+        $this->email = $email;
+        $this->city = $city;
+        Log::info("CheckAndCancelOrderJob created uid={$uid} app={$app} delay_check");
+    }
+
+    public function handle()
+    {
+        Log::info("CheckAndCancelOrderJob start uid={$this->uid}");
+
+        try {
+            $this->processOrderCancellation();
+            Log::info("CheckAndCancelOrderJob done uid={$this->uid}");
+        } catch (\Exception $e) {
+            Log::error("CheckAndCancelOrderJob error uid={$this->uid}: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    private function processOrderCancellation(): void
+    {
+        $uid = (new MemoryOrderChangeController)->show($this->uid);
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order) {
+            Log::error("CheckAndCancelOrderJob: order not found uid={$uid}");
+            return;
+        }
+
+        if ($order->server !== 'my_server_api') {
+            Log::info("CheckAndCancelOrderJob: skip non my_server_api uid={$uid}");
+            return;
+        }
+
+        if ($order->required_time !== null) {
+            Log::info("CheckAndCancelOrderJob: skip pre-order uid={$uid}");
+            return;
+        }
+
+        if ($order->auto !== null) {
+            Log::info("CheckAndCancelOrderJob: car assigned, skip uid={$uid}");
+            return;
+        }
+
+        if (!in_array((string) $order->closeReason, ['100', ''], true)) {
+            Log::info("CheckAndCancelOrderJob: closeReason={$order->closeReason}, skip uid={$uid}");
+            return;
+        }
+
+        $paySystem = $order->pay_system ?? '';
+        if (!in_array($paySystem, ['wfp_payment', 'card_payment', 'fondy_payment', 'mono_payment'], true)) {
+            Log::info("CheckAndCancelOrderJob: not card pay_system={$paySystem}, skip uid={$uid}");
+            return;
+        }
+
+        $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+        if (isset($merchantInfo['merchantAccount']) && $merchantInfo['merchantAccount'] === 'errorMerchantAccount') {
+            $order->transactionStatus = 'errorMerchantAccount';
+            $order->save();
+            Log::warning("CheckAndCancelOrderJob: errorMerchantAccount uid={$uid}");
+            $this->cancelUnpaidOrder($order, $uid);
+            return;
+        }
+
+        $orderReference = $order->wfp_order_id;
+        if ($orderReference === null || $orderReference === '') {
+            Log::warning("CheckAndCancelOrderJob: no wfp_order_id uid={$uid}");
+            $this->cancelUnpaidOrder($order, $uid);
+            return;
+        }
+
+        $wfpCity = $this->resolveWfpCity($order);
+        try {
+            (new WfpController)->checkStatus($this->app, $wfpCity, $orderReference);
+            Log::info("CheckAndCancelOrderJob: refreshed WFP status uid={$uid} ref={$orderReference}");
+        } catch (\Throwable $e) {
+            Log::warning("CheckAndCancelOrderJob: checkStatus failed uid={$uid}: " . $e->getMessage());
+        }
+
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if (!$invoice) {
+            Log::warning("CheckAndCancelOrderJob: invoice missing ref={$orderReference}");
+            $this->cancelUnpaidOrder($order, $uid);
+            return;
+        }
+
+        $transactionStatus = $invoice->transactionStatus;
+        Log::info("CheckAndCancelOrderJob: status={$transactionStatus} uid={$uid}");
+
+        $allowedStatuses = ['WaitingAuthComplete', 'Approved'];
+        if ($transactionStatus !== null && in_array($transactionStatus, $allowedStatuses, true)) {
+            Log::info("CheckAndCancelOrderJob: payment ok, keep order uid={$uid}");
+            return;
+        }
+
+        if ($transactionStatus === 'Declined') {
+            PaymentStatusNotifier::notifyTransactionStatus(
+                $transactionStatus,
+                $uid,
+                $this->app,
+                $this->email
+            );
+        }
+
+        $this->cancelUnpaidOrder($order, $uid, $transactionStatus === 'Declined');
+    }
+
+    private function cancelUnpaidOrder(Orderweb $order, string $uid, bool $paymentDeclined = false): void
+    {
+        $application = $this->resolveApplicationConfig($order);
+        $city = $this->resolveCancelCity($order);
+
+        Log::info("CheckAndCancelOrderJob: cancel unpaid uid={$uid} city={$city}");
+
+        try {
+            (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+        } catch (\Throwable $e) {
+            Log::error("CheckAndCancelOrderJob: webordersCancel failed uid={$uid}: " . $e->getMessage());
+        }
+
+        $this->cleanupOrder($uid, $paymentDeclined);
+    }
+
+    private function cleanupOrder(string $uid, bool $paymentDeclined = false): void
+    {
+        Log::info("CheckAndCancelOrderJob: cleanup uid={$uid}");
+
+        try {
+            $fcmController = new FCMController();
+            $fcmController->deleteDocumentFromFirestore($uid);
+            $fcmController->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            $fcmController->deleteDocumentFromSectorFirestore($uid);
+            $fcmController->writeDocumentToHistoryFirestore($uid, 'cancelled');
+
+            $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+            if ($order) {
+                $order->cancel_timestamp = Carbon::now();
+                if ((string) $order->closeReason === '100' || $order->closeReason === '') {
+                    $order->closeReason = '1';
+                }
+                $order->save();
+            }
+
+            if (!$paymentDeclined && $this->email) {
+                (new PusherController)->sentCanceledStatus($this->app, $this->email, $uid);
+                (new CentrifugoController)->sentCanceledStatus($this->app, $this->email, $uid);
+            }
+        } catch (\Exception $e) {
+            Log::error("CheckAndCancelOrderJob: cleanup error uid={$uid}: " . $e->getMessage());
+        }
+    }
+
+    private function resolveWfpCity(Orderweb $order): string
+    {
+        if (!empty($this->city) && $this->city !== 'all') {
+            return $this->city;
+        }
+
+        return $this->resolveCancelCity($order);
+    }
+
+    private function resolveCancelCity(Orderweb $order): string
+    {
+        if ($order->city === 'all' || $order->city === 'city_kiev') {
+            return 'Kyiv City';
+        }
+
+        $cityMap = [
+            'city_odessa' => 'OdessaTest',
+            'city_cherkassy' => 'Cherkasy Oblast',
+            'city_zaporizhzhia' => 'Zaporizhzhia',
+            'city_dnipro' => 'DniproTest',
+        ];
+
+        return $cityMap[$order->city] ?? 'OdessaTest';
+    }
+
+    private function resolveApplicationConfig(Orderweb $order): string
+    {
+        switch ($order->comment) {
+            case 'taxi_easy_ua_pas1':
+                return config('app.X-WO-API-APP-ID-PAS1');
+            case 'taxi_easy_ua_pas2':
+                return config('app.X-WO-API-APP-ID-PAS2');
+            case 'taxi_easy_ua_pas4':
+                return config('app.X-WO-API-APP-ID-PAS4');
+            default:
+                return config('app.X-WO-API-APP-ID-PAS5');
+        }
+    }
+}
+

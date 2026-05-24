@@ -2,4 +2,11 @@
 
 return [
     'auto_cancel_delay_minutes' => env('AUTO_CANCEL_DELAY_MINUTES', 15),
+
+    /** my_server_api: через сколько секунд после создания заказа проверить оплату и отменить */
+    'my_server_api_payment_check_delay_seconds' => env('MY_SERVER_API_PAYMENT_CHECK_DELAY_SECONDS', 60),
+
+    /** Опрос WfpInvoice до этой секунды (интервал — my_server_api_payment_poll_interval_seconds) */
+    'my_server_api_payment_poll_max_seconds' => env('MY_SERVER_API_PAYMENT_POLL_MAX_SECONDS', 60),
+    'my_server_api_payment_poll_interval_seconds' => env('MY_SERVER_API_PAYMENT_POLL_INTERVAL_SECONDS', 3),
 ];

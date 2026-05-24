@@ -545,18 +545,22 @@ class MyTaxiApiController extends Controller
 
                 // Первый запуск - без пятого параметра (по умолчанию 0)
 
+                $paymentCheckDelay = (int) config('orders.my_server_api_payment_check_delay_seconds', 60);
+
                 SimplePollStatusJob::dispatch(
                     $orderReference,
                     $dispatching_order_uid,
                     $application,
-                    $email
+                    $email,
+                    $city
                 )->onQueue('high');
 
                 CheckAndCancelOrderJob::dispatch(
                     $dispatching_order_uid,
                     $application,
-                    $email
-                )->onQueue('high')->delay(now()->addSeconds(50));
+                    $email,
+                    $city
+                )->onQueue('high')->delay(now()->addSeconds($paymentCheckDelay));
 
 
 
