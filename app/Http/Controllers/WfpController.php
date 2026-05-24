@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
+use App\Services\PaymentStatusNotifier;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\Card;
@@ -2309,13 +2310,7 @@ class WfpController extends Controller
                         try {
                             $transactionStatus = $data['transactionStatus'];
                             $uid = $wfpInvoices->dispatching_order_uid;
-                            (new PusherController)->sentStatusWfp(
-                                $transactionStatus,
-                                $uid,
-                                $application,
-                                $clientEmail
-                            );
-                            (new CentrifugoController)->sentStatusWfp(
+                            PaymentStatusNotifier::notifyTransactionStatus(
                                 $transactionStatus,
                                 $uid,
                                 $application,
@@ -2608,13 +2603,7 @@ class WfpController extends Controller
                                     'client_email' => $clientEmail,
                                 ]);
 
-                                (new PusherController)->sentStatusWfp(
-                                    $transactionStatus,
-                                    $uid,
-                                    $application,
-                                    $clientEmail
-                                );
-                                (new CentrifugoController)->sentStatusWfp(
+                                PaymentStatusNotifier::notifyTransactionStatus(
                                     $transactionStatus,
                                     $uid,
                                     $application,
@@ -2926,13 +2915,7 @@ class WfpController extends Controller
                         try {
                             $transactionStatus = $data['transactionStatus'];
                             $uid = $wfpInvoices->dispatching_order_uid;
-                            (new PusherController)->sentStatusWfp(
-                                $transactionStatus,
-                                $uid,
-                                $application,
-                                $clientEmail
-                            );
-                            (new CentrifugoController)->sentStatusWfp(
+                            PaymentStatusNotifier::notifyTransactionStatus(
                                 $transactionStatus,
                                 $uid,
                                 $application,

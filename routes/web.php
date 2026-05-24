@@ -1588,6 +1588,8 @@ Route::get('/sendNotificationAuto/{body}/{app}/{user_id}/{uid}', [FCMController:
 
 Route::get('/sendNotificationOrderCost/{orderCost}/{app}/{user_id}', [FCMController::class, 'sendNotificationOrderCost'])->name('sendNotificationOrderCost');
 
+Route::get('/sendNotificationPaymentError/{body}/{app}/{user_id}/{uid}/{transactionStatus?}', [FCMController::class, 'sendNotificationPaymentError'])->name('sendNotificationPaymentError');
+
 Route::get('/checkEmailInAllFirestoreBlackLists/{email}', [FCMController::class, 'checkEmailInAllFirestoreBlackLists'])->name('checkEmailInAllFirestoreBlackLists');
 Route::get('/geo/city/{lat}/{lon}', [UniversalAndroidFunctionController::class, 'detectCity']);
 Route::get('/wfp/transaction-status/{transactionStatus}/{uid}/{app}/{email}', [PusherController::class, 'sentStatusWfp']);

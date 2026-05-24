@@ -17,6 +17,7 @@ use App\Http\Controllers\WfpController;
 use App\Models\WfpInvoice;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Http\Controllers\FCMController;
+use App\Services\PaymentStatusNotifier;
 
 class CheckAndCancelOrderJob implements ShouldQueue
 {
@@ -129,15 +130,22 @@ class CheckAndCancelOrderJob implements ShouldQueue
         // Проверяем отклоненные статусы
         if ($transactionStatus === 'Declined') {
             Log::warning("❌ Платеж отклонен (Declined). Отменяем заказ {$uid}");
+            PaymentStatusNotifier::notifyTransactionStatus(
+                $transactionStatus,
+                $uid,
+                $this->app,
+                $this->email
+            );
         } else {
             Log::warning("⚠️ Неразрешенный статус '{$transactionStatus}'. Отменяем заказ {$uid}");
         }
 
-        $this->cleanupOrder($uid);
+        $this->cleanupOrder($uid, $transactionStatus === 'Declined');
     }
 
     private function cleanupOrder(
-        $uid
+        $uid,
+        bool $paymentDeclined = false
     ): void
     {
         Log::info("🧹 Начало очистки данных заказа {$uid}");
@@ -169,17 +177,19 @@ class CheckAndCancelOrderJob implements ShouldQueue
             $order->cancel_timestamp = Carbon::now();
             $order->closeReason = "1";
             $order->save();
-            //Пуш об отмене заказа
-            (new PusherController)->sentCanceledStatus(
-                $this->app,
-                $this->email,
-                $uid
-            );
-            (new CentrifugoController)->sentCanceledStatus(
-                $this->app,
-                $this->email,
-                $uid
-            );
+            // При Declined клиент уже получил payment_error; шлём cancel только для прочих причин
+            if (!$paymentDeclined) {
+                (new PusherController)->sentCanceledStatus(
+                    $this->app,
+                    $this->email,
+                    $uid
+                );
+                (new CentrifugoController)->sentCanceledStatus(
+                    $this->app,
+                    $this->email,
+                    $uid
+                );
+            }
             Log::info("🧹 Очистка данных заказа {$uid} завершена");
 
         } catch (\Exception $e) {

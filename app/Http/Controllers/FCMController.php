@@ -357,6 +357,91 @@ class FCMController extends Controller
         }
     }
 
+    /**
+     * Push об ошибке оплаты (Declined). Data-сообщение; клиент обрабатывает type=payment_error.
+     */
+    public function sendNotificationPaymentError($body, $app, $user_id, $uid, $transactionStatus = 'Declined')
+    {
+        Log::info('=== Запуск sendNotificationPaymentError ===', [
+            'body'                => $body,
+            'app'                 => $app,
+            'user_id'             => $user_id,
+            'uid'                 => $uid,
+            'transactionStatus'   => $transactionStatus,
+        ]);
+
+        $userToken = UserTokenFmsS::where('user_id', $user_id)->first();
+
+        if ($userToken === null) {
+            Log::warning('UserTokenFmsS не найден', ['user_id' => $user_id]);
+            return response()->json(['message' => 'User token not found'], 404);
+        }
+
+        $to = null;
+        $firebaseMessaging = null;
+
+        switch ($app) {
+            case 'PAS1':
+                $to = $userToken->token_app_pas_1;
+                $firebaseMessaging = app('firebase.messaging')['app1'] ?? null;
+                break;
+            case 'PAS2':
+                $to = $userToken->token_app_pas_2;
+                $firebaseMessaging = app('firebase.messaging')['app2'] ?? null;
+                break;
+            case 'PAS4':
+                $to = $userToken->token_app_pas_4;
+                $firebaseMessaging = app('firebase.messaging')['app4'] ?? null;
+                break;
+            default:
+                $to = $userToken->token_app_pas_5;
+                $firebaseMessaging = app('firebase.messaging')['app5'] ?? null;
+        }
+
+        if (empty($to)) {
+            Log::error('Токен пустой для пользователя', ['user_id' => $user_id, 'app' => $app]);
+            return response()->json(['message' => 'Empty token for user'], 400);
+        }
+
+        if ($firebaseMessaging === null) {
+            Log::error('FirebaseMessaging не настроен для приложения', ['app' => $app]);
+            return response()->json(['message' => 'Firebase messaging config not found'], 500);
+        }
+
+        $detailSuffix = ($body !== null && $body !== '') ? ': ' . $body : '';
+        $dataPayload = [
+            'type'              => 'payment_error',
+            'transactionStatus' => $transactionStatus,
+            'status'            => 'Declined',
+            'message_uk'        => 'Оплата не пройшла' . $detailSuffix,
+            'message_en'        => 'Payment failed' . $detailSuffix,
+            'message_ru'        => 'Оплата не прошла' . $detailSuffix,
+            'uid'               => $uid,
+        ];
+
+        try {
+            $message = CloudMessage::withTarget('token', $to)->withData($dataPayload);
+            $firebaseMessaging->send($message);
+            Log::info('sendNotificationPaymentError: уведомление отправлено', [
+                'token' => $to,
+                'uid'   => $uid,
+            ]);
+
+            return response()->json(['message' => 'Notification sent']);
+        } catch (\Exception $e) {
+            Log::error('sendNotificationPaymentError: ошибка отправки', [
+                'error' => $e->getMessage(),
+                'token' => $to,
+                'uid'   => $uid,
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to send notification',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function sendNotificationOrderCost($orderCost, $app, $user_id)
     {
         Log::info("=== Запуск sendNotificationOrderCost ===", [
