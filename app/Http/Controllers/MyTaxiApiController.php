@@ -521,6 +521,7 @@ class MyTaxiApiController extends Controller
             dispatch(new AutoCancelJob($dispatching_order_uid))
                 ->delay(now()->addMinutes($delayMinutes))
                 ->onQueue('low');
+
             if($wfpInvoice != "*") {
                 $orderReference = $wfpInvoice;
                 $amount = $clientCost;
