@@ -12886,7 +12886,19 @@ class AndroidTestOSMController extends Controller
 //                $dispatching_order_uid
 //            );
 
-            if($orderweb->server != "my_server_api") {
+            if ($orderweb->server != "my_server_api") {
+                $cityResolved = (new UniversalAndroidFunctionController)->cityFinder(
+                    $orderweb->city,
+                    $orderweb->server
+                );
+                $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
+                $this->webordersCancelRestorAddCostNal(
+                    $uid,
+                    $cityResolved,
+                    $applicationResolved,
+                    $orderweb
+                );
+
                 $startTime = time(); // Запоминаем начальное время
                 do {
                     // Попробуем найти запись
@@ -12914,11 +12926,13 @@ class AndroidTestOSMController extends Controller
                     // Ждём одну секунду перед следующим проверочным циклом
                     sleep(1);
                 } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
-                $uid_history->cancel = "1";
-                $uid_history->save();
+                if ($uid_history) {
+                    $uid_history->cancel = "1";
+                    $uid_history->save();
+                }
             }
 
-            $resp_answer = "Замовлення $uid отправлено на отмену";
+            $resp_answer = "Запит на скасування замовлення надіслано. ";
             return [
                 'response' => $resp_answer,
             ];
@@ -13027,12 +13041,6 @@ class AndroidTestOSMController extends Controller
             Log::debug('Orderweb query result', ['uid' => $uid, 'order_found' => !is_null($orderweb)]);
 
             if ($orderweb) {
-                (new FCMController)->deleteDocumentFromFirestore($uid);
-                (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-                (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-                (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-
-                // Log before updating the order
                 Log::info('Updating orderweb', ['order_id' => $orderweb->id, 'uid' => $uid]);
                 self::updateTimestamp($orderweb->id);
                 $orderweb->auto = null;
@@ -13040,7 +13048,27 @@ class AndroidTestOSMController extends Controller
                 $orderweb->save();
                 Log::info('Orderweb updated and saved', ['order_id' => $orderweb->id, 'uid' => $uid]);
 
-                $resp_answer = "Замовлення $uid отменено";
+                if ($orderweb->server != "my_server_api") {
+                    $cityResolved = (new UniversalAndroidFunctionController)->cityFinder(
+                        $orderweb->city,
+                        $orderweb->server
+                    );
+                    $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
+                    $this->webordersCancelRestorAddCostNal(
+                        $uid,
+                        $cityResolved,
+                        $applicationResolved,
+                        $orderweb
+                    );
+                    $resp_answer = "Запит на скасування замовлення надіслано. ";
+                } else {
+                    (new FCMController)->deleteDocumentFromFirestore($uid);
+                    (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+                    (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+                    (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+                    $resp_answer = "Замовлення $uid отменено";
+                }
+
                 Log::info('Order cancellation successful', ['response' => $resp_answer]);
 
                 return [
