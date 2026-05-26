@@ -84,8 +84,13 @@ return [
     ],
 
     'city_app_order' => [
-        'cache_ttl' => 5, // Время жизни кэша в секундах
-        'curl_timeout' => 5, // Таймаут подключения cURL в секундах
+        'cache_ttl' => 5,
+        'fail_cache_ttl' => 30,
+        'fail_cache_ttl_boundary' => 0,
+        'curl_timeout' => 3,
+        'offline_recheck_seconds' => 300,
+        'curfew_boundary_minutes' => 30,
+        'curfew_boundary_cities' => ['Kyiv City'],
     ],
 
     /** City-Info API (reb_active, air_alarm) — как CityInfoHelper в PAS_4 */

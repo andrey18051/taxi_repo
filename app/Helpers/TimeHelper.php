@@ -78,7 +78,50 @@ class TimeHelper
             'start_time' => config('app.start_time', '00:00'),
             'end_time' => config('app.end_time', '05:00'),
             'curfew_active' => self::isCurfewActive($at),
+            'near_boundary' => self::isNearCurfewBoundary($at),
         ];
+    }
+
+    /**
+     * Окно ±N минут от начала/конца комендантского часа (Киев).
+     * В это время оператор часто включается/выключается — нужен живой ping без кэша.
+     */
+    public static function isNearCurfewBoundary(?Carbon $at = null, ?int $windowMinutes = null): bool
+    {
+        $windowMinutes = $windowMinutes ?? (int) config('services.city_app_order.curfew_boundary_minutes', 30);
+        if ($windowMinutes <= 0) {
+            return false;
+        }
+
+        $at = ($at ?? now())->timezone(self::KYIV_TIMEZONE);
+        $currentMinutes = $at->hour * 60 + $at->minute;
+        $startMinutes = self::timeToMinutes(config('app.start_time', '00:00'));
+        $endMinutes = self::timeToMinutes(config('app.end_time', '05:00'));
+
+        return self::minutesWithinWindow($currentMinutes, $startMinutes, $windowMinutes)
+            || self::minutesWithinWindow($currentMinutes, $endMinutes, $windowMinutes);
+    }
+
+    public static function isCityInCurfewBoundaryScope(string $city): bool
+    {
+        $cities = config('services.city_app_order.curfew_boundary_cities', ['Kyiv City']);
+        if ($cities === null || $cities === []) {
+            return true;
+        }
+
+        return in_array($city, $cities, true);
+    }
+
+    public static function shouldForceFreshOperatorProbe(string $city, ?Carbon $at = null): bool
+    {
+        return self::isNearCurfewBoundary($at) && self::isCityInCurfewBoundaryScope($city);
+    }
+
+    private static function minutesWithinWindow(int $currentMinutes, int $centerMinutes, int $windowMinutes): bool
+    {
+        $diff = abs($currentMinutes - $centerMinutes);
+
+        return min($diff, 1440 - $diff) <= $windowMinutes;
     }
 
     /**
