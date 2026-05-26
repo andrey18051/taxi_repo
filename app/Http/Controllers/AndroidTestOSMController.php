@@ -4862,16 +4862,8 @@ class AndroidTestOSMController extends Controller
 
 
         $service = new CityAppOrderService();
-        $connectAPI = $service->cityOnlineOrder($city, $application);
+        $connectAPI = $service->resolveConnectApi($city, $application);
         Log::debug("2 connectAPI $connectAPI");
-
-        if ($connectAPI == 400) {
-            Log::info('Внешний сервер недоступен — переключение на my_server_api', [
-                'city' => $city,
-                'application' => $application,
-            ]);
-            $connectAPI = 'my_server_api';
-        }
 
         // === 3. Проверка блокировки API ===
         $cacheKeyBlock = "blocked_api_" . md5($connectAPI);
@@ -9880,16 +9872,9 @@ class AndroidTestOSMController extends Controller
         }
 
         $service = new CityAppOrderService();
-        $connectAPI = $service->cityOnlineOrder($city, $application);
+        $connectAPI = $service->resolveConnectApi($city, $application);
         Log::debug("6 connectAPI $connectAPI");
 
-        if ($connectAPI == 400) {
-            Log::info('Внешний сервер недоступен — переключение на my_server_api', [
-                'city' => $city,
-                'application' => $application,
-            ]);
-            $connectAPI = 'my_server_api';
-        }
         $params["startLat"] = $originLatitude; //
         $params["startLan"] = $originLongitude; //
         $params["to_lat"] = $toLatitude; //
