@@ -347,7 +347,17 @@ class CentrifugoController extends Controller
      */
     public function sentCostAppEmail(string $order_cost, string $app, string $email): JsonResponse
     {
-        $event = 'order-cost-' . $app . "-" . $email;
+        $appNormalized = strtoupper(trim($app));
+        if (!preg_match('/^PAS[1-5]$/', $appNormalized)) {
+            Log::warning('Centrifugo sentCostAppEmail: invalid app', [
+                'raw_app' => $app,
+                'email' => $email,
+                'order_cost' => $order_cost,
+            ]);
+            return response()->json(['result' => 'ignored', 'error' => 'invalid app'], 200);
+        }
+
+        $event = 'order-cost-' . $appNormalized . "-" . $email;
 
         $costForClient = (string) (int) round((float) $order_cost);
         $result = $this->trigger($event, [

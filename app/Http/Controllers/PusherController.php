@@ -546,12 +546,22 @@ class PusherController extends Controller
             ['cluster' => env('PUSHER_APP_CLUSTER')]
         );
 
+        $appNormalized = strtoupper(trim((string) $app));
+        if (!preg_match('/^PAS[1-5]$/', $appNormalized)) {
+            Log::warning('Pusher sentCostAppEmail: invalid app', [
+                'raw_app' => $app,
+                'email' => $email,
+                'order_cost' => $order_cost,
+            ]);
+            return response()->json(['result' => 'ignored', 'error' => 'invalid app'], 200);
+        }
+
         // Отправка события на канал
-        Log::info("Pusher отправляет событие: order-cost-" . $app . " в канал teal-towel-48");
+        Log::info("Pusher отправляет событие: order-cost-" . $appNormalized . " в канал teal-towel-48");
 
         $costForClient = (string) (int) round((float) $order_cost);
-        $pusher->trigger('teal-towel-48', 'order-cost-'. $app . "-" . $email, ['order_cost' => $costForClient]);
-        $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $app: " . $order_cost;
+        $pusher->trigger('teal-towel-48', 'order-cost-'. $appNormalized . "-" . $email, ['order_cost' => $costForClient]);
+        $messageAdmin = "Отправлена стоимость нового заказа  клиенту $email в $appNormalized: " . $order_cost;
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         $user = User::where("email", $email) ->first();

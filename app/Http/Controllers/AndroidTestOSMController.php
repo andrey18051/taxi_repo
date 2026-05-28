@@ -42,6 +42,12 @@ use SebastianBergmann\Diff\Exception;
 
 class AndroidTestOSMController extends Controller
 {
+    private function normalizeApplication(string $application): string
+    {
+        $app = strtoupper(trim($application));
+        // Жестко ограничиваем, чтобы не путать PAS1/2/3/4/5
+        return preg_match('/^PAS[1-5]$/', $app) ? $app : '';
+    }
     /**
      * @throws \Exception
      */
@@ -4498,6 +4504,18 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+        $rawApplication = (string) $application;
+        $application = $this->normalizeApplication($rawApplication);
+        if ($application === '') {
+            Log::warning('[costSearchMarkersTime] invalid application param', [
+                'raw_application' => $rawApplication,
+                'route_city' => $city,
+            ]);
+            return response([
+                "order_cost" => 0,
+                "Message" => "Некорректное приложение"
+            ], 200)->header('Content-Type', 'json');
+        }
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
@@ -4836,6 +4854,18 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+        $rawApplication = (string) $application;
+        $application = $this->normalizeApplication($rawApplication);
+        if ($application === '') {
+            Log::warning('[costSearchMarkersTimeMyApi] invalid application param', [
+                'raw_application' => $rawApplication,
+                'route_city' => $city,
+            ]);
+            return response([
+                "order_cost" => 0,
+                "Message" => "Некорректное приложение"
+            ], 200)->header('Content-Type', 'json');
+        }
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
