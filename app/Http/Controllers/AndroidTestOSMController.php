@@ -5073,6 +5073,30 @@ class AndroidTestOSMController extends Controller
             );
         }
 
+        // Внешний сервер доступен, но отклонил маршрут (адрес вне базы / неверный маршрут) —
+        // считаем стоимость резервным способом (OSRM + тариф), а не возвращаем 0.
+        if (
+            (isset($responseArr["Id"]) && (int) $responseArr["Id"] === -13) ||
+            (isset($responseArr["Message"]) && (
+                str_contains($responseArr["Message"], 'Неверно сформирован маршрут') ||
+                str_contains($responseArr["Message"], 'нет в базе данных')
+            ))
+        ) {
+            Log::warning('[costSearchMarkersTime] Внешний сервер отклонил маршрут — резервный расчёт my_server_api', [
+                'city' => $city,
+                'connectAPI' => $connectAPI,
+                'id' => $responseArr['Id'] ?? null,
+                'message' => $responseArr['Message'] ?? null,
+            ]);
+
+            return (new MyTaxiApiController)->costMyApiTaxi(
+                $parameter,
+                $city,
+                $application,
+                $email
+            );
+        }
+
 
 
         if (isset($responseArr["order_cost"])) {
@@ -5184,13 +5208,18 @@ class AndroidTestOSMController extends Controller
             } while ($attempt <= $city_count);
 
         }
-        // Если после всех попыток не удалось получить стоимость — возвращаем заглушку
+        // Если после всех попыток не удалось получить стоимость — резервный расчёт my_server_api
+        Log::warning('[costSearchMarkersTime] Внешние серверы не дали стоимость — резервный расчёт my_server_api', [
+            'city' => $city,
+            'application' => $application,
+        ]);
 
-
-        return response([
-            "order_cost" => 0,
-            "Message" => "Ошибка создания заказа"
-        ], 200)->header('Content-Type', 'json');
+        return (new MyTaxiApiController)->costMyApiTaxi(
+            $parameter,
+            $city,
+            $application,
+            $email
+        );
     }
 
     private static function getCityServer($application, $address)

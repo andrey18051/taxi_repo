@@ -465,6 +465,31 @@ class MyTaxiApiController extends Controller
             $routeUndefined = implode(',', $routeUndefined);
         }
 
+        // Если стоимость не пришла от внешнего сервера (он отклонил маршрут) —
+        // считаем её резервным способом (OSRM + тариф), чтобы заказ не сохранялся без цены.
+        $clientCostNormalized = is_string($clientCost) ? trim($clientCost) : $clientCost;
+        if ($clientCostNormalized === null || $clientCostNormalized === '' ||
+            (is_numeric($clientCostNormalized) && (float) $clientCostNormalized == 0)) {
+            Log::info('💰 Стоимость не получена от внешнего сервера — резервный расчёт', [
+                'city' => $city,
+                'application' => $application,
+            ]);
+
+            $reserveCost = $this->costMyApiTaxi($parameter, $city, $application, $email);
+
+            if (isset($reserveCost['order_cost']) && (float) $reserveCost['order_cost'] > 0) {
+                $clientCost = $reserveCost['order_cost'];
+                Log::info('💰 Резервная стоимость рассчитана', [
+                    'order_cost' => $clientCost,
+                    'distance_km' => $reserveCost['distance_km'] ?? null,
+                ]);
+            } else {
+                Log::warning('⚠️ Резервный расчёт стоимости не дал результата', [
+                    'reserve_response' => $reserveCost,
+                ]);
+            }
+        }
+
         // Подготовка параметров для сохранения заказа
         $params = [
             "user_full_name" => $parameter['user_full_name'] ?? null,
