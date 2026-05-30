@@ -178,11 +178,23 @@ jobs:
             docker stop taxi_test || true
             docker rm taxi_test || true
 
+            mkdir -p /opt/laravel_logs/taxi_test
+            chmod 777 /opt/laravel_logs/taxi_test
+            touch /opt/laravel_logs/taxi_test/laravel.log
+            chmod 666 /opt/laravel_logs/taxi_test/laravel.log
+            if [ ! -f /opt/laravel_logs/taxi_test/watch_log.sh ]; then
+              docker create --name taxi_test_init ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
+              docker cp taxi_test_init:/usr/share/nginx/html/taxi/docker/watch_log.sh /opt/laravel_logs/taxi_test/watch_log.sh
+              docker rm taxi_test_init
+              chmod +x /opt/laravel_logs/taxi_test/watch_log.sh
+            fi
+
             docker run --name taxi_test -d \
               --network host \
               --restart unless-stopped \
               --user 0:0 \
               -v /opt/secrets/firebase/test:/run/secrets/firebase:ro \
+              -v /opt/laravel_logs/taxi_test:/usr/share/nginx/html/laravel_logs \
               ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
 
             echo "TEST deployed!"
@@ -368,11 +380,23 @@ jobs:
             docker stop taxi_work || true
             docker rm taxi_work || true
 
+            mkdir -p /opt/laravel_logs/taxi_work
+            chmod 777 /opt/laravel_logs/taxi_work
+            touch /opt/laravel_logs/taxi_work/laravel.log
+            chmod 666 /opt/laravel_logs/taxi_work/laravel.log
+            if [ ! -f /opt/laravel_logs/taxi_work/watch_log.sh ]; then
+              docker create --name taxi_work_init ghcr.io/andrey18051/taxi_work:$IMAGE_TAG
+              docker cp taxi_work_init:/usr/share/nginx/html/taxi/docker/watch_log.sh /opt/laravel_logs/taxi_work/watch_log.sh
+              docker rm taxi_work_init
+              chmod +x /opt/laravel_logs/taxi_work/watch_log.sh
+            fi
+
             docker run --name taxi_work -d \
               --network host \
               --restart unless-stopped \
               --user 0:0 \
               -v /opt/secrets/firebase/prod:/run/secrets/firebase:ro \
+              -v /opt/laravel_logs/taxi_work:/usr/share/nginx/html/laravel_logs \
               ghcr.io/andrey18051/taxi_work:$IMAGE_TAG
 
             echo "PRODUCTION deployed!"

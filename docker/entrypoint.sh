@@ -24,7 +24,13 @@ else
     echo "Storage link уже существует"
 fi
 
-chmod 777 /usr/share/nginx/html/laravel_logs/laravel.log
+mkdir -p /usr/share/nginx/html/laravel_logs
+touch /usr/share/nginx/html/laravel_logs/laravel.log
+if [ ! -f /usr/share/nginx/html/laravel_logs/watch_log.sh ]; then
+    cp /usr/share/nginx/html/taxi/docker/watch_log.sh /usr/share/nginx/html/laravel_logs/watch_log.sh
+    chmod +x /usr/share/nginx/html/laravel_logs/watch_log.sh
+fi
+chmod -R 777 /usr/share/nginx/html/laravel_logs
 
 
 echo "Запуск supervisord..."
