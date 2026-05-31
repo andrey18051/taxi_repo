@@ -941,6 +941,7 @@ class UIDController extends Controller
 //                ->where("comment", $application)
 //                ->orderBy("created_at", "desc")
 //                ->get();
+            $historySince = now()->subHours(48);
             $orderHistory = Orderweb::where("email", $email)
                 ->whereIn('closeReason', ['-1', '100', '101', '102', '103'])
                 ->where("city", $city)
@@ -949,6 +950,7 @@ class UIDController extends Controller
 //                ->whereNotNull("to_lat")
 //                ->whereNotNull("to_lng")
                 ->where("comment", $application)
+                ->where('created_at', '>=', $historySince)
                 ->orderBy("created_at", "desc")
                 ->get();
 

@@ -219,12 +219,19 @@ class AutoCancelJob implements ShouldQueue
 
         $app = $this->resolvePasApp($order);
 
+        $reason = 'auto_cancel';
+        if ((int) $order->payment_type === 1
+            || (is_string($order->pay_system) && str_contains((string) $order->pay_system, 'wfp'))) {
+            $reason = 'payment_timeout';
+        }
+
         try {
             (new FCMController)->sendNotificationCancel(
                 $body,
                 $app,
                 $user->id,
-                $uid
+                $uid,
+                $reason
             );
             Log::info("AutoCancelJob: FCM push об отмене отправлен (uid {$uid})");
         } catch (\Throwable $e) {

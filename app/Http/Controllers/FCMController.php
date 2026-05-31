@@ -280,14 +280,17 @@ class FCMController extends Controller
 
     /**
      * Push-уведомление об отмене заказа (аналог sendNotificationAuto для скасування).
+     *
+     * @param string $reason payment_timeout|auto_cancel|dispatcher (для текста в клиенте)
      */
-    public function sendNotificationCancel($body, $app, $user_id, $uid)
+    public function sendNotificationCancel($body, $app, $user_id, $uid, $reason = 'auto_cancel')
     {
         Log::info('=== Запуск sendNotificationCancel ===', [
             'body'    => $body,
             'app'     => $app,
             'user_id' => $user_id,
             'uid'     => $uid,
+            'reason'  => $reason,
         ]);
 
         $userToken = UserTokenFmsS::where('user_id', $user_id)->first();
@@ -329,12 +332,16 @@ class FCMController extends Controller
         }
 
         $detail = $body !== '' ? $body : $uid;
+        $appLabels = $this->fcmAppLabels($app);
+        $reasonTexts = $this->fcmCancelReasonTexts($reason);
         $dataPayload = [
-            'message_uk' => 'Замовлення скасовано: ' . $detail,
-            'message_en' => 'Order cancelled: ' . $detail,
-            'message_ru' => 'Заказ отменён: ' . $detail,
-            'uid'        => $uid,
-            'status'     => 'cancelled',
+            'target_app'    => $app,
+            'cancel_reason' => $reason,
+            'message_uk'    => $appLabels['uk'] . ' — ' . $reasonTexts['uk'] . ': ' . $detail,
+            'message_en'    => $appLabels['en'] . ' — ' . $reasonTexts['en'] . ': ' . $detail,
+            'message_ru'    => $appLabels['ru'] . ' — ' . $reasonTexts['ru'] . ': ' . $detail,
+            'uid'           => $uid,
+            'status'        => 'cancelled',
         ];
 
         try {
@@ -408,14 +415,16 @@ class FCMController extends Controller
             return response()->json(['message' => 'Firebase messaging config not found'], 500);
         }
 
+        $appLabels = $this->fcmAppLabels($app);
         $detailSuffix = ($body !== null && $body !== '') ? ': ' . $body : '';
         $dataPayload = [
             'type'              => 'payment_error',
+            'target_app'        => $app,
             'transactionStatus' => $transactionStatus,
             'status'            => 'Declined',
-            'message_uk'        => 'Оплата не пройшла' . $detailSuffix,
-            'message_en'        => 'Payment failed' . $detailSuffix,
-            'message_ru'        => 'Оплата не прошла' . $detailSuffix,
+            'message_uk'        => $appLabels['uk'] . ' — Оплата не пройшла' . $detailSuffix,
+            'message_en'        => $appLabels['en'] . ' — Payment failed' . $detailSuffix,
+            'message_ru'        => $appLabels['ru'] . ' — Оплата не прошла' . $detailSuffix,
             'uid'               => $uid,
         ];
 
@@ -3450,5 +3459,48 @@ google_id: $uidDriver ожидает отмены заявки на возвра
         $dateTime = new DateTime($currentDateTime);
         $dateTime->setTimezone($kievTimeZone);
         return $dateTime->format('d.m.Y H:i:s');
+    }
+
+    /**
+     * Название приложения для текста push (как app_name в клиенте), по локали.
+     *
+     * @return array{uk: string, ru: string, en: string}
+     */
+    private function fcmAppLabels(string $app): array
+    {
+        $names = config('fcm_app_names.' . $app);
+        if (is_array($names) && isset($names['uk'], $names['ru'], $names['en'])) {
+            return $names;
+        }
+
+        return [
+            'uk' => $app,
+            'ru' => $app,
+            'en' => $app,
+        ];
+    }
+
+    /**
+     * @return array{uk: string, ru: string, en: string}
+     */
+    private function fcmCancelReasonTexts(string $reason): array
+    {
+        return match ($reason) {
+            'payment_timeout' => [
+                'uk' => 'замовлення скасовано (оплата не пройшла)',
+                'ru' => 'заказ отменён (оплата не прошла)',
+                'en' => 'order cancelled (payment failed)',
+            ],
+            'dispatcher' => [
+                'uk' => 'замовлення скасовано диспетчером',
+                'ru' => 'заказ отменён диспетчером',
+                'en' => 'order cancelled by dispatcher',
+            ],
+            default => [
+                'uk' => 'замовлення скасовано (авто)',
+                'ru' => 'заказ отменён (авто)',
+                'en' => 'order cancelled (auto)',
+            ],
+        };
     }
 }
