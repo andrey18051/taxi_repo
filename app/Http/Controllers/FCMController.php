@@ -3485,22 +3485,25 @@ google_id: $uidDriver ожидает отмены заявки на возвра
      */
     private function fcmCancelReasonTexts(string $reason): array
     {
-        return match ($reason) {
-            'payment_timeout' => [
-                'uk' => 'замовлення скасовано (оплата не пройшла)',
-                'ru' => 'заказ отменён (оплата не прошла)',
-                'en' => 'order cancelled (payment failed)',
-            ],
-            'dispatcher' => [
-                'uk' => 'замовлення скасовано диспетчером',
-                'ru' => 'заказ отменён диспетчером',
-                'en' => 'order cancelled by dispatcher',
-            ],
-            default => [
-                'uk' => 'замовлення скасовано (авто)',
-                'ru' => 'заказ отменён (авто)',
-                'en' => 'order cancelled (auto)',
-            ],
-        };
+        switch ($reason) {
+            case 'payment_timeout':
+                return [
+                    'uk' => 'замовлення скасовано (оплата не пройшла)',
+                    'ru' => 'заказ отменён (оплата не прошла)',
+                    'en' => 'order cancelled (payment failed)',
+                ];
+            case 'dispatcher':
+                return [
+                    'uk' => 'замовлення скасовано диспетчером',
+                    'ru' => 'заказ отменён диспетчером',
+                    'en' => 'order cancelled by dispatcher',
+                ];
+            default:
+                return [
+                    'uk' => 'замовлення скасовано (авто)',
+                    'ru' => 'заказ отменён (авто)',
+                    'en' => 'order cancelled (auto)',
+                ];
+        }
     }
 }
