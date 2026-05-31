@@ -2567,7 +2567,7 @@ class AndroidTestOSMController extends Controller
             $response_ok["routefromnumber"] = $from_number;
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
-            $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+            $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
             $response_ok["flexible_tariff_name"] = $tariff;
             $response_ok["comment_info"] = $comment;
             $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -3056,7 +3056,7 @@ class AndroidTestOSMController extends Controller
             $response_ok["routefromnumber"] = $from_number;
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
-            $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+            $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
             $response_ok["flexible_tariff_name"] = $tariff;
             $response_ok["comment_info"] = $comment;
             $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -3606,7 +3606,7 @@ class AndroidTestOSMController extends Controller
             $response_ok["routefromnumber"] = $from_number;
             $response_ok["routeto"] = $to;
             $response_ok["to_number"] = $to_number;
-            $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+            $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
             $response_ok["flexible_tariff_name"] = $tariff;
             $response_ok["comment_info"] = $comment;
             $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -6824,7 +6824,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $to;
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -7288,7 +7288,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -7979,7 +7979,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -8715,7 +8715,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -9594,7 +9594,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -10432,7 +10432,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -11170,7 +11170,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];
@@ -11711,7 +11711,7 @@ class AndroidTestOSMController extends Controller
                 $response_ok["routefromnumber"] = $params['from_number'];
                 $response_ok["routeto"] = $params['to'];
                 $response_ok["to_number"] = $params['to_number'];
-                $response_ok["required_time"] = date('d.m.Y H:i', strtotime($required_time));
+                $response_ok["required_time"] = UniversalAndroidFunctionController::formatRequiredTimeForAndroidResponse($required_time);
                 $response_ok["flexible_tariff_name"] = $tariff;
                 $response_ok["comment_info"] = $comment;
                 $response_ok["extra_charge_codes"] = $params['extra_charge_codes'];

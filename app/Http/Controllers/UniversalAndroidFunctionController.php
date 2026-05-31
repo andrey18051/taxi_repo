@@ -11320,6 +11320,18 @@ class UniversalAndroidFunctionController extends Controller
     }
 
 
+    public static function formatRequiredTimeForAndroidResponse($required_time): string
+    {
+        if ($required_time === null || $required_time === '' || $required_time === false) {
+            return '';
+        }
+        $timestamp = strtotime($required_time);
+        if ($timestamp === false || $timestamp <= 0) {
+            return '';
+        }
+        return date('d.m.Y H:i', $timestamp);
+    }
+
     public function parseOrderResponse(
         $response_arr,
         $dispatching_order_uid_Double,
@@ -11347,10 +11359,10 @@ class UniversalAndroidFunctionController extends Controller
                 $costMap['routeto'] = $response_arr['route_address_to']['name'];
                 $costMap['to_number'] = $response_arr['route_address_to']['number'];
 
-                if($required_time != null) {
+                if ($required_time != null && $required_time !== '') {
                     $costMap['required_time'] = $required_time;
                 } else {
-                    $costMap['required_time'] = "1970-01-01T03:00";
+                    $costMap['required_time'] = '';
                 }
 
 
@@ -11903,7 +11915,7 @@ class UniversalAndroidFunctionController extends Controller
                 'routefromnumber' => $orderweb->routefromnumber,
                 'routeto' => $orderweb->routeto,
                 'to_number' => $orderweb->routetonumber,
-                'required_time' => $orderweb->required_time ?? '1970-01-01T03:00',
+                'required_time' => $orderweb->required_time ?? '',
                 'comment_info' => $orderweb->comment_info,
                 'extra_charge_codes' => $orderweb->extra_charge_codes,
             ];
@@ -12025,7 +12037,7 @@ class UniversalAndroidFunctionController extends Controller
                 'routefromnumber' => $orderweb->routefromnumber,
                 'routeto' => $orderweb->routeto,
                 'to_number' => $orderweb->routetonumber,
-                'required_time' => $orderweb->required_time ?? '1970-01-01T03:00',
+                'required_time' => $orderweb->required_time ?? '',
                 'comment_info' => $orderweb->comment_info,
                 'extra_charge_codes' => $orderweb->extra_charge_codes,
             ];
