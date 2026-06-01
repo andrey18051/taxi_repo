@@ -1354,14 +1354,16 @@ class OrderStatusController extends Controller
             $autoInfoCard = $cardOrder['order_car_info'] ?? null;
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
-            if ($uid_history->cancel == "1") {
-                $response = $cardOrderInput; // БЕЗНАЛ
+            if ($uid_history->cancel == "1" || self::isDispatchOrderCanceled($cardOrder)) {
                 $action = 'Заказ снят';
-                $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+                self::applyCanceledOrderweb($orderweb);
+                $orderweb->save();
+                $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
                 Log::info('Order canceled', [
                     'action' => $action,
-                    'response' => $response,
-                    'dispatching_order_uid' => $dispatching_order_uid
+                    'dispatching_order_uid' => $dispatching_order_uid,
+                    'cardState' => $cardState,
+                    'nalState' => $nalState,
                 ]);
                 Log::info('Exiting function due to cancel', ['response' => $response]);
                 return $response;
@@ -1585,10 +1587,10 @@ class OrderStatusController extends Controller
                             break;
 
                         case 'Executed|Canceled':
-                            $action = 'Заказ выполнен';
-                            $orderweb->closeReason = "104";
-                            $response = $nalOrderInput;
-                            Log::info('Switch: Заказ выполнен (nal executed, card canceled)', ['action' => $action, 'stateKey' => $stateKey]);
+                            $action = 'Заказ снят';
+                            self::applyCanceledOrderweb($orderweb);
+                            $response = $cardOrderInput;
+                            Log::info('Switch: Заказ снят (nal executed, card canceled)', ['action' => $action, 'stateKey' => $stateKey]);
                             break;
 
                         case 'Executed|Executed':
@@ -2274,5 +2276,33 @@ class OrderStatusController extends Controller
             'безнал' => $nextState,
             'close_reason' => $closeReason
         ]);
+    }
+
+    /**
+     * Bonus/card leg in uid_history: canceled in dispatch (execution_status or close_reason).
+     */
+    public static function isDispatchOrderCanceled(?array $order): bool
+    {
+        if ($order === null || $order === []) {
+            return false;
+        }
+        if (($order['execution_status'] ?? '') === 'Canceled') {
+            return true;
+        }
+        $closeReason = $order['close_reason'] ?? -1;
+        if ($closeReason === -1 || $closeReason === '-1' || $closeReason === 0 || $closeReason === '0') {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function applyCanceledOrderweb(Orderweb $orderweb): void
+    {
+        $orderweb->closeReason = '1';
+        $orderweb->auto = null;
+        if ($orderweb->cancel_timestamp === null) {
+            $orderweb->cancel_timestamp = now();
+        }
     }
 }

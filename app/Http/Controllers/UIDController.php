@@ -910,8 +910,9 @@ class UIDController extends Controller
                 $city = "all";
         }
 
-        $order = Orderweb:: where("email", $email)
+        $order = Orderweb::where("email", $email)
             ->whereIn('closeReason', ['-1', '100', '101', '102'])
+            ->whereNull('cancel_timestamp')
             ->where("comment", $application)
             ->where("city", $city)
             ->orderBy("created_at", "desc")
@@ -927,7 +928,13 @@ class UIDController extends Controller
 
         if (!$order->isEmpty()) {
 
-                self::UIDStatusReview($order);
+                $ordersForReview = $order->filter(function ($orderRow) {
+                    return $orderRow->cancel_timestamp === null
+                        && !in_array((string) $orderRow->closeReason, ['0', '1', '8', '9'], true);
+                });
+                if ($ordersForReview->isNotEmpty()) {
+                    self::UIDStatusReview($ordersForReview);
+                }
 
 
 //            $orderHistory = Orderweb::where("email", $email)
@@ -944,6 +951,7 @@ class UIDController extends Controller
             $historySince = now()->subHours(48);
             $orderHistory = Orderweb::where("email", $email)
                 ->whereIn('closeReason', ['-1', '100', '101', '102', '103'])
+                ->whereNull('cancel_timestamp')
                 ->where("city", $city)
 //                ->whereNotNull("startLat")
 //                ->whereNotNull("startLan")
@@ -965,6 +973,10 @@ class UIDController extends Controller
                 date_default_timezone_set('Europe/Kiev');
 
                 foreach ($orderUpdate as $value) {
+                    if (!empty($value['cancel_timestamp'])
+                        || in_array((string) ($value['closeReason'] ?? ''), ['0', '1', '8', '9'], true)) {
+                        continue;
+                    }
                     $uid_history = Uid_history::where("uid_bonusOrderHold", $value['dispatching_order_uid'])->first();
 //                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
                     $storedData = $value["auto"];
@@ -1551,6 +1563,14 @@ class UIDController extends Controller
             $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
 
             if (isset($orderweb)) {
+
+                if ($uid_history->cancel == "1"
+                    || OrderStatusController::isDispatchOrderCanceled($cardOrder ?? null)
+                    || $orderweb->cancel_timestamp !== null) {
+                    OrderStatusController::applyCanceledOrderweb($orderweb);
+                    $orderweb->save();
+                    return;
+                }
 
                 // Блок 1: Состояния "Поиск авто"
                 if (in_array($nalState, ['SearchesForCar', 'WaitingCarSearch']) &&

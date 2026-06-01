@@ -19,7 +19,9 @@ use App\Models\DniproCombo;
 use App\Models\DoubleOrder;
 use App\Models\OdessaCombo;
 use App\Models\Orderweb;
+use App\Models\Uid_history;
 use App\Models\ZaporizhzhiaCombo;
+use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
@@ -2430,27 +2432,7 @@ class AndroidAppController extends Controller
             ])->put($url);
 
             $json_arrWeb = json_decode($response, true);
-
-            $resp_answer = "Запит на скасування замовлення надіслано. ";
-
-            switch ($json_arrWeb['order_client_cancel_result']) {
-                case '0':
-                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
-                    break;
-                case '1':
-                    $resp_answer = $resp_answer . "Замовлення скасоване.";
-                    break;
-                case '2':
-                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
-                    break;
-                default:
-                    $resp_answer = $resp_answer . "Статус поїздки дізнайтесь у диспетчера.";
-            }
-//        dd($resp_answer);
-
-            $orderweb->closeReason = "1";
-            $orderweb->save();
-            self::sentCancelInfo($orderweb);
+            $resp_answer = $this->buildWeborderCancelResponse($orderweb, $json_arrWeb);
         }
 
         return [
@@ -2493,24 +2475,7 @@ class AndroidAppController extends Controller
             ])->put($url);
 
             $json_arrWeb = json_decode($response, true);
-
-            $resp_answer = "Запит на скасування замовлення надіслано. ";
-
-            switch ($json_arrWeb['order_client_cancel_result']) {
-                case '0':
-                    $resp_answer = $resp_answer . "Замовлення не вдалося скасувати.";
-                    break;
-                case '1':
-                    $resp_answer = $resp_answer . "Замовлення скасоване.";
-                    break;
-                case '2':
-                    $resp_answer = $resp_answer . "Вимагає підтвердження клієнтом скасування диспетчерської.";
-                    break;
-            }
-
-            $orderweb->closeReason = "1";
-            $orderweb->save();
-            self::sentCancelInfo($orderweb);
+            $resp_answer = $this->buildWeborderCancelResponse($orderweb, $json_arrWeb);
 
             $url = $connectAPI . '/api/weborders/cancel/' . $uid_Double;
             Http::withHeaders([
@@ -2770,6 +2735,42 @@ class AndroidAppController extends Controller
             // Если файл не найден, возвращаем ошибку 404
             http_response_code(404);
             echo 'Файл не найден.';
+        }
+    }
+
+    private function buildWeborderCancelResponse(Orderweb $orderweb, ?array $json_arrWeb): string
+    {
+        $cancelResult = isset($json_arrWeb['order_client_cancel_result'])
+            ? (string) $json_arrWeb['order_client_cancel_result']
+            : null;
+
+        switch ($cancelResult) {
+            case '1':
+                $orderweb->closeReason = '1';
+                $orderweb->cancel_timestamp = Carbon::now();
+                $orderweb->auto = null;
+                $orderweb->save();
+                $this->markUidHistoryCancelled($orderweb->dispatching_order_uid);
+                self::sentCancelInfo($orderweb);
+                return 'Замовлення скасоване.';
+            case '0':
+                return 'Замовлення не вдалося скасувати. Статус поїздки дізнайтесь у диспетчера.';
+            case '2':
+                return 'Запит на скасування замовлення надіслано. Вимагає підтвердження клієнтом скасування диспетчерської.';
+            default:
+                return 'Запит на скасування замовлення надіслано. Статус поїздки дізнайтесь у диспетчера.';
+        }
+    }
+
+    private function markUidHistoryCancelled(string $uid): void
+    {
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first()
+            ?? Uid_history::where('uid_bonusOrder', $uid)->first()
+            ?? Uid_history::where('uid_doubleOrder', $uid)->first();
+        if ($uid_history) {
+            $uid_history->cancel = '1';
+            $uid_history->save();
         }
     }
 

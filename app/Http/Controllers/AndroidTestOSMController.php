@@ -12945,6 +12945,14 @@ class AndroidTestOSMController extends Controller
             $orderweb->closeReason = "1";
             $orderweb->save();
 
+            $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first()
+                ?? Uid_history::where('uid_bonusOrder', $uid)->first()
+                ?? Uid_history::where('uid_doubleOrder', $uid)->first();
+            if ($uid_history) {
+                $uid_history->cancel = '1';
+                $uid_history->save();
+            }
+
             $email = $orderweb->email;
             $app = $application;
             $dispatching_order_uid = $orderweb->dispatching_order_uid;
@@ -12968,37 +12976,6 @@ class AndroidTestOSMController extends Controller
                     $orderweb
                 );
 
-                $startTime = time(); // Запоминаем начальное время
-                do {
-                    // Попробуем найти запись
-                    $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-
-                    if ($uid_history) {
-                        // Если запись найдена, выходим из цикла
-                        break;
-                    } else {
-                        $uid_history = Uid_history::where("uid_doubleOrder", $uid)->first();
-
-                        if ($uid_history) {
-                            // Если запись найдена, выходим из цикла
-                            break;
-                        }
-                    }
-
-                    $uid_history = Uid_history::where("uid_bonusOrder", $uid)->first();
-
-                    if ($uid_history) {
-                        // Если запись найдена, выходим из цикла
-                        break;
-                    }
-
-                    // Ждём одну секунду перед следующим проверочным циклом
-                    sleep(1);
-                } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
-                if ($uid_history) {
-                    $uid_history->cancel = "1";
-                    $uid_history->save();
-                }
             } else {
                 $this->notifyOrderCancelTelegram($orderweb, "Отмена Double my_server_api");
             }
