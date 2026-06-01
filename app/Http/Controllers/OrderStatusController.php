@@ -1249,7 +1249,8 @@ class OrderStatusController extends Controller
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
         if ($orderweb) {
-            if (in_array($orderweb->closeReason, ['100', '101', '102', '103', '104'])) {
+            // 0, 8, 9 — закрытие внешним API / диспетчеризацией («Выполнен»); 100–104 — внутренние этапы PAS
+            if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
 
                 $responseArr = [
                     'close_reason' => $orderweb->closeReason
@@ -1281,7 +1282,13 @@ class OrderStatusController extends Controller
                 }
 
                 $action = 'Поиск авто';
-                switch ($orderweb->closeReason) {
+                switch ((string) $orderweb->closeReason) {
+                    case '0':
+                    case '8':
+                    case '9':
+                        $action = 'Заказ выполнен';
+                        Log::info('Switch: external API close', ['closeReason' => $orderweb->closeReason, 'action' => $action]);
+                        break;
                     // Block 2: Состояния "Авто найдено"
                     case '101':
                         $action = 'Авто найдено';
@@ -1541,7 +1548,7 @@ class OrderStatusController extends Controller
                         case 'Executed|CarFound':
                         case 'Executed|Running':
                             $action = 'Заказ выполнен';
-                            $orderweb->closeReason = "0";
+                            $orderweb->closeReason = "104";
                             $response = $nalOrderInput; // НАЛ
                             Log::info('Switch: Заказ выполнен (nal executed, card various)', ['action' => $action, 'response' => $response]);
                             break;
@@ -1551,23 +1558,44 @@ class OrderStatusController extends Controller
                         case 'CarFound|Executed':
                         case 'Running|Executed':
                             $action = 'Заказ выполнен';
-                            $orderweb->closeReason = "0";
+                            $orderweb->closeReason = "104";
                             $response = $cardOrderInput; // БЕЗНАЛ
                             Log::info('Switch: Заказ выполнен (nal various, card executed)', ['action' => $action, 'response' => $response]);
                             break;
 
                         case 'Executed|CostCalculation':
                             $action = 'Заказ выполнен';
-                            $orderweb->closeReason = "0";
+                            $orderweb->closeReason = "104";
                             $response = $nalOrderInput; // НАЛ
                             Log::info('Switch: Заказ выполнен (nal executed, card cost calc)', ['action' => $action, 'response' => $response]);
                             break;
 
                         case 'CostCalculation|Executed':
                             $action = 'Заказ выполнен';
-                            $orderweb->closeReason = "0";
+                            $orderweb->closeReason = "104";
                             $response = $cardOrderInput; // БЕЗНАЛ
                             Log::info('Switch: Заказ выполнен (nal cost calc, card executed)', ['action' => $action, 'response' => $response]);
+                            break;
+
+                        case 'Canceled|Executed':
+                            $action = 'Заказ выполнен';
+                            $orderweb->closeReason = "104";
+                            $response = $cardOrderInput;
+                            Log::info('Switch: Заказ выполнен (nal canceled, card/double executed)', ['action' => $action, 'stateKey' => $stateKey]);
+                            break;
+
+                        case 'Executed|Canceled':
+                            $action = 'Заказ выполнен';
+                            $orderweb->closeReason = "104";
+                            $response = $nalOrderInput;
+                            Log::info('Switch: Заказ выполнен (nal executed, card canceled)', ['action' => $action, 'stateKey' => $stateKey]);
+                            break;
+
+                        case 'Executed|Executed':
+                            $action = 'Заказ выполнен';
+                            $orderweb->closeReason = "104";
+                            $response = $cardOrderInput;
+                            Log::info('Switch: Заказ выполнен (both executed)', ['action' => $action]);
                             break;
 
                         // Block 4: Состояния "Заказ снят" с проверкой close_reason
@@ -1775,7 +1803,7 @@ class OrderStatusController extends Controller
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
         if ($orderweb) {
-            if (in_array($orderweb->closeReason, ['101', '102', '103', '104'])) {
+            if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
 
                 $responseArr = [
                     'close_reason' => $orderweb->closeReason
@@ -1806,7 +1834,13 @@ class OrderStatusController extends Controller
                 }
 
                 $action = 'Поиск авто';
-                switch ($orderweb->closeReason) {
+                switch ((string) $orderweb->closeReason) {
+                    case '0':
+                    case '8':
+                    case '9':
+                        $action = 'Заказ выполнен';
+                        Log::info('Switch: external API close (background)', ['closeReason' => $orderweb->closeReason, 'action' => $action]);
+                        break;
                     // Block 2: Состояния "Авто найдено"
                     case '101':
                         $action = 'Авто найдено';
