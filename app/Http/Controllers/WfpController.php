@@ -1212,7 +1212,7 @@ class WfpController extends Controller
 
             do {
                 $response = Http::post('https://api.wayforpay.com/api', $params);
-                Log::debug((string)["checkStatus attempt $attempt response" => $response->body()]);
+                Log::debug("checkStatus attempt $attempt response", ['body' => $response->body()]);
 
                 $data = json_decode($response->body(), true);
 
