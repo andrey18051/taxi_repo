@@ -6785,13 +6785,8 @@ class UniversalAndroidFunctionController extends Controller
 
             $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
             $paidStatuses = ['WaitingAuthComplete', 'Approved'];
-            $processingStatuses = ['InProcessing', 'Pending'];
             $transactionStatus = $invoice->transactionStatus ?? null;
             if ($invoice && in_array($transactionStatus, $paidStatuses, true)) {
-                return false;
-            }
-            if ($invoice && in_array($transactionStatus, $processingStatuses, true)) {
-                Log::debug("canceledOneMinute: payment still processing uid=$uid, transactionStatus=$transactionStatus");
                 return false;
             }
             if ($invoice && ($transactionStatus === null || !in_array($transactionStatus, $paidStatuses, true))) {
