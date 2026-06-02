@@ -4,24 +4,9 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      deploy_target:
-        description: Deploy target
-        required: true
-        type: choice
-        options:
-          - test
-          - work
-          - both
-      image_tag:
-        description: Docker image tag (default latest)
-        required: false
-        default: latest
 
 jobs:
   build-test:
-    if: github.event_name == 'push'
     runs-on: ubuntu-22.04
     environment: test
     steps:
@@ -126,7 +111,38 @@ jobs:
           LOG_REPORT_EMAIL="${{ vars.TEST_LOG_REPORT_EMAIL }}"
           EOF
 
+      - name: Prepare Firebase credentials (TEST)
+        env:
+          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
+          SSH_USER: ${{ secrets.TEST_SSH_USER }}
+          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          FIREBASE_PAS_1_JSON: ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
+          FIREBASE_PAS_2_JSON: ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
+          FIREBASE_PAS_4_JSON: ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
+          FIREBASE_PAS_5_JSON: ${{ secrets.TEST_FIREBASE_PAS_5_JSON }}
+          FIREBASE_DRIVER_JSON: ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+
+          # Создаем локальные файлы
+          echo "$FIREBASE_PAS_1_JSON" > pas_1.json
+          echo "$FIREBASE_PAS_2_JSON" > pas_2.json
+          echo "$FIREBASE_PAS_4_JSON" > pas_4.json
+          echo "$FIREBASE_PAS_5_JSON" > pas_5.json
+          echo "$FIREBASE_DRIVER_JSON" > driver.json
+
+          # Копируем на сервер
+          scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem pas_5.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+          scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
+
+          # Устанавливаем права
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 644 /opt/secrets/firebase/test/*.json"
       - name: Build and push TEST image
+        id: build_test
         run: |
           TAG=$(echo ${{ github.sha }} | cut -c1-7)
           for attempt in 1 2 3; do
@@ -138,7 +154,7 @@ jobs:
               --push \
               --provenance=false \
               .; then
-              echo "Built and pushed ghcr.io/andrey18051/taxi_test:$TAG"
+              echo "image_tag=$TAG" >> $GITHUB_OUTPUT
               exit 0
             fi
             echo "Push failed, waiting 30s before retry..."
@@ -147,11 +163,50 @@ jobs:
           echo "All push attempts failed"
           exit 1
 
+      - name: Deploy to TEST server
+        env:
+          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
+          SSH_USER: ${{ secrets.TEST_SSH_USER }}
+          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          IMAGE_TAG: ${{ steps.build_test.outputs.image_tag }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+
+          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
+            docker pull ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
+            docker stop taxi_test || true
+            docker rm taxi_test || true
+
+            mkdir -p /opt/laravel_logs/taxi_test
+            chmod 777 /opt/laravel_logs/taxi_test
+            touch /opt/laravel_logs/taxi_test/laravel.log
+            chmod 666 /opt/laravel_logs/taxi_test/laravel.log
+            if [ ! -f /opt/laravel_logs/taxi_test/watch_log.sh ]; then
+              docker create --name taxi_test_init ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
+              docker cp taxi_test_init:/usr/share/nginx/html/taxi/docker/watch_log.sh /opt/laravel_logs/taxi_test/watch_log.sh
+              docker rm taxi_test_init
+              chmod +x /opt/laravel_logs/taxi_test/watch_log.sh
+            fi
+
+            docker run --name taxi_test -d \
+              --network host \
+              --restart unless-stopped \
+              --user 0:0 \
+              -v /opt/secrets/firebase/test:/run/secrets/firebase:ro \
+              -v /opt/laravel_logs/taxi_test:/usr/share/nginx/html/laravel_logs \
+              ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
+
+            echo "TEST deployed!"
+          EOF
+
   build-work:
-    if: github.event_name == 'push'
     runs-on: ubuntu-22.04
     environment: production
+    outputs:
+      image_tag: ${{ steps.build_work.outputs.image_tag }}
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -164,6 +219,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
+
 
       - name: Create .env.work
         run: |
@@ -250,6 +306,7 @@ jobs:
           EOF
 
       - name: Build and push WORK image
+        id: build_work
         run: |
           TAG=$(echo ${{ github.sha }} | cut -c1-7)
           for attempt in 1 2 3; do
@@ -261,7 +318,7 @@ jobs:
               --push \
               --provenance=false \
               .; then
-              echo "Built and pushed ghcr.io/andrey18051/taxi_work:$TAG"
+              echo "image_tag=$TAG" >> $GITHUB_OUTPUT
               exit 0
             fi
             echo "Push failed, waiting 30s before retry..."
@@ -269,79 +326,8 @@ jobs:
           done
           echo "All push attempts failed"
           exit 1
-
-  deploy-test:
-    if: github.event_name == 'workflow_dispatch' && (github.event.inputs.deploy_target == 'test' || github.event.inputs.deploy_target == 'both')
-    runs-on: ubuntu-22.04
-    environment: test
-    steps:
-      - name: Prepare Firebase credentials (TEST)
-        env:
-          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
-          SSH_USER: ${{ secrets.TEST_SSH_USER }}
-          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
-          FIREBASE_PAS_1_JSON: ${{ secrets.TEST_FIREBASE_PAS_1_JSON }}
-          FIREBASE_PAS_2_JSON: ${{ secrets.TEST_FIREBASE_PAS_2_JSON }}
-          FIREBASE_PAS_4_JSON: ${{ secrets.TEST_FIREBASE_PAS_4_JSON }}
-          FIREBASE_PAS_5_JSON: ${{ secrets.TEST_FIREBASE_PAS_5_JSON }}
-          FIREBASE_DRIVER_JSON: ${{ secrets.TEST_FIREBASE_DRIVER_JSON }}
-        run: |
-          echo "$SSH_KEY" > key.pem
-          chmod 600 key.pem
-
-          echo "$FIREBASE_PAS_1_JSON" > pas_1.json
-          echo "$FIREBASE_PAS_2_JSON" > pas_2.json
-          echo "$FIREBASE_PAS_4_JSON" > pas_4.json
-          echo "$FIREBASE_PAS_5_JSON" > pas_5.json
-          echo "$FIREBASE_DRIVER_JSON" > driver.json
-
-          scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
-          scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
-          scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
-          scp -o StrictHostKeyChecking=no -i key.pem pas_5.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
-          scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/test/
-
-          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 644 /opt/secrets/firebase/test/*.json"
-
-      - name: Deploy to TEST server
-        env:
-          SSH_HOST: ${{ secrets.TEST_SSH_HOST }}
-          SSH_USER: ${{ secrets.TEST_SSH_USER }}
-          SSH_KEY: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
-          IMAGE_TAG: ${{ github.event.inputs.image_tag }}
-        run: |
-          echo "$SSH_KEY" > key.pem
-          chmod 600 key.pem
-
-          ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST << EOF
-            docker pull ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
-            docker stop taxi_test || true
-            docker rm taxi_test || true
-
-            mkdir -p /opt/laravel_logs/taxi_test
-            chmod 777 /opt/laravel_logs/taxi_test
-            touch /opt/laravel_logs/taxi_test/laravel.log
-            chmod 666 /opt/laravel_logs/taxi_test/laravel.log
-            if [ ! -f /opt/laravel_logs/taxi_test/watch_log.sh ]; then
-              docker create --name taxi_test_init ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
-              docker cp taxi_test_init:/usr/share/nginx/html/taxi/docker/watch_log.sh /opt/laravel_logs/taxi_test/watch_log.sh
-              docker rm taxi_test_init
-              chmod +x /opt/laravel_logs/taxi_test/watch_log.sh
-            fi
-
-            docker run --name taxi_test -d \
-              --network host \
-              --restart unless-stopped \
-              --user 0:0 \
-              -v /opt/secrets/firebase/test:/run/secrets/firebase:ro \
-              -v /opt/laravel_logs/taxi_test:/usr/share/nginx/html/laravel_logs \
-              ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
-
-            echo "TEST deployed!"
-          EOF
-
   deploy-work:
-    if: github.event_name == 'workflow_dispatch' && (github.event.inputs.deploy_target == 'work' || github.event.inputs.deploy_target == 'both')
+    needs: build-work
     runs-on: ubuntu-22.04
     environment: production
     steps:
@@ -359,20 +345,24 @@ jobs:
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
 
+          # Создаем локальные файлы
           echo "$FIREBASE_PAS_1_JSON" > pas_1.json
           echo "$FIREBASE_PAS_2_JSON" > pas_2.json
           echo "$FIREBASE_PAS_4_JSON" > pas_4.json
           echo "$FIREBASE_PAS_5_JSON" > pas_5.json
           echo "$FIREBASE_DRIVER_JSON" > driver.json
 
+          # Создаем директорию на сервере
           ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "mkdir -p /opt/secrets/firebase/prod"
 
+          # Копируем на сервер
           scp -o StrictHostKeyChecking=no -i key.pem pas_1.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem pas_2.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem pas_4.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem pas_5.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
           scp -o StrictHostKeyChecking=no -i key.pem driver.json $SSH_USER@$SSH_HOST:/opt/secrets/firebase/prod/
 
+          # Устанавливаем права
           ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 644 /opt/secrets/firebase/prod/*.json"
 
       - name: Deploy to WORK server
@@ -380,7 +370,7 @@ jobs:
           SSH_HOST: ${{ secrets.WORK_SSH_HOST }}
           SSH_USER: ${{ secrets.WORK_SSH_USER }}
           SSH_KEY: ${{ secrets.WORK_SSH_PRIVATE_KEY }}
-          IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+          IMAGE_TAG: ${{ needs.build-work.outputs.image_tag }}
         run: |
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
