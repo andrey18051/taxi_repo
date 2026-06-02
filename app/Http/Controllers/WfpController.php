@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
+use App\Jobs\StartAddCostCardBottomCreat;
 use App\Services\PaymentStatusNotifier;
 use App\Mail\Check;
 use App\Mail\Server;
@@ -1202,8 +1203,11 @@ class WfpController extends Controller
                 $order = Orderweb::where("wfp_order_id", $orderReference)->first();
                 $amount = $order->web_cost ?? $order->client_cost ?? null;
             }
+            $isAddCostInvoice = $this->isAddCostInvoice($invoice);
             if ($amount == "1" || $amount == 1) {
                 $maxAttempts = 18; // 3 минуты / 10 секунд = 18 попыток
+            } elseif ($isAddCostInvoice) {
+                $maxAttempts = 18; // доплата: до 3 минут ожидания Approved
             } else {
                 $maxAttempts = 6; // 1 минуты / 10 секунд = 6 попыток
             }
@@ -1226,7 +1230,26 @@ class WfpController extends Controller
                         $invoice->reasonCode = $data['reasonCode'] ?? null;
                         $invoice->save();
                     }
-                    if ($transactionStatus === "WaitingAuthComplete") {
+
+                    if ($isAddCostInvoice) {
+                        if (in_array($transactionStatus, ['Approved', 'WaitingAuthComplete'], true)) {
+                            $this->dispatchAddCostProcessing($application, $city, $orderReference, $invoice);
+                            return $response;
+                        }
+                        if ($transactionStatus === 'Declined') {
+                            $uid = $invoice->dispatching_order_uid ?? null;
+                            if ($uid) {
+                                $clientEmail = Orderweb::where('dispatching_order_uid', $uid)->value('email');
+                                PaymentStatusNotifier::notifyTransactionStatus(
+                                    $transactionStatus,
+                                    $uid,
+                                    $application,
+                                    $clientEmail ?? ''
+                                );
+                            }
+                            return $response;
+                        }
+                    } elseif ($transactionStatus === "WaitingAuthComplete") {
                         if (!$invoice) {
                             if (($data['amount'] ?? null) == "1" || $amount == "1" || $amount == 1) {
                                 $params = [
@@ -1250,18 +1273,15 @@ class WfpController extends Controller
 
                         }
 
-                        // Если получили нужный статус — выходим из цикла
-
                         return $response;
                     }
                 }
 
-                // Ждём 10 секунд перед следующей попыткой
                 sleep(10);
                 $attempt++;
             } while ($attempt < $maxAttempts);
 
-            Log::error("Тайм-аут: статус WaitingAuthComplete не получен за 3 минуты");
+            Log::error("Тайм-аут checkStatusJob: orderReference=$orderReference, addCost=" . ($isAddCostInvoice ? 'yes' : 'no'));
             return "timeout";
         }
     }
@@ -2547,20 +2567,50 @@ class WfpController extends Controller
 
                 try {
                     $startTime = microtime(true);
-                    $response = Http::post('https://api.wayforpay.com/api', $params);
-                    $responseTime = round((microtime(true) - $startTime) * 1000, 2);
+                    $existingInvoice = WfpInvoice::where("orderReference", $orderReference)->first();
+                    $skipCharge = false;
+                    if ($existingInvoice !== null) {
+                        $existingStatus = $existingInvoice->transactionStatus;
+                        if (in_array($existingStatus, ['InProcessing', 'Pending', 'Approved', 'WaitingAuthComplete'], true)) {
+                            $skipCharge = true;
+                            Log::info('Skipping duplicate CHARGE for add-cost, payment already in progress or completed', [
+                                'order_reference' => $orderReference,
+                                'transaction_status' => $existingStatus,
+                            ]);
+                        }
+                    }
 
-                    Log::info('WayForPay API response received', [
-                        'order_reference' => $orderReference,
-                        'response_time_ms' => $responseTime,
-                        'http_status' => $response->status(),
-                        'response_body_preview' => substr($response->body(), 0, 200) . '...',
-                    ]);
+                    $response = null;
+                    if (!$skipCharge) {
+                        $response = Http::post('https://api.wayforpay.com/api', $params);
+                        $responseTime = round((microtime(true) - $startTime) * 1000, 2);
 
-                    Log::debug("Full WFP response", [
-                        'response' => $response->body(),
-                        'headers' => $response->headers(),
-                    ]);
+                        Log::info('WayForPay API response received', [
+                            'order_reference' => $orderReference,
+                            'response_time_ms' => $responseTime,
+                            'http_status' => $response->status(),
+                            'response_body_preview' => substr($response->body(), 0, 200) . '...',
+                        ]);
+
+                        Log::debug("Full WFP response", [
+                            'response' => $response->body(),
+                            'headers' => $response->headers(),
+                        ]);
+
+                        $chargeData = json_decode($response->body(), true);
+                        $chargeReasonCode = (int)($chargeData['reasonCode'] ?? 0);
+                        $chargeReason = (string)($chargeData['reason'] ?? '');
+                        if ($chargeReasonCode === 1112 || stripos($chargeReason, 'Duplicate Order') !== false) {
+                            Log::info('Duplicate Order ID from WFP, polling existing payment status', [
+                                'order_reference' => $orderReference,
+                                'reason_code' => $chargeReasonCode,
+                            ]);
+                        }
+                    } else {
+                        Log::info('Reusing existing add-cost payment, proceeding to status check only', [
+                            'order_reference' => $orderReference,
+                        ]);
+                    }
 
                     // Проверка статуса транзакции
                     Log::debug('Checking transaction status', [
@@ -2626,108 +2676,21 @@ class WfpController extends Controller
                                         'next_step' => 'processing_add_cost',
                                     ]);
 
-                                    $order = Orderweb::where("dispatching_order_uid", $uid)->first();
-
-                                    Log::debug('Order lookup by UID', [
-                                        'uid' => $uid,
-                                        'order_found' => !is_null($order),
-                                        'order_id' => optional($order)->id,
-                                        'order_server' => optional($order)->server,
-                                    ]);
-
-                                    $email = $order->email ?? null;
-
-                                    // Определение приложения из комментария заказа
-                                    $applicationFromComment = "PAS5"; // дефолтное значение
-                                    switch ($order->comment ?? null) {
-                                        case "taxi_easy_ua_pas1":
-                                            $applicationFromComment = "PAS1";
-                                            break;
-                                        case "taxi_easy_ua_pas2":
-                                            $applicationFromComment = "PAS2";
-                                            break;
-                                        case "taxi_easy_ua_pas4":
-                                            $applicationFromComment = "PAS4";
-                                            break;
+                                    $addCostResult = $this->processAddCostAfterApproved(
+                                        $orderReference,
+                                        $city,
+                                        $amount,
+                                        $application,
+                                        $response
+                                    );
+                                    if ($addCostResult !== null) {
+                                        return $addCostResult;
                                     }
-
-                                    Log::debug('Application determined from order comment', [
-                                        'order_comment' => $order->comment ?? null,
-                                        'application' => $applicationFromComment,
+                                } elseif (in_array($transactionStatus, ['InProcessing', 'Pending'], true)) {
+                                    Log::info('Add-cost payment still processing, CheckStatusJob will finalize', [
+                                        'order_reference' => $orderReference,
+                                        'status' => $transactionStatus,
                                     ]);
-
-                                    if(($order->server ?? null) == 'my_server_api') {
-                                        Log::info('Processing MyTaxi API add cost', [
-                                            'order_reference' => $orderReference,
-                                            'server' => $order->server,
-                                            'application' => $applicationFromComment,
-                                            'amount' => $amount,
-                                        ]);
-
-                                        $myTaxiResult = (new MyTaxiApiController)->startAddCostMyApi(
-                                            $order,
-                                            $applicationFromComment,
-                                            $email,
-                                            $amount,
-                                            $response
-                                        );
-
-                                        Log::info('MyTaxi API add cost completed', [
-                                            'order_reference' => $orderReference,
-                                            'result' => $myTaxiResult,
-                                        ]);
-
-                                        return $myTaxiResult;
-                                    }
-
-                                    $pay_method = "wfp_payment";
-
-                                    Log::debug('Looking for UID history', [
-                                        'uid' => $uid,
-                                        'pay_method' => $pay_method,
-                                    ]);
-
-                                    $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-
-                                    Log::debug('UID history lookup', [
-                                        'uid' => $uid,
-                                        'history_found' => !is_null($uid_history),
-                                        'uid_double' => optional($uid_history)->uid_doubleOrder,
-                                    ]);
-
-                                    if ($uid_history) {
-                                        $uid_Double = $uid_history->uid_doubleOrder;
-
-                                        Log::info('Starting universal add cost processing', [
-                                            'order_reference' => $orderReference,
-                                            'uid' => $uid,
-                                            'uid_double' => $uid_Double,
-                                            'pay_method' => $pay_method,
-                                            'city' => $city,
-                                            'amount' => $amount,
-                                        ]);
-
-                                        $universalResult = (new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
-                                            $uid,
-                                            $uid_Double,
-                                            $pay_method,
-                                            $orderReference,
-                                            $city,
-                                            $amount
-                                        );
-
-                                        Log::info('Universal add cost processing completed', [
-                                            'order_reference' => $orderReference,
-                                            'result' => $universalResult,
-                                        ]);
-
-                                        return $universalResult;
-                                    } else {
-                                        Log::warning('UID history not found, cannot process universal add cost', [
-                                            'uid' => $uid,
-                                            'order_reference' => $orderReference,
-                                        ]);
-                                    }
                                 } else {
                                     Log::info('Transaction not approved', [
                                         'order_reference' => $orderReference,
@@ -2760,12 +2723,16 @@ class WfpController extends Controller
                         ]);
                     }
 
-                    Log::info('Returning original WFP response', [
+                    Log::info('Returning WFP response', [
                         'order_reference' => $orderReference,
-                        'response_status' => $response->status(),
+                        'response_status' => $response !== null ? $response->status() : 'status_check_only',
                     ]);
 
-                    return $response;
+                    if ($response !== null) {
+                        return $response;
+                    }
+
+                    return $responseStatus;
 
                 } catch (\Exception $e) {
                     Log::error('WayForPay API request failed', [
@@ -4294,5 +4261,180 @@ class WfpController extends Controller
         }
 
         return ['result' => 'not_found'];
+    }
+
+    /**
+     * Доплата картой: invoice с другим orderReference, чем основной платёж заказа.
+     */
+    public function isAddCostInvoice(?WfpInvoice $invoice): bool
+    {
+        if ($invoice === null || empty($invoice->dispatching_order_uid) || empty($invoice->orderReference)) {
+            return false;
+        }
+
+        $order = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
+        if ($order === null) {
+            return false;
+        }
+
+        if (!empty($order->wfp_order_id) && $order->wfp_order_id !== $invoice->orderReference) {
+            return true;
+        }
+
+        $mainCost = (float)($order->web_cost ?? $order->client_cost ?? 0);
+        $invoiceAmount = (float)($invoice->amount ?? 0);
+
+        return $mainCost > 0 && $invoiceAmount > 0 && $invoiceAmount < $mainCost;
+    }
+
+    /**
+     * Есть ли незавершённая доплата по uid (InProcessing/Pending/WaitingAuthComplete).
+     */
+    public function hasPendingAddCostPayment(string $uid, ?string $mainOrderReference = null): bool
+    {
+        $query = WfpInvoice::where('dispatching_order_uid', $uid);
+
+        if ($mainOrderReference !== null && $mainOrderReference !== '') {
+            $query->where('orderReference', '!=', $mainOrderReference);
+        }
+
+        return $query->whereIn('transactionStatus', ['InProcessing', 'Pending', 'WaitingAuthComplete'])->exists();
+    }
+
+    /**
+     * Запуск пересоздания заказа после успешной доплаты (идемпотентно).
+     */
+    private function dispatchAddCostProcessing(
+        string $application,
+        string $city,
+        string $orderReference,
+        ?WfpInvoice $invoice
+    ): void {
+        if ($invoice === null) {
+            return;
+        }
+
+        $uid = $invoice->dispatching_order_uid;
+        $amount = $invoice->amount;
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if ($order !== null && $order->wfp_order_id === $orderReference) {
+            Log::info('Add-cost already applied, skipping duplicate processing', [
+                'order_reference' => $orderReference,
+                'uid' => $uid,
+            ]);
+            return;
+        }
+
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        if (!$uid_history) {
+            Log::warning('dispatchAddCostProcessing: uid_history not found', [
+                'uid' => $uid,
+                'order_reference' => $orderReference,
+            ]);
+            return;
+        }
+
+        dispatch(new StartAddCostCardBottomCreat(
+            $uid,
+            $uid_history->uid_doubleOrder,
+            'wfp_payment',
+            $orderReference,
+            $city,
+            $amount
+        ))->onQueue('high');
+
+        Log::info('StartAddCostCardBottomCreat dispatched from payment poll', [
+            'order_reference' => $orderReference,
+            'uid' => $uid,
+            'amount' => $amount,
+            'application' => $application,
+        ]);
+    }
+
+    /**
+     * Синхронная обработка доплаты сразу после Approved (chargeActiveTokenAddCost).
+     *
+     * @return mixed|null
+     */
+    private function processAddCostAfterApproved(
+        string $orderReference,
+        string $city,
+        $amount,
+        string $application,
+        $chargeResponse
+    ) {
+        $wfpInvoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if ($wfpInvoice === null) {
+            return null;
+        }
+
+        $uid = $wfpInvoice->dispatching_order_uid;
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+
+        if ($order !== null && $order->wfp_order_id === $orderReference) {
+            Log::info('Add-cost already applied (sync path)', [
+                'order_reference' => $orderReference,
+                'uid' => $uid,
+            ]);
+            return null;
+        }
+
+        Log::debug('Order lookup by UID for add-cost', [
+            'uid' => $uid,
+            'order_found' => !is_null($order),
+            'order_id' => optional($order)->id,
+            'order_server' => optional($order)->server,
+        ]);
+
+        $email = $order->email ?? null;
+
+        $applicationFromComment = 'PAS5';
+        switch ($order->comment ?? null) {
+            case 'taxi_easy_ua_pas1':
+                $applicationFromComment = 'PAS1';
+                break;
+            case 'taxi_easy_ua_pas2':
+                $applicationFromComment = 'PAS2';
+                break;
+            case 'taxi_easy_ua_pas4':
+                $applicationFromComment = 'PAS4';
+                break;
+        }
+
+        if (($order->server ?? null) === 'my_server_api') {
+            Log::info('Processing MyTaxi API add cost', [
+                'order_reference' => $orderReference,
+                'server' => $order->server,
+                'application' => $applicationFromComment,
+                'amount' => $amount,
+            ]);
+
+            return (new MyTaxiApiController)->startAddCostMyApi(
+                $order,
+                $applicationFromComment,
+                $email,
+                $amount,
+                $chargeResponse
+            );
+        }
+
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        if (!$uid_history) {
+            Log::warning('UID history not found, cannot process universal add cost', [
+                'uid' => $uid,
+                'order_reference' => $orderReference,
+            ]);
+            return null;
+        }
+
+        return (new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
+            $uid,
+            $uid_history->uid_doubleOrder,
+            'wfp_payment',
+            $orderReference,
+            $city,
+            $amount
+        );
     }
 }

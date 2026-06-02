@@ -120,6 +120,10 @@ class CheckAndCancelOrderJob implements ShouldQueue
 
         $transactionStatus = $invoice->transactionStatus;
         Log::info("CheckAndCancelOrderJob: status={$transactionStatus} uid={$uid}");
+        if ((new WfpController)->hasPendingAddCostPayment($uid, $orderReference)) {
+            Log::info("CheckAndCancelOrderJob: pending add-cost payment, keep order uid={$uid}");
+            return;
+        }
 
         $allowedStatuses = ['WaitingAuthComplete', 'Approved'];
         if ($transactionStatus !== null && in_array($transactionStatus, $allowedStatuses, true)) {

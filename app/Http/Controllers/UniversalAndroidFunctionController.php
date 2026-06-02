@@ -6778,6 +6778,11 @@ class UniversalAndroidFunctionController extends Controller
         if ($orderReference != null) {
             Log::debug("canceledOneMinute: orderReference=$orderReference");
 
+            if ((new WfpController)->hasPendingAddCostPayment($uid, $orderReference)) {
+                Log::debug("canceledOneMinute: pending add-cost payment, skip cancel uid=$uid");
+                return false;
+            }
+
             $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
             $paidStatuses = ['WaitingAuthComplete', 'Approved'];
             $processingStatuses = ['InProcessing', 'Pending'];
