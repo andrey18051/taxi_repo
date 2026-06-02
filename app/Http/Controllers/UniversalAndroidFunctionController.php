@@ -6779,8 +6779,18 @@ class UniversalAndroidFunctionController extends Controller
             Log::debug("canceledOneMinute: orderReference=$orderReference");
 
             $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
-            if ($invoice && ($invoice->transactionStatus == null || $invoice->transactionStatus != "WaitingAuthComplete")) {
-                Log::info("Order canceled due to invoice status: uid=$uid, orderReference=$orderReference, transactionStatus=" . ($invoice->transactionStatus ?? 'null'));
+            $paidStatuses = ['WaitingAuthComplete', 'Approved'];
+            $processingStatuses = ['InProcessing', 'Pending'];
+            $transactionStatus = $invoice->transactionStatus ?? null;
+            if ($invoice && in_array($transactionStatus, $paidStatuses, true)) {
+                return false;
+            }
+            if ($invoice && in_array($transactionStatus, $processingStatuses, true)) {
+                Log::debug("canceledOneMinute: payment still processing uid=$uid, transactionStatus=$transactionStatus");
+                return false;
+            }
+            if ($invoice && ($transactionStatus === null || !in_array($transactionStatus, $paidStatuses, true))) {
+                Log::info("Order canceled due to invoice status: uid=$uid, orderReference=$orderReference, transactionStatus=" . ($transactionStatus ?? 'null'));
                 if (($current_time_timestamp - $created_at_timestamp) >= 50) {
                     (new FCMController)->deleteDocumentFromFirestore($uid);
                     (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);

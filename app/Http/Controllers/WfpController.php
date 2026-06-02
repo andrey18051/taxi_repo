@@ -1196,7 +1196,13 @@ class WfpController extends Controller
             $params["merchantSignature"] = self::generateHmacMd5Signature($params, $secretKey, "checkStatus");
             $params["apiVersion"] = 1;
 
-            if ($params['amount'] == "1") {
+            $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+            $amount = $invoice->amount ?? null;
+            if ($amount === null) {
+                $order = Orderweb::where("wfp_order_id", $orderReference)->first();
+                $amount = $order->web_cost ?? $order->client_cost ?? null;
+            }
+            if ($amount == "1" || $amount == 1) {
                 $maxAttempts = 18; // 3 минуты / 10 секунд = 18 попыток
             } else {
                 $maxAttempts = 6; // 1 минуты / 10 секунд = 6 попыток
@@ -1214,16 +1220,15 @@ class WfpController extends Controller
                     Log::error("Ошибка получения ответа от WayforPay API на попытке $attempt");
                 } else {
                     $transactionStatus = $data['transactionStatus'];
+                    if ($invoice) {
+                        $invoice->transactionStatus = $transactionStatus;
+                        $invoice->reason = $data['reason'] ?? null;
+                        $invoice->reasonCode = $data['reasonCode'] ?? null;
+                        $invoice->save();
+                    }
                     if ($transactionStatus === "WaitingAuthComplete") {
-                        // Обновляем данные в базе
-                        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
-                        if ($invoice) {
-                            $invoice->transactionStatus = $transactionStatus;
-                            $invoice->reason = $data['reason'] ?? null;
-                            $invoice->reasonCode = $data['reasonCode'] ?? null;
-                            $invoice->save();
-                        } else {
-                            if ($data['amount'] == "1") {
+                        if (!$invoice) {
+                            if (($data['amount'] ?? null) == "1" || $amount == "1" || $amount == 1) {
                                 $params = [
                                     "transactionType" => "REFUND",
                                     "merchantAccount" => $merchantAccount,
