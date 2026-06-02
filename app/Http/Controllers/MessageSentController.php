@@ -20,6 +20,49 @@ class MessageSentController extends Controller
     /**
      * @throws \Exception
      */
+    public function sentAddCostRecreatedInfo(Orderweb $orderweb, string $newUid, int $newClientCost): void
+    {
+        $user_full_name = $orderweb->user_full_name;
+        $user_phone = $orderweb->user_phone;
+        $email = $orderweb->email;
+        $routefrom = $orderweb->routefrom;
+        $routeto = $orderweb->routeto;
+        $server = $orderweb->server;
+
+        switch ($orderweb->comment) {
+            case "taxi_easy_ua_pas1":
+                $pas = "ПАС_1";
+                break;
+            case "taxi_easy_ua_pas2":
+                $pas = "ПАС_2";
+                break;
+            case "taxi_easy_ua_pas3":
+                $pas = "ПАС_3";
+                break;
+            case "taxi_easy_ua_pas4":
+                $pas = "ПАС_4";
+                break;
+            default:
+                $pas = "ПАС_5";
+                break;
+        }
+
+        $messageAdmin = "Нове замовлення від $user_full_name (телефон $user_phone, email $email) за маршрутом від $routefrom до $routeto. Вартість поїздки становитиме: {$newClientCost}грн. Оплата картой (возможно бонусами). Номер замовлення: $newUid, сервер $server. Приложение $pas";
+
+        $alarmMessage = new TelegramController();
+        try {
+            $alarmMessage->sendAlarmMessage($messageAdmin);
+            $alarmMessage->sendMeMessage($messageAdmin);
+        } catch (\Throwable $e) {
+            Log::debug("sentAddCostRecreatedInfo Ошибка в телеграмм $messageAdmin");
+        }
+
+        Log::debug("sentAddCostRecreatedInfo  $messageAdmin");
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function sentCancelInfo($orderweb)
     {
 
@@ -30,6 +73,7 @@ class MessageSentController extends Controller
         $routeto = $orderweb->routeto;
         $add_cost = $orderweb->add_cost;
         $web_cost = $orderweb->web_cost;
+        $client_cost = (int) ($orderweb->client_cost ?? 0);
         $dispatching_order_uid = $orderweb->dispatching_order_uid;
         $server = $orderweb->server;
         switch ($orderweb->comment) {
@@ -63,7 +107,8 @@ class MessageSentController extends Controller
 
         $subject = "Отмена заказа";
 
-        $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
+        $costForClient = $client_cost > 0 ? $client_cost : (int) ($web_cost ?? 0);
+        $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $costForClient грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
 
         $alarmMessage = new TelegramController();
 

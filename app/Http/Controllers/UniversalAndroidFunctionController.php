@@ -10967,6 +10967,18 @@ class UniversalAndroidFunctionController extends Controller
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::info("Создан новый заказ с UID: '$orderNew'.");
 
+                $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+                $newClientCost = $oldClientCost + (int) $addCost;
+                try {
+                    (new MessageSentController)->sentAddCostRecreatedInfo($order, $orderNew, $newClientCost);
+                } catch (\Throwable $e) {
+                    Log::error("Failed to send add-cost recreated telegram", [
+                        "old_uid" => $uid,
+                        "new_uid" => $orderNew,
+                        "error" => $e->getMessage(),
+                    ]);
+                }
+
                 // Отправка уведомлений
                 (new PusherController)->sentUidAppEmailPayType($orderNew, $application, $email, $pay_method);
                 (new CentrifugoController)->sentUidAppEmailPayType($orderNew, $application, $email, $pay_method);
@@ -11022,6 +11034,7 @@ class UniversalAndroidFunctionController extends Controller
                 $order->auto = null;
                 $order->wfp_order_id = $orderReference;
                 $order->web_cost = $responseArr["order_cost"];
+                $order->client_cost = $newClientCost;
                 $order->closeReason = "-1";
                 $order->closeReasonI = "0";
                 $order->attempt_20 += $addCost;

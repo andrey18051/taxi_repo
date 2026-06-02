@@ -12406,7 +12406,7 @@ class AndroidTestOSMController extends Controller
         $response = Http::withHeaders($header)->put($url);
 
         $messageAdmin = "Отправлена Отмена $url заказа $response";
-        (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         $url = $connectAPI . '/api/weborders/' . $uid;
         $responseArr = (new UniversalAndroidFunctionController)->getStatus(
@@ -12414,7 +12414,7 @@ class AndroidTestOSMController extends Controller
             $url
         );
         $messageAdmin = "Статус Отмены заказа  " . json_encode($responseArr) . " responseArr[close_reason]: " . $responseArr['close_reason'];
-        (new MessageSentController)->sentMessageMeCancel($messageAdmin);
+        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
 
         if ($responseArr["close_reason"] != 1) {
             self::repeatCancel(
