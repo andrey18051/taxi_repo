@@ -4601,14 +4601,12 @@ class AndroidTestOSMController extends Controller
 
         if ($originLatitude == $toLatitude) {
             $params['to'] = 'по місту';
+            $params['to_number'] = " ";
         } else {
             $route_undefined = false;
-
-            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
-
-            $params['to'] = $osmAddress;
+            // Адрес «куда» для ответа клиенту — после расчёта (reverseCached в buildSuccessfulResponse).
+            $params['to'] = ' ';
             $params['to_number'] = " ";
-
         }
         $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
             ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
@@ -4720,8 +4718,8 @@ class AndroidTestOSMController extends Controller
 
         if (isset($responseArr["order_cost"])) {
             $order_cost = $responseArr["order_cost"];
-            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
             (new CentrifugoController)->sentCostAppEmail($order_cost, $application, $email);
+            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
             return response(
                 self::buildSuccessfulResponse(
                     $responseArr,
@@ -4892,7 +4890,10 @@ class AndroidTestOSMController extends Controller
 
 
         $service = new CityAppOrderService();
-        $connectAPI = $service->resolveConnectApi($city, $application);
+        $connectApiCacheKey = 'cost_connect_api:' . md5($application . ':' . $city);
+        $connectAPI = cache()->remember($connectApiCacheKey, 300, function () use ($service, $city, $application) {
+            return $service->resolveConnectApi($city, $application);
+        });
         Log::debug("2 connectAPI $connectAPI");
 
         // === 3. Проверка блокировки API ===
@@ -4943,14 +4944,11 @@ class AndroidTestOSMController extends Controller
 
         if ($originLatitude == $toLatitude) {
             $params['to'] = 'по місту';
+            $params['to_number'] = " ";
         } else {
             $route_undefined = false;
-
-            $osmAddress = (new OpenStreetMapController)->reverse($toLatitude, $toLongitude);
-
-            $params['to'] = $osmAddress;
+            $params['to'] = ' ';
             $params['to_number'] = " ";
-
         }
         $rout = [ //Обязательный. Маршрут заказа. (См. Таблицу описания маршрута)
             ['name' => "name", 'lat' => $originLatitude, 'lng' => $originLongitude],
@@ -5101,8 +5099,8 @@ class AndroidTestOSMController extends Controller
 
         if (isset($responseArr["order_cost"])) {
             $order_cost = $responseArr["order_cost"];
-            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
             (new CentrifugoController)->sentCostAppEmail($order_cost, $application, $email);
+            (new PusherController)->sentCostAppEmail($order_cost, $application, $email);
             return response(
                 self::buildSuccessfulResponse(
                     $responseArr,
@@ -5254,6 +5252,15 @@ class AndroidTestOSMController extends Controller
         $toLongitude,
         $route_undefined
     ) {
+        $destinationLabel = $params['to'] ?? ' ';
+        if (
+            $originLatitude != $toLatitude
+            && ($destinationLabel === ' ' || $destinationLabel === '' || $destinationLabel === 'Точка на карте')
+        ) {
+            $destinationLabel = OpenStreetMapController::reverseCached((float) $toLatitude, (float) $toLongitude);
+            $params['to'] = $destinationLabel;
+        }
+
         return [
             "order_cost" => $response_arr["order_cost"],
             "from_lat" => $originLatitude,
@@ -5262,8 +5269,8 @@ class AndroidTestOSMController extends Controller
             "lng" => $route_undefined ? 0 : $toLongitude,
             "dispatching_order_uid" => $response_arr["dispatching_order_uid"],
             "currency" => $response_arr["currency"],
-            "routeto" => $originLatitude != $toLatitude ? $params["to"] : $toLatitude,
-            "to_number" => $originLatitude != $toLatitude ? $params["to_number"] : " ",
+            "routeto" => $originLatitude != $toLatitude ? $destinationLabel : $toLatitude,
+            "to_number" => $originLatitude != $toLatitude ? ($params["to_number"] ?? " ") : " ",
             "routefrom" => $originLatitude,
             "routefromnumber" => " ",
         ];

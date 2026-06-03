@@ -3,12 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class OpenStreetMapController extends Controller
 {
+    /**
+     * Обратное геокодирование с кэшем (для расчёта стоимости — не блокировать внешний API).
+     */
+    public static function reverseCached(float $latitude, float $longitude): string
+    {
+        $latKey = round($latitude, 5);
+        $lonKey = round($longitude, 5);
+        $cacheKey = "osm_reverse:{$latKey}:{$lonKey}";
+
+        return Cache::remember($cacheKey, 86400, function () use ($latitude, $longitude) {
+            return (new self)->reverse($latitude, $longitude);
+        });
+    }
+
     public function reverse($originLatitude, $originLongitude): string
     {
         // Осуществляем запрос к OpenStreetMap (OSM)

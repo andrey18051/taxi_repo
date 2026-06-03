@@ -64,6 +64,7 @@ class MyTaxiApiController extends Controller
                 // Отправляем email с кешированной стоимостью
                 if (isset($cachedResult['order_cost'])) {
                     (new PusherController)->sentCostAppEmail($cachedResult['order_cost'], $application, $email);
+                    (new CentrifugoController)->sentCostAppEmail($cachedResult['order_cost'], $application, $email);
                 }
 
                 // Возвращаем кешированный результат
@@ -115,7 +116,8 @@ class MyTaxiApiController extends Controller
         $result['distance_km'] = $routeDistanceKm;
         $result['base_price'] = $basePrice;
 
-        // Отправляем email с рассчитанной стоимостью
+        // Уведомляем клиента (Centrifugo + Pusher) до записи в кэш
+        (new CentrifugoController)->sentCostAppEmail($result['order_cost'], $application, $email);
         (new PusherController)->sentCostAppEmail($result['order_cost'], $application, $email);
 
         // Кешируем финальный результат

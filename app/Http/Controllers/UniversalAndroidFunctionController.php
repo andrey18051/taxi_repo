@@ -78,8 +78,8 @@ class UniversalAndroidFunctionController extends Controller
 
             $result = $this->handleHttpResponse($response);
 
-            // Сохраняем результат запроса в кэш на 60 секунд
-            $this->cacheRequestResult($requestKey, $result, 60);
+            // Сохраняем результат запроса в кэш (повторный расчёт того же маршрута)
+            $this->cacheRequestResult($requestKey, $result, 300);
             Log::debug("[postRequestHTTP] Ключ {$requestKey} успешно записан в кэш с результатом запроса.");
 
             return $result;
