@@ -11037,6 +11037,7 @@ class UniversalAndroidFunctionController extends Controller
                 $order->client_cost = $newClientCost;
                 $order->closeReason = "-1";
                 $order->closeReasonI = "0";
+                $order->cancel_timestamp = null;
                 $order->attempt_20 += $addCost;
                 $order->save();
                 Log::info("Обновлен order с новым UID: '$order_new_uid', web_cost='{$responseArr['order_cost']}', attempt_20='{$order->attempt_20}'.");

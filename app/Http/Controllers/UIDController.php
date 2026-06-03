@@ -608,7 +608,8 @@ class UIDController extends Controller
                     // Расчет стоимости
                     $cost = $value["web_cost"] ?? 0;
                     if (!empty($value["client_cost"])) {
-                        $cost = $value["client_cost"] + ($value["attempt_20"] ?? 0);
+                        // client_cost уже включает сумму доплат; attempt_20 — служебный накопитель
+                        $cost = $value["client_cost"];
                         Log::debug('💰 Расчет стоимости с client_cost', [
                             'client_cost' => $value["client_cost"],
                             'attempt_20' => $value["attempt_20"] ?? 0,
@@ -1004,7 +1005,7 @@ class UIDController extends Controller
                     }
                     $cost = $value["web_cost"];
                     if ($value["client_cost"] !=null) {
-                        $cost = $value["client_cost"]+ $value["attempt_20"];
+                        $cost = $value["client_cost"];
                     }
                     if ($value["finish_cost"] !=null) {
                         $cost = $value["finish_cost"];
@@ -1564,9 +1565,14 @@ class UIDController extends Controller
 
             if (isset($orderweb)) {
 
-                if ($uid_history->cancel == "1"
+                if (OrderStatusController::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+                    if ($uid_history->cancel === '1' || $uid_history->cancel === 1) {
+                        $uid_history->cancel = '0';
+                        $uid_history->save();
+                    }
+                } elseif ($uid_history->cancel == "1"
                     || OrderStatusController::isDispatchOrderCanceled($cardOrder ?? null)
-                    || $orderweb->cancel_timestamp !== null) {
+                    || OrderStatusController::isDispatchOrderCanceled($nalOrder ?? null)) {
                     OrderStatusController::applyCanceledOrderweb($orderweb);
                     $orderweb->save();
                     return;
@@ -1737,6 +1743,13 @@ class UIDController extends Controller
                     $orderweb->closeReason = "-1";
 
                 }
+
+                OrderStatusController::syncOrderwebAfterStatusPush(
+                    $orderweb,
+                    $action ?? 'Поиск авто',
+                    $cardOrder,
+                    $nalOrder
+                );
 
                 $orderweb->save();
 

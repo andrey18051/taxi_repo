@@ -25,15 +25,15 @@
         <h1 class="display-4">Database reports</h1>
         <p class="lead">Quick selection of requests and reporting period</p>
 
-{{--        <a href="{{ route('logs.download-latest') }}" class="btn btn-primary btn-lg">--}}
-{{--            📤 Скачать последний лог--}}
-{{--        </a>--}}
+        <a href="{{ url('/logs/download') }}" class="btn btn-success btn-lg mx-1">
+            📤 Скачать лог
+        </a>
 
-        <a href="{{ route('logs.view') }}" class="btn btn-primary btn-lg">
+        <a href="{{ route('logs.view') }}" class="btn btn-primary btn-lg mx-1">
             📜 Посмотреть логи
         </a>
 
-        <a href="{{ route('logs.clear') }}" class="btn btn-danger btn-lg"
+        <a href="{{ route('logs.clear') }}" class="btn btn-danger btn-lg mx-1"
            onclick="return confirm('Вы уверены, что хотите очистить логи?')">
             🗑 Очистить логи
         </a>

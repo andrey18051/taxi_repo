@@ -3725,6 +3725,14 @@ class WfpController extends Controller
             }
         }
 
+        $activeOnDispatch = in_array((string) $closeReason_bonusOrder, ['-1'], true)
+            || in_array((string) $closeReason_doubleOrder, ['-1'], true)
+            || in_array((string) $closeReason_bonusOrderHold, ['-1'], true);
+        if ($activeOnDispatch) {
+            $order->closeReason = '-1';
+            Log::info('wfpStatus: dispatch still active, order->closeReason reset to -1');
+        }
+
         Log::info("Final order->closeReason before save: {$order->closeReason}");
         $order->save();
         Log::info("Order saved with closeReason: {$order->closeReason}, result: $result");

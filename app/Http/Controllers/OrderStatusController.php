@@ -1354,7 +1354,17 @@ class OrderStatusController extends Controller
             $autoInfoCard = $cardOrder['order_car_info'] ?? null;
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
-            if ($uid_history->cancel == "1" || self::isDispatchOrderCanceled($cardOrder)) {
+            if (self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+                if ($uid_history->cancel === '1' || $uid_history->cancel === 1) {
+                    $uid_history->cancel = '0';
+                    $uid_history->save();
+                    Log::info('Uid_history cancel cleared: active leg on dispatch', [
+                        'dispatching_order_uid' => $dispatching_order_uid,
+                    ]);
+                }
+            } elseif ($uid_history->cancel == "1"
+                || self::isDispatchOrderCanceled($cardOrder)
+                || self::isDispatchOrderCanceled($nalOrder)) {
                 $action = 'Заказ снят';
                 self::applyCanceledOrderweb($orderweb);
                 $orderweb->save();
@@ -1758,15 +1768,14 @@ class OrderStatusController extends Controller
 
                     if (isset($response_arr["order_car_info"]) && $response_arr["order_car_info"] != null) {
                         $orderweb->auto = $response_arr["order_car_info"];
-                        $orderweb->closeReason = -1;
                         Log::info('Updated orderweb auto from response', ['auto' => $orderweb->auto]);
-                    } else if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
-                        $orderweb->closeReason = 1;
-                        Log::info('Set closeReason to 1 for canceled order');
-                    } else {
-                        $orderweb->closeReason = $response_arr["close_reason"] ?? -1;
-                        Log::info('Set closeReason from response', ['closeReason' => $orderweb->closeReason]);
                     }
+                    self::syncOrderwebAfterStatusPush($orderweb, $action, $cardOrder, $nalOrder);
+                    Log::info('Synced orderweb after status push', [
+                        'action' => $action,
+                        'closeReason' => $orderweb->closeReason,
+                        'cancel_timestamp' => $orderweb->cancel_timestamp,
+                    ]);
 
                     Log::debug('Saving orderweb final', ['orderweb' => $orderweb->toArray()]);
                     $orderweb->save();
@@ -2276,6 +2285,45 @@ class OrderStatusController extends Controller
             'безнал' => $nextState,
             'close_reason' => $closeReason
         ]);
+    }
+
+    /**
+     * Хотя бы одна нога (карта или нал) ещё активна на диспетчере.
+     */
+    public static function hasActiveDispatchLeg(?array $cardOrder, ?array $nalOrder): bool
+    {
+        $cardActive = $cardOrder !== null && !self::isDispatchOrderCanceled($cardOrder);
+        $nalActive = $nalOrder !== null && !self::isDispatchOrderCanceled($nalOrder);
+
+        return $cardActive || $nalActive;
+    }
+
+    /**
+     * После опроса: не перезаписывать orderweb отменой, если заказ ещё в работе.
+     */
+    public static function syncOrderwebAfterStatusPush(
+        Orderweb $orderweb,
+        string $action,
+        ?array $cardOrder = null,
+        ?array $nalOrder = null
+    ): void {
+        if ($action === 'Заказ снят' && !self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+            self::applyCanceledOrderweb($orderweb);
+
+            return;
+        }
+
+        $activeActions = ['Поиск авто', 'Авто найдено', 'На месте', 'В пути'];
+        if (in_array($action, $activeActions, true) && self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+            $orderweb->closeReason = '-1';
+            $orderweb->cancel_timestamp = null;
+
+            return;
+        }
+
+        if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
+            return;
+        }
     }
 
     /**
