@@ -1807,6 +1807,142 @@ class WfpController extends Controller
 //            return "exit";
 //        }
 //    }
+
+    private function resolveMerchantForInvoice(WfpInvoice $invoice): ?array
+    {
+        $order = null;
+        if (!empty($invoice->dispatching_order_uid)) {
+            $order = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
+        }
+        if (!$order) {
+            $order = Orderweb::where('wfp_order_id', $invoice->orderReference)->latest()->first();
+        }
+        if (!$order) {
+            return null;
+        }
+
+        return $this->checkMerchantInfo($order);
+    }
+
+    private function syncInvoiceFromWfpCheckStatus(
+        WfpInvoice $invoice,
+        string $merchantAccount,
+        string $secretKey
+    ): ?array {
+        $checkParams = [
+            'merchantAccount' => $merchantAccount,
+            'orderReference' => $invoice->orderReference,
+            'transactionType' => 'CHECK_STATUS',
+            'merchantSignature' => self::generateHmacMd5Signature([
+                'merchantAccount' => $merchantAccount,
+                'orderReference' => $invoice->orderReference,
+            ], $secretKey, 'checkStatus'),
+            'apiVersion' => 1,
+        ];
+
+        $response = Http::post('https://api.wayforpay.com/api', $checkParams);
+        $data = $response->json();
+        if (!is_array($data) || empty($data['transactionStatus'])) {
+            Log::warning('refundSettleJob: CHECK_STATUS failed', [
+                'orderReference' => $invoice->orderReference,
+                'body' => $response->body(),
+            ]);
+            return null;
+        }
+
+        $invoice->transactionStatus = $data['transactionStatus'];
+        $invoice->reason = $data['reason'] ?? null;
+        $invoice->reasonCode = $data['reasonCode'] ?? null;
+        $invoice->save();
+
+        Log::info('refundSettleJob: synced from CHECK_STATUS', [
+            'orderReference' => $invoice->orderReference,
+            'transactionStatus' => $data['transactionStatus'],
+            'reasonCode' => $data['reasonCode'] ?? null,
+        ]);
+
+        return $data;
+    }
+
+    private function buildRefundParams(
+        string $merchantAccount,
+        string $secretKey,
+        WfpInvoice $invoice
+    ): array {
+        $amount = (string) (int) round((float) $invoice->amount);
+
+        return [
+            'transactionType' => 'REFUND',
+            'merchantAccount' => $merchantAccount,
+            'orderReference' => $invoice->orderReference,
+            'amount' => $amount,
+            'currency' => 'UAH',
+            'comment' => 'Повернення платежу',
+            'merchantSignature' => self::generateHmacMd5Signature([
+                'transactionType' => 'REFUND',
+                'merchantAccount' => $merchantAccount,
+                'orderReference' => $invoice->orderReference,
+                'amount' => $amount,
+                'currency' => 'UAH',
+            ], $secretKey, 'refund'),
+            'apiVersion' => 1,
+        ];
+    }
+
+    private function isFinalWfpStatus(?string $status): bool
+    {
+        return in_array(strtolower(trim($status ?? '')), ['refunded', 'voided', 'approved'], true);
+    }
+
+    /**
+     * @return bool true если холд уже закрыт (void/refund)
+     */
+    private function applyRefundApiResponse(
+        WfpInvoice $invoice,
+        string $orderReference,
+        array $responseArray,
+        bool $notifyTelegramOnSuccess
+    ): bool {
+        $apiStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
+        $reasonCode = (int) ($responseArray['reasonCode'] ?? 0);
+
+        if ($this->isFinalWfpStatus($apiStatus)) {
+            if ($notifyTelegramOnSuccess) {
+                (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
+            }
+            Log::info("refundSettleJob Успешная транзакция: {$apiStatus}");
+            (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$apiStatus}");
+            $this->updateOrderStatus($responseArray, $orderReference);
+            Cache::forget('wfp_refund_dispatch:' . $orderReference);
+            return true;
+        }
+
+        $invoice->refresh();
+        if ($this->isFinalWfpStatus($invoice->transactionStatus)) {
+            Log::info('refundSettleJob: finalized in DB after refresh', [
+                'orderReference' => $orderReference,
+                'transactionStatus' => $invoice->transactionStatus,
+            ]);
+            Cache::forget('wfp_refund_dispatch:' . $orderReference);
+            return true;
+        }
+
+        if ($apiStatus === 'declined' && in_array($reasonCode, [1126, 1129, 1130], true)) {
+            Log::warning('refundSettleJob: refund declined, will allow cron retry', [
+                'orderReference' => $orderReference,
+                'reasonCode' => $reasonCode,
+                'reason' => $responseArray['reason'] ?? null,
+                'response' => $responseArray,
+            ]);
+            Cache::forget('wfp_refund_dispatch:' . $orderReference);
+            return false;
+        }
+
+        (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
+        Cache::forget('wfp_refund_dispatch:' . $orderReference);
+        return false;
+    }
+
     public function refundSettleJob($params, $orderReference)
     {
         $lock = Cache::lock('refund_settle_job:' . $orderReference, 120);
@@ -1822,56 +1958,80 @@ class WfpController extends Controller
                 return 'exit';
             }
 
-            $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
-            Log::debug('refundSettleJob WfpInvoice transactionStatus: ' . $transactionStatus);
-
-            if (in_array($transactionStatus, ['refunded', 'voided', 'approved'], true)) {
-                Log::info('refundSettleJob: already finalized, skip API', [
+            if ($this->isFinalWfpStatus($invoice->transactionStatus)) {
+                Log::info('refundSettleJob: already finalized in DB, skip API', [
                     'orderReference' => $orderReference,
-                    'transactionStatus' => $transactionStatus,
+                    'transactionStatus' => $invoice->transactionStatus,
                 ]);
                 return 'exit';
             }
 
-            $response = Http::post('https://api.wayforpay.com/api', $params);
-            $responseArray = $response->json();
-            Log::debug('refundSettleJob Ответ от API', is_array($responseArray) ? $responseArray : ['raw' => $response->body()]);
-
-            if (!is_array($responseArray)) {
+            $merchant = $this->resolveMerchantForInvoice($invoice);
+            if (
+                !$merchant
+                || empty($merchant['merchantAccount'])
+                || $merchant['merchantAccount'] === 'errorMerchantAccount'
+            ) {
+                Log::error('refundSettleJob: merchant not resolved', ['orderReference' => $orderReference]);
+                Cache::forget('wfp_refund_dispatch:' . $orderReference);
                 return 'exit';
             }
 
-            $apiStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
-            $reasonCode = (int) ($responseArray['reasonCode'] ?? 0);
+            $merchantAccount = $merchant['merchantAccount'];
+            $secretKey = $merchant['secretKey'];
 
-            if (in_array($apiStatus, ['refunded', 'voided', 'approved'], true)) {
-                (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
-                Log::info("refundSettleJob Успешная транзакция: {$apiStatus}");
-                (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$apiStatus}");
-                $this->updateOrderStatus($responseArray, $orderReference);
-                return 'exit';
-            }
-
+            $this->syncInvoiceFromWfpCheckStatus($invoice, $merchantAccount, $secretKey);
             $invoice->refresh();
-            $dbStatus = strtolower(trim($invoice->transactionStatus ?? ''));
-            if (in_array($dbStatus, ['refunded', 'voided', 'approved'], true)) {
-                Log::info('refundSettleJob: finalized by parallel job, skip notify', [
+
+            if ($this->isFinalWfpStatus($invoice->transactionStatus)) {
+                Log::info('refundSettleJob: WFP already finalized after CHECK_STATUS', [
                     'orderReference' => $orderReference,
-                    'dbStatus' => $dbStatus,
+                    'transactionStatus' => $invoice->transactionStatus,
                 ]);
+                $this->updateOrderStatus([
+                    'orderReference' => $orderReference,
+                    'transactionStatus' => $invoice->transactionStatus,
+                    'reason' => $invoice->reason,
+                    'reasonCode' => $invoice->reasonCode,
+                ], $orderReference);
+                Cache::forget('wfp_refund_dispatch:' . $orderReference);
                 return 'exit';
             }
 
-            if ($apiStatus === 'declined' && $reasonCode === 1130) {
-                Log::warning('refundSettleJob: duplicate refund declined (hold already voided)', [
-                    'orderReference' => $orderReference,
-                    'response' => $responseArray,
-                ]);
+            $refundParams = $this->buildRefundParams($merchantAccount, $secretKey, $invoice);
+            $responseArray = Http::post('https://api.wayforpay.com/api', $refundParams)->json();
+            Log::debug('refundSettleJob Ответ от API (attempt 1)', is_array($responseArray) ? $responseArray : []);
+
+            if (is_array($responseArray) && $this->applyRefundApiResponse($invoice, $orderReference, $responseArray, true)) {
                 return 'exit';
             }
 
-            (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
-            Log::debug('refundSettleJob Транзакция отклонена.');
+            sleep(3);
+            $this->syncInvoiceFromWfpCheckStatus($invoice, $merchantAccount, $secretKey);
+            $invoice->refresh();
+
+            if ($this->isFinalWfpStatus($invoice->transactionStatus)) {
+                Log::info('refundSettleJob: finalized after CHECK_STATUS before retry', [
+                    'orderReference' => $orderReference,
+                ]);
+                $this->updateOrderStatus([
+                    'orderReference' => $orderReference,
+                    'transactionStatus' => $invoice->transactionStatus,
+                    'reason' => $invoice->reason,
+                    'reasonCode' => $invoice->reasonCode,
+                ], $orderReference);
+                Cache::forget('wfp_refund_dispatch:' . $orderReference);
+                return 'exit';
+            }
+
+            $refundParams = $this->buildRefundParams($merchantAccount, $secretKey, $invoice);
+            $responseArray = Http::post('https://api.wayforpay.com/api', $refundParams)->json();
+            Log::debug('refundSettleJob Ответ от API (attempt 2)', is_array($responseArray) ? $responseArray : []);
+
+            if (is_array($responseArray)) {
+                $this->applyRefundApiResponse($invoice, $orderReference, $responseArray, false);
+            }
+
             return 'exit';
         } finally {
             $lock->release();
