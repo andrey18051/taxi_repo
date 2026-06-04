@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class RefundSettleCardPayJob implements ShouldQueue
+class RefundSettleCardPayJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $params;
@@ -21,6 +21,7 @@ class RefundSettleCardPayJob implements ShouldQueue
 
     public $tries = 1; //   1 попытка
     public $timeout = 3600;
+    public $uniqueFor = 300;
 
     /**
      * Create a new job instance.
@@ -32,6 +33,11 @@ class RefundSettleCardPayJob implements ShouldQueue
         $this->params = $params;
         $this->orderReference = $orderReference;
         $this->method = $method;
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->method . ':' . $this->orderReference;
     }
 
     /**

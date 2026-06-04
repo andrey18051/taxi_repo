@@ -28,6 +28,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -1364,7 +1365,8 @@ class WfpController extends Controller
         $application,
         $city,
         $orderReference,
-        $amount
+        $amount,
+        ?string $dispatchingOrderUid = null
     ) {
         switch ($city) {
             case "Lviv":
@@ -1417,26 +1419,32 @@ class WfpController extends Controller
                 'orderReference' => $orderReference
             ]);
 
-            $orderwebs = Orderweb::where("wfp_order_id", $orderReference)->latest()->first();
+            $invoiceQuery = WfpInvoice::where('orderReference', $orderReference)
+                ->where('transactionStatus', 'WaitingAuthComplete');
 
-            if ($orderwebs) {
-                Log::info('Orderweb found', ['dispatching_order_uid' => $orderwebs->dispatching_order_uid]);
-                $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $orderwebs->dispatching_order_uid)->get();
-            } else {
-                $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)->get();
+            if ($dispatchingOrderUid !== null && $dispatchingOrderUid !== '') {
+                $invoiceQuery->where('dispatching_order_uid', $dispatchingOrderUid);
             }
+
+            $wfpInvoices = $invoiceQuery->get();
+
             if ($wfpInvoices->isNotEmpty()) {
-                Log::info('Processing invoices', ['invoice_count' => $wfpInvoices->count()]);
+                Log::info('Processing invoices for refund', [
+                    'invoice_count' => $wfpInvoices->count(),
+                    'orderReference' => $orderReference,
+                    'dispatching_order_uid' => $dispatchingOrderUid,
+                ]);
 
                 foreach ($wfpInvoices as $value) {
                     Log::info('Checking transaction status for invoice', [
                         'invoice_id' => $value->id,
                         'orderReference' => $value->orderReference,
+                        'dispatching_order_uid' => $value->dispatching_order_uid,
                         'transactionStatus' => $value->transactionStatus
                     ]);
 
                     $transactionStatus = $value->transactionStatus;
-                    if ($transactionStatus == 'WaitingAuthComplete') {
+                    if ($transactionStatus === 'WaitingAuthComplete') {
                         Log::info('Transaction status is WaitingAuthComplete, preparing refund', [
                             'invoice_id' => $value->id,
                             'orderReference' => $value->orderReference
@@ -1465,12 +1473,20 @@ class WfpController extends Controller
                             'orderReference' => $value->orderReference
                         ]);
 
-                        // Диспетчеризация задачи RefundSettleCardPayJob
-                        dispatch(new RefundSettleCardPayJob($params, $value->orderReference, "refund"))
+                        $dispatchKey = 'wfp_refund_dispatch:' . $value->orderReference;
+                        if (!Cache::add($dispatchKey, 1, 300)) {
+                            Log::info('Refund job already dispatched recently, skipping', [
+                                'orderReference' => $value->orderReference,
+                            ]);
+                            continue;
+                        }
+
+                        RefundSettleCardPayJob::dispatch($params, $value->orderReference, 'refund')
                             ->onQueue('medium');
 
                         Log::info('Refund job dispatched to medium queue', [
-                            'orderReference' => $value->orderReference
+                            'orderReference' => $value->orderReference,
+                            'invoice_id' => $value->id,
                         ]);
                     } else {
                         Log::warning('Transaction status not eligible for refund', [
@@ -1793,54 +1809,73 @@ class WfpController extends Controller
 //    }
     public function refundSettleJob($params, $orderReference)
     {
-        $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
+        $lock = Cache::lock('refund_settle_job:' . $orderReference, 120);
+        if (!$lock->get()) {
+            Log::info('refundSettleJob: lock busy, skipping duplicate run', ['orderReference' => $orderReference]);
+            return 'exit';
+        }
 
-        Log::debug("refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus");
-        $messageAdmin = "refundSettleJob WfpInvoice invoice->transactionStatus: $invoice->transactionStatus";
-
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-        $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
-        Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
-        $messageAdmin = "refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}";
-
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-
-        if (!in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-            Log::debug("refundSettleJob Транзакция отклонена.");
-            // Отправка POST-запроса к API
-            $response = Http::post('https://api.wayforpay.com/api', $params);
-            $responseArray = $response->json(); // Проверка на валидный JSON
-            Log::debug("refundSettleJob Ответ от API", $responseArray);
-
-            (new DailyTaskController)->sentTaskMessage("Попытка проверки холда: " . json_encode($responseArray));
-
-            // Проверка статуса транзакции
-
-            $transactionStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
-
-            if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-                Log::info("refundSettleJob Успешная транзакция: {$transactionStatus}");
-                (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$transactionStatus}");
-
-                $this->updateOrderStatus($responseArray, $orderReference);
-                return "exit";
-            } else {
-                $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
-                $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
-                Log::debug("refundSettleJob WfpInvoice transactionStatus: {$transactionStatus}");
-
-                if (in_array($transactionStatus, ['refunded', 'voided', 'approved'])) {
-                    return "exit";
-                } else {
-                    Log::debug("refundSettleJob Транзакция отклонена. Повторная попытка через 10 секунд.");
-                }
+        try {
+            $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+            if (!$invoice) {
+                Log::warning('refundSettleJob: invoice not found', ['orderReference' => $orderReference]);
+                return 'exit';
             }
 
-            Log::debug("refundSettleJob Завершение метода");
+            $transactionStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+            Log::debug('refundSettleJob WfpInvoice transactionStatus: ' . $transactionStatus);
+
+            if (in_array($transactionStatus, ['refunded', 'voided', 'approved'], true)) {
+                Log::info('refundSettleJob: already finalized, skip API', [
+                    'orderReference' => $orderReference,
+                    'transactionStatus' => $transactionStatus,
+                ]);
+                return 'exit';
+            }
+
+            $response = Http::post('https://api.wayforpay.com/api', $params);
+            $responseArray = $response->json();
+            Log::debug('refundSettleJob Ответ от API', is_array($responseArray) ? $responseArray : ['raw' => $response->body()]);
+
+            if (!is_array($responseArray)) {
+                return 'exit';
+            }
+
+            $apiStatus = strtolower(trim($responseArray['transactionStatus'] ?? ''));
+            $reasonCode = (int) ($responseArray['reasonCode'] ?? 0);
+
+            if (in_array($apiStatus, ['refunded', 'voided', 'approved'], true)) {
+                (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
+                Log::info("refundSettleJob Успешная транзакция: {$apiStatus}");
+                (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$apiStatus}");
+                $this->updateOrderStatus($responseArray, $orderReference);
+                return 'exit';
+            }
+
+            $invoice->refresh();
+            $dbStatus = strtolower(trim($invoice->transactionStatus ?? ''));
+            if (in_array($dbStatus, ['refunded', 'voided', 'approved'], true)) {
+                Log::info('refundSettleJob: finalized by parallel job, skip notify', [
+                    'orderReference' => $orderReference,
+                    'dbStatus' => $dbStatus,
+                ]);
+                return 'exit';
+            }
+
+            if ($apiStatus === 'declined' && $reasonCode === 1130) {
+                Log::warning('refundSettleJob: duplicate refund declined (hold already voided)', [
+                    'orderReference' => $orderReference,
+                    'response' => $responseArray,
+                ]);
+                return 'exit';
+            }
+
+            (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
+            Log::debug('refundSettleJob Транзакция отклонена.');
+            return 'exit';
+        } finally {
+            $lock->release();
         }
-        return "exit";
     }
 
     public function refundSettleOneUAH($params)
@@ -1922,10 +1957,12 @@ class WfpController extends Controller
             $wfpOrder->save();
         }
 
-        $webOrder = Orderweb::where('wfp_order_id', $orderReference)->first();
-        if ($webOrder) {
-            $webOrder->wfp_status_pay = $transactionStatus;
-            $webOrder->save();
+        if ($wfpOrder && $wfpOrder->dispatching_order_uid) {
+            $webOrder = Orderweb::where('dispatching_order_uid', $wfpOrder->dispatching_order_uid)->first();
+            if ($webOrder) {
+                $webOrder->wfp_status_pay = $transactionStatus;
+                $webOrder->save();
+            }
         }
 
         Log::info("refundSettleJob Обновлен статус заказа: {$transactionStatus}");
@@ -3702,18 +3739,18 @@ class WfpController extends Controller
                     $application,
                     $city,
                     $orderReference,
-                    $amount
+                    $amount,
+                    $bonusOrderHold
                 );
-                $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $bonusOrder) -> get();
+                $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $bonusOrder)->get();
                 if ($wfpInvoices != null) {
                     foreach ($wfpInvoices as $value) {
-                        $orderReference = $value->orderReference;
-                        $amount = $value->amount;
                         self::refund(
                             $application,
                             $city,
-                            $orderReference,
-                            $amount
+                            $value->orderReference,
+                            $value->amount,
+                            $value->dispatching_order_uid
                         );
                     }
                 }

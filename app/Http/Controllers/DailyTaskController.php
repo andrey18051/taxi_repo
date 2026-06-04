@@ -227,9 +227,14 @@ class DailyTaskController extends Controller
                             Log::info("orderCardWfpReviewTask: closeReason=1 - выполняем refund");
                             if ($wfpInvoicesForOrder != null && !$wfpInvoicesForOrder->isEmpty()) {
                                 foreach ($wfpInvoicesForOrder as $invoiceIndex => $valueInv) {
+                                    if ($valueInv->transactionStatus !== 'WaitingAuthComplete') {
+                                        continue;
+                                    }
+
                                     Log::info("orderCardWfpReviewTask: Обработка инвойса для refund #" . ($invoiceIndex + 1), [
                                         'orderReference' => $valueInv->orderReference,
-                                        'amount' => $valueInv->amount
+                                        'amount' => $valueInv->amount,
+                                        'dispatching_order_uid' => $valueInv->dispatching_order_uid,
                                     ]);
 
                                     $orderReference = $valueInv->orderReference;
@@ -240,7 +245,8 @@ class DailyTaskController extends Controller
                                             $application,
                                             $city,
                                             $orderReference,
-                                            $amount
+                                            $amount,
+                                            $valueInv->dispatching_order_uid
                                         );
                                         Log::info("orderCardWfpReviewTask: Refund выполнен успешно", [
                                             'orderReference' => $orderReference,
@@ -302,6 +308,47 @@ class DailyTaskController extends Controller
                             break;
                     }
 
+                } else if ($orderweb->closeReason == '1' && $orderweb->server != 'my_server_api') {
+                    $application = 'PAS4';
+                    switch ($orderweb->comment) {
+                        case 'taxi_easy_ua_pas1': $application = 'PAS1'; break;
+                        case 'taxi_easy_ua_pas2': $application = 'PAS2'; break;
+                        case 'taxi_easy_ua_pas4': $application = 'PAS4'; break;
+                        default: $application = 'PAS5'; break;
+                    }
+                    $city = 'Kyiv City';
+                    switch ($orderweb->city) {
+                        case 'city_kiev': $city = 'Kyiv City'; break;
+                        case 'city_cherkassy': $city = 'Cherkasy Oblast'; break;
+                        case 'city_odessa':
+                            $city = ($orderweb->server === 'http://188.190.245.102:7303' || $orderweb->server === 'my_server_api')
+                                ? 'OdessaTest' : 'Odessa';
+                            break;
+                        case 'city_zaporizhzhia': $city = 'Zaporizhzhia'; break;
+                        case 'city_dnipro': $city = 'Dnipropetrovsk Oblast'; break;
+                        default: $city = 'all';
+                    }
+
+                    if (($value['transactionStatus'] ?? '') === 'WaitingAuthComplete') {
+                        Log::info('orderCardWfpReviewTask: closeReason=1 на внешнем сервере — прямой refund инвойса', [
+                            'orderReference' => $value['orderReference'],
+                            'uid' => $uid,
+                        ]);
+                        try {
+                            (new WfpController)->refund(
+                                $application,
+                                $city,
+                                $value['orderReference'],
+                                $value['amount'],
+                                $uid
+                            );
+                        } catch (\Exception $e) {
+                            Log::error('orderCardWfpReviewTask: Ошибка прямого refund', [
+                                'orderReference' => $value['orderReference'],
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
                 } else if ($orderweb->server != "my_server_api" && !in_array($orderweb->closeReason, ['100', '101', '102', '103', '104'])) {
                     Log::info("orderCardWfpReviewTask: Условие для orderReview выполнено (не my_server_api и не closeReason 100-104)");
 
