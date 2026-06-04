@@ -10928,7 +10928,11 @@ class UniversalAndroidFunctionController extends Controller
             $messageAdmin = "Новые заказы по вилке для доплаты не создались.";
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             Log::error($messageAdmin);
-            return response()->json(["response" => "Новый заказ не создался"], 200);
+            $duplicateAddCost = \App\Helpers\OrderDuplicateHelper::isDuplicateOrderMessage($responseBonusArr["Message"] ?? null)
+                || \App\Helpers\OrderDuplicateHelper::isDuplicateOrderMessage($responseDoubleArr["Message"] ?? null);
+            return response()->json([
+                "response" => $duplicateAddCost ? "duplicate_add_cost_failed" : "Новый заказ не создался",
+            ], 200);
         }
 
         if ((empty($responseBonusArr) || isset($responseBonusArr["Message"])) && !empty($responseDoubleArr) && !isset($responseDoubleArr["Message"])) {

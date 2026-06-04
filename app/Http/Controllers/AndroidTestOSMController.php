@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CacheHandler;
+use App\Helpers\OrderDuplicateHelper;
 use App\Helpers\OrderHelper;
 use App\Jobs\AutoCancelJob;
 use App\Jobs\SearchOrderToDeleteJob;
@@ -10253,15 +10254,29 @@ class AndroidTestOSMController extends Controller
                     } else {
 
                         Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
-                        $parameter['comment_info'] = $comment;
-                        return (new MyTaxiApiController)->orderMyApiTaxi(
-                            $parameter,
-                            $clientCost,
-                            $application,
+                        $dupFallback = $this->duplicateOrderFallbackOrNull(
+                            $message,
                             $email,
-                            $wfpInvoice,
-                            $city
+                            $application,
+                            $clientCost
                         );
+                        if ($dupFallback !== null) {
+                            if (!empty($dupFallback['dispatching_order_uid'])) {
+                                return $dupFallback;
+                            }
+                            $response_error['order_cost'] = $dupFallback['order_cost'] ?? '0';
+                            $response_error['Message'] = $dupFallback['Message'] ?? $message;
+                        } else {
+                            $parameter['comment_info'] = $comment;
+                            return (new MyTaxiApiController)->orderMyApiTaxi(
+                                $parameter,
+                                $clientCost,
+                                $application,
+                                $email,
+                                $wfpInvoice,
+                                $city
+                            );
+                        }
                     }
 
 
@@ -10678,15 +10693,29 @@ class AndroidTestOSMController extends Controller
 
                 } else {
                     Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
-                    $parameter['comment_info'] = $comment;
-                    return (new MyTaxiApiController)->orderMyApiTaxi(
-                        $parameter,
-                        $clientCost,
-                        $application,
+                    $dupFallback = $this->duplicateOrderFallbackOrNull(
+                        $message,
                         $email,
-                        $wfpInvoice,
-                        $city
+                        $application,
+                        $clientCost
                     );
+                    if ($dupFallback !== null) {
+                        if (!empty($dupFallback['dispatching_order_uid'])) {
+                            return $dupFallback;
+                        }
+                        $response_error['order_cost'] = $dupFallback['order_cost'] ?? '0';
+                        $response_error['Message'] = $dupFallback['Message'] ?? $message;
+                    } else {
+                        $parameter['comment_info'] = $comment;
+                        return (new MyTaxiApiController)->orderMyApiTaxi(
+                            $parameter,
+                            $clientCost,
+                            $application,
+                            $email,
+                            $wfpInvoice,
+                            $city
+                        );
+                    }
                 }
 
                 $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr);
@@ -10720,16 +10749,30 @@ class AndroidTestOSMController extends Controller
 
             } else {
                 Log::debug("Сообщение не содержит фразу 'Вы в черном списке'.");
-                $response_error["Message"] = $response_arr["Message"];
-                $parameter['comment_info'] = $comment;
-                return (new MyTaxiApiController)->orderMyApiTaxi(
-                    $parameter,
-                    $clientCost,
-                    $application,
+                $dupFallback = $this->duplicateOrderFallbackOrNull(
+                    $message,
                     $email,
-                    $wfpInvoice,
-                    $city
+                    $application,
+                    $clientCost
                 );
+                if ($dupFallback !== null) {
+                    if (!empty($dupFallback['dispatching_order_uid'])) {
+                        return $dupFallback;
+                    }
+                    $response_error['order_cost'] = $dupFallback['order_cost'] ?? '0';
+                    $response_error['Message'] = $dupFallback['Message'] ?? $message;
+                } else {
+                    $response_error["Message"] = $response_arr["Message"];
+                    $parameter['comment_info'] = $comment;
+                    return (new MyTaxiApiController)->orderMyApiTaxi(
+                        $parameter,
+                        $clientCost,
+                        $application,
+                        $email,
+                        $wfpInvoice,
+                        $city
+                    );
+                }
             }
 
             $message = "Ошибка заказа в приложение $application, сервер $connectAPI: " . json_encode($response_arr, JSON_UNESCAPED_UNICODE);
@@ -15213,5 +15256,38 @@ class AndroidTestOSMController extends Controller
         $orderweb = Orderweb::find($id);
         $orderweb->cancel_timestamp = Carbon::now();
         $orderweb->save();
+    }
+
+    /**
+     * Дубль на внешнем API: вернуть существующий заказ вместо orderMyApiTaxi.
+     * null — не дубль, вызывающий код может использовать fallback my_server_api.
+     *
+     * @return array|null
+     */
+    private function duplicateOrderFallbackOrNull(
+        ?string $message,
+        string $email,
+        string $application,
+        $clientCost
+    ): ?array {
+        if (!OrderDuplicateHelper::isDuplicateOrderMessage($message)) {
+            return null;
+        }
+
+        $existing = OrderDuplicateHelper::findActiveExternalOrder($email, $application);
+        if ($existing) {
+            return OrderDuplicateHelper::buildAndroidOrderResponse($existing, $clientCost);
+        }
+
+        Log::warning('duplicateOrderFallback: active external order not found', [
+            'email' => $email,
+            'application' => $application,
+            'message' => $message,
+        ]);
+
+        return [
+            'order_cost' => '0',
+            'Message' => $message ?? 'DuplicateActiveOrder',
+        ];
     }
 }
