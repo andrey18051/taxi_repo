@@ -184,15 +184,11 @@ class CardsController extends Controller
             ->where('app', $application)
             ->get();
 
+        $firstCard = true;
         foreach ($userCards as $value) {
-            $value->active = true;
+            $value->active = $firstCard;
             $value->save();
-            $id = $value->id;
-
-            if($value->id != $id) {
-                $value->active = false;
-                $value->save();
-            }
+            $firstCard = false;
         }
         return ["result" => "ok"];
     }
