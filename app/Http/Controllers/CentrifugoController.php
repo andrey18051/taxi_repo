@@ -155,7 +155,13 @@ class CentrifugoController extends Controller
     /**
      * Отправка UID с типом оплаты
      */
-    public function sentUidAppEmailPayType(string $order_uid, string $app, string $email, string $pay_system): JsonResponse
+    public function sentUidAppEmailPayType(
+        string $order_uid,
+        string $app,
+        string $email,
+        string $pay_system,
+        ?int $order_cost = null
+    ): JsonResponse
     {
         try {
             $event = 'order_uid_new-' . $app . "-" . $email;
@@ -166,6 +172,9 @@ class CentrifugoController extends Controller
                 'email' => $email,
                 'paySystemStatus' => $pay_system
             ];
+            if ($order_cost !== null && $order_cost > 0) {
+                $data['order_cost'] = (string) $order_cost;
+            }
 
             $result = $this->trigger($event, $data);
 

@@ -10984,9 +10984,21 @@ class UniversalAndroidFunctionController extends Controller
                 }
 
                 // Отправка уведомлений
-                (new PusherController)->sentUidAppEmailPayType($orderNew, $application, $email, $pay_method);
-                (new CentrifugoController)->sentUidAppEmailPayType($orderNew, $application, $email, $pay_method);
-                Log::info("Отправлено уведомление sentUidAppEmailPayType для orderNew='$orderNew', application='$application', email='$email', pay_method='$pay_method'.");
+                (new PusherController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    $pay_method,
+                    $newClientCost
+                );
+                (new CentrifugoController)->sentUidAppEmailPayType(
+                    $orderNew,
+                    $application,
+                    $email,
+                    $pay_method,
+                    $newClientCost
+                );
+                Log::info("Отправлено уведомление sentUidAppEmailPayType для orderNew='$orderNew', application='$application', email='$email', pay_method='$pay_method', order_cost='$newClientCost'.");
 
                 if (isset($responseDoubleArr["dispatching_order_uid"])) {
                     $orderDoubleNew = $responseDoubleArr["dispatching_order_uid"];

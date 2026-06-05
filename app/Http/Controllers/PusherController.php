@@ -148,7 +148,8 @@ class PusherController extends Controller
         $order_uid,
         $app,
         $email,
-        $pay_system
+        $pay_system,
+        $order_cost = null
     ): \Illuminate\Http\JsonResponse
     {
         try {
@@ -167,6 +168,9 @@ class PusherController extends Controller
                 'email' => $email,
                 'paySystemStatus' => $pay_system
             ];
+            if ($order_cost !== null && (int) $order_cost > 0) {
+                $data['order_cost'] = (string) (int) $order_cost;
+            }
 
             // Отправка события через Pusher
             $channel = 'teal-towel-48'; // Замените на нужный канал

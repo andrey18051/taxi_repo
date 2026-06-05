@@ -2763,6 +2763,25 @@ class WfpController extends Controller
                 ]);
 
                 try {
+                    $addCostInvoice = WfpInvoice::where('orderReference', $orderReference)->first();
+                    if ($addCostInvoice !== null && !empty($addCostInvoice->dispatching_order_uid)) {
+                        if ($this->hasPendingAddCostPayment(
+                            $addCostInvoice->dispatching_order_uid,
+                            $orderReference
+                        )) {
+                            Log::info('Blocked duplicate add-cost while another payment is in progress', [
+                                'order_reference' => $orderReference,
+                                'uid' => $addCostInvoice->dispatching_order_uid,
+                            ]);
+
+                            return response()->json([
+                                'orderReference' => $orderReference,
+                                'transactionStatus' => 'InProcessing',
+                                'reason' => 'add_cost_already_in_progress',
+                            ]);
+                        }
+                    }
+
                     $startTime = microtime(true);
                     $existingInvoice = WfpInvoice::where("orderReference", $orderReference)->first();
                     $skipCharge = false;

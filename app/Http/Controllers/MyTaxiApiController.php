@@ -685,29 +685,6 @@ class MyTaxiApiController extends Controller
             'old_order_uid' => $order->dispatching_order_uid ?? 'unknown'
         ]);
 
-        // Отправка email уведомления
-        Log::info('📧 Отправка email уведомления...');
-        try {
-            (new PusherController)->sentUidAppEmailPayType(
-                $orderNew,
-                $application,
-                $email,
-                "nal_payment"
-            );
-            (new CentrifugoController)->sentUidAppEmailPayType(
-                $orderNew,
-                $application,
-                $email,
-                "nal_payment"
-            );
-            Log::info('✅ Уведомление отправлено успешно');
-        } catch (\Exception $e) {
-            Log::error('❌ Ошибка отправки уведомления', [
-                'error' => $e->getMessage(),
-                'new_uid' => $orderNew
-            ]);
-        }
-
         Log::debug("📝 Создан новый заказ с UID: " . $orderNew);
 
         $order_old_uid = $order->dispatching_order_uid;
@@ -773,6 +750,36 @@ class MyTaxiApiController extends Controller
 
         $order->save();
         Log::info("✅ Заказ обновлен с новым UID: " . $order_new_uid);
+
+        $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+        $newClientCost = $oldClientCost + (int) $addCost;
+        $paySystem = $order->pay_system ?? 'nal_payment';
+        Log::info('📧 Отправка уведомления о новом UID после доплаты...');
+        try {
+            (new PusherController)->sentUidAppEmailPayType(
+                $order_new_uid,
+                $application,
+                $email,
+                $paySystem,
+                $newClientCost
+            );
+            (new CentrifugoController)->sentUidAppEmailPayType(
+                $order_new_uid,
+                $application,
+                $email,
+                $paySystem,
+                $newClientCost
+            );
+            Log::info('✅ Уведомление после доплаты отправлено', [
+                'new_uid' => $order_new_uid,
+                'order_cost' => $newClientCost,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Ошибка отправки уведомления после доплаты', [
+                'error' => $e->getMessage(),
+                'new_uid' => $order_new_uid,
+            ]);
+        }
 
         // Запись в Firestore
         if ($order->route_undefined == "0") {
