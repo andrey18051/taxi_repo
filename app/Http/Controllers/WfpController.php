@@ -4459,20 +4459,31 @@ class WfpController extends Controller
 
     public function verifyHold ($uid): array
     {
-        $result = "hold";
-
-        $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $uid)-> get();
-        if($wfpInvoices != null) {
-            foreach ($wfpInvoices as $value) {
-                if($value->transactionStatus !== "WaitingAuthComplete") {
-                    $result = "no_hold";
-                    return ["result" => $result];
-                }
-            }
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        if ($order === null) {
+            return ['result' => 'no_hold'];
         }
 
+        $mainOrderReference = $order->wfp_order_id ?? null;
+        if ($mainOrderReference !== null && $mainOrderReference !== ''
+            && $this->hasPendingAddCostPayment($uid, $mainOrderReference)) {
+            return ['result' => 'pending_add_cost'];
+        }
 
-        return ["result" => $result];
+        if ($mainOrderReference === null || $mainOrderReference === '') {
+            return ['result' => 'no_hold'];
+        }
+
+        $mainInvoice = WfpInvoice::where('orderReference', $mainOrderReference)->first();
+        if ($mainInvoice === null) {
+            return ['result' => 'no_hold'];
+        }
+
+        if ($mainInvoice->transactionStatus === 'WaitingAuthComplete') {
+            return ['result' => 'hold'];
+        }
+
+        return ['result' => 'no_hold'];
     }
 
     public function deleteInvoice($orderReference): array
