@@ -4533,7 +4533,8 @@ class WfpController extends Controller
             $query->where('orderReference', '!=', $mainOrderReference);
         }
 
-        return $query->whereIn('transactionStatus', ['InProcessing', 'Pending', 'WaitingAuthComplete'])->exists();
+        // WaitingAuthComplete — платёж уже прошёл, идёт пересоздание заказа; не блокируем повторное повышение.
+        return $query->whereIn('transactionStatus', ['InProcessing', 'Pending'])->exists();
     }
 
     /**
