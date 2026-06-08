@@ -9400,132 +9400,133 @@ class UniversalAndroidFunctionController extends Controller
     public function findCityJson($startLat, $startLan)
     {
         Log::debug("findCity $startLat, $startLan");
+        // Геозоны городов (город + пригород), без перекрытий. Порядок важен только при пересечении.
         $cities = [
+            'city_chernihiv' => [
+                'lat_min' => 51.3500,
+                'lat_max' => 51.6500,
+                'lan_min' => 30.9500,
+                'lan_max' => 31.5500,
+            ],
             'city_kiev' => [
-                'lat_min' => 49.8000,  // Минимальная широта для области
-                'lat_max' => 51.5000,  // Максимальная широта для области
-                'lan_min' => 29.9000,  // Минимальная долгота для области
-                'lan_max' => 31.7000,  // Максимальная долгота для области
+                'lat_min' => 50.0500,
+                'lat_max' => 50.7500,
+                'lan_min' => 29.9500,
+                'lan_max' => 31.0500,
             ],
             'city_cherkassy' => [
-                'lat_min' => 48.5000,  // Минимальная широта для области
-                'lat_max' => 49.7000,  // Максимальная широта для области
-                'lan_min' => 31.5000,  // Минимальная долгота для области
-                'lan_max' => 32.5000,  // Максимальная долгота для области
+                'lat_min' => 49.3000,
+                'lat_max' => 49.5500,
+                'lan_min' => 31.8500,
+                'lan_max' => 32.2500,
             ],
             'city_odessa' => [
-                'lat_min' => 45.5000,  // Минимальная широта для области
-                'lat_max' => 47.0000,  // Максимальная широта для области
-                'lan_min' => 29.5000,  // Минимальная долгота для области
-                'lan_max' => 31.5000,  // Максимальная долгота для области
+                'lat_min' => 46.3000,
+                'lat_max' => 46.6500,
+                'lan_min' => 30.4500,
+                'lan_max' => 31.0000,
             ],
             'city_zaporizhzhia' => [
-                'lat_min' => 47.4000,  // Минимальная широта для области
-                'lat_max' => 48.2000,  // Максимальная широта для области
-                'lan_min' => 34.5000,  // Минимальная долгота для области
-                'lan_max' => 36.0000,  // Максимальная долгота для области
+                'lat_min' => 47.7000,
+                'lat_max' => 48.0500,
+                'lan_min' => 34.9500,
+                'lan_max' => 35.3500,
             ],
             'city_dnipro' => [
-                'lat_min' => 47.8000,  // Минимальная широта для области
-                'lat_max' => 49.1000,  // Максимальная широта для области
-                'lan_min' => 33.8000,  // Минимальная долгота для области
-                'lan_max' => 35.5000,  // Максимальная долгота для области
-            ],
-            'city_lviv' => [
-                'lat_min' => 48.9000,
-                'lat_max' => 50.6000,
-                'lan_min' => 22.0000,
-                'lan_max' => 25.5000,
+                'lat_min' => 48.3000,
+                'lat_max' => 48.6000,
+                'lan_min' => 34.7500,
+                'lan_max' => 35.2500,
             ],
             'city_ivano_frankivsk' => [
-                'lat_min' => 47.5000,
-                'lat_max' => 49.2000,
-                'lan_min' => 23.8000,
-                'lan_max' => 25.6000,
+                'lat_min' => 48.7800,
+                'lat_max' => 49.0200,
+                'lan_min' => 24.5000,
+                'lan_max' => 24.9500,
             ],
-            'city_vinnytsia' => [
-                'lat_min' => 48.2000,
-                'lat_max' => 49.9000,
-                'lan_min' => 27.3000,
-                'lan_max' => 29.4000,
-            ],
-            'city_poltava' => [
-                'lat_min' => 48.5000,
-                'lat_max' => 50.6000,
-                'lan_min' => 32.4000,
-                'lan_max' => 35.0000,
-            ],
-            'city_sumy' => [
-                'lat_min' => 50.1000,
-                'lat_max' => 52.3000,
-                'lan_min' => 33.0000,
-                'lan_max' => 35.3000,
-            ],
-            'city_kharkiv' => [
-                'lat_min' => 48.9000,
-                'lat_max' => 50.6000,
-                'lan_min' => 35.0000,
-                'lan_max' => 37.3000,
-            ],
-            'city_chernihiv' => [
-                'lat_min' => 50.4000,
-                'lat_max' => 52.5000,
-                'lan_min' => 30.4000,
-                'lan_max' => 33.2000,
-            ],
-            'city_rivne' => [
-                'lat_min' => 49.6000,
-                'lat_max' => 51.0000,
-                'lan_min' => 25.5000,
-                'lan_max' => 27.4000,
-            ],
-            'city_ternopil' => [
-                'lat_min' => 48.8000,
-                'lat_max' => 50.2000,
-                'lan_min' => 24.0000,
-                'lan_max' => 26.2000,
-            ],
-            'city_khmelnytskyi' => [
-                'lat_min' => 48.8000,
-                'lat_max' => 50.3000,
-                'lan_min' => 25.9000,
-                'lan_max' => 28.0000,
-            ],
-            'city_zakarpattya' => [
-                'lat_min' => 47.5000,
-                'lat_max' => 49.0000,
-                'lan_min' => 22.1000,
+            'city_lviv' => [
+                'lat_min' => 49.7200,
+                'lat_max' => 50.0500,
+                'lan_min' => 23.8500,
                 'lan_max' => 24.4000,
             ],
+            'city_vinnytsia' => [
+                'lat_min' => 49.1500,
+                'lat_max' => 49.4000,
+                'lan_min' => 28.3000,
+                'lan_max' => 28.6500,
+            ],
+            'city_poltava' => [
+                'lat_min' => 49.4800,
+                'lat_max' => 49.7000,
+                'lan_min' => 34.3500,
+                'lan_max' => 34.7500,
+            ],
+            'city_sumy' => [
+                'lat_min' => 50.7800,
+                'lat_max' => 51.0000,
+                'lan_min' => 34.5500,
+                'lan_max' => 34.9500,
+            ],
+            'city_kharkiv' => [
+                'lat_min' => 49.8000,
+                'lat_max' => 50.1500,
+                'lan_min' => 36.0500,
+                'lan_max' => 36.5500,
+            ],
+            'city_rivne' => [
+                'lat_min' => 50.5200,
+                'lat_max' => 50.7500,
+                'lan_min' => 26.1000,
+                'lan_max' => 26.5500,
+            ],
+            'city_ternopil' => [
+                'lat_min' => 49.4500,
+                'lat_max' => 49.7200,
+                'lan_min' => 25.4500,
+                'lan_max' => 25.8000,
+            ],
+            'city_khmelnytskyi' => [
+                'lat_min' => 49.3200,
+                'lat_max' => 49.5500,
+                'lan_min' => 26.8500,
+                'lan_max' => 27.2500,
+            ],
+            'city_zakarpattya' => [
+                'lat_min' => 48.5500,
+                'lat_max' => 48.7500,
+                'lan_min' => 22.1500,
+                'lan_max' => 22.4500,
+            ],
             'city_zhytomyr' => [
-                'lat_min' => 49.7000,
-                'lat_max' => 51.5000,
-                'lan_min' => 27.6000,
-                'lan_max' => 29.4000,
+                'lat_min' => 50.1500,
+                'lat_max' => 50.4200,
+                'lan_min' => 28.4500,
+                'lan_max' => 28.8500,
             ],
             'city_kropyvnytskyi' => [
-                'lat_min' => 47.2000,
-                'lat_max' => 49.0000,
-                'lan_min' => 30.4000,
-                'lan_max' => 33.0000,
+                'lat_min' => 48.4000,
+                'lat_max' => 48.6500,
+                'lan_min' => 32.0500,
+                'lan_max' => 32.4500,
             ],
             'city_mykolaiv' => [
-                'lat_min' => 46.0000,
-                'lat_max' => 48.1000,
-                'lan_min' => 30.0000,
-                'lan_max' => 32.5000,
+                'lat_min' => 46.8000,
+                'lat_max' => 47.1000,
+                'lan_min' => 31.8000,
+                'lan_max' => 32.3000,
             ],
             'city_chernivtsi' => [
-                'lat_min' => 47.9000,
-                'lat_max' => 48.8000,
-                'lan_min' => 25.6000,
-                'lan_max' => 27.3000,
+                'lat_min' => 48.2000,
+                'lat_max' => 48.4000,
+                'lan_min' => 25.7500,
+                'lan_max' => 26.1500,
             ],
             'city_lutsk' => [
-                'lat_min' => 50.5900,  // Минимальная широта для области
-                'lat_max' => 51.8000,  // Максимальная широта для области
-                'lan_min' => 23.5000,  // Минимальная долгота для области
-                'lan_max' => 26.9000,  // Максимальная долгота для области
+                'lat_min' => 50.6500,
+                'lat_max' => 50.9000,
+                'lan_min' => 25.1500,
+                'lan_max' => 25.5500,
             ],
         ];
 
