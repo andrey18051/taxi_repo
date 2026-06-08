@@ -1,0 +1,29 @@
+---
+description: Правила Cursor должны быть одинаковыми во всех репозиториях workspace
+alwaysApply: true
+---
+
+# Синхронизация правил Cursor
+
+Все файлы в `.cursor/rules/` **идентичны** во всех репозиториях workspace:
+
+- `PAS_1`, `PAS_2`, `PAS_3`, `PAS_4`
+- `PhpstormProjects/taxi_repo`
+
+## При изменении правила
+
+1. Обнови файл в **каждом** репозитории из списка выше.
+2. Закоммить и push в соответствующий репозиторий.
+3. Не оставляй расхождений (в т.ч. разные формулировки для PAS_1 vs PAS_4 — текст общий).
+
+## Набор файлов
+
+| Файл | Назначение |
+|------|------------|
+| `workspace-context-check.mdc` | Выбор репозитория, git fetch/pull |
+| `pas-version-commit.mdc` | Коммиты версий PAS (только PAS_*) |
+| `pas-build-before-commit.mdc` | Сборка перед коммитом (только PAS_*) |
+| `pas-report-format.mdc` | Формат отчётов клиенту |
+| `cursor-rules-sync.mdc` | Синхронизация правил между репозиториями |
+
+PAS-специфичные правила (`pas-version-commit`, `pas-build-before-commit`) применяй **только** когда целевой репозиторий — PAS_1–PAS_4, не `taxi_repo`.

@@ -1,0 +1,41 @@
+---
+description: Verify workspace context before starting any task
+alwaysApply: true
+---
+
+# Workspace context check
+
+Перед началом любой задачи убедись, что рабочее пространство **актуально**.
+
+## Корни workspace
+
+Multi-root файл: `AndroidStudioProjects/My_work_space.code-workspace`
+
+| Папка | Ветка по умолчанию | Назначение |
+|-------|-------------------|------------|
+| `PAS_4` | `master` | Android-приложение (основной вариант в workspace) |
+| `PAS_2` | `master` | Android-приложение |
+| `PAS_3` | `master` | Android-приложение |
+| `PAS_1` | `master` | Android-приложение |
+| `PhpstormProjects/taxi_repo` | `main` | Backend (PHP) |
+
+Не предполагай `PAS_4`, если задача явно про другой PAS или `taxi_repo`.
+
+## Обязательная проверка
+
+1. **Правильный репозиторий** — определи целевую папку по запросу, путям, истории чата.
+2. **Синхронизация с remote** — в целевом репо:
+   ```powershell
+   git fetch
+   git status -sb
+   ```
+   Если ветка отстаёт от `origin/*` — выполни `git pull --ff-only` (или спроси пользователя) **до** правок.
+3. **Состояние** — зафиксируй незакоммиченные изменения и текущую ветку; не перезаписывай чужую работу.
+4. **Неоднозначность** — при сомнении между корнями уточни у пользователя.
+
+## Связанные правила
+
+- `cursor-rules-sync.mdc` — правила Cursor одинаковы во всех репозиториях workspace.
+- В PAS-репозиториях также: `pas-version-commit`, `pas-build-before-commit`, `pas-report-format`.
+
+Only after this check — reads, edits, and commands in the correct repo.

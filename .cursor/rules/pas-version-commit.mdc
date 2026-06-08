@@ -1,0 +1,22 @@
+---
+description: PAS commits — only via run_version_update.bat
+alwaysApply: true
+---
+
+# PAS version commit workflow
+
+For any PAS Android app (PAS_1, PAS_2, PAS_3, PAS_4) in this family, **never** commit version bumps by calling `git_commit.ps1` or raw `git commit` directly.
+
+Always use the project script from the **PAS project root**:
+
+```bat
+app\run_version_update.bat
+```
+
+Non-interactive (agent/terminal, auto-dismiss `pause`):
+
+```bat
+cmd /c "echo.| app\run_version_update.bat"
+```
+
+Run separately per PAS repo (PAS_1, PAS_2, PAS_3, PAS_4). The script bumps version, updates strings, commits, tags, and pushes.
