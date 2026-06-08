@@ -9286,103 +9286,170 @@ class UniversalAndroidFunctionController extends Controller
                 $regionToCityMap[$normalize($name)] = $code;
             }
 
-            // Запрос к Nominatim
-            $address = null;
-            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=$startLat&lon=$startLon";
-            $context = stream_context_create([
-                "http" => [
-                    "header" => "User-Agent: MyApp/1.0\r\n"
-                ]
-            ]);
-
-            $response = @file_get_contents($url, false, $context);
-            if ($response) {
-                Log::debug("findCity: успешный ответ от Nominatim");
-                $data = json_decode($response, true);
-                if (!empty($data['address'])) {
-                    $address = $data['address'];
-                    Log::debug("findCity: адрес из Nominatim: " . json_encode($address, JSON_UNESCAPED_UNICODE));
-                }
+            $cityCode = null;
+            $nominatimAddress = $this->getAddressFromNominatim($startLat, $startLon);
+            if ($nominatimAddress) {
+                Log::debug("findCity: адрес из Nominatim: " . json_encode($nominatimAddress, JSON_UNESCAPED_UNICODE));
+                $cityCode = $this->resolveCityCodeFromAddress($nominatimAddress, $cityNameMap, $regionToCityMap, $normalize);
             } else {
-                Log::error("findCity: ошибка при запросе к Nominatim, пробуем Mapbox...");
-                $address = $this->getAddressFromMapbox($startLat, $startLon);
+                Log::warning("findCity: Nominatim не вернул адрес");
             }
 
-            if (!$address) {
-                Log::info("findCity: адрес не найден, возвращаем 'all'");
-                return 'all';
-            }
-
-
-            $possibleNames = [];
-            foreach (['city', 'town', 'village', 'municipality', 'borough', 'district', 'state'] as $field) {
-                if (!empty($address[$field])) {
-                    $normalized = $normalize($address[$field]);
-                    $possibleNames[] = $normalized;
-                    Log::debug("findCity: найдено значение '$normalized' в поле '$field'");
+            if (!$cityCode) {
+                Log::info("findCity: Nominatim не определил город, пробуем Mapbox...");
+                $mapboxAddress = $this->getAddressFromMapbox($startLat, $startLon);
+                if ($mapboxAddress) {
+                    Log::debug("findCity: адрес из Mapbox: " . json_encode($mapboxAddress, JSON_UNESCAPED_UNICODE));
+                    $cityCode = $this->resolveCityCodeFromAddress($mapboxAddress, $cityNameMap, $regionToCityMap, $normalize);
                 }
             }
 
-
-            Log::debug("findCity: список возможных названий: " . implode(', ', $possibleNames));
-
-            // Сопоставление по названию города
-            foreach ($possibleNames as $name) {
-                if (isset($cityNameMap[$name])) {
-                    Log::info("findCity: прямое совпадение '$name' => " . $cityNameMap[$name]);
-                    return $cityNameMap[$name];
-                }
+            if ($cityCode) {
+                return $cityCode;
             }
 
-            // Сопоставление по региону
-            foreach ($possibleNames as $name) {
-                if (isset($regionToCityMap[$name])) {
-                    Log::info("findCity: совпадение по региону '$name' => " . $regionToCityMap[$name]);
-                    return $regionToCityMap[$name];
-                }
-            }
-
-            Log::info("findCity: город не определён, возвращаем 'all'");
+            Log::info("findCity: город не определён (Nominatim + Mapbox), возвращаем 'all'");
             return 'all';
         });
     }
-    private function getAddressFromMapbox($lat, $lon)
+
+    private function getAddressFromNominatim(float $lat, float $lon): ?array
     {
-        $mapboxToken = config('app.keyMapbox'); // ваш токен храните в .env
-        $url = "https://api.mapbox.com/geocoding/v5/mapbox.places/$lon,$lat.json?access_token=$mapboxToken&language=uk";
+        try {
+            $response = Http::withHeaders([
+                'User-Agent' => 'TaxiEasyUa/1.0 (taxi.easy.ua.sup@gmail.com)',
+            ])->timeout(8)->get('https://nominatim.openstreetmap.org/reverse', [
+                'format' => 'json',
+                'lat' => $lat,
+                'lon' => $lon,
+                'accept-language' => 'uk',
+            ]);
 
-        $response = @file_get_contents($url);
-        if (!$response) {
-            Log::error("getAddressFromMapbox: ошибка при запросе к Mapbox");
+            if (!$response->successful()) {
+                Log::error("getAddressFromNominatim: HTTP " . $response->status());
+                return null;
+            }
+
+            $data = $response->json();
+            return !empty($data['address']) ? $data['address'] : null;
+        } catch (\Throwable $e) {
+            Log::error("getAddressFromNominatim: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    private function resolveCityCodeFromAddress(
+        array $address,
+        array $cityNameMap,
+        array $regionToCityMap,
+        callable $normalize
+    ): ?string {
+        if (!empty($address['state'])) {
+            $stateName = $normalize($address['state']);
+            Log::debug("resolveCityCodeFromAddress: область '$stateName'");
+            if (isset($regionToCityMap[$stateName])) {
+                Log::info("resolveCityCodeFromAddress: по области '$stateName' => " . $regionToCityMap[$stateName]);
+                return $regionToCityMap[$stateName];
+            }
+            if (isset($cityNameMap[$stateName])) {
+                Log::info("resolveCityCodeFromAddress: state как город '$stateName' => " . $cityNameMap[$stateName]);
+                return $cityNameMap[$stateName];
+            }
+        }
+
+        $possibleNames = [];
+        foreach (['city', 'town', 'village', 'municipality', 'borough', 'district', 'county', 'region'] as $field) {
+            if (!empty($address[$field])) {
+                $normalized = $normalize($address[$field]);
+                $possibleNames[] = $normalized;
+                Log::debug("resolveCityCodeFromAddress: '$normalized' в поле '$field'");
+            }
+        }
+
+        foreach ($possibleNames as $name) {
+            if (isset($cityNameMap[$name])) {
+                Log::info("resolveCityCodeFromAddress: прямое совпадение '$name' => " . $cityNameMap[$name]);
+                return $cityNameMap[$name];
+            }
+        }
+
+        foreach ($possibleNames as $name) {
+            if (isset($regionToCityMap[$name])) {
+                Log::info("resolveCityCodeFromAddress: по региону '$name' => " . $regionToCityMap[$name]);
+                return $regionToCityMap[$name];
+            }
+        }
+
+        return null;
+    }
+
+    private function getAddressFromMapbox(float $lat, float $lon): ?array
+    {
+        $mapboxToken = config('app.keyMapbox');
+        if (empty($mapboxToken)) {
+            Log::warning('getAddressFromMapbox: токен не задан');
             return null;
         }
 
-        $data = json_decode($response, true);
-        if (empty($data['features'])) {
-            Log::error("getAddressFromMapbox: пустой ответ");
+        try {
+            $response = Http::timeout(8)->get(
+                "https://api.mapbox.com/geocoding/v5/mapbox.places/$lon,$lat.json",
+                [
+                    'access_token' => $mapboxToken,
+                    'language' => 'uk',
+                    'types' => 'address,place,locality,neighborhood',
+                ]
+            );
+
+            if (!$response->successful()) {
+                Log::error('getAddressFromMapbox: HTTP ' . $response->status());
+                return null;
+            }
+
+            $data = $response->json();
+            if (empty($data['features'])) {
+                Log::error('getAddressFromMapbox: пустой ответ');
+                return null;
+            }
+
+            $feature = $data['features'][0];
+            $placeTypes = $feature['place_type'] ?? [];
+            $featureText = $feature['text'] ?? '';
+            $address = [];
+
+            if (in_array('place', $placeTypes, true) || in_array('locality', $placeTypes, true)) {
+                $address['city'] = $featureText;
+            } elseif ($featureText !== '') {
+                $address['town'] = $featureText;
+            }
+
+            foreach ($feature['context'] ?? [] as $contextItem) {
+                $id = $contextItem['id'] ?? '';
+                $text = $contextItem['text'] ?? '';
+                if ($text === '') {
+                    continue;
+                }
+                if (str_contains($id, 'region')) {
+                    $address['state'] = $text;
+                } elseif (str_contains($id, 'place') && empty($address['city'])) {
+                    $address['city'] = $text;
+                } elseif (str_contains($id, 'locality') && empty($address['town'])) {
+                    $address['town'] = $text;
+                } elseif (str_contains($id, 'district')) {
+                    $address['district'] = $text;
+                }
+            }
+
+            if ($address === []) {
+                return null;
+            }
+
+            Log::debug('getAddressFromMapbox: адрес: ' . json_encode($address, JSON_UNESCAPED_UNICODE));
+            return $address;
+        } catch (\Throwable $e) {
+            Log::error('getAddressFromMapbox: ' . $e->getMessage());
             return null;
         }
-
-        // Берём первую фичу (самую релевантную)
-        $feature = $data['features'][0];
-        $context = $feature['context'] ?? [];
-
-        $address = [];
-        if (!empty($feature['text'])) {
-            $address['city'] = $feature['text'];
-        }
-
-        foreach ($context as $c) {
-            if (str_contains($c['id'], 'region')) {
-                $address['state'] = $c['text'];
-            }
-            if (str_contains($c['id'], 'place')) {
-                $address['town'] = $c['text'];
-            }
-        }
-
-        Log::debug("getAddressFromMapbox: адрес: " . json_encode($address, JSON_UNESCAPED_UNICODE));
-        return $address;
     }
 
 
@@ -9399,148 +9466,10 @@ class UniversalAndroidFunctionController extends Controller
 
     public function findCityJson($startLat, $startLan)
     {
-        Log::debug("findCity $startLat, $startLan");
-        // Геозоны городов (город + пригород), без перекрытий. Порядок важен только при пересечении.
-        $cities = [
-            'city_chernihiv' => [
-                'lat_min' => 51.3500,
-                'lat_max' => 51.6500,
-                'lan_min' => 30.9500,
-                'lan_max' => 31.5500,
-            ],
-            'city_kiev' => [
-                'lat_min' => 50.0500,
-                'lat_max' => 50.7500,
-                'lan_min' => 29.9500,
-                'lan_max' => 31.0500,
-            ],
-            'city_cherkassy' => [
-                'lat_min' => 49.3000,
-                'lat_max' => 49.5500,
-                'lan_min' => 31.8500,
-                'lan_max' => 32.2500,
-            ],
-            'city_odessa' => [
-                'lat_min' => 46.3000,
-                'lat_max' => 46.6500,
-                'lan_min' => 30.4500,
-                'lan_max' => 31.0000,
-            ],
-            'city_zaporizhzhia' => [
-                'lat_min' => 47.7000,
-                'lat_max' => 48.0500,
-                'lan_min' => 34.9500,
-                'lan_max' => 35.3500,
-            ],
-            'city_dnipro' => [
-                'lat_min' => 48.3000,
-                'lat_max' => 48.6000,
-                'lan_min' => 34.7500,
-                'lan_max' => 35.2500,
-            ],
-            'city_ivano_frankivsk' => [
-                'lat_min' => 48.7800,
-                'lat_max' => 49.0200,
-                'lan_min' => 24.5000,
-                'lan_max' => 24.9500,
-            ],
-            'city_lviv' => [
-                'lat_min' => 49.7200,
-                'lat_max' => 50.0500,
-                'lan_min' => 23.8500,
-                'lan_max' => 24.4000,
-            ],
-            'city_vinnytsia' => [
-                'lat_min' => 49.1500,
-                'lat_max' => 49.4000,
-                'lan_min' => 28.3000,
-                'lan_max' => 28.6500,
-            ],
-            'city_poltava' => [
-                'lat_min' => 49.4800,
-                'lat_max' => 49.7000,
-                'lan_min' => 34.3500,
-                'lan_max' => 34.7500,
-            ],
-            'city_sumy' => [
-                'lat_min' => 50.7800,
-                'lat_max' => 51.0000,
-                'lan_min' => 34.5500,
-                'lan_max' => 34.9500,
-            ],
-            'city_kharkiv' => [
-                'lat_min' => 49.8000,
-                'lat_max' => 50.1500,
-                'lan_min' => 36.0500,
-                'lan_max' => 36.5500,
-            ],
-            'city_rivne' => [
-                'lat_min' => 50.5200,
-                'lat_max' => 50.7500,
-                'lan_min' => 26.1000,
-                'lan_max' => 26.5500,
-            ],
-            'city_ternopil' => [
-                'lat_min' => 49.4500,
-                'lat_max' => 49.7200,
-                'lan_min' => 25.4500,
-                'lan_max' => 25.8000,
-            ],
-            'city_khmelnytskyi' => [
-                'lat_min' => 49.3200,
-                'lat_max' => 49.5500,
-                'lan_min' => 26.8500,
-                'lan_max' => 27.2500,
-            ],
-            'city_zakarpattya' => [
-                'lat_min' => 48.5500,
-                'lat_max' => 48.7500,
-                'lan_min' => 22.1500,
-                'lan_max' => 22.4500,
-            ],
-            'city_zhytomyr' => [
-                'lat_min' => 50.1500,
-                'lat_max' => 50.4200,
-                'lan_min' => 28.4500,
-                'lan_max' => 28.8500,
-            ],
-            'city_kropyvnytskyi' => [
-                'lat_min' => 48.4000,
-                'lat_max' => 48.6500,
-                'lan_min' => 32.0500,
-                'lan_max' => 32.4500,
-            ],
-            'city_mykolaiv' => [
-                'lat_min' => 46.8000,
-                'lat_max' => 47.1000,
-                'lan_min' => 31.8000,
-                'lan_max' => 32.3000,
-            ],
-            'city_chernivtsi' => [
-                'lat_min' => 48.2000,
-                'lat_max' => 48.4000,
-                'lan_min' => 25.7500,
-                'lan_max' => 26.1500,
-            ],
-            'city_lutsk' => [
-                'lat_min' => 50.6500,
-                'lat_max' => 50.9000,
-                'lan_min' => 25.1500,
-                'lan_max' => 25.5500,
-            ],
-        ];
+        Log::debug("findCityJson: lat=$startLat, lon=$startLan");
+        $city = $this->findCity($startLat, $startLan);
 
-
-
-        foreach ($cities as $city => $coords) {
-            if ($startLat >= $coords['lat_min'] && $startLat <= $coords['lat_max'] &&
-                $startLan >= $coords['lan_min'] && $startLan <= $coords['lan_max']) {
-                return response()->json(['city' => $city]); // Используем Response в Laravel
-            }
-        }
-
-        return response()->json(['city' => "all"]); // Если город не найден
-
+        return response()->json(['city' => $city]);
     }
     /**
      * @throws \\Exception
