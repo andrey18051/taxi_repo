@@ -6829,21 +6829,12 @@ class UniversalAndroidFunctionController extends Controller
             Log::info("canceledNoServerCity: автоотмена не применяется для города {$order->city}");
             return false;
         }
-        // Заданное время
-        $created_at = $order->created_at;
+        $current_time_timestamp = time();
+        $deadlineTimestamp = (new \App\Services\OrderAutoCancelService)->getAutoCancelDeadlineTimestamp($order);
 
-        // Текущие дата и время
-        $current_time = date('Y-m-d H:i:s');
+        Log::debug("canceledNoServerCity: deadline={$deadlineTimestamp} now={$current_time_timestamp}");
 
-        // Преобразование строковых дат во временные метки
-        $created_at_timestamp = strtotime($created_at);
-        $current_time_timestamp = strtotime($current_time);
-
-        $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
-        Log::debug("canceledNoServerCity:  $delayMinutes  ");
-        // Проверка, прошла ли одна минута
-
-        if (($current_time_timestamp - $created_at_timestamp) >= $delayMinutes * 60) {
+        if ($current_time_timestamp >= $deadlineTimestamp) {
             if ($order->auto !== null) {
                 Log::info("AutoCancelJob: авто уже назначено, отмена не требуется (uid {$uid})");
                 return false;

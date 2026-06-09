@@ -9473,14 +9473,12 @@ class AndroidTestOSMController extends Controller
                     }
 
                     Log::debug("AutoCancelJob payment_type:  $payment_type");
-                    if ($payment_type == 0) {
+                    if ($payment_type == 0 && !(new \App\Services\OrderAutoCancelService)->hasScheduledRequiredTime($required_time)) {
                         $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
                         Log::debug("AutoCancelJob:  $delayMinutes  ");
                         dispatch(new AutoCancelJob($response_arr['dispatching_order_uid']))
                             ->delay(now()->addMinutes($delayMinutes))
                             ->onQueue('low');
-
-
                     }
 
 
@@ -10325,14 +10323,12 @@ class AndroidTestOSMController extends Controller
                     }
 
                     Log::debug("AutoCancelJob payment_type:  $payment_type");
-                    if ($payment_type == 0) {
+                    if ($payment_type == 0 && !(new \App\Services\OrderAutoCancelService)->hasScheduledRequiredTime($required_time)) {
                         $delayMinutes = config('orders.auto_cancel_delay_minutes', 15);
                         Log::debug("AutoCancelJob:  $delayMinutes  ");
                         dispatch(new AutoCancelJob($response_arr['dispatching_order_uid']))
                             ->delay(now()->addMinutes($delayMinutes))
                             ->onQueue('low');
-
-
                     }
 
 
