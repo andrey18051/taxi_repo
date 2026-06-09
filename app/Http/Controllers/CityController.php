@@ -420,6 +420,10 @@ class CityController extends Controller
     }
     public function maxPayValueApp($cityApp, $app): array
     {
+        // Legacy PAS typo: Cyrillic "С" instead of Latin "C" in Chernivtsi.
+        if ($cityApp === 'Сhernivtsi') {
+            $cityApp = 'Chernivtsi';
+        }
 
         switch ($cityApp) {
             case "Lviv":
