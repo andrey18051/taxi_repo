@@ -247,6 +247,9 @@ class CardsController extends Controller
         $pay_system
     ): \Illuminate\Http\JsonResponse {
         $user = User::where('email', $email)->first();
+        if (!$user) {
+            return response()->json(['cards' => []]);
+        }
 
         switch ($city) {
             case "Lviv":
@@ -300,23 +303,23 @@ class CardsController extends Controller
                     $rectokenLifetimeString = $card->rectoken_lifetime;
                     $rectokenLifetimeDateTime = DateTime::createFromFormat('d.m.Y H:i:s', $rectokenLifetimeString);
 
-                    $cardData = [
-                        'masked_card' => $card->masked_card,
-                        'card_type' => $card->card_type,
-                        'bank_name' => $card->bank_name,
-                        'merchant' => $card->merchant,
-                        'rectoken' => $card->id,
-                        'active' => $card->active
-                    ];
-
                     if ($rectokenLifetimeDateTime instanceof DateTime) {
                         $currentTime = new DateTime();
 
                         if ($rectokenLifetimeDateTime < $currentTime) {
                             $card->delete();
+                            continue;
                         }
                     }
-                    $response[] = $cardData;
+
+                    $response[] = [
+                        'masked_card' => $card->masked_card,
+                        'card_type' => $card->card_type,
+                        'bank_name' => $card->bank_name,
+                        'merchant' => $card->merchant,
+                        'rectoken' => $card->id,
+                        'active' => $card->active ? '1' : '0',
+                    ];
                 }
             }
         }
@@ -326,41 +329,27 @@ class CardsController extends Controller
 
     public function deleteCardToken($id): array
     {
-        // Найти карту по ID
         $card = Card::find($id);
 
         if (!$card) {
             return ["result" => "error", "message" => "Card not found"];
         }
 
-        $user_id = $card->user_id; // Сохраняем ID пользователя
+        $user_id = $card->user_id;
         $application = $card->app;
+        $merchant = $card->merchant;
+        $wasActive = $card->active;
 
-        $userCards = Card::where("user_id", $user_id)->get();
-        foreach ($userCards as $value) {
-            if (
-                $value->masked_card == $card->masked_card &&
-                $value->app == $card->app
-            ) {
-                $active = $value->active;
-                $merchant = $value->merchant;
+        $card->delete();
 
-                $value->delete(); // Удаляем карту
-                if($active)
-                {
-                    // Если удаляемая карта была активной, назначаем новую активную карту
-                    self::setActiveCardAfterDelete(
-                        $merchant,
-                        $user_id,
-                        $id,
-                        $application
-                    );
-                }
-
-            }
+        if ($wasActive) {
+            self::setActiveCardAfterDelete(
+                $merchant,
+                $user_id,
+                $id,
+                $application
+            );
         }
-
-
 
         return ["result" => "ok"];
     }
