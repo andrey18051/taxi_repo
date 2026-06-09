@@ -1,5 +1,5 @@
 ---
-description: PAS — собирать release перед коммитом/версией
+description: PAS — unit-тесты и release-сборка перед коммитом/версией
 alwaysApply: true
 ---
 
@@ -7,29 +7,33 @@ alwaysApply: true
 
 Перед **любым** коммитом с изменениями в `app/src/**` (Java/Kotlin/resources/manifest):
 
-1. Из **корня PAS-проекта** выполни release-сборку:
+1. Из **корня PAS-проекта** выполни unit-тесты и release-сборку:
 
 ```bat
+gradlew.bat testDebugUnitTest --no-daemon
 gradlew.bat assembleRelease --no-daemon
 ```
 
-2. Дождись **BUILD SUCCESSFUL**. При ошибке компиляции — исправь код, **не** коммить и **не** запускай `run_version_update.bat`.
+2. Дождись **BUILD SUCCESSFUL** на обоих шагах. При ошибке — исправь код, **не** коммить и **не** запускай `run_version_update.bat`.
 
-3. Только после успешной сборки — `app\run_version_update.bat` (или другой коммит, если пользователь просит без bump версии).
+3. `app\run_version_update.bat` (`git_commit.ps1`) **сам** запускает `testDebugUnitTest` и `assembleRelease` **до** bump версии. Ручной прогон нужен при обычном коммите кода без bump.
 
 ## Если локально падает только подпись APK
 
-Keystore может быть недоступен на dev-машине. Минимальная проверка перед коммитом:
+Keystore может быть недоступен на dev-машине. `git_commit.ps1` автоматически пробует fallback:
 
 ```bat
 gradlew.bat compileReleaseJavaWithJavac --no-daemon
 ```
 
-Это повторяет шаг CI, на котором упала сборка 1.1004 (`FinishSeparateFragment`).
+## CI
+
+- Push/PR в `master` — workflow `ci.yml` → `testDebugUnitTest`
+- Push тега — `build-and-publish.yml` → `testDebugUnitTest`, затем `bundleRelease`
 
 ## Мульти-PAS
 
-При одинаковых правках в PAS_1–PAS_4 — собери **каждый** затронутый репозиторий отдельно перед его `run_version_update.bat`.
+При одинаковых правках в PAS_1–PAS_4 — проверь **каждый** затронутый репозиторий отдельно перед его `run_version_update.bat`.
 
 ## Внутренние классы Java
 
