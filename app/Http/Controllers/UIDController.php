@@ -959,15 +959,25 @@ class UIDController extends Controller
 //                ->whereNotNull("to_lat")
 //                ->whereNotNull("to_lng")
                 ->where("comment", $application)
-                ->where('created_at', '>=', $historySince)
+                ->where(function ($query) use ($historySince) {
+                    $query->where('created_at', '>=', $historySince)
+                        ->orWhere(function ($q) {
+                            $q->where('reservation', 1)
+                                ->whereNotNull('required_time');
+                        });
+                })
                 ->orderBy("created_at", "desc")
                 ->get();
+
+            if ($orderHistory->isEmpty() && !$order->isEmpty()) {
+                $orderHistory = $order;
+            }
 
 //            $controller = new MemoryOrderChangeController();
 //            $orderHistory = $controller->getFilteredOrders($orderHistory);
 
 
-            if ($orderHistory) {
+            if ($orderHistory->isNotEmpty()) {
                 $i = 0;
                 $orderUpdate = $orderHistory->toArray();
                 Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderUpdate);
