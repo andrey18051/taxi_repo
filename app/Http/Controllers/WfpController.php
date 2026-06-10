@@ -2416,6 +2416,164 @@ class WfpController extends Controller
         }
     }
 
+    public function googlePayConfig($application, $city)
+    {
+        $merchant = $this->resolveWfpMerchant($application, $city);
+        if ($merchant === null) {
+            return response()->json(['error' => 'merchant_not_found'], 404);
+        }
+
+        return response()->json([
+            'merchantAccount' => $merchant->wfp_merchantAccount,
+            'gateway' => 'wayforpay',
+        ]);
+    }
+
+    public function googlePayCharge(\Illuminate\Http\Request $request)
+    {
+        $application = $request->input('application');
+        $city = $request->input('city');
+        $orderReference = $request->input('orderReference');
+        $amount = $request->input('amount');
+        $productName = $request->input('productName');
+        $clientEmail = $request->input('clientEmail');
+        $clientPhone = $request->input('clientPhone');
+        $paymentDataJson = $request->input('paymentDataJson');
+
+        if (!$application || !$city || !$orderReference || !$amount || !$paymentDataJson) {
+            return response()->json(['error' => 'missing_required_fields'], 400);
+        }
+
+        $paymentData = json_decode($paymentDataJson, true);
+        if (!is_array($paymentData)) {
+            return response()->json(['error' => 'invalid_payment_data'], 400);
+        }
+
+        $paymentMethodData = $paymentData['paymentMethodData'] ?? null;
+        $tokenizationData = is_array($paymentMethodData) ? ($paymentMethodData['tokenizationData'] ?? null) : null;
+        $gpToken = is_array($tokenizationData) ? ($tokenizationData['token'] ?? null) : null;
+        if (!$gpToken) {
+            return response()->json(['error' => 'missing_gp_token'], 400);
+        }
+
+        $merchant = $this->resolveWfpMerchant($application, $city);
+        if ($merchant === null) {
+            return response()->json(['error' => 'merchant_not_found'], 404);
+        }
+
+        $merchantAccount = $merchant->wfp_merchantAccount;
+        $secretKey = $merchant->wfp_merchantSecretKey;
+        $resolvedCity = $this->resolveWfpCityName($city);
+
+        if ($resolvedCity != "OdessaTest") {
+            $serviceUrl = "https://m.easy-order-taxi.site/wfp/serviceUrl/$application";
+        } else {
+            $serviceUrl = "https://t.easy-order-taxi.site/wfp/serviceUrl/$application";
+        }
+
+        $orderDate = strtotime(date('Y-m-d H:i:s'));
+        $pmInfo = is_array($paymentMethodData) ? ($paymentMethodData['info'] ?? []) : [];
+        $billingAddress = is_array($pmInfo) ? ($pmInfo['billingAddress'] ?? []) : [];
+        $cardHolder = is_array($billingAddress) && !empty($billingAddress['name'])
+            ? $billingAddress['name']
+            : 'GOOGLE PAY';
+
+        $signatureParams = [
+            "merchantAccount" => $merchantAccount,
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1],
+        ];
+
+        $params = [
+            "transactionType" => "CHARGE",
+            "merchantAccount" => $merchantAccount,
+            "merchantAuthType" => "SimpleSignature",
+            "merchantDomainName" => "m.easy-order-taxi.site",
+            "merchantTransactionType" => "AUTH",
+            "merchantTransactionSecureType" => "NON3DS",
+            "merchantSignature" => self::generateHmacMd5Signature($signatureParams, $secretKey, "charge"),
+            "apiVersion" => 1,
+            "orderReference" => $orderReference,
+            "orderDate" => $orderDate,
+            "amount" => $amount,
+            "currency" => "UAH",
+            "productName" => [$productName],
+            "productPrice" => [$amount],
+            "productCount" => [1],
+            "clientFirstName" => "Bulba",
+            "clientLastName" => "Taras",
+            "clientEmail" => $clientEmail,
+            "clientPhone" => $clientPhone,
+            "clientCountry" => "UKR",
+            "serviceUrl" => $serviceUrl,
+            "notifyMethod" => "bot",
+            "cardHolder" => $cardHolder,
+            "gpApiVersionMinor" => $paymentData['apiVersionMinor'] ?? 0,
+            "gpApiVersion" => $paymentData['apiVersion'] ?? 2,
+            "gpPMDescription" => $paymentMethodData['description'] ?? '',
+            "gpPMType" => $paymentMethodData['type'] ?? 'CARD',
+            "gpPMTCardNetwork" => $pmInfo['cardNetwork'] ?? '',
+            "gpPMTCardDetails" => $pmInfo['cardDetails'] ?? '',
+            "gpTokenizationType" => $tokenizationData['type'] ?? 'PAYMENT_GATEWAY',
+            "gpToken" => $gpToken,
+            "holdTimeout" => 1000000,
+        ];
+
+        $response = Http::post('https://api.wayforpay.com/api', $params);
+        Log::debug("GOOGLE_PAY_CHARGE", ['orderReference' => $orderReference, 'response' => $response->body()]);
+
+        return response($response->body(), $response->status())
+            ->header('Content-Type', 'application/json');
+    }
+
+    private function resolveWfpCityName($city)
+    {
+        switch ($city) {
+            case "Lviv":
+            case "Ivano_frankivsk":
+            case "Vinnytsia":
+            case "Poltava":
+            case "Sumy":
+            case "Kharkiv":
+            case "Chernihiv":
+            case "Rivne":
+            case "Ternopil":
+            case "Khmelnytskyi":
+            case "Zakarpattya":
+            case "Zhytomyr":
+            case "Kropyvnytskyi":
+            case "Mykolaiv":
+            case "Chernivtsi":
+            case "Lutsk":
+                return "OdessaTest";
+            case "foreign countries":
+                return "Kyiv City";
+            default:
+                return $city;
+        }
+    }
+
+    private function resolveWfpMerchant($application, $city)
+    {
+        $city = $this->resolveWfpCityName($city);
+        switch ($application) {
+            case "PAS1":
+                return City_PAS1::where("name", $city)->first();
+            case "PAS2":
+                return City_PAS2::where("name", $city)->first();
+            case "PAS4":
+                return City_PAS4::where("name", $city)->first();
+            default:
+                return City_PAS5::where("name", $city)->first();
+        }
+    }
+
     /**
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException

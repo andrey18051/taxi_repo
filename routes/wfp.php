@@ -17,6 +17,8 @@ use App\Http\Controllers\WfpController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/createInvoice/{application}/{city}/{orderReference}/{amount}/{language}/{productName}/{clientEmail}/{clientPhone}', [WfpController::class, 'createInvoice'])->name('createInvoice');
+Route::get('/googlePayConfig/{application}/{city}', [WfpController::class, 'googlePayConfig'])->name('googlePayConfig');
+Route::post('/googlePayCharge', [WfpController::class, 'googlePayCharge'])->name('googlePayCharge');
 Route::get('/charge/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/{recToken}', [WfpController::class, 'charge'])->name('charge');
 
 Route::get('/chargeActiveToken/{application}/{city}/{orderReference}/{amount}/{productName}/{clientEmail}/{clientPhone}/', [WfpController::class, 'chargeActiveToken'])->name('chargeActiveToken');
