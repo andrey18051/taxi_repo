@@ -1,0 +1,46 @@
+# Google Pay — план оплаты (PAS)
+
+Зафиксированные решения продукта. Реализация списания — **после** UI выбора способа в PAS_4.
+
+## Модель
+
+| | Карта (`wfp_payment`) | Google Pay (`google_pay_payment`) |
+|---|---|---|
+| Привязка | WebView WayForPay → `rectoken` | Не нужна |
+| Оплата | Холд по `rectoken` | Каждый раз: нативный GPay → токен → `POST /wfp/googlePayCharge` |
+| Привязка через GPay | Нет (только WebView) | Нет |
+
+## Когда показывать GPay
+
+1. **При нажатии «Заказать»** — обязательная авторизация GPay до отправки заказа (если выбран `google_pay_payment`).
+2. **При смене способа на Google Pay в нижней шторке** (`MyBottomSheetBonusFragment`) — тоже запускать GPay (подтверждение/холд на сумму заказа), не только запись в БД.
+
+## Доплата по поездке
+
+- **Второй GPay** на разницу суммы (как отдельный charge), не fallback на карту.
+
+## Города и права
+
+- GPay доступен **там же**, где WFP-карта: Firestore (город) + `userPayPermissions[1]`.
+- В UI карта и GPay включаются/отключаются **вместе** (`setCardAndGooglePayEnabled`).
+
+## Уже в коде (инфраструктура)
+
+- Android: `WfpGooglePayHelper`, `GooglePayConfigService`, `GooglePayChargeService`
+- Backend: `WfpController::googlePayConfig`, `googlePayCharge` (WayForPay CHARGE + `gpToken`, hold)
+
+## Этапы
+
+1. **UI выбора** — `CardFragment`, шторка заказа, `PaymentTypeHelper` (`google_pay_payment` в БД). Без списания.
+2. **Оплата при заказе + при смене в шторке** — этап 2 (следующая разработка).
+3. **Активный заказ** — доплата вторым GPay; ветки в `FinishSeparateFragment`, `MyBottomSheetAddCostFragment`, Pusher/Centrifugo.
+4. **Выкат** — сначала PAS_4, после проверки PAS_1–3.
+
+## Деплой
+
+- Версии с **только UI** GPay можно выпускать через `run_version_update.bat`; **продакшен-списание GPay** не включать до завершения этапов 2–3 и тестов на устройстве.
+- `WalletConstants.ENVIRONMENT_PRODUCTION` — только когда этап 2 готов и согласован тест на реальном GPay.
+
+## Синхронизация
+
+Файл идентичен во всех репозиториях workspace (см. `cursor-rules-sync.mdc`).
