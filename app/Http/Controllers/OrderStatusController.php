@@ -1962,18 +1962,19 @@ class OrderStatusController extends Controller
 
     /**
      * Bonus/card leg in uid_history: canceled in dispatch (execution_status or close_reason).
+     * Canceled with close_reason -1 is a fork transition, not a real cancel (Oleg / Excel matrix).
      */
     public static function isDispatchOrderCanceled(?array $order): bool
     {
         if ($order === null || $order === []) {
             return false;
         }
-        if (($order['execution_status'] ?? '') === 'Canceled') {
-            return true;
-        }
         $closeReason = $order['close_reason'] ?? -1;
         if ($closeReason === -1 || $closeReason === '-1' || $closeReason === 0 || $closeReason === '0') {
             return false;
+        }
+        if (($order['execution_status'] ?? '') === 'Canceled') {
+            return true;
         }
 
         return true;
