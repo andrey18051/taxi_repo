@@ -1,0 +1,296 @@
+[
+  {
+    "nal": "SearchesForCar",
+    "card": "SearchesForCar",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "SearchesForCar",
+    "card": "WaitingCarSearch",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "SearchesForCar",
+    "card": "CarFound",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "SearchesForCar",
+    "card": "Running",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "SearchesForCar",
+    "card": "Canceled",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "SearchesForCar",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "SearchesForCar",
+    "card": "CostCalculation",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "SearchesForCar",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "WaitingCarSearch",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "CarFound",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "Running",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "Canceled",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "WaitingCarSearch",
+    "card": "CostCalculation",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "CarFound",
+    "card": "SearchesForCar",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "CarFound",
+    "card": "WaitingCarSearch",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "CarFound",
+    "card": "CarFound",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "CarFound",
+    "card": "Running",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "CarFound",
+    "card": "Canceled",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "CarFound",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "CarFound",
+    "card": "CostCalculation",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "Running",
+    "card": "SearchesForCar",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "Running",
+    "card": "WaitingCarSearch",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "Running",
+    "card": "CarFound",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "Running",
+    "card": "Running",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "Running",
+    "card": "Canceled",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "Running",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "Running",
+    "card": "CostCalculation",
+    "action": "Авто найдено",
+    "leg": "nal"
+  },
+  {
+    "nal": "Canceled",
+    "card": "SearchesForCar",
+    "action": "Поиск авто",
+    "leg": "card"
+  },
+  {
+    "nal": "Canceled",
+    "card": "WaitingCarSearch",
+    "action": "Поиск авто",
+    "leg": "card"
+  },
+  {
+    "nal": "Canceled",
+    "card": "CarFound",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "Canceled",
+    "card": "Running",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "Canceled",
+    "card": "Canceled",
+    "action": "Поиск авто",
+    "leg": "card"
+  },
+  {
+    "nal": "Canceled",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "Canceled",
+    "card": "CostCalculation",
+    "action": "Поиск авто",
+    "leg": "nal"
+  },
+  {
+    "nal": "Executed",
+    "card": "SearchesForCar",
+    "action": "Заказ выполнен",
+    "leg": "nal"
+  },
+  {
+    "nal": "Executed",
+    "card": "WaitingCarSearch",
+    "action": "Заказ выполнен",
+    "leg": "nal"
+  },
+  {
+    "nal": "Executed",
+    "card": "CarFound",
+    "action": "Заказ выполнен",
+    "leg": "nal"
+  },
+  {
+    "nal": "Executed",
+    "card": "Running",
+    "action": "Заказ выполнен",
+    "leg": "nal"
+  },
+  {
+    "nal": "Executed",
+    "card": "Canceled",
+    "action": "Заказ снят",
+    "leg": "card"
+  },
+  {
+    "nal": "Executed",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "Executed",
+    "card": "CostCalculation",
+    "action": "Заказ выполнен",
+    "leg": "nal"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "SearchesForCar",
+    "action": "Поиск авто",
+    "leg": "card"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "WaitingCarSearch",
+    "action": "Поиск авто",
+    "leg": "card"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "CarFound",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "Running",
+    "action": "Авто найдено",
+    "leg": "card"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "Canceled",
+    "action": "Поиск авто",
+    "leg": "card"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "Executed",
+    "action": "Заказ выполнен",
+    "leg": "card"
+  },
+  {
+    "nal": "CostCalculation",
+    "card": "CostCalculation",
+    "action": "Поиск авто",
+    "leg": "card"
+  }
+]

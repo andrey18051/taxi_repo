@@ -1,0 +1,54 @@
+[
+  {
+    "bonus": "SearchesForCar",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "SearchesForCar",
+    "double_options": [
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "отмена",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "SearchesForCar",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "востановление"
+  },
+  {
+    "bonus": "WaitingCarSearch",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "WaitingCarSearch",
+    "double_options": [
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "отмена",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "SearchesForCar"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос"
+  }
+]

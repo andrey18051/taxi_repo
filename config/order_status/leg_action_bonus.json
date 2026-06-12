@@ -1,0 +1,394 @@
+[
+  {
+    "bonus": "SearchesForCar",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "SearchesForCar",
+    "double_options": [
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "отмена",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "SearchesForCar",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "востановление"
+  },
+  {
+    "bonus": "WaitingCarSearch",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "WaitingCarSearch",
+    "double_options": [
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "отмена",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "WaitingCarSearch",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "востановление"
+  },
+  {
+    "bonus": "CarFound",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch",
+      "CarFound"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "отмена"
+  },
+  {
+    "bonus": "CarFound",
+    "double_options": [
+      "Running"
+    ],
+    "bonus_action": "отмена",
+    "double_action": "опрос"
+  },
+  {
+    "bonus": "CarFound",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "Running",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch",
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "отмена"
+  },
+  {
+    "bonus": "Running",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "SearchesForCar"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ]
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "SearchesForCar"
+    ],
+    "bonus_action": "востановление",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "CarFound",
+      "Running",
+      "Canceled",
+      "Executed",
+      "CostCalculation"
+    ]
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ]
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "востановление",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "CarFound",
+      "Running",
+      "Canceled",
+      "Executed",
+      "CostCalculation"
+    ]
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "CarFound",
+      "Running",
+      "Canceled",
+      "Executed",
+      "CostCalculation"
+    ]
+  },
+  {
+    "bonus": "Canceled",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "CarFound",
+      "Running",
+      "Canceled",
+      "Executed",
+      "CostCalculation"
+    ]
+  },
+  {
+    "bonus": "Executed",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch",
+      "CarFound",
+      "Running"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "отмена"
+  },
+  {
+    "bonus": "Executed",
+    "double_options": [
+      "CostCalculation"
+    ],
+    "bonus_action": "опрос",
+    "double_action": "ничего"
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "SearchesForCar",
+      "WaitingCarSearch"
+    ],
+    "bonus_action": "востановление",
+    "double_action": "опрос"
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "SearchesForCar"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "WaitingCarSearch"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "CarFound"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "Running"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "Canceled"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "Executed"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос",
+    "last_bonus_options": [
+      "CostCalculation"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "SearchesForCar"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "WaitingCarSearch"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "CarFound"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "Running"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "Canceled"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "Executed"
+    ]
+  },
+  {
+    "bonus": "CostCalculation",
+    "double_options": [
+      "CarFound",
+      "Running",
+      "CostCalculation"
+    ],
+    "bonus_action": "ничего",
+    "double_action": "ничего",
+    "last_bonus_options": [
+      "CostCalculation"
+    ]
+  }
+]
