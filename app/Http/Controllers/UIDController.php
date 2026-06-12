@@ -935,6 +935,9 @@ class UIDController extends Controller
                 });
                 if ($ordersForReview->isNotEmpty()) {
                     self::UIDStatusReview($ordersForReview);
+                    foreach ($ordersForReview as $orderRowForSync) {
+                        self::syncOrderStatusForHistory($orderRowForSync);
+                    }
                 }
 
 
@@ -979,33 +982,31 @@ class UIDController extends Controller
 
             if ($orderHistory->isNotEmpty()) {
                 $i = 0;
-                $orderUpdate = $orderHistory->toArray();
-                Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderUpdate);
+                Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderHistory->toArray());
                 date_default_timezone_set('Europe/Kiev');
 
-                foreach ($orderUpdate as $value) {
-                    if (!empty($value['cancel_timestamp'])
-                        || in_array((string) ($value['closeReason'] ?? ''), ['0', '1', '8', '9'], true)) {
+                foreach ($orderHistory as $orderRow) {
+                    $orderRow->refresh();
+                    if (!empty($orderRow->cancel_timestamp)
+                        || in_array((string) $orderRow->closeReason, ['0', '1', '8', '9'], true)) {
                         continue;
                     }
-                    $uid_history = Uid_history::where("uid_bonusOrderHold", $value['dispatching_order_uid'])->first();
-//                    Log::debug("uid_history webordersCancelDouble :", $uid_history->toArray());
-                    $storedData = $value["auto"];
+                    $uid_history = Uid_history::where("uid_bonusOrderHold", $orderRow->dispatching_order_uid)->first();
+                    $storedData = $orderRow->auto;
 
                     $dataDriver = json_decode($storedData, true);
 
                     if (isset($dataDriver["uid"]) && $dataDriver["uid"] !== null) {
-                        $storedData = $value["auto"];
+                        $storedData = $orderRow->auto;
 
                         $dataDriver = json_decode($storedData, true);
-//                            $name = $dataDriver["name"];
                         $color = $dataDriver["color"];
                         $brand = $dataDriver["brand"];
                         $model = $dataDriver["model"];
                         $number = $dataDriver["number"];
                         $auto = "Авто $number, цвет $color  $brand $model";
                     } else {
-                        $auto =  $value["auto"];
+                        $auto = $orderRow->auto;
                     }
                     if ($uid_history) {
                         $dispatchingOrderUidDouble = $uid_history->uid_doubleOrder;
@@ -1013,33 +1014,38 @@ class UIDController extends Controller
                     } else {
                         $dispatchingOrderUidDouble = " ";
                     }
-                    $cost = $value["web_cost"];
-                    if ($value["client_cost"] !=null) {
-                        $cost = $value["client_cost"];
+                    $cost = $orderRow->web_cost;
+                    if ($orderRow->client_cost != null) {
+                        $cost = $orderRow->client_cost;
                     }
-                    if ($value["finish_cost"] !=null) {
-                        $cost = $value["finish_cost"];
+                    if ($orderRow->finish_cost != null) {
+                        $cost = $orderRow->finish_cost;
+                    }
+                    $requiredTimeFormatted = null;
+                    if (!empty($orderRow->required_time)) {
+                        $requiredTimeFormatted = date('d.m.Y H:i', strtotime($orderRow->required_time));
                     }
                     $response[] = [
-                        'uid' => $value["dispatching_order_uid"],
-                        'routefrom' => $value["routefrom"],
-                        'routefromnumber' => $value["routefromnumber"],
-                        'startLat' => $value["startLat"],
-                        'startLan' => $value["startLan"],
-                        'routeto' => $value["routeto"],
-                        'routetonumber' => $value["routetonumber"],
-                        'to_lat' => $value["to_lat"],
-                        'to_lng' => $value["to_lng"],
+                        'uid' => $orderRow->dispatching_order_uid,
+                        'routefrom' => $orderRow->routefrom,
+                        'routefromnumber' => $orderRow->routefromnumber,
+                        'startLat' => $orderRow->startLat,
+                        'startLan' => $orderRow->startLan,
+                        'routeto' => $orderRow->routeto,
+                        'routetonumber' => $orderRow->routetonumber,
+                        'to_lat' => $orderRow->to_lat,
+                        'to_lng' => $orderRow->to_lng,
                         'web_cost' => $cost,
-                        'closeReason' => $value["closeReason"],
+                        'closeReason' => $orderRow->closeReason,
+                        'execution_status' => self::resolveExecutionStatusForOrder($orderRow),
                         'auto' => $auto,
-                        'flexible_tariff_name' => $value["flexible_tariff_name"],
-                        'comment_info' => $value["comment_info"],
-                        'extra_charge_codes' => $value["extra_charge_codes"],
-                        'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
+                        'flexible_tariff_name' => $orderRow->flexible_tariff_name,
+                        'comment_info' => $orderRow->comment_info,
+                        'extra_charge_codes' => $orderRow->extra_charge_codes,
+                        'required_time' => $requiredTimeFormatted,
                         'dispatching_order_uid_Double' => $dispatchingOrderUidDouble,
-                        'pay_method' => $value["pay_system"],
-                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                        'pay_method' => $orderRow->pay_system,
+                        'created_at' => date('d.m.Y H:i:s', strtotime($orderRow->created_at)),
                     ];
 
                     $i++;
@@ -1776,6 +1782,92 @@ class UIDController extends Controller
 
 
 
+    }
+
+    private static function syncOrderStatusForHistory(Orderweb $orderRow): void
+    {
+        $uid = $orderRow->dispatching_order_uid;
+        if (!$uid) {
+            return;
+        }
+
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        if ($uid_history) {
+            (new UIDController())->UIDStatusReviewCard($uid);
+            return;
+        }
+
+        if (in_array((string) $orderRow->closeReason, ['100', '101', '102', '103', '104'], true)) {
+            return;
+        }
+
+        $connectAPI = $orderRow->server;
+        if (!$connectAPI) {
+            return;
+        }
+
+        (new UIDController())->closeReasonUIDStatus(
+            $uid,
+            $connectAPI,
+            (new UIDController())->autorization($connectAPI),
+            $orderRow->comment
+        );
+    }
+
+    public static function resolveExecutionStatusForOrder(Orderweb $orderRow): string
+    {
+        $uid = $orderRow->dispatching_order_uid;
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        if (!$uid_history) {
+            $uid_history = Uid_history::where('uid_doubleOrder', $uid)->first();
+        }
+
+        if ($uid_history) {
+            if ($uid_history->cancel === '1' || $uid_history->cancel === 1) {
+                return 'Canceled';
+            }
+
+            $nalOrder = json_decode($uid_history->double_status, true) ?: [];
+            $cardOrder = json_decode($uid_history->bonus_status, true) ?: [];
+
+            if (OrderStatusController::isDispatchOrderCanceled($cardOrder)
+                || OrderStatusController::isDispatchOrderCanceled($nalOrder)) {
+                return 'Canceled';
+            }
+
+            $states = [
+                $nalOrder['execution_status'] ?? '',
+                $cardOrder['execution_status'] ?? '',
+            ];
+            foreach (['Running', 'CarFound', 'WaitingCarSearch', 'SearchesForCar'] as $preferred) {
+                foreach ($states as $state) {
+                    if ($state === $preferred) {
+                        return $preferred;
+                    }
+                }
+            }
+        }
+
+        if (!empty($orderRow->cancel_timestamp)) {
+            return 'Canceled';
+        }
+
+        $closeReason = (string) $orderRow->closeReason;
+        if (in_array($closeReason, ['1', '2', '3', '4', '5', '6', '7', '9'], true)) {
+            return 'Canceled';
+        }
+        if (in_array($closeReason, ['101', '102', '103', '104'], true)) {
+            return 'CarFound';
+        }
+        if (in_array($closeReason, ['0', '8'], true)) {
+            return 'Executed';
+        }
+
+        if ((int) ($orderRow->reservation ?? 0) === 1 && !empty($orderRow->required_time)) {
+            return 'WaitingCarSearch';
+        }
+
+        return 'SearchesForCar';
     }
 
     public function autorization($connectApi)
