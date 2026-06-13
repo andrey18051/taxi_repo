@@ -9,6 +9,7 @@ use App\Models\City_PAS4;
 use App\Models\City_PAS5;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
+use App\Support\KievDateTimeFormatter;
 use Carbon\Carbon;
 use DateInterval;
 use DateTime;
@@ -217,7 +218,7 @@ class UIDController extends Controller
                         'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $value["auto"],
-                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                        'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]),
                     ];
                 } else {
 //                    if ($value["closeReason"] == "0" ) {
@@ -234,7 +235,7 @@ class UIDController extends Controller
                             'web_cost' => $value["web_cost"],
                             'closeReason' => $value["closeReason"],
                             'auto' => $value["auto"],
-                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                            'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]),
                         ];
                     }
                 }
@@ -622,8 +623,8 @@ class UIDController extends Controller
                     }
 
                     // Форматирование дат
-                    $requiredTime = !empty($value["required_time"]) ? date('d.m.Y H:i', strtotime($value["required_time"])) : '';
-                    $createdAt = !empty($value["created_at"]) ? date('d.m.Y H:i:s', strtotime($value["created_at"])) : '';
+                    $requiredTime = KievDateTimeFormatter::formatRequiredTime($value["required_time"] ?? null);
+                    $createdAt = KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"] ?? null);
 
                     if ($i < 10) {
                         $response[] = [
@@ -787,10 +788,10 @@ class UIDController extends Controller
                         'web_cost' => $value["web_cost"],
                         'closeReason' => $value["closeReason"],
                         'auto' => $auto,
-                        'required_time' => date('d.m.Y H:i', strtotime($value["required_time"])),
+                        'required_time' => KievDateTimeFormatter::formatRequiredTime($value["required_time"] ?? null),
                         'dispatchingOrderUidDouble' => $dispatchingOrderUidDouble,
                         'pay_method' => $value["pay_system"],
-                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+                        'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]),
                     ];
 
                     $i++;
@@ -1021,10 +1022,7 @@ class UIDController extends Controller
                     if ($orderRow->finish_cost != null) {
                         $cost = $orderRow->finish_cost;
                     }
-                    $requiredTimeFormatted = null;
-                    if (!empty($orderRow->required_time)) {
-                        $requiredTimeFormatted = date('d.m.Y H:i', strtotime($orderRow->required_time));
-                    }
+                    $requiredTimeFormatted = KievDateTimeFormatter::formatRequiredTime($orderRow->required_time);
                     $response[] = [
                         'uid' => $orderRow->dispatching_order_uid,
                         'routefrom' => $orderRow->routefrom,
@@ -1045,7 +1043,7 @@ class UIDController extends Controller
                         'required_time' => $requiredTimeFormatted,
                         'dispatching_order_uid_Double' => $dispatchingOrderUidDouble,
                         'pay_method' => $orderRow->pay_system,
-                        'created_at' => date('d.m.Y H:i:s', strtotime($orderRow->created_at)),
+                        'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($orderRow->created_at),
                     ];
 
                     $i++;
@@ -1159,7 +1157,7 @@ class UIDController extends Controller
 //                        'web_cost' => $value["web_cost"],
 //                        'closeReason' => $value["closeReason"],
 //                        'auto' => $value["auto"],
-//                        'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+//                        'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]),
 //                    ];
 //                } else {
 ////                    if ($value["closeReason"] == "0" ) {
@@ -1176,7 +1174,7 @@ class UIDController extends Controller
 //                            'web_cost' => $value["web_cost"],
 //                            'closeReason' => $value["closeReason"],
 //                            'auto' => $value["auto"],
-//                            'created_at' => date('d.m.Y H:i:s', strtotime($value["created_at"])),
+//                            'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]),
 //                        ];
 //                    }
 //                }
