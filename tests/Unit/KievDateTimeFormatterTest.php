@@ -22,6 +22,14 @@ class KievDateTimeFormatterTest extends TestCase
         $this->assertSame('', KievDateTimeFormatter::formatOrderCreatedAt(''));
     }
 
+    public function test_formatOrderCreatedAt_passesThroughDisplayFormat(): void
+    {
+        $this->assertSame(
+            '13.06.2026 11:28:19',
+            KievDateTimeFormatter::formatOrderCreatedAt('13.06.2026 11:28:19')
+        );
+    }
+
     public function test_formatRequiredTime_formatsLocalPickupTime(): void
     {
         $this->assertSame(

@@ -142,7 +142,7 @@ class UIDController extends Controller
                     'routetonumber' => $value["routetonumber"],
                     'web_cost' => $value["web_cost"],
                     'closeReason' => $value["closeReason"],
-                    'created_at' => $value["created_at"],
+                    'created_at' => KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]),
                 ];
                 $i++;
             }
@@ -202,7 +202,6 @@ class UIDController extends Controller
             $i=0;
             $orderUpdate = $orderHistory->toArray();
             Log::debug("UIDStatusShowEmail orderUpdate", $orderUpdate);
-            date_default_timezone_set('Europe/Kiev');
 
             foreach ($orderUpdate as $value) {
                 if ($i < 5) {
@@ -577,8 +576,6 @@ class UIDController extends Controller
                     'first_record' => $orderUpdate[0] ?? 'empty'
                 ]);
 
-                date_default_timezone_set('Europe/Kiev');
-
                 foreach ($orderUpdate as $index => $value) {
                     Log::debug("🔧 Обработка заказа #{$index}", [
                         'order_id' => $value['id'] ?? 'unknown',
@@ -747,7 +744,6 @@ class UIDController extends Controller
                 $i=0;
                 $orderUpdate = $orderHistory->toArray();
                 Log::debug("UIDStatusShowEmailCancel orderUpdate", $orderUpdate);
-                date_default_timezone_set('Europe/Kiev');
 
                 foreach ($orderUpdate as $value) {
                     $uid_history = Uid_history::where("uid_bonusOrderHold", $value['id'])->first();
@@ -984,7 +980,6 @@ class UIDController extends Controller
             if ($orderHistory->isNotEmpty()) {
                 $i = 0;
                 Log::debug("UIDStatusShowEmailCancelApp orderUpdate", $orderHistory->toArray());
-                date_default_timezone_set('Europe/Kiev');
 
                 foreach ($orderHistory as $orderRow) {
                     $orderRow->refresh();
@@ -1250,14 +1245,7 @@ class UIDController extends Controller
                 }
 
 
-                date_default_timezone_set('Europe/Kiev');
-
-
-                $date = new DateTime($value["created_at"]);
-                $date->add(new DateInterval('PT3H'));
-
-                $formatted_date = $date->format('d.m.Y H:i:s');
-
+                $formatted_date = KievDateTimeFormatter::formatOrderCreatedAt($value["created_at"]);
 
                 $response[$i] = [
                     'id' => $value["id"],
