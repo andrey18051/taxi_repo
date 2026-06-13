@@ -5576,6 +5576,7 @@ class UniversalAndroidFunctionController extends Controller
 
         switch ($pay_system) {
             case "wfp_payment":
+            case "google_pay_payment":
                 $orderweb->wfp_order_id = $order_id;
                 self::wfpInvoice(
                     $order_id,
@@ -5615,6 +5616,7 @@ class UniversalAndroidFunctionController extends Controller
         }
         switch ($pay_system) {
             case "wfp_payment":
+            case "google_pay_payment":
                 $orderweb->wfp_order_id = $orderReference;
                 if ($uid !== null) {
                     self::wfpInvoice($orderReference, $cost, $uid);

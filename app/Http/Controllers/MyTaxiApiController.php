@@ -560,15 +560,17 @@ class MyTaxiApiController extends Controller
                 $pay_system = $params['pay_system'];
 
                 (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                (new WfpController)->chargeActiveToken(
-                    $application,
-                    $city,
-                    $orderReference,
-                    $amount,
-                    $productName,
-                    $clientEmail,
-                    $clientPhone
-                );
+                if ($pay_system === 'wfp_payment') {
+                    (new WfpController)->chargeActiveToken(
+                        $application,
+                        $city,
+                        $orderReference,
+                        $amount,
+                        $productName,
+                        $clientEmail,
+                        $clientPhone
+                    );
+                }
 
                 Log::debug("🔍 Поиск информации о транзакции в таблице WfpInvoice");
 

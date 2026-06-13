@@ -9962,7 +9962,8 @@ class AndroidTestOSMController extends Controller
             && ($userArr[2] == 'bonus_payment'
             || $userArr[2] == 'fondy_payment'
             || $userArr[2] == 'mono_payment'
-            || $userArr[2] == 'wfp_payment')
+            || $userArr[2] == 'wfp_payment'
+            || $userArr[2] == 'google_pay_payment')
         ) {
             $address = str_replace("http://", "", $connectAPI);
             $card_max_pay = CityController::cardPayServer($address, $application);
@@ -14997,7 +14998,8 @@ class AndroidTestOSMController extends Controller
             case 'fondy_payment':
             case 'mono_payment':
             case 'wfp_payment':
-                Log::info("Тип оплаты: '$payment'. Вход в ветку fondy/mono/wfp.");
+            case 'google_pay_payment':
+                Log::info("Тип оплаты: '$payment'. Вход в ветку fondy/mono/wfp/google_pay.");
                 $authorizationChoiceArr["payment_type"] = 1;
                 Log::info("Установлено \$authorizationChoiceArr['payment_type'] = 1.");
 
