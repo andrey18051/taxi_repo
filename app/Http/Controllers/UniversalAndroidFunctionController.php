@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\City\CityPaymentFlowResolver;
 use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderDuplicateHelper;
@@ -4857,6 +4858,14 @@ class UniversalAndroidFunctionController extends Controller
         );
 
         $order->server = $params['server'];
+
+        $application = $params['application']
+            ?? CityPaymentFlowResolver::applicationFromIdentificationId($identificationId);
+        $order->payment_flow_mode = CityPaymentFlowResolver::resolve(
+            $order->city,
+            $application,
+            $params['server'] ?? null
+        );
 
         $order->save();
 
