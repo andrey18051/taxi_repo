@@ -1146,6 +1146,25 @@ class OrderStatusController extends Controller
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
         if ($orderweb) {
+            $isCanceledOrderweb = $orderweb->cancel_timestamp !== null
+                || in_array((string) $orderweb->closeReason, ['1', '2', '3', '4', '5', '6', '7'], true);
+            if ($isCanceledOrderweb) {
+                Log::info('Exiting function: orderweb canceled', [
+                    'close_reason' => $orderweb->closeReason,
+                    'dispatching_order_uid' => $uid,
+                    'uid' => $uid,
+                    'action' => OrderStatusMessageResolver::ACTION_CANCELED,
+                ]);
+
+                return response()->json([
+                    'action' => OrderStatusMessageResolver::ACTION_CANCELED,
+                    'close_reason' => (int) $orderweb->closeReason,
+                    'dispatching_order_uid' => $uid,
+                    'uid' => $uid,
+                    'execution_status' => 'Canceled',
+                ]);
+            }
+
             // 0, 8, 9 — закрытие внешним API / диспетчеризацией («Выполнен»); 100–104 — внутренние этапы PAS
             if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
 

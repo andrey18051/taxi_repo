@@ -13143,8 +13143,25 @@ class AndroidTestOSMController extends Controller
                 self::updateTimestamp($orderweb->id);
                 $orderweb->auto = null;
                 $orderweb->closeReason = "1";
+                if ($orderweb->cancel_timestamp === null) {
+                    $orderweb->cancel_timestamp = now();
+                }
                 $orderweb->save();
                 Log::info('Orderweb updated and saved', ['order_id' => $orderweb->id, 'uid' => $uid]);
+
+                $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
+                if (!empty($orderweb->email)) {
+                    (new PusherController)->sentCanceledStatus(
+                        $applicationResolved,
+                        $orderweb->email,
+                        $uid
+                    );
+                    (new CentrifugoController)->sentCanceledStatus(
+                        $applicationResolved,
+                        $orderweb->email,
+                        $uid
+                    );
+                }
 
                 if ($orderweb->server != "my_server_api") {
                     $cityResolved = (new UniversalAndroidFunctionController)->cityFinder(
