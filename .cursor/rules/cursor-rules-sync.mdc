@@ -26,6 +26,7 @@ alwaysApply: true
 | `pas-report-format.mdc` | Формат отчётов клиенту |
 | `pas-gradual-testing.mdc` | Постепенное улучшение тестов; `taxi_repo` — только test-роуты |
 | `pas-google-pay-plan.mdc` | План Google Pay: моменты оплаты, доплата, города, этапы |
+| `git-multi-account.mdc` | Два GitHub-аккаунта: PAS (sferaved) и taxi_repo (andrey18051) |
 | `cursor-rules-sync.mdc` | Синхронизация правил между репозиториями |
 
 PAS-специфичные правила (`pas-version-commit`, `pas-build-before-commit`) применяй **только** когда целевой репозиторий — PAS_1–PAS_4, не `taxi_repo`.

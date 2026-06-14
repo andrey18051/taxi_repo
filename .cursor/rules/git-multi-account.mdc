@@ -1,0 +1,57 @@
+# Git: два аккаунта GitHub (PAS vs taxi_repo)
+
+## Схема
+
+| Репозитории | GitHub | Email в коммитах | Remote |
+|-------------|--------|------------------|--------|
+| PAS_1–PAS_4 | `Sferaved/*` | `sferaved@gmail.com` | `https://sferaved@github.com/Sferaved/...` |
+| `taxi_repo` | `andrey18051/taxi_repo` | `andrey18051@gmail.com` | `https://andrey18051@github.com/andrey18051/taxi_repo.git` |
+
+## Почему был 403
+
+Windows хранил **один** токен `git:https://github.com` (аккаунт Sferaved). Push в `andrey18051/taxi_repo` шёл с чужим токеном → 403.
+
+## Обязательные настройки
+
+```powershell
+git config --global credential.helper manager
+git config --global credential.useHttpPath true
+```
+
+`useHttpPath` — отдельный PAT на каждый путь репозитория.
+
+## Починка / первичная настройка
+
+Из корня PAS_4 (интерактивно, один раз):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Users\Lenovo\AndroidStudioProjects\PAS_4\scripts\setup_git_accounts.ps1"
+```
+
+Скрипт: remote URL, local `user.email`, удаление старого общего credential, опционально сохранение двух PAT.
+
+Без PAT в скрипте — при первом `git push` Windows Credential Manager запросит логин один раз **на каждый аккаунт** (не на каждый PAS, если PAT один для всех `Sferaved/*`).
+
+## PAT
+
+- GitHub → Settings → Developer settings → Personal access tokens (**classic**, scope **repo**).
+- Два токена: для `sferaved@gmail.com` и для `andrey18051@gmail.com`.
+
+## Деплой
+
+- **PAS:** `app\run_version_update.bat` — push от `sferaved@`, без ручной смены аккаунта.
+- **taxi_repo:** `git push origin main` — только аккаунт `andrey18051@`.
+
+## Агент / CI
+
+Перед push в `taxi_repo` не использовать credential PAS. Проверка:
+
+```powershell
+git -C C:\Users\Lenovo\PhpstormProjects\taxi_repo remote get-url origin
+# must contain andrey18051@
+```
+
+## Не менять
+
+- Не ставить один remote без username на оба семейства репо.
+- Не отключать `credential.useHttpPath` без отдельных SSH-ключей на Host.
