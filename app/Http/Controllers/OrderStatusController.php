@@ -1980,6 +1980,27 @@ class OrderStatusController extends Controller
         return true;
     }
 
+    /**
+     * Нога вилки закрыта на диспетчере — можно создавать новый UID той же ноги (нал/безнал).
+     * Canceled учитывается только при реальном close_reason (не -1).
+     */
+    public static function isLegClosedForForkRecreate(?array $order, ?string $displayStatus): bool
+    {
+        if ($displayStatus === null || $displayStatus === '') {
+            return false;
+        }
+
+        if (in_array($displayStatus, ['CostCalculation', 'Executed'], true)) {
+            return true;
+        }
+
+        if ($displayStatus === 'Canceled') {
+            return self::isDispatchOrderCanceled($order);
+        }
+
+        return false;
+    }
+
     public static function applyCanceledOrderweb(Orderweb $orderweb): void
     {
         $orderweb->closeReason = '1';

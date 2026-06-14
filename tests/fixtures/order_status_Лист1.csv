@@ -1,4 +1,4 @@
-﻿действие с тек нал,действие с тек безн
+﻿,,,,,,,,,,,,действие с тек нал,действие с тек безн
 текущее нал,SearchesForCar,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,ничего
 текущее нал,SearchesForCar,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,ничего
 текущее нал,SearchesForCar,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,опрос,ничего
@@ -71,41 +71,41 @@
 текущее безнал,SearchesForCar,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,востановление,опрос
 ,,,,,,,,,,,,,
 текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,SearchesForCar,предыд нал,WaitingCarSearch,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,SearchesForCar,предыд нал,Running,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,Running,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,Canceled,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,SearchesForCar,предыд нал,Executed,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,Executed,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,SearchesForCar,,предыд нал,CostCalculation,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,WaitingCarSearch,предыд нал,SearchesForCar,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,WaitingCarSearch,предыд нал,CarFound,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,CarFound,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,Running,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,WaitingCarSearch,предыд нал,Canceled,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,Canceled,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,Executed,,предыд безнал,любой,,опрос,ничего
-текущее нал,WaitingCarSearch,текущее безнал,WaitingCarSearch,предыд нал,CostCalculation,предыд безнал,любой,опрос,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,WaitingCarSearch,,предыд нал,CostCalculation,,предыд безнал,любой,,опрос,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,SearchesForCar,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,CarFound,предыд нал,WaitingCarSearch,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,CarFound,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,CarFound,предыд нал,Running,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,Running,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,Canceled,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,CarFound,предыд нал,Executed,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,Executed,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,CarFound,,предыд нал,CostCalculation,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,Running,предыд нал,SearchesForCar,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,SearchesForCar,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,Running,предыд нал,CarFound,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,CarFound,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,Running,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,Running,предыд нал,Canceled,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,Canceled,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,Executed,,предыд безнал,любой,,отмена,ничего
-текущее нал,WaitingCarSearch,текущее безнал,Running,предыд нал,CostCalculation,предыд безнал,любой,отмена,ничего
+текущее нал,WaitingCarSearch,,текущее безнал,Running,,предыд нал,CostCalculation,,предыд безнал,любой,,отмена,ничего
 текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,востановление
-текущее нал,WaitingCarSearch,текущее безнал,CostCalculation,предыд нал,WaitingCarSearch,предыд безнал,любой,опрос,востановление
+текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,востановление
 текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,CarFound,,предыд безнал,любой,,опрос,востановление
-текущее нал,WaitingCarSearch,текущее безнал,CostCalculation,предыд нал,Running,предыд безнал,любой,опрос,востановление
+текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,Running,,предыд безнал,любой,,опрос,востановление
 текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,Canceled,,предыд безнал,любой,,опрос,востановление
-текущее нал,WaitingCarSearch,текущее безнал,CostCalculation,предыд нал,Executed,предыд безнал,любой,опрос,востановление
+текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,Executed,,предыд безнал,любой,,опрос,востановление
 текущее нал,WaitingCarSearch,,текущее безнал,CostCalculation,,предыд нал,CostCalculation,,предыд безнал,любой,,опрос,востановление
-текущее безнал,WaitingCarSearch,текущее нал,SearchesForCar,предыд безнал,SearchesForCar,предыд нал,любой,ничего,опрос
+текущее безнал,WaitingCarSearch,,текущее нал,SearchesForCar,,предыд безнал,SearchesForCar,,предыд нал,любой,,ничего,опрос
 текущее безнал,WaitingCarSearch,,текущее нал,SearchesForCar,,предыд безнал,WaitingCarSearch,,предыд нал,любой,,ничего,опрос
 текущее безнал,WaitingCarSearch,,текущее нал,SearchesForCar,,предыд безнал,CarFound,,предыд нал,любой,,ничего,опрос
 текущее безнал,WaitingCarSearch,,текущее нал,SearchesForCar,,предыд безнал,Running,,предыд нал,любой,,ничего,опрос
@@ -140,7 +140,7 @@
 текущее безнал,WaitingCarSearch,,текущее нал,CostCalculation,,предыд безнал,Canceled,,предыд нал,любой,,востановление,опрос
 текущее безнал,WaitingCarSearch,,текущее нал,CostCalculation,,предыд безнал,Executed,,предыд нал,любой,,востановление,опрос
 текущее безнал,WaitingCarSearch,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,востановление,опрос
-,,,,,,,
+,,,,,,,,,,,,,
 текущее нал,CarFound,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,отмена
 текущее нал,CarFound,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,отмена
 текущее нал,CarFound,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,опрос,отмена
@@ -211,7 +211,7 @@
 текущее безнал,CarFound,,текущее нал,CostCalculation,,предыд безнал,Canceled,,предыд нал,любой,,ничего,опрос
 текущее безнал,CarFound,,текущее нал,CostCalculation,,предыд безнал,Executed,,предыд нал,любой,,ничего,опрос
 текущее безнал,CarFound,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,ничего,опрос
-,,,,,,,
+,,,,,,,,,,,,,
 текущее нал,Running,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,отмена
 текущее нал,Running,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,отмена
 текущее нал,Running,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,опрос,отмена
@@ -282,7 +282,7 @@
 текущее безнал,Running,,текущее нал,CostCalculation,,предыд безнал,Canceled,,предыд нал,любой,,ничего,опрос
 текущее безнал,Running,,текущее нал,CostCalculation,,предыд безнал,Executed,,предыд нал,любой,,ничего,опрос
 текущее безнал,Running,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,ничего,опрос
-,,,,,,,
+,,,,,,,,,,,,,
 текущее нал,Canceled,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,ничего,отмена
 текущее нал,Canceled,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,ничего,отмена
 текущее нал,Canceled,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,востановление,опрос
@@ -353,7 +353,7 @@
 текущее безнал,Canceled,,текущее нал,CostCalculation,,предыд безнал,Canceled,,предыд нал,любой,,ничего,ничего
 текущее безнал,Canceled,,текущее нал,CostCalculation,,предыд безнал,Executed,,предыд нал,любой,,ничего,ничего
 текущее безнал,Canceled,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,ничего,ничего
-,,,,,,,
+,,,,,,,,,,,,,
 текущее нал,Executed,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,опрос,отмена
 текущее нал,Executed,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,опрос,отмена
 текущее нал,Executed,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,опрос,отмена
@@ -424,7 +424,7 @@
 текущее безнал,Executed,,текущее нал,CostCalculation,,предыд безнал,Canceled,,предыд нал,любой,,ничего,опрос
 текущее безнал,Executed,,текущее нал,CostCalculation,,предыд безнал,Executed,,предыд нал,любой,,ничего,опрос
 текущее безнал,Executed,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,ничего,опрос
-,,,,,,,
+,,,,,,,,,,,,,
 текущее нал,CostCalculation,,текущее безнал,SearchesForCar,,предыд нал,SearchesForCar,,предыд безнал,любой,,востановление,опрос
 текущее нал,CostCalculation,,текущее безнал,SearchesForCar,,предыд нал,WaitingCarSearch,,предыд безнал,любой,,востановление,опрос
 текущее нал,CostCalculation,,текущее безнал,SearchesForCar,,предыд нал,CarFound,,предыд безнал,любой,,востановление,опрос
@@ -495,4 +495,4 @@
 текущее безнал,CostCalculation,,текущее нал,CostCalculation,,предыд безнал,Canceled,,предыд нал,любой,,ничего,ничего
 текущее безнал,CostCalculation,,текущее нал,CostCalculation,,предыд безнал,Executed,,предыд нал,любой,,ничего,ничего
 текущее безнал,CostCalculation,,текущее нал,CostCalculation,,предыд безнал,CostCalculation,,предыд нал,любой,,ничего,ничего
-,,,,,,,
+,,,,,,,,,,,,,

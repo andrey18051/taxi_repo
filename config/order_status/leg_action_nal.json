@@ -26,33 +26,6 @@
     "bonus_action": "востановление"
   },
   {
-    "double": "SearchesForCar",
-    "bonus_options": [
-      "Canceled"
-    ],
-    "double_action": "опрос",
-    "bonus_action": "ничего",
-    "last_double_options": [
-      "SearchesForCar",
-      "WaitingCarSearch"
-    ]
-  },
-  {
-    "double": "SearchesForCar",
-    "bonus_options": [
-      "Canceled"
-    ],
-    "double_action": "опрос",
-    "bonus_action": "востановление",
-    "last_double_options": [
-      "CarFound",
-      "Running",
-      "Canceled",
-      "Executed",
-      "CostCalculation"
-    ]
-  },
-  {
     "double": "WaitingCarSearch",
     "bonus_options": [
       "SearchesForCar",
@@ -77,33 +50,6 @@
     ],
     "double_action": "опрос",
     "bonus_action": "востановление"
-  },
-  {
-    "double": "WaitingCarSearch",
-    "bonus_options": [
-      "Canceled"
-    ],
-    "double_action": "опрос",
-    "bonus_action": "ничего",
-    "last_double_options": [
-      "SearchesForCar",
-      "WaitingCarSearch"
-    ]
-  },
-  {
-    "double": "WaitingCarSearch",
-    "bonus_options": [
-      "Canceled"
-    ],
-    "double_action": "опрос",
-    "bonus_action": "востановление",
-    "last_double_options": [
-      "CarFound",
-      "Running",
-      "Canceled",
-      "Executed",
-      "CostCalculation"
-    ]
   },
   {
     "double": "CarFound",

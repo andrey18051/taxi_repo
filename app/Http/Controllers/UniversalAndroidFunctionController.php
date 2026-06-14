@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
 
+use App\Helpers\OrderDuplicateHelper;
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Jobs\WebordersCancelAndRestorNalJob;
@@ -4217,6 +4218,10 @@ class UniversalAndroidFunctionController extends Controller
                     // Логируем ошибки в случае неудачного запроса
                     Log::error("Request failed with status: " . $response->status());
                     Log::error("Response: " . $response->body());
+                    if (OrderDuplicateHelper::isDuplicateOrderMessage($response->body())) {
+                        Log::warning('orderNewCreat: duplicate order blocked by dispatch API');
+                        return null;
+                    }
                     $result = null;
                 }
             } catch (\Exception $e) {

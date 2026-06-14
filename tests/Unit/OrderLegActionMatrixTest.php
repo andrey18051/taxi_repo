@@ -78,22 +78,4 @@ class OrderLegActionMatrixTest extends TestCase
         $this->assertSame('опрос', $result['double_action']);
         $this->assertSame('ничего', $result['bonus_action']);
     }
-
-    public function test_nal_phase_canceled_bonus_with_searching_double_polls_double(): void
-    {
-        $result = $this->matrix->resolveNalPhase('SearchesForCar', 'Canceled', 'SearchesForCar');
-
-        $this->assertNotNull($result);
-        $this->assertSame('опрос', $result['double_action']);
-        $this->assertSame('ничего', $result['bonus_action']);
-    }
-
-    public function test_nal_phase_canceled_bonus_restore_when_last_double_was_car_found(): void
-    {
-        $result = $this->matrix->resolveNalPhase('SearchesForCar', 'Canceled', 'CarFound');
-
-        $this->assertNotNull($result);
-        $this->assertSame('опрос', $result['double_action']);
-        $this->assertSame('востановление', $result['bonus_action']);
-    }
 }

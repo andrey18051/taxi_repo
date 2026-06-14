@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
+use App\Helpers\OrderDuplicateHelper;
 use App\Models\DoubleOrder;
 use App\Models\Uid_history;
 use Illuminate\Support\Facades\Log;
@@ -248,6 +250,18 @@ class OrderForkLegExecutor
      */
     private function restoreLeg(array $state, $leg, $phaseTag)
     {
+        if (!$this->canCreateNewOrderForLeg($state, $leg)) {
+            $this->log('restore_deferred_leg_not_closed', [
+                'phase' => $phaseTag,
+                'leg' => $leg,
+                'status' => $leg === 'bonus'
+                    ? ($state['newStatusBonus'] ?? null)
+                    : ($state['newStatusDouble'] ?? null),
+            ]);
+
+            return $this->pollLeg($state, $leg, $phaseTag . '_await_close');
+        }
+
         if ($leg === 'bonus') {
             $newUid = $this->controller->orderNewCreat(
                 $this->config['authorizationBonus'],
@@ -256,6 +270,17 @@ class OrderForkLegExecutor
                 $this->config['responseBonus']['url'],
                 $this->config['responseBonus']['parameter']
             );
+            if (!$this->isValidRestoredUid($newUid)) {
+                $this->log('restore_bonus_failed', [
+                    'phase' => $phaseTag,
+                    'newUid' => $newUid,
+                    'newStatusDouble' => $state['newStatusDouble'] ?? null,
+                ]);
+                if ($this->shouldCancelDoubleAfterRestoreFailure($state)) {
+                    return $this->cancelLeg($state, 'double', $phaseTag . '_after_restore_blocked');
+                }
+                return $state;
+            }
             $state['bonusOrder'] = $newUid;
             /** @var Uid_history $uidHistory */
             $uidHistory = $state['uid_history'];
@@ -272,6 +297,17 @@ class OrderForkLegExecutor
             $this->config['responseDouble']['url'],
             $this->config['responseDouble']['parameter']
         );
+        if (!$this->isValidRestoredUid($newUid)) {
+            $this->log('restore_double_failed', [
+                'phase' => $phaseTag,
+                'newUid' => $newUid,
+                'newStatusBonus' => $state['newStatusBonus'] ?? null,
+            ]);
+            if ($this->shouldCancelBonusAfterRestoreFailure($state)) {
+                return $this->cancelLeg($state, 'bonus', $phaseTag . '_after_restore_blocked');
+            }
+            return $state;
+        }
         $state['doubleOrder'] = $newUid;
         /** @var Uid_history $uidHistory */
         $uidHistory = $state['uid_history'];
@@ -280,6 +316,62 @@ class OrderForkLegExecutor
         $this->log('restore_double', ['newUid' => $newUid, 'phase' => $phaseTag]);
 
         return $this->pollLeg($state, 'double', $phaseTag . '_after_restore');
+    }
+
+    private function canCreateNewOrderForLeg(array $state, string $leg): bool
+    {
+        /** @var Uid_history $uidHistory */
+        $uidHistory = $state['uid_history'];
+
+        if ($leg === 'bonus') {
+            $rawOrder = $this->decodeLegStatus($uidHistory->bonus_status);
+
+            return OrderStatusController::isLegClosedForForkRecreate(
+                $rawOrder,
+                isset($state['newStatusBonus']) ? (string) $state['newStatusBonus'] : null
+            );
+        }
+
+        $rawOrder = $this->decodeLegStatus($uidHistory->double_status);
+
+        return OrderStatusController::isLegClosedForForkRecreate(
+            $rawOrder,
+            isset($state['newStatusDouble']) ? (string) $state['newStatusDouble'] : null
+        );
+    }
+
+    /**
+     * @param string|null $json
+     * @return array|null
+     */
+    private function decodeLegStatus($json)
+    {
+        if ($json === null || $json === '') {
+            return null;
+        }
+
+        $decoded = json_decode($json, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function isValidRestoredUid($newUid): bool
+    {
+        return is_string($newUid)
+            && $newUid !== ''
+            && stripos($newUid, 'New UID') === false;
+    }
+
+    private function shouldCancelDoubleAfterRestoreFailure(array $state): bool
+    {
+        $doubleStatus = $state['newStatusDouble'] ?? '';
+        return in_array($doubleStatus, ['SearchesForCar', 'WaitingCarSearch'], true);
+    }
+
+    private function shouldCancelBonusAfterRestoreFailure(array $state): bool
+    {
+        $bonusStatus = $state['newStatusBonus'] ?? '';
+        return in_array($bonusStatus, ['SearchesForCar', 'WaitingCarSearch'], true);
     }
 
     /**
