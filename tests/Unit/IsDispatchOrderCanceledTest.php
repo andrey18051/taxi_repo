@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\OrderStatusController;
-use App\Models\Orderweb;
 use Tests\TestCase;
 
 class IsDispatchOrderCanceledTest extends TestCase
@@ -86,70 +85,5 @@ class IsDispatchOrderCanceledTest extends TestCase
         ];
 
         $this->assertTrue(OrderStatusController::isLegClosedForForkRecreate($order, 'Canceled'));
-    }
-
-    public function test_should_cascade_hold_dispatch_cancel_after_grace_period(): void
-    {
-        $orderweb = new Orderweb();
-        $orderweb->created_at = now()->subSeconds(120);
-
-        $cardOrder = [
-            'execution_status' => 'Canceled',
-            'close_reason' => -1,
-            'order_car_info' => null,
-        ];
-        $nalOrder = [
-            'execution_status' => 'SearchesForCar',
-            'close_reason' => -1,
-            'order_car_info' => null,
-        ];
-
-        $this->assertTrue(OrderStatusController::shouldCascadeForkHoldDispatchCancel(
-            $cardOrder,
-            $nalOrder,
-            $orderweb
-        ));
-    }
-
-    public function test_should_not_cascade_hold_dispatch_cancel_within_grace_period(): void
-    {
-        $orderweb = new Orderweb();
-        $orderweb->created_at = now()->subSeconds(30);
-
-        $cardOrder = [
-            'execution_status' => 'Canceled',
-            'close_reason' => -1,
-        ];
-        $nalOrder = [
-            'execution_status' => 'SearchesForCar',
-            'close_reason' => -1,
-        ];
-
-        $this->assertFalse(OrderStatusController::shouldCascadeForkHoldDispatchCancel(
-            $cardOrder,
-            $nalOrder,
-            $orderweb
-        ));
-    }
-
-    public function test_should_cascade_immediately_when_card_has_real_close_reason(): void
-    {
-        $orderweb = new Orderweb();
-        $orderweb->created_at = now()->subSeconds(10);
-
-        $cardOrder = [
-            'execution_status' => 'Canceled',
-            'close_reason' => 1,
-        ];
-        $nalOrder = [
-            'execution_status' => 'SearchesForCar',
-            'close_reason' => -1,
-        ];
-
-        $this->assertTrue(OrderStatusController::shouldCascadeForkHoldDispatchCancel(
-            $cardOrder,
-            $nalOrder,
-            $orderweb
-        ));
     }
 }

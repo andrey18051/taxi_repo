@@ -1283,20 +1283,12 @@ class OrderStatusController extends Controller
             $autoInfoCard = $cardOrder['order_car_info'] ?? null;
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
-            if (self::isExplicitForkCancelRequested($uid_history)
-                || self::shouldCascadeForkHoldDispatchCancel($cardOrder, $nalOrder, $orderweb)) {
-                if (!self::isExplicitForkCancelRequested($uid_history)) {
-                    $uid_history->cancel = '1';
-                    $uid_history->save();
-                    Log::info('Uid_history cancel set: hold leg dispatch cancel during fork search', [
-                        'dispatching_order_uid' => $dispatching_order_uid,
-                    ]);
-                }
+            if (self::isExplicitForkCancelRequested($uid_history)) {
                 $action = 'Заказ снят';
                 self::applyCanceledOrderweb($orderweb);
                 $orderweb->save();
                 $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
-                Log::info('Order canceled (fork hold dispatch cancel)', [
+                Log::info('Order canceled (explicit fork cancel)', [
                     'action' => $action,
                     'dispatching_order_uid' => $dispatching_order_uid,
                     'cardState' => $cardState,
@@ -1955,6 +1947,9 @@ class OrderStatusController extends Controller
     /**
      * Хотя бы одна нога (карта или нал) ещё активна на диспетчере.
      */
+    /**
+     * Явная отмена вилки (кнопка в приложении, Vod, webordersCancelDouble).
+     */
     public static function isExplicitForkCancelRequested(?Uid_history $uid_history): bool
     {
         if ($uid_history === null) {
@@ -1964,43 +1959,6 @@ class OrderStatusController extends Controller
         return $uid_history->cancel === '1'
             || $uid_history->cancel === 1
             || $uid_history->cancel === true;
-    }
-
-    /**
-     * Hold (card) leg canceled on dispatch while cash leg still searches — finalize fork for the app.
-     * Grace period keeps early fork duplicate search alive; stale state is treated as admin/dispatch cancel.
-     */
-    public static function shouldCascadeForkHoldDispatchCancel(
-        ?array $cardOrder,
-        ?array $nalOrder,
-        Orderweb $orderweb
-    ): bool {
-        if ($cardOrder === null || $nalOrder === null) {
-            return false;
-        }
-
-        $cardState = (string) ($cardOrder['execution_status'] ?? '');
-        $nalState = (string) ($nalOrder['execution_status'] ?? '');
-        if ($cardState !== 'Canceled') {
-            return false;
-        }
-        if (!in_array($nalState, ['SearchesForCar', 'WaitingCarSearch'], true)) {
-            return false;
-        }
-        if (!empty($cardOrder['order_car_info']) || !empty($nalOrder['order_car_info'])) {
-            return false;
-        }
-
-        $cardClose = $cardOrder['close_reason'] ?? -1;
-        if (!in_array($cardClose, [-1, '-1', 0, '0'], true)) {
-            return true;
-        }
-
-        if ($orderweb->created_at === null) {
-            return false;
-        }
-
-        return $orderweb->created_at->diffInSeconds(now()) >= 90;
     }
 
     public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void

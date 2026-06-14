@@ -3800,27 +3800,9 @@ class UniversalAndroidFunctionController extends Controller
         $canceledNoServerCity = $this->canceledNoServerCity($uid_bonusOrderHold);
 
         $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
-        $cardOrder = null;
-        $nalOrder = null;
-        if ($uid_history) {
-            $decodedCard = json_decode($uid_history->bonus_status ?? '', true);
-            $decodedNal = json_decode($uid_history->double_status ?? '', true);
-            $cardOrder = is_array($decodedCard) ? $decodedCard : null;
-            $nalOrder = is_array($decodedNal) ? $decodedNal : null;
-        }
-        $shouldCascadeHoldCancel = $orderweb
-            && OrderStatusController::shouldCascadeForkHoldDispatchCancel($cardOrder, $nalOrder, $orderweb);
 
-        if ($shouldCascadeHoldCancel && $uid_history && $uid_history->cancel != "1") {
-            $uid_history->cancel = '1';
-            $uid_history->save();
-            Log::info('canceledFinish: cascade hold dispatch cancel flagged', [
-                'uid_bonusOrderHold' => $uid_bonusOrderHold,
-            ]);
-        }
-
-        // Выход по 1 минуте, нажатию отмены, безсерверному городу или снятию hold-ноги на диспетчере
-        if ($canceledOneMinute || $canceledNoServerCity || $uid_history->cancel == "1" || $shouldCascadeHoldCancel) {
+        // Выход по 1 минуте, нажатию отмены или безсерверному городу
+        if ($canceledOneMinute || $canceledNoServerCity || $uid_history->cancel == "1") {
             $orderCanceledBonus = !($lastStatusBonus !== "Canceled") || self::orderCanceledReturn(
                 $bonusOrder,
                 'bonus',

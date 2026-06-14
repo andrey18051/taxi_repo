@@ -6,7 +6,6 @@ use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Helpers\OrderDuplicateHelper;
 use App\Models\DoubleOrder;
-use App\Models\Orderweb;
 use App\Models\Uid_history;
 use Illuminate\Support\Facades\Log;
 
@@ -111,15 +110,6 @@ class OrderForkLegExecutor
             $resolved['double_action'],
             'bonus_phase'
         );
-
-        if ($this->shouldCascadeHoldDispatchCancelAfterBonusPhase($resolved, $statusAtPhaseStart, $state)) {
-            $state = $this->cancelLeg($state, 'double', 'bonus_phase_cascade_hold_cancel');
-            /** @var Uid_history $uidHistory */
-            $uidHistory = $state['uid_history'];
-            $uidHistory->cancel = '1';
-            $uidHistory->save();
-            $this->log('cascade_hold_dispatch_cancel', $this->snapshot($state));
-        }
 
         if ($state['newStatusBonus'] !== null) {
             $state['lastStatusBonus'] = $this->advanceLastLegStatus(
@@ -279,17 +269,6 @@ class OrderForkLegExecutor
     private function restoreLeg(array $state, $leg, $phaseTag)
     {
         if (!$this->canCreateNewOrderForLeg($state, $leg)) {
-            if ($this->shouldCascadeHoldDispatchCancel($state, $leg)) {
-                $state = $this->cancelLeg($state, 'double', $phaseTag . '_cascade_hold_cancel');
-                /** @var Uid_history $uidHistory */
-                $uidHistory = $state['uid_history'];
-                $uidHistory->cancel = '1';
-                $uidHistory->save();
-                $this->log('restore_cascade_hold_dispatch_cancel', $this->snapshot($state));
-
-                return $state;
-            }
-
             $this->log('restore_deferred_leg_not_closed', [
                 'phase' => $phaseTag,
                 'leg' => $leg,
@@ -411,60 +390,6 @@ class OrderForkLegExecutor
     {
         $bonusStatus = $state['newStatusBonus'] ?? '';
         return in_array($bonusStatus, ['SearchesForCar', 'WaitingCarSearch'], true);
-    }
-
-    /**
-     * @param array $state
-     * @param string $leg
-     * @return bool
-     */
-    private function shouldCascadeHoldDispatchCancel(array $state, $leg): bool
-    {
-        if ($leg !== 'bonus') {
-            return false;
-        }
-
-        $orderweb = Orderweb::where('dispatching_order_uid', $this->config['bonusOrderHold'] ?? '')->first();
-        if ($orderweb === null) {
-            return false;
-        }
-
-        /** @var Uid_history $uidHistory */
-        $uidHistory = $state['uid_history'];
-        $cardOrder = $this->decodeLegStatus($uidHistory->bonus_status);
-        $nalOrder = $this->decodeLegStatus($uidHistory->double_status);
-
-        return OrderStatusController::shouldCascadeForkHoldDispatchCancel($cardOrder, $nalOrder, $orderweb);
-    }
-
-    /**
-     * @param array|null $resolved
-     * @param string|null $statusAtPhaseStart
-     * @param array $state
-     * @return bool
-     */
-    private function shouldCascadeHoldDispatchCancelAfterBonusPhase($resolved, $statusAtPhaseStart, array $state): bool
-    {
-        if ($resolved === null) {
-            return false;
-        }
-        if (($resolved['bonus_action'] ?? '') !== self::ACTION_NOTHING) {
-            return false;
-        }
-        if (($resolved['double_action'] ?? '') !== self::ACTION_POLL) {
-            return false;
-        }
-        if (!in_array($statusAtPhaseStart, ['SearchesForCar', 'WaitingCarSearch'], true)) {
-            return false;
-        }
-        if (($state['newStatusBonus'] ?? '') !== 'Canceled') {
-            return false;
-        }
-        if (!in_array($state['newStatusDouble'] ?? '', ['SearchesForCar', 'WaitingCarSearch'], true)) {
-            return false;
-        }
-
-        return $this->shouldCascadeHoldDispatchCancel($state, 'bonus');
     }
 
     /**
