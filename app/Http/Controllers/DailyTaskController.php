@@ -85,18 +85,13 @@ class DailyTaskController extends Controller
                 $responseBonusStrArr = json_decode($order->responseBonusStr, true);
                 $uid = $responseBonusStrArr['dispatching_order_uid'] ?? 'неизвестен';
 
-                // Проверяем ключ в Redis, например "double_order_processing:{id}"
-                $redisKey = "double_order_processing_key:" . $order->id;
+                // Тот же ключ, что в StartNewProcessExecution — сбрасываем после перезагрузки/падения воркера
+                $redisKey = 'double_order_processing:' . $order->id;
 
                 if (Redis::exists($redisKey)) {
-                    Log::info("restartProcessExecutionStatus: Задача для заказа $uid (ID {$order->id}) уже запущена, пропускаем");
-                    continue; // задача уже в очереди или выполняется
+                    Log::info("restartProcessExecutionStatus: сбрасываем зависший ключ Redis для заказа $uid (ID {$order->id})");
+                    Redis::del($redisKey);
                 }
-
-                // Помечаем, что задача запущена
-                // Установка ключа без срока жизни (будет храниться бессрочно)
-                Redis::set($redisKey, true);
-
 
                 $message = "Запущен заново процесс опроса статусов заказа: $uid (ID: {$order->id})";
                 Log::info("restartProcessExecutionStatus: $message");

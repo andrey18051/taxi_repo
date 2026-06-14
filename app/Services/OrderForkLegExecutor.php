@@ -102,6 +102,8 @@ class OrderForkLegExecutor
             'double_action' => $resolved['double_action'],
         ]);
 
+        $statusAtPhaseStart = $state['newStatusBonus'] ?? null;
+
         $state = $this->applyLegActions(
             $state,
             $resolved['bonus_action'],
@@ -110,8 +112,15 @@ class OrderForkLegExecutor
         );
 
         if ($state['newStatusBonus'] !== null) {
-            $state['lastStatusBonus'] = $state['newStatusBonus'];
-            $this->log('lastStatusBonus_updated', ['lastStatusBonus' => $state['lastStatusBonus']]);
+            $state['lastStatusBonus'] = $this->advanceLastLegStatus(
+                $statusAtPhaseStart,
+                $state['newStatusBonus']
+            );
+            $this->log('lastStatusBonus_updated', [
+                'lastStatusBonus' => $state['lastStatusBonus'],
+                'statusAtPhaseStart' => $statusAtPhaseStart,
+                'newStatusBonus' => $state['newStatusBonus'],
+            ]);
         }
 
         $state['bonusOrder'] = $state['uid_history']->uid_bonusOrder;
@@ -157,6 +166,8 @@ class OrderForkLegExecutor
             'bonus_action' => $resolved['bonus_action'],
         ]);
 
+        $statusAtPhaseStart = $state['newStatusDouble'] ?? null;
+
         $state = $this->applyLegActions(
             $state,
             $resolved['bonus_action'],
@@ -165,8 +176,15 @@ class OrderForkLegExecutor
         );
 
         if ($state['newStatusDouble'] !== null) {
-            $state['lastStatusDouble'] = $state['newStatusDouble'];
-            $this->log('lastStatusDouble_updated', ['lastStatusDouble' => $state['lastStatusDouble']]);
+            $state['lastStatusDouble'] = $this->advanceLastLegStatus(
+                $statusAtPhaseStart,
+                $state['newStatusDouble']
+            );
+            $this->log('lastStatusDouble_updated', [
+                'lastStatusDouble' => $state['lastStatusDouble'],
+                'statusAtPhaseStart' => $statusAtPhaseStart,
+                'newStatusDouble' => $state['newStatusDouble'],
+            ]);
         }
 
         $state['bonusOrder'] = $state['uid_history']->uid_bonusOrder;
@@ -540,6 +558,27 @@ class OrderForkLegExecutor
         ]);
 
         return true;
+    }
+
+    /**
+     * «Предыдущий» статус для матрицы Excel: если в фазе статус сменился (опрос/отмена),
+     * last = значение на начало фазы; иначе last = текущий new.
+     *
+     * @param string|null $statusAtPhaseStart
+     * @param string|null $statusAfterPhase
+     * @return string|null
+     */
+    private function advanceLastLegStatus($statusAtPhaseStart, $statusAfterPhase)
+    {
+        if ($statusAfterPhase === null) {
+            return null;
+        }
+
+        if ($statusAtPhaseStart !== null && $statusAfterPhase !== $statusAtPhaseStart) {
+            return $statusAtPhaseStart;
+        }
+
+        return $statusAfterPhase;
     }
 
     /**
