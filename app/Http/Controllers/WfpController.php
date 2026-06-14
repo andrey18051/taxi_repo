@@ -2528,6 +2528,23 @@ class WfpController extends Controller
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug("GOOGLE_PAY_CHARGE", ['orderReference' => $orderReference, 'response' => $response->body()]);
 
+        try {
+            $this->finalizeWalletAddCostAfterCharge(
+                $application,
+                $resolvedCity,
+                $orderReference,
+                $amount,
+                (string) ($clientEmail ?? ''),
+                $response,
+                false
+            );
+        } catch (\Exception $e) {
+            Log::error('googlePayCharge add-cost finalize failed', [
+                'order_reference' => $orderReference,
+                'error_message' => $e->getMessage(),
+            ]);
+        }
+
         return response($response->body(), $response->status())
             ->header('Content-Type', 'application/json');
     }
@@ -2986,115 +3003,17 @@ class WfpController extends Controller
                         ]);
                     }
 
-                    // Проверка статуса транзакции
-                    Log::debug('Checking transaction status', [
-                        'order_reference' => $orderReference,
-                        'application' => $application,
-                        'city' => $city,
-                    ]);
-
-                    $responseStatus = self::checkStatus($application, $city, $orderReference);
-
-                    Log::debug('Status check response', [
-                        'status_response' => $responseStatus->body(),
-                        'status_code' => $responseStatus->status(),
-                    ]);
-
-                    $data = json_decode($responseStatus->body(), true);
-
-                    Log::info('Transaction status parsed', [
-                        'order_reference' => $orderReference,
-                        'raw_data' => $data,
-                        'transaction_status' => $data['transactionStatus'] ?? 'not_set',
-                    ]);
-
-                    // Поиск инвойса
-                    $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)->first();
-
-                    Log::debug('WfpInvoice lookup', [
-                        'order_reference' => $orderReference,
-                        'invoice_found' => !is_null($wfpInvoices),
-                        'invoice_id' => optional($wfpInvoices)->id,
-                        'uid' => optional($wfpInvoices)->dispatching_order_uid,
-                    ]);
-
-                    if ($wfpInvoices !== null) {
-                        if (isset($data['transactionStatus'])) {
-                            try {
-                                $transactionStatus = $data['transactionStatus'];
-                                $uid = $wfpInvoices->dispatching_order_uid;
-
-                                Log::info('Sending status to Pusher', [
-                                    'order_reference' => $orderReference,
-                                    'uid' => $uid,
-                                    'transaction_status' => $transactionStatus,
-                                    'application' => $application,
-                                    'client_email' => $clientEmail,
-                                ]);
-
-                                PaymentStatusNotifier::notifyTransactionStatus(
-                                    $transactionStatus,
-                                    $uid,
-                                    $application,
-                                    $clientEmail
-                                );
-                                Log::info('Pusher notification sent successfully', [
-                                    'order_reference' => $orderReference,
-                                    'status' => $transactionStatus,
-                                ]);
-
-                                if ($transactionStatus == "Approved" || $transactionStatus == "WaitingAuthComplete") {
-                                    Log::info('Payment approved or waiting auth', [
-                                        'order_reference' => $orderReference,
-                                        'status' => $transactionStatus,
-                                        'next_step' => 'processing_add_cost',
-                                    ]);
-
-                                    $addCostResult = $this->processAddCostAfterApproved(
-                                        $orderReference,
-                                        $city,
-                                        $amount,
-                                        $application,
-                                        $response
-                                    );
-                                    if ($addCostResult !== null) {
-                                        return $addCostResult;
-                                    }
-                                } elseif (in_array($transactionStatus, ['InProcessing', 'Pending'], true)) {
-                                    Log::info('Add-cost payment still processing, CheckStatusJob will finalize', [
-                                        'order_reference' => $orderReference,
-                                        'status' => $transactionStatus,
-                                    ]);
-                                } else {
-                                    Log::info('Transaction not approved', [
-                                        'order_reference' => $orderReference,
-                                        'status' => $transactionStatus,
-                                        'expected_statuses' => ['Approved', 'WaitingAuthComplete'],
-                                    ]);
-                                }
-                            } catch (\Exception $e) {
-                                Log::error('Error in sentStatusWfp processing', [
-                                    'order_reference' => $orderReference,
-                                    'error_message' => $e->getMessage(),
-                                    'error_file' => $e->getFile(),
-                                    'error_line' => $e->getLine(),
-                                    'stack_trace' => $e->getTraceAsString(),
-                                ]);
-                                throw $e;
-                            }
-                        } else {
-                            Log::error('transactionStatus missing in response data', [
-                                'order_reference' => $orderReference,
-                                'response_data' => $data,
-                                'wfp_invoice_id' => $wfpInvoices->id,
-                            ]);
-                        }
-                    } else {
-                        Log::warning('WfpInvoice not found for order reference', [
-                            'order_reference' => $orderReference,
-                            'client_email' => $clientEmail,
-                            'amount' => $amount,
-                        ]);
+                    $finalize = $this->finalizeWalletAddCostAfterCharge(
+                        $application,
+                        $city,
+                        $orderReference,
+                        $amount,
+                        $clientEmail,
+                        $response,
+                        true
+                    );
+                    if ($finalize['addCostResult'] !== null) {
+                        return $finalize['addCostResult'];
                     }
 
                     Log::info('Returning WFP response', [
@@ -3106,7 +3025,7 @@ class WfpController extends Controller
                         return $response;
                     }
 
-                    return $responseStatus;
+                    return $finalize['responseStatus'];
 
                 } catch (\Exception $e) {
                     Log::error('WayForPay API request failed', [
@@ -4729,10 +4648,13 @@ class WfpController extends Controller
             return;
         }
 
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $payMethod = $this->resolveAddCostPayMethod($order);
+
         dispatch(new StartAddCostCardBottomCreat(
             $uid,
             $uid_history->uid_doubleOrder,
-            'wfp_payment',
+            $payMethod,
             $orderReference,
             $city,
             $amount
@@ -4744,6 +4666,121 @@ class WfpController extends Controller
             'amount' => $amount,
             'application' => $application,
         ]);
+    }
+
+    /**
+     * Доплата картой/Google Pay: checkStatus → push → пересоздание заказа (как chargeActiveTokenAddCost).
+     *
+     * @param mixed $chargeResponse ответ WayForPay CHARGE (может быть null при skipCharge)
+     * @return array{addCostResult: mixed, responseStatus: mixed}
+     */
+    private function finalizeWalletAddCostAfterCharge(
+        string $application,
+        string $city,
+        string $orderReference,
+        $amount,
+        string $clientEmail,
+        $chargeResponse,
+        bool $returnAddCostResult
+    ): array {
+        Log::debug('finalizeWalletAddCostAfterCharge', [
+            'order_reference' => $orderReference,
+            'application' => $application,
+            'city' => $city,
+        ]);
+
+        $responseStatus = self::checkStatus($application, $city, $orderReference);
+
+        Log::debug('finalizeWalletAddCostAfterCharge status check', [
+            'status_response' => $responseStatus->body(),
+            'status_code' => $responseStatus->status(),
+        ]);
+
+        $data = json_decode($responseStatus->body(), true);
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        $addCostResult = null;
+
+        if ($invoice === null || !$this->isAddCostInvoice($invoice)) {
+            return [
+                'addCostResult' => null,
+                'responseStatus' => $responseStatus,
+            ];
+        }
+
+        if (!isset($data['transactionStatus'])) {
+            Log::error('finalizeWalletAddCostAfterCharge: transactionStatus missing', [
+                'order_reference' => $orderReference,
+                'response_data' => $data,
+            ]);
+
+            return [
+                'addCostResult' => null,
+                'responseStatus' => $responseStatus,
+            ];
+        }
+
+        $transactionStatus = $data['transactionStatus'];
+        $uid = $invoice->dispatching_order_uid;
+        $notifyEmail = $clientEmail;
+        if ($notifyEmail === '' && $uid) {
+            $notifyEmail = (string) (Orderweb::where('dispatching_order_uid', $uid)->value('email') ?? '');
+        }
+
+        Log::info('finalizeWalletAddCostAfterCharge notify', [
+            'order_reference' => $orderReference,
+            'uid' => $uid,
+            'transaction_status' => $transactionStatus,
+        ]);
+
+        PaymentStatusNotifier::notifyTransactionStatus(
+            $transactionStatus,
+            $uid,
+            $application,
+            $notifyEmail
+        );
+
+        if ($transactionStatus === 'Approved' || $transactionStatus === 'WaitingAuthComplete') {
+            Log::info('finalizeWalletAddCostAfterCharge: processing add-cost', [
+                'order_reference' => $orderReference,
+                'status' => $transactionStatus,
+            ]);
+
+            $addCostResult = $this->processAddCostAfterApproved(
+                $orderReference,
+                $city,
+                $amount,
+                $application,
+                $chargeResponse
+            );
+
+            if (!$returnAddCostResult) {
+                $addCostResult = null;
+            }
+        } elseif (in_array($transactionStatus, ['InProcessing', 'Pending'], true)) {
+            Log::info('finalizeWalletAddCostAfterCharge: payment still processing', [
+                'order_reference' => $orderReference,
+                'status' => $transactionStatus,
+            ]);
+        } else {
+            Log::info('finalizeWalletAddCostAfterCharge: payment not approved', [
+                'order_reference' => $orderReference,
+                'status' => $transactionStatus,
+            ]);
+        }
+
+        return [
+            'addCostResult' => $addCostResult,
+            'responseStatus' => $responseStatus,
+        ];
+    }
+
+    private function resolveAddCostPayMethod(?Orderweb $order): string
+    {
+        if ($order !== null && (string) $order->pay_system === 'google_pay_payment') {
+            return 'google_pay_payment';
+        }
+
+        return 'wfp_payment';
     }
 
     /**
@@ -4825,7 +4862,7 @@ class WfpController extends Controller
         return (new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
             $uid,
             $uid_history->uid_doubleOrder,
-            'wfp_payment',
+            $this->resolveAddCostPayMethod($order),
             $orderReference,
             $city,
             $amount
