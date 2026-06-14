@@ -240,105 +240,21 @@
   {
     "bonus": "Canceled",
     "double": "CarFound",
-    "last_bonus": "CarFound",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CarFound",
-    "last_bonus": "Running",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CarFound",
-    "last_bonus": "Canceled",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CarFound",
-    "last_bonus": "Executed",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CarFound",
-    "last_bonus": "CostCalculation",
+    "last_bonus": null,
     "bonus_action": "ничего",
     "double_action": "опрос"
   },
   {
     "bonus": "Canceled",
     "double": "Running",
-    "last_bonus": "CarFound",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "Running",
-    "last_bonus": "Running",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "Running",
-    "last_bonus": "Canceled",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "Running",
-    "last_bonus": "Executed",
-    "bonus_action": "ничего",
-    "double_action": "опрос"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "Running",
-    "last_bonus": "CostCalculation",
+    "last_bonus": null,
     "bonus_action": "ничего",
     "double_action": "опрос"
   },
   {
     "bonus": "Canceled",
     "double": "CostCalculation",
-    "last_bonus": "CarFound",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CostCalculation",
-    "last_bonus": "Running",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CostCalculation",
-    "last_bonus": "Canceled",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CostCalculation",
-    "last_bonus": "Executed",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "Canceled",
-    "double": "CostCalculation",
-    "last_bonus": "CostCalculation",
+    "last_bonus": null,
     "bonus_action": "ничего",
     "double_action": "ничего"
   },
@@ -394,147 +310,21 @@
   {
     "bonus": "CostCalculation",
     "double": "CarFound",
-    "last_bonus": "SearchesForCar",
+    "last_bonus": null,
     "bonus_action": "ничего",
-    "double_action": "ничего"
+    "double_action": "опрос"
   },
   {
     "bonus": "CostCalculation",
     "double": "Running",
-    "last_bonus": "SearchesForCar",
+    "last_bonus": null,
     "bonus_action": "ничего",
-    "double_action": "ничего"
+    "double_action": "опрос"
   },
   {
     "bonus": "CostCalculation",
     "double": "CostCalculation",
-    "last_bonus": "SearchesForCar",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CarFound",
-    "last_bonus": "WaitingCarSearch",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "Running",
-    "last_bonus": "WaitingCarSearch",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CostCalculation",
-    "last_bonus": "WaitingCarSearch",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CarFound",
-    "last_bonus": "CarFound",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "Running",
-    "last_bonus": "CarFound",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CostCalculation",
-    "last_bonus": "CarFound",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CarFound",
-    "last_bonus": "Running",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "Running",
-    "last_bonus": "Running",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CostCalculation",
-    "last_bonus": "Running",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CarFound",
-    "last_bonus": "Canceled",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "Running",
-    "last_bonus": "Canceled",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CostCalculation",
-    "last_bonus": "Canceled",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CarFound",
-    "last_bonus": "Executed",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "Running",
-    "last_bonus": "Executed",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CostCalculation",
-    "last_bonus": "Executed",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CarFound",
-    "last_bonus": "CostCalculation",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "Running",
-    "last_bonus": "CostCalculation",
-    "bonus_action": "ничего",
-    "double_action": "ничего"
-  },
-  {
-    "bonus": "CostCalculation",
-    "double": "CostCalculation",
-    "last_bonus": "CostCalculation",
+    "last_bonus": null,
     "bonus_action": "ничего",
     "double_action": "ничего"
   }

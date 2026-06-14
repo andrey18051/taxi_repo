@@ -157,14 +157,7 @@
       "Running"
     ],
     "bonus_action": "ничего",
-    "double_action": "опрос",
-    "last_bonus_options": [
-      "CarFound",
-      "Running",
-      "Canceled",
-      "Executed",
-      "CostCalculation"
-    ]
+    "double_action": "опрос"
   },
   {
     "bonus": "Canceled",
@@ -172,14 +165,7 @@
       "CostCalculation"
     ],
     "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "CarFound",
-      "Running",
-      "Canceled",
-      "Executed",
-      "CostCalculation"
-    ]
+    "double_action": "ничего"
   },
   {
     "bonus": "Executed",
@@ -213,91 +199,17 @@
     "bonus": "CostCalculation",
     "double_options": [
       "CarFound",
-      "Running",
-      "CostCalculation"
-    ],
-    "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "SearchesForCar"
-    ]
-  },
-  {
-    "bonus": "CostCalculation",
-    "double_options": [
-      "CarFound",
-      "Running",
-      "CostCalculation"
-    ],
-    "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "WaitingCarSearch"
-    ]
-  },
-  {
-    "bonus": "CostCalculation",
-    "double_options": [
-      "CarFound",
-      "Running",
-      "CostCalculation"
-    ],
-    "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "CarFound"
-    ]
-  },
-  {
-    "bonus": "CostCalculation",
-    "double_options": [
-      "CarFound",
-      "Running",
-      "CostCalculation"
-    ],
-    "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
       "Running"
-    ]
+    ],
+    "bonus_action": "ничего",
+    "double_action": "опрос"
   },
   {
     "bonus": "CostCalculation",
     "double_options": [
-      "CarFound",
-      "Running",
       "CostCalculation"
     ],
     "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "Canceled"
-    ]
-  },
-  {
-    "bonus": "CostCalculation",
-    "double_options": [
-      "CarFound",
-      "Running",
-      "CostCalculation"
-    ],
-    "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "Executed"
-    ]
-  },
-  {
-    "bonus": "CostCalculation",
-    "double_options": [
-      "CarFound",
-      "Running",
-      "CostCalculation"
-    ],
-    "bonus_action": "ничего",
-    "double_action": "ничего",
-    "last_bonus_options": [
-      "CostCalculation"
-    ]
+    "double_action": "ничего"
   }
 ]

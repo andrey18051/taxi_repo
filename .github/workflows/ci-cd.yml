@@ -143,6 +143,18 @@ jobs:
 
           # Устанавливаем права
           ssh -o StrictHostKeyChecking=no -i key.pem $SSH_USER@$SSH_HOST "chmod 644 /opt/secrets/firebase/test/*.json"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          extensions: mbstring, xml, dom
+          coverage: none
+
+      - name: Run order leg action matrix tests
+        run: |
+          php vendor/bin/phpunit --filter 'OrderLegActionMatrixList1Test|OrderLegActionMatrixExhaustiveTest|OrderForkLegExecutorExhaustiveTest|OrderForkLegExecutorLastStatusTest|IsDispatchOrderCanceledTest'
+
       - name: Build and push TEST image
         id: build_test
         run: |

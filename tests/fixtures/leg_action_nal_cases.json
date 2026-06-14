@@ -240,455 +240,91 @@
   {
     "double": "Canceled",
     "bonus": "CarFound",
-    "last_double": "CarFound",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CarFound",
-    "last_double": "Running",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CarFound",
-    "last_double": "Canceled",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CarFound",
-    "last_double": "Executed",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CarFound",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "ничего",
     "bonus_action": "опрос"
   },
   {
     "double": "Canceled",
     "bonus": "Running",
-    "last_double": "CarFound",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "Running",
-    "last_double": "Running",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "Running",
-    "last_double": "Canceled",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "Running",
-    "last_double": "Executed",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "Running",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "ничего",
     "bonus_action": "опрос"
   },
   {
     "double": "Canceled",
     "bonus": "CostCalculation",
-    "last_double": "CarFound",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CostCalculation",
-    "last_double": "Running",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CostCalculation",
-    "last_double": "Canceled",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CostCalculation",
-    "last_double": "Executed",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Canceled",
-    "bonus": "CostCalculation",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "ничего",
     "bonus_action": "ничего"
   },
   {
     "double": "Executed",
     "bonus": "SearchesForCar",
-    "last_double": "CarFound",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "SearchesForCar",
-    "last_double": "Running",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "SearchesForCar",
-    "last_double": "Canceled",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "SearchesForCar",
-    "last_double": "Executed",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "SearchesForCar",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "опрос",
     "bonus_action": "отмена"
   },
   {
     "double": "Executed",
     "bonus": "WaitingCarSearch",
-    "last_double": "CarFound",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "WaitingCarSearch",
-    "last_double": "Running",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "WaitingCarSearch",
-    "last_double": "Canceled",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "WaitingCarSearch",
-    "last_double": "Executed",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "WaitingCarSearch",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "опрос",
     "bonus_action": "отмена"
   },
   {
     "double": "Executed",
     "bonus": "CarFound",
-    "last_double": "CarFound",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CarFound",
-    "last_double": "Running",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CarFound",
-    "last_double": "Canceled",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CarFound",
-    "last_double": "Executed",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CarFound",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "опрос",
     "bonus_action": "отмена"
   },
   {
     "double": "Executed",
     "bonus": "Running",
-    "last_double": "CarFound",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "Running",
-    "last_double": "Running",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "Running",
-    "last_double": "Canceled",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "Running",
-    "last_double": "Executed",
-    "double_action": "опрос",
-    "bonus_action": "отмена"
-  },
-  {
-    "double": "Executed",
-    "bonus": "Running",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "опрос",
     "bonus_action": "отмена"
   },
   {
     "double": "Executed",
     "bonus": "CostCalculation",
-    "last_double": "CarFound",
-    "double_action": "опрос",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CostCalculation",
-    "last_double": "Running",
-    "double_action": "опрос",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CostCalculation",
-    "last_double": "Canceled",
-    "double_action": "опрос",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CostCalculation",
-    "last_double": "Executed",
-    "double_action": "опрос",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "Executed",
-    "bonus": "CostCalculation",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "опрос",
     "bonus_action": "ничего"
   },
   {
     "double": "CostCalculation",
     "bonus": "SearchesForCar",
-    "last_double": "CarFound",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "SearchesForCar",
-    "last_double": "Running",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "SearchesForCar",
-    "last_double": "Canceled",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "SearchesForCar",
-    "last_double": "Executed",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "SearchesForCar",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "востановление",
     "bonus_action": "опрос"
   },
   {
     "double": "CostCalculation",
     "bonus": "WaitingCarSearch",
-    "last_double": "CarFound",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "WaitingCarSearch",
-    "last_double": "Running",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "WaitingCarSearch",
-    "last_double": "Canceled",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "WaitingCarSearch",
-    "last_double": "Executed",
-    "double_action": "востановление",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "WaitingCarSearch",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "востановление",
     "bonus_action": "опрос"
   },
   {
     "double": "CostCalculation",
     "bonus": "CarFound",
-    "last_double": "CarFound",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CarFound",
-    "last_double": "Running",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CarFound",
-    "last_double": "Canceled",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CarFound",
-    "last_double": "Executed",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CarFound",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "ничего",
     "bonus_action": "опрос"
   },
   {
     "double": "CostCalculation",
     "bonus": "Running",
-    "last_double": "CarFound",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "Running",
-    "last_double": "Running",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "Running",
-    "last_double": "Canceled",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "Running",
-    "last_double": "Executed",
-    "double_action": "ничего",
-    "bonus_action": "опрос"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "Running",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "ничего",
     "bonus_action": "опрос"
   },
   {
     "double": "CostCalculation",
     "bonus": "CostCalculation",
-    "last_double": "CarFound",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CostCalculation",
-    "last_double": "Running",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CostCalculation",
-    "last_double": "Canceled",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CostCalculation",
-    "last_double": "Executed",
-    "double_action": "ничего",
-    "bonus_action": "ничего"
-  },
-  {
-    "double": "CostCalculation",
-    "bonus": "CostCalculation",
-    "last_double": "CostCalculation",
+    "last_double": null,
     "double_action": "ничего",
     "bonus_action": "ничего"
   }
