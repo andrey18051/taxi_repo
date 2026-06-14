@@ -15,3 +15,8 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# Python cache (scripts/export_leg_action_rules.py and other local helpers)
+__pycache__/
+*.py[cod]
+scripts/__pycache__/
