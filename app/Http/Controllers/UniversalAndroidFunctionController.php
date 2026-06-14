@@ -3799,8 +3799,28 @@ class UniversalAndroidFunctionController extends Controller
         $canceledOneMinute = $this->canceledOneMinute($uid_bonusOrderHold);
         $canceledNoServerCity = $this->canceledNoServerCity($uid_bonusOrderHold);
 
-        // Выход по 1 минуте, нажатию отмены или безсерверному городу
-        if ($canceledOneMinute || $canceledNoServerCity || $uid_history->cancel == "1") {
+        $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
+        $cardOrder = null;
+        $nalOrder = null;
+        if ($uid_history) {
+            $decodedCard = json_decode($uid_history->bonus_status ?? '', true);
+            $decodedNal = json_decode($uid_history->double_status ?? '', true);
+            $cardOrder = is_array($decodedCard) ? $decodedCard : null;
+            $nalOrder = is_array($decodedNal) ? $decodedNal : null;
+        }
+        $shouldCascadeHoldCancel = $orderweb
+            && OrderStatusController::shouldCascadeForkHoldDispatchCancel($cardOrder, $nalOrder, $orderweb);
+
+        if ($shouldCascadeHoldCancel && $uid_history && $uid_history->cancel != "1") {
+            $uid_history->cancel = '1';
+            $uid_history->save();
+            Log::info('canceledFinish: cascade hold dispatch cancel flagged', [
+                'uid_bonusOrderHold' => $uid_bonusOrderHold,
+            ]);
+        }
+
+        // Выход по 1 минуте, нажатию отмены, безсерверному городу или снятию hold-ноги на диспетчере
+        if ($canceledOneMinute || $canceledNoServerCity || $uid_history->cancel == "1" || $shouldCascadeHoldCancel) {
             $orderCanceledBonus = !($lastStatusBonus !== "Canceled") || self::orderCanceledReturn(
                 $bonusOrder,
                 'bonus',
@@ -3822,46 +3842,12 @@ class UniversalAndroidFunctionController extends Controller
             if ($orderCanceledBonus && $orderCanceledDouble) {
                 Log::info("Fork canceled: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");
 
-//                try {
-//
-//                    $orderweb = Orderweb::where("dispatching_order_uid", $uid_bonusOrderHold)->first();
-//                    if (!in_array($orderweb->closeReason,  ['101', '102', '103', '104']) ) {
-//                        $uid = $uid_bonusOrderHold;
-//                        (new FCMController)->deleteDocumentFromFirestore($uid);
-//                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-//                        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-//                        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-//
-////                        (new AndroidTestOSMController)->updateTimestamp($orderweb->id);
-////                        $orderweb->auto = null;
-////                        $orderweb->closeReason = "1";
-////                        $orderweb->save();
-//
-//                        $email = $orderweb->email;
-//
-//                        switch ($orderweb->comment) {
-//                            case "taxi_easy_ua_pas1":
-//                                $app = "PAS1";
-//                                break;
-//                            case "taxi_easy_ua_pas2":
-//                                $app = "PAS2";
-//                                break;
-//                            default:
-//                                $app = "PAS4";
-//                        }
-//
-//                        $dispatching_order_uid = $orderweb->dispatching_order_uid;
-//                        (new PusherController)->sentCanceledStatus(
-//                            $app,
-//                            $email,
-//                            $dispatching_order_uid
-//                        );
-//                    }
-//                    return true; // Изменено с "exit" на true для консистентности возвращаемого типа
-//                } catch (\Exception  $e) {
-//                    Log::error("\Exception  in canceledFinish: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder, error=" . $e->getMessage());
-//                    return false; // Возвращаем false в случае ошибки для консистентности
-//                }
+                if ($orderweb) {
+                    OrderStatusController::applyCanceledOrderweb($orderweb);
+                    $orderweb->save();
+                    OrderStatusController::notifyForkOrderCanceledPush($orderweb, $uid_bonusOrderHold);
+                }
+
                 return true;
             } else {
                 Log::warning("Failed to cancel fork: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");

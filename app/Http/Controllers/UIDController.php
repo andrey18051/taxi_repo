@@ -1567,14 +1567,17 @@ class UIDController extends Controller
 
             if (isset($orderweb)) {
 
-                if (OrderStatusController::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
-                    if ($uid_history->cancel === '1' || $uid_history->cancel === 1) {
-                        $uid_history->cancel = '0';
-                        $uid_history->save();
-                    }
-                } elseif ($uid_history->cancel == "1"
+                if (OrderStatusController::isExplicitForkCancelRequested($uid_history)
+                    || OrderStatusController::shouldCascadeForkHoldDispatchCancel($cardOrder, $nalOrder, $orderweb)) {
+                    OrderStatusController::applyCanceledOrderweb($orderweb);
+                    $orderweb->save();
+                    return;
+                }
+
+                if (!OrderStatusController::hasActiveDispatchLeg($cardOrder, $nalOrder)
+                    && ($uid_history->cancel == "1"
                     || OrderStatusController::isDispatchOrderCanceled($cardOrder ?? null)
-                    || OrderStatusController::isDispatchOrderCanceled($nalOrder ?? null)) {
+                    || OrderStatusController::isDispatchOrderCanceled($nalOrder ?? null))) {
                     OrderStatusController::applyCanceledOrderweb($orderweb);
                     $orderweb->save();
                     return;

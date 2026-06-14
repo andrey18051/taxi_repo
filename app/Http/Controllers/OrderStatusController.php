@@ -1283,17 +1283,31 @@ class OrderStatusController extends Controller
             $autoInfoCard = $cardOrder['order_car_info'] ?? null;
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
-            if (self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
-                if ($uid_history->cancel === '1' || $uid_history->cancel === 1) {
-                    $uid_history->cancel = '0';
+            if (self::isExplicitForkCancelRequested($uid_history)
+                || self::shouldCascadeForkHoldDispatchCancel($cardOrder, $nalOrder, $orderweb)) {
+                if (!self::isExplicitForkCancelRequested($uid_history)) {
+                    $uid_history->cancel = '1';
                     $uid_history->save();
-                    Log::info('Uid_history cancel cleared: active leg on dispatch', [
+                    Log::info('Uid_history cancel set: hold leg dispatch cancel during fork search', [
                         'dispatching_order_uid' => $dispatching_order_uid,
                     ]);
                 }
-            } elseif ($uid_history->cancel == "1"
+                $action = 'Заказ снят';
+                self::applyCanceledOrderweb($orderweb);
+                $orderweb->save();
+                $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
+                Log::info('Order canceled (fork hold dispatch cancel)', [
+                    'action' => $action,
+                    'dispatching_order_uid' => $dispatching_order_uid,
+                    'cardState' => $cardState,
+                    'nalState' => $nalState,
+                ]);
+                Log::info('Exiting function due to cancel', ['response' => $response]);
+                return $response;
+            } elseif (!self::hasActiveDispatchLeg($cardOrder, $nalOrder)
+                && ($uid_history->cancel == "1"
                 || self::isDispatchOrderCanceled($cardOrder)
-                || self::isDispatchOrderCanceled($nalOrder)) {
+                || self::isDispatchOrderCanceled($nalOrder))) {
                 $action = 'Заказ снят';
                 self::applyCanceledOrderweb($orderweb);
                 $orderweb->save();
@@ -1941,6 +1955,75 @@ class OrderStatusController extends Controller
     /**
      * Хотя бы одна нога (карта или нал) ещё активна на диспетчере.
      */
+    public static function isExplicitForkCancelRequested(?Uid_history $uid_history): bool
+    {
+        if ($uid_history === null) {
+            return false;
+        }
+
+        return $uid_history->cancel === '1'
+            || $uid_history->cancel === 1
+            || $uid_history->cancel === true;
+    }
+
+    /**
+     * Hold (card) leg canceled on dispatch while cash leg still searches — finalize fork for the app.
+     * Grace period keeps early fork duplicate search alive; stale state is treated as admin/dispatch cancel.
+     */
+    public static function shouldCascadeForkHoldDispatchCancel(
+        ?array $cardOrder,
+        ?array $nalOrder,
+        Orderweb $orderweb
+    ): bool {
+        if ($cardOrder === null || $nalOrder === null) {
+            return false;
+        }
+
+        $cardState = (string) ($cardOrder['execution_status'] ?? '');
+        $nalState = (string) ($nalOrder['execution_status'] ?? '');
+        if ($cardState !== 'Canceled') {
+            return false;
+        }
+        if (!in_array($nalState, ['SearchesForCar', 'WaitingCarSearch'], true)) {
+            return false;
+        }
+        if (!empty($cardOrder['order_car_info']) || !empty($nalOrder['order_car_info'])) {
+            return false;
+        }
+
+        $cardClose = $cardOrder['close_reason'] ?? -1;
+        if (!in_array($cardClose, [-1, '-1', 0, '0'], true)) {
+            return true;
+        }
+
+        if ($orderweb->created_at === null) {
+            return false;
+        }
+
+        return $orderweb->created_at->diffInSeconds(now()) >= 90;
+    }
+
+    public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
+    {
+        if (empty($orderweb->email)) {
+            return;
+        }
+        if (in_array((string) $orderweb->closeReason, ['101', '102', '103', '104'], true)) {
+            return;
+        }
+
+        try {
+            $app = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
+            (new PusherController)->sentCanceledStatus($app, $orderweb->email, $uid);
+            (new CentrifugoController)->sentCanceledStatus($app, $orderweb->email, $uid);
+        } catch (\Throwable $e) {
+            Log::error('notifyForkOrderCanceledPush failed: ' . $e->getMessage(), [
+                'uid' => $uid,
+                'order_id' => $orderweb->id,
+            ]);
+        }
+    }
+
     public static function hasActiveDispatchLeg(?array $cardOrder, ?array $nalOrder): bool
     {
         $cardActive = $cardOrder !== null && !self::isDispatchOrderCanceled($cardOrder);
