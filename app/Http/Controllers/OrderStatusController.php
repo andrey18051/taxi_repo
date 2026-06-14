@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExecutionStatus;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
+use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -1132,6 +1133,56 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Ответ по кэшу orderweb, когда uid_history ещё недоступен.
+     */
+    private function buildCachedStatusPushResponse(Orderweb $orderweb, string $uid): \Illuminate\Http\JsonResponse
+    {
+        $closeReason = (string) $orderweb->closeReason;
+
+        if (!OrderCarInfoHelper::isCachedStageCloseReason($closeReason)) {
+            $carInfo = OrderCarInfoHelper::formatForApp($orderweb->auto);
+            if ($carInfo !== null) {
+                return response()->json(array_merge([
+                    'action' => OrderStatusMessageResolver::ACTION_CAR_FOUND,
+                    'close_reason' => 101,
+                    'dispatching_order_uid' => $uid,
+                    'uid' => $uid,
+                    'time_to_start_point' => $orderweb->time_to_start_point,
+                ], $carInfo));
+            }
+
+            return response()->json([
+                'action' => OrderStatusMessageResolver::ACTION_SEARCH,
+                'dispatching_order_uid' => $uid,
+                'uid' => $uid,
+            ]);
+        }
+
+        $responseArr = [
+            'close_reason' => $orderweb->closeReason,
+            'dispatching_order_uid' => $uid,
+            'uid' => $uid,
+            'action' => OrderCarInfoHelper::actionFromCloseReason($closeReason),
+        ];
+
+        $carInfo = OrderCarInfoHelper::formatForApp($orderweb->auto);
+        if ($carInfo !== null) {
+            $responseArr = array_merge($responseArr, $carInfo);
+            $responseArr['time_to_start_point'] = $orderweb->time_to_start_point;
+        }
+
+        Log::info('Exiting function (cached orderweb)', $responseArr);
+
+        return response()->json($responseArr);
+    }
+
+    private static function finalizeCanceledFromStatusPush(Orderweb $orderweb, string $uid): void
+    {
+        self::applyCanceledOrderweb($orderweb);
+        self::notifyForkOrderCanceledPush($orderweb, $uid);
+    }
+
+    /**
      * @throws \Exception
      */
     public function getOrderStatusMessageResultPush($dispatching_order_uid)
@@ -1164,99 +1215,17 @@ class OrderStatusController extends Controller
                     'execution_status' => 'Canceled',
                 ]);
             }
-
-            // 0, 8, 9 — закрытие внешним API / диспетчеризацией («Выполнен»); 100–104 — внутренние этапы PAS
-            if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
-
-                $responseArr = [
-                    'close_reason' => $orderweb->closeReason
-                ];
-
-                $responseArr['dispatching_order_uid'] = $uid;
-                $responseArr['uid'] = $uid;
-
-
-                $storedData = $orderweb->auto ?? null;
-                Log::debug('Set orderweb auto initially', ['auto' => $storedData]);
-                if ($storedData != null) {
-                    $dataDriver = json_decode($storedData, true);
-//            $name = $dataDriver["name"];
-                    $color = $dataDriver["color"];
-                    $brand = $dataDriver["brand"];
-                    $model = $dataDriver["model"];
-                    $number = $dataDriver["number"];
-                    $phoneNumber = $dataDriver["phoneNumber"];
-
-                    $auto = "$number, цвет $color  $brand $model. ";
-
-
-                    // Обновление полей
-                    $responseArr['order_car_info'] = $auto;
-                    $responseArr['driver_phone'] = $phoneNumber;
-                    $responseArr['time_to_start_point'] = $orderweb->time_to_start_point;
-
-                }
-
-                $action = 'Поиск авто';
-                switch ((string) $orderweb->closeReason) {
-                    case '0':
-                    case '8':
-                    case '9':
-                        $action = 'Заказ выполнен';
-                        Log::info('Switch: external API close', ['closeReason' => $orderweb->closeReason, 'action' => $action]);
-                        break;
-                    // Block 2: Состояния "Авто найдено"
-                    case '101':
-                        $action = 'Авто найдено';
-                        Log::info('Switch: 101', ['action' => $action]);
-                        break;
-                    case '102':
-                        $action = 'На месте';
-                        Log::info('Switch: 102', ['action' => $action]);
-                        break;
-
-                    case '103':
-                        $action = 'В пути';
-                        Log::info('Switch: 103', ['action' => $action]);
-                        break;
-
-                    case '104':
-                        $action = "Заказ выполнен";
-                        Log::info('Switch: 104', ['action' => $action]);
-                        break;
-                    default:
-                        $action = 'Поиск авто';
-                        Log::info('Switch: default', ['action' => $action]);
-                }
-
-                Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
-                $responseArr['action'] = $action;
-
-                Log::info('Exiting function',  $responseArr);
-                return response()->json( $responseArr);
-            }
-        } else {
-            return response()->json(['action' => 'Поиск авто']);
         }
 
-        // Без sleep(60): приложение опрашивает каждые ~5 с, блокировка PHP-FPM давала 504.
+        // Сначала uid_history — кэш closeReason не должен перекрывать актуальное состояние vod.
         [$uid_history, $nalOrderInput, $cardOrderInput, $dispatching_order_uid] = $this->resolveUidHistoryForStatusPush($uid);
 
         Log::debug('Uid_history lookup (non-blocking)', ['found' => $uid_history !== null]);
 
         if (!$uid_history || $cardOrderInput === null) {
-            Log::info('Uid_history not ready, fast response for poll', ['uid' => $uid]);
-            if ($orderweb && !empty($orderweb->auto)
-                && !in_array((string) $orderweb->closeReason, ['0', '1', '8', '9'], true)) {
-                return response()->json([
-                    'action' => OrderStatusMessageResolver::ACTION_CAR_FOUND,
-                    'close_reason' => 101,
-                    'dispatching_order_uid' => $uid,
-                    'uid' => $uid,
-                    'order_car_info' => $orderweb->auto,
-                    'driver_phone' => null,
-                    'time_to_start_point' => $orderweb->time_to_start_point,
-                ]);
+            Log::info('Uid_history not ready, cached orderweb response', ['uid' => $uid]);
+            if ($orderweb) {
+                return $this->buildCachedStatusPushResponse($orderweb, $uid);
             }
 
             return response()->json(['action' => OrderStatusMessageResolver::ACTION_SEARCH]);
@@ -1285,7 +1254,7 @@ class OrderStatusController extends Controller
 
             if (self::isExplicitForkCancelRequested($uid_history)) {
                 $action = 'Заказ снят';
-                self::applyCanceledOrderweb($orderweb);
+                self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
                 $orderweb->save();
                 $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
                 Log::info('Order canceled (explicit fork cancel)', [
@@ -1301,7 +1270,7 @@ class OrderStatusController extends Controller
                 || self::isDispatchOrderCanceled($cardOrder)
                 || self::isDispatchOrderCanceled($nalOrder))) {
                 $action = 'Заказ снят';
-                self::applyCanceledOrderweb($orderweb);
+                self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
                 $orderweb->save();
                 $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
                 Log::info('Order canceled', [
@@ -1313,7 +1282,10 @@ class OrderStatusController extends Controller
                 Log::info('Exiting function due to cancel', ['response' => $response]);
                 return $response;
             }
-            $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
+            $newAuto = $autoInfoNal ?? $autoInfoCard ?? null;
+            if ($newAuto !== null) {
+                $orderweb->auto = $newAuto;
+            }
             Log::debug('Set orderweb auto initially', ['auto' => $orderweb->auto]);
 
             $resolved = $this->resolveLegStatuses($nalState, $cardState, $nalOrder, $cardOrder);
@@ -1413,7 +1385,7 @@ class OrderStatusController extends Controller
                         $orderweb->auto = $response_arr["order_car_info"];
                         Log::info('Updated orderweb auto from response', ['auto' => $orderweb->auto]);
                     }
-                    self::syncOrderwebAfterStatusPush($orderweb, $action, $cardOrder, $nalOrder);
+                    self::syncOrderwebAfterStatusPush($orderweb, $action, $cardOrder, $nalOrder, $dispatching_order_uid);
                     Log::info('Synced orderweb after status push', [
                         'action' => $action,
                         'closeReason' => $orderweb->closeReason,
@@ -1456,93 +1428,14 @@ class OrderStatusController extends Controller
         $orderweb = Orderweb::where("dispatching_order_uid", $dispatching_order_uid)->first();
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
-        if ($orderweb) {
-            if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
+        [$uid_history, $nalOrderInput, $cardOrderInput, $dispatching_order_uid] = $this->resolveUidHistoryForStatusPush($dispatching_order_uid);
 
-                $responseArr = [
-                    'close_reason' => $orderweb->closeReason
-                ];
-
-                $responseArr['uid'] = $dispatching_order_uid;
-
-
-                $storedData = $orderweb->auto ?? null;
-                Log::debug('Set orderweb auto initially', ['auto' => $storedData]);
-                if ($storedData != null) {
-                    $dataDriver = json_decode($storedData, true);
-//            $name = $dataDriver["name"];
-                    $color = $dataDriver["color"];
-                    $brand = $dataDriver["brand"];
-                    $model = $dataDriver["model"];
-                    $number = $dataDriver["number"];
-                    $phoneNumber = $dataDriver["phoneNumber"];
-
-                    $auto = "$number, цвет $color  $brand $model. ";
-
-
-                    // Обновление полей
-                    $responseArr['order_car_info'] = $auto;
-                    $responseArr['driver_phone'] = $phoneNumber;
-                    $responseArr['time_to_start_point'] = $orderweb->time_to_start_point;
-
-                }
-
-                $action = 'Поиск авто';
-                switch ((string) $orderweb->closeReason) {
-                    case '0':
-                    case '8':
-                    case '9':
-                        $action = 'Заказ выполнен';
-                        Log::info('Switch: external API close (background)', ['closeReason' => $orderweb->closeReason, 'action' => $action]);
-                        break;
-                    // Block 2: Состояния "Авто найдено"
-                    case '101':
-                        $action = 'Авто найдено';
-                        Log::info('Switch: Авто найдено', ['action' => $action]);
-                        break;
-                    case '102':
-                        $action = 'На месте';
-                        Log::info('Switch: На месте', ['action' => $action]);
-                        break;
-
-                    case '103':
-                        $action = 'В пути';
-                        Log::info('Switch: В пути', ['action' => $action]);
-                        break;
-
-                    case '104':
-                        $action = "Заказ выполнен";
-                        Log::info('Switch: Заказ выполнен', ['action' => $action]);
-                        break;
-                }
-
-                Log::debug('Saving orderweb after action determination', ['orderweb' => $orderweb->toArray()]);
-                $responseArr['action'] = $action;
-
-                Log::info('Exiting function',  $responseArr);
-                return response()->json( $responseArr);
+        if (!$uid_history || $cardOrderInput === null) {
+            if ($orderweb) {
+                return $this->buildCachedStatusPushResponse($orderweb, $dispatching_order_uid);
             }
-        } else {
-            $action = 'Поиск авто';
-            $responseArr['action'] = $action;
-            response()->json( $responseArr);
-        }
 
-        $uid_history = Uid_history::where("uid_bonusOrderHold", $dispatching_order_uid)->first();
-
-        if ($uid_history) {
-            // Если запись найдена, выходим из цикла
-            $nalOrderInput = $uid_history->double_status;
-            $cardOrderInput = $uid_history->bonus_status;
-        } else {
-            $uid_history = Uid_history::where("uid_doubleOrder", $dispatching_order_uid)->first();
-
-            if ($uid_history) {
-                // Если запись найдена, выходим из цикла
-                $nalOrderInput = $uid_history->double_status;
-                $cardOrderInput = $uid_history->bonus_status;
-                $dispatching_order_uid = $uid_history->uid_bonusOrder;
-            }
+            return response()->json(['action' => OrderStatusMessageResolver::ACTION_SEARCH]);
         }
 
         if ($uid_history) {
@@ -1565,7 +1458,10 @@ class OrderStatusController extends Controller
 
 //            if ($orderweb && isset($orderweb->comment) && isset($orderweb->email)) {
             if ($orderweb) {
-                $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
+                $newAuto = $autoInfoNal ?? $autoInfoCard ?? null;
+                if ($newAuto !== null) {
+                    $orderweb->auto = $newAuto;
+                }
 //                switch ($orderweb->comment) {
 //                    case 'taxi_easy_ua_pas1':
 //                        $app = "PAS1";
@@ -1984,39 +1880,50 @@ class OrderStatusController extends Controller
 
     public static function hasActiveDispatchLeg(?array $cardOrder, ?array $nalOrder): bool
     {
-        $cardActive = $cardOrder !== null && !self::isDispatchOrderCanceled($cardOrder);
-        $nalActive = $nalOrder !== null && !self::isDispatchOrderCanceled($nalOrder);
+        $dispatched = ['CarFound', 'Running', 'WaitingAtAddress', 'AtAddress', 'InRoute'];
 
-        return $cardActive || $nalActive;
+        $cardStatus = $cardOrder['execution_status'] ?? '';
+        $nalStatus = $nalOrder['execution_status'] ?? '';
+
+        return in_array($cardStatus, $dispatched, true)
+            || in_array($nalStatus, $dispatched, true);
     }
 
     /**
-     * После опроса: не перезаписывать orderweb отменой, если заказ ещё в работе.
+     * После опроса: синхронизировать orderweb с актуальным action из vod.
      */
     public static function syncOrderwebAfterStatusPush(
         Orderweb $orderweb,
         string $action,
         ?array $cardOrder = null,
-        ?array $nalOrder = null
+        ?array $nalOrder = null,
+        ?string $uidForCancelPush = null
     ): void {
-        if ($action === 'Заказ снят' && !self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+        if ($action === OrderStatusMessageResolver::ACTION_CANCELED
+            && !self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
             self::applyCanceledOrderweb($orderweb);
+            if ($uidForCancelPush !== null) {
+                self::notifyForkOrderCanceledPush($orderweb, $uidForCancelPush);
+            }
 
             return;
         }
 
-        $activeActions = ['Поиск авто', 'Авто найдено', 'На месте', 'В пути'];
-        if (in_array($action, $activeActions, true) && self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
-            if (!in_array((string) $orderweb->closeReason, ['101', '102', '103'], true)) {
-                $orderweb->closeReason = '-1';
-            }
+        if ($action === OrderStatusMessageResolver::ACTION_SEARCH) {
+            $orderweb->closeReason = '-1';
+            $orderweb->auto = null;
             $orderweb->cancel_timestamp = null;
 
             return;
         }
 
-        if (in_array((string) $orderweb->closeReason, ['0', '8', '9', '100', '101', '102', '103', '104'], true)) {
-            return;
+        $activeTripActions = [
+            OrderStatusMessageResolver::ACTION_CAR_FOUND,
+            OrderStatusMessageResolver::ACTION_AT_ADDRESS,
+            OrderStatusMessageResolver::ACTION_IN_ROUTE,
+        ];
+        if (in_array($action, $activeTripActions, true) && self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+            $orderweb->cancel_timestamp = null;
         }
     }
 

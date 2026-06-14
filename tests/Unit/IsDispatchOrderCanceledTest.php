@@ -27,14 +27,28 @@ class IsDispatchOrderCanceledTest extends TestCase
         $this->assertTrue(OrderStatusController::isDispatchOrderCanceled($order));
     }
 
-    public function test_fork_card_canceled_does_not_trigger_early_cancel_when_nal_missing(): void
+    public function test_fork_card_canceled_is_not_active_dispatch_leg(): void
     {
         $cardOrder = [
             'execution_status' => 'Canceled',
             'close_reason' => -1,
         ];
 
-        $this->assertTrue(OrderStatusController::hasActiveDispatchLeg($cardOrder, null));
+        $this->assertFalse(OrderStatusController::hasActiveDispatchLeg($cardOrder, null));
+    }
+
+    public function test_running_nal_with_fork_canceled_card_is_active(): void
+    {
+        $cardOrder = [
+            'execution_status' => 'Canceled',
+            'close_reason' => -1,
+        ];
+        $nalOrder = [
+            'execution_status' => 'Running',
+            'close_reason' => -1,
+        ];
+
+        $this->assertTrue(OrderStatusController::hasActiveDispatchLeg($cardOrder, $nalOrder));
     }
 
     public function test_both_legs_truly_canceled_means_no_active_leg(): void

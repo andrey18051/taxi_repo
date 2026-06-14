@@ -152,7 +152,7 @@ class OrderStatusMessageResolver
             return $this->pack(self::ACTION_SEARCH, 'card', -1, '-1');
         }
         if ($nalState === 'Canceled' && $cardState === 'Canceled') {
-            if ($nalClose !== -1 && $cardClose !== -1) {
+            if ($nalClose !== -1 || $cardClose !== -1) {
                 return $this->pack(self::ACTION_CANCELED, 'card', 1, '1');
             }
 

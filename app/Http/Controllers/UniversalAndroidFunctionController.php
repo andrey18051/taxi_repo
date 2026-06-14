@@ -465,7 +465,10 @@ class UniversalAndroidFunctionController extends Controller
 
             if ($orderweb) {
                 $old_auto = $orderweb->auto;
-                $orderweb->auto = $autoInfoNal ?? $autoInfoCard ?? null;
+                $newAuto = $autoInfoNal ?? $autoInfoCard ?? null;
+                if ($newAuto !== null) {
+                    $orderweb->auto = $newAuto;
+                }
 
                 $orderweb->save();
                 $messageAdmin = "function writeAutoInfo $orderweb->auto" ;

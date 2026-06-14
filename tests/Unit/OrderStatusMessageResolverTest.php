@@ -75,4 +75,14 @@ class OrderStatusMessageResolverTest extends TestCase
 
         $this->assertSame('Заказ выполнен', $result['action']);
     }
+
+    public function test_both_canceled_with_operator_close_returns_canceled(): void
+    {
+        $nalOrder = ['execution_status' => 'Canceled', 'close_reason' => 9];
+        $cardOrder = ['execution_status' => 'Canceled', 'close_reason' => -1];
+
+        $result = $this->resolver->resolve('Canceled', 'Canceled', $nalOrder, $cardOrder);
+
+        $this->assertSame('Заказ снят', $result['action']);
+    }
 }
