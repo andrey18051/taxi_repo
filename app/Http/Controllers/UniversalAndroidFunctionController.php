@@ -5650,9 +5650,18 @@ class UniversalAndroidFunctionController extends Controller
         $wfp_invoice->dispatching_order_uid = $uid;
         $wfp_invoice->orderReference = $order_id;
         $wfp_invoice->amount = $amount;
+
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        if ($order) {
+            $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+            if (!empty($merchantInfo['merchantAccount']) && $merchantInfo['merchantAccount'] !== 'errorMerchantAccount') {
+                $wfp_invoice->merchantAccount = $merchantInfo['merchantAccount'];
+            }
+        }
+
         $wfp_invoice->save();
 
-        Log::debug("wfpInvoice dispatching_order_uid");
+        Log::debug("wfpInvoice dispatching_order_uid $uid");
         Log::debug("wfpInvoice $order_id");
         Log::debug("wfpInvoice $amount");
     }

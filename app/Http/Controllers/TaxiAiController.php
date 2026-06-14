@@ -795,6 +795,13 @@ class TaxiAiController extends Controller
                 $wfpInvoices->orderReference = $orderReference;
                 $wfpInvoices->amount = $amount;
                 $wfpInvoices->dispatching_order_uid = $uid ?? null;
+                $merchantInfo = (new WfpController)->checkMerchantInfo($order);
+                if (
+                    !empty($merchantInfo['merchantAccount'])
+                    && $merchantInfo['merchantAccount'] !== 'errorMerchantAccount'
+                ) {
+                    $wfpInvoices->merchantAccount = $merchantInfo['merchantAccount'];
+                }
                 $wfpInvoices->save();
 
                 Log::info('New WfpInvoice created successfully', [

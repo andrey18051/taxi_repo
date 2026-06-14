@@ -255,6 +255,13 @@ class WfpController extends Controller
         Log::debug($data['email']);
         Log::debug($data['recToken']);
 
+        if (!empty($data['orderReference']) && !empty($data['merchantAccount'])) {
+            $invoice = WfpInvoice::where('orderReference', $data['orderReference'])->first();
+            if ($invoice) {
+                $this->stampInvoiceMerchantAccount($invoice, $data['merchantAccount']);
+            }
+        }
+
         $user = User::where('email', $data['email'])->first();
 
         if ($user && isset($data['recToken']) && $data['recToken'] != "") {
@@ -1109,6 +1116,7 @@ class WfpController extends Controller
 
                     }
                     if ($invoice) {
+                        $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
                         $invoice->transactionStatus = $data['transactionStatus'];
                         $invoice->reason = $data['reason'];
                         $invoice->reasonCode = $data['reasonCode'];
@@ -1325,8 +1333,11 @@ class WfpController extends Controller
             case "http://91.205.17.153:7201":
                 $city = "Cherkasy Oblast";
                 break;
+            case "my_server_api":
+                $city = $this->resolveWfpCityFromOrderweb($order);
+                break;
             default:
-                $city = "OdessaTest";
+                $city = $this->resolveWfpCityFromOrderweb($order);
         }
         switch ($application) {
             case "PAS1":
@@ -1449,6 +1460,8 @@ class WfpController extends Controller
                             'invoice_id' => $value->id,
                             'orderReference' => $value->orderReference
                         ]);
+
+                        $this->stampInvoiceMerchantAccount($value, $merchantAccount);
 
                         // Параметры для REFUND
                         $params = [
@@ -1808,8 +1821,20 @@ class WfpController extends Controller
 //        }
 //    }
 
-    private function resolveMerchantForInvoice(WfpInvoice $invoice): ?array
+    private function resolveMerchantForInvoice(WfpInvoice $invoice, ?array $dispatchParams = null): ?array
     {
+        $merchantAccount = trim((string) ($dispatchParams['merchantAccount'] ?? $invoice->merchantAccount ?? ''));
+        if ($merchantAccount !== '') {
+            $secretKey = $this->resolveSecretKeyForMerchantAccount($merchantAccount);
+            if ($secretKey !== null) {
+                $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
+                return [
+                    'merchantAccount' => $merchantAccount,
+                    'secretKey' => $secretKey,
+                ];
+            }
+        }
+
         $order = null;
         if (!empty($invoice->dispatching_order_uid)) {
             $order = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
@@ -1850,6 +1875,18 @@ class WfpController extends Controller
             return null;
         }
 
+        if (
+            ($data['transactionStatus'] ?? '') === 'Declined'
+            && (int) ($data['reasonCode'] ?? 0) === 1127
+        ) {
+            Log::warning('refundSettleJob: CHECK_STATUS Order Not Found — skip sync (wrong merchant)', [
+                'orderReference' => $invoice->orderReference,
+                'merchantAccount' => $merchantAccount,
+            ]);
+            return null;
+        }
+
+        $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
         $invoice->transactionStatus = $data['transactionStatus'];
         $invoice->reason = $data['reason'] ?? null;
         $invoice->reasonCode = $data['reasonCode'] ?? null;
@@ -1966,7 +2003,10 @@ class WfpController extends Controller
                 return 'exit';
             }
 
-            $merchant = $this->resolveMerchantForInvoice($invoice);
+            $merchant = $this->resolveMerchantForInvoice(
+                $invoice,
+                is_array($params) ? $params : null
+            );
             if (
                 !$merchant
                 || empty($merchant['merchantAccount'])
@@ -1979,6 +2019,7 @@ class WfpController extends Controller
 
             $merchantAccount = $merchant['merchantAccount'];
             $secretKey = $merchant['secretKey'];
+            $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
 
             $this->syncInvoiceFromWfpCheckStatus($invoice, $merchantAccount, $secretKey);
             $invoice->refresh();
@@ -2111,6 +2152,9 @@ class WfpController extends Controller
 
         $wfpOrder = WfpInvoice::where('orderReference', $orderReferenceApi)->first();
         if ($wfpOrder) {
+            if (!empty($responseArray['merchantAccount'])) {
+                $this->stampInvoiceMerchantAccount($wfpOrder, $responseArray['merchantAccount']);
+            }
             $wfpOrder->transactionStatus = $transactionStatus;
             $wfpOrder->reason = $reason;
             $wfpOrder->reasonCode = $reasonCode;
@@ -2528,6 +2572,11 @@ class WfpController extends Controller
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug("GOOGLE_PAY_CHARGE", ['orderReference' => $orderReference, 'response' => $response->body()]);
 
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if ($invoice) {
+            $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
+        }
+
         try {
             $this->finalizeWalletAddCostAfterCharge(
                 $application,
@@ -2589,6 +2638,121 @@ class WfpController extends Controller
             default:
                 return City_PAS5::where("name", $city)->first();
         }
+    }
+
+    private function resolveWfpCityFromOrderweb(Orderweb $order): string
+    {
+        switch ($order->city ?? null) {
+            case 'city_kiev':
+                $city = 'Kyiv City';
+                break;
+            case 'city_cherkassy':
+                $city = 'Cherkasy Oblast';
+                break;
+            case 'city_odessa':
+                if (
+                    ($order->server ?? null) === 'http://188.190.245.102:7303'
+                    || ($order->server ?? null) === 'my_server_api'
+                ) {
+                    $city = 'OdessaTest';
+                } else {
+                    $city = 'Odessa';
+                }
+                break;
+            case 'city_zaporizhzhia':
+                $city = 'Zaporizhzhia';
+                break;
+            case 'city_dnipro':
+                $city = 'Dnipropetrovsk Oblast';
+                break;
+            case 'city_lviv':
+                $city = 'Lviv';
+                break;
+            case 'city_ivano_frankivsk':
+                $city = 'Ivano_frankivsk';
+                break;
+            case 'city_vinnytsia':
+                $city = 'Vinnytsia';
+                break;
+            case 'city_poltava':
+                $city = 'Poltava';
+                break;
+            case 'city_sumy':
+                $city = 'Sumy';
+                break;
+            case 'city_kharkiv':
+                $city = 'Kharkiv';
+                break;
+            case 'city_chernihiv':
+                $city = 'Chernihiv';
+                break;
+            case 'city_rivne':
+                $city = 'Rivne';
+                break;
+            case 'city_ternopil':
+                $city = 'Ternopil';
+                break;
+            case 'city_khmelnytskyi':
+                $city = 'Khmelnytskyi';
+                break;
+            case 'city_zakarpattya':
+                $city = 'Zakarpattya';
+                break;
+            case 'city_zhytomyr':
+                $city = 'Zhytomyr';
+                break;
+            case 'city_kropyvnytskyi':
+                $city = 'Kropyvnytskyi';
+                break;
+            case 'city_mykolaiv':
+                $city = 'Mykolaiv';
+                break;
+            case 'city_chernivtsi':
+                $city = 'Chernivtsi';
+                break;
+            case 'city_lutsk':
+                $city = 'Lutsk';
+                break;
+            default:
+                $city = 'OdessaTest';
+        }
+
+        return $this->resolveWfpCityName($city);
+    }
+
+    private function resolveSecretKeyForMerchantAccount(string $merchantAccount): ?string
+    {
+        if ($merchantAccount === 'play_google_com_f183e') {
+            return config('app.merchantSecretKey');
+        }
+
+        foreach ([City_PAS1::class, City_PAS2::class, City_PAS4::class, City_PAS5::class] as $modelClass) {
+            $merchant = $modelClass::where('wfp_merchantAccount', $merchantAccount)->first();
+            if ($merchant && !empty($merchant->wfp_merchantSecretKey)) {
+                return $merchant->wfp_merchantSecretKey;
+            }
+        }
+
+        if ($merchantAccount === config('app.merchantAccountMy')) {
+            return config('app.merchantSecretKeyMy');
+        }
+
+        if ($merchantAccount === config('app.merchantAccount')) {
+            return config('app.merchantSecretKey');
+        }
+
+        return null;
+    }
+
+    private function stampInvoiceMerchantAccount(WfpInvoice $invoice, string $merchantAccount): void
+    {
+        $merchantAccount = trim($merchantAccount);
+        if ($merchantAccount === '' || $invoice->merchantAccount === $merchantAccount) {
+            return;
+        }
+
+        $invoice->merchantAccount = $merchantAccount;
+        $invoice->save();
     }
 
     /**
