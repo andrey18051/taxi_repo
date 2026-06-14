@@ -1116,7 +1116,7 @@ class WfpController extends Controller
 
                     }
                     if ($invoice) {
-                        $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
+                        $this->stampInvoiceMerchantFromWfpResponse($invoice, $data, $merchantAccount);
                         $invoice->transactionStatus = $data['transactionStatus'];
                         $invoice->reason = $data['reason'];
                         $invoice->reasonCode = $data['reasonCode'];
@@ -1233,7 +1233,11 @@ class WfpController extends Controller
                     Log::error("Ошибка получения ответа от WayforPay API на попытке $attempt");
                 } else {
                     $transactionStatus = $data['transactionStatus'];
+                    if (!$invoice) {
+                        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+                    }
                     if ($invoice) {
+                        $this->stampInvoiceMerchantFromWfpResponse($invoice, $data, $merchantAccount);
                         $invoice->transactionStatus = $transactionStatus;
                         $invoice->reason = $data['reason'] ?? null;
                         $invoice->reasonCode = $data['reasonCode'] ?? null;
@@ -2755,6 +2759,43 @@ class WfpController extends Controller
         $invoice->save();
     }
 
+    private function stampInvoiceMerchantFromWfpResponse(
+        WfpInvoice $invoice,
+        array $data,
+        string $fallbackMerchantAccount
+    ): void {
+        $merchantAccount = trim((string) ($data['merchantAccount'] ?? ''));
+        if ($merchantAccount === '') {
+            $merchantAccount = $fallbackMerchantAccount;
+        }
+        $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
+    }
+
+    private function stampInvoiceMerchantAfterCharge(
+        string $orderReference,
+        $response,
+        string $fallbackMerchantAccount
+    ): void {
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if (!$invoice) {
+            return;
+        }
+
+        $data = null;
+        if (is_object($response) && method_exists($response, 'json')) {
+            $data = $response->json();
+        } elseif (is_array($response)) {
+            $data = $response;
+        }
+
+        if (is_array($data)) {
+            $this->stampInvoiceMerchantFromWfpResponse($invoice, $data, $fallbackMerchantAccount);
+            return;
+        }
+
+        $this->stampInvoiceMerchantAccount($invoice, $fallbackMerchantAccount);
+    }
+
     /**
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException
@@ -2857,6 +2898,7 @@ class WfpController extends Controller
                 // Відправлення POST-запиту
                 $response = Http::post('https://api.wayforpay.com/api ', $params);
                 Log::debug("purchase: ", ['response' => $response->body()]);
+                $this->stampInvoiceMerchantAfterCharge($orderReference, $response, $merchantAccount);
 
                 $responseStatus = self::checkStatus(
                     $application,
@@ -3330,6 +3372,7 @@ class WfpController extends Controller
 // Відправлення POST-запиту
                 $response = Http::post('https://api.wayforpay.com/api ', $params);
                 Log::debug("purchase: ", ['response' => $response->body()]);
+                $this->stampInvoiceMerchantAfterCharge($orderReference, $response, $merchantAccount);
 
                 $responseStatus = self::checkStatus(
                     $application,
