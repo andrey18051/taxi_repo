@@ -1122,7 +1122,7 @@ Route::get('/ip/address', [IPController::class,'address'])->name('address');
 Route::get('/city/all', [CityController::class,'index']);
 Route::get('/city/online/{city}', [CityController::class,'cityOnline']);
 Route::get('/city/destroy/{id}', [CityController::class,'destroy']);
-Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}', [CityController::class,'edit']);
+Route::get('/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{payment_flow?}', [CityController::class,'edit']);
 Route::get('/city/cityNew', function () {
     return view('admin.cities');
 })->name('city-new');
@@ -1156,7 +1156,7 @@ Route::get('/city/merchantFondyApp/{city}/{app}', [CityController::class,'mercha
 Route::get('/pas1/city/all', [CityPas1Controller::class,'index']);
 Route::get('/pas1/city/online/{city}', [CityPas1Controller::class,'cityOnline']);
 Route::get('/pas1/city/destroy/{id}', [CityPas1Controller::class,'destroy']);
-Route::get('/pas1/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}', [CityPas1Controller::class,'edit']);
+Route::get('/pas1/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}/{payment_flow?}', [CityPas1Controller::class,'edit']);
 Route::get('/pas1/city/newCityCreat', [CityPas1Controller::class,'newCityCreat'])->name('newCityCreat');
 Route::get('/pas1/city/verification', [CityPas1Controller::class,'checkDomains'])->name('checkDomains');
 
@@ -1171,7 +1171,7 @@ Route::get('/pas1/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionCo
 Route::get('/pas2/city/all', [CityPas2Controller::class,'index']);
 Route::get('/pas2/city/online/{city}', [CityPas2Controller::class,'cityOnline']);
 Route::get('/pas2/city/destroy/{id}', [CityPas2Controller::class,'destroy']);
-Route::get('/pas2/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}', [CityPas2Controller::class,'edit']);
+Route::get('/pas2/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}/{payment_flow?}', [CityPas2Controller::class,'edit']);
 Route::get('/pas2/city/newCityCreat', [CityPas2Controller::class,'newCityCreat']);
 Route::get('/pas2/city/verification', [CityPas2Controller::class,'checkDomains']);
 
@@ -1186,7 +1186,7 @@ Route::get('/pas2/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionCo
 Route::get('/pas4/city/all', [CityPas4Controller::class,'index']);
 Route::get('/pas4/city/online/{city}', [CityPas4Controller::class,'cityOnline']);
 Route::get('/pas4/city/destroy/{id}', [CityPas4Controller::class,'destroy']);
-Route::get('/pas4/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}', [CityPas4Controller::class,'edit']);
+Route::get('/pas4/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}/{payment_flow?}', [CityPas4Controller::class,'edit']);
 Route::get('/pas4/city/newCityCreat', [CityPas4Controller::class,'newCityCreat']);
 Route::get('/pas4/city/verification', [CityPas4Controller::class,'checkDomains']);
 
@@ -1201,7 +1201,7 @@ Route::get('/pas4/city/apiVersion/{name}/{address}', [UniversalAndroidFunctionCo
 Route::get('/pas5/city/all', [\App\Http\Controllers\CityPas5Controller::class,'index']);
 Route::get('/pas5/city/online/{city}', [\App\Http\Controllers\CityPas5Controller::class,'cityOnline']);
 Route::get('/pas5/city/destroy/{id}', [\App\Http\Controllers\CityPas5Controller::class,'destroy']);
-Route::get('/pas5/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}', [\App\Http\Controllers\CityPas5Controller::class,'edit']);
+Route::get('/pas5/city/edit/{id}/{name}/{address}/{login}/{password}/{online}/{card_max_pay}/{bonus_max_pay}/{black_list}/{payment_flow?}', [\App\Http\Controllers\CityPas5Controller::class,'edit']);
 Route::get('/pas5/city/newCityCreat', [\App\Http\Controllers\CityPas5Controller::class,'newCityCreat']);
 Route::get('/pas5/city/verification', [\App\Http\Controllers\CityPas5Controller::class,'checkDomains']);
 

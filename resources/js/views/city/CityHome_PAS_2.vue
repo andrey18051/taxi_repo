@@ -33,6 +33,7 @@
                 <v-th sortKey="name" >Name</v-th>
                 <v-th sortKey="card_max_pay">card_max_pay</v-th>
                 <v-th sortKey="login">bonus_max_pay</v-th>
+                <v-th sortKey="payment_flow">payment_flow</v-th>
                 <v-th sortKey="address">address</v-th>
                 <v-th sortKey="login">login</v-th>
                 <v-th sortKey="password">password</v-th>
@@ -45,6 +46,7 @@
                     <td><input class="form-input input-lg"  style="width: 300px" v-model="filters.name.value" placeholder="Select by name"></td>
                     <td><input class="form-input input-lg"  style="width: 100px" v-model="filters.card_max_pay.value" placeholder="Select by card_max_pay" value="0"></td>
                     <td> <input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_max_pay.value"  placeholder="Select by bonus_max_pay" value="0" ></td>
+                    <td> <input class="form-input input-lg" style="width: 140px" v-model="filters.payment_flow.value" placeholder="0/1/2"></td>
                     <td> <input class="form-input input-lg" style="width: 200px" v-model="filters.address.value"  placeholder="Select by address"></td>
                     <td> <input class="form-input input-lg" style="width: 150px" v-model="filters.login.value"  placeholder="Select by login"></td>
                     <td> <input class="form-input input-lg" style="width: 150px" v-model="filters.password.value"  placeholder="Select by password"></td>
@@ -58,6 +60,13 @@
                     <td> <input id="name" class="form-control" style="width: 300px" v-model.text="row.name" required ></td>
                     <td><input id="card_max_pay" class="form-control" style="width: 100px" v-model.text="row.card_max_pay"  ></td>
                     <td> <input id="bonus_max_pay" class="form-control" style="width: 100px" v-model.text="row.bonus_max_pay"  ></td>
+                    <td>
+                        <select id="payment_flow" class="form-control" style="width: 140px" v-model="row.payment_flow">
+                            <option :value="0">0 — выкл</option>
+                            <option :value="1">1 — вилка</option>
+                            <option :value="2">2 — простой</option>
+                        </select>
+                    </td>
                     <td><input id="address" class="form-control" style="width: 200px" v-model.text="row.address" required ></td>
                     <td> <input id="login" class="form-control" style="width: 150px" v-model.text="row.login" required ></td>
                     <td><input id="password" class="form-control" style="width: 120px" v-model.text="row.password" required ></td>
@@ -77,7 +86,7 @@
 
                     <td>
                         <div class="btn-group" role="group">
-                            <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password, row.online, row.card_max_pay, row.bonus_max_pay, row.black_list)" style="margin-left: 5px">
+                            <button class="btn btn-success" @click="editCities(row.id, row.name, row.address, row.login, row.password, row.online, row.card_max_pay, row.bonus_max_pay, row.black_list, row.payment_flow)" style="margin-left: 5px">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save2" viewBox="0 0 16 16">
                                     <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                                 </svg>
@@ -123,6 +132,7 @@ export default {
             online: { value: "", keys: ["online"] },
             card_max_pay: { value: "", keys: ["card_max_pay"] },
             bonus_max_pay: { value: "", keys: ["bonus_max_pay"] },
+            payment_flow: { value: "", keys: ["payment_flow"] },
             black_list: { value: "", keys: ["black_list"] },
         }
     }),
@@ -134,7 +144,10 @@ export default {
             axios.get('/pas2/city/all')
                 .then(
                     res => {
-                        this.cities = res.data;
+                        this.cities = res.data.map(city => ({
+                            ...city,
+                            payment_flow: city.payment_flow ?? 0,
+                        }));
                         this.loading = false;
                     }
                 )
@@ -150,8 +163,8 @@ export default {
                     window.alert("Данные обновлены");
                 });
         },
-        editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list) {
-            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list)
+        editCities(id, name, address, login, password, online, card_max_pay, bonus_max_pay, black_list, payment_flow) {
+            axios.get('/pas2/city/edit/'+ id +'/'+name+'/'+address+'/'+login+'/'+password+'/'+ online+'/'+card_max_pay+'/'+ bonus_max_pay+'/'+ black_list+'/'+ payment_flow)
                 .then(function(ret) {
                     console.log(ret.data);
                     // document.location.reload();

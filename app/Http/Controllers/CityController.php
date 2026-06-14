@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\City\PaymentFlow;
 use App\Helpers\ConnectionErrorHandler;
 use App\Helpers\TimeHelper;
 use App\Mail\Check;
@@ -47,7 +48,8 @@ class CityController extends Controller
         $password,
         $online,
         $card_max_pay,
-        $bonus_max_pay
+        $bonus_max_pay,
+        $payment_flow = 0
     ) {
         $city = City::find($id);
 
@@ -63,6 +65,7 @@ class CityController extends Controller
         $city->online = $online;
         $city->card_max_pay = $card_max_pay;
         $city->bonus_max_pay = $bonus_max_pay;
+        $city->payment_flow = PaymentFlow::normalize($payment_flow);
         $city->save();
 
         return response()->json($city);
@@ -405,8 +408,9 @@ class CityController extends Controller
 
         return [
             'card_max_pay' => $city["card_max_pay"],
-            'bonus_max_pay' => $city["bonus_max_pay"]
-            ];
+            'bonus_max_pay' => $city["bonus_max_pay"],
+            'payment_flow' => PaymentFlow::normalize($city["payment_flow"] ?? 0),
+        ];
     }
     public function merchantFondy($city): array
     {
@@ -471,7 +475,8 @@ class CityController extends Controller
         return [
             'card_max_pay' => $city["card_max_pay"],
             'bonus_max_pay' => $city["bonus_max_pay"],
-            'black_list' => $city["black_list"]
+            'black_list' => $city["black_list"],
+            'payment_flow' => PaymentFlow::normalize($city["payment_flow"] ?? 0),
         ];
     }
     public function cardPayServer($address, $app)

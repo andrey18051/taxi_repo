@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\City\PaymentFlow;
 use App\Helpers\ConnectionErrorHandler;
 use App\Mail\Check;
 use App\Mail\Server;
@@ -43,7 +44,8 @@ class CityPas4Controller extends Controller
         $online,
         $card_max_pay,
         $bonus_max_pay,
-        $black_list
+        $black_list,
+        $payment_flow = 0
     ) {
         $city = City_PAS4::find($id);
 
@@ -60,6 +62,7 @@ class CityPas4Controller extends Controller
         $city->card_max_pay = $card_max_pay;
         $city->bonus_max_pay = $bonus_max_pay;
         $city->black_list = $black_list;
+        $city->payment_flow = PaymentFlow::normalize($payment_flow);
         $city->save();
 
         return response()->json($city);
