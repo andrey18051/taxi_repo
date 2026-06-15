@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\City\SimpleCashlessPaymentWatch;
 use App\Jobs\AutoCancelJob;
-use App\Jobs\CheckAndCancelOrderJob;
-use App\Jobs\SimplePollStatusJob;
 use App\Models\Orderweb;
 use App\Models\WfpInvoice;
 use Illuminate\Http\Request;
@@ -574,28 +573,10 @@ class MyTaxiApiController extends Controller
 
                 Log::debug("🔍 Поиск информации о транзакции в таблице WfpInvoice");
 
-                // Первый запуск - без пятого параметра (по умолчанию 0)
-
-                $paymentCheckDelay = (int) config('orders.my_server_api_payment_check_delay_seconds', 60);
-
-                SimplePollStatusJob::dispatch(
-                    $orderReference,
-                    $dispatching_order_uid,
-                    $application,
-                    $email,
-                    $city
-                )->onQueue('high');
-
-                CheckAndCancelOrderJob::dispatch(
-                    $dispatching_order_uid,
-                    $application,
-                    $email,
-                    $city
-                )->onQueue('high')->delay(now()->addSeconds($paymentCheckDelay));
-
-
-
-
+                $orderweb = Orderweb::find($order_id);
+                if ($orderweb) {
+                    SimpleCashlessPaymentWatch::start($orderweb, $application, $city, $orderReference);
+                }
             }
 
 

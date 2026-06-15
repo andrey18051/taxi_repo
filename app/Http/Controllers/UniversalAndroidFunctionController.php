@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\City\CityPaymentFlowResolver;
 use App\City\PaymentFlow;
+use App\City\SimpleCashlessPaymentWatch;
 use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderDuplicateHelper;
@@ -4112,6 +4113,10 @@ class UniversalAndroidFunctionController extends Controller
 
             if ($cancelNeed60) {
                 (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+                if (PaymentFlow::normalize($order->payment_flow_mode ?? 0) === PaymentFlow::SIMPLE) {
+                    SimpleCashlessPaymentWatch::notifyClientOrderCanceled($order, $application);
+                }
+
                 return "exit cancelOnlyCardPayUid нет оплаты";
             }
         }
@@ -4877,7 +4882,11 @@ class UniversalAndroidFunctionController extends Controller
         if ($order->payment_flow_mode === PaymentFlow::SIMPLE
             && (int) $params['payment_type'] === 1
             && !empty($params['dispatching_order_uid'])) {
-            dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+            $paySystem = $params['pay_system'] ?? '';
+            $tokenPay = in_array($paySystem, ['wfp_payment', 'google_pay_payment'], true);
+            if (!$tokenPay) {
+                dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+            }
         }
 
         $order_id = $order->id;
@@ -5629,6 +5638,16 @@ class UniversalAndroidFunctionController extends Controller
 
         $orderweb->pay_system = $pay_system;
         $orderweb->save();
+
+        $application = SimpleCashlessPaymentWatch::resolveApplicationLabel($orderweb);
+        if ($application !== null) {
+            SimpleCashlessPaymentWatch::start(
+                $orderweb,
+                $application,
+                SimpleCashlessPaymentWatch::resolveCityDisplayName($orderweb),
+                $orderReference
+            );
+        }
     }
 
 
