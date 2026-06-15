@@ -11,6 +11,15 @@ use Throwable;
 
 final class CityPaymentFlowResolver
 {
+    /** @var array<string, list<string>> */
+    private const INTERNAL_CITY_CANDIDATES = [
+        'city_odessa' => ['OdessaTest', 'Odessa'],
+        'city_kiev' => ['Kyiv City'],
+        'city_cherkassy' => ['Cherkasy Oblast'],
+        'city_zaporizhzhia' => ['Zaporizhzhia'],
+        'city_dnipro' => ['Dnipropetrovsk Oblast', 'DniproTest'],
+    ];
+
     public static function applicationFromIdentificationId(?string $identificationId): ?string
     {
         if ($identificationId === null || $identificationId === '') {
@@ -31,21 +40,32 @@ final class CityPaymentFlowResolver
 
     /**
      * Snapshot payment_flow for a new order from city map settings.
+     *
+     * @param string|null $cityName   Internal code (city_odessa) or display name
+     * @param string|null $cityApp    Display name from the app (OdessaTest) — preferred
      */
-    public static function resolve(?string $cityName, ?string $application, ?string $server = null): int
-    {
-        if ($cityName !== null && $cityName !== '' && $application !== null && $application !== '') {
-            try {
-                $cityArr = (new CityController())->maxPayValueApp($cityName, $application);
+    public static function resolve(
+        ?string $cityName,
+        ?string $application,
+        ?string $server = null,
+        ?string $cityApp = null
+    ): int {
+        if ($application === null || $application === '') {
+            return PaymentFlow::OFF;
+        }
 
-                return PaymentFlow::normalize($cityArr['payment_flow'] ?? 0);
-            } catch (Throwable $e) {
-                // fall through to server lookup
+        foreach (self::cityLookupCandidates($cityApp, $cityName) as $candidate) {
+            $flow = self::resolveFromAppCity($candidate, $application);
+            if ($flow !== null) {
+                return $flow;
             }
         }
 
-        if ($server !== null && $server !== '') {
-            return self::resolveByServerAddress($server);
+        if ($server !== null && $server !== '' && $server !== 'my_server_api') {
+            $fromServer = self::resolveByServerAddress($server);
+            if ($fromServer !== PaymentFlow::OFF) {
+                return $fromServer;
+            }
         }
 
         return PaymentFlow::OFF;
@@ -63,5 +83,45 @@ final class CityPaymentFlowResolver
         }
 
         return PaymentFlow::OFF;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function cityLookupCandidates(?string $cityApp, ?string $cityName): array
+    {
+        $candidates = [];
+
+        if ($cityApp !== null && $cityApp !== '') {
+            $candidates[] = $cityApp;
+        }
+
+        if ($cityName !== null && $cityName !== '' && !self::isInternalCityCode($cityName)) {
+            $candidates[] = $cityName;
+        }
+
+        if ($cityName !== null && self::isInternalCityCode($cityName)) {
+            foreach (self::INTERNAL_CITY_CANDIDATES[$cityName] ?? [] as $mapped) {
+                $candidates[] = $mapped;
+            }
+        }
+
+        return array_values(array_unique($candidates));
+    }
+
+    private static function isInternalCityCode(string $cityName): bool
+    {
+        return str_starts_with($cityName, 'city_');
+    }
+
+    private static function resolveFromAppCity(string $cityApp, string $application): ?int
+    {
+        try {
+            $cityArr = (new CityController())->maxPayValueApp($cityApp, $application);
+
+            return PaymentFlow::normalize($cityArr['payment_flow'] ?? 0);
+        } catch (Throwable $e) {
+            return null;
+        }
     }
 }

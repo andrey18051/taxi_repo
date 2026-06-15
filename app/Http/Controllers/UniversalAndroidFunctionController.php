@@ -4874,7 +4874,8 @@ class UniversalAndroidFunctionController extends Controller
         $order->payment_flow_mode = CityPaymentFlowResolver::resolve(
             $order->city,
             $application,
-            $params['server'] ?? null
+            $params['server'] ?? null,
+            $params['city_app'] ?? null
         );
 
         $order->save();

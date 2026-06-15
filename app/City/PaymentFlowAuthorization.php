@@ -29,7 +29,7 @@ final class PaymentFlowAuthorization
             $authorizationChoiceArr['authorization'] = $authorizationChoiceArr['authorizationBonus'];
         }
 
-        $authorizationChoiceArr['authorizationBonus'] = null;
+        // authorizationBonus оставляем: cost/order по-прежнему берут его при payment_type=1.
         $authorizationChoiceArr['authorizationDouble'] = null;
 
         return $authorizationChoiceArr;

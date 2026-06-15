@@ -522,7 +522,9 @@ class MyTaxiApiController extends Controller
             "clientCost" => $clientCost,
             "dispatching_order_uid" => $dispatching_order_uid,
             "closeReason" => '100',
-            "server" => "my_server_api"
+            "server" => "my_server_api",
+            "city_app" => $city,
+            "application" => $application,
         ];
 
         Log::info('📋 Параметры заказа подготовлены', [

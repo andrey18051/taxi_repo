@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\City\CityPaymentFlowResolver;
 use App\City\PaymentFlow;
+use App\Http\Controllers\CityController;
 use Tests\TestCase;
 
 class CityPaymentFlowResolverTest extends TestCase
@@ -30,5 +31,35 @@ class CityPaymentFlowResolverTest extends TestCase
     {
         $this->assertSame(PaymentFlow::OFF, CityPaymentFlowResolver::resolve(null, null, null));
         $this->assertSame(PaymentFlow::OFF, CityPaymentFlowResolver::resolve('', 'PAS2', null));
+    }
+
+    public function test_resolve_prefers_city_app_over_internal_code(): void
+    {
+        try {
+            $cityArr = (new CityController())->maxPayValueApp('OdessaTest', 'PAS4');
+        } catch (\Throwable $e) {
+            $this->markTestSkipped('OdessaTest missing in test DB: ' . $e->getMessage());
+        }
+
+        if (PaymentFlow::normalize($cityArr['payment_flow'] ?? 0) !== PaymentFlow::SIMPLE) {
+            $this->markTestSkipped('OdessaTest payment_flow is not SIMPLE in test DB');
+        }
+
+        $flow = CityPaymentFlowResolver::resolve(
+            'city_odessa',
+            'PAS4',
+            'my_server_api',
+            'OdessaTest'
+        );
+
+        $this->assertSame(PaymentFlow::SIMPLE, $flow);
+    }
+
+    public function test_resolve_skips_my_server_api_server_lookup(): void
+    {
+        $this->assertSame(
+            PaymentFlow::OFF,
+            CityPaymentFlowResolver::resolve('unknown_city_xyz', 'PAS4', 'my_server_api', null)
+        );
     }
 }

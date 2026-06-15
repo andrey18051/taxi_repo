@@ -36,7 +36,7 @@ class PaymentFlowAuthorizationTest extends TestCase
         $result = PaymentFlowAuthorization::apply($input, PaymentFlow::SIMPLE);
 
         $this->assertSame('bonus-auth', $result['authorization']);
-        $this->assertNull($result['authorizationBonus']);
+        $this->assertSame('bonus-auth', $result['authorizationBonus']);
         $this->assertNull($result['authorizationDouble']);
         $this->assertSame(1, $result['payment_type']);
     }
