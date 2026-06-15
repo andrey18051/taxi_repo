@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\City\CityPaymentFlowResolver;
+use App\City\PaymentFlow;
 use App\Helpers\OpenStreetMapHelper;
 
 use App\Helpers\OrderDuplicateHelper;
@@ -16,6 +17,7 @@ use App\Jobs\StartAddCostCardCreat;
 
 use App\Jobs\StartNewProcessExecution;
 
+use App\Jobs\StartStatusPaymentReview;
 use App\Mail\Check;
 
 use App\Models\BlackList;
@@ -4871,6 +4873,12 @@ class UniversalAndroidFunctionController extends Controller
         );
 
         $order->save();
+
+        if ($order->payment_flow_mode === PaymentFlow::SIMPLE
+            && (int) $params['payment_type'] === 1
+            && !empty($params['dispatching_order_uid'])) {
+            dispatch((new StartStatusPaymentReview($params['dispatching_order_uid']))->onQueue('medium'));
+        }
 
         $order_id = $order->id;
 

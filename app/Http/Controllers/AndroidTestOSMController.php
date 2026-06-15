@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\City\CityPaymentFlowResolver;
+use App\City\PaymentFlowAuthorization;
 use App\Helpers\CacheHandler;
 use App\Helpers\OrderDuplicateHelper;
 use App\Helpers\OrderHelper;
@@ -15163,9 +15165,10 @@ class AndroidTestOSMController extends Controller
         }
         Log::info("Выход из switch по типу оплаты.");
 
-        // Возврат результата
-        Log::info("Возвращен массив \$authorizationChoiceArr с ключами: 'authorization', 'payment_type', 'authorizationBonus', 'authorizationDouble'.");
-        return $authorizationChoiceArr;
+        $paymentFlow = CityPaymentFlowResolver::resolve($city, $application, $connectAPI);
+        Log::info("payment_flow для города '$city': $paymentFlow");
+
+        return PaymentFlowAuthorization::apply($authorizationChoiceArr, $paymentFlow);
     }
 
 

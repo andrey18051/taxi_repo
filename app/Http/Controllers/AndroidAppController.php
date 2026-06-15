@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\City\CityPaymentFlowResolver;
+use App\City\PaymentFlowAuthorization;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Mail\ServerServiceMessage;
@@ -2709,7 +2711,9 @@ class AndroidAppController extends Controller
                 break;
         }
 
-        return $authorizationChoiceArr;
+        $paymentFlow = CityPaymentFlowResolver::resolve($city, $application, $connectAPI);
+
+        return PaymentFlowAuthorization::apply($authorizationChoiceArr, $paymentFlow);
     }
 
     public function lastVersion($app_name)
