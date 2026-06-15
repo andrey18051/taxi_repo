@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\City\CityPaymentFlowResolver;
 use App\City\PaymentFlow;
+use App\City\PaymentFlowAuthorization;
 use App\City\SimpleCashlessPaymentWatch;
 use App\Helpers\OpenStreetMapHelper;
 
@@ -7865,6 +7866,245 @@ class UniversalAndroidFunctionController extends Controller
             }
 
     }
+
+    /**
+     * Доплата для одиночного безнала (payment_flow=SIMPLE): один заказ на dispatch, без вилки и Uid_history.
+     *
+     * @throws \Exception
+     */
+    public function startAddCostSimpleCashless(
+        $uid,
+        $pay_method,
+        $orderReference,
+        $city,
+        $addCost
+    ): ?\Illuminate\Http\JsonResponse {
+        Log::info("startAddCostSimpleCashless: uid='$uid', pay_method='$pay_method', orderReference='$orderReference', city='$city', addCost='$addCost'.");
+
+        $city = trim($city);
+        $uid = (new MemoryOrderChangeController)->show($uid);
+
+        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $orderMemory = DriverMemoryOrder::where('dispatching_order_uid', $uid)->first();
+
+        if (!$order || !$orderMemory) {
+            Log::error("startAddCostSimpleCashless: order or orderMemory not found for uid='$uid'.");
+            return response()->json(['response' => '400'], 200);
+        }
+
+        switch ($order->comment) {
+            case 'taxi_easy_ua_pas1':
+                $application = 'PAS1';
+                break;
+            case 'taxi_easy_ua_pas2':
+                $application = 'PAS2';
+                break;
+            default:
+                $application = 'PAS4';
+                break;
+        }
+
+        $originalCity = $order->city;
+        switch ($originalCity) {
+            case 'city_kiev':
+                $city = 'Kyiv City';
+                break;
+            case 'city_cherkassy':
+                $city = 'Cherkasy Oblast';
+                break;
+            case 'city_odessa':
+                $city = $order->server === 'http://188.190.245.102:7303' ? 'OdessaTest' : 'Odessa';
+                break;
+            case 'city_zaporizhzhia':
+                $city = 'Zaporizhzhia';
+                break;
+            case 'city_dnipro':
+                $city = 'Dnipropetrovsk Oblast';
+                break;
+            case 'city_lviv':
+            case 'city_ivano_frankivsk':
+            case 'city_vinnytsia':
+            case 'city_poltava':
+            case 'city_sumy':
+            case 'city_kharkiv':
+            case 'city_chernihiv':
+            case 'city_rivne':
+            case 'city_ternopil':
+            case 'city_khmelnytskyi':
+            case 'city_zakarpattya':
+            case 'city_zhytomyr':
+            case 'city_kropyvnytskyi':
+            case 'city_mykolaiv':
+            case 'city_chernivtsi':
+            case 'city_lutsk':
+                $city = 'OdessaTest';
+                break;
+            default:
+                $city = 'OdessaTest';
+                break;
+        }
+
+        $email = $order->email;
+        $service = new CityAppOrderService();
+        $connectAPI = $service->cityOnlineOrder($city, $application);
+        $authorizationChoiceArr = (new AndroidTestOSMController)->authorizationChoiceApp(
+            $pay_method,
+            $city,
+            $connectAPI,
+            $application
+        );
+        $authorizationChoiceArr = PaymentFlowAuthorization::apply(
+            $authorizationChoiceArr,
+            PaymentFlow::SIMPLE
+        );
+
+        if (empty($authorizationChoiceArr['authorizationBonus'])) {
+            Log::warning('startAddCostSimpleCashless: authorizationBonus missing', [
+                'uid' => $uid,
+                'authorization_choice' => $authorizationChoiceArr,
+            ]);
+            return response()->json(['response' => '400'], 200);
+        }
+
+        $authorization = $authorizationChoiceArr['authorization'];
+        $authorizationBonus = $authorizationChoiceArr['authorizationBonus'];
+        $identificationId = (new AndroidTestOSMController)->identificationId($application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
+        $url = $connectAPI . '/api/weborders';
+
+        $parameter = json_decode($orderMemory->response, true);
+        if (!is_array($parameter)) {
+            Log::error('startAddCostSimpleCashless: invalid orderMemory response', ['uid' => $uid]);
+            return response()->json(['response' => '400'], 200);
+        }
+
+        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $addCost,
+            $order
+        );
+        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
+        $parameter['payment_type'] = 1;
+
+        try {
+            $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
+                $url,
+                $parameter,
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion
+            );
+            $responseArr = json_decode($response, true);
+        } catch (\Exception $e) {
+            Log::error('startAddCostSimpleCashless: dispatch POST failed: ' . $e->getMessage());
+            return response()->json(['response' => '400'], 200);
+        }
+
+        if (empty($responseArr) || isset($responseArr['Message']) || empty($responseArr['dispatching_order_uid'])) {
+            $messageAdmin = 'startAddCostSimpleCashless: новый заказ не создался для uid=' . $uid;
+            (new MessageSentController)->sentMessageAdmin($messageAdmin);
+            Log::error($messageAdmin, ['response' => $responseArr]);
+            $duplicateAddCost = OrderDuplicateHelper::isDuplicateOrderMessage($responseArr['Message'] ?? null);
+            return response()->json([
+                'response' => $duplicateAddCost ? 'duplicate_add_cost_failed' : 'Новый заказ не создался',
+            ], 200);
+        }
+
+        $orderNew = $responseArr['dispatching_order_uid'];
+        $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+        $newClientCost = $oldClientCost + (int) $addCost;
+
+        try {
+            (new MessageSentController)->sentAddCostRecreatedInfo($order, $orderNew, $newClientCost);
+        } catch (\Throwable $e) {
+            Log::error('startAddCostSimpleCashless: telegram notify failed', [
+                'old_uid' => $uid,
+                'new_uid' => $orderNew,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        (new PusherController)->sentUidAppEmailPayType(
+            $orderNew,
+            $application,
+            $email,
+            $pay_method,
+            $newClientCost
+        );
+        (new CentrifugoController)->sentUidAppEmailPayType(
+            $orderNew,
+            $application,
+            $email,
+            $pay_method,
+            $newClientCost
+        );
+
+        (new AndroidTestOSMController)->webordersCancelRestorAddCostNal(
+            $uid,
+            $city,
+            $application,
+            $order
+        );
+
+        $order_old_uid = $order->dispatching_order_uid;
+        (new MemoryOrderChangeController)->store($order_old_uid, $orderNew);
+
+        (new DriverMemoryOrderController)->store(
+            $orderNew,
+            json_encode($parameter, JSON_UNESCAPED_UNICODE),
+            $authorization,
+            $connectAPI,
+            $identificationId,
+            $apiVersion
+        );
+
+        $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $order_old_uid)->get();
+        foreach ($wfpInvoices as $wfpInvoice) {
+            $wfpInvoice->dispatching_order_uid = $orderNew;
+            $wfpInvoice->save();
+        }
+
+        $order->dispatching_order_uid = $orderNew;
+        $order->auto = null;
+        $order->wfp_order_id = $orderReference;
+        $order->web_cost = $responseArr['order_cost'];
+        $order->client_cost = $newClientCost;
+        $order->closeReason = '-1';
+        $order->closeReasonI = '0';
+        $order->cancel_timestamp = null;
+        $order->attempt_20 += $addCost;
+        $order->save();
+
+        dispatch(
+            (new \App\Jobs\WriteDocumentToFirestore($orderNew))
+                ->onQueue('high')
+        );
+
+        Log::info('startAddCostSimpleCashless: success', [
+            'old_uid' => $order_old_uid,
+            'new_uid' => $orderNew,
+            'new_client_cost' => $newClientCost,
+        ]);
+
+        return response()->json([
+            'uid' => $orderNew,
+            'web_cost' => $order->web_cost,
+            'client_cost' => $newClientCost,
+            'routefrom' => $order->routefrom,
+            'startLat' => $order->startLat,
+            'startLan' => $order->startLan,
+            'routeto' => $order->routeto,
+            'to_lat' => $order->to_lat,
+            'to_lng' => $order->to_lng,
+            'pay_system' => $order->pay_system,
+            'transactionStatus' => 'WaitingAuthComplete',
+        ], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

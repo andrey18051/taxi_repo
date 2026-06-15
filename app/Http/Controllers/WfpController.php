@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\City\PaymentFlow;
 use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
 use App\Jobs\StartAddCostCardBottomCreat;
@@ -5010,7 +5011,16 @@ class WfpController extends Controller
         $uid = $wfpInvoice->dispatching_order_uid;
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
 
-        if ($order !== null && $order->wfp_order_id === $orderReference) {
+        if ($order === null) {
+            Log::warning('Add-cost order not found', [
+                'uid' => $uid,
+                'order_reference' => $orderReference,
+            ]);
+
+            return null;
+        }
+
+        if ($order->wfp_order_id === $orderReference) {
             Log::info('Add-cost already applied (sync path)', [
                 'order_reference' => $orderReference,
                 'uid' => $uid,
@@ -5054,6 +5064,22 @@ class WfpController extends Controller
                 $email,
                 $amount,
                 $chargeResponse
+            );
+        }
+
+        if (PaymentFlow::normalize($order->payment_flow_mode ?? 0) === PaymentFlow::SIMPLE) {
+            Log::info('Processing simple cashless add cost (no fork)', [
+                'uid' => $uid,
+                'order_reference' => $orderReference,
+                'amount' => $amount,
+            ]);
+
+            return (new UniversalAndroidFunctionController)->startAddCostSimpleCashless(
+                $uid,
+                $this->resolveAddCostPayMethod($order),
+                $orderReference,
+                $city,
+                $amount
             );
         }
 
