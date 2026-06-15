@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\City\SimpleCashlessDispatchStatusSync;
 use App\Models\ExecutionStatus;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
@@ -1133,6 +1134,67 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Одиночный безнал: live GET dispatch на каждый опрос (как uid_history у вилки).
+     */
+    private function buildSimpleCashlessLiveStatusPushResponse(Orderweb $orderweb, string $uid): ?\Illuminate\Http\JsonResponse
+    {
+        if (!SimpleCashlessDispatchStatusSync::shouldLiveSync($orderweb)) {
+            return null;
+        }
+
+        $snapshot = SimpleCashlessDispatchStatusSync::fetchDispatchSnapshot($orderweb, $uid);
+        if ($snapshot === null) {
+            return null;
+        }
+
+        $executionStatus = (string) ($snapshot['execution_status'] ?? 'SearchesForCar');
+        $resolved = $this->resolveLegStatuses(
+            $executionStatus,
+            $executionStatus,
+            $snapshot,
+            $snapshot
+        );
+        $action = $resolved['action'];
+
+        if (self::isDispatchOrderCanceled($snapshot)
+            && !self::hasActiveDispatchLeg($snapshot, $snapshot)) {
+            self::finalizeCanceledFromStatusPush($orderweb, $uid);
+            $orderweb->save();
+
+            return response()->json([
+                'action' => OrderStatusMessageResolver::ACTION_CANCELED,
+                'close_reason' => (int) ($snapshot['close_reason'] ?? 1),
+                'dispatching_order_uid' => $uid,
+                'uid' => $uid,
+                'execution_status' => 'Canceled',
+            ]);
+        }
+
+        SimpleCashlessDispatchStatusSync::applySnapshotToOrderweb($orderweb, $snapshot);
+        $this->applyResolvedStatusToOrderweb($orderweb, $resolved, $action);
+        self::syncOrderwebAfterStatusPush($orderweb, $action, $snapshot, $snapshot, $uid);
+        $orderweb->save();
+
+        $dispatchJson = json_encode($snapshot, JSON_UNESCAPED_UNICODE);
+        $response = $this->addActionToResponseUid($dispatchJson, $action, $uid);
+        if ($resolved['close_reason'] >= 0) {
+            $response = $this->patchCloseReasonInResponse($response, $resolved['close_reason']);
+        }
+
+        Log::info('Simple cashless live dispatch status', [
+            'uid' => $uid,
+            'action' => $action,
+            'execution_status' => $executionStatus,
+        ]);
+
+        $payload = json_decode($response, true);
+
+        return is_array($payload)
+            ? response()->json($payload)
+            : response()->json(['action' => $action, 'uid' => $uid]);
+    }
+
+    /**
      * Ответ по кэшу orderweb, когда uid_history ещё недоступен.
      */
     private function buildCachedStatusPushResponse(Orderweb $orderweb, string $uid): \Illuminate\Http\JsonResponse
@@ -1223,6 +1285,13 @@ class OrderStatusController extends Controller
         Log::debug('Uid_history lookup (non-blocking)', ['found' => $uid_history !== null]);
 
         if (!$uid_history || $cardOrderInput === null) {
+            if ($orderweb) {
+                $liveResponse = $this->buildSimpleCashlessLiveStatusPushResponse($orderweb, $uid);
+                if ($liveResponse !== null) {
+                    return $liveResponse;
+                }
+            }
+
             Log::info('Uid_history not ready, cached orderweb response', ['uid' => $uid]);
             if ($orderweb) {
                 return $this->buildCachedStatusPushResponse($orderweb, $uid);
@@ -1432,6 +1501,11 @@ class OrderStatusController extends Controller
 
         if (!$uid_history || $cardOrderInput === null) {
             if ($orderweb) {
+                $liveResponse = $this->buildSimpleCashlessLiveStatusPushResponse($orderweb, $dispatching_order_uid);
+                if ($liveResponse !== null) {
+                    return $liveResponse;
+                }
+
                 return $this->buildCachedStatusPushResponse($orderweb, $dispatching_order_uid);
             }
 
