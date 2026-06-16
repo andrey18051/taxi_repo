@@ -448,4 +448,54 @@ class OpenStreetMapHelper
         return $mapboxDistance;
     }
 
+    /**
+     * Краткий адрес для такси из компонентов Nominatim.
+     * Без области, страны, индекса, громады и прочих админ. уровней.
+     */
+    public static function formatCompactReverseAddress(array $address, ?string $osmName, string $local): ?string
+    {
+        $buildingText = $local === 'ru' ? 'д.' : ($local === 'en' ? 'build.' : 'буд.');
+
+        $road = $address['road'] ?? $address['pedestrian'] ?? $address['footway'] ?? $address['path'] ?? null;
+        $house = $address['house_number'] ?? null;
+        $placeName = $address['building'] ?? $address['residential'] ?? $address['apartments']
+            ?? $address['house'] ?? $address['tourism'] ?? $address['amenity']
+            ?? $address['shop'] ?? $address['man_made'] ?? null;
+        if (($placeName === null || $placeName === '') && $osmName !== null && $osmName !== '') {
+            $placeName = $osmName;
+        }
+
+        $area = $address['suburb'] ?? $address['neighbourhood'] ?? $address['quarter'] ?? null;
+
+        $line = null;
+        if ($road !== null) {
+            $line = $house !== null
+                ? $road . ', ' . $buildingText . ' ' . $house
+                : $road;
+        } elseif ($placeName !== null) {
+            $line = $house !== null
+                ? $placeName . ', ' . $buildingText . ' ' . $house
+                : $placeName;
+        }
+
+        if ($line === null && $area !== null) {
+            return $area;
+        }
+
+        if ($line === null) {
+            $city = $address['city'] ?? $address['town'] ?? $address['village'] ?? null;
+            return $city !== null && $city !== '' ? $city : null;
+        }
+
+        if ($area !== null && $road !== null && mb_stripos($line, $area) === false) {
+            return $area . ', ' . $line;
+        }
+
+        if ($area !== null && $road === null && $placeName !== null && mb_stripos($placeName, $area) === false) {
+            return $area . ', ' . $line;
+        }
+
+        return $line;
+    }
+
 }

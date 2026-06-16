@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\OpenStreetMapHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -352,23 +353,13 @@ class OpenStreetMapController extends Controller
                 return null;
             }
 
-            $address = $data['address'];
-            $road = $address['road'] ?? $address['pedestrian'] ?? $address['footway'] ?? null;
-            $house = $address['house_number'] ?? null;
-            $city = $address['city'] ?? $address['town'] ?? $address['village'] ?? $address['municipality'] ?? null;
-            $cityText = $local === 'ru' ? 'город ' : ($local === 'en' ? 'city ' : 'місто ');
-            $buildingText = $local === 'ru' ? 'д.' : ($local === 'en' ? 'build.' : 'буд.');
-
-            if ($road !== null && $house !== null) {
-                if ($city !== null) {
-                    return $road . ', ' . $buildingText . ' ' . $house . ', ' . $cityText . $city;
-                }
-
-                return $road . ', ' . $buildingText . ' ' . $house;
-            }
-
-            if (!empty($data['display_name'])) {
-                return $data['display_name'];
+            $compact = OpenStreetMapHelper::formatCompactReverseAddress(
+                $data['address'],
+                $data['name'] ?? null,
+                $local
+            );
+            if ($compact !== null) {
+                return $compact;
             }
         } catch (\Exception $e) {
             Log::error('Nominatim Error: ' . $e->getMessage());
