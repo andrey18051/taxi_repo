@@ -20,6 +20,32 @@ class OpenStreetMapHelperCompactAddressTest extends TestCase
         $this->assertSame('вул. Глаубермана (Державіна), буд.11, місто  Одеса', $result);
     }
 
+    public function test_visicom_street_type_and_name_separated_ru(): void
+    {
+        $result = OpenStreetMapHelper::buildAddressFromVisicomProperties([
+            'street_type' => 'ул.',
+            'street' => 'Князей Острожских (Московская)',
+            'name' => '26',
+            'settlement_type' => 'город ',
+            'settlement' => 'Киев',
+        ], 'ru');
+
+        $this->assertSame('ул. Князей Острожских (Московская), д.26, город  Киев', $result);
+    }
+
+    public function test_visicom_spusk_street_type_separated(): void
+    {
+        $result = OpenStreetMapHelper::buildAddressFromVisicomProperties([
+            'street_type' => 'спуск',
+            'street' => 'Кловский',
+            'name' => '6',
+            'settlement_type' => 'город ',
+            'settlement' => 'Киев',
+        ], 'ru');
+
+        $this->assertSame('спуск Кловский, д.6, город  Киев', $result);
+    }
+
     public function test_nominatim_street_house_city_like_visicom(): void
     {
         $result = OpenStreetMapHelper::buildAddressFromNominatim([

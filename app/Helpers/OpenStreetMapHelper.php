@@ -455,8 +455,17 @@ class OpenStreetMapHelper
     {
         $buildingText = $local === 'ru' ? 'д.' : ($local === 'en' ? 'build.' : 'буд.');
 
-        return ($props['street_type'] ?? '')
-            . ($props['street'] ?? '')
+        $streetType = trim((string) ($props['street_type'] ?? ''));
+        $street = trim((string) ($props['street'] ?? ''));
+        if ($streetType !== '' && $street !== '') {
+            $streetLine = $streetType . ' ' . $street;
+        } elseif ($street !== '') {
+            $streetLine = $street;
+        } else {
+            $streetLine = $streetType;
+        }
+
+        return $streetLine
             . ', ' . $buildingText . ($props['name'] ?? '')
             . ', ' . ($props['settlement_type'] ?? '')
             . ' ' . ($props['settlement'] ?? '');
