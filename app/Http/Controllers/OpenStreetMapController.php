@@ -287,21 +287,24 @@ class OpenStreetMapController extends Controller
 
         try {
             $response = Http::get($url);
-            $response_arr_from = json_decode($response, true);
-            Log::info("Visicom Response: " . json_encode($response_arr_from));
+            $response_arr_from = $response->json();
+            Log::info("Visicom Response: status=" . $response->status() . " " . json_encode($response_arr_from));
 
-            if (!empty($response_arr_from)) {
+            if ($response->successful()
+                && is_array($response_arr_from)
+                && isset($response_arr_from['properties'])) {
                 $city_text = $local === "ru" ? "город " : ($local === "en" ? "city " : "місто ");
                 $building_text = $local === "ru" ? "д." : ($local === "en" ? "build." : "буд.");
+                $props = $response_arr_from['properties'];
 
-                return ["result" => $response_arr_from["properties"]["street_type"]
-                    . $response_arr_from["properties"]["street"]
-                    . ", $building_text" . $response_arr_from["properties"]["name"]
-                    . ", " . $response_arr_from["properties"]["settlement_type"]
-                    . " " . $response_arr_from["properties"]["settlement"]];
-            } else {
-                return ["result" => "Точка на карте"];
+                return ["result" => ($props['street_type'] ?? '')
+                    . ($props['street'] ?? '')
+                    . ", $building_text" . ($props['name'] ?? '')
+                    . ", " . ($props['settlement_type'] ?? '')
+                    . " " . ($props['settlement'] ?? '')];
             }
+
+            return ["result" => "Точка на карте"];
         } catch (\Exception $e) {
             Log::error("Visicom Error: " . $e->getMessage());
             return ["result" => "Ошибка Visicom: " . $e->getMessage()];
@@ -317,8 +320,8 @@ class OpenStreetMapController extends Controller
 
         try {
             $response = Http::get($url);
-            $response_arr = json_decode($response, true);
-            Log::info("wwww Overpass API Response: " . json_encode($response_arr));
+            $response_arr = $response->json();
+            Log::info("Overpass API Response: status=" . $response->status() . " " . json_encode($response_arr));
 
             if (!empty($response_arr['elements'])) {
                 $nodes = $response_arr['elements'];
@@ -379,21 +382,24 @@ class OpenStreetMapController extends Controller
 
         try {
             $response = Http::get($url);
-            $response_arr_from = json_decode($response, true);
-            Log::info("Visicom Response: " . json_encode($response_arr_from));
+            $response_arr_from = $response->json();
+            Log::info("Visicom Response: status=" . $response->status() . " " . json_encode($response_arr_from));
 
-            if (!empty($response_arr_from)) {
+            if ($response->successful()
+                && is_array($response_arr_from)
+                && isset($response_arr_from['properties'])) {
                 $city_text = $local === "ru" ? "город " : ($local === "en" ? "city " : "місто ");
                 $building_text = $local === "ru" ? "д." : ($local === "en" ? "build." : "буд.");
+                $props = $response_arr_from['properties'];
 
-                return ["result" => $response_arr_from["properties"]["street_type"] . " "
-                    . $response_arr_from["properties"]["street"]
-                    . ", $building_text" . $response_arr_from["properties"]["name"]
-                    . ", " . $response_arr_from["properties"]["settlement_type"]
-                    . " " . $response_arr_from["properties"]["settlement"]];
-            } else {
-                return ["result" => "Точка на карте"];
+                return ["result" => ($props['street_type'] ?? '') . " "
+                    . ($props['street'] ?? '')
+                    . ", $building_text" . ($props['name'] ?? '')
+                    . ", " . ($props['settlement_type'] ?? '')
+                    . " " . ($props['settlement'] ?? '')];
             }
+
+            return ["result" => "Точка на карте"];
         } catch (\Exception $e) {
             Log::error("Visicom Error: " . $e->getMessage());
             return ["result" => "Точка на карте"];
