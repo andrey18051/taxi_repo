@@ -225,7 +225,9 @@ class OrderHelper
 
     /**
      * Итоговая стоимость заказа для клиента (список «в роботі», отмена, пуши).
-     * Учитывает finish_cost, client_cost и доплату attempt_20 («Бажаю швидше»).
+     * Приоритет: finish_cost → client_cost → web_cost.
+     * attempt_20 не суммируется повторно: после доплаты на финише web_cost и client_cost
+     * уже содержат итог, а attempt_20 — служебный накопитель.
      */
     public static function resolveDisplayCostGrivna(object $order): int
     {
@@ -234,19 +236,12 @@ class OrderHelper
             return $finish;
         }
 
-        $web = (int) ($order->web_cost ?? 0);
         $client = (int) ($order->client_cost ?? 0);
-        $attempt = (int) ($order->attempt_20 ?? 0);
-        $withAttempt = $web + $attempt;
-
-        if ($client > 0 && $client >= $withAttempt) {
-            return $client;
-        }
-        if ($client > 0 && $attempt === 0) {
+        if ($client > 0) {
             return $client;
         }
 
-        return max($withAttempt, $client);
+        return (int) ($order->web_cost ?? 0);
     }
 
 }

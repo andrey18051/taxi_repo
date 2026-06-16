@@ -724,6 +724,7 @@ class MyTaxiApiController extends Controller
         $order->dispatching_order_uid = $order_new_uid;
         $order->auto = null;
         $order->web_cost = $newWebCost;
+        $order->client_cost = $newWebCost;
         $order->closeReason = "100";
         $order->closeReasonI = "0";
         $order->attempt_20 += $addCost;
@@ -857,6 +858,7 @@ class MyTaxiApiController extends Controller
         $response =  [
             'uid' => $order_new_uid,
             'web_cost' => $order->web_cost,
+            'client_cost' => $newWebCost,
             'routefrom' => $order->routefrom,
             'startLat' => $order->startLat,
             'startLan' => $order->startLan,
