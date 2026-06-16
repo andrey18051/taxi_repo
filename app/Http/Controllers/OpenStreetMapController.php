@@ -313,97 +313,68 @@ class OpenStreetMapController extends Controller
 
     public function reverseAddressLocal($originLatitude, $originLongitude, $local)
     {
-        $radius = 50; // Радиус поиска в метрах
-        $url = "https://overpass-api.de/api/interpreter?data=[out:json];node(around:$radius,$originLatitude,$originLongitude);out;";
-
-        Log::info("Overpass API Request URL: $url");
-
-        try {
-            $response = Http::get($url);
-            $response_arr = $response->json();
-            Log::info("Overpass API Response: status=" . $response->status() . " " . json_encode($response_arr));
-
-            if (!empty($response_arr['elements'])) {
-                $nodes = $response_arr['elements'];
-                $validNode = null;
-
-                // Поиск первого узла с непустыми данными
-                foreach ($nodes as $node) {
-                    if (!empty($node['tags']['addr:street'])) {
-                        $validNode = $node;
-                        break;
-                    }
-                }
-
-                if ($validNode) {
-                    $address = $validNode['tags'];
-
-                    $city_text = $local === "ru" ? "город " : ($local === "en" ? "city " : "місто ");
-                    $building_text = $local === "ru" ? "д." : ($local === "en" ? "build." : "буд.");
-
-                    $road = $address['addr:street'] ?? "Неизвестная улица";
-                    $house = $address['addr:housenumber'] ?? "Неизвестная";
-
-                    // Попробуем извлечь город из нескольких источников
-                    $city = $address['addr:city']
-                        ?? $address['is_in']
-                        ?? $address['addr:place']
-                        ?? "Неизвестная"; // Резервное значение, если город не найден
-
-                    Log::info("Extracted city: $city from node: " . json_encode($validNode));
-
-                    if ($house != "Неизвестная") {
-                        if ($city != "Неизвестная") {
-                            $result = "$road, $building_text $house, $city_text $city";
-                        } else {
-                            $result = "$road, $building_text $house";
-                        }
-                        return ["result" => $result];
-                    }
-
-
-                }
-        } else {
-                Log::error("Адрес не найден в радиусе $radius метров");
-            }
-        } catch (\Exception $e) {
-            Log::error("Overpass API Error: " . $e->getMessage());
+        $nominatim = $this->reverseFromNominatim((float) $originLatitude, (float) $originLongitude, (string) $local);
+        if ($nominatim !== null) {
+            return ['result' => $nominatim];
         }
 
-        $r = 50; // Радиус поиска в метрах
-        $url = "https://api.visicom.ua/data-api/5.0/$local/geocode.json?categories=adr_address&near="
-            . $originLongitude
-            . "," . $originLatitude
-            . "&r=" . $r . "&l=1&key="
-            . config("app.keyVisicomMy");
-//        $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near=30.51043,50.45358&r=50&l=1&key=". config("app.keyVisicom");
+        $visicom = $this->reverseWithVisicom($originLatitude, $originLongitude, $local);
+        if (!empty($visicom['result']) && $visicom['result'] !== 'Точка на карте') {
+            return $visicom;
+        }
 
-        Log::info("Visicom Request URL: $url");
+        return ['result' => 'Точка на карте'];
+    }
 
+    /**
+     * Обратное геокодирование через Nominatim (требует User-Agent).
+     */
+    private function reverseFromNominatim(float $latitude, float $longitude, string $local): ?string
+    {
         try {
-            $response = Http::get($url);
-            $response_arr_from = $response->json();
-            Log::info("Visicom Response: status=" . $response->status() . " " . json_encode($response_arr_from));
+            $response = Http::withHeaders([
+                'User-Agent' => 'TaxiEasyUa/1.0 (taxi.easy.ua.sup@gmail.com)',
+            ])->timeout(10)->get('https://nominatim.openstreetmap.org/reverse', [
+                'format' => 'jsonv2',
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'accept-language' => $local,
+            ]);
 
-            if ($response->successful()
-                && is_array($response_arr_from)
-                && isset($response_arr_from['properties'])) {
-                $city_text = $local === "ru" ? "город " : ($local === "en" ? "city " : "місто ");
-                $building_text = $local === "ru" ? "д." : ($local === "en" ? "build." : "буд.");
-                $props = $response_arr_from['properties'];
+            Log::info('Nominatim reverse: status=' . $response->status());
 
-                return ["result" => ($props['street_type'] ?? '') . " "
-                    . ($props['street'] ?? '')
-                    . ", $building_text" . ($props['name'] ?? '')
-                    . ", " . ($props['settlement_type'] ?? '')
-                    . " " . ($props['settlement'] ?? '')];
+            if (!$response->successful()) {
+                return null;
             }
 
-            return ["result" => "Точка на карте"];
+            $data = $response->json();
+            if (!is_array($data) || empty($data['address'])) {
+                return null;
+            }
+
+            $address = $data['address'];
+            $road = $address['road'] ?? $address['pedestrian'] ?? $address['footway'] ?? null;
+            $house = $address['house_number'] ?? null;
+            $city = $address['city'] ?? $address['town'] ?? $address['village'] ?? $address['municipality'] ?? null;
+            $cityText = $local === 'ru' ? 'город ' : ($local === 'en' ? 'city ' : 'місто ');
+            $buildingText = $local === 'ru' ? 'д.' : ($local === 'en' ? 'build.' : 'буд.');
+
+            if ($road !== null && $house !== null) {
+                if ($city !== null) {
+                    return $road . ', ' . $buildingText . ' ' . $house . ', ' . $cityText . $city;
+                }
+
+                return $road . ', ' . $buildingText . ' ' . $house;
+            }
+
+            if (!empty($data['display_name'])) {
+                return $data['display_name'];
+            }
         } catch (\Exception $e) {
-            Log::error("Visicom Error: " . $e->getMessage());
-            return ["result" => "Точка на карте"];
+            Log::error('Nominatim Error: ' . $e->getMessage());
         }
+
+        return null;
     }
 
     /**
