@@ -223,6 +223,30 @@ class OrderHelper
         return $addCostBalance;
     }
 
+    /**
+     * Итоговая стоимость заказа для клиента (список «в роботі», отмена, пуши).
+     * Учитывает finish_cost, client_cost и доплату attempt_20 («Бажаю швидше»).
+     */
+    public static function resolveDisplayCostGrivna(object $order): int
+    {
+        $finish = (int) ($order->finish_cost ?? 0);
+        if ($finish > 0) {
+            return $finish;
+        }
 
+        $web = (int) ($order->web_cost ?? 0);
+        $client = (int) ($order->client_cost ?? 0);
+        $attempt = (int) ($order->attempt_20 ?? 0);
+        $withAttempt = $web + $attempt;
+
+        if ($client > 0 && $client >= $withAttempt) {
+            return $client;
+        }
+        if ($client > 0 && $attempt === 0) {
+            return $client;
+        }
+
+        return max($withAttempt, $client);
+    }
 
 }

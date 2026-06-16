@@ -7179,9 +7179,13 @@ class UniversalAndroidFunctionController extends Controller
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
 
+                $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+                $newClientCost = $oldClientCost + (int) $addCost;
+
                 $order->dispatching_order_uid = $order_new_uid;
                 $order->auto = null;
                 $order->web_cost = $responseArr["order_cost"];
+                $order->client_cost = $newClientCost;
                 $order->closeReason = "-1";
                 $order->closeReasonI = "0";
                 $order->attempt_20 += $addCost;
@@ -7200,6 +7204,7 @@ class UniversalAndroidFunctionController extends Controller
                 $response =  [
                     'uid' => $order_new_uid,
                     'web_cost' => $order->web_cost,
+                    'client_cost' => $newClientCost,
                     'routefrom' => $order->routefrom,
                     'startLat' => $order->startLat,
                     'startLan' => $order->startLan,

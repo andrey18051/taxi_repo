@@ -604,20 +604,8 @@ class UIDController extends Controller
                     }
 
                     // Расчет стоимости
-                    $cost = $value["web_cost"] ?? 0;
-                    if (!empty($value["client_cost"])) {
-                        // client_cost уже включает сумму доплат; attempt_20 — служебный накопитель
-                        $cost = $value["client_cost"];
-                        Log::debug('💰 Расчет стоимости с client_cost', [
-                            'client_cost' => $value["client_cost"],
-                            'attempt_20' => $value["attempt_20"] ?? 0,
-                            'total_cost' => $cost
-                        ]);
-                    }
-                    if (!empty($value["finish_cost"])) {
-                        $cost = $value["finish_cost"];
-                        Log::debug('💰 Использована finish_cost', ['finish_cost' => $cost]);
-                    }
+                    $cost = \App\Helpers\OrderHelper::resolveDisplayCostGrivna((object) $value);
+                    Log::debug('💰 Итоговая стоимость заказа', ['cost' => $cost]);
 
                     // Форматирование дат
                     $requiredTime = KievDateTimeFormatter::formatRequiredTime($value["required_time"] ?? null);
@@ -1010,13 +998,7 @@ class UIDController extends Controller
                     } else {
                         $dispatchingOrderUidDouble = " ";
                     }
-                    $cost = $orderRow->web_cost;
-                    if ($orderRow->client_cost != null) {
-                        $cost = $orderRow->client_cost;
-                    }
-                    if ($orderRow->finish_cost != null) {
-                        $cost = $orderRow->finish_cost;
-                    }
+                    $cost = \App\Helpers\OrderHelper::resolveDisplayCostGrivna($orderRow);
                     $requiredTimeFormatted = KievDateTimeFormatter::formatRequiredTime($orderRow->required_time);
                     $response[] = [
                         'uid' => $orderRow->dispatching_order_uid,

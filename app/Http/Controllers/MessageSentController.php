@@ -107,7 +107,7 @@ class MessageSentController extends Controller
 
         $subject = "Отмена заказа";
 
-        $costForClient = $client_cost > 0 ? $client_cost : (int) ($web_cost ?? 0);
+        $costForClient = \App\Helpers\OrderHelper::resolveDisplayCostGrivna($orderweb);
         $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $costForClient грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
 
         $alarmMessage = new TelegramController();
