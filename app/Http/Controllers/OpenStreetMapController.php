@@ -294,15 +294,10 @@ class OpenStreetMapController extends Controller
             if ($response->successful()
                 && is_array($response_arr_from)
                 && isset($response_arr_from['properties'])) {
-                $city_text = $local === "ru" ? "город " : ($local === "en" ? "city " : "місто ");
-                $building_text = $local === "ru" ? "д." : ($local === "en" ? "build." : "буд.");
-                $props = $response_arr_from['properties'];
-
-                return ["result" => ($props['street_type'] ?? '')
-                    . ($props['street'] ?? '')
-                    . ", $building_text" . ($props['name'] ?? '')
-                    . ", " . ($props['settlement_type'] ?? '')
-                    . " " . ($props['settlement'] ?? '')];
+                return ['result' => OpenStreetMapHelper::buildAddressFromVisicomProperties(
+                    $response_arr_from['properties'],
+                    (string) $local
+                )];
             }
 
             return ["result" => "Точка на карте"];
@@ -314,14 +309,14 @@ class OpenStreetMapController extends Controller
 
     public function reverseAddressLocal($originLatitude, $originLongitude, $local)
     {
-        $nominatim = $this->reverseFromNominatim((float) $originLatitude, (float) $originLongitude, (string) $local);
-        if ($nominatim !== null) {
-            return ['result' => $nominatim];
-        }
-
         $visicom = $this->reverseWithVisicom($originLatitude, $originLongitude, $local);
         if (!empty($visicom['result']) && $visicom['result'] !== 'Точка на карте') {
             return $visicom;
+        }
+
+        $nominatim = $this->reverseFromNominatim((float) $originLatitude, (float) $originLongitude, (string) $local);
+        if ($nominatim !== null) {
+            return ['result' => $nominatim];
         }
 
         return ['result' => 'Точка на карте'];
@@ -353,7 +348,7 @@ class OpenStreetMapController extends Controller
                 return null;
             }
 
-            $compact = OpenStreetMapHelper::formatCompactReverseAddress(
+            $compact = OpenStreetMapHelper::buildAddressFromNominatim(
                 $data['address'],
                 $data['name'] ?? null,
                 $local

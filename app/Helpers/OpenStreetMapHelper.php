@@ -449,53 +449,64 @@ class OpenStreetMapHelper
     }
 
     /**
-     * Краткий адрес для такси из компонентов Nominatim.
-     * Без области, страны, индекса, громады и прочих админ. уровней.
+     * Сборка адреса в формате Visicom (как в AndroidPas*_Controller).
      */
-    public static function formatCompactReverseAddress(array $address, ?string $osmName, string $local): ?string
+    public static function buildAddressFromVisicomProperties(array $props, string $local): string
+    {
+        $buildingText = $local === 'ru' ? 'д.' : ($local === 'en' ? 'build.' : 'буд.');
+
+        return ($props['street_type'] ?? '')
+            . ($props['street'] ?? '')
+            . ', ' . $buildingText . ($props['name'] ?? '')
+            . ', ' . ($props['settlement_type'] ?? '')
+            . ' ' . ($props['settlement'] ?? '');
+    }
+
+    /**
+     * Тот же формат строки для fallback из Nominatim.
+     */
+    public static function buildAddressFromNominatim(array $address, ?string $osmName, string $local): ?string
     {
         $buildingText = $local === 'ru' ? 'д.' : ($local === 'en' ? 'build.' : 'буд.');
 
         $road = $address['road'] ?? $address['pedestrian'] ?? $address['footway'] ?? $address['path'] ?? null;
         $house = $address['house_number'] ?? null;
-        $placeName = $address['building'] ?? $address['residential'] ?? $address['apartments']
-            ?? $address['house'] ?? $address['tourism'] ?? $address['amenity']
-            ?? $address['shop'] ?? $address['man_made'] ?? null;
-        if (($placeName === null || $placeName === '') && $osmName !== null && $osmName !== '') {
-            $placeName = $osmName;
+
+        if ($road === null || $road === '') {
+            $road = $address['building'] ?? $address['residential'] ?? $address['apartments']
+                ?? $address['house'] ?? $address['tourism'] ?? $address['amenity']
+                ?? $address['shop'] ?? $address['man_made'] ?? null;
+            if (($road === null || $road === '') && $osmName !== null && $osmName !== '') {
+                $road = $osmName;
+            }
         }
 
-        $area = $address['suburb'] ?? $address['neighbourhood'] ?? $address['quarter'] ?? null;
-
-        $line = null;
-        if ($road !== null) {
-            $line = $house !== null
-                ? $road . ', ' . $buildingText . ' ' . $house
-                : $road;
-        } elseif ($placeName !== null) {
-            $line = $house !== null
-                ? $placeName . ', ' . $buildingText . ' ' . $house
-                : $placeName;
+        if ($road === null || $road === '') {
+            return null;
         }
 
-        if ($line === null && $area !== null) {
-            return $area;
+        $settlement = null;
+        $settlementType = '';
+        if (!empty($address['city'])) {
+            $settlement = $address['city'];
+            $settlementType = $local === 'ru' ? 'город ' : ($local === 'en' ? 'city ' : 'місто ');
+        } elseif (!empty($address['town'])) {
+            $settlement = $address['town'];
+            $settlementType = $local === 'ru' ? 'г. ' : ($local === 'en' ? 'town ' : 'м. ');
+        } elseif (!empty($address['village'])) {
+            $settlement = $address['village'];
+            $settlementType = $local === 'ru' ? 'селище ' : ($local === 'en' ? 'village ' : 'селище ');
         }
 
-        if ($line === null) {
-            $city = $address['city'] ?? $address['town'] ?? $address['village'] ?? null;
-            return $city !== null && $city !== '' ? $city : null;
+        $result = $road;
+        if ($house !== null && $house !== '') {
+            $result .= ', ' . $buildingText . $house;
+        }
+        if ($settlement !== null && $settlement !== '') {
+            $result .= ', ' . $settlementType . $settlement;
         }
 
-        if ($area !== null && $road !== null && mb_stripos($line, $area) === false) {
-            return $area . ', ' . $line;
-        }
-
-        if ($area !== null && $road === null && $placeName !== null && mb_stripos($placeName, $area) === false) {
-            return $area . ', ' . $line;
-        }
-
-        return $line;
+        return $result;
     }
 
 }
