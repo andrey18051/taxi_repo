@@ -14,18 +14,22 @@ final class SimpleCashlessDispatchStatusSync
 {
     private const ACTIVE_CLOSE_REASONS = ['-1', '100', '101', '102', '103'];
 
+    /** @var list<string> */
+    public const CASHLESS_PAY_SYSTEMS = ['wfp_payment', 'google_pay_payment'];
+
+    public static function isCashlessPaySystem(?string $paySystem): bool
+    {
+        return in_array((string) $paySystem, self::CASHLESS_PAY_SYSTEMS, true);
+    }
+
     public static function shouldLiveSync(Orderweb $orderweb): bool
     {
         if (PaymentFlow::normalize($orderweb->payment_flow_mode ?? 0) !== PaymentFlow::SIMPLE) {
             return false;
         }
 
-        if ((int) ($orderweb->payment_type ?? 0) !== 1) {
-            return false;
-        }
-
         $paySystem = (string) ($orderweb->pay_system ?? '');
-        if (!in_array($paySystem, ['wfp_payment', 'google_pay_payment'], true)) {
+        if (!self::isCashlessPaySystem($paySystem)) {
             return false;
         }
 
