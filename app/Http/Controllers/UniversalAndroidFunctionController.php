@@ -9060,6 +9060,8 @@ class UniversalAndroidFunctionController extends Controller
             ]);
             if ($order->pay_system == "nal_payment") {
                 $this->searchAutoOrderService($order->dispatching_order_uid, $mes_info);
+            } elseif (SimpleCashlessDispatchStatusSync::shouldLiveSync($order)) {
+                $this->searchAutoOrderCashlessService($order->dispatching_order_uid, $mes_info);
             } else {
                 (new OrderStatusController)
                     ->getOrderStatusMessageResultPush($order->dispatching_order_uid);
@@ -9085,6 +9087,66 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
+
+    /**
+     * One background poll for simple cashless (wfp/google pay): live dispatch sync + FCM when car found.
+     */
+    public function searchAutoOrderCashlessService($uid, $mes_info): array
+    {
+        Log::info('searchAutoOrderCashlessService: start', ['uid' => $uid, 'mes_info' => $mes_info]);
+
+        if (empty($uid)) {
+            return ['status' => 'error', 'message' => 'Неверный UID'];
+        }
+
+        try {
+            $processedUid = (new MemoryOrderChangeController)->show($uid);
+            if ($processedUid === null) {
+                Log::warning('searchAutoOrderCashlessService: UID processing failed', ['uid' => $uid]);
+
+                return ['status' => 'error', 'message' => 'Обработка UID не удалась'];
+            }
+
+            (new OrderStatusController)->getOrderStatusMessageResultPush($processedUid);
+
+            $orderweb = Orderweb::where('dispatching_order_uid', $processedUid)->first();
+            if (!$orderweb) {
+                return ['status' => 'success', 'message' => 'Заказ не найден'];
+            }
+
+            $activeCloseReasons = ['-1', '100', '101', '102', '103'];
+            if (!in_array((string) $orderweb->closeReason, $activeCloseReasons, true)) {
+                return ['status' => 'success', 'message' => 'Заказ снят'];
+            }
+
+            if ($orderweb->auto === null || $orderweb->auto === '') {
+                return ['status' => 'success', 'message' => 'Автоматический заказ не найден'];
+            }
+
+            Log::info('searchAutoOrderCashlessService: car found, sending push', [
+                'dispatching_order_uid' => $orderweb->dispatching_order_uid,
+                'auto' => $orderweb->auto,
+            ]);
+
+            if ((string) $orderweb->closeReason === '-1') {
+                (new FCMController)->deleteDocumentFromFirestore($processedUid);
+                (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($processedUid);
+                (new FCMController)->deleteDocumentFromSectorFirestore($processedUid);
+                (new FCMController)->writeDocumentToHistoryFirestore($processedUid, 'cancelled');
+            }
+
+            $this->sendAutoOrderResponse($orderweb, $mes_info);
+
+            return ['status' => 'success', 'message' => $orderweb->auto];
+        } catch (\Exception $e) {
+            Log::error('searchAutoOrderCashlessService: error', [
+                'uid' => $uid,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['status' => 'error', 'message' => 'Ошибка обработки: ' . $e->getMessage()];
+        }
+    }
 
     public function searchAutoOrderService($uid, $mes_info): array
     {
@@ -9433,14 +9495,16 @@ class UniversalAndroidFunctionController extends Controller
             if(isset ($user)) {
                 if ($orderweb->closeReason !== "-1") {
                     $storedData = $orderweb->auto;
-
                     $dataDriver = json_decode($storedData, true);
-//                            $name = $dataDriver["name"];
-                    $color = $dataDriver["color"];
-                    $brand = $dataDriver["brand"];
-                    $model = $dataDriver["model"];
-                    $number = $dataDriver["number"];
-                    $auto = "$number, $color  $brand $model";
+                    if (is_array($dataDriver)) {
+                        $color = $dataDriver['color'] ?? '';
+                        $brand = $dataDriver['brand'] ?? '';
+                        $model = $dataDriver['model'] ?? '';
+                        $number = $dataDriver['number'] ?? '';
+                        $auto = "$number, $color  $brand $model";
+                    } else {
+                        $auto = (string) $storedData;
+                    }
                 } else {
                     $auto = $orderweb->auto;
                 }
