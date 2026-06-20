@@ -7,6 +7,7 @@ use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
 use App\Models\City_PAS5;
+use App\City\SimpleCashlessDispatchStatusSync;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Support\KievDateTimeFormatter;
@@ -897,7 +898,7 @@ class UIDController extends Controller
         }
 
         $order = Orderweb::where("email", $email)
-            ->whereIn('closeReason', ['-1', '100', '101', '102'])
+            ->whereIn('closeReason', ['-1', '0', '100', '101', '102'])
             ->whereNull('cancel_timestamp')
             ->where("comment", $application)
             ->where("city", $city)
@@ -915,8 +916,17 @@ class UIDController extends Controller
         if (!$order->isEmpty()) {
 
                 $ordersForReview = $order->filter(function ($orderRow) {
-                    return $orderRow->cancel_timestamp === null
-                        && !in_array((string) $orderRow->closeReason, ['0', '1', '8', '9'], true);
+                    if ($orderRow->cancel_timestamp !== null) {
+                        return false;
+                    }
+                    if (in_array((string) $orderRow->closeReason, ['1', '8', '9'], true)) {
+                        return false;
+                    }
+                    if ((string) $orderRow->closeReason === '0') {
+                        return SimpleCashlessDispatchStatusSync::shouldLiveSync($orderRow);
+                    }
+
+                    return true;
                 });
                 if ($ordersForReview->isNotEmpty()) {
                     self::UIDStatusReview($ordersForReview);
@@ -939,7 +949,7 @@ class UIDController extends Controller
 //                ->get();
             $historySince = now()->subHours(48);
             $orderHistory = Orderweb::where("email", $email)
-                ->whereIn('closeReason', ['-1', '100', '101', '102', '103'])
+                ->whereIn('closeReason', ['-1', '0', '100', '101', '102', '103'])
                 ->whereNull('cancel_timestamp')
                 ->where("city", $city)
 //                ->whereNotNull("startLat")
@@ -972,7 +982,11 @@ class UIDController extends Controller
                 foreach ($orderHistory as $orderRow) {
                     $orderRow->refresh();
                     if (!empty($orderRow->cancel_timestamp)
-                        || in_array((string) $orderRow->closeReason, ['0', '1', '8', '9'], true)) {
+                        || in_array((string) $orderRow->closeReason, ['1', '8', '9'], true)) {
+                        continue;
+                    }
+                    if ((string) $orderRow->closeReason === '0'
+                        && !SimpleCashlessDispatchStatusSync::shouldLiveSync($orderRow)) {
                         continue;
                     }
                     $uid_history = Uid_history::where("uid_bonusOrderHold", $orderRow->dispatching_order_uid)->first();
@@ -1764,6 +1778,12 @@ class UIDController extends Controller
         $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
         if ($uid_history) {
             (new UIDController())->UIDStatusReviewCard($uid);
+            return;
+        }
+
+        if (SimpleCashlessDispatchStatusSync::shouldLiveSync($orderRow)) {
+            (new OrderStatusController())->getOrderStatusMessageResultPush($uid);
+
             return;
         }
 

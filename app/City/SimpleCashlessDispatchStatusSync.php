@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class SimpleCashlessDispatchStatusSync
 {
-    private const ACTIVE_CLOSE_REASONS = ['-1', '100', '101', '102', '103'];
+    private const ACTIVE_CLOSE_REASONS = ['-1', '0', '100', '101', '102', '103'];
 
     /** @var list<string> */
     public const CASHLESS_PAY_SYSTEMS = ['wfp_payment', 'google_pay_payment'];

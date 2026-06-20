@@ -46,6 +46,18 @@ class SimpleCashlessDispatchStatusSyncTest extends TestCase
         $this->assertTrue(SimpleCashlessDispatchStatusSync::shouldLiveSync($order));
     }
 
+    public function test_should_live_sync_when_close_reason_zero_during_search(): void
+    {
+        $order = new Orderweb();
+        $order->payment_flow_mode = PaymentFlow::SIMPLE;
+        $order->payment_type = 0;
+        $order->pay_system = 'wfp_payment';
+        $order->server = 'http://188.190.245.102:7303';
+        $order->closeReason = '0';
+
+        $this->assertTrue(SimpleCashlessDispatchStatusSync::shouldLiveSync($order));
+    }
+
     public function test_should_not_live_sync_for_fork_mode(): void
     {
         $order = new Orderweb();

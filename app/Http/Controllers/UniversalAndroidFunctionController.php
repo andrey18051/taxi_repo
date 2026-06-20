@@ -9038,7 +9038,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         Log::info("Выбран comment: {$comment}");
-        $closeReasons = ['-1', '100', '101', '102', '103'];
+        $closeReasons = ['-1', '0', '100', '101', '102', '103'];
         // Получаем все заказы
         $orders = Orderweb::where('email', $email)
             ->where('comment', $comment)
