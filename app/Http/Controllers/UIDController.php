@@ -898,7 +898,7 @@ class UIDController extends Controller
         }
 
         $order = Orderweb::where("email", $email)
-            ->whereIn('closeReason', ['-1', '0', '100', '101', '102'])
+            ->whereIn('closeReason', SimpleCashlessDispatchStatusSync::IN_PROGRESS_CLOSE_REASONS)
             ->whereNull('cancel_timestamp')
             ->where("comment", $application)
             ->where("city", $city)
@@ -949,7 +949,7 @@ class UIDController extends Controller
 //                ->get();
             $historySince = now()->subHours(48);
             $orderHistory = Orderweb::where("email", $email)
-                ->whereIn('closeReason', ['-1', '0', '100', '101', '102', '103'])
+                ->whereIn('closeReason', SimpleCashlessDispatchStatusSync::IN_PROGRESS_CLOSE_REASONS)
                 ->whereNull('cancel_timestamp')
                 ->where("city", $city)
 //                ->whereNotNull("startLat")

@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Log;
  */
 final class SimpleCashlessDispatchStatusSync
 {
+    /** @var list<string> Active dispatch legs — search through trip completion (excludes 104). */
     private const ACTIVE_CLOSE_REASONS = ['-1', '0', '100', '101', '102', '103'];
+
+    /** @var list<string> Same set for client "orders in progress" list and background poll. */
+    public const IN_PROGRESS_CLOSE_REASONS = ['-1', '0', '100', '101', '102', '103'];
 
     /** @var list<string> */
     public const CASHLESS_PAY_SYSTEMS = ['wfp_payment', 'google_pay_payment'];

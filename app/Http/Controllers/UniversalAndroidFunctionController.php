@@ -9038,7 +9038,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         Log::info("Выбран comment: {$comment}");
-        $closeReasons = ['-1', '0', '100', '101', '102', '103'];
+        $closeReasons = SimpleCashlessDispatchStatusSync::IN_PROGRESS_CLOSE_REASONS;
         // Получаем все заказы
         $orders = Orderweb::where('email', $email)
             ->where('comment', $comment)

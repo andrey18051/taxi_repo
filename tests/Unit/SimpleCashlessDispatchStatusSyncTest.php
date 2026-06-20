@@ -58,6 +58,11 @@ class SimpleCashlessDispatchStatusSyncTest extends TestCase
         $this->assertTrue(SimpleCashlessDispatchStatusSync::shouldLiveSync($order));
     }
 
+    public function test_in_progress_list_includes_running_close_reason(): void
+    {
+        $this->assertContains('103', SimpleCashlessDispatchStatusSync::IN_PROGRESS_CLOSE_REASONS);
+    }
+
     public function test_should_not_live_sync_for_fork_mode(): void
     {
         $order = new Orderweb();
