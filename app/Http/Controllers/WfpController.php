@@ -312,6 +312,8 @@ class WfpController extends Controller
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
 
+        $this->syncGooglePayServiceUrlCallback($data);
+
         return [
             "orderReference" => $request->orderReference,
             "status" => "accept",
@@ -443,6 +445,8 @@ class WfpController extends Controller
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
 
+        $this->syncGooglePayServiceUrlCallback($data);
+
         return [
             "orderReference" => $request->orderReference,
             "status" => "accept",
@@ -501,6 +505,8 @@ class WfpController extends Controller
         $secretKey = $merchant->wfp_merchantSecretKey;
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        $this->syncGooglePayServiceUrlCallback($data);
 
         return [
             "orderReference" => $request->orderReference,
@@ -623,6 +629,8 @@ class WfpController extends Controller
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
 
+        $this->syncGooglePayServiceUrlCallback($data);
+
         return [
             "orderReference" => $request->orderReference,
             "status" => "accept",
@@ -683,6 +691,8 @@ class WfpController extends Controller
         $secretKey = $merchant->wfp_merchantSecretKey;
 
         $signature = self::generateHmacMd5Signature($params, $secretKey, "serviceUrl");
+
+        $this->syncGooglePayServiceUrlCallback($data);
 
         return [
             "orderReference" => $request->orderReference,
@@ -2810,6 +2820,19 @@ class WfpController extends Controller
         $clientEmail,
         $clientPhone
     ) {
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if ($invoice !== null) {
+            $order = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
+            if ($order !== null && (string) $order->pay_system === 'google_pay_payment') {
+                Log::info('chargeActiveToken skipped for google_pay_payment', [
+                    'orderReference' => $orderReference,
+                    'uid' => $order->dispatching_order_uid,
+                ]);
+
+                return null;
+            }
+        }
+
         switch ($city) {
             case "Lviv":
             case "Ivano_frankivsk":
@@ -5100,5 +5123,64 @@ class WfpController extends Controller
             $city,
             $amount
         );
+    }
+
+    /**
+     * WayForPay callback для Google Pay: привязать hold к активному заказу,
+     * если приложение передало другой orderReference при создании заказа.
+     */
+    private function syncGooglePayServiceUrlCallback(array $data): void
+    {
+        if (strtolower((string) ($data['paymentSystem'] ?? '')) !== 'googlepay') {
+            return;
+        }
+
+        $orderReference = $data['orderReference'] ?? null;
+        $email = $data['email'] ?? null;
+        $transactionStatus = $data['transactionStatus'] ?? null;
+        $paidStatuses = ['WaitingAuthComplete', 'Approved'];
+
+        if ($orderReference === null || $orderReference === '' || $email === null || $email === '') {
+            return;
+        }
+
+        if (!in_array($transactionStatus, $paidStatuses, true)) {
+            return;
+        }
+
+        $order = Orderweb::where('email', $email)
+            ->where('pay_system', 'google_pay_payment')
+            ->whereNull('cancel_timestamp')
+            ->where('created_at', '>=', now()->subMinutes(15))
+            ->orderByDesc('id')
+            ->first();
+
+        if ($order === null) {
+            return;
+        }
+
+        if ($order->wfp_order_id !== $orderReference) {
+            Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
+                'uid' => $order->dispatching_order_uid,
+                'old' => $order->wfp_order_id,
+                'new' => $orderReference,
+                'transactionStatus' => $transactionStatus,
+            ]);
+            $order->wfp_order_id = $orderReference;
+        }
+
+        $order->wfp_status_pay = $transactionStatus;
+        $order->save();
+
+        $invoice = WfpInvoice::firstOrNew(['orderReference' => $orderReference]);
+        $invoice->dispatching_order_uid = $order->dispatching_order_uid;
+        $invoice->amount = $data['amount'] ?? $order->client_cost ?? $order->web_cost;
+        $invoice->transactionStatus = $transactionStatus;
+        $invoice->reason = $data['reason'] ?? null;
+        $invoice->reasonCode = $data['reasonCode'] ?? null;
+        if (!empty($data['merchantAccount'])) {
+            $invoice->merchantAccount = $data['merchantAccount'];
+        }
+        $invoice->save();
     }
 }

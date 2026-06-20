@@ -3979,6 +3979,20 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         $orderReference = $order->wfp_order_id;
+        if (($order->pay_system ?? '') === 'google_pay_payment') {
+            $paidStatuses = ['WaitingAuthComplete', 'Approved'];
+            if (in_array($order->wfp_status_pay, $paidStatuses, true)) {
+                return false;
+            }
+
+            $hasPaidInvoice = WfpInvoice::where('dispatching_order_uid', $uid)
+                ->whereIn('transactionStatus', $paidStatuses)
+                ->exists();
+            if ($hasPaidInvoice) {
+                return false;
+            }
+        }
+
         if ($orderReference != null) {
             Log::debug("canceledOneMinute: orderReference=$orderReference");
 
@@ -5681,6 +5695,35 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("wfpInvoice dispatching_order_uid $uid");
         Log::debug("wfpInvoice $order_id");
         Log::debug("wfpInvoice $amount");
+    }
+
+    /**
+     * Списание по сохранённой карте — только wfp_payment, не Google Pay.
+     */
+    public function chargeLinkedCardAfterOrderReference(
+        string $paySystem,
+        string $application,
+        string $city,
+        string $orderReference,
+        $amount,
+        string $clientEmail,
+        string $clientPhone
+    ): void {
+        if ($paySystem !== 'wfp_payment') {
+            return;
+        }
+
+        $productName = 'Інша допоміжна діяльність у сфері транспорту';
+        (new WfpController)->chargeActiveToken(
+            $application,
+            $city,
+            $orderReference,
+            $amount,
+            $productName,
+            $clientEmail,
+            $clientPhone
+        );
+        (new WfpController)->checkStatus($application, $city, $orderReference);
     }
 
     public function getCardToken($email, $pay_system, $merchantId): \Illuminate\Http\JsonResponse

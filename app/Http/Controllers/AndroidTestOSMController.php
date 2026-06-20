@@ -3074,19 +3074,14 @@ class AndroidTestOSMController extends Controller
                 $pay_system = $params['pay_system'];
 
                 (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                (new WfpController)->chargeActiveToken(
+                (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                    $pay_system,
                     $application,
                     $city,
                     $orderReference,
                     $amount,
-                    $productName,
                     $clientEmail,
                     $clientPhone
-                );
-                (new WfpController)->checkStatus(
-                    $application,
-                    $city,
-                    $orderReference
                 );
             }
 
@@ -3624,19 +3619,14 @@ class AndroidTestOSMController extends Controller
                 $pay_system = $params['pay_system'];
 
                 (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                (new WfpController)->chargeActiveToken(
+                (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                    $pay_system,
                     $application,
                     $city,
                     $orderReference,
                     $amount,
-                    $productName,
                     $clientEmail,
                     $clientPhone
-                );
-                (new WfpController)->checkStatus(
-                    $application,
-                    $city,
-                    $orderReference
                 );
             }
 
@@ -7944,19 +7934,14 @@ class AndroidTestOSMController extends Controller
                     $pay_system = $params['pay_system'];
 
                     (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new WfpController)->chargeActiveToken(
+                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                        $pay_system,
                         $application,
                         $city,
                         $orderReference,
                         $amount,
-                        $productName,
                         $clientEmail,
                         $clientPhone
-                    );
-                    (new WfpController)->checkStatus(
-                        $application,
-                        $city,
-                        $orderReference
                     );
                 }
 
@@ -8680,19 +8665,14 @@ class AndroidTestOSMController extends Controller
                     $pay_system = $params['pay_system'];
 
                     (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new WfpController)->chargeActiveToken(
+                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                        $pay_system,
                         $application,
                         $city,
                         $orderReference,
                         $amount,
-                        $productName,
                         $clientEmail,
                         $clientPhone
-                    );
-                    (new WfpController)->checkStatus(
-                        $application,
-                        $city,
-                        $orderReference
                     );
                 }
 
@@ -9555,19 +9535,14 @@ class AndroidTestOSMController extends Controller
                     $pay_system = $params['pay_system'];
 
                     (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new WfpController)->chargeActiveToken(
+                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                        $pay_system,
                         $application,
                         $city,
                         $orderReference,
                         $amount,
-                        $productName,
                         $clientEmail,
                         $clientPhone
-                    );
-                    (new WfpController)->checkStatus(
-                        $application,
-                        $city,
-                        $orderReference
                     );
                 }
 
@@ -10406,19 +10381,14 @@ class AndroidTestOSMController extends Controller
                     $pay_system = $params['pay_system'];
 
                     (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new WfpController)->chargeActiveToken(
+                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                        $pay_system,
                         $application,
                         $city,
                         $orderReference,
                         $amount,
-                        $productName,
                         $clientEmail,
                         $clientPhone
-                    );
-                    (new WfpController)->checkStatus(
-                        $application,
-                        $city,
-                        $orderReference
                     );
                 }
 
@@ -11172,19 +11142,14 @@ class AndroidTestOSMController extends Controller
 //                        $pay_system
 //                    );
                     (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new WfpController)->chargeActiveToken(
+                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+                        $pay_system,
                         $application,
                         $city,
                         $orderReference,
                         $amount,
-                        $productName,
                         $clientEmail,
                         $clientPhone
-                    );
-                    (new WfpController)->checkStatus(
-                        $application,
-                        $city,
-                        $orderReference
                     );
                 }
 

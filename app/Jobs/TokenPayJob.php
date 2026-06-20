@@ -32,19 +32,14 @@ class TokenPayJob implements ShouldQueue
     public function handle()
     {
         (new UniversalAndroidFunctionController)->orderIdMemoryToken($this->orderReference, $this->order_id, $this->pay_system);
-        (new WfpController)->chargeActiveToken(
+        (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
+            $this->pay_system,
             $this->application,
             $this->city,
             $this->orderReference,
             $this->amount,
-            $this->productName,
             $this->clientEmail,
             $this->clientPhone
-        );
-        (new WfpController)->checkStatus(
-            $this->application,
-            $this->city,
-            $this->orderReference
         );
     }
 }
