@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\City\CityPaymentFlowResolver;
+use App\City\GooglePayOrderReferenceResolver;
 use App\City\PaymentFlow;
 use App\City\PaymentFlowAuthorization;
 use App\City\SimpleCashlessDispatchStatusSync;
@@ -5638,6 +5639,9 @@ class UniversalAndroidFunctionController extends Controller
         switch ($pay_system) {
             case "wfp_payment":
             case "google_pay_payment":
+                $orderReference = $pay_system === 'google_pay_payment'
+                    ? $this->resolveGooglePayOrderReferenceForBind($orderReference, $cost)
+                    : $orderReference;
                 $orderweb->wfp_order_id = $orderReference;
                 if ($uid !== null) {
                     self::wfpInvoice($orderReference, $cost, $uid);
@@ -5677,9 +5681,8 @@ class UniversalAndroidFunctionController extends Controller
         $uid
     ) {
         $uid = (new MemoryOrderChangeController)->show($uid);
-        $wfp_invoice = new WfpInvoice();
+        $wfp_invoice = WfpInvoice::firstOrNew(['orderReference' => $order_id]);
         $wfp_invoice->dispatching_order_uid = $uid;
-        $wfp_invoice->orderReference = $order_id;
         $wfp_invoice->amount = $amount;
 
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
@@ -5695,6 +5698,48 @@ class UniversalAndroidFunctionController extends Controller
         Log::debug("wfpInvoice dispatching_order_uid $uid");
         Log::debug("wfpInvoice $order_id");
         Log::debug("wfpInvoice $amount");
+    }
+
+    private function resolveGooglePayOrderReferenceForBind(string $orderReference, $cost): string
+    {
+        $candidates = WfpInvoice::query()
+            ->where(function ($query) use ($orderReference, $cost) {
+                $query->where('orderReference', $orderReference);
+                if ($cost !== null && $cost !== '') {
+                    $query->orWhere(function ($orphanQuery) use ($cost) {
+                        $orphanQuery->whereNull('dispatching_order_uid')
+                            ->whereIn('transactionStatus', ['WaitingAuthComplete', 'Approved'])
+                            ->where('amount', (string) $cost)
+                            ->where('created_at', '>=', now()->subMinutes(15));
+                    });
+                }
+            })
+            ->orderByDesc('id')
+            ->get(['orderReference', 'amount', 'transactionStatus', 'dispatching_order_uid'])
+            ->map(static function (WfpInvoice $invoice) {
+                return [
+                    'orderReference' => $invoice->orderReference,
+                    'amount' => $invoice->amount,
+                    'transactionStatus' => $invoice->transactionStatus,
+                    'dispatching_order_uid' => $invoice->dispatching_order_uid,
+                ];
+            })
+            ->all();
+
+        $resolved = GooglePayOrderReferenceResolver::resolveForOrderBind(
+            $orderReference,
+            $cost,
+            $candidates
+        );
+
+        if ($resolved !== $orderReference) {
+            Log::warning('orderIdMemoryToken: rebind google pay hold reference', [
+                'app_reference' => $orderReference,
+                'hold_reference' => $resolved,
+            ]);
+        }
+
+        return $resolved;
     }
 
     /**

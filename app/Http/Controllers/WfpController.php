@@ -2587,10 +2587,16 @@ class WfpController extends Controller
         $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug("GOOGLE_PAY_CHARGE", ['orderReference' => $orderReference, 'response' => $response->body()]);
 
-        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
-        if ($invoice) {
-            $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
-        }
+        $responseData = json_decode($response->body(), true);
+        $transactionStatus = is_array($responseData)
+            ? ($responseData['transactionStatus'] ?? $responseData['orderStatus'] ?? null)
+            : null;
+        $this->upsertWfpInvoiceRecord(
+            $orderReference,
+            $amount,
+            $merchantAccount,
+            is_string($transactionStatus) ? $transactionStatus : null
+        );
 
         try {
             $this->finalizeWalletAddCostAfterCharge(
@@ -5156,31 +5162,80 @@ class WfpController extends Controller
             ->first();
 
         if ($order === null) {
-            return;
+            $order = Orderweb::where('email', $email)
+                ->where('pay_system', 'google_pay_payment')
+                ->where('created_at', '>=', now()->subMinutes(15))
+                ->orderByDesc('id')
+                ->first();
         }
 
-        if ($order->wfp_order_id !== $orderReference) {
-            Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
-                'uid' => $order->dispatching_order_uid,
-                'old' => $order->wfp_order_id,
-                'new' => $orderReference,
-                'transactionStatus' => $transactionStatus,
-            ]);
-            $order->wfp_order_id = $orderReference;
+        $invoiceAmount = $data['amount'] ?? null;
+        $invoiceUid = null;
+        if ($order !== null) {
+            if ($order->wfp_order_id !== $orderReference) {
+                Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
+                    'uid' => $order->dispatching_order_uid,
+                    'old' => $order->wfp_order_id,
+                    'new' => $orderReference,
+                    'transactionStatus' => $transactionStatus,
+                ]);
+                $order->wfp_order_id = $orderReference;
+            }
+
+            $order->wfp_status_pay = $transactionStatus;
+            $order->save();
+
+            $invoiceUid = $order->dispatching_order_uid;
+            if ($invoiceAmount === null) {
+                $invoiceAmount = $order->client_cost ?? $order->web_cost;
+            }
         }
 
-        $order->wfp_status_pay = $transactionStatus;
-        $order->save();
+        $this->upsertWfpInvoiceRecord(
+            $orderReference,
+            $invoiceAmount,
+            (string) ($data['merchantAccount'] ?? ''),
+            $transactionStatus,
+            $invoiceUid,
+            $data['reason'] ?? null,
+            isset($data['reasonCode']) ? (string) $data['reasonCode'] : null
+        );
+    }
 
+    private function upsertWfpInvoiceRecord(
+        string $orderReference,
+        $amount,
+        string $merchantAccount,
+        ?string $transactionStatus = null,
+        ?string $uid = null,
+        ?string $reason = null,
+        ?string $reasonCode = null
+    ): WfpInvoice {
         $invoice = WfpInvoice::firstOrNew(['orderReference' => $orderReference]);
-        $invoice->dispatching_order_uid = $order->dispatching_order_uid;
-        $invoice->amount = $data['amount'] ?? $order->client_cost ?? $order->web_cost;
-        $invoice->transactionStatus = $transactionStatus;
-        $invoice->reason = $data['reason'] ?? null;
-        $invoice->reasonCode = $data['reasonCode'] ?? null;
-        if (!empty($data['merchantAccount'])) {
-            $invoice->merchantAccount = $data['merchantAccount'];
+
+        if ($uid !== null && $uid !== '') {
+            $invoice->dispatching_order_uid = $uid;
+        }
+        if ($amount !== null && $amount !== '') {
+            $invoice->amount = (string) $amount;
+        }
+        if ($transactionStatus !== null && $transactionStatus !== '') {
+            $invoice->transactionStatus = $transactionStatus;
+        }
+        if ($reason !== null) {
+            $invoice->reason = $reason;
+        }
+        if ($reasonCode !== null) {
+            $invoice->reasonCode = $reasonCode;
+        }
+        if ($merchantAccount !== '') {
+            $merchantAccount = trim($merchantAccount);
+            if ($merchantAccount !== '' && $invoice->merchantAccount !== $merchantAccount) {
+                $invoice->merchantAccount = $merchantAccount;
+            }
         }
         $invoice->save();
+
+        return $invoice;
     }
 }
