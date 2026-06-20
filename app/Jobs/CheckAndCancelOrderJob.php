@@ -73,11 +73,6 @@ class CheckAndCancelOrderJob implements ShouldQueue
             return;
         }
 
-        if ($order->auto !== null) {
-            Log::info("CheckAndCancelOrderJob: car assigned, skip uid={$uid}");
-            return;
-        }
-
         if (!$this->isActiveForPaymentCancel($order)) {
             Log::info("CheckAndCancelOrderJob: closeReason={$order->closeReason}, skip uid={$uid}");
             return;
@@ -153,7 +148,7 @@ class CheckAndCancelOrderJob implements ShouldQueue
         Log::info("CheckAndCancelOrderJob: cancel unpaid uid={$uid} city={$city}");
 
         try {
-            (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+            (new AndroidTestOSMController)->webordersCancel($uid, $city, $application, true);
         } catch (\Throwable $e) {
             Log::error("CheckAndCancelOrderJob: webordersCancel failed uid={$uid}: " . $e->getMessage());
         }
@@ -236,7 +231,7 @@ class CheckAndCancelOrderJob implements ShouldQueue
 
     private function isActiveForPaymentCancel(Orderweb $order): bool
     {
-        return in_array((string) $order->closeReason, ['-1', '100', ''], true);
+        return !in_array((string) $order->closeReason, ['1'], true);
     }
 
     private function resolveApplicationLabel(Orderweb $order): string

@@ -12713,7 +12713,8 @@ class AndroidTestOSMController extends Controller
     public function webordersCancel(
         $uid,
         $city,
-        $application
+        $application,
+        bool $forceDispatchCancel = false
     ) {
         $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
@@ -12747,7 +12748,10 @@ class AndroidTestOSMController extends Controller
 //                Cache::put($cacheKey, $responseArr, 600); // Перезаписываем кэш на 10 минут
 //            }
 
-            if (in_array($closeReasonBeforeCancel, ["100", "101", "102"], true)) {
+            if (
+                !$forceDispatchCancel
+                && in_array($closeReasonBeforeCancel, ["100", "101", "102"], true)
+            ) {
                 $this->notifyOrderCancelTelegram($orderweb);
                 return [
                     'response' => $resp_answer,

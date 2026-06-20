@@ -4114,7 +4114,7 @@ class UniversalAndroidFunctionController extends Controller
             $cancelNeed60 =self::canceledOneMinute($uid);
 
             if ($cancelNeed60) {
-                (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
+                (new AndroidTestOSMController)->webordersCancel($uid, $city, $application, true);
                 if (PaymentFlow::normalize($order->payment_flow_mode ?? 0) === PaymentFlow::SIMPLE) {
                     SimpleCashlessPaymentWatch::notifyClientOrderCanceled($order, $application);
                 }
