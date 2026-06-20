@@ -2591,12 +2591,20 @@ class WfpController extends Controller
         $transactionStatus = is_array($responseData)
             ? ($responseData['transactionStatus'] ?? $responseData['orderStatus'] ?? null)
             : null;
-        $this->upsertWfpInvoiceRecord(
-            $orderReference,
-            $amount,
-            $merchantAccount,
-            is_string($transactionStatus) ? $transactionStatus : null
-        );
+        try {
+            $this->upsertWfpInvoiceRecord(
+                $orderReference,
+                $amount,
+                $merchantAccount,
+                is_string($transactionStatus) ? $transactionStatus : null
+            );
+        } catch (\Throwable $e) {
+            Log::error('googlePayCharge: upsert WfpInvoice failed', [
+                'order_reference' => $orderReference,
+                'transaction_status' => $transactionStatus,
+                'error_message' => $e->getMessage(),
+            ]);
+        }
 
         try {
             $this->finalizeWalletAddCostAfterCharge(

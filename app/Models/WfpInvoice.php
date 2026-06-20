@@ -10,4 +10,14 @@ class WfpInvoice extends Model implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
+
+    protected $fillable = [
+        'dispatching_order_uid',
+        'merchantAccount',
+        'orderReference',
+        'amount',
+        'transactionStatus',
+        'reason',
+        'reasonCode',
+    ];
 }
