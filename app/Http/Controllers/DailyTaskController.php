@@ -137,8 +137,17 @@ class DailyTaskController extends Controller
                     'value' => $value
                 ]);
 
-                $uid = $value['dispatching_order_uid'];
+                $uid = $value['dispatching_order_uid'] ?? null;
                 Log::info("orderCardWfpReviewTask: Исходный UID из инвойса: {$uid}");
+
+                if ($uid === null || $uid === '') {
+                    Log::warning('orderCardWfpReviewTask: orphan invoice without uid — refund by orderReference', [
+                        'orderReference' => $value['orderReference'] ?? null,
+                        'amount' => $value['amount'] ?? null,
+                    ]);
+                    $this->refundOrphanWfpInvoice($value);
+                    continue;
+                }
 
                 $uid = (new MemoryOrderChangeController)->show($uid);
                 Log::info("orderCardWfpReviewTask: UID после MemoryOrderChangeController: {$uid}");
@@ -425,6 +434,49 @@ class DailyTaskController extends Controller
             Log::info($message);
         }
     }
+
+    /**
+     * Orphan hold in wfp_invoices (no dispatching_order_uid) — void via WFP refund job.
+     */
+    private function refundOrphanWfpInvoice(array $invoiceRow): void
+    {
+        if (($invoiceRow['transactionStatus'] ?? '') !== 'WaitingAuthComplete') {
+            return;
+        }
+
+        $orderReference = $invoiceRow['orderReference'] ?? null;
+        if ($orderReference === null || $orderReference === '') {
+            return;
+        }
+
+        $application = 'PAS4';
+        $city = 'OdessaTest';
+        $merchantAccount = $invoiceRow['merchantAccount'] ?? '';
+        if ($merchantAccount !== '' && $merchantAccount !== 'm_easy_order_taxi_site') {
+            $city = 'Kyiv City';
+        }
+
+        try {
+            (new WfpController)->refund(
+                $application,
+                $city,
+                $orderReference,
+                $invoiceRow['amount'] ?? null,
+                null
+            );
+            Log::info('orderCardWfpReviewTask: orphan refund dispatched', [
+                'orderReference' => $orderReference,
+                'application' => $application,
+                'city' => $city,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('orderCardWfpReviewTask: orphan refund failed', [
+                'orderReference' => $orderReference,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     public function orderBonusReviewTask()
     {
         $orderwebs = Orderweb::where('pay_system', 'bonus_payment')

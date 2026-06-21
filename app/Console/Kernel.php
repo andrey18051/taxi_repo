@@ -22,7 +22,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('daily-task:run')
-            ->hourly()
+            ->everyFifteenMinutes()
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground();

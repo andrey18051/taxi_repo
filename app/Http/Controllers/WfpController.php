@@ -1946,6 +1946,19 @@ class WfpController extends Controller
         return in_array(strtolower(trim($status ?? '')), ['refunded', 'voided', 'approved'], true);
     }
 
+    private function shouldUpdateWfpInvoiceStatus(?string $currentStatus, ?string $newStatus): bool
+    {
+        if ($newStatus === null || $newStatus === '') {
+            return false;
+        }
+
+        if (!$this->isFinalWfpStatus($currentStatus)) {
+            return true;
+        }
+
+        return $this->isFinalWfpStatus($newStatus);
+    }
+
     /**
      * @return bool true если холд уже закрыт (void/refund)
      */
@@ -1960,7 +1973,9 @@ class WfpController extends Controller
 
         if ($this->isFinalWfpStatus($apiStatus)) {
             if ($notifyTelegramOnSuccess) {
-                (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
+                (new DailyTaskController)->sentTaskMessage(
+                    'Холд закрыт (' . $apiStatus . '): ' . json_encode($responseArray)
+                );
             }
             Log::info("refundSettleJob Успешная транзакция: {$apiStatus}");
             (new MessageSentController)->sentMessageAdminLog("refund Статус транзакции: {$apiStatus}");
@@ -5150,15 +5165,21 @@ class WfpController extends Controller
         }
 
         $orderReference = $data['orderReference'] ?? null;
-        $email = $data['email'] ?? null;
         $transactionStatus = $data['transactionStatus'] ?? null;
-        $paidStatuses = ['WaitingAuthComplete', 'Approved'];
 
-        if ($orderReference === null || $orderReference === '' || $email === null || $email === '') {
+        if ($orderReference === null || $orderReference === '' || $transactionStatus === null || $transactionStatus === '') {
             return;
         }
 
-        if (!in_array($transactionStatus, $paidStatuses, true)) {
+        if (in_array($transactionStatus, ['Voided', 'Refunded'], true)) {
+            $this->syncGooglePayVoidOrRefundCallback($data);
+            return;
+        }
+
+        $email = $data['email'] ?? null;
+        $paidStatuses = ['WaitingAuthComplete', 'Approved'];
+
+        if ($email === null || $email === '' || !in_array($transactionStatus, $paidStatuses, true)) {
             return;
         }
 
@@ -5210,6 +5231,49 @@ class WfpController extends Controller
         );
     }
 
+    /**
+     * WayForPay callback Google Pay: void/refund — синхронизировать wfp_invoices без email в payload.
+     */
+    private function syncGooglePayVoidOrRefundCallback(array $data): void
+    {
+        $orderReference = $data['orderReference'];
+        $transactionStatus = $data['transactionStatus'];
+
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        $invoiceUid = $invoice !== null ? $invoice->dispatching_order_uid : null;
+
+        $order = null;
+        if ($invoiceUid !== null && $invoiceUid !== '') {
+            $order = Orderweb::where('dispatching_order_uid', $invoiceUid)->first();
+        }
+        if ($order === null) {
+            $order = Orderweb::where('wfp_order_id', $orderReference)->first();
+        }
+
+        if ($order !== null) {
+            $order->wfp_status_pay = $transactionStatus;
+            $order->save();
+            if ($invoiceUid === null || $invoiceUid === '') {
+                $invoiceUid = $order->dispatching_order_uid;
+            }
+        }
+
+        $this->upsertWfpInvoiceRecord(
+            $orderReference,
+            $data['amount'] ?? ($invoice !== null ? $invoice->amount : null),
+            (string) ($data['merchantAccount'] ?? ($invoice !== null ? ($invoice->merchantAccount ?? '') : '')),
+            $transactionStatus,
+            $invoiceUid,
+            $data['reason'] ?? null,
+            isset($data['reasonCode']) ? (string) $data['reasonCode'] : null
+        );
+
+        Log::info('syncGooglePayServiceUrlCallback: synced void/refund', [
+            'orderReference' => $orderReference,
+            'transactionStatus' => $transactionStatus,
+        ]);
+    }
+
     private function upsertWfpInvoiceRecord(
         string $orderReference,
         $amount,
@@ -5227,7 +5291,7 @@ class WfpController extends Controller
         if ($amount !== null && $amount !== '') {
             $invoice->amount = (string) $amount;
         }
-        if ($transactionStatus !== null && $transactionStatus !== '') {
+        if ($this->shouldUpdateWfpInvoiceStatus($invoice->transactionStatus, $transactionStatus)) {
             $invoice->transactionStatus = $transactionStatus;
         }
         if ($reason !== null) {
