@@ -8139,24 +8139,10 @@ class UniversalAndroidFunctionController extends Controller
             $newClientCost
         );
 
-        (new AndroidTestOSMController)->webordersCancelRestorAddCostNal(
-            $uid,
-            $city,
-            $application,
-            $order
-        );
-
         $order_old_uid = $order->dispatching_order_uid;
+        // Mapping + row update before dispatch cancel: background poll must not treat
+        // intentional old-uid cancel (add-cost recreation) as client order cancel.
         (new MemoryOrderChangeController)->store($order_old_uid, $orderNew);
-
-        (new DriverMemoryOrderController)->store(
-            $orderNew,
-            json_encode($parameter, JSON_UNESCAPED_UNICODE),
-            $authorization,
-            $connectAPI,
-            $identificationId,
-            $apiVersion
-        );
 
         $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $order_old_uid)->get();
         foreach ($wfpInvoices as $wfpInvoice) {
@@ -8175,6 +8161,22 @@ class UniversalAndroidFunctionController extends Controller
         $order->cancel_timestamp = null;
         $order->attempt_20 += $addCost;
         $order->save();
+
+        (new DriverMemoryOrderController)->store(
+            $orderNew,
+            json_encode($parameter, JSON_UNESCAPED_UNICODE),
+            $authorization,
+            $connectAPI,
+            $identificationId,
+            $apiVersion
+        );
+
+        (new AndroidTestOSMController)->webordersCancelRestorAddCostNal(
+            $order_old_uid,
+            $city,
+            $application,
+            $order
+        );
 
         dispatch(
             (new \App\Jobs\WriteDocumentToFirestore($orderNew))
@@ -9142,6 +9144,15 @@ class UniversalAndroidFunctionController extends Controller
         // Запускаем searchAutoOrderService для каждого uid
         foreach ($orders as $index => $order) {
             $orderNumber = $index + 1;
+            $resolvedUid = (new MemoryOrderChangeController())->findLatestOrderUid(
+                (string) $order->dispatching_order_uid
+            );
+            if ($resolvedUid !== (string) $order->dispatching_order_uid) {
+                $resolvedOrder = Orderweb::where('dispatching_order_uid', $resolvedUid)->first();
+                if ($resolvedOrder !== null) {
+                    $order = $resolvedOrder;
+                }
+            }
             Log::info("Запуск searchAutoOrderService", [
                 'номер' => $orderNumber,
                 'dispatching_order_uid' => $order->dispatching_order_uid

@@ -1158,6 +1158,9 @@ class OrderStatusController extends Controller
 
         if (self::isDispatchOrderCanceled($snapshot)
             && !self::hasActiveDispatchLeg($snapshot, $snapshot)) {
+            if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
+                return null;
+            }
             self::finalizeCanceledFromStatusPush($orderweb, $uid);
             $orderweb->save();
 
@@ -1240,8 +1243,49 @@ class OrderStatusController extends Controller
 
     private static function finalizeCanceledFromStatusPush(Orderweb $orderweb, string $uid): void
     {
+        if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
+            return;
+        }
         self::applyCanceledOrderweb($orderweb);
         self::notifyForkOrderCanceledPush($orderweb, $uid);
+    }
+
+    /**
+     * Add-cost recreation cancels the old dispatch uid while the same orderweb row
+     * already points at the new uid — do not mark the live order canceled.
+     */
+    private static function shouldSkipCancelForSupersededUid(Orderweb $orderweb, string $uid): bool
+    {
+        if (!$orderweb->exists) {
+            return false;
+        }
+
+        $orderweb->refresh();
+        $currentUid = (string) $orderweb->dispatching_order_uid;
+        $polledUid = (string) $uid;
+
+        if ($currentUid !== $polledUid) {
+            Log::info('Skip cancel: orderweb uid differs from polled uid (add-cost recreation)', [
+                'polled_uid' => $polledUid,
+                'orderweb_uid' => $currentUid,
+                'order_id' => $orderweb->id,
+            ]);
+
+            return true;
+        }
+
+        $latestUid = (string) (new MemoryOrderChangeController())->findLatestOrderUid($polledUid);
+        if ($latestUid !== $polledUid && $currentUid === $latestUid) {
+            Log::info('Skip cancel: polled uid superseded by active order', [
+                'polled_uid' => $polledUid,
+                'latest_uid' => $latestUid,
+                'order_id' => $orderweb->id,
+            ]);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
