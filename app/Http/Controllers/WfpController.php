@@ -2638,6 +2638,11 @@ class WfpController extends Controller
             ]);
         }
 
+        if (is_array($responseData)
+            && in_array($transactionStatus, ['Approved', 'WaitingAuthComplete'], true)) {
+            return response()->json($responseData, 200);
+        }
+
         return response($response->body(), $response->status())
             ->header('Content-Type', 'application/json');
     }
