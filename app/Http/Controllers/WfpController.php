@@ -4816,7 +4816,7 @@ class WfpController extends Controller
             return ['result' => 'no_hold'];
         }
 
-        if ($mainInvoice->transactionStatus === 'WaitingAuthComplete') {
+        if (in_array($mainInvoice->transactionStatus, ['Approved', 'WaitingAuthComplete'], true)) {
             return ['result' => 'hold'];
         }
 
