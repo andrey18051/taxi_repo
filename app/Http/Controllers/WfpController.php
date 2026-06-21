@@ -5072,7 +5072,7 @@ class WfpController extends Controller
             return null;
         }
 
-        if ($order->wfp_order_id === $orderReference) {
+        if ($order->wfp_order_id === $orderReference && !$this->isAddCostInvoice($wfpInvoice)) {
             Log::info('Add-cost already applied (sync path)', [
                 'order_reference' => $orderReference,
                 'uid' => $uid,
@@ -5201,7 +5201,12 @@ class WfpController extends Controller
         $invoiceAmount = $data['amount'] ?? null;
         $invoiceUid = null;
         if ($order !== null) {
-            if ($order->wfp_order_id !== $orderReference) {
+            $existingInvoice = WfpInvoice::where('orderReference', $orderReference)->first();
+            $isAddCostCallback = $existingInvoice !== null && $this->isAddCostInvoice($existingInvoice);
+
+            // Доплата: не перезаписываем основной wfp_order_id — иначе processAddCostAfterApproved
+            // считает доплату уже применённой и заказ не пересоздаётся с новой суммой.
+            if (!$isAddCostCallback && $order->wfp_order_id !== $orderReference) {
                 Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
                     'uid' => $order->dispatching_order_uid,
                     'old' => $order->wfp_order_id,
@@ -5209,10 +5214,19 @@ class WfpController extends Controller
                     'transactionStatus' => $transactionStatus,
                 ]);
                 $order->wfp_order_id = $orderReference;
+            } elseif ($isAddCostCallback) {
+                Log::info('syncGooglePayServiceUrlCallback: skip rebind for add-cost invoice', [
+                    'uid' => $order->dispatching_order_uid,
+                    'main_wfp_order_id' => $order->wfp_order_id,
+                    'add_cost_reference' => $orderReference,
+                    'transactionStatus' => $transactionStatus,
+                ]);
             }
 
-            $order->wfp_status_pay = $transactionStatus;
-            $order->save();
+            if (!$isAddCostCallback) {
+                $order->wfp_status_pay = $transactionStatus;
+                $order->save();
+            }
 
             $invoiceUid = $order->dispatching_order_uid;
             if ($invoiceAmount === null) {
