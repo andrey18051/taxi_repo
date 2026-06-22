@@ -5743,6 +5743,40 @@ class UniversalAndroidFunctionController extends Controller
     }
 
     /**
+     * Сохранить заказ и списать по токену до push в приложение (parseOrderResponse).
+     * Иначе финиш опрашивает checkStatus раньше CHARGE — «Order Not Found» / ложный Declined.
+     */
+    public function saveOrderAndChargeTokenBeforeAppNotify(
+        array $params,
+        string $identificationId,
+        ?string $wfpInvoice,
+        string $application,
+        string $city,
+        $chargeAmount,
+        ?string $preferredCardId = null
+    ): ?int {
+        Log::debug('Order Parameters:', $params);
+        $orderId = $this->saveOrder($params, $identificationId);
+
+        if ($wfpInvoice !== null && $wfpInvoice !== '' && $wfpInvoice !== '*') {
+            $paySystem = $params['pay_system'] ?? '';
+            $this->orderIdMemoryToken($wfpInvoice, $orderId, $paySystem);
+            $this->chargeLinkedCardAfterOrderReference(
+                $paySystem,
+                $application,
+                $city,
+                $wfpInvoice,
+                $chargeAmount,
+                $params['email'],
+                $params['user_phone'],
+                $preferredCardId
+            );
+        }
+
+        return $orderId;
+    }
+
+    /**
      * Списание по сохранённой карте — только wfp_payment, не Google Pay.
      */
     public function chargeLinkedCardAfterOrderReference(
@@ -5752,10 +5786,20 @@ class UniversalAndroidFunctionController extends Controller
         string $orderReference,
         $amount,
         string $clientEmail,
-        string $clientPhone
+        string $clientPhone,
+        ?string $preferredCardId = null
     ): void {
         if ($paySystem !== 'wfp_payment') {
             return;
+        }
+
+        if ($preferredCardId !== null && $preferredCardId !== '') {
+            (new CardsController)->setActiveCardApp(
+                $clientEmail,
+                $preferredCardId,
+                $city,
+                $application
+            );
         }
 
         $productName = 'Інша допоміжна діяльність у сфері транспорту';

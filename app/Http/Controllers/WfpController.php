@@ -1046,6 +1046,14 @@ class WfpController extends Controller
         }
     }
 
+    /**
+     * WFP reasonCode 1127 — заказ ещё не создан (CHARGE не отправлен). Не пишем Declined в invoice.
+     */
+    public static function shouldSkipCheckStatusInvoiceUpdate(array $wfpResponse): bool
+    {
+        return (int) ($wfpResponse['reasonCode'] ?? 0) === 1127;
+    }
+
     public function checkStatus(
         $application,
         $city,
@@ -1120,6 +1128,14 @@ class WfpController extends Controller
 
                 if (isset($response)) {
                     $data = json_decode($response->body(), true);
+                    if (self::shouldSkipCheckStatusInvoiceUpdate($data)) {
+                        Log::debug('checkStatus: order not in WFP yet, skip invoice update', [
+                            'orderReference' => $orderReference,
+                        ]);
+
+                        return $response;
+                    }
+
                     $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
                     if ($data['transactionStatus'] != "WaitingAuthComplete") {
                         dispatch(new CheckStatusJob($application, $city, $orderReference))

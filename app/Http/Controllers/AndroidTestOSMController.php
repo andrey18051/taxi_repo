@@ -8593,6 +8593,34 @@ class AndroidTestOSMController extends Controller
             ///// Тут будет пуш в ПАС
             $params['pay_system'] = $userArr[2];
 
+            if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
+                $params["order_cost"] = $response_arr["order_cost"];
+
+                $params["add_cost"] = $add_cost;
+                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
+
+                $params['closeReason'] = "-1";
+                $params['comment_info'] = $comment;
+                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
+                $params['payment_type'] = $payment_type;
+
+                if ($params['pay_system'] == "bonus_payment") {
+                    $params['bonus_status'] = 'hold';
+                } else {
+                    $params['bonus_status'] = '';
+                }
+
+                (new UniversalAndroidFunctionController)->saveOrderAndChargeTokenBeforeAppNotify(
+                    $params,
+                    self::identificationId($application),
+                    $wfpInvoice !== '*' ? $wfpInvoice : null,
+                    $application,
+                    $city,
+                    $params['order_cost']
+                );
+            }
+
             if($email != "no email") {
                 if(isset( $responseDoubleArr["dispatching_order_uid"])) {
                     $dispatching_order_uid_Double = $responseDoubleArr["dispatching_order_uid"];
@@ -8637,45 +8665,6 @@ class AndroidTestOSMController extends Controller
             }
 
             if (isset($response_arr["order_cost"]) && $response_arr["order_cost"] != 0) {
-                $params["order_cost"] = $response_arr["order_cost"];
-
-                $params["add_cost"] = $add_cost;
-                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
-                $params['server'] = $connectAPI;
-
-                $params['closeReason'] = "-1";
-                $params['comment_info'] = $comment;
-                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
-                $params['payment_type'] = $payment_type;
-
-                if ($params['pay_system'] == "bonus_payment") {
-                    $params['bonus_status'] = 'hold';
-                } else {
-                    $params['bonus_status'] = '';
-                }
-                Log::debug('Order Parameters:', $params);
-                $order_id = (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
-
-                if($wfpInvoice != "*") {
-                    $orderReference = $wfpInvoice;
-                    $amount = $params['order_cost'];
-                    $productName = "Інша допоміжна діяльність у сфері транспорту";
-                    $clientEmail = $params['email'];
-                    $clientPhone = $params["user_phone"];
-                    $pay_system = $params['pay_system'];
-
-                    (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
-                        $pay_system,
-                        $application,
-                        $city,
-                        $orderReference,
-                        $amount,
-                        $clientEmail,
-                        $clientPhone
-                    );
-                }
-
 
                 Log::debug("Перед проверкой условий:");
                 Log::debug("Содержимое \$responseBonusArr: " . json_encode($responseBonusArr));
@@ -9462,9 +9451,36 @@ class AndroidTestOSMController extends Controller
                             ->delay(now()->addMinutes($delayMinutes))
                             ->onQueue('low');
                     }
+                }
 
+                $params["order_cost"] = $order_cost;
 
+                $params["add_cost"] = $add_cost;
+                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
 
+                $params['closeReason'] = "-1";
+                $params['comment_info'] = $comment;
+                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
+                $params['payment_type'] = $payment_type;
+                $params['clientCost'] = $clientCost;
+
+                if ($params['pay_system'] == "bonus_payment") {
+                    $params['bonus_status'] = 'hold';
+                } else {
+                    $params['bonus_status'] = '';
+                }
+
+                (new UniversalAndroidFunctionController)->saveOrderAndChargeTokenBeforeAppNotify(
+                    $params,
+                    self::identificationId($application),
+                    $wfpInvoice !== '*' ? $wfpInvoice : null,
+                    $application,
+                    $city,
+                    $clientCost
+                );
+
+                if ($email != "no email") {
                     (new PusherController)->sentUidAppEmailPayType(
                         $response_arr['dispatching_order_uid'],
                         $application,
@@ -9502,47 +9518,6 @@ class AndroidTestOSMController extends Controller
                         $required_time,
                         $application,
                         $email
-                    );
-                }
-
-                $params["order_cost"] = $order_cost;
-
-                $params["add_cost"] = $add_cost;
-                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
-                $params['server'] = $connectAPI;
-
-                $params['closeReason'] = "-1";
-                $params['comment_info'] = $comment;
-                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
-                $params['payment_type'] = $payment_type;
-                $params['clientCost'] = $clientCost;
-
-                if ($params['pay_system'] == "bonus_payment") {
-                    $params['bonus_status'] = 'hold';
-                } else {
-                    $params['bonus_status'] = '';
-                }
-                Log::debug('Order Parameters:', $params);
-                $order_id = (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
-
-
-                if($wfpInvoice != "*") {
-                    $orderReference = $wfpInvoice;
-                    $amount = $clientCost;
-                    $productName = "Інша допоміжна діяльність у сфері транспорту";
-                    $clientEmail = $params['email'];
-                    $clientPhone = $params["user_phone"];
-                    $pay_system = $params['pay_system'];
-
-                    (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
-                        $pay_system,
-                        $application,
-                        $city,
-                        $orderReference,
-                        $amount,
-                        $clientEmail,
-                        $clientPhone
                     );
                 }
 
@@ -10308,9 +10283,36 @@ class AndroidTestOSMController extends Controller
                             ->delay(now()->addMinutes($delayMinutes))
                             ->onQueue('low');
                     }
+                }
 
+                $params["order_cost"] = $order_cost;
 
+                $params["add_cost"] = $add_cost;
+                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
+                $params['server'] = $connectAPI;
 
+                $params['closeReason'] = "-1";
+                $params['comment_info'] = $comment;
+                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
+                $params['payment_type'] = $payment_type;
+                $params['clientCost'] = $clientCost;
+
+                if ($params['pay_system'] == "bonus_payment") {
+                    $params['bonus_status'] = 'hold';
+                } else {
+                    $params['bonus_status'] = '';
+                }
+
+                (new UniversalAndroidFunctionController)->saveOrderAndChargeTokenBeforeAppNotify(
+                    $params,
+                    self::identificationId($application),
+                    $wfpInvoice !== '*' ? $wfpInvoice : null,
+                    $application,
+                    $city,
+                    $clientCost
+                );
+
+                if ($email != "no email") {
                     (new PusherController)->sentUidAppEmailPayType(
                         $response_arr['dispatching_order_uid'],
                         $application,
@@ -10348,47 +10350,6 @@ class AndroidTestOSMController extends Controller
                         $required_time,
                         $application,
                         $email
-                    );
-                }
-
-                $params["order_cost"] = $order_cost;
-
-                $params["add_cost"] = $add_cost;
-                $params['dispatching_order_uid'] = $response_arr['dispatching_order_uid'];
-                $params['server'] = $connectAPI;
-
-                $params['closeReason'] = "-1";
-                $params['comment_info'] = $comment;
-                $params['extra_charge_codes'] = implode(',', $extra_charge_codes);
-                $params['payment_type'] = $payment_type;
-                $params['clientCost'] = $clientCost;
-
-                if ($params['pay_system'] == "bonus_payment") {
-                    $params['bonus_status'] = 'hold';
-                } else {
-                    $params['bonus_status'] = '';
-                }
-                Log::debug('Order Parameters:', $params);
-                $order_id = (new UniversalAndroidFunctionController)->saveOrder($params, self::identificationId($application));
-
-
-                if($wfpInvoice != "*") {
-                    $orderReference = $wfpInvoice;
-                    $amount = $clientCost;
-                    $productName = "Інша допоміжна діяльність у сфері транспорту";
-                    $clientEmail = $params['email'];
-                    $clientPhone = $params["user_phone"];
-                    $pay_system = $params['pay_system'];
-
-                    (new UniversalAndroidFunctionController)->orderIdMemoryToken($orderReference, $order_id, $pay_system);
-                    (new UniversalAndroidFunctionController)->chargeLinkedCardAfterOrderReference(
-                        $pay_system,
-                        $application,
-                        $city,
-                        $orderReference,
-                        $amount,
-                        $clientEmail,
-                        $clientPhone
                     );
                 }
 
