@@ -14,11 +14,12 @@ class DispatchOrderCancelRetryJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 1;
+    public $tries = 1;
 
-    public int $timeout = 120;
+    public $timeout = 120;
 
-    private string $primaryUid;
+    /** @var string */
+    private $primaryUid;
 
     public function __construct(string $primaryUid)
     {
