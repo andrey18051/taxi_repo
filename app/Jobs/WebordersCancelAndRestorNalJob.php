@@ -57,6 +57,14 @@ class WebordersCancelAndRestorNalJob implements ShouldQueue
             );
 
             // Проверяем результат выполнения
+            if (isset($result['dispatch_cancelled']) && $result['dispatch_cancelled'] === true) {
+                Log::info("WebordersCancelAndRestorNalJob completed successfully", [
+                    'uid' => $this->uid,
+                    'response' => $result['response'] ?? null,
+                ]);
+                return;
+            }
+
             if (isset($result['response']) && $result['response'] === '200') {
                 Log::info("WebordersCancelAndRestorNalJob completed successfully", [
                     'uid' => $this->uid,
