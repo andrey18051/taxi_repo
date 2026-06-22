@@ -121,6 +121,8 @@ class DispatchOrderCancelService
                 }
             }
 
+            $this->ensureCancelRetryJobQueued($primaryUid, 'resumed existing campaign');
+
             return false;
         }
 
@@ -137,14 +139,29 @@ class DispatchOrderCancelService
 
         Cache::put($cacheKey, $state, now()->addHours(24));
 
-        DispatchOrderCancelRetryJob::dispatch($primaryUid);
+        try {
+            $this->ensureCancelRetryJobQueued($primaryUid, 'campaign started');
+        } catch (\Throwable $e) {
+            Cache::forget($cacheKey);
+            Log::error('DispatchOrderCancelService: failed to queue retry job, cleared campaign cache', [
+                'uid' => $primaryUid,
+                'error' => $e->getMessage(),
+            ]);
 
-        Log::info('DispatchOrderCancelService: campaign started', [
-            'uid' => $primaryUid,
-            'legs' => array_column($legs, 'uid'),
-        ]);
+            throw $e;
+        }
 
         return true;
+    }
+
+    private function ensureCancelRetryJobQueued(string $primaryUid, string $reason): void
+    {
+        DispatchOrderCancelRetryJob::dispatch($primaryUid);
+
+        Log::info('DispatchOrderCancelService: ensured cancel retry job queued', [
+            'uid' => $primaryUid,
+            'reason' => $reason,
+        ]);
     }
 
     public function runAttempt(string $primaryUid): void
