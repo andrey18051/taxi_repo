@@ -135,7 +135,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -195,7 +195,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -265,7 +265,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -331,7 +331,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -396,7 +396,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -464,7 +464,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -526,7 +526,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -585,7 +585,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -648,7 +648,7 @@ class WfpController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && isset($data['recToken']) && $data['recToken'] != "") {
+        if ($user && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $cardType = $data['cardType'];
             if (isset($data['issuerBankName']) && $data['issuerBankName'] != null) {
                 $bankName = $data['issuerBankName'];
@@ -713,7 +713,7 @@ class WfpController extends Controller
         Log::debug($data['recToken']);
 
         $userData = (new FCMController)->findUserByEmail($data['email']);
-        if (is_array($userData)  && isset($data['recToken']) && $data['recToken'] != null) {
+        if (is_array($userData) && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $uidDriver = $userData["uid"];
 
             $status = "payment_card";
@@ -781,7 +781,7 @@ class WfpController extends Controller
         Log::debug($data['recToken']);
 
         $userData = (new FCMController)->findUserByEmail($data['email']);
-        if (is_array($userData)  && isset($data['recToken']) && $data['recToken'] != null) {
+        if (is_array($userData) && self::shouldPersistRecTokenFromServiceUrl($data)) {
             $uidDriver = $userData["uid"];
 
             $status = "payment_card";
@@ -1052,6 +1052,20 @@ class WfpController extends Controller
     public static function shouldSkipCheckStatusInvoiceUpdate(array $wfpResponse): bool
     {
         return (int) ($wfpResponse['reasonCode'] ?? 0) === 1127;
+    }
+
+    /**
+     * Токен из Google Pay не сохраняем как привязанную карту wfp_payment.
+     */
+    public static function shouldPersistRecTokenFromServiceUrl(array $data): bool
+    {
+        if (strtolower((string) ($data['paymentSystem'] ?? '')) === 'googlepay') {
+            return false;
+        }
+
+        $recToken = $data['recToken'] ?? null;
+
+        return $recToken !== null && $recToken !== '';
     }
 
     public function checkStatus(

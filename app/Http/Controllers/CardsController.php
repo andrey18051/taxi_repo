@@ -60,6 +60,7 @@ class CardsController extends Controller
                 where("user_id", $user->id)->
                 where('merchant', $merchantAccount)->
                 where('app', $application)->
+                where('pay_system', 'wfp')->
                 where("active", true)->first();
                 $messageAdmin = "getActiveCard" . $activeCard;
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
@@ -98,6 +99,7 @@ class CardsController extends Controller
             $user = User::where("email", $email)->first();
             $userCards = Card::where("user_id", $user->id)
                 ->where('merchant', $merchantAccount)
+                ->where('pay_system', 'wfp')
                 ->get();
 
             foreach ($userCards as $value) {
@@ -160,6 +162,7 @@ class CardsController extends Controller
                 $userCards = Card::where("user_id", $user->id)
                     ->where('merchant', $merchantAccount)
                     ->where('app', $application)
+                    ->where('pay_system', 'wfp')
                     ->get();
 
                 foreach ($userCards as $value) {
@@ -205,6 +208,7 @@ class CardsController extends Controller
             $user = User::where("email", $email)->first();
             $userCards = Card::where("user_id", $user->id)
                 ->where('merchant', $merchantAccount)
+                ->where('pay_system', 'wfp')
                 ->get();
 
             foreach ($userCards as $value) {
@@ -229,6 +233,7 @@ class CardsController extends Controller
             $userCards = Card::where("user_id", $user->id)
                 ->where('merchant', $merchantAccount)
                 ->where('app', $app)
+                ->where('pay_system', 'wfp')
                 ->get();
 
             foreach ($userCards as $value) {
