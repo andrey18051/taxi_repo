@@ -12,4 +12,7 @@ return [
     /** Опрос WfpInvoice до этой секунды (интервал — my_server_api_payment_poll_interval_seconds) */
     'my_server_api_payment_poll_max_seconds' => env('MY_SERVER_API_PAYMENT_POLL_MAX_SECONDS', 60),
     'my_server_api_payment_poll_interval_seconds' => env('MY_SERVER_API_PAYMENT_POLL_INTERVAL_SECONDS', 3),
+
+    /** Клиентская отмена на диспетчере: Telegram «проблема отмены» после N секунд (по умолчанию 10 мин) */
+    'dispatch_cancel_problem_telegram_seconds' => env('DISPATCH_CANCEL_PROBLEM_TELEGRAM_SECONDS', 600),
 ];
