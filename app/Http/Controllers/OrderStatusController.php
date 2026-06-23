@@ -1303,8 +1303,7 @@ class OrderStatusController extends Controller
         Log::debug('Fetched orderweb', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
 
         if ($orderweb) {
-            $isCanceledOrderweb = $orderweb->cancel_timestamp !== null
-                || in_array((string) $orderweb->closeReason, ['1', '2', '3', '4', '5', '6', '7'], true);
+            $isCanceledOrderweb = in_array((string) $orderweb->closeReason, ['1', '2', '3', '4', '5', '6', '7', '9'], true);
             if ($isCanceledOrderweb) {
                 Log::info('Exiting function: orderweb canceled', [
                     'close_reason' => $orderweb->closeReason,
@@ -2043,6 +2042,25 @@ class OrderStatusController extends Controller
         if (in_array($action, $activeTripActions, true) && self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
             $orderweb->cancel_timestamp = null;
         }
+    }
+
+    /**
+     * Диспетчер иногда отдаёт execution_status=Canceled при close_reason=-1 (заказ ещё в поиске).
+     */
+    public static function normalizeFalseCanceledDispatchStatus(?array $snapshot): ?array
+    {
+        if ($snapshot === null || $snapshot === []) {
+            return $snapshot;
+        }
+        if (self::isDispatchOrderCanceled($snapshot)) {
+            return $snapshot;
+        }
+        $status = (string) ($snapshot['execution_status'] ?? '');
+        if (strcasecmp($status, 'Canceled') === 0 || strcasecmp($status, 'Cancelled') === 0) {
+            $snapshot['execution_status'] = 'SearchesForCar';
+        }
+
+        return $snapshot;
     }
 
     /**

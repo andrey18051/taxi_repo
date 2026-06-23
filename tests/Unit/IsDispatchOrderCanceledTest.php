@@ -27,6 +27,30 @@ class IsDispatchOrderCanceledTest extends TestCase
         $this->assertTrue(OrderStatusController::isDispatchOrderCanceled($order));
     }
 
+    public function test_normalize_false_canceled_dispatch_status(): void
+    {
+        $order = [
+            'execution_status' => 'Canceled',
+            'close_reason' => -1,
+        ];
+
+        $normalized = OrderStatusController::normalizeFalseCanceledDispatchStatus($order);
+
+        $this->assertSame('SearchesForCar', $normalized['execution_status']);
+    }
+
+    public function test_normalize_keeps_real_cancel(): void
+    {
+        $order = [
+            'execution_status' => 'Canceled',
+            'close_reason' => 1,
+        ];
+
+        $normalized = OrderStatusController::normalizeFalseCanceledDispatchStatus($order);
+
+        $this->assertSame('Canceled', $normalized['execution_status']);
+    }
+
     public function test_fork_card_canceled_is_not_active_dispatch_leg(): void
     {
         $cardOrder = [

@@ -14213,19 +14213,19 @@ class AndroidTestOSMController extends Controller
 
                     // Проверяем успешность ответа
                     if ($response->successful()) {
-                        // Обрабатываем успешный ответ
-                        $response_arr = json_decode($response, true);
+                        $response_arr = json_decode($response->body(), true);
+                        if (!is_array($response_arr)) {
+                            $response_arr = [];
+                        }
+                        $response_arr = OrderStatusController::normalizeFalseCanceledDispatchStatus($response_arr);
                         Log::debug("$url: ", $response_arr);
-//                        $orderweb_uid->auto = null;
-//                        if ($response_arr["order_car_info"] != null) {
-//                            $orderweb_uid->auto = $response_arr["order_car_info"];
-//                        }
 
-                        $orderweb_uid->auto = $response_arr["order_car_info"];
+                        $orderweb_uid->auto = $response_arr["order_car_info"] ?? null;
 
-                        $orderweb_uid->closeReason = $response_arr["close_reason"];
+                        $orderweb_uid->closeReason = $response_arr["close_reason"] ?? $orderweb_uid->closeReason;
                         $orderweb_uid->save();
-                        return $response;
+
+                        return response()->json($response_arr);
 
                     } else {
                         // Логируем ошибки в случае неудачного запроса
