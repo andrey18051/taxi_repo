@@ -1839,7 +1839,10 @@ class UIDController extends Controller
         }
 
         if (!empty($orderRow->cancel_timestamp)) {
-            return 'Canceled';
+            $uid_history = Uid_history::where('uid_bonusOrderHold', $orderRow->dispatching_order_uid)->first();
+            if (!OrderStatusController::isForkOrderStillLive($uid_history)) {
+                return 'Canceled';
+            }
         }
 
         $closeReason = (string) $orderRow->closeReason;

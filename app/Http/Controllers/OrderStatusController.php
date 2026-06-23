@@ -1974,12 +1974,48 @@ class OrderStatusController extends Controller
             || $uid_history->cancel === true;
     }
 
-    public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
+    public static function isForkOrderStillLive(?Uid_history $uid_history): bool
+    {
+        if ($uid_history === null) {
+            return false;
+        }
+        $nalOrder = json_decode($uid_history->double_status, true);
+        $cardOrder = json_decode($uid_history->bonus_status, true);
+
+        return self::hasActiveDispatchLeg($cardOrder, $nalOrder);
+    }
+
+    /**
+     * Push/Telegram «клиент отменил» — только при реальной отмене всего заказа, не при смене ноги вилки.
+     */
+    public static function shouldNotifyClientOrderCanceled(Orderweb $orderweb): bool
     {
         if (empty($orderweb->email)) {
-            return;
+            return false;
         }
         if (in_array((string) $orderweb->closeReason, ['101', '102', '103', '104'], true)) {
+            return false;
+        }
+
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+        if (self::isForkOrderStillLive($uid_history)) {
+            Log::info('Skip client cancel notify: fork order still live', [
+                'uid' => $orderweb->dispatching_order_uid,
+            ]);
+
+            return false;
+        }
+
+        if (in_array((string) $orderweb->closeReason, ['-1', '0', '100'], true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
+    {
+        if (!self::shouldNotifyClientOrderCanceled($orderweb)) {
             return;
         }
 
@@ -1997,13 +2033,36 @@ class OrderStatusController extends Controller
 
     public static function hasActiveDispatchLeg(?array $cardOrder, ?array $nalOrder): bool
     {
-        $dispatched = ['CarFound', 'Running', 'WaitingAtAddress', 'AtAddress', 'InRoute'];
+        $liveStatuses = [
+            'SearchesForCar',
+            'WaitingCarSearch',
+            'CarFound',
+            'Running',
+            'WaitingAtAddress',
+            'AtAddress',
+            'InRoute',
+        ];
 
-        $cardStatus = $cardOrder['execution_status'] ?? '';
-        $nalStatus = $nalOrder['execution_status'] ?? '';
+        $cardStatus = (string) ($cardOrder['execution_status'] ?? '');
+        $nalStatus = (string) ($nalOrder['execution_status'] ?? '');
 
-        return in_array($cardStatus, $dispatched, true)
-            || in_array($nalStatus, $dispatched, true);
+        if (in_array($cardStatus, $liveStatuses, true) || in_array($nalStatus, $liveStatuses, true)) {
+            return true;
+        }
+
+        if ($cardOrder !== null && $cardOrder !== []
+            && !self::isDispatchOrderCanceled($cardOrder)
+            && $cardStatus !== 'Canceled' && $cardStatus !== 'Executed' && $cardStatus !== 'CostCalculation') {
+            return true;
+        }
+
+        if ($nalOrder !== null && $nalOrder !== []
+            && !self::isDispatchOrderCanceled($nalOrder)
+            && $nalStatus !== 'Canceled' && $nalStatus !== 'Executed' && $nalStatus !== 'CostCalculation') {
+            return true;
+        }
+
+        return false;
     }
 
     /**

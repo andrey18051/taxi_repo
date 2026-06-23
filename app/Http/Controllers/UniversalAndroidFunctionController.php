@@ -3607,11 +3607,8 @@ class UniversalAndroidFunctionController extends Controller
             );
 
             if ($newStatusArr["execution_status"] !== null) {
+                $newStatusArr = OrderStatusController::normalizeFalseCanceledDispatchStatus($newStatusArr) ?? $newStatusArr;
                 $newStatus = $newStatusArr["execution_status"];
-
-                if ($newStatus === "Canceled" && $newStatusArr["close_reason"] === "-1") {
-                    $newStatus = "CarFound";
-                }
 
                 Log::info("newStatus for $orderType order $order: status=$newStatus");
 
@@ -4376,7 +4373,7 @@ class UniversalAndroidFunctionController extends Controller
 
             Log::info("Successfully fetched execution_status: url=$url, execution_status={$responseArr["execution_status"]}, close_reason=" . ($responseArr["close_reason"] ?? 'null'));
 
-            return $responseArr;
+            return OrderStatusController::normalizeFalseCanceledDispatchStatus($responseArr) ?? $responseArr;
         } catch (\Exception  $e) {
             Log::error("Connection timeout in getExecutionStatus: url=$url, error=" . $e->getMessage());
             return [

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\OrderStatusController;
+use App\Models\Uid_history;
 use Tests\TestCase;
 
 class IsDispatchOrderCanceledTest extends TestCase
@@ -73,6 +74,50 @@ class IsDispatchOrderCanceledTest extends TestCase
         ];
 
         $this->assertTrue(OrderStatusController::hasActiveDispatchLeg($cardOrder, $nalOrder));
+    }
+
+    public function test_searches_nal_with_canceled_card_leg_is_still_live(): void
+    {
+        $cardOrder = [
+            'execution_status' => 'Canceled',
+            'close_reason' => 1,
+        ];
+        $nalOrder = [
+            'execution_status' => 'SearchesForCar',
+            'close_reason' => -1,
+        ];
+
+        $this->assertTrue(OrderStatusController::hasActiveDispatchLeg($cardOrder, $nalOrder));
+    }
+
+    public function test_is_fork_order_still_live_when_nal_searches(): void
+    {
+        $uidHistory = new Uid_history();
+        $uidHistory->double_status = json_encode([
+            'execution_status' => 'SearchesForCar',
+            'close_reason' => -1,
+        ]);
+        $uidHistory->bonus_status = json_encode([
+            'execution_status' => 'Canceled',
+            'close_reason' => 1,
+        ]);
+
+        $this->assertTrue(OrderStatusController::isForkOrderStillLive($uidHistory));
+    }
+
+    public function test_is_fork_order_not_live_when_both_canceled(): void
+    {
+        $uidHistory = new Uid_history();
+        $uidHistory->double_status = json_encode([
+            'execution_status' => 'Canceled',
+            'close_reason' => 1,
+        ]);
+        $uidHistory->bonus_status = json_encode([
+            'execution_status' => 'Canceled',
+            'close_reason' => 1,
+        ]);
+
+        $this->assertFalse(OrderStatusController::isForkOrderStillLive($uidHistory));
     }
 
     public function test_both_legs_truly_canceled_means_no_active_leg(): void

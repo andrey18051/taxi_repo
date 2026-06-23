@@ -12257,6 +12257,9 @@ class AndroidTestOSMController extends Controller
      */
     private function notifyOrderCancelTelegram(Orderweb $orderweb, ?string $channelNote = null): void
     {
+        if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderweb)) {
+            return;
+        }
         try {
             (new MessageSentController)->sentCancelInfo($orderweb);
         } catch (\Throwable $e) {
@@ -12300,6 +12303,10 @@ class AndroidTestOSMController extends Controller
     private function notifyClientOrderCanceled(string $application, string $email, string $uid): void
     {
         if ($email === '') {
+            return;
+        }
+        $orderweb = Orderweb::where('dispatching_order_uid', $uid)->first();
+        if ($orderweb && !OrderStatusController::shouldNotifyClientOrderCanceled($orderweb)) {
             return;
         }
         (new PusherController)->sentCanceledStatus($application, $email, $uid);
@@ -12440,6 +12447,21 @@ class AndroidTestOSMController extends Controller
         }
 
         if ($this->isDispatchCloseReasonCanceled($responseArr)) {
+            $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($uid) ?: $uid;
+            $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
+            if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
+                Log::info('webordersCancelRestorAddCostNal: skip notify, fork still live', [
+                    'uid' => $uid,
+                    'hold_uid' => $holdUid,
+                ]);
+
+                return [
+                    'response' => '200',
+                    'dispatch_cancelled' => false,
+                    'client_message' => '',
+                ];
+            }
+
             $this->performFirestoreCancelCleanup($uid);
             $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
             if (!empty($orderweb->email)) {
