@@ -81,28 +81,12 @@ class DispatchOrderCancelService
 
         $pass = $this->runCancelPass($orderweb, $city, $application, $paymentType, $legs);
         if ($pass['all_settled']) {
-            $this->finalizeIfAllowed($orderweb, $primaryUid, $pass['cancel_result_code']);
-            $this->stopCampaign($primaryUid);
-
-            return [
-                'dispatch_cancelled' => true,
-                'client_message' => $this->buildConfirmedMessage($pass['cancel_result_code']),
-                'cancel_result_code' => $pass['cancel_result_code'],
-                'background_retry' => false,
-            ];
+            return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         }
 
         $pass = $this->runSyncBurst($orderweb, $city, $application, $paymentType, $legs, $pass);
         if ($pass['all_settled']) {
-            $this->finalizeIfAllowed($orderweb, $primaryUid, $pass['cancel_result_code']);
-            $this->stopCampaign($primaryUid);
-
-            return [
-                'dispatch_cancelled' => true,
-                'client_message' => $this->buildConfirmedMessage($pass['cancel_result_code']),
-                'cancel_result_code' => $pass['cancel_result_code'],
-                'background_retry' => false,
-            ];
+            return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         }
 
         $this->scheduleBackgroundCampaign($primaryUid, $city, $application, $paymentType, $legs, $pass['attempt_number']);
@@ -153,11 +137,17 @@ class DispatchOrderCancelService
         $state['attempt_number'] = $pass['attempt_number'];
 
         if ($pass['all_settled']) {
-            $this->finalizeIfAllowed($orderweb, $primaryUid, $pass['cancel_result_code']);
-            $this->stopCampaign($primaryUid);
-            Log::info('DispatchOrderCancelService: background cancel finalized', ['uid' => $primaryUid]);
+            if ($this->canFinalizeClientCancel($orderweb, $primaryUid)) {
+                $this->finalizeIfAllowed($orderweb, $primaryUid, $pass['cancel_result_code']);
+                $this->stopCampaign($primaryUid);
+                Log::info('DispatchOrderCancelService: background cancel finalized', ['uid' => $primaryUid]);
 
-            return;
+                return;
+            }
+
+            Log::info('DispatchOrderCancelService: dispatch settled but fork still live, continue campaign', [
+                'uid' => $primaryUid,
+            ]);
         }
 
         $elapsed = time() - (int) $state['started_at'];
@@ -362,12 +352,11 @@ class DispatchOrderCancelService
             DispatchOrderCancelRetryJob::dispatch($primaryUid)
                 ->delay(now()->addSeconds($delay));
         } catch (\Throwable $e) {
-            Cache::forget($cacheKey);
             Log::error('DispatchOrderCancelService: failed to enqueue retry job', [
                 'uid' => $primaryUid,
                 'error' => $e->getMessage(),
             ]);
-            throw $e;
+            // Кампания в cache остаётся — повторная отмена или worker после hotfix подхватит.
         }
 
         Log::info('DispatchOrderCancelService: background campaign scheduled', [
@@ -380,18 +369,68 @@ class DispatchOrderCancelService
 
     private function finalizeIfAllowed(Orderweb $orderweb, string $primaryUid, ?int $cancelResultCode): void
     {
-        $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($primaryUid) ?: $primaryUid;
-        $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
-        if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
+        if (!$this->canFinalizeClientCancel($orderweb, $primaryUid)) {
             Log::info('DispatchOrderCancelService: skip finalize, fork still live', [
                 'uid' => $primaryUid,
-                'hold_uid' => $holdUid,
+                'hold_uid' => (new MemoryOrderChangeController)->findLatestOrderUid($primaryUid) ?: $primaryUid,
             ]);
 
             return;
         }
 
         (new AndroidTestOSMController())->finalizeDispatchClientCancel($orderweb, $primaryUid);
+    }
+
+    /**
+     * @param array<int, array{uid: string, auth_role?: string, authorization?: string}> $legs
+     * @param array{all_settled: bool, cancel_result_code: int|null, attempt_number: int, snapshots: array} $pass
+     *
+     * @return array{dispatch_cancelled: bool, client_message: string, cancel_result_code: int|null, background_retry: bool}
+     */
+    private function handleSettledPass(
+        Orderweb $orderweb,
+        string $primaryUid,
+        string $city,
+        string $application,
+        ?string $paymentType,
+        array $legs,
+        array $pass
+    ): array {
+        if (!$this->canFinalizeClientCancel($orderweb, $primaryUid)) {
+            $this->scheduleBackgroundCampaign(
+                $primaryUid,
+                $city,
+                $application,
+                $paymentType,
+                $legs,
+                $pass['attempt_number']
+            );
+
+            return [
+                'dispatch_cancelled' => false,
+                'client_message' => self::CLIENT_MESSAGE_PENDING,
+                'cancel_result_code' => $pass['cancel_result_code'],
+                'background_retry' => true,
+            ];
+        }
+
+        $this->finalizeIfAllowed($orderweb, $primaryUid, $pass['cancel_result_code']);
+        $this->stopCampaign($primaryUid);
+
+        return [
+            'dispatch_cancelled' => true,
+            'client_message' => $this->buildConfirmedMessage($pass['cancel_result_code']),
+            'cancel_result_code' => $pass['cancel_result_code'],
+            'background_retry' => false,
+        ];
+    }
+
+    private function canFinalizeClientCancel(Orderweb $orderweb, string $primaryUid): bool
+    {
+        $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($primaryUid) ?: $primaryUid;
+        $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
+
+        return OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify);
     }
 
     private function buildConfirmedMessage(?int $cancelResultCode): string

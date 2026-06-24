@@ -14,23 +14,26 @@ class DispatchOrderCancelRetryJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 1;
+    public $tries = 1;
 
-    public int $timeout = 120;
+    public $timeout = 120;
 
-    private string $primaryUid;
+    public $uniqueFor = 300;
 
-    public function __construct(string $primaryUid)
+    /** @var string */
+    protected $primaryUid;
+
+    public function __construct($primaryUid)
     {
         $this->primaryUid = $primaryUid;
     }
 
-    public function uniqueId(): string
+    public function uniqueId()
     {
         return 'dispatch_cancel_' . $this->primaryUid;
     }
 
-    public function handle(DispatchOrderCancelService $service): void
+    public function handle(DispatchOrderCancelService $service)
     {
         $service->runBackgroundAttempt($this->primaryUid);
     }
