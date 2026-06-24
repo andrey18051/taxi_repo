@@ -21,6 +21,9 @@ class DispatchOrderCancelService
 
     public const CACHE_INDEX_KEY = 'dispatch_cancel_campaign_index';
 
+    /** Horizon слушает high/medium/low, не default — см. config/horizon.php */
+    public const RETRY_JOB_QUEUE = 'low';
+
     public const CLIENT_MESSAGE_PENDING = 'Запит на скасування замовлення надіслано. Очікуємо підтвердження диспетчера.';
 
     /** Короткий синхронный дожим в HTTP после первого PUT (сек). */
@@ -220,23 +223,12 @@ class DispatchOrderCancelService
         Cache::put($cacheKey, $state, now()->addHours(24));
         $this->addToCampaignIndex($primaryUid);
 
-        $nextAttempt = $attempt + 1;
-        $delay = DispatchOrderCancelSchedule::delayUntilNextAttempt((int) $state['started_at'], $nextAttempt);
-        try {
-            DispatchOrderCancelRetryJob::dispatch($primaryUid)
-                ->delay(now()->addSeconds($delay));
-        } catch (\Throwable $e) {
-            Log::error('DispatchOrderCancelService: failed to enqueue retry job', [
-                'uid' => $primaryUid,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->enqueueCancelRetryJob($primaryUid, $state, false);
 
         Log::info('DispatchOrderCancelService: scheduled next background attempt', [
             'uid' => $primaryUid,
             'attempt' => $attempt,
-            'next_attempt' => $nextAttempt,
-            'delay_seconds' => $delay,
+            'next_attempt' => $attempt + 1,
         ]);
     }
 
@@ -417,25 +409,12 @@ class DispatchOrderCancelService
         Cache::put($cacheKey, $state, now()->addHours(24));
         $this->addToCampaignIndex($primaryUid);
 
-        $nextAttempt = $attemptNumber + 1;
-        $delay = DispatchOrderCancelSchedule::delayUntilNextAttempt((int) $state['started_at'], $nextAttempt);
-
-        try {
-            DispatchOrderCancelRetryJob::dispatch($primaryUid)
-                ->delay(now()->addSeconds($delay));
-        } catch (\Throwable $e) {
-            Log::error('DispatchOrderCancelService: failed to enqueue retry job', [
-                'uid' => $primaryUid,
-                'error' => $e->getMessage(),
-            ]);
-            // Кампания в cache остаётся — повторная отмена или worker после hotfix подхватит.
-        }
+        $this->enqueueCancelRetryJob($primaryUid, $state, false);
 
         Log::info('DispatchOrderCancelService: background campaign scheduled', [
             'uid' => $primaryUid,
             'attempt_number' => $attemptNumber,
-            'next_attempt' => $nextAttempt,
-            'delay_seconds' => $delay,
+            'next_attempt' => $attemptNumber + 1,
         ]);
     }
 
@@ -453,7 +432,13 @@ class DispatchOrderCancelService
         if (Cache::has($cacheKey)) {
             $existing = Cache::get($cacheKey);
             if (is_array($existing)) {
+                $existing['city'] = $city;
+                $existing['application'] = $application;
+                $existing['payment_type'] = $paymentType;
+                $existing['legs'] = $this->mergeLegs($existing['legs'] ?? [], $legs);
+                Cache::put($cacheKey, $existing, now()->addHours(24));
                 $this->addToCampaignIndex($primaryUid);
+                $this->enqueueCancelRetryJob($primaryUid, $existing, true);
 
                 return;
             }
@@ -470,6 +455,39 @@ class DispatchOrderCancelService
             'problem_telegram_sent' => false,
         ], now()->addHours(24));
         $this->addToCampaignIndex($primaryUid);
+    }
+
+    /**
+     * @param array<string, mixed> $state
+     */
+    private function enqueueCancelRetryJob(string $primaryUid, array $state, bool $resumeExisting = false): void
+    {
+        $startedAt = (int) ($state['started_at'] ?? time());
+        $attemptNumber = (int) ($state['attempt_number'] ?? 0);
+        $nextAttempt = $attemptNumber + 1;
+        $delay = DispatchOrderCancelSchedule::delayUntilNextAttempt($startedAt, $nextAttempt);
+        if ($resumeExisting) {
+            $delay = 0;
+        }
+
+        try {
+            DispatchOrderCancelRetryJob::dispatch($primaryUid)
+                ->onQueue(self::RETRY_JOB_QUEUE)
+                ->delay(now()->addSeconds($delay));
+        } catch (\Throwable $e) {
+            Log::error('DispatchOrderCancelService: failed to enqueue retry job', [
+                'uid' => $primaryUid,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        Log::info('DispatchOrderCancelService: ensured cancel retry job queued', [
+            'uid' => $primaryUid,
+            'next_attempt' => $nextAttempt,
+            'delay_seconds' => $delay,
+            'queue' => self::RETRY_JOB_QUEUE,
+            'resume_existing' => $resumeExisting,
+        ]);
     }
 
     private function addToCampaignIndex(string $primaryUid): void

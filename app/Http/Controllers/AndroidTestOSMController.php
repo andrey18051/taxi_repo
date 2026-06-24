@@ -12151,81 +12151,15 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-
-        switch ($city) {
-            case "Lviv":
-            case "Ivano_frankivsk":
-            case "Vinnytsia":
-            case "Poltava":
-            case "Sumy":
-            case "Kharkiv":
-            case "Chernihiv":
-            case "Rivne":
-            case "Ternopil":
-            case "Khmelnytskyi":
-            case "Zakarpattya":
-            case "Zhytomyr":
-            case "Kropyvnytskyi":
-            case "Mykolaiv":
-            case "Chernivtsi":
-            case "Lutsk":
-
-                $city = "OdessaTest";
-                break;
-            case "foreign countries":
-                $city = "Kyiv City";
-                break;
-        }
-
-
-
-        (new FCMController)->deleteDocumentFromFirestore($uid);
-        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-        (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-        (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
-
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
-        if ($orderweb) {
-            $connectAPI = $orderweb->server;
-
-            $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
-            $url = $connectAPI . '/api/weborders/cancel/' . $uid;
-
-            $header = [
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => self::identificationId($application),
-                "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        $orderweb = Orderweb::where('dispatching_order_uid', $uid)->first();
+        if (!$orderweb) {
+            return [
+                'response' => '200',
             ];
-            $response = Http::withHeaders($header)->put($url);
-            $json_arrWeb = json_decode($response, true);
-
-            $messageAdmin = "Отправлена Отмена $url заказа $response";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-            $url = $connectAPI . '/api/weborders/' . $uid;
-            $responseArr = (new UniversalAndroidFunctionController)->getStatus(
-                $header,
-                $url
-            );
-            $messageAdmin = "Статус Отмены заказа  " . json_encode($responseArr) . " responseArr[close_reason]: " . $responseArr['close_reason'];
-            (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-            if ($responseArr["close_reason"] != 1) {
-                self::repeatCancel(
-                    $url,
-                    $authorization,
-                    $application,
-                    $city,
-                    $connectAPI,
-                    $uid
-                );
-            }
-
         }
 
-        return [
-            'response' => "200",
-        ];
+        return $this->webordersCancelRestorAddCostNal($uid, $city, $application, $orderweb);
     }
 
     /**
@@ -12461,7 +12395,13 @@ class AndroidTestOSMController extends Controller
             $uid_history = ForkOrderCancelLegResolver::findHistory($uid, $uid_Double);
         }
 
-        $legs = ForkOrderCancelLegResolver::resolve($uid, $uid_Double, $uid_history);
+        $authChoice = $this->authorizationChoiceApp(
+            $orderweb->pay_system,
+            $cityForService,
+            $orderweb->server,
+            $applicationResolved
+        );
+        $legs = ForkOrderCancelLegResolver::resolveDispatchCancelLegs($orderweb, $uid_history, $authChoice);
 
         $cancelOutcome = app(DispatchOrderCancelService::class)->requestClientCancel([
             'primary_uid' => $orderweb->dispatching_order_uid,
