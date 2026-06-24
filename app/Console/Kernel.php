@@ -35,6 +35,12 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->runInBackground();
 
+        $schedule->command('dispatch-cancel:process-due')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
+
 //        $schedule->command('check-inactive:run')
 //            ->everyFiveMinutes()
 //            ->withoutOverlapping()

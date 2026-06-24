@@ -19,6 +19,8 @@ class DispatchOrderCancelService
 {
     public const CACHE_PREFIX = 'dispatch_cancel_campaign:';
 
+    public const CACHE_INDEX_KEY = 'dispatch_cancel_campaign_index';
+
     public const CLIENT_MESSAGE_PENDING = 'Запит на скасування замовлення надіслано. Очікуємо підтвердження диспетчера.';
 
     /** Короткий синхронный дожим в HTTP после первого PUT (сек). */
@@ -79,6 +81,8 @@ class DispatchOrderCancelService
             ['uid' => $primaryUid, 'auth_role' => 'default'],
         ];
 
+        $this->touchCampaignState($primaryUid, $city, $application, $paymentType, $legs);
+
         $pass = $this->runCancelPass($orderweb, $city, $application, $paymentType, $legs);
         if ($pass['all_settled']) {
             return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
@@ -102,11 +106,67 @@ class DispatchOrderCancelService
     public function runBackgroundAttempt(string $primaryUid): void
     {
         $primaryUid = (new MemoryOrderChangeController)->show($primaryUid);
+        $lock = Cache::lock(self::CACHE_PREFIX . 'lock:' . $primaryUid, 90);
+        if (!$lock->get()) {
+            Log::info('DispatchOrderCancelService: background attempt skipped, lock held', [
+                'uid' => $primaryUid,
+            ]);
+
+            return;
+        }
+
+        try {
+            $this->runBackgroundAttemptLocked($primaryUid);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function processDueCampaigns(): int
+    {
+        $index = Cache::get(self::CACHE_INDEX_KEY, []);
+        if (!is_array($index) || $index === []) {
+            return 0;
+        }
+
+        $processed = 0;
+        foreach (array_unique($index) as $uid) {
+            if (!is_string($uid) || $uid === '') {
+                continue;
+            }
+
+            $state = Cache::get(self::CACHE_PREFIX . $uid);
+            if (!is_array($state)) {
+                $this->removeFromCampaignIndex($uid);
+                continue;
+            }
+
+            $nextAttempt = (int) ($state['attempt_number'] ?? 0) + 1;
+            $startedAt = (int) ($state['started_at'] ?? 0);
+            if ($startedAt <= 0) {
+                continue;
+            }
+
+            $dueAt = $startedAt + DispatchOrderCancelSchedule::offsetSecondsForAttempt($nextAttempt);
+            if (time() < $dueAt) {
+                continue;
+            }
+
+            $this->runBackgroundAttempt($uid);
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    private function runBackgroundAttemptLocked(string $primaryUid): void
+    {
         $cacheKey = self::CACHE_PREFIX . $primaryUid;
         $state = Cache::get($cacheKey);
 
         if (!is_array($state)) {
             Log::info('DispatchOrderCancelService: no active campaign', ['uid' => $primaryUid]);
+            $this->removeFromCampaignIndex($primaryUid);
 
             return;
         }
@@ -132,7 +192,8 @@ class DispatchOrderCancelService
             $state['city'],
             $state['application'],
             $state['payment_type'] ?? $orderweb->pay_system,
-            $state['legs'] ?? [['uid' => $primaryUid, 'auth_role' => 'default']]
+            $state['legs'] ?? [['uid' => $primaryUid, 'auth_role' => 'default']],
+            $attempt
         );
         $state['attempt_number'] = $pass['attempt_number'];
 
@@ -157,11 +218,19 @@ class DispatchOrderCancelService
         }
 
         Cache::put($cacheKey, $state, now()->addHours(24));
+        $this->addToCampaignIndex($primaryUid);
 
         $nextAttempt = $attempt + 1;
         $delay = DispatchOrderCancelSchedule::delayUntilNextAttempt((int) $state['started_at'], $nextAttempt);
-        DispatchOrderCancelRetryJob::dispatch($primaryUid)
-            ->delay(now()->addSeconds($delay));
+        try {
+            DispatchOrderCancelRetryJob::dispatch($primaryUid)
+                ->delay(now()->addSeconds($delay));
+        } catch (\Throwable $e) {
+            Log::error('DispatchOrderCancelService: failed to enqueue retry job', [
+                'uid' => $primaryUid,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         Log::info('DispatchOrderCancelService: scheduled next background attempt', [
             'uid' => $primaryUid,
@@ -186,7 +255,9 @@ class DispatchOrderCancelService
 
     public function stopCampaign(string $primaryUid): void
     {
-        Cache::forget(self::CACHE_PREFIX . (new MemoryOrderChangeController)->show($primaryUid));
+        $primaryUid = (new MemoryOrderChangeController)->show($primaryUid);
+        Cache::forget(self::CACHE_PREFIX . $primaryUid);
+        $this->removeFromCampaignIndex($primaryUid);
     }
 
     /**
@@ -344,6 +415,7 @@ class DispatchOrderCancelService
         }
 
         Cache::put($cacheKey, $state, now()->addHours(24));
+        $this->addToCampaignIndex($primaryUid);
 
         $nextAttempt = $attemptNumber + 1;
         $delay = DispatchOrderCancelSchedule::delayUntilNextAttempt((int) $state['started_at'], $nextAttempt);
@@ -365,6 +437,66 @@ class DispatchOrderCancelService
             'next_attempt' => $nextAttempt,
             'delay_seconds' => $delay,
         ]);
+    }
+
+    /**
+     * @param array<int, array{uid: string, auth_role?: string, authorization?: string}> $legs
+     */
+    private function touchCampaignState(
+        string $primaryUid,
+        string $city,
+        string $application,
+        ?string $paymentType,
+        array $legs
+    ): void {
+        $cacheKey = self::CACHE_PREFIX . $primaryUid;
+        if (Cache::has($cacheKey)) {
+            $existing = Cache::get($cacheKey);
+            if (is_array($existing)) {
+                $this->addToCampaignIndex($primaryUid);
+
+                return;
+            }
+        }
+
+        Cache::put($cacheKey, [
+            'primary_uid' => $primaryUid,
+            'city' => $city,
+            'application' => $application,
+            'payment_type' => $paymentType,
+            'legs' => $legs,
+            'started_at' => time(),
+            'attempt_number' => 0,
+            'problem_telegram_sent' => false,
+        ], now()->addHours(24));
+        $this->addToCampaignIndex($primaryUid);
+    }
+
+    private function addToCampaignIndex(string $primaryUid): void
+    {
+        $primaryUid = (new MemoryOrderChangeController)->show($primaryUid);
+        $index = Cache::get(self::CACHE_INDEX_KEY, []);
+        if (!is_array($index)) {
+            $index = [];
+        }
+        if (!in_array($primaryUid, $index, true)) {
+            $index[] = $primaryUid;
+            Cache::put(self::CACHE_INDEX_KEY, $index, now()->addHours(24));
+        }
+    }
+
+    private function removeFromCampaignIndex(string $primaryUid): void
+    {
+        $primaryUid = (new MemoryOrderChangeController)->show($primaryUid);
+        $index = Cache::get(self::CACHE_INDEX_KEY, []);
+        if (!is_array($index) || $index === []) {
+            return;
+        }
+
+        $index = array_values(array_filter($index, static function ($uid) use ($primaryUid) {
+            return $uid !== $primaryUid;
+        }));
+        Cache::put(self::CACHE_INDEX_KEY, $index, now()->addHours(24));
     }
 
     private function finalizeIfAllowed(Orderweb $orderweb, string $primaryUid, ?int $cancelResultCode): void
