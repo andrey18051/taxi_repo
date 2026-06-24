@@ -34,4 +34,13 @@ class DispatchOrderCancelSettledTest extends TestCase
         $this->assertFalse($this->service->isDispatchCancelSettled(['close_reason' => 2]));
         $this->assertFalse($this->service->isDispatchCancelSettled(null));
     }
+
+    public function test_fork_requires_both_legs_settled(): void
+    {
+        $bonusSettled = ['close_reason' => 1];
+        $nalActive = ['close_reason' => -1];
+
+        $this->assertTrue($this->service->isDispatchCancelSettled($bonusSettled));
+        $this->assertFalse($this->service->isDispatchCancelSettled($nalActive));
+    }
 }
