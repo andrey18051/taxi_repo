@@ -13,6 +13,7 @@ use App\Jobs\StartStatusPaymentReview;
 use App\Jobs\StartNewProcessExecution;
 use App\Jobs\TokenPayJob;
 use App\Jobs\WebordersCancelAndRestorNalJob;
+use App\Services\DispatchOrderCancelService;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\CherkasyCombo;
@@ -154,61 +155,35 @@ class AndroidTestOSMController extends Controller
         $connectAPI,
         $uid
     ) {
-         $maxExecutionTime = 1*60; // Максимальное время выполнения - 3 часа
+        $uid = (new MemoryOrderChangeController)->show($uid);
+        $orderweb = Orderweb::where('dispatching_order_uid', $uid)->first();
+        if (!$orderweb) {
+            Log::warning('repeatCancel: orderweb not found', ['uid' => $uid]);
 
-        $startTime = time();
-        $result = false;
-
-        do {
-            $header = [
-                "Authorization" => $authorization,
-                "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
-            ];
-            $response_bonus = Http::withHeaders($header)->put($url);
-
-            $messageAdmin = "2 Отмена заказа repeatCancel $url " .json_encode($response_bonus);
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-            // Проверка статуса после отмены
-            sleep(5);
-            $urlCheck = $connectAPI . '/api/weborders/' . $uid;
-            try {
-                $response_uid = Http::withHeaders([
-                    "Authorization" => $authorization,
-                    "X-WO-API-APP-ID" => (new AndroidTestOSMController)->identificationId($application),
-                ])->get($urlCheck);
-
-                if ($response_uid->successful() && $response_uid->status() == 200) {
-                    $response_arr = json_decode($response_uid->body(), true);
-
-                    $messageAdmin = "1 Отмена заказа repeatCancel $url " .$response_arr['close_reason'];
-                    (new MessageSentController)->sentMessageAdmin($messageAdmin);
-
-                    if ($response_arr['close_reason'] == 1) {
-                        Log::debug("repeatCancel: close_reason is 1, exiting.");
-                        return "1";
-                    } else {
-                        Log::debug("repeatCancel: close_reason is not 1, continuing.");
-                    }
-                } else {
-                    // Логируем ошибки в случае неудачного запроса
-                    Log::error("repeatCancel Request failed with status: " . $response_uid->status());
-                    Log::error("repeatCancel Response: " . $response_uid->body());
-                    (new MessageSentController)->sentMessageAdmin("repeatCancel Response: " . $response_uid->body());
-                }
-            } catch (\Exception $e) {
-                // Обработка исключений
-                Log::error("repeatCancel Exception caught: " . $e->getMessage());
-                (new MessageSentController)->sentMessageAdmin("repeatCancel Exception caught: " . $e->getMessage());
-
-            }
-            sleep(5);
-        } while (time() - $startTime < $maxExecutionTime);
-        if (!$result) {
-            $messageAdmin = "Заказ не удаляется $uid";
-            (new MessageSentController)->sentMessageAdmin($messageAdmin);
             return null;
         }
+
+        if (strpos((string) $url, '/cancel/') === false) {
+            Log::info('repeatCancel: fixed cancel URL', [
+                'uid' => $uid,
+                'url' => $url,
+            ]);
+        }
+
+        $result = app(DispatchOrderCancelService::class)->requestClientCancel([
+            'primary_uid' => $uid,
+            'city' => $city,
+            'application' => $application,
+            'payment_type' => $orderweb->pay_system,
+        ]);
+
+        Log::info('repeatCancel: delegated to DispatchOrderCancelService', [
+            'uid' => $uid,
+            'dispatch_cancelled' => $result['dispatch_cancelled'] ?? false,
+            'background_retry' => $result['background_retry'] ?? false,
+        ]);
+
+        return !empty($result['dispatch_cancelled']) ? '1' : null;
     }
 
     /**
@@ -12342,10 +12317,14 @@ class AndroidTestOSMController extends Controller
             return 'Замовлення не вдалося скасувати на диспетчері. Спробуйте ще раз або зателефонуйте оператору.';
         }
         $message = 'Запит на скасування замовлення надіслано. ';
-        if ($cancelResultCode === 1) {
-            $message .= 'Замовлення скасоване. ';
-        }
+        $message .= 'Замовлення скасоване. ';
+
         return $message;
+    }
+
+    public function buildClientCancelConfirmedMessage(?int $cancelResultCode): string
+    {
+        return $this->buildNalCancelClientMessage($cancelResultCode, true);
     }
 
     private function markOrderwebClientCanceled(Orderweb $orderweb): void
@@ -12356,6 +12335,39 @@ class AndroidTestOSMController extends Controller
             $orderweb->cancel_timestamp = now();
         }
         $orderweb->save();
+    }
+
+    /**
+     * Подтверждённая отмена на диспетчере: Firestore, push, Telegram, closeReason=1.
+     */
+    public function finalizeDispatchClientCancel(Orderweb $orderweb, string $uid, ?string $channelNote = null): void
+    {
+        $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($uid) ?: $uid;
+        $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
+        if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
+            Log::info('finalizeDispatchClientCancel: skip notify, fork still live', [
+                'uid' => $uid,
+                'hold_uid' => $holdUid,
+            ]);
+
+            return;
+        }
+
+        $this->performFirestoreCancelCleanup($uid);
+        $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
+        if (!empty($orderweb->email)) {
+            $this->notifyClientOrderCanceled(
+                $applicationResolved,
+                $orderweb->email,
+                $uid
+            );
+        }
+        if ($channelNote !== null) {
+            $this->notifyOrderCancelTelegram($orderweb, $channelNote);
+        } else {
+            $this->notifyOrderCancelTelegram($orderweb);
+        }
+        $this->markOrderwebClientCanceled($orderweb);
     }
 
     /**
@@ -12397,16 +12409,12 @@ class AndroidTestOSMController extends Controller
 
         $connectAPI = $orderweb->server;
         if ($connectAPI == "my_server_api") {
-            $this->performFirestoreCancelCleanup($uid);
-            $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
-            if (!empty($orderweb->email)) {
-                $this->notifyClientOrderCanceled(
-                    $applicationResolved,
-                    $orderweb->email,
-                    $uid
-                );
-            }
-            $this->notifyOrderCancelTelegram($orderweb, "Отмена my_server_api (без диспетчера)");
+            $this->finalizeDispatchClientCancel(
+                $orderweb,
+                $uid,
+                'Отмена my_server_api (без диспетчера)'
+            );
+
             return [
                 'response' => '200',
                 'dispatch_cancelled' => true,
@@ -12414,81 +12422,43 @@ class AndroidTestOSMController extends Controller
             ];
         }
 
-        $authorization = (new UniversalAndroidFunctionController)->authorizationApp($city, $connectAPI, $application);
-        $cancelUrl = $connectAPI . '/api/weborders/cancel/' . $uid;
-        $statusUrl = $connectAPI . '/api/weborders/' . $uid;
+        $cancelOutcome = app(DispatchOrderCancelService::class)->requestClientCancel([
+            'primary_uid' => $uid,
+            'city' => $city,
+            'application' => $application,
+            'payment_type' => $orderweb->pay_system,
+        ]);
 
-        $header = [
-            "Authorization" => $authorization,
-            "X-WO-API-APP-ID" => self::identificationId($application),
-            "X-API-VERSION" => (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application)
-        ];
-        $cancelResponse = Http::withHeaders($header)->put($cancelUrl);
-        $cancelResultCode = $this->parseDispatchClientCancelResult($cancelResponse);
+        (new MessageSentController)->sentMessageAdminLog(
+            $uid . ' cancel outcome: ' . json_encode($cancelOutcome, JSON_UNESCAPED_UNICODE)
+        );
 
-        $messageAdmin = "Отправлена Отмена $cancelUrl заказа $cancelResponse";
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-        $responseArr = (new UniversalAndroidFunctionController)->getStatus($header, $statusUrl);
-        $messageAdmin = "Статус Отмены заказа  " . json_encode($responseArr)
-            . " responseArr[close_reason]: " . ($responseArr['close_reason'] ?? 'n/a');
-        (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-
-        if (!$this->isDispatchCloseReasonCanceled($responseArr)) {
-            self::repeatCancel(
-                $statusUrl,
-                $authorization,
-                $application,
-                $city,
-                $connectAPI,
-                $uid
-            );
-            $responseArr = (new UniversalAndroidFunctionController)->getStatus($header, $statusUrl);
-        }
-
-        if ($this->isDispatchCloseReasonCanceled($responseArr)) {
-            $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($uid) ?: $uid;
-            $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
-            if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
-                Log::info('webordersCancelRestorAddCostNal: skip notify, fork still live', [
-                    'uid' => $uid,
-                    'hold_uid' => $holdUid,
-                ]);
-
-                return [
-                    'response' => '200',
-                    'dispatch_cancelled' => false,
-                    'client_message' => '',
-                ];
-            }
-
-            $this->performFirestoreCancelCleanup($uid);
-            $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
-            if (!empty($orderweb->email)) {
-                $this->notifyClientOrderCanceled(
-                    $applicationResolved,
-                    $orderweb->email,
-                    $uid
-                );
-            }
-            $this->notifyOrderCancelTelegram($orderweb);
+        if (!empty($cancelOutcome['dispatch_cancelled'])) {
             return [
                 'response' => '200',
                 'dispatch_cancelled' => true,
-                'client_message' => $this->buildNalCancelClientMessage($cancelResultCode, true),
+                'client_message' => $cancelOutcome['client_message'],
             ];
         }
 
-        $clientMessage = $this->buildNalCancelClientMessage($cancelResultCode, false);
+        if (!empty($cancelOutcome['background_retry'])) {
+            return [
+                'response' => '200',
+                'dispatch_cancelled' => false,
+                'background_retry' => true,
+                'client_message' => $cancelOutcome['client_message'],
+            ];
+        }
+
         Log::warning('Dispatch cancel not confirmed', [
             'uid' => $uid,
-            'cancel_result' => $cancelResultCode,
-            'close_reason' => $responseArr['close_reason'] ?? null,
+            'cancel_result' => $cancelOutcome['cancel_result_code'] ?? null,
         ]);
 
         return [
-            'response' => $clientMessage,
+            'response' => $cancelOutcome['client_message'],
             'dispatch_cancelled' => false,
+            'client_message' => $cancelOutcome['client_message'],
         ];
     }
 
@@ -12746,7 +12716,6 @@ class AndroidTestOSMController extends Controller
         }
         $resp_answer = "";
         if ($orderweb) {
-            self::updateTimestamp($orderweb->id);
             $closeReasonBeforeCancel = (string) $orderweb->closeReason;
 
             if (
@@ -12769,10 +12738,12 @@ class AndroidTestOSMController extends Controller
                 $orderweb
             );
             if (!empty($result['dispatch_cancelled'])) {
-                $this->markOrderwebClientCanceled($orderweb);
-                $resp_answer = $result['client_message'] ?? 'Запит на скасування замовлення надіслано. ';
+                $resp_answer = $result['client_message']
+                    ?? 'Запит на скасування замовлення надіслано. Замовлення скасоване. ';
             } else {
-                $resp_answer = $result['response'] ?? 'Замовлення не вдалося скасувати. ';
+                $resp_answer = $result['client_message']
+                    ?? $result['response']
+                    ?? 'Замовлення не вдалося скасувати. ';
             }
 
             (new MessageSentController)->sentMessageMeCancel($uid . " " . $resp_answer);
@@ -12995,8 +12966,6 @@ class AndroidTestOSMController extends Controller
             } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
         }
         if ($orderweb) {
-            self::updateTimestamp($orderweb->id);
-
             $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first()
                 ?? Uid_history::where('uid_bonusOrder', $uid)->first()
                 ?? Uid_history::where('uid_doubleOrder', $uid)->first();
@@ -13014,14 +12983,16 @@ class AndroidTestOSMController extends Controller
                     $orderweb
                 );
                 if (!empty($result['dispatch_cancelled'])) {
-                    $this->markOrderwebClientCanceled($orderweb);
                     if ($uid_history) {
                         $uid_history->cancel = '1';
                         $uid_history->save();
                     }
-                    $resp_answer = $result['client_message'] ?? 'Запит на скасування замовлення надіслано. ';
+                    $resp_answer = $result['client_message']
+                        ?? 'Запит на скасування замовлення надіслано. Замовлення скасоване. ';
                 } else {
-                    $resp_answer = $result['response'] ?? 'Замовлення не вдалося скасувати. ';
+                    $resp_answer = $result['client_message']
+                        ?? $result['response']
+                        ?? 'Замовлення не вдалося скасувати. ';
                 }
             } else {
                 $fcmController = (new FCMController);
