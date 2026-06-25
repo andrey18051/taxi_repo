@@ -4,10 +4,10 @@
 
 | Репозитории | GitHub | Email в коммитах | Remote |
 |-------------|--------|------------------|--------|
-| PAS_1–PAS_4, `Taxi_dariver` | `Sferaved/*` | `sferaved@gmail.com` | `https://sferaved@github.com/Sferaved/...` |
+| PAS_1–PAS_4, `Taxi_driver` | `Sferaved/*` | `sferaved@gmail.com` | `https://sferaved@github.com/Sferaved/...` |
 | `taxi_repo` | `andrey18051/taxi_repo` | `andrey18051@gmail.com` | `https://andrey18051@github.com/andrey18051/taxi_repo.git` |
 
-`Taxi_dariver` → `https://sferaved@github.com/Sferaved/taxi_driver.git` (тот же PAT, что и PAS; **не** fetch при задачах не про водителя — см. `workspace-context-check.mdc`).
+`Taxi_driver` → `https://sferaved@github.com/Sferaved/taxi_driver.git` (тот же PAT, что и PAS; **не** fetch при задачах не про водителя — см. `workspace-context-check.mdc`).
 
 ## Почему был 403
 
@@ -31,7 +31,7 @@ cd PAS_4
 powershell -ExecutionPolicy Bypass -File "scripts\setup_git_accounts.ps1"
 ```
 
-Пути в скрипте берутся от расположения `PAS_4\scripts\` (соседние PAS_1–3, `Taxi_dariver` и `PhpstormProjects\taxi_repo`).
+Пути в скрипте берутся от расположения `PAS_4\scripts\` (соседние PAS_1–3, `Taxi_driver` и `PhpstormProjects\taxi_repo`).
 
 Скрипт: remote URL, local `user.email`, удаление старого общего credential, опционально сохранение двух PAT.
 
@@ -50,7 +50,7 @@ powershell -ExecutionPolicy Bypass -File "scripts\setup_git_accounts.ps1"
 ## Агент / CI — без повторных окон «проверка доступа»
 
 - **Не** проверять auth перед задачей: `ls-remote`, `push --dry-run`, `fetch` «на всякий случай», повторный вход в браузер.
-- **Не** трогать git в `Taxi_dariver` при обновлении PAS/сервера — см. `workspace-context-check.mdc`.
+- **Не** трогать git в `Taxi_driver` при обновлении PAS/сервера — см. `workspace-context-check.mdc`.
 - PAT уже в Credential Manager после `setup_git_accounts.ps1` (в т.ч. `Sferaved/taxi_driver.git`). При релизе — сразу `git push` в **одном** целевом репо.
 - Перед push в `taxi_repo` не использовать credential PAS. При сомнении — только локально:
 

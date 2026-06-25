@@ -9,7 +9,7 @@ alwaysApply: true
 
 - `PAS_1`, `PAS_2`, `PAS_3`, `PAS_4`
 - `PhpstormProjects/taxi_repo`
-- `Taxi_dariver` — минимум `workspace-context-check.mdc` и `git-multi-account.mdc` (без PAS-специфичных правил)
+- `Taxi_driver` — минимум `workspace-context-check.mdc` и `git-multi-account.mdc` (без PAS-специфичных правил)
 
 ## При изменении правила
 
