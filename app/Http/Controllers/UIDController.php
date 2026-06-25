@@ -985,6 +985,12 @@ class UIDController extends Controller
                         || in_array((string) $orderRow->closeReason, ['1', '8', '9'], true)) {
                         continue;
                     }
+                    $resolvedExecutionStatus = self::resolveExecutionStatusForOrder($orderRow);
+                    if ($resolvedExecutionStatus === 'Canceled') {
+                        OrderStatusController::applyCanceledOrderweb($orderRow);
+                        $orderRow->save();
+                        continue;
+                    }
                     if ((string) $orderRow->closeReason === '0'
                         && !SimpleCashlessDispatchStatusSync::shouldLiveSync($orderRow)) {
                         continue;

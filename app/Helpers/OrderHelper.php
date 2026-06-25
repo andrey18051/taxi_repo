@@ -191,8 +191,12 @@ class OrderHelper
 
                 $orderNewCost = $responseCostArr["order_cost"];
 
-                $addCostBalanceClear = (int)$clientCost - (int)$orderNewCost + (int)$parameter['add_cost'];
-                $addCostBalance = $addCostBalanceClear - (int)$cost_correction;
+                $addCostBalance = self::resolveAddCostBalanceFromQuote(
+                    (int) $clientCost,
+                    (int) $orderNewCost,
+                    (int) $parameter['add_cost'],
+                    (int) $cost_correction
+                );
 
                 $responseCostArrAnswer = "Полный ответ: " .
                     json_encode($responseCostArr, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -200,7 +204,7 @@ class OrderHelper
                 $messageAdmin = "После перепроверки базовая стоимость:
                 Стоимость клиента: $clientCost
                 Новая: $orderNewCost
-                addCostBalanceClear: $addCostBalanceClear
+                addCostBalanceClear: " . ((int) $clientCost - (int) $orderNewCost + (int) $parameter['add_cost']) . "
                 cost_correction: $cost_correction
                 Корректировка нового заказа: $addCostBalance
                 $responseCostArrAnswer";
@@ -221,6 +225,50 @@ class OrderHelper
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
 
         return $addCostBalance;
+    }
+
+    /**
+     * Итоговый add_cost по котировке диспетчера и цене клиента (без HTTP).
+     */
+    public static function resolveAddCostBalanceFromQuote(
+        int $clientCost,
+        int $orderNewCost,
+        int $baseAddCost,
+        int $costCorrection
+    ): int {
+        $addCostBalanceClear = $clientCost - $orderNewCost + $baseAddCost;
+
+        return $addCostBalanceClear - $costCorrection;
+    }
+
+    /**
+     * Параметры наличной ноги вилки: отдельный пересчёт add_cost по payment_type=0.
+     * Нельзя копировать add_cost безнала — иначе вилка уезжает (напр. 2 грн при client_cost 7).
+     */
+    public static function buildForkLegParameter(
+        string $url,
+        array $cardParameter,
+        int $baseAddCost,
+        string $authorization,
+        string $identificationId,
+        string $apiVersion,
+        string $costCorrection,
+        string $clientCost
+    ): array {
+        $forkParameter = $cardParameter;
+        $forkParameter['payment_type'] = 0;
+        $forkParameter['add_cost'] = $baseAddCost;
+        $forkParameter['add_cost'] = self::calculateCostBalanceBeforeOrder(
+            $url,
+            $forkParameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $costCorrection,
+            $clientCost
+        );
+
+        return $forkParameter;
     }
 
     /**

@@ -3,11 +3,19 @@
 namespace App\Support;
 
 /**
- * Расписание повторных PUT /api/weborders/cancel от начала кампании (секунды).
- * 1: сразу (в HTTP), 2: +5с, 3: +30с, 4: +60с, далее каждые 60с.
+ * Единое расписание PUT /api/weborders/cancel от начала кампании (секунды).
+ *
+ * 1 — сразу (в HTTP-запросе клиента)
+ * 2 — через 5 с после первой неудачи
+ * 3 — на 30-й секунде
+ * 4 — на 60-й секунде
+ * 5+ — каждые 60 с (120, 180, …) пока заказ не в архиве на диспетчере
+ *
+ * Telegram «проблема отмены» — {@see PROBLEM_TELEGRAM_AFTER_SECONDS} (10 мин от старта кампании).
  */
 class DispatchOrderCancelSchedule
 {
+    /** 10 минут без успешной отмены — уведомление в Telegram, кампания продолжается. */
     public const PROBLEM_TELEGRAM_AFTER_SECONDS = 600;
 
     public static function offsetSecondsForAttempt(int $attemptNumber): int

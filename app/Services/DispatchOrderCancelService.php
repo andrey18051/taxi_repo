@@ -15,6 +15,13 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Единая кампания отмены заказа на диспетчере (нал, безнал, вилка).
+ *
+ * Расписание повторов — {@see DispatchOrderCancelSchedule}.
+ * Остановка только когда все ноги в архиве / close_reason=1 на диспетчере.
+ * На 10-й минуте без успеха — Telegram, кампания не прекращается.
+ */
 class DispatchOrderCancelService
 {
     public const CACHE_PREFIX = 'dispatch_cancel_campaign:';
@@ -25,9 +32,6 @@ class DispatchOrderCancelService
     public const RETRY_JOB_QUEUE = 'low';
 
     public const CLIENT_MESSAGE_PENDING = 'Запит на скасування замовлення надіслано. Очікуємо підтвердження диспетчера.';
-
-    /** Короткий синхронный дожим в HTTP после первого PUT (сек). */
-    public const SYNC_BURST_SECONDS = 12;
 
     /**
      * @param array{
@@ -91,7 +95,7 @@ class DispatchOrderCancelService
             return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         }
 
-        $pass = $this->runSyncBurst($orderweb, $city, $application, $paymentType, $legs, $pass);
+        $pass = $this->runSyncSecondAttempt($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         if ($pass['all_settled']) {
             return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         }
@@ -343,33 +347,34 @@ class DispatchOrderCancelService
     }
 
     /**
+     * Вторая попытка в том же HTTP-запросе — ровно на 5-й секунде кампании (спека).
+     *
      * @param array<int, array{uid: string, auth_role?: string, authorization?: string}> $legs
      * @param array{all_settled: bool, cancel_result_code: int|null, attempt_number: int, snapshots: array} $firstPass
      *
      * @return array{all_settled: bool, cancel_result_code: int|null, attempt_number: int, snapshots: array}
      */
-    private function runSyncBurst(
+    private function runSyncSecondAttempt(
         Orderweb $orderweb,
+        string $primaryUid,
         string $city,
         string $application,
         ?string $paymentType,
         array $legs,
         array $firstPass
     ): array {
-        $deadline = time() + self::SYNC_BURST_SECONDS;
-        $pass = $firstPass;
-        $attempt = (int) ($pass['attempt_number'] ?? 1);
-
-        while (time() < $deadline) {
-            sleep(5);
-            $attempt++;
-            $pass = $this->runCancelPass($orderweb, $city, $application, $paymentType, $legs, $attempt);
-            if ($pass['all_settled']) {
-                return $pass;
-            }
+        if (!empty($firstPass['all_settled'])) {
+            return $firstPass;
         }
 
-        return $pass;
+        $state = Cache::get(self::CACHE_PREFIX . $primaryUid);
+        $startedAt = is_array($state) ? (int) ($state['started_at'] ?? time()) : time();
+        $waitSeconds = DispatchOrderCancelSchedule::delayUntilNextAttempt($startedAt, 2);
+        if ($waitSeconds > 0) {
+            sleep($waitSeconds);
+        }
+
+        return $this->runCancelPass($orderweb, $city, $application, $paymentType, $legs, 2);
     }
 
     /**
@@ -623,15 +628,19 @@ class DispatchOrderCancelService
         $from = trim((string) ($orderweb->routefrom ?? ''));
 
         $message = sprintf(
-            '%s %s %s — проблема отмены (попытка %d)',
+            '%s %s %s — проблема отмены',
             $createdLocal,
             $server,
-            $from !== '' ? $from : $primaryUid,
-            $attempt
+            $from !== '' ? $from : $primaryUid
         );
 
         try {
             (new MessageSentController)->sentMessageMeCancel($primaryUid . ' ' . $message);
+            Log::warning('DispatchOrderCancelService: problem telegram sent', [
+                'uid' => $primaryUid,
+                'attempt' => $attempt,
+                'elapsed_seconds' => DispatchOrderCancelSchedule::PROBLEM_TELEGRAM_AFTER_SECONDS,
+            ]);
         } catch (\Throwable $e) {
             Log::error('DispatchOrderCancelService: problem telegram failed', [
                 'uid' => $primaryUid,

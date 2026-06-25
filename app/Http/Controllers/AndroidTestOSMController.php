@@ -9228,6 +9228,7 @@ class AndroidTestOSMController extends Controller
 
         $cost_correction = self::costCorrectionValue($userArr[2], $city, $connectAPI, $application);
         $add_cost = $add_cost - $cost_correction;
+        $baseAddCostForFork = $add_cost;
 
         $parameter = [
             'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
@@ -9328,11 +9329,20 @@ class AndroidTestOSMController extends Controller
             if ($authorizationDouble != null) {
                 $responseBonusArr["parameter"] = $parameter;
 
-                $parameter['payment_type'] = 0;
+                $forkParameter = OrderHelper::buildForkLegParameter(
+                    $url,
+                    $parameter,
+                    $baseAddCostForFork,
+                    $authorizationDouble,
+                    $identificationId,
+                    $apiVersion,
+                    $cost_correction,
+                    $clientCost
+                );
 
                 $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
                     $url,
-                    $parameter,
+                    $forkParameter,
                     $authorizationDouble,
                     $identificationId,
                     $apiVersion
@@ -9344,7 +9354,7 @@ class AndroidTestOSMController extends Controller
                 if (isset($responseDoubleArr['dispatching_order_uid']) && !isset($responseBonusArr['dispatching_order_uid'])) {
                     (new DriverMemoryOrderController)->store(
                         $responseDoubleArr['dispatching_order_uid'],
-                        json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                        json_encode($forkParameter, JSON_UNESCAPED_UNICODE),
                         $authorization,
                         $url,
                         $identificationId,
@@ -9391,7 +9401,7 @@ class AndroidTestOSMController extends Controller
                 }
                 if (!isset($responseDoubleArr["Message"])) {
                     $responseDoubleArr["url"] = $url;
-                    $responseDoubleArr["parameter"] = $parameter;
+                    $responseDoubleArr["parameter"] = $forkParameter;
                 } else {
 
                     $messageAdmin = "orderSearchMarkersVisicom: дубль  не создался";
@@ -10023,6 +10033,7 @@ class AndroidTestOSMController extends Controller
 
         $cost_correction = self::costCorrectionValue($userArr[2], $city, $connectAPI, $application);
         $add_cost = $add_cost - $cost_correction;
+        $baseAddCostForFork = $add_cost;
 
         $parameter = [
             'user_full_name' => preg_replace('/\s*\(.*?\)/', '', $params['user_full_name']), //Полное имя пользователя
@@ -10136,11 +10147,20 @@ class AndroidTestOSMController extends Controller
             if ($authorizationDouble != null) {
                 $responseBonusArr["parameter"] = $parameter;
 
-                $parameter['payment_type'] = 0;
+                $forkParameter = OrderHelper::buildForkLegParameter(
+                    $url,
+                    $parameter,
+                    $baseAddCostForFork,
+                    $authorizationDouble,
+                    $identificationId,
+                    $apiVersion,
+                    $cost_correction,
+                    $clientCost
+                );
 
                 $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
                     $url,
-                    $parameter,
+                    $forkParameter,
                     $authorizationDouble,
                     $identificationId,
                     $apiVersion
@@ -10152,7 +10172,7 @@ class AndroidTestOSMController extends Controller
                 if (isset($responseDoubleArr['dispatching_order_uid']) && !isset($responseBonusArr['dispatching_order_uid'])) {
                     (new DriverMemoryOrderController)->store(
                         $responseDoubleArr['dispatching_order_uid'],
-                        json_encode($parameter, JSON_UNESCAPED_UNICODE),
+                        json_encode($forkParameter, JSON_UNESCAPED_UNICODE),
                         $authorization,
                         $url,
                         $identificationId,
@@ -10223,7 +10243,7 @@ class AndroidTestOSMController extends Controller
                 }
                 if (!isset($responseDoubleArr["Message"])) {
                     $responseDoubleArr["url"] = $url;
-                    $responseDoubleArr["parameter"] = $parameter;
+                    $responseDoubleArr["parameter"] = $forkParameter;
                 } else {
 
                     $messageAdmin = "orderSearchMarkersVisicom: дубль  не создался";
@@ -12419,6 +12439,10 @@ class AndroidTestOSMController extends Controller
             'dispatch_cancelled' => $cancelOutcome['dispatch_cancelled'] ?? false,
             'background_retry' => $cancelOutcome['background_retry'] ?? false,
         ]);
+
+        if (!empty($cancelOutcome['background_retry']) || !empty($cancelOutcome['dispatch_cancelled'])) {
+            $this->markForkHistoryCanceledIfPresent($uid);
+        }
 
         return $this->mapForkCancelOutcome($cancelOutcome);
     }

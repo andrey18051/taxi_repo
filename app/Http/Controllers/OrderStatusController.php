@@ -1346,6 +1346,13 @@ class OrderStatusController extends Controller
         if ($uid_history) {
             Log::info('Processing uid_history', ['nalOrderInput' => $nalOrderInput, 'cardOrderInput' => $cardOrderInput]);
 
+            if ($orderweb && self::shouldRefreshForkLegSnapshotsForStatusPush($uid_history, $orderweb)) {
+                $this->refreshForkLegSnapshotsForStatusPush($uid_history, $orderweb);
+                $uid_history->refresh();
+                $nalOrderInput = $uid_history->double_status;
+                $cardOrderInput = $uid_history->bonus_status;
+            }
+
             $nalOrder = json_decode($nalOrderInput, true);
             $cardOrder = json_decode($cardOrderInput, true);
 
@@ -2170,5 +2177,60 @@ class OrderStatusController extends Controller
         if ($orderweb->cancel_timestamp === null) {
             $orderweb->cancel_timestamp = now();
         }
+    }
+
+    private static function shouldRefreshForkLegSnapshotsForStatusPush(
+        Uid_history $uid_history,
+        Orderweb $orderweb
+    ): bool {
+        if (self::isExplicitForkCancelRequested($uid_history)) {
+            return true;
+        }
+
+        $nalOrder = json_decode($uid_history->double_status, true) ?: [];
+        $cardOrder = json_decode($uid_history->bonus_status, true) ?: [];
+        $nalState = (string) ($nalOrder['execution_status'] ?? '');
+        $cardState = (string) ($cardOrder['execution_status'] ?? '');
+
+        if (self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
+            return false;
+        }
+
+        return in_array((string) ($orderweb->closeReason ?? ''), ['-1', '0', '100'], true)
+            || self::isDispatchOrderCanceled($cardOrder)
+            || self::isDispatchOrderCanceled($nalOrder)
+            || $nalState === 'Canceled'
+            || $cardState === 'Canceled';
+    }
+
+    private function refreshForkLegSnapshotsForStatusPush(Uid_history $uid_history, Orderweb $orderweb): void
+    {
+        $bonusUid = (string) ($uid_history->uid_bonusOrder ?: $orderweb->dispatching_order_uid);
+        $doubleUid = (string) ($uid_history->uid_doubleOrder ?? '');
+        if ($bonusUid === '') {
+            return;
+        }
+
+        $bonusSnapshot = SimpleCashlessDispatchStatusSync::fetchDispatchSnapshot($orderweb, $bonusUid);
+        if ($bonusSnapshot !== null) {
+            $uid_history->bonus_status = json_encode($bonusSnapshot, JSON_UNESCAPED_UNICODE);
+        }
+
+        $doubleSnapshot = null;
+        if ($doubleUid !== '') {
+            $doubleSnapshot = SimpleCashlessDispatchStatusSync::fetchDispatchSnapshot($orderweb, $doubleUid);
+            if ($doubleSnapshot !== null) {
+                $uid_history->double_status = json_encode($doubleSnapshot, JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        $uid_history->save();
+
+        Log::info('refreshForkLegSnapshotsForStatusPush', [
+            'bonus_uid' => $bonusUid,
+            'double_uid' => $doubleUid,
+            'bonus_state' => $bonusSnapshot['execution_status'] ?? null,
+            'double_state' => $doubleSnapshot['execution_status'] ?? null,
+        ]);
     }
 }
