@@ -236,7 +236,7 @@ class DispatchOrderCancelService
         ]);
     }
 
-    public function isDispatchCancelSettled(?array $status): bool
+    public function isDispatchCancelSettled(?array $status, ?string $primaryUid = null): bool
     {
         if (!is_array($status)) {
             return false;
@@ -246,7 +246,17 @@ class DispatchOrderCancelService
             return true;
         }
 
-        return (int) ($status['close_reason'] ?? -1) === 1;
+        if ((int) ($status['close_reason'] ?? -1) === 1) {
+            return true;
+        }
+
+        if ($primaryUid !== null
+            && self::hasActiveCampaign($primaryUid)
+            && in_array((string) ($status['execution_status'] ?? ''), ['Canceled', 'Cancelled'], true)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function stopCampaign(string $primaryUid): void
@@ -254,6 +264,14 @@ class DispatchOrderCancelService
         $primaryUid = (new MemoryOrderChangeController)->show($primaryUid);
         Cache::forget(self::CACHE_PREFIX . $primaryUid);
         $this->removeFromCampaignIndex($primaryUid);
+    }
+
+    /** Client pressed cancel; background retries still running. */
+    public static function hasActiveCampaign(string $primaryUid): bool
+    {
+        $primaryUid = (new MemoryOrderChangeController)->show($primaryUid);
+
+        return Cache::has(self::CACHE_PREFIX . $primaryUid);
     }
 
     /**
@@ -333,7 +351,7 @@ class DispatchOrderCancelService
             }
 
             $snapshots[$legUid] = $statusArr;
-            if (!$this->isDispatchCancelSettled($statusArr)) {
+            if (!$this->isDispatchCancelSettled($statusArr, $legUid)) {
                 $allSettled = false;
             }
         }

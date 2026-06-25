@@ -8,6 +8,7 @@ use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
+use App\Services\DispatchOrderCancelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -1156,12 +1157,12 @@ class OrderStatusController extends Controller
         );
         $action = $resolved['action'];
 
-        if (self::isDispatchOrderCanceled($snapshot)
+        if (self::isDispatchCanceledForClientCancel($snapshot, $uid)
             && !self::hasActiveDispatchLeg($snapshot, $snapshot)) {
             if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
                 return null;
             }
-            if (!self::shouldDeferDispatchCancelForGooglePayHold($orderweb, $snapshot)) {
+            if (!self::shouldDeferDispatchCancelForGooglePayHold($orderweb, $snapshot, $uid)) {
                 self::finalizeCanceledFromStatusPush($orderweb, $uid);
                 $orderweb->save();
 
@@ -2196,8 +2197,15 @@ class OrderStatusController extends Controller
      *
      * @param array<string, mixed> $snapshot
      */
-    public static function shouldDeferDispatchCancelForGooglePayHold(Orderweb $orderweb, array $snapshot): bool
-    {
+    public static function shouldDeferDispatchCancelForGooglePayHold(
+        Orderweb $orderweb,
+        array $snapshot,
+        ?string $dispatchUid = null
+    ): bool {
+        if ($dispatchUid !== null && DispatchOrderCancelService::hasActiveCampaign($dispatchUid)) {
+            return false;
+        }
+
         $dispatchCloseReason = (string) ($snapshot['close_reason'] ?? '');
         if ($dispatchCloseReason === '-1') {
             return true;
@@ -2222,6 +2230,24 @@ class OrderStatusController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Dispatch reports Canceled — treat as real cancel when client cancel campaign is active.
+     *
+     * @param array<string, mixed> $snapshot
+     */
+    public static function isDispatchCanceledForClientCancel(array $snapshot, string $uid): bool
+    {
+        if (self::isDispatchOrderCanceled($snapshot)) {
+            return true;
+        }
+
+        if (!DispatchOrderCancelService::hasActiveCampaign($uid)) {
+            return false;
+        }
+
+        return in_array((string) ($snapshot['execution_status'] ?? ''), ['Canceled', 'Cancelled'], true);
     }
 
     private static function shouldRefreshForkLegSnapshotsForStatusPush(
