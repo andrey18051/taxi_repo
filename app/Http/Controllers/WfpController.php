@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\City\PaymentFlow;
+use App\Helpers\WfpOrderPaymentContextHelper;
 use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
 use App\Jobs\StartAddCostCardBottomCreat;
@@ -5242,12 +5243,16 @@ class WfpController extends Controller
             // Доплата: не перезаписываем основной wfp_order_id — иначе processAddCostAfterApproved
             // считает доплату уже применённой и заказ не пересоздаётся с новой суммой.
             if (!$isAddCostCallback && $order->wfp_order_id !== $orderReference) {
+                $oldOrderReference = $order->wfp_order_id;
                 Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
                     'uid' => $order->dispatching_order_uid,
-                    'old' => $order->wfp_order_id,
+                    'old' => $oldOrderReference,
                     'new' => $orderReference,
                     'transactionStatus' => $transactionStatus,
                 ]);
+                if ($oldOrderReference !== null && $oldOrderReference !== '') {
+                    $this->voidSupersededGooglePayHold($order, (string) $oldOrderReference);
+                }
                 $order->wfp_order_id = $orderReference;
             } elseif ($isAddCostCallback) {
                 Log::info('syncGooglePayServiceUrlCallback: skip rebind for add-cost invoice', [
@@ -5321,6 +5326,47 @@ class WfpController extends Controller
             'orderReference' => $orderReference,
             'transactionStatus' => $transactionStatus,
         ]);
+    }
+
+    private function voidSupersededGooglePayHold(Orderweb $order, string $oldOrderReference): void
+    {
+        $invoice = WfpInvoice::where('orderReference', $oldOrderReference)->first();
+        if ($invoice === null || $invoice->transactionStatus !== 'WaitingAuthComplete') {
+            return;
+        }
+        if ($this->isAddCostInvoice($invoice)) {
+            Log::info('syncGooglePayServiceUrlCallback: skip void for add-cost invoice', [
+                'uid' => $order->dispatching_order_uid,
+                'orderReference' => $oldOrderReference,
+            ]);
+
+            return;
+        }
+
+        $application = WfpOrderPaymentContextHelper::resolveApplication($order);
+        $city = WfpOrderPaymentContextHelper::resolveCity($order);
+
+        try {
+            $this->refund(
+                $application,
+                $city,
+                $oldOrderReference,
+                $invoice->amount,
+                $order->dispatching_order_uid
+            );
+            Log::info('syncGooglePayServiceUrlCallback: void superseded hold dispatched', [
+                'uid' => $order->dispatching_order_uid,
+                'orderReference' => $oldOrderReference,
+                'application' => $application,
+                'city' => $city,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('syncGooglePayServiceUrlCallback: void superseded hold failed', [
+                'uid' => $order->dispatching_order_uid,
+                'orderReference' => $oldOrderReference,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function upsertWfpInvoiceRecord(

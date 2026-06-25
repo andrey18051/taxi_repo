@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WfpOrderPaymentContextHelper;
+use App\Helpers\WfpSupersededHoldHelper;
 use App\Jobs\StartNewProcessExecution;
 use App\Models\DoubleOrder;
 use App\Models\Orderweb;
@@ -166,6 +168,21 @@ class DailyTaskController extends Controller
                     'comment' => $orderweb->comment,
                     'city' => $orderweb->city
                 ]);
+
+                $invoiceReference = $value['orderReference'] ?? '';
+                if (WfpSupersededHoldHelper::isSupersededMainHold(
+                    $invoiceReference,
+                    $orderweb->wfp_order_id,
+                    $value['transactionStatus'] ?? null
+                )) {
+                    Log::info('orderCardWfpReviewTask: superseded main hold — direct refund', [
+                        'orderReference' => $invoiceReference,
+                        'current_wfp_order_id' => $orderweb->wfp_order_id,
+                        'uid' => $uid,
+                    ]);
+                    $this->refundSupersededWfpInvoiceForOrder($orderweb, $value);
+                    continue;
+                }
 
                 if ($orderweb->server == "my_server_api" || in_array($orderweb->closeReason, ['104'])) {
                     Log::info("orderCardWfpReviewTask: Условие my_server_api или closeReason=104 выполнено");
@@ -438,6 +455,43 @@ class DailyTaskController extends Controller
     /**
      * Orphan hold in wfp_invoices (no dispatching_order_uid) — void via WFP refund job.
      */
+    private function refundSupersededWfpInvoiceForOrder(Orderweb $orderweb, array $invoiceRow): void
+    {
+        if (($invoiceRow['transactionStatus'] ?? '') !== 'WaitingAuthComplete') {
+            return;
+        }
+
+        $orderReference = $invoiceRow['orderReference'] ?? null;
+        if ($orderReference === null || $orderReference === '') {
+            return;
+        }
+
+        $application = WfpOrderPaymentContextHelper::resolveApplication($orderweb);
+        $city = WfpOrderPaymentContextHelper::resolveCity($orderweb);
+
+        try {
+            (new WfpController)->refund(
+                $application,
+                $city,
+                $orderReference,
+                $invoiceRow['amount'] ?? null,
+                $orderweb->dispatching_order_uid
+            );
+            Log::info('orderCardWfpReviewTask: superseded hold refund dispatched', [
+                'orderReference' => $orderReference,
+                'uid' => $orderweb->dispatching_order_uid,
+                'application' => $application,
+                'city' => $city,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('orderCardWfpReviewTask: superseded hold refund failed', [
+                'orderReference' => $orderReference,
+                'uid' => $orderweb->dispatching_order_uid,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     private function refundOrphanWfpInvoice(array $invoiceRow): void
     {
         if (($invoiceRow['transactionStatus'] ?? '') !== 'WaitingAuthComplete') {
