@@ -47,9 +47,11 @@ powershell -ExecutionPolicy Bypass -File "scripts\setup_git_accounts.ps1"
 - **PAS:** `app\run_version_update.bat` — push от `sferaved@`, без ручной смены аккаунта.
 - **taxi_repo:** `git push origin main` — только аккаунт `andrey18051@`.
 
-## Агент / CI
+## Агент / CI — без повторных окон «проверка доступа»
 
-- **Не** проверять auth перед каждой задачей (`ls-remote`, повторный вход в браузер, скрипты верификации). PAT в Credential Manager сохраняется один раз через `setup_git_accounts.ps1`.
+- **Не** проверять auth перед задачей: `ls-remote`, `push --dry-run`, `fetch` «на всякий случай», повторный вход в браузер.
+- **Не** трогать git в `Taxi_dariver` при обновлении PAS/сервера — см. `workspace-context-check.mdc`.
+- PAT уже в Credential Manager после `setup_git_accounts.ps1` (в т.ч. `Sferaved/taxi_driver.git`). При релизе — сразу `git push` в **одном** целевом репо.
 - Перед push в `taxi_repo` не использовать credential PAS. При сомнении — только локально:
 
 ```powershell
