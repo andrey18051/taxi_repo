@@ -649,12 +649,13 @@ class DispatchOrderCancelService
         }
     }
 
+    /**
+     * Заказ уже снят с диспетчера (closeReason=1).
+     * Статусы 101–104 — поездка с нашим водителем; отмену на внешнем API всё равно нужно отправить при взятии.
+     */
     private function isOrderwebAlreadyFinished(Orderweb $orderweb): bool
     {
-        $closeReason = (string) ($orderweb->closeReason ?? '');
-
-        return $closeReason === '1'
-            || in_array($closeReason, ['101', '102', '103', '104'], true);
+        return (string) ($orderweb->closeReason ?? '') === '1';
     }
 
     private function normalizeCity(string $city): string

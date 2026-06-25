@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Http\Controllers\MessageSentController;
 use App\Http\Controllers\UniversalAndroidFunctionController;
+use App\Models\Orderweb;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,6 +38,14 @@ class StartStatusPaymentReview implements ShouldQueue
      */
     public function handle()
     {
+        $order = Orderweb::where('dispatching_order_uid', $this->orderId)->first();
+        if ($order !== null && ($order->pay_system ?? '') === 'google_pay_payment') {
+            Log::info('StartStatusPaymentReview: skip google_pay (hold on client before order)', [
+                'uid' => $this->orderId,
+            ]);
+
+            return;
+        }
 
         (new UniversalAndroidFunctionController)->cancelOnlyCardPayUid($this->orderId);
 //        Http::get('https://m.easy-order-taxi.site/cancelOnlyCardPayUid' .$this->orderId );

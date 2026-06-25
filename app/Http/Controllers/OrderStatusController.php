@@ -1161,16 +1161,27 @@ class OrderStatusController extends Controller
             if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
                 return null;
             }
-            self::finalizeCanceledFromStatusPush($orderweb, $uid);
-            $orderweb->save();
+            if (!self::shouldDeferDispatchCancelForGooglePayHold($orderweb, $snapshot)) {
+                self::finalizeCanceledFromStatusPush($orderweb, $uid);
+                $orderweb->save();
 
-            return response()->json([
-                'action' => OrderStatusMessageResolver::ACTION_CANCELED,
-                'close_reason' => (int) ($snapshot['close_reason'] ?? 1),
-                'dispatching_order_uid' => $uid,
-                'uid' => $uid,
-                'execution_status' => 'Canceled',
-            ]);
+                return response()->json([
+                    'action' => OrderStatusMessageResolver::ACTION_CANCELED,
+                    'close_reason' => (int) ($snapshot['close_reason'] ?? 1),
+                    'dispatching_order_uid' => $uid,
+                    'uid' => $uid,
+                    'execution_status' => 'Canceled',
+                ]);
+            }
+            $snapshot['execution_status'] = 'SearchesForCar';
+            $executionStatus = 'SearchesForCar';
+            $resolved = $this->resolveLegStatuses(
+                $executionStatus,
+                $executionStatus,
+                $snapshot,
+                $snapshot
+            );
+            $action = $resolved['action'];
         }
 
         SimpleCashlessDispatchStatusSync::applySnapshotToOrderweb($orderweb, $snapshot);
@@ -2177,6 +2188,40 @@ class OrderStatusController extends Controller
         if ($orderweb->cancel_timestamp === null) {
             $orderweb->cancel_timestamp = now();
         }
+    }
+
+    /**
+     * Google Pay: order is created after client hold; dispatch may briefly report Canceled
+     * with close_reason -1 while payment callback is still syncing.
+     *
+     * @param array<string, mixed> $snapshot
+     */
+    public static function shouldDeferDispatchCancelForGooglePayHold(Orderweb $orderweb, array $snapshot): bool
+    {
+        $dispatchCloseReason = (string) ($snapshot['close_reason'] ?? '');
+        if ($dispatchCloseReason === '-1') {
+            return true;
+        }
+
+        if (($orderweb->pay_system ?? '') !== 'google_pay_payment') {
+            return false;
+        }
+
+        $paidStatuses = ['WaitingAuthComplete', 'Approved'];
+        if (in_array((string) ($orderweb->wfp_status_pay ?? ''), $paidStatuses, true)) {
+            return true;
+        }
+
+        $orderReference = (string) ($orderweb->wfp_order_id ?? '');
+        if ($orderReference !== '') {
+            $invoice = \App\Models\WfpInvoice::where('orderReference', $orderReference)->first();
+            if ($invoice !== null
+                && in_array((string) ($invoice->transactionStatus ?? ''), $paidStatuses, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function shouldRefreshForkLegSnapshotsForStatusPush(

@@ -271,11 +271,24 @@ class DriverController extends Controller
 
             $dataDriver = (new FCMController)->readDriverInfoFromFirestore($uidDriver);
 
+            if ($connectAPI != "my_server_api" && $orderweb->pay_system == "nal_payment") {
+                try {
+                    AndroidTestOSMController::repeatCancel(
+                        $url,
+                        $authorization,
+                        $application,
+                        $city,
+                        $connectAPI,
+                        $uid
+                    );
+                } catch (\Exception $e) {
+                }
+            }
+
             $orderweb->auto = json_encode($dataDriver);
             $orderweb->closeReason = "101";
             $orderweb->time_to_start_point = "";
             $orderweb->save();
-
 
             (new FCMController)->calculateTimeToStart($uid);
 
@@ -286,20 +299,8 @@ class DriverController extends Controller
             (new FCMController)->ordersTakingStatus($uid, $status);
             (new UniversalAndroidFunctionController)->sendAutoOrderMyVodResponse($orderweb);
             Log::debug('orderTaking orderweb ', ['orderweb' => $orderweb ? $orderweb->toArray() : null]);
-            if($connectAPI != "my_server_api" ) {
-                if ($orderweb->pay_system == "nal_payment") {
-                    try {
-                        AndroidTestOSMController::repeatCancel(
-                            $url,
-                            $authorization,
-                            $application,
-                            $city,
-                            $connectAPI,
-                            $uid
-                        );
-                    } catch (\Exception $e) {
-                    }
-                } else {
+            if ($connectAPI != "my_server_api") {
+                if ($orderweb->pay_system != "nal_payment") {
                     $startTime = time(); // Запоминаем начальное время
                     do {
                         // Попробуем найти запись
