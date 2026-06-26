@@ -12210,6 +12210,11 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    public function cleanupFirestoreOnClientCancel(string $uid): void
+    {
+        $this->performFirestoreCancelCleanup($uid);
+    }
+
     private function performFirestoreCancelCleanup(string $uid): void
     {
         try {

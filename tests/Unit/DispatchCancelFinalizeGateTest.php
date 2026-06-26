@@ -30,4 +30,16 @@ class DispatchCancelFinalizeGateTest extends TestCase
     {
         $this->assertFalse(OrderStatusController::hasActiveDispatchLeg(null, null));
     }
+
+    public function test_stale_searching_snapshots_block_until_both_settled(): void
+    {
+        $staleCard = ['close_reason' => -1, 'execution_status' => 'SearchesForCar'];
+        $staleNal = ['close_reason' => -1, 'execution_status' => 'SearchesForCar'];
+        $this->assertTrue(OrderStatusController::hasActiveDispatchLeg($staleCard, $staleNal));
+
+        $settledCard = ['close_reason' => 1, 'execution_status' => 'Canceled'];
+        $settledNal = ['close_reason' => 1, 'execution_status' => 'Canceled'];
+        $this->assertTrue(OrderStatusController::areForkLegSnapshotsCancelSettled($settledCard, $settledNal));
+        $this->assertFalse(OrderStatusController::hasActiveDispatchLeg($settledCard, $settledNal));
+    }
 }

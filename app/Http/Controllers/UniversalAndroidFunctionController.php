@@ -3834,6 +3834,7 @@ class UniversalAndroidFunctionController extends Controller
                 if ($orderweb) {
                     OrderStatusController::applyCanceledOrderweb($orderweb);
                     $orderweb->save();
+                    (new AndroidTestOSMController())->cleanupFirestoreOnClientCancel($uid_bonusOrderHold);
                     OrderStatusController::notifyForkOrderCanceledPush($orderweb, $uid_bonusOrderHold);
                 }
 

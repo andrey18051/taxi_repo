@@ -1259,6 +1259,7 @@ class OrderStatusController extends Controller
             return;
         }
         self::applyCanceledOrderweb($orderweb);
+        (new AndroidTestOSMController())->cleanupFirestoreOnClientCancel($uid);
         self::notifyForkOrderCanceledPush($orderweb, $uid);
     }
 
@@ -2051,6 +2052,13 @@ class OrderStatusController extends Controller
         $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
 
         if (self::isForkOrderStillLive($uid_history)) {
+            if ($uid_history !== null
+                && !empty($uid_history->uid_doubleOrder)
+                && self::refreshForkLegSnapshotsForFinalizeGate($uid_history, $orderweb)
+                && !self::isForkOrderStillLive($uid_history->fresh())) {
+                return true;
+            }
+
             Log::info('Skip dispatch cancel finalize: fork order still live', [
                 'uid' => $orderweb->dispatching_order_uid,
             ]);
@@ -2331,12 +2339,14 @@ class OrderStatusController extends Controller
             || $cardState === 'Canceled';
     }
 
-    private function refreshForkLegSnapshotsForStatusPush(Uid_history $uid_history, Orderweb $orderweb): void
-    {
+    private static function refreshForkLegSnapshotsForFinalizeGate(
+        Uid_history $uid_history,
+        Orderweb $orderweb
+    ): bool {
         $bonusUid = (string) ($uid_history->uid_bonusOrder ?: $orderweb->dispatching_order_uid);
         $doubleUid = (string) ($uid_history->uid_doubleOrder ?? '');
         if ($bonusUid === '') {
-            return;
+            return false;
         }
 
         $bonusSnapshot = SimpleCashlessDispatchStatusSync::fetchDispatchSnapshot($orderweb, $bonusUid);
@@ -2352,13 +2362,24 @@ class OrderStatusController extends Controller
             }
         }
 
+        if ($bonusSnapshot === null && $doubleSnapshot === null) {
+            return false;
+        }
+
         $uid_history->save();
 
-        Log::info('refreshForkLegSnapshotsForStatusPush', [
+        Log::info('refreshForkLegSnapshotsForFinalizeGate', [
             'bonus_uid' => $bonusUid,
             'double_uid' => $doubleUid,
             'bonus_state' => $bonusSnapshot['execution_status'] ?? null,
             'double_state' => $doubleSnapshot['execution_status'] ?? null,
         ]);
+
+        return true;
+    }
+
+    private function refreshForkLegSnapshotsForStatusPush(Uid_history $uid_history, Orderweb $orderweb): void
+    {
+        self::refreshForkLegSnapshotsForFinalizeGate($uid_history, $orderweb);
     }
 }
