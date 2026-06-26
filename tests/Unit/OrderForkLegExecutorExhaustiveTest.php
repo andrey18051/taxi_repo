@@ -175,7 +175,7 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
     {
         $this->recorder->reset();
         $this->recorder->bonusPollStatus = 'SearchesForCar';
-        $this->recorder->doublePollStatus = 'Canceled';
+        $this->recorder->doublePollStatus = 'CostCalculation';
 
         $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
         $uidHistory->cancel = '1';
@@ -183,7 +183,7 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
 
         $state = $this->baseState($uidHistory, [
             'newStatusBonus' => 'SearchesForCar',
-            'newStatusDouble' => 'Canceled',
+            'newStatusDouble' => 'CostCalculation',
             'lastStatusBonus' => 'SearchesForCar',
             'lastStatusDouble' => 'SearchesForCar',
         ]);
@@ -191,6 +191,7 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
         $state = $this->invokeBonusPhase($state);
 
         $this->assertNotContains('restore_double', $this->recorder->calls);
+        $this->assertContains('poll_bonus', $this->recorder->calls);
         $this->assertContains('poll_double', $this->recorder->calls);
     }
 
