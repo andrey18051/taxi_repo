@@ -1,0 +1,51 @@
+# SSH-доступ к логам taxi (prod-сервер)
+
+Логи Laravel **не** в репозитории и **не** на GitHub. Чтение — только по SSH с ПК пользователя.
+
+## Когда проверять (новое устройство / новая сессия)
+
+Перед разбором серверных логов, багов оплаты, fork-cancel, WFP void, диспетчерской — **один раз за сессию** (без сетевого шума в git):
+
+```powershell
+ssh -o BatchMode=yes -o ConnectTimeout=10 taxi-prod "echo OK"
+```
+
+- **OK** — читать логи через `ssh taxi-prod "grep …"`, не просить скачивать `laravel.log`.
+- **Permission denied / Host not found** — на этом ПК SSH не настроен → см. «Настройка на новом устройстве».
+
+Не делать `git fetch` и не опрашивать все репо workspace «для проверки».
+
+## Сервер и пути
+
+| | |
+|---|---|
+| Host alias | `taxi-prod` |
+| Адрес | `91.219.60.148`, user `root`, ключ `~/.ssh/id_taxi_prod` |
+| Контейнер test | `/opt/laravel_logs/taxi_test/laravel.log` (OdessaTest, PAS-тесты) |
+| Контейнер work | `/opt/laravel_logs/taxi_work/laravel.log` (прод) |
+| Архив за день | `laravel_log_YYYY-MM-DD_21-0*.log` в той же папке (ротация ~00:00 Kyiv) |
+
+Диспетчерская API `188.190.245.102` — **другой** сервер; Laravel-логи только на `91.219.60.148`.
+
+## Настройка на новом устройстве
+
+**Не копировать** приватный ключ с другого ПК. На каждом устройстве — свой ключ, публичная часть добавляется на сервер.
+
+Из корня любого PAS или `taxi_repo`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "PAS_4\scripts\setup_taxi_prod_ssh.ps1"
+```
+
+Скрипт: ключ без passphrase, запись в `~/.ssh/config`, проверка `OK_NO_PASSWORD`. Если ключа на сервере ещё нет — выводит команды для однократного входа root с паролем.
+
+После успеха агент может:
+
+```powershell
+ssh taxi-prod "grep 'UID' /opt/laravel_logs/taxi_test/laravel.log | tail -50"
+ssh taxi-prod "grep 'UID' /opt/laravel_logs/taxi_test/laravel_log_2026-06-25_21-01-01.log | tail -20"
+```
+
+## Синхронизация файла
+
+При изменении правила или скрипта — те же байты в `PAS_1`…`PAS_4` и `PhpstormProjects/taxi_repo` (см. `cursor-rules-sync.mdc`). `Taxi_driver` — не обязателен.
