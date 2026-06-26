@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Models\Orderweb;
 use App\Services\OrderPaymentNotificationHelper;
 use PHPUnit\Framework\TestCase;
 
@@ -45,11 +44,13 @@ class OrderPaymentNotificationHelperTest extends TestCase
 
     public function test_payment_bind_message(): void
     {
-        $order = new Orderweb();
-        $order->dispatching_order_uid = 'abc123';
-        $order->pay_system = 'wfp_payment';
-        $order->web_cost = 7;
-        $order->client_cost = 7;
+        $order = (object) [
+            'dispatching_order_uid' => 'abc123',
+            'pay_system' => 'wfp_payment',
+            'web_cost' => 7,
+            'client_cost' => 7,
+            'finish_cost' => 0,
+        ];
 
         $message = OrderPaymentNotificationHelper::buildPaymentBindTelegramMessage(
             $order,
