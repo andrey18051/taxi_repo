@@ -5,6 +5,7 @@ namespace App\Services;
 use App\City\SimpleCashlessDispatchStatusSync;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
+use App\Models\WfpInvoice;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -32,6 +33,93 @@ final class WfpHoldRefundEligibility
             if (!$this->cancelService->isDispatchCancelSettled($snapshot)) {
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    /**
+     * Google Pay callback may replace wfp_order_id only when the invoice belongs to this order
+     * and is not older than the hold already stored on orderweb.
+     */
+    public function mayRebindGooglePayHold(
+        Orderweb $order,
+        string $newOrderReference,
+        ?string $currentOrderReference
+    ): bool {
+        $orderUid = (string) ($order->dispatching_order_uid ?? '');
+        $newInvoice = WfpInvoice::where('orderReference', $newOrderReference)->first();
+
+        if ($newInvoice !== null && $orderUid !== '') {
+            $invoiceUid = (string) ($newInvoice->dispatching_order_uid ?? '');
+            if ($invoiceUid !== '' && $invoiceUid !== $orderUid) {
+                Log::info('WfpHoldRefundEligibility: skip GP rebind — invoice uid mismatch', [
+                    'uid' => $orderUid,
+                    'orderReference' => $newOrderReference,
+                    'invoice_uid' => $invoiceUid,
+                ]);
+
+                return false;
+            }
+        }
+
+        if ($newInvoice !== null
+            && $order->created_at !== null
+            && $newInvoice->created_at !== null
+            && $newInvoice->created_at < $order->created_at->copy()->subMinute()) {
+            Log::info('WfpHoldRefundEligibility: skip GP rebind — invoice older than orderweb', [
+                'uid' => $orderUid,
+                'orderReference' => $newOrderReference,
+            ]);
+
+            return false;
+        }
+
+        if ($currentOrderReference !== null
+            && $currentOrderReference !== ''
+            && $newInvoice !== null) {
+            $currentInvoice = WfpInvoice::where('orderReference', $currentOrderReference)->first();
+            if ($currentInvoice !== null
+                && $currentInvoice->created_at !== null
+                && $newInvoice->created_at !== null
+                && $newInvoice->created_at < $currentInvoice->created_at) {
+                Log::info('WfpHoldRefundEligibility: skip GP rebind — stale callback', [
+                    'uid' => $orderUid,
+                    'current' => $currentOrderReference,
+                    'incoming' => $newOrderReference,
+                ]);
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Void the previous hold only when it belonged to the same dispatch uid.
+     */
+    public function mayVoidSupersededGooglePayHold(Orderweb $order, string $oldOrderReference): bool
+    {
+        if ($oldOrderReference === '') {
+            return false;
+        }
+
+        $orderUid = (string) ($order->dispatching_order_uid ?? '');
+        $invoice = WfpInvoice::where('orderReference', $oldOrderReference)->first();
+        if ($invoice === null) {
+            return true;
+        }
+
+        $invoiceUid = (string) ($invoice->dispatching_order_uid ?? '');
+        if ($invoiceUid !== '' && $orderUid !== '' && $invoiceUid !== $orderUid) {
+            Log::info('WfpHoldRefundEligibility: skip void superseded hold — uid mismatch', [
+                'uid' => $orderUid,
+                'orderReference' => $oldOrderReference,
+                'invoice_uid' => $invoiceUid,
+            ]);
+
+            return false;
         }
 
         return true;

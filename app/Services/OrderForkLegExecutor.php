@@ -268,6 +268,17 @@ class OrderForkLegExecutor
      */
     private function restoreLeg(array $state, $leg, $phaseTag)
     {
+        /** @var Uid_history $uidHistory */
+        $uidHistory = $state['uid_history'];
+        if (OrderStatusController::isExplicitForkCancelRequested($uidHistory)) {
+            $this->log('restore_skipped_client_cancel', [
+                'phase' => $phaseTag,
+                'leg' => $leg,
+            ]);
+
+            return $this->pollLeg($state, $leg, $phaseTag . '_cancel_pending');
+        }
+
         if (!$this->canCreateNewOrderForLeg($state, $leg)) {
             $this->log('restore_deferred_leg_not_closed', [
                 'phase' => $phaseTag,

@@ -8,6 +8,7 @@ use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
 use App\Jobs\StartAddCostCardBottomCreat;
 use App\Services\PaymentStatusNotifier;
+use App\Services\WfpHoldRefundEligibility;
 use App\Mail\Check;
 use App\Mail\Server;
 use App\Models\Card;
@@ -5244,16 +5245,27 @@ class WfpController extends Controller
             // считает доплату уже применённой и заказ не пересоздаётся с новой суммой.
             if (!$isAddCostCallback && $order->wfp_order_id !== $orderReference) {
                 $oldOrderReference = $order->wfp_order_id;
-                Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
-                    'uid' => $order->dispatching_order_uid,
-                    'old' => $oldOrderReference,
-                    'new' => $orderReference,
-                    'transactionStatus' => $transactionStatus,
-                ]);
-                if ($oldOrderReference !== null && $oldOrderReference !== '') {
-                    $this->voidSupersededGooglePayHold($order, (string) $oldOrderReference);
+                $holdEligibility = new WfpHoldRefundEligibility();
+                if (!$holdEligibility->mayRebindGooglePayHold($order, (string) $orderReference, $oldOrderReference)) {
+                    Log::info('syncGooglePayServiceUrlCallback: skip rebind wfp_order_id', [
+                        'uid' => $order->dispatching_order_uid,
+                        'old' => $oldOrderReference,
+                        'new' => $orderReference,
+                        'transactionStatus' => $transactionStatus,
+                    ]);
+                } else {
+                    Log::info('syncGooglePayServiceUrlCallback: rebind wfp_order_id', [
+                        'uid' => $order->dispatching_order_uid,
+                        'old' => $oldOrderReference,
+                        'new' => $orderReference,
+                        'transactionStatus' => $transactionStatus,
+                    ]);
+                    if ($oldOrderReference !== null && $oldOrderReference !== ''
+                        && $holdEligibility->mayVoidSupersededGooglePayHold($order, (string) $oldOrderReference)) {
+                        $this->voidSupersededGooglePayHold($order, (string) $oldOrderReference);
+                    }
+                    $order->wfp_order_id = $orderReference;
                 }
-                $order->wfp_order_id = $orderReference;
             } elseif ($isAddCostCallback) {
                 Log::info('syncGooglePayServiceUrlCallback: skip rebind for add-cost invoice', [
                     'uid' => $order->dispatching_order_uid,

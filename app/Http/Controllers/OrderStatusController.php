@@ -1384,18 +1384,29 @@ class OrderStatusController extends Controller
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
             if (self::isExplicitForkCancelRequested($uid_history)) {
-                $action = 'Заказ снят';
-                self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
-                $orderweb->save();
-                $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
-                Log::info('Order canceled (explicit fork cancel)', [
-                    'action' => $action,
+                if (self::areForkLegSnapshotsCancelSettled($cardOrder, $nalOrder)) {
+                    $action = 'Заказ снят';
+                    self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
+                    $orderweb->save();
+                    $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
+                    Log::info('Order canceled (explicit fork cancel settled)', [
+                        'action' => $action,
+                        'dispatching_order_uid' => $dispatching_order_uid,
+                        'cardState' => $cardState,
+                        'nalState' => $nalState,
+                    ]);
+                    Log::info('Exiting function due to cancel', ['response' => $response]);
+
+                    return $response;
+                }
+
+                Log::info('Fork explicit cancel pending dispatch settlement', [
                     'dispatching_order_uid' => $dispatching_order_uid,
                     'cardState' => $cardState,
                     'nalState' => $nalState,
+                    'card_close_reason' => $cardOrder['close_reason'] ?? null,
+                    'nal_close_reason' => $nalOrder['close_reason'] ?? null,
                 ]);
-                Log::info('Exiting function due to cancel', ['response' => $response]);
-                return $response;
             } elseif (!self::hasActiveDispatchLeg($cardOrder, $nalOrder)
                 && ($uid_history->cancel == "1"
                 || self::isDispatchOrderCanceled($cardOrder)
@@ -1991,6 +2002,30 @@ class OrderStatusController extends Controller
         return $uid_history->cancel === '1'
             || $uid_history->cancel === 1
             || $uid_history->cancel === true;
+    }
+
+    /**
+     * Fork cancel is confirmed on dispatch when every leg is archived or close_reason=1.
+     *
+     * @param array<string, mixed>|null $cardOrder
+     * @param array<string, mixed>|null $nalOrder
+     */
+    public static function areForkLegSnapshotsCancelSettled(?array $cardOrder, ?array $nalOrder): bool
+    {
+        $cancelService = new DispatchOrderCancelService();
+        $legs = array_filter([$cardOrder, $nalOrder], static fn ($leg) => is_array($leg) && $leg !== []);
+
+        if ($legs === []) {
+            return false;
+        }
+
+        foreach ($legs as $leg) {
+            if (!$cancelService->isDispatchCancelSettled($leg)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static function isForkOrderStillLive(?Uid_history $uid_history): bool

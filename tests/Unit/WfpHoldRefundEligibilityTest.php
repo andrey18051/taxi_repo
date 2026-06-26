@@ -52,4 +52,14 @@ class WfpHoldRefundEligibilityTest extends TestCase
     {
         $this->assertFalse($this->eligibility->allSnapshotsSettledForRefund([]));
     }
+
+    public function test_gp_rebind_allowed_when_no_invoice_metadata(): void
+    {
+        $order = new \App\Models\Orderweb();
+        $order->dispatching_order_uid = 'current-uid';
+        $order->created_at = now();
+
+        $this->assertTrue($this->eligibility->mayRebindGooglePayHold($order, 'V_NEW', null));
+        $this->assertTrue($this->eligibility->mayVoidSupersededGooglePayHold($order, 'V_OLD'));
+    }
 }

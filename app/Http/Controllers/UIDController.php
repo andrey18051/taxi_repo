@@ -1569,7 +1569,8 @@ class UIDController extends Controller
 
             if (isset($orderweb)) {
 
-                if (OrderStatusController::isExplicitForkCancelRequested($uid_history)) {
+                if (OrderStatusController::isExplicitForkCancelRequested($uid_history)
+                    && OrderStatusController::areForkLegSnapshotsCancelSettled($cardOrder, $nalOrder)) {
                     OrderStatusController::applyCanceledOrderweb($orderweb);
                     $orderweb->save();
                     return;
