@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\WfpOrderPaymentContextHelper;
 use App\Helpers\WfpSupersededHoldHelper;
+use App\Services\WfpHoldRefundEligibility;
 use App\Jobs\StartNewProcessExecution;
 use App\Models\DoubleOrder;
 use App\Models\Orderweb;
@@ -245,6 +246,12 @@ class DailyTaskController extends Controller
                     // Обработка в зависимости от closeReason
                     switch ($orderweb->closeReason) {
                         case "1":
+                            if (!$this->shouldRefundCanceledWfpHold($orderweb, $uid)) {
+                                Log::info('orderCardWfpReviewTask: closeReason=1 в orderweb, refund отложен — диспетчер не подтвердил отмену', [
+                                    'uid' => $uid,
+                                ]);
+                                break;
+                            }
                             Log::info("orderCardWfpReviewTask: closeReason=1 - выполняем refund");
                             if ($wfpInvoicesForOrder != null && !$wfpInvoicesForOrder->isEmpty()) {
                                 foreach ($wfpInvoicesForOrder as $invoiceIndex => $valueInv) {
@@ -351,6 +358,13 @@ class DailyTaskController extends Controller
                     }
 
                     if (($value['transactionStatus'] ?? '') === 'WaitingAuthComplete') {
+                        if (!$this->shouldRefundCanceledWfpHold($orderweb, $uid)) {
+                            Log::info('orderCardWfpReviewTask: closeReason=1 в orderweb, прямой refund отложен — диспетчер не подтвердил отмену', [
+                                'orderReference' => $value['orderReference'],
+                                'uid' => $uid,
+                            ]);
+                            continue;
+                        }
                         Log::info('orderCardWfpReviewTask: closeReason=1 на внешнем сервере — прямой refund инвойса', [
                             'orderReference' => $value['orderReference'],
                             'uid' => $uid,
@@ -846,5 +860,9 @@ class DailyTaskController extends Controller
     self::sentTaskMessage($message);
 }
 
+    private function shouldRefundCanceledWfpHold(Orderweb $orderweb, string $uid): bool
+    {
+        return (new WfpHoldRefundEligibility())->mayRefundCanceledHold($orderweb, $uid);
+    }
 
 }
