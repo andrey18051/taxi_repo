@@ -12293,36 +12293,36 @@ class AndroidTestOSMController extends Controller
     }
 
     /**
-     * Подтверждённая отмена на диспетчере: Firestore, push, Telegram, closeReason=1.
+     * Подтверждённая отмена на диспетчере: Firestore всегда; push — только при полной отмене поездки.
      */
     public function finalizeDispatchClientCancel(Orderweb $orderweb, string $uid, ?string $channelNote = null): void
     {
         $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($uid) ?: $uid;
         $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
-        if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
-            Log::info('finalizeDispatchClientCancel: skip notify, fork still live', [
-                'uid' => $uid,
-                'hold_uid' => $holdUid,
-            ]);
-
-            return;
-        }
 
         $this->performFirestoreCancelCleanup($uid);
+        $this->markOrderwebClientCanceled($orderweb);
+        $orderwebForNotify->refresh();
+
         $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
-        if (!empty($orderweb->email)) {
+        if (!empty($orderweb->email) && OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
             $this->notifyClientOrderCanceled(
                 $applicationResolved,
                 $orderweb->email,
                 $uid
             );
+        } elseif (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
+            Log::info('finalizeDispatchClientCancel: skip client push, fork or order not fully canceled', [
+                'uid' => $uid,
+                'hold_uid' => $holdUid,
+                'close_reason' => $orderwebForNotify->closeReason,
+            ]);
         }
         if ($channelNote !== null) {
             $this->notifyOrderCancelTelegram($orderweb, $channelNote);
         } else {
             $this->notifyOrderCancelTelegram($orderweb);
         }
-        $this->markOrderwebClientCanceled($orderweb);
         $this->markForkHistoryCanceledIfPresent($holdUid);
     }
 

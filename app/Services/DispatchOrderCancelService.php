@@ -595,9 +595,9 @@ class DispatchOrderCancelService
     private function canFinalizeClientCancel(Orderweb $orderweb, string $primaryUid): bool
     {
         $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($primaryUid) ?: $primaryUid;
-        $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
+        $orderwebForFinalize = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
 
-        return OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify);
+        return OrderStatusController::shouldFinalizeDispatchClientCancel($orderwebForFinalize);
     }
 
     private function buildConfirmedMessage(?int $cancelResultCode): string

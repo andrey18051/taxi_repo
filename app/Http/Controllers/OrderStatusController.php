@@ -2042,7 +2042,27 @@ class OrderStatusController extends Controller
     }
 
     /**
-     * Push/Telegram «клиент отменил» — только при реальной отмене всего заказа, не при смене ноги вилки.
+     * Firestore cleanup / finalize кампании — после подтверждённой отмены на диспетчере.
+     * Не зависит от closeReason в orderweb (часто ещё -1 до финализации).
+     * Для вилки — только когда обе ноги уже не активны на диспетчере.
+     */
+    public static function shouldFinalizeDispatchClientCancel(Orderweb $orderweb): bool
+    {
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+
+        if (self::isForkOrderStillLive($uid_history)) {
+            Log::info('Skip dispatch cancel finalize: fork order still live', [
+                'uid' => $orderweb->dispatching_order_uid,
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Push «клиент отменил» — только при реальной отмене всего заказа, не при смене ноги вилки.
      */
     public static function shouldNotifyClientOrderCanceled(Orderweb $orderweb): bool
     {
