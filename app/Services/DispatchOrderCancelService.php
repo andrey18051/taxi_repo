@@ -250,12 +250,6 @@ class DispatchOrderCancelService
             return true;
         }
 
-        if ($primaryUid !== null
-            && self::hasActiveCampaign($primaryUid)
-            && in_array((string) ($status['execution_status'] ?? ''), ['Canceled', 'Cancelled'], true)) {
-            return true;
-        }
-
         return false;
     }
 

@@ -2247,7 +2247,7 @@ class OrderStatusController extends Controller
             return false;
         }
 
-        return in_array((string) ($snapshot['execution_status'] ?? ''), ['Canceled', 'Cancelled'], true);
+        return (new DispatchOrderCancelService())->isDispatchCancelSettled($snapshot, $uid);
     }
 
     private static function shouldRefreshForkLegSnapshotsForStatusPush(
