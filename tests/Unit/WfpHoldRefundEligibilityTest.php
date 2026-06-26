@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 class WfpHoldRefundEligibilityTest extends TestCase
 {
-    private WfpHoldRefundEligibility $eligibility;
+    /** @var WfpHoldRefundEligibility */
+    private $eligibility;
 
     protected function setUp(): void
     {

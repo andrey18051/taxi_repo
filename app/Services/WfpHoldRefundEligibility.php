@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Log;
  */
 final class WfpHoldRefundEligibility
 {
-    private DispatchOrderCancelService $cancelService;
+    /** @var DispatchOrderCancelService */
+    private $cancelService;
 
     public function __construct(?DispatchOrderCancelService $cancelService = null)
     {
@@ -154,7 +155,9 @@ final class WfpHoldRefundEligibility
             Log::info('WfpHoldRefundEligibility: skip refund — dispatch cancel not settled', [
                 'uid' => $uid,
                 'dispatch_close_reasons' => array_map(
-                    static fn (array $s): int => (int) ($s['close_reason'] ?? -1),
+                    static function (array $s): int {
+                        return (int) ($s['close_reason'] ?? -1);
+                    },
                     $snapshots
                 ),
             ]);

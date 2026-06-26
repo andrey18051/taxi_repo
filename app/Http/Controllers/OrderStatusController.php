@@ -2013,7 +2013,9 @@ class OrderStatusController extends Controller
     public static function areForkLegSnapshotsCancelSettled(?array $cardOrder, ?array $nalOrder): bool
     {
         $cancelService = new DispatchOrderCancelService();
-        $legs = array_filter([$cardOrder, $nalOrder], static fn ($leg) => is_array($leg) && $leg !== []);
+        $legs = array_filter([$cardOrder, $nalOrder], static function ($leg) {
+            return is_array($leg) && $leg !== [];
+        });
 
         if ($legs === []) {
             return false;

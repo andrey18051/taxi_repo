@@ -24,7 +24,7 @@ class DispatchOrderCancelScheduleTest extends TestCase
 
     public function test_delay_until_next_attempt(): void
     {
-        $startedAt = 1_000_000;
+        $startedAt = 1000000;
         $this->assertSame(5, DispatchOrderCancelSchedule::delayUntilNextAttempt($startedAt, 2, $startedAt));
         $this->assertSame(0, DispatchOrderCancelSchedule::delayUntilNextAttempt($startedAt, 2, $startedAt + 10));
         $this->assertSame(25, DispatchOrderCancelSchedule::delayUntilNextAttempt($startedAt, 3, $startedAt + 5));

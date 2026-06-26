@@ -147,13 +147,13 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
+          php-version: '7.3'
           extensions: mbstring, xml, dom
           coverage: none
 
       - name: Run order leg action matrix tests
         run: |
-          php vendor/bin/phpunit --filter 'OrderLegActionMatrixList1Test|OrderLegActionMatrixExhaustiveTest|OrderForkLegExecutorExhaustiveTest|OrderForkLegExecutorLastStatusTest|IsDispatchOrderCanceledTest'
+          php vendor/bin/phpunit --filter 'OrderLegActionMatrixList1Test|OrderLegActionMatrixExhaustiveTest|OrderForkLegExecutorExhaustiveTest|OrderForkLegExecutorLastStatusTest|IsDispatchOrderCanceledTest|ForkExplicitCancelSettledTest|WfpSupersededHoldHelperTest|DispatchOrderCancelSettledTest|DispatchOrderCancelScheduleTest'
 
       - name: Build and push TEST image
         id: build_test

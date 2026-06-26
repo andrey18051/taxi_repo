@@ -7,7 +7,8 @@ use PHPUnit\Framework\TestCase;
 
 class DispatchOrderCancelSettledTest extends TestCase
 {
-    private DispatchOrderCancelService $service;
+    /** @var DispatchOrderCancelService */
+    private $service;
 
     protected function setUp(): void
     {
