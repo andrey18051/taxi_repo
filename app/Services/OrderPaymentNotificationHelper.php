@@ -57,7 +57,7 @@ class OrderPaymentNotificationHelper
         return "Taxi uid={$uidShort} {$type} {$amount}UAH";
     }
 
-    public static function buildPaymentBindTelegramMessage(Orderweb $orderweb, string $orderReference): string
+    public static function buildPaymentBindTelegramMessage(object $orderweb, string $orderReference): string
     {
         $uid = (string) ($orderweb->dispatching_order_uid ?? '');
         $payLabel = self::payTypeLabel($orderweb->pay_system);
