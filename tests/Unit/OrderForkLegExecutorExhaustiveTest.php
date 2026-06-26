@@ -195,6 +195,28 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
         $this->assertContains('poll_double', $this->recorder->calls);
     }
 
+    public function test_restore_double_skipped_when_both_legs_already_canceled(): void
+    {
+        $this->recorder->reset();
+        $this->recorder->bonusPollStatus = 'Canceled';
+        $this->recorder->doublePollStatus = 'Canceled';
+
+        $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
+        $uidHistory->double_status = ForkDispatchRecorder::closedLegJson();
+
+        $state = $this->baseState($uidHistory, [
+            'newStatusBonus' => 'Canceled',
+            'newStatusDouble' => 'Canceled',
+            'lastStatusBonus' => 'SearchesForCar',
+            'lastStatusDouble' => 'Canceled',
+        ]);
+
+        $state = $this->invokeBonusPhase($state);
+
+        $this->assertNotContains('restore_double', $this->recorder->calls);
+        $this->assertNotContains('restore_bonus', $this->recorder->calls);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      * @return array<string, mixed>

@@ -12334,10 +12334,7 @@ class AndroidTestOSMController extends Controller
     private function markForkHistoryCanceledIfPresent(string $uid): void
     {
         $history = ForkOrderCancelLegResolver::findHistory($uid, $uid);
-        if ($history && (string) ($history->cancel ?? '') !== '1') {
-            $history->cancel = '1';
-            $history->save();
-        }
+        OrderStatusController::markExplicitForkCancelRequested($history);
     }
 
     /**
@@ -12395,6 +12392,11 @@ class AndroidTestOSMController extends Controller
         $uid = (new MemoryOrderChangeController)->show($uid);
         $uid_Double = (new MemoryOrderChangeController)->show($uid_Double);
 
+        if ($uid_history === null) {
+            $uid_history = ForkOrderCancelLegResolver::findHistory($uid, $uid_Double);
+        }
+        OrderStatusController::markExplicitForkCancelRequested($uid_history);
+
         if ($orderweb->server === 'my_server_api') {
             $this->finalizeDispatchClientCancel(
                 $orderweb,
@@ -12415,10 +12417,6 @@ class AndroidTestOSMController extends Controller
         );
         $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
         $cityForService = $this->normalizeCity($cityResolved);
-
-        if ($uid_history === null) {
-            $uid_history = ForkOrderCancelLegResolver::findHistory($uid, $uid_Double);
-        }
 
         $authChoice = $this->authorizationChoiceApp(
             $orderweb->pay_system,
@@ -13058,11 +13056,6 @@ class AndroidTestOSMController extends Controller
                 $uid_history
             );
 
-            if (!empty($result['dispatch_cancelled']) && $uid_history) {
-                $uid_history->cancel = '1';
-                $uid_history->save();
-            }
-
             $resp_answer = $result['client_message']
                 ?? $result['response']
                 ?? 'Замовлення не вдалося скасувати. ';
@@ -13142,8 +13135,7 @@ class AndroidTestOSMController extends Controller
                 sleep(1);
             } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
             if ($uid_history) {
-                $uid_history->cancel = "1";
-                $uid_history->save();
+                OrderStatusController::markExplicitForkCancelRequested($uid_history);
             }
             $this->notifyOrderCancelTelegram($orderweb, "Отмена UidHistory");
             $resp_answer = "Замовлення $uid отправлено в влику на отмену";

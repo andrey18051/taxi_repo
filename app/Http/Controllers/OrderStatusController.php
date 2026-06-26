@@ -2006,6 +2006,27 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Ставит cancel=1 сразу при нажатии «Отменить», до ответа диспетчера — чтобы ForkMatrix не пересоздавала ногу.
+     */
+    public static function markExplicitForkCancelRequested(?Uid_history $uid_history): bool
+    {
+        if ($uid_history === null || self::isExplicitForkCancelRequested($uid_history)) {
+            return false;
+        }
+
+        $uid_history->cancel = '1';
+        $uid_history->save();
+
+        Log::info('Fork explicit cancel flag set', [
+            'hold' => $uid_history->uid_bonusOrderHold,
+            'bonus' => $uid_history->uid_bonusOrder,
+            'double' => $uid_history->uid_doubleOrder,
+        ]);
+
+        return true;
+    }
+
+    /**
      * Fork cancel is confirmed on dispatch when every leg is archived or close_reason=1.
      *
      * @param array<string, mixed>|null $cardOrder

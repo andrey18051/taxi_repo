@@ -268,8 +268,13 @@ class OrderForkLegExecutor
      */
     private function restoreLeg(array $state, $leg, $phaseTag)
     {
-        /** @var Uid_history $uidHistory */
+        /** @var Uid_history|null $uidHistory */
         $uidHistory = $state['uid_history'];
+        if ($uidHistory !== null && $uidHistory->exists) {
+            $uidHistory->refresh();
+            $state['uid_history'] = $uidHistory;
+        }
+
         if (OrderStatusController::isExplicitForkCancelRequested($uidHistory)) {
             $this->log('restore_skipped_client_cancel', [
                 'phase' => $phaseTag,
@@ -277,6 +282,16 @@ class OrderForkLegExecutor
             ]);
 
             return $this->pollLeg($state, $leg, $phaseTag . '_cancel_pending');
+        }
+
+        if (($state['newStatusBonus'] ?? '') === 'Canceled'
+            && ($state['newStatusDouble'] ?? '') === 'Canceled') {
+            $this->log('restore_skipped_both_legs_canceled', [
+                'phase' => $phaseTag,
+                'leg' => $leg,
+            ]);
+
+            return $this->pollLeg($state, $leg, $phaseTag . '_both_canceled');
         }
 
         if (!$this->canCreateNewOrderForLeg($state, $leg)) {
