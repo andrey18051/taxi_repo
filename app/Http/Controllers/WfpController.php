@@ -907,6 +907,18 @@ class WfpController extends Controller
             $merchantAccount = $merchant->wfp_merchantAccount;
             $secretKey = $merchant->wfp_merchantSecretKey;
 
+            $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+            if ($invoice !== null && !empty($invoice->dispatching_order_uid)) {
+                $boundOrder = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
+                if ($boundOrder !== null) {
+                    $productName = \App\Services\OrderPaymentNotificationHelper::buildWfpProductName(
+                        (string) $invoice->dispatching_order_uid,
+                        $boundOrder->pay_system,
+                        $amount
+                    );
+                }
+            }
+
             $orderDate = strtotime(date('Y-m-d H:i:s'));
 
             $params = [

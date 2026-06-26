@@ -29,7 +29,7 @@ if (-not (Test-Path $sshDir)) {
 
 if (-not (Test-Path $KeyPath)) {
     Write-Host "Creating key: $KeyPath"
-    & ssh-keygen -t ed25519 -f $KeyPath -C $keyComment -q -N ""
+    & ssh-keygen -t ed25519 -f $KeyPath -C $keyComment -q -N '""'
     if ($LASTEXITCODE -ne 0) { throw "ssh-keygen failed" }
 } else {
     Write-Host "Key exists: $KeyPath"
@@ -70,8 +70,12 @@ if (Test-Path $configPath) {
 
 Write-Host ""
 Write-Host "Testing key login..."
-$test = & ssh -o BatchMode=yes -o ConnectTimeout=12 -o IdentitiesOnly=yes -i $KeyPath "${SshUser}@${HostName}" "echo OK_NO_PASSWORD" 2>&1
-if ($LASTEXITCODE -eq 0 -and ($test -match "OK_NO_PASSWORD")) {
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+$test = & ssh -o BatchMode=yes -o ConnectTimeout=12 -o IdentitiesOnly=yes -i $KeyPath "${SshUser}@${HostName}" "echo OK_NO_PASSWORD" 2>&1 | Out-String
+$sshExit = $LASTEXITCODE
+$ErrorActionPreference = $prevEap
+if ($sshExit -eq 0 -and ($test -match "OK_NO_PASSWORD")) {
     Write-Host "OK: passwordless login works." -ForegroundColor Green
     Write-Host ""
     Write-Host "Logs:"

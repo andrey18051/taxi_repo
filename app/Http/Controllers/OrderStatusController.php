@@ -2134,6 +2134,14 @@ class OrderStatusController extends Controller
                 'order_id' => $orderweb->id,
             ]);
         }
+
+        $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+        if ($uid_history !== null && !empty($uid_history->uid_doubleOrder)) {
+            \App\Services\OrderPaymentNotificationHelper::notifyForkCancelConfirmedTelegram(
+                $orderweb,
+                'Вилка скасована (підтверджено на диспетчері)'
+            );
+        }
     }
 
     public static function hasActiveDispatchLeg(?array $cardOrder, ?array $nalOrder): bool

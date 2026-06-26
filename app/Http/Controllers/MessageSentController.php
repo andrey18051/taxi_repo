@@ -109,6 +109,10 @@ class MessageSentController extends Controller
 
         $costForClient = \App\Helpers\OrderHelper::resolveDisplayCostGrivna($orderweb);
         $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $costForClient грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
+        $messageAdmin = \App\Services\OrderPaymentNotificationHelper::appendWfpReferenceToCancelMessage(
+            $messageAdmin,
+            $orderweb->wfp_order_id
+        );
 
         $alarmMessage = new TelegramController();
 

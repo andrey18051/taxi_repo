@@ -4972,10 +4972,11 @@ class UniversalAndroidFunctionController extends Controller
 
         $email = $params['email'];//Телефон пользователя
 
-        $pay_type = " Оплата наличными. ";
-        if($params["payment_type"] == 1) {
-            $pay_type = " Оплата картой (возможно бонусами).";
-        }
+        $pay_type = \App\Services\OrderPaymentNotificationHelper::formatNewOrderPayTypeLine(
+            $params['pay_system'] ?? null,
+            (int) ($params['payment_type'] ?? 0)
+        );
+        $pay_type = ' ' . trim($pay_type) . ' ';
 
 
         if ($params["route_undefined"] != "1") {
@@ -5659,6 +5660,8 @@ class UniversalAndroidFunctionController extends Controller
 
         $orderweb->pay_system = $pay_system;
         $orderweb->save();
+
+        \App\Services\OrderPaymentNotificationHelper::notifyPaymentBoundTelegram($orderweb, $orderReference);
 
         $application = SimpleCashlessPaymentWatch::resolveApplicationLabel($orderweb);
         if ($application !== null) {
