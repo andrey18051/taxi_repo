@@ -7838,11 +7838,28 @@ class UniversalAndroidFunctionController extends Controller
 
             $responseBonusArr["parameter"] = $parameter;
 
-            $parameter['payment_type'] = 0;
+            $cost_correction = (new AndroidTestOSMController)->costCorrectionValue(
+                $order->pay_system,
+                $city,
+                $connectAPI,
+                $application
+            );
+            $clientCost = (string) (OrderHelper::resolveDisplayCostGrivna($order) + 20);
+            $baseAddCostForFork = (int) $order->attempt_20 + (int) $order->add_cost + 20;
+            $forkParameter = OrderHelper::buildForkLegParameter(
+                $url,
+                $parameter,
+                $baseAddCostForFork,
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion,
+                $cost_correction,
+                $clientCost
+            );
 
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
-                $parameter,
+                $forkParameter,
                 $authorizationDouble,
                 $identificationId,
                 $apiVersion
@@ -8460,13 +8477,30 @@ class UniversalAndroidFunctionController extends Controller
             return response()->json(["response" => "400"], 200);
         }
 
-        // Отправка POST-запроса с authorizationDouble
-        $parameter['payment_type'] = 0;
-        Log::info("Отправка POST-запроса с authorizationDouble, параметры: " . json_encode($parameter, JSON_UNESCAPED_UNICODE));
+        // Наличная нога вилки: отдельный add_cost по котировке payment_type=0
+        $cost_correction = (new AndroidTestOSMController)->costCorrectionValue(
+            $order->pay_system,
+            $city,
+            $connectAPI,
+            $application
+        );
+        $clientCost = (string) (OrderHelper::resolveDisplayCostGrivna($order) + (int) $addCost);
+        $baseAddCostForFork = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
+        $forkParameter = OrderHelper::buildForkLegParameter(
+            $url,
+            $parameter,
+            $baseAddCostForFork,
+            $authorizationDouble,
+            $identificationId,
+            $apiVersion,
+            $cost_correction,
+            $clientCost
+        );
+        Log::info("Отправка POST-запроса с authorizationDouble, параметры: " . json_encode($forkParameter, JSON_UNESCAPED_UNICODE));
         try {
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
                 $url,
-                $parameter,
+                $forkParameter,
                 $authorizationDouble,
                 $identificationId,
                 $apiVersion
@@ -8499,7 +8533,7 @@ class UniversalAndroidFunctionController extends Controller
 
         if (!isset($responseDoubleArr["Message"])) {
             $responseDoubleArr["url"] = $url;
-            $responseDoubleArr["parameter"] = $parameter;
+            $responseDoubleArr["parameter"] = $forkParameter;
             Log::info("Добавлены url и parameter в responseDoubleArr: " . json_encode($responseDoubleArr, JSON_UNESCAPED_UNICODE));
         } else {
             $messageAdmin = "Дубль при +20 не создался.";
@@ -8526,7 +8560,7 @@ class UniversalAndroidFunctionController extends Controller
                 $orderNew = $responseArr["dispatching_order_uid"];
                 Log::info("Создан новый заказ с UID: '$orderNew'.");
 
-                $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+                $oldClientCost = OrderHelper::resolveDisplayCostGrivna($order);
                 $newClientCost = $oldClientCost + (int) $addCost;
                 try {
                     (new MessageSentController)->sentAddCostRecreatedInfo($order, $orderNew, $newClientCost);
