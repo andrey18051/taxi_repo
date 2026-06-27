@@ -13076,6 +13076,30 @@ class AndroidTestOSMController extends Controller
         ];
     }
 
+    /**
+     * Локальная очистка Firestore после доплаты, когда отмена на диспетчере уже подтверждена.
+     *
+     * @param list<string> $uids
+     */
+    public function cleanupAddCostRecreationLocalState(array $uids, ?Uid_history $uid_history = null): void
+    {
+        foreach ($uids as $rawUid) {
+            $uid = trim((string) $rawUid);
+            if ($uid === '') {
+                continue;
+            }
+
+            (new FCMController)->deleteDocumentFromFirestore($uid);
+            (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
+            (new FCMController)->deleteDocumentFromSectorFirestore($uid);
+            (new FCMController)->writeDocumentToHistoryFirestore($uid, 'cancelled');
+        }
+
+        if ($uid_history !== null) {
+            OrderStatusController::markExplicitForkCancelRequested($uid_history);
+        }
+    }
+
     public function webordersCancelUidHistory($uid) {
 
         $uid = (new MemoryOrderChangeController)->show($uid);

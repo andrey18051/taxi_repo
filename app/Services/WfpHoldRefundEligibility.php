@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\City\SimpleCashlessDispatchStatusSync;
+use App\Http\Controllers\MemoryOrderChangeController;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
 use App\Models\WfpInvoice;
@@ -121,6 +122,40 @@ final class WfpHoldRefundEligibility
             ]);
 
             return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Не void'ить superseded-холд на новом UID, пока предшественники ещё живы в диспетчере.
+     */
+    public function mayRefundSupersededMainHold(Orderweb $orderweb): bool
+    {
+        if ($orderweb->server === 'my_server_api') {
+            return true;
+        }
+
+        $currentUid = (string) ($orderweb->dispatching_order_uid ?? '');
+        if ($currentUid === '') {
+            return true;
+        }
+
+        $predecessors = (new MemoryOrderChangeController)->collectPredecessorUids($currentUid);
+        if ($predecessors === []) {
+            return true;
+        }
+
+        foreach ($predecessors as $predecessorUid) {
+            $snapshots = $this->collectDispatchSnapshots($orderweb, $predecessorUid);
+            if ($snapshots === null || !$this->allSnapshotsSettledForRefund($snapshots)) {
+                Log::info('WfpHoldRefundEligibility: skip superseded hold refund — predecessor not archived', [
+                    'current_uid' => $currentUid,
+                    'predecessor_uid' => $predecessorUid,
+                ]);
+
+                return false;
+            }
         }
 
         return true;

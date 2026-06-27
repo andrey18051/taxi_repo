@@ -33,6 +33,8 @@ class DispatchOrderCancelService
 
     public const CLIENT_MESSAGE_PENDING = 'Запит на скасування замовлення надіслано. Очікуємо підтвердження диспетчера.';
 
+    public const ADD_COST_RECREATION_WAIT_SECONDS = 60;
+
     /**
      * @param array{
      *     primary_uid: string,
@@ -139,6 +141,118 @@ class DispatchOrderCancelService
             'cancel_result_code' => $pass['cancel_result_code'],
             'background_retry' => true,
         ];
+    }
+
+    /**
+     * Синхронное ожидание архивации старых UID перед пересозданием заказа при доплате.
+     * Не финализирует отмену в orderweb — только подтверждает close_reason=1 / archive на диспетчере.
+     *
+     * @param array{
+     *     primary_uid: string,
+     *     city: string,
+     *     application: string,
+     *     payment_type?: string|null,
+     *     resolve_uid_mapping?: bool,
+     *     legs?: array<int, array{uid: string, auth_role?: string, authorization?: string}>|null,
+     *     wait_seconds?: int
+     * } $options
+     *
+     * @return array{ready: bool, snapshots: array, cancel_result_code: int|null}
+     */
+    public function waitForAddCostRecreationCancel(array $options): array
+    {
+        $rawPrimaryUid = (string) $options['primary_uid'];
+        $resolveUidMapping = (bool) ($options['resolve_uid_mapping'] ?? false);
+        $primaryUid = $this->resolveCancelLegUid($rawPrimaryUid, $resolveUidMapping);
+        $orderwebLookupUid = $resolveUidMapping
+            ? $primaryUid
+            : (new MemoryOrderChangeController)->show($rawPrimaryUid);
+        $orderweb = Orderweb::where('dispatching_order_uid', $orderwebLookupUid)->first();
+        if (!$orderweb) {
+            return ['ready' => false, 'snapshots' => [], 'cancel_result_code' => null];
+        }
+
+        if ($orderweb->server === 'my_server_api') {
+            return ['ready' => true, 'snapshots' => [], 'cancel_result_code' => null];
+        }
+
+        $city = $this->normalizeCity($options['city']);
+        $application = $options['application'];
+        $paymentType = $options['payment_type'] ?? $orderweb->pay_system;
+        $legs = $options['legs'] ?? [
+            ['uid' => $resolveUidMapping ? $primaryUid : $rawPrimaryUid, 'auth_role' => 'default'],
+        ];
+        $waitSeconds = max(1, (int) ($options['wait_seconds'] ?? self::ADD_COST_RECREATION_WAIT_SECONDS));
+        $deadline = time() + $waitSeconds;
+
+        $attempt = 0;
+        $cancelResultCode = null;
+        $snapshots = [];
+
+        while (time() < $deadline) {
+            $attempt++;
+            $pass = $this->runCancelPass(
+                $orderweb,
+                $city,
+                $application,
+                $paymentType,
+                $legs,
+                $attempt,
+                $resolveUidMapping
+            );
+            $snapshots = $pass['snapshots'];
+            if ($pass['cancel_result_code'] !== null) {
+                $cancelResultCode = $pass['cancel_result_code'];
+            }
+
+            if ($pass['all_settled']) {
+                $this->stopCampaignWithoutMapping($primaryUid);
+                if ($rawPrimaryUid !== $primaryUid) {
+                    $this->stopCampaignWithoutMapping($rawPrimaryUid);
+                }
+
+                Log::info('DispatchOrderCancelService: add-cost recreation cancel ready', [
+                    'primary_uid' => $primaryUid,
+                    'attempt' => $attempt,
+                ]);
+
+                return [
+                    'ready' => true,
+                    'snapshots' => $snapshots,
+                    'cancel_result_code' => $cancelResultCode,
+                ];
+            }
+
+            if ($attempt === 1) {
+                $this->touchCampaignState(
+                    $primaryUid,
+                    $city,
+                    $application,
+                    $paymentType,
+                    $legs,
+                    $resolveUidMapping
+                );
+            }
+
+            sleep(1);
+        }
+
+        Log::warning('DispatchOrderCancelService: add-cost recreation cancel timeout', [
+            'primary_uid' => $primaryUid,
+            'wait_seconds' => $waitSeconds,
+        ]);
+
+        return [
+            'ready' => false,
+            'snapshots' => $snapshots,
+            'cancel_result_code' => $cancelResultCode,
+        ];
+    }
+
+    private function stopCampaignWithoutMapping(string $primaryUid): void
+    {
+        Cache::forget(self::CACHE_PREFIX . $primaryUid);
+        $this->removeFromCampaignIndex($primaryUid);
     }
 
     public function runBackgroundAttempt(string $primaryUid): void

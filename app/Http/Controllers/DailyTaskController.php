@@ -181,6 +181,14 @@ class DailyTaskController extends Controller
                         'current_wfp_order_id' => $orderweb->wfp_order_id,
                         'uid' => $uid,
                     ]);
+                    $eligibility = new WfpHoldRefundEligibility();
+                    if (!$eligibility->mayRefundSupersededMainHold($orderweb)) {
+                        Log::info('orderCardWfpReviewTask: superseded hold refund deferred — predecessor not archived', [
+                            'uid' => $uid,
+                            'orderReference' => $invoiceReference,
+                        ]);
+                        continue;
+                    }
                     $this->refundSupersededWfpInvoiceForOrder($orderweb, $value);
                     continue;
                 }

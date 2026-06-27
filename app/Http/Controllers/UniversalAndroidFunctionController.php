@@ -13,6 +13,7 @@ use App\Helpers\OpenStreetMapHelper;
 use App\Helpers\OrderDuplicateHelper;
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
+use App\Services\DispatchOrderCancelService;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -7223,35 +7224,55 @@ class UniversalAndroidFunctionController extends Controller
 //        $url = $orderMemory->connectAPI;
 
         $service = new CityAppOrderService();
-        $url = $service->cityOnlineOrder($city, $application);
+        $connectAPI = $service->cityOnlineOrder($city, $application);
+        $url = $connectAPI . "/api/weborders";
 
         $authorizationChoiceArr = (new AndroidTestOSMController)
-            ->authorizationChoiceApp('nal_payment', $city, $url, $application);
+            ->authorizationChoiceApp('nal_payment', $city, $connectAPI, $application);
 
         $authorization = $authorizationChoiceArr["authorization"];
 
         $identificationId = (new AndroidTestOSMController)->identificationId($application);
-        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $url, $application);
+        $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $connectAPI, $application);
 
         $parameter = json_decode($orderMemory->response, true);
 
         $messageAdmin = "Параметры проверки стоимости" .
             json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         Log::info($messageAdmin);
-        $url =  $url . "/api/weborders";
 
-        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+        $oldDispatchUid = $uid;
+        $waitResult = app(DispatchOrderCancelService::class)->waitForAddCostRecreationCancel([
+            'primary_uid' => $oldDispatchUid,
+            'city' => $city,
+            'application' => $application,
+            'payment_type' => $order->pay_system,
+            'resolve_uid_mapping' => false,
+        ]);
+        if (!$waitResult['ready']) {
+            Log::warning('startAddCostWithAddBottomUpdate: dispatch cancel not settled before recreate', [
+                'uid' => $oldDispatchUid,
+            ]);
+
+            return response()->json(['response' => 'dispatch_cancel_pending'], 200);
+        }
+
+        $targetClientCost = OrderHelper::resolveDisplayCostGrivna($order) + (int) $addCost;
+        $cost_correction = (new AndroidTestOSMController)->costCorrectionValue(
+            $order->pay_system,
+            $city,
+            $connectAPI,
+            $application
+        );
+        $parameter = OrderHelper::applyClientCostToDispatchParameter(
             $url,
             $parameter,
             $authorization,
             $identificationId,
             $apiVersion,
-            $addCost,
-            $order
+            $cost_correction,
+            $targetClientCost
         );
-
-
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int)$addCost + $addCostBalance;
         $messageAdmin = "Параметры запроса нового заказа" . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         Log::info($messageAdmin);
 
@@ -7294,12 +7315,6 @@ class UniversalAndroidFunctionController extends Controller
                 );
 
 
-//                (new AndroidTestOSMController)->webordersCancelAddCostNal($uid, $city, $application);
-                (new AndroidTestOSMController)->webordersCancelRestorAddCostNal($uid, $city, $application, $order);
-//                WebordersCancelAndRestorNalJob::dispatch($uid, $city, $application, $order);
-//                dispatch((new WebordersCancelAndRestorNalJob($uid, $city, $application, $order))
-//                    ->onQueue('high'));
-
                 Log::debug("Ответ от API: " . json_encode($responseArr));
                 $messageAdmin = "Создан новый заказ" . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 Log::info($messageAdmin);
@@ -7328,6 +7343,8 @@ class UniversalAndroidFunctionController extends Controller
                 $order->save();
 
                 Log::info("Обновлен order с новым UID: " . $order_new_uid);
+
+                (new AndroidTestOSMController)->cleanupAddCostRecreationLocalState([$order_old_uid]);
 
                 if ($order->pay_system == "nal_payment" && $order->route_undefined == "0") {
                     (new FCMController)->writeDocumentToFirestore($order_new_uid);
@@ -8136,16 +8153,38 @@ class UniversalAndroidFunctionController extends Controller
             return response()->json(['response' => '400'], 200);
         }
 
-        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+        $oldDispatchUid = $order->dispatching_order_uid;
+        $waitResult = app(DispatchOrderCancelService::class)->waitForAddCostRecreationCancel([
+            'primary_uid' => $oldDispatchUid,
+            'city' => $city,
+            'application' => $application,
+            'payment_type' => $pay_method,
+            'resolve_uid_mapping' => false,
+        ]);
+        if (!$waitResult['ready']) {
+            Log::warning('startAddCostSimpleCashless: dispatch cancel not settled before recreate', [
+                'uid' => $oldDispatchUid,
+            ]);
+
+            return response()->json(['response' => 'dispatch_cancel_pending'], 200);
+        }
+
+        $targetClientCost = OrderHelper::resolveDisplayCostGrivna($order) + (int) $addCost;
+        $cost_correction = (new AndroidTestOSMController)->costCorrectionValue(
+            $order->pay_system,
+            $city,
+            $connectAPI,
+            $application
+        );
+        $parameter = OrderHelper::applyClientCostToDispatchParameter(
             $url,
             $parameter,
             $authorization,
             $identificationId,
             $apiVersion,
-            $addCost,
-            $order
+            $cost_correction,
+            $targetClientCost
         );
-        $parameter['add_cost'] = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost + $addCostBalance;
         $parameter['payment_type'] = 1;
 
         try {
@@ -8202,9 +8241,6 @@ class UniversalAndroidFunctionController extends Controller
         );
 
         $order_old_uid = $order->dispatching_order_uid;
-        // Mapping before dispatch cancel: background poll must not treat intentional
-        // old-uid cancel (add-cost recreation) as client order cancel.
-        // Cancel uses resolve_uid_mapping=false so dispatch targets the old uid, not the new one.
         (new MemoryOrderChangeController)->store($order_old_uid, $orderNew);
 
         $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $order_old_uid)->get();
@@ -8234,12 +8270,7 @@ class UniversalAndroidFunctionController extends Controller
             $apiVersion
         );
 
-        (new AndroidTestOSMController)->webordersCancelRestorAddCostNal(
-            $order_old_uid,
-            $city,
-            $application,
-            $order
-        );
+        (new AndroidTestOSMController)->cleanupAddCostRecreationLocalState([$order_old_uid]);
 
         dispatch(
             (new \App\Jobs\WriteDocumentToFirestore($orderNew))
@@ -8416,6 +8447,32 @@ class UniversalAndroidFunctionController extends Controller
         $apiVersion = (new UniversalAndroidFunctionController)->apiVersionApp($city, $url, $application);
         Log::info("Получены identificationId='$identificationId', apiVersion='$apiVersion'.");
 
+        $oldBonusUid = $uid;
+        $oldDoubleUid = $uid_Double;
+        $forkCancelLegs = [
+            ['uid' => $oldBonusUid, 'auth_role' => 'bonus'],
+        ];
+        if ($oldDoubleUid !== '' && $oldDoubleUid !== $oldBonusUid) {
+            $forkCancelLegs[] = ['uid' => $oldDoubleUid, 'auth_role' => 'double'];
+        }
+
+        $waitResult = app(DispatchOrderCancelService::class)->waitForAddCostRecreationCancel([
+            'primary_uid' => $oldBonusUid,
+            'city' => $city,
+            'application' => $application,
+            'payment_type' => $pay_method,
+            'resolve_uid_mapping' => false,
+            'legs' => $forkCancelLegs,
+        ]);
+        if (!$waitResult['ready']) {
+            Log::warning('startAddCostCardBottomCreat: dispatch cancel not settled before recreate', [
+                'uid' => $oldBonusUid,
+                'uid_double' => $oldDoubleUid,
+            ]);
+
+            return response()->json(['response' => 'dispatch_cancel_pending'], 200);
+        }
+
         // Формирование URL для API
         $url = $url . "/api/weborders";
         Log::info("Сформирован URL для API: '$url'.");
@@ -8426,20 +8483,25 @@ class UniversalAndroidFunctionController extends Controller
         Log::info($messageAdmin);
         Log::info($messageAdmin);
 
-        // Расчет дополнительной стоимости
-        $addCostBalance = OrderHelper::calculateCostBalanceAfterHourChange(
+        $targetClientCost = OrderHelper::resolveDisplayCostGrivna($order) + (int) $addCost;
+        $cost_correction = (new AndroidTestOSMController)->costCorrectionValue(
+            $order->pay_system,
+            $city,
+            $connectAPI,
+            $application
+        );
+        $legParameters = OrderHelper::buildForkAddCostLegParameters(
             $url,
             $parameter,
             $authorization,
+            $authorizationDouble,
             $identificationId,
             $apiVersion,
-            $addCost,
-            $order
+            $cost_correction,
+            $targetClientCost
         );
-        Log::info("Рассчитана дополнительная стоимость: addCostBalance='$addCostBalance'.");
-
-        // Обновление параметра add_cost
-        $parameter['add_cost'] = (int)$order->attempt_20 + (int)$order->add_cost + (int)$addCost + $addCostBalance;
+        $parameter = $legParameters['card'];
+        $forkParameter = $legParameters['cash'];
         $messageAdmin = "Параметры запроса нового заказа: " . json_encode($parameter, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         Log::info($messageAdmin);
         Log::info($messageAdmin);
@@ -8479,24 +8541,6 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         // Наличная нога вилки: отдельный add_cost по котировке payment_type=0
-        $cost_correction = (new AndroidTestOSMController)->costCorrectionValue(
-            $order->pay_system,
-            $city,
-            $connectAPI,
-            $application
-        );
-        $clientCost = (string) (OrderHelper::resolveDisplayCostGrivna($order) + (int) $addCost);
-        $baseAddCostForFork = (int) $order->attempt_20 + (int) $order->add_cost + (int) $addCost;
-        $forkParameter = OrderHelper::buildForkLegParameter(
-            $url,
-            $parameter,
-            $baseAddCostForFork,
-            $authorizationDouble,
-            $identificationId,
-            $apiVersion,
-            $cost_correction,
-            $clientCost
-        );
         Log::info("Отправка POST-запроса с authorizationDouble, параметры: " . json_encode($forkParameter, JSON_UNESCAPED_UNICODE));
         try {
             $responseDouble = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -8599,11 +8643,14 @@ class UniversalAndroidFunctionController extends Controller
 
                 // Запуск задачи отмены и восстановления
 //                dispatch(new WebordersCancelAndRestorDoubleJob($uid, $uid_Double, $city, $application, $order))->onQueue('high');
-                Log::info("Запущена отмена webordersCancelAndRestorDouble для uid='$uid', uid_Double='$uid_Double', city='$city', application='$application'.");
+                Log::info("Add-cost fork: dispatch cancel completed before recreate for uid='$oldBonusUid', uid_Double='$oldDoubleUid'.");
 //                (new AndroidTestOSMController)->webordersCancelAndRestorDouble($uid, $uid_Double, $city, $application, $order);
 
-                (new AndroidTestOSMController)->webordersCancelUidHistory($uid);
-
+                $oldUidHistory = Uid_history::where('uid_bonusOrderHold', $oldBonusUid)->first();
+                (new AndroidTestOSMController)->cleanupAddCostRecreationLocalState(
+                    [$oldBonusUid, $oldDoubleUid],
+                    $oldUidHistory
+                );
 
                 // Сохранение нового заказа
                 $order_old_uid = $order->dispatching_order_uid;

@@ -109,6 +109,27 @@ class MemoryOrderChangeController extends Controller
         return $uid;
     }
 
+    /**
+     * Все предыдущие UID цепочки add-cost (order_new → order_old), без текущего.
+     *
+     * @return list<string>
+     */
+    public function collectPredecessorUids(string $currentUid): array
+    {
+        $predecessors = [];
+        $uid = trim($currentUid);
+        while ($uid !== '') {
+            $link = MemoryOrderChange::where('order_new', $uid)->first();
+            if ($link === null || empty($link->order_old)) {
+                break;
+            }
+            $predecessors[] = (string) $link->order_old;
+            $uid = (string) $link->order_old;
+        }
+
+        return $predecessors;
+    }
+
 
 
     /**

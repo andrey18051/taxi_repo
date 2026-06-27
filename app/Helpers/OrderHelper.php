@@ -292,4 +292,74 @@ class OrderHelper
         return (int) ($order->web_cost ?? 0);
     }
 
+    /**
+     * Пересчёт add_cost под целевую client_cost (как при первичном заказе через /cost).
+     */
+    public static function applyClientCostToDispatchParameter(
+        string $url,
+        array $parameter,
+        string $authorization,
+        string $identificationId,
+        string $apiVersion,
+        string $costCorrection,
+        int $targetClientCost
+    ): array {
+        $parameter['add_cost'] = 0;
+        $parameter['add_cost'] = self::calculateCostBalanceBeforeOrder(
+            $url,
+            $parameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $costCorrection,
+            (string) $targetClientCost
+        );
+
+        return $parameter;
+    }
+
+    /**
+     * Параметры card + cash ног вилки при доплате: отдельный add_cost по котировке каждой ноги.
+     *
+     * @return array{card: array, cash: array}
+     */
+    public static function buildForkAddCostLegParameters(
+        string $url,
+        array $templateParameter,
+        string $authorization,
+        string $authorizationDouble,
+        string $identificationId,
+        string $apiVersion,
+        string $costCorrection,
+        int $targetClientCost
+    ): array {
+        $cardParameter = $templateParameter;
+        $cardParameter['payment_type'] = 1;
+        $cardParameter = self::applyClientCostToDispatchParameter(
+            $url,
+            $cardParameter,
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $costCorrection,
+            $targetClientCost
+        );
+
+        $cashParameter = self::buildForkLegParameter(
+            $url,
+            $cardParameter,
+            0,
+            $authorizationDouble,
+            $identificationId,
+            $apiVersion,
+            $costCorrection,
+            (string) $targetClientCost
+        );
+
+        return [
+            'card' => $cardParameter,
+            'cash' => $cashParameter,
+        ];
+    }
+
 }
