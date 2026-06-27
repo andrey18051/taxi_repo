@@ -39,6 +39,7 @@ class DispatchOrderCancelService
      *     city: string,
      *     application: string,
      *     payment_type?: string|null,
+     *     resolve_uid_mapping?: bool,
      *     legs?: array<int, array{uid: string, auth_role?: string, authorization?: string}>|null
      * } $options
      *
@@ -51,8 +52,13 @@ class DispatchOrderCancelService
      */
     public function requestClientCancel(array $options): array
     {
-        $primaryUid = (new MemoryOrderChangeController)->show($options['primary_uid']);
-        $orderweb = Orderweb::where('dispatching_order_uid', $primaryUid)->first();
+        $rawPrimaryUid = $options['primary_uid'];
+        $resolveUidMapping = $options['resolve_uid_mapping'] ?? true;
+        $primaryUid = $this->resolveCancelLegUid($rawPrimaryUid, $resolveUidMapping);
+        $orderwebLookupUid = $resolveUidMapping
+            ? $primaryUid
+            : (new MemoryOrderChangeController)->show($rawPrimaryUid);
+        $orderweb = Orderweb::where('dispatching_order_uid', $orderwebLookupUid)->first();
         if (!$orderweb) {
             return $this->failureResult(null, 'Замовлення не знайдено.');
         }
@@ -85,22 +91,47 @@ class DispatchOrderCancelService
         $application = $options['application'];
         $paymentType = $options['payment_type'] ?? $orderweb->pay_system;
         $legs = $options['legs'] ?? [
-            ['uid' => $primaryUid, 'auth_role' => 'default'],
+            ['uid' => $resolveUidMapping ? $primaryUid : $rawPrimaryUid, 'auth_role' => 'default'],
         ];
 
-        $this->touchCampaignState($primaryUid, $city, $application, $paymentType, $legs);
+        $this->touchCampaignState($primaryUid, $city, $application, $paymentType, $legs, $resolveUidMapping);
 
-        $pass = $this->runCancelPass($orderweb, $city, $application, $paymentType, $legs);
+        $pass = $this->runCancelPass(
+            $orderweb,
+            $city,
+            $application,
+            $paymentType,
+            $legs,
+            1,
+            $resolveUidMapping
+        );
         if ($pass['all_settled']) {
             return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         }
 
-        $pass = $this->runSyncSecondAttempt($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
+        $pass = $this->runSyncSecondAttempt(
+            $orderweb,
+            $primaryUid,
+            $city,
+            $application,
+            $paymentType,
+            $legs,
+            $pass,
+            $resolveUidMapping
+        );
         if ($pass['all_settled']) {
             return $this->handleSettledPass($orderweb, $primaryUid, $city, $application, $paymentType, $legs, $pass);
         }
 
-        $this->scheduleBackgroundCampaign($primaryUid, $city, $application, $paymentType, $legs, $pass['attempt_number']);
+        $this->scheduleBackgroundCampaign(
+            $primaryUid,
+            $city,
+            $application,
+            $paymentType,
+            $legs,
+            $pass['attempt_number'],
+            $resolveUidMapping
+        );
 
         return [
             'dispatch_cancelled' => false,
@@ -178,7 +209,11 @@ class DispatchOrderCancelService
             return;
         }
 
-        $orderweb = Orderweb::where('dispatching_order_uid', $primaryUid)->first();
+        $resolveUidMapping = (bool) ($state['resolve_uid_mapping'] ?? true);
+        $orderwebLookupUid = $resolveUidMapping
+            ? $primaryUid
+            : (new MemoryOrderChangeController)->show($primaryUid);
+        $orderweb = Orderweb::where('dispatching_order_uid', $orderwebLookupUid)->first();
         if (!$orderweb) {
             $this->stopCampaign($primaryUid);
 
@@ -200,7 +235,8 @@ class DispatchOrderCancelService
             $state['application'],
             $state['payment_type'] ?? $orderweb->pay_system,
             $state['legs'] ?? [['uid' => $primaryUid, 'auth_role' => 'default']],
-            $attempt
+            $attempt,
+            $resolveUidMapping
         );
         $state['attempt_number'] = $pass['attempt_number'];
 
@@ -273,13 +309,23 @@ class DispatchOrderCancelService
      *
      * @return array{all_settled: bool, cancel_result_code: int|null, attempt_number: int, snapshots: array}
      */
+    private function resolveCancelLegUid(string $uid, bool $resolveUidMapping): string
+    {
+        if (!$resolveUidMapping) {
+            return $uid;
+        }
+
+        return (new MemoryOrderChangeController)->show($uid);
+    }
+
     private function runCancelPass(
         Orderweb $orderweb,
         string $city,
         string $application,
         ?string $paymentType,
         array $legs,
-        int $attemptNumber = 1
+        int $attemptNumber = 1,
+        bool $resolveUidMapping = true
     ): array {
         $connectAPI = $orderweb->server;
         $controller = new AndroidTestOSMController();
@@ -292,7 +338,7 @@ class DispatchOrderCancelService
         $cancelResultCode = null;
 
         foreach ($legs as $leg) {
-            $legUid = (new MemoryOrderChangeController)->show($leg['uid']);
+            $legUid = $this->resolveCancelLegUid($leg['uid'], $resolveUidMapping);
             $authorization = $this->resolveLegAuthorization($authChoice, $leg);
 
             if ($authorization === null || $authorization === '') {
@@ -373,7 +419,8 @@ class DispatchOrderCancelService
         string $application,
         ?string $paymentType,
         array $legs,
-        array $firstPass
+        array $firstPass,
+        bool $resolveUidMapping = true
     ): array {
         if (!empty($firstPass['all_settled'])) {
             return $firstPass;
@@ -386,7 +433,15 @@ class DispatchOrderCancelService
             sleep($waitSeconds);
         }
 
-        return $this->runCancelPass($orderweb, $city, $application, $paymentType, $legs, 2);
+        return $this->runCancelPass(
+            $orderweb,
+            $city,
+            $application,
+            $paymentType,
+            $legs,
+            2,
+            $resolveUidMapping
+        );
     }
 
     /**
@@ -398,7 +453,8 @@ class DispatchOrderCancelService
         string $application,
         ?string $paymentType,
         array $legs,
-        int $attemptNumber
+        int $attemptNumber,
+        bool $resolveUidMapping = true
     ): void {
         $cacheKey = self::CACHE_PREFIX . $primaryUid;
         $now = time();
@@ -409,6 +465,7 @@ class DispatchOrderCancelService
             'application' => $application,
             'payment_type' => $paymentType,
             'legs' => $legs,
+            'resolve_uid_mapping' => $resolveUidMapping,
             'started_at' => $now,
             'attempt_number' => $attemptNumber,
             'problem_telegram_sent' => false,
@@ -420,6 +477,7 @@ class DispatchOrderCancelService
                 $state['started_at'] = (int) ($existing['started_at'] ?? $now);
                 $state['problem_telegram_sent'] = (bool) ($existing['problem_telegram_sent'] ?? false);
                 $state['legs'] = $this->mergeLegs($existing['legs'] ?? [], $legs);
+                $state['resolve_uid_mapping'] = (bool) ($existing['resolve_uid_mapping'] ?? $resolveUidMapping);
             }
         }
 
@@ -443,7 +501,8 @@ class DispatchOrderCancelService
         string $city,
         string $application,
         ?string $paymentType,
-        array $legs
+        array $legs,
+        bool $resolveUidMapping = true
     ): void {
         $cacheKey = self::CACHE_PREFIX . $primaryUid;
         if (Cache::has($cacheKey)) {
@@ -453,6 +512,7 @@ class DispatchOrderCancelService
                 $existing['application'] = $application;
                 $existing['payment_type'] = $paymentType;
                 $existing['legs'] = $this->mergeLegs($existing['legs'] ?? [], $legs);
+                $existing['resolve_uid_mapping'] = $resolveUidMapping;
                 Cache::put($cacheKey, $existing, now()->addHours(24));
                 $this->addToCampaignIndex($primaryUid);
                 $this->enqueueCancelRetryJob($primaryUid, $existing, true);
@@ -467,6 +527,7 @@ class DispatchOrderCancelService
             'application' => $application,
             'payment_type' => $paymentType,
             'legs' => $legs,
+            'resolve_uid_mapping' => $resolveUidMapping,
             'started_at' => time(),
             'attempt_number' => 0,
             'problem_telegram_sent' => false,

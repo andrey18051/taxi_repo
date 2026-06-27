@@ -8202,8 +8202,9 @@ class UniversalAndroidFunctionController extends Controller
         );
 
         $order_old_uid = $order->dispatching_order_uid;
-        // Mapping + row update before dispatch cancel: background poll must not treat
-        // intentional old-uid cancel (add-cost recreation) as client order cancel.
+        // Mapping before dispatch cancel: background poll must not treat intentional
+        // old-uid cancel (add-cost recreation) as client order cancel.
+        // Cancel uses resolve_uid_mapping=false so dispatch targets the old uid, not the new one.
         (new MemoryOrderChangeController)->store($order_old_uid, $orderNew);
 
         $wfpInvoices = WfpInvoice::where('dispatching_order_uid', $order_old_uid)->get();

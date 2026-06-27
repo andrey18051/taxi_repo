@@ -12507,6 +12507,7 @@ class AndroidTestOSMController extends Controller
             'city' => $city,
             'application' => $application,
             'payment_type' => $orderweb->pay_system,
+            'resolve_uid_mapping' => false,
         ]);
 
         (new MessageSentController)->sentMessageAdminLog(
