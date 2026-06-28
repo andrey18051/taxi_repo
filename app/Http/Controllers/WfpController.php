@@ -953,9 +953,7 @@ class WfpController extends Controller
                 "productName" => [$productName],
                 "productPrice" => [$amount],
                 "productCount" => [1],
-//            "paymentSystems" => "card;privat24;googlePay;applePay",
-                "paymentSystems" => "card;privat24;googlePay;",
-//            "paymentSystems" => "card;privat24;",
+                "paymentSystems" => self::paymentSystemsForCreateInvoice(),
                 "clientEmail" => $clientEmail,
                 "clientPhone" => $clientPhone,
                 "notifyMethod" => "bot"
@@ -1066,6 +1064,15 @@ class WfpController extends Controller
     public static function shouldSkipCheckStatusInvoiceUpdate(array $wfpResponse): bool
     {
         return (int) ($wfpResponse['reasonCode'] ?? 0) === 1127;
+    }
+
+    /**
+     * Способы оплаты на странице ВФП для invoice (привязка карты 1 грн, повторная оплата через WebView).
+     * Google Pay исключён: токен GPay не даёт rectoken для wfp_payment.
+     */
+    public static function paymentSystemsForCreateInvoice(): string
+    {
+        return 'card;privat24';
     }
 
     /**
