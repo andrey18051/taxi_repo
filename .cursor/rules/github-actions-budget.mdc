@@ -1,0 +1,42 @@
+---
+description: Экономия лимита GitHub Actions (2000 min/мес)
+alwaysApply: true
+---
+
+# GitHub Actions — не тратить минуты на каждый push
+
+Лимит included minutes сбрасывается раз в месяц. **Не** возвращать триггер `push: branches: [master|main]` без необходимости.
+
+## MDDocImport
+
+| Workflow | Когда запускается |
+|----------|-------------------|
+| `ci.yml` | pull_request, workflow_dispatch |
+| `release.yml` | **только** workflow_dispatch (запасной) |
+
+**Релиз:** `publish-version.bat` — сборка локально + `publish-github-release.ps1` (без Actions).
+
+## PAS_1 … PAS_4
+
+| Workflow | Когда запускается |
+|----------|-------------------|
+| `ci.yml` | pull_request, push тега `v*`, workflow_dispatch |
+| `build-and-publish.yml` | push тега `v*`, workflow_dispatch |
+
+**Релиз:** `app\run_version_update.bat` (тесты и сборка локально) → push тега → один прогон Actions.
+
+Обычные коммиты в `master` **не** запускают Actions.
+
+## taxi_repo (TaxiEasyUaMain)
+
+| Job | Когда |
+|-----|--------|
+| `build-test` | pull_request; или workflow_dispatch + deploy_test |
+| `build-work` / `deploy-work` | **только** workflow_dispatch + deploy_production |
+
+Деплой на prod: GitHub → Actions → CI/CD Laravel Docker → Run workflow.
+
+## Агент
+
+- Не добавлять `on: push: branches` в новые workflow без согласования.
+- MDDocImport Release на GitHub — через `publish-version.bat`, не ждать Actions.

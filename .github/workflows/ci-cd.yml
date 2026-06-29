@@ -1,14 +1,26 @@
 name: CI/CD Laravel Docker
 
+# Экономия минут Actions: не на каждый push в main — PR (тесты) и ручной деплой.
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths-ignore:
       - '.cursor/**'
+  workflow_dispatch:
+    inputs:
+      deploy_test:
+        description: 'Deploy to TEST environment'
+        type: boolean
+        default: false
+      deploy_production:
+        description: 'Build and deploy PRODUCTION (work)'
+        type: boolean
+        default: true
 
 jobs:
   build-test:
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.deploy_test)
     runs-on: ubuntu-22.04
     environment: test
     steps:
@@ -215,6 +227,7 @@ jobs:
           EOF
 
   build-work:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_production
     runs-on: ubuntu-22.04
     environment: production
     outputs:
@@ -341,6 +354,7 @@ jobs:
           echo "All push attempts failed"
           exit 1
   deploy-work:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_production
     needs: build-work
     runs-on: ubuntu-22.04
     environment: production
