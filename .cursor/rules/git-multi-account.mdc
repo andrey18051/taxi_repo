@@ -4,38 +4,53 @@
 
 | Репозитории | GitHub | Email в коммитах | Remote |
 |-------------|--------|------------------|--------|
-| PAS_1–PAS_4, `Taxi_driver` | `Sferaved/*` | `sferaved@gmail.com` | `https://sferaved@github.com/Sferaved/...` |
+| PAS_1–PAS_4, `Taxi_driver`, `MDDocImport`, `MDDocImport.Access`, `MDDocImport.Admin` | `Sferaved/*` | `sferaved@gmail.com` | `https://sferaved@github.com/Sferaved/...` |
 | `taxi_repo` | `andrey18051/taxi_repo` | `andrey18051@gmail.com` | `https://andrey18051@github.com/andrey18051/taxi_repo.git` |
 
-`Taxi_driver` → `https://sferaved@github.com/Sferaved/taxi_driver.git` (тот же PAT, что и PAS; **не** fetch при задачах не про водителя — см. `workspace-context-check.mdc`).
+`Taxi_driver` → `https://sferaved@github.com/Sferaved/taxi_driver.git` (тот же PAT, что и PAS).
 
-## Почему был 403
+MDDocImport* — PAT из `github.env` в корне репо (аккаунт sferaved); после `setup-git-auth.bat` тот же токен в Credential Manager.
 
-Windows хранил **один** токен `git:https://github.com` (аккаунт Sferaved). Push в `andrey18051/taxi_repo` шёл с чужим токеном → 403.
+Если Taxi Driver снова спрашивает GitHub при push — один раз:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "PAS_4\scripts\register_taxi_driver_git.ps1"
+```
+
+## Почему был 403 / окна авторизации
+
+Windows хранил **один** токен `git:https://github.com` или дубли с `x-access-token@` — push шёл с чужим токеном или Git открывал браузер.
 
 ## Обязательные настройки
 
 ```powershell
 git config --global credential.helper manager
 git config --global credential.useHttpPath true
+git config --global credential.interactive never
 ```
 
-`useHttpPath` — отдельный PAT на каждый путь репозитория.
+`useHttpPath` — отдельный PAT на каждый путь репозитория. `interactive never` — без браузера, только Credential Manager.
 
-## Починка / первичная настройка
+## Починка всех репо (без ввода PAT, если уже сохранён)
 
-Из папки PAS_4 (интерактивно, один раз):
+```bat
+PAS_4\scripts\repair_all_git_auth.bat
+```
+
+или:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "PAS_4\scripts\setup_git_accounts.ps1" -Auto
+```
+
+Скрипт: remotes с `sferaved@` / `andrey18051@`, чистка legacy credential, регистрация PAT из `github.env` (MDDocImport) или Credential Manager для всех путей `Sferaved/*` и `andrey18051/taxi_repo.git`.
+
+Интерактивно (первый раз, если PAT нигде нет):
 
 ```powershell
 cd PAS_4
 powershell -ExecutionPolicy Bypass -File "scripts\setup_git_accounts.ps1"
 ```
-
-Пути в скрипте берутся от расположения `PAS_4\scripts\` (соседние PAS_1–3, `Taxi_driver` и `PhpstormProjects\taxi_repo`).
-
-Скрипт: remote URL, local `user.email`, удаление старого общего credential, опционально сохранение двух PAT.
-
-Без PAT в скрипте — при первом `git push` Windows Credential Manager запросит логин один раз **на каждый аккаунт** (не на каждый PAS, если PAT один для всех `Sferaved/*`).
 
 ## PAT
 
@@ -46,12 +61,13 @@ powershell -ExecutionPolicy Bypass -File "scripts\setup_git_accounts.ps1"
 
 - **PAS:** `app\run_version_update.bat` — push от `sferaved@`, без ручной смены аккаунта.
 - **taxi_repo:** `git push origin main` — только аккаунт `andrey18051@`.
+- **MDDocImport*:** `push-github.bat` / `sync-repo.bat` (не голый `git push` без `setup-git-auth.bat` на новой машине).
 
 ## Агент / CI — без повторных окон «проверка доступа»
 
 - **Не** проверять auth перед задачей: `ls-remote`, `push --dry-run`, `fetch` «на всякий случай», повторный вход в браузер.
 - **Не** трогать git в `Taxi_driver` при обновлении PAS/сервера — см. `workspace-context-check.mdc`.
-- PAT уже в Credential Manager после `setup_git_accounts.ps1` (в т.ч. `Sferaved/taxi_driver.git`). При релизе — сразу `git push` в **одном** целевом репо.
+- PAT уже в Credential Manager после `repair_all_git_auth.bat` или `setup_git_accounts.ps1 -Auto`. При релизе — сразу `git push` в **одном** целевом репо.
 - Перед push в `taxi_repo` не использовать credential PAS. При сомнении — только локально:
 
 ```powershell
@@ -61,5 +77,6 @@ git -C "$env:USERPROFILE\PhpstormProjects\taxi_repo" remote get-url origin
 
 ## Не менять
 
-- Не ставить один remote без username на оба семейства репо.
+- Не ставить remote без username (`https://github.com/Sferaved/...`) — только `sferaved@` или `andrey18051@`.
 - Не отключать `credential.useHttpPath` без отдельных SSH-ключей на Host.
+- Не использовать `x-access-token@` в remote URL — только Credential Manager + `sferaved@`.
