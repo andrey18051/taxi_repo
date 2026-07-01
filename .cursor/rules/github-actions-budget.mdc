@@ -20,12 +20,12 @@ alwaysApply: true
 
 | Workflow | Когда запускается |
 |----------|-------------------|
-| `ci.yml` | pull_request, push тега `v*`, workflow_dispatch |
-| `build-and-publish.yml` | push тега `v*`, workflow_dispatch |
+| `ci.yml` | pull_request, workflow_dispatch |
+| `build-and-publish.yml` | **только** workflow_dispatch (запасной) |
 
-**Релиз:** `app\run_version_update.bat` (тесты и сборка локально) → push тега → один прогон Actions.
+**Релиз:** `app\run_version_update.bat` — тесты, `bundleRelease`, Google Play локально, затем push в GitHub **без** Actions.
 
-Обычные коммиты в `master` **не** запускают Actions.
+Обычные коммиты и push тега `v*` **не** запускают Actions.
 
 ## taxi_repo (TaxiEasyUaMain)
 
@@ -38,5 +38,6 @@ alwaysApply: true
 
 ## Агент
 
-- Не добавлять `on: push: branches` в новые workflow без согласования.
-- MDDocImport Release на GitHub — через `publish-version.bat`, не ждать Actions.
+- Не добавлять `on: push: branches` или `push: tags` в release-workflow без согласования.
+- MDDocImport Release — через `publish-version.bat`, не ждать Actions.
+- PAS Release — через `run_version_update.bat`, не ждать Actions.
