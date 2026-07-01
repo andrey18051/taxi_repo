@@ -627,6 +627,7 @@ class UIDController extends Controller
                             'auto' => $auto,
                             'required_time' => $requiredTime,
                             'created_at' => $createdAt,
+                            'pay_method' => $value['pay_system'] ?? '',
                         ];
                         Log::debug("✅ Добавлен заказ в ответ (i < 10)", ['index' => $i]);
                     } else {
@@ -645,6 +646,7 @@ class UIDController extends Controller
                                 'auto' => $auto,
                                 'required_time' => $requiredTime,
                                 'created_at' => $createdAt,
+                                'pay_method' => $value['pay_system'] ?? '',
                             ];
                             Log::debug("✅ Добавлен заказ в ответ (closeReason 0,8,9)", [
                                 'index' => $i,
