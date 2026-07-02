@@ -99,4 +99,9 @@ return [
         'token' => env('UTAX_API_KEY'),
         'timeout' => env('CITY_INFO_TIMEOUT', 5),
     ],
+
+    /** MantisBT — баг-репорты PAS (веб-UI, не API) */
+    'mantis' => [
+        'url' => env('MANTIS_URL', 'https://t.easy-order-taxi.site/mantis/'),
+    ],
 ];

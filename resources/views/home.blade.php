@@ -37,6 +37,10 @@
            onclick="return confirm('Вы уверены, что хотите очистить логи?')">
             🗑 Очистить логи
         </a>
+
+        <a href="{{ config('services.mantis.url') }}" class="btn btn-warning btn-lg mx-1" target="_blank" rel="noopener noreferrer">
+            🐞 Mantis
+        </a>
     </div>
 
     <div class="container">
