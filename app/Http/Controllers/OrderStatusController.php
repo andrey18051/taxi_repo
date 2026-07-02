@@ -2217,7 +2217,8 @@ class OrderStatusController extends Controller
     }
 
     /**
-     * Диспетчер иногда отдаёт execution_status=Canceled при close_reason=-1 (заказ ещё в поиске).
+     * Диспетчер иногда отдаёт execution_status=Canceled при техническом close_reason вилки
+     * (-1 поиск, 4 подавленная нога «Нет авто») — для матрицы это не реальная отмена.
      */
     public static function normalizeFalseCanceledDispatchStatus(?array $snapshot): ?array
     {
@@ -2229,23 +2230,57 @@ class OrderStatusController extends Controller
         }
         $status = (string) ($snapshot['execution_status'] ?? '');
         if (strcasecmp($status, 'Canceled') === 0 || strcasecmp($status, 'Cancelled') === 0) {
-            $snapshot['execution_status'] = 'SearchesForCar';
+            $closeReason = (int) ($snapshot['close_reason'] ?? -1);
+            $snapshot['execution_status'] = $closeReason === 4 ? 'WaitingCarSearch' : 'SearchesForCar';
         }
 
         return $snapshot;
     }
 
     /**
+     * Техническая «отмена» диспетчера на вилке — не считать ногу закрытой.
+     *
+     * @param array<string, mixed>|null $order
+     */
+    public static function isForkTechnicalDispatchCancel(?array $order): bool
+    {
+        if ($order === null || $order === []) {
+            return false;
+        }
+        $closeReason = $order['close_reason'] ?? -1;
+
+        return in_array($closeReason, [-1, '-1', 0, '0', 4, '4'], true);
+    }
+
+    /**
+     * Статус ноги вилки из ответа создания/опроса диспетчера (с нормализацией fork-cancel).
+     *
+     * @param array<string, mixed>|null $dispatchResponse
+     */
+    public static function forkLegDisplayStatus(?array $dispatchResponse): ?string
+    {
+        if ($dispatchResponse === null || !isset($dispatchResponse['execution_status'])) {
+            return null;
+        }
+        $snapshot = [
+            'execution_status' => $dispatchResponse['execution_status'],
+            'close_reason' => $dispatchResponse['close_reason'] ?? -1,
+        ];
+        $normalized = self::normalizeFalseCanceledDispatchStatus($snapshot) ?? $snapshot;
+
+        return isset($normalized['execution_status']) ? (string) $normalized['execution_status'] : null;
+    }
+
+    /**
      * Bonus/card leg in uid_history: canceled in dispatch (execution_status or close_reason).
-     * Canceled with close_reason -1 is a fork transition, not a real cancel (Oleg / Excel matrix).
+     * Canceled with close_reason -1/4 is a fork transition, not a real cancel (Oleg / Excel matrix).
      */
     public static function isDispatchOrderCanceled(?array $order): bool
     {
         if ($order === null || $order === []) {
             return false;
         }
-        $closeReason = $order['close_reason'] ?? -1;
-        if ($closeReason === -1 || $closeReason === '-1' || $closeReason === 0 || $closeReason === '0') {
+        if (self::isForkTechnicalDispatchCancel($order)) {
             return false;
         }
         if (($order['execution_status'] ?? '') === 'Canceled') {

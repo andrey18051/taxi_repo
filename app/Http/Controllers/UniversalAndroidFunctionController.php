@@ -3257,7 +3257,17 @@ class UniversalAndroidFunctionController extends Controller
             Log::info($messageAdmin);
             Log::info($messageAdmin);
 
-// Безнал
+// Безнал — предыдущий статус = статус из ответа создания (Oleg / матрица вилки)
+            $initialStatusBonus = OrderStatusController::forkLegDisplayStatus($responseBonus) ?? 'SearchesForCar';
+            $initialStatusDouble = OrderStatusController::forkLegDisplayStatus($responseDouble) ?? 'SearchesForCar';
+            $lastStatusBonus = $initialStatusBonus;
+            $lastStatusDouble = $initialStatusDouble;
+            self::persistForkLegSnapshot($uid_history, 'bonus', $responseBonus, $initialStatusBonus);
+            self::persistForkLegSnapshot($uid_history, 'double', $responseDouble, $initialStatusDouble);
+            Log::info("Fork initial statuses from creation response", [
+                'initialStatusBonus' => $initialStatusBonus,
+                'initialStatusDouble' => $initialStatusDouble,
+            ]);
 
             Log::info("Calling newStatus for bonus order");
             $newStatusBonus = self::newStatus(
@@ -3272,14 +3282,12 @@ class UniversalAndroidFunctionController extends Controller
                 $uid_history
             );
             Log::info("newStatusBonus result: {$newStatusBonus}");
+            if ($newStatusBonus === null && $initialStatusBonus !== null) {
+                $newStatusBonus = $initialStatusBonus;
+            }
 
             $lastStatusBonusTime = $lastTimeUpdate;
             Log::info("Set lastStatusBonusTime to: {$lastStatusBonusTime}");
-
-            if ($newStatusBonus != null) {
-                $lastStatusBonus = $newStatusBonus;
-                Log::info("Updated lastStatusBonus to: {$lastStatusBonus}");
-            }
 
 
 //Нал
@@ -3296,14 +3304,13 @@ class UniversalAndroidFunctionController extends Controller
                 $uid_history
             );
             Log::info("newStatusDouble result: {$newStatusDouble}");
+            if ($newStatusDouble === null && $initialStatusDouble !== null) {
+                $newStatusDouble = $initialStatusDouble;
+            }
 
 
             $lastStatusDoubleTime = time();
             Log::info("Set lastStatusDoubleTime to: {$lastStatusDoubleTime}");
-            if ($newStatusDouble != null) {
-                $lastStatusDouble = $newStatusDouble;
-                Log::info("Updated lastStatusDouble to: {$lastStatusDouble}");
-            }
 
             Log::info("Entering switch for newStatusDouble: {$newStatusDouble}");
             switch ($newStatusDouble) {
@@ -3635,6 +3642,32 @@ class UniversalAndroidFunctionController extends Controller
             Log::error("Failed to process newStatus for $orderType order $order: " . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Сохранить снимок статуса ноги вилки при старте job (из ответа создания заказа).
+     *
+     * @param \App\Models\Uid_history $uid_history
+     * @param string $leg bonus|double
+     * @param array<string, mixed> $creationResponse
+     * @param string|null $displayStatus
+     */
+    private static function persistForkLegSnapshot($uid_history, string $leg, array $creationResponse, ?string $displayStatus): void
+    {
+        if ($displayStatus === null) {
+            return;
+        }
+        $snapshot = [
+            'execution_status' => $displayStatus,
+            'close_reason' => $creationResponse['close_reason'] ?? -1,
+        ];
+        $encoded = json_encode($snapshot);
+        if ($leg === 'bonus') {
+            $uid_history->bonus_status = $encoded;
+        } else {
+            $uid_history->double_status = $encoded;
+        }
+        $uid_history->save();
     }
 
     /**
@@ -4184,13 +4217,15 @@ class UniversalAndroidFunctionController extends Controller
         $identificationId,
         $apiVersion,
         $url,
-        $parameter
+        $parameter,
+        &$creationSnapshot = null
     ) {
         $order = "New UID ";
         $maxExecutionTime = 60; // Максимальное время выполнения - 3 часа
 
         $startTime = time();
         $result = false;
+        $creationSnapshot = null;
 
         do {
             try {
@@ -4206,6 +4241,7 @@ class UniversalAndroidFunctionController extends Controller
                     //проверка статуса после отмены
                     $responseArr = json_decode($response, true);
                     Log::debug(" orderNewCreat responseArr: ", $responseArr);
+                    $creationSnapshot = is_array($responseArr) ? $responseArr : null;
                     $order = $responseArr["dispatching_order_uid"];
                     Log::debug(" orderNewCreat: " . $url . $order);
                     return $order;

@@ -307,12 +307,14 @@ class OrderForkLegExecutor
         }
 
         if ($leg === 'bonus') {
+            $creationSnapshot = null;
             $newUid = $this->controller->orderNewCreat(
                 $this->config['authorizationBonus'],
                 $this->config['identificationId'],
                 $this->config['apiVersion'],
                 $this->config['responseBonus']['url'],
-                $this->config['responseBonus']['parameter']
+                $this->config['responseBonus']['parameter'],
+                $creationSnapshot
             );
             if (!$this->isValidRestoredUid($newUid)) {
                 $this->log('restore_bonus_failed', [
@@ -331,15 +333,18 @@ class OrderForkLegExecutor
             $uidHistory->uid_bonusOrder = $newUid;
             $uidHistory->save();
             $this->log('restore_bonus', ['newUid' => $newUid, 'phase' => $phaseTag]);
-            return $this->pollLeg($state, 'bonus', $phaseTag . '_after_restore');
+            $state = $this->pollLeg($state, 'bonus', $phaseTag . '_after_restore');
+            return $this->seedForkLegStatusAfterRestore($state, 'bonus', $creationSnapshot);
         }
 
+        $creationSnapshot = null;
         $newUid = $this->controller->orderNewCreat(
             $this->config['authorizationDouble'],
             $this->config['identificationId'],
             $this->config['apiVersion'],
             $this->config['responseDouble']['url'],
-            $this->config['responseDouble']['parameter']
+            $this->config['responseDouble']['parameter'],
+            $creationSnapshot
         );
         if (!$this->isValidRestoredUid($newUid)) {
             $this->log('restore_double_failed', [
@@ -359,7 +364,46 @@ class OrderForkLegExecutor
         $uidHistory->save();
         $this->log('restore_double', ['newUid' => $newUid, 'phase' => $phaseTag]);
 
-        return $this->pollLeg($state, 'double', $phaseTag . '_after_restore');
+        $state = $this->pollLeg($state, 'double', $phaseTag . '_after_restore');
+
+        return $this->seedForkLegStatusAfterRestore($state, 'double', $creationSnapshot);
+    }
+
+    /**
+     * После восстановления ноги: предыдущий = текущий (статус из ответа создания / опроса).
+     *
+     * @param array $state
+     * @param string $leg bonus|double
+     * @param array<string, mixed>|null $creationSnapshot
+     * @return array
+     */
+    private function seedForkLegStatusAfterRestore(array $state, string $leg, ?array $creationSnapshot)
+    {
+        $fromCreation = OrderStatusController::forkLegDisplayStatus($creationSnapshot);
+        $polledStatus = $leg === 'bonus'
+            ? ($state['newStatusBonus'] ?? null)
+            : ($state['newStatusDouble'] ?? null);
+        $displayStatus = $polledStatus ?? $fromCreation;
+        if ($displayStatus === null) {
+            return $state;
+        }
+
+        if ($leg === 'bonus') {
+            $state['newStatusBonus'] = $displayStatus;
+            $state['lastStatusBonus'] = $displayStatus;
+        } else {
+            $state['newStatusDouble'] = $displayStatus;
+            $state['lastStatusDouble'] = $displayStatus;
+        }
+
+        $this->log('restore_leg_status_seeded', [
+            'leg' => $leg,
+            'displayStatus' => $displayStatus,
+            'fromCreation' => $fromCreation,
+            'polledStatus' => $polledStatus,
+        ]);
+
+        return $state;
     }
 
     private function canCreateNewOrderForLeg(array $state, string $leg): bool

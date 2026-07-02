@@ -218,6 +218,46 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
     }
 
     /**
+     * Сценарий Oleg: Поиск/Поиск → Нет авто/Поиск — карту не отменять (опрос, не cancel_bonus).
+     */
+    public function test_nal_phase_waiting_car_search_does_not_cancel_bonus(): void
+    {
+        $this->recorder->reset();
+        $this->recorder->bonusPollStatus = 'SearchesForCar';
+        $this->recorder->doublePollStatus = 'WaitingCarSearch';
+
+        $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
+        $state = $this->baseState($uidHistory, [
+            'newStatusBonus' => 'SearchesForCar',
+            'newStatusDouble' => 'WaitingCarSearch',
+            'lastStatusBonus' => 'SearchesForCar',
+            'lastStatusDouble' => 'SearchesForCar',
+        ]);
+
+        $state = $this->invokeNalPhase($state);
+
+        $this->assertNotContains('cancel_bonus', $this->recorder->calls);
+        $this->assertSame(['poll_double'], $this->recorder->calls);
+    }
+
+    /**
+     * Регрессия кейса из логов: Canceled+4 на нал при поиске карты — не отменять bonus.
+     */
+    public function test_nal_phase_technical_canceled_double_with_search_bonus_only_polls(): void
+    {
+        $matrix = new \App\Services\OrderLegActionMatrix();
+        $resolved = $matrix->resolveNalPhase(
+            'WaitingCarSearch',
+            'SearchesForCar',
+            'SearchesForCar'
+        );
+
+        $this->assertNotNull($resolved);
+        $this->assertSame('опрос', $resolved['double_action']);
+        $this->assertSame('ничего', $resolved['bonus_action']);
+    }
+
+    /**
      * @param array<string, mixed> $overrides
      * @return array<string, mixed>
      */

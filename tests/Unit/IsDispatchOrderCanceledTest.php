@@ -52,6 +52,49 @@ class IsDispatchOrderCanceledTest extends TestCase
         $this->assertSame('Canceled', $normalized['execution_status']);
     }
 
+    public function test_canceled_with_close_reason_four_is_not_real_cancel(): void
+    {
+        $order = [
+            'execution_status' => 'Canceled',
+            'close_reason' => 4,
+        ];
+
+        $this->assertFalse(OrderStatusController::isDispatchOrderCanceled($order));
+    }
+
+    public function test_normalize_fork_suppressed_leg_maps_to_waiting_car_search(): void
+    {
+        $order = [
+            'execution_status' => 'Canceled',
+            'close_reason' => 4,
+        ];
+
+        $normalized = OrderStatusController::normalizeFalseCanceledDispatchStatus($order);
+
+        $this->assertSame('WaitingCarSearch', $normalized['execution_status']);
+    }
+
+    public function test_fork_leg_display_status_from_creation_response(): void
+    {
+        $status = OrderStatusController::forkLegDisplayStatus([
+            'execution_status' => 'Canceled',
+            'close_reason' => 4,
+            'dispatching_order_uid' => 'abc',
+        ]);
+
+        $this->assertSame('WaitingCarSearch', $status);
+    }
+
+    public function test_fork_leg_display_status_from_search_creation(): void
+    {
+        $status = OrderStatusController::forkLegDisplayStatus([
+            'execution_status' => 'SearchesForCar',
+            'close_reason' => -1,
+        ]);
+
+        $this->assertSame('SearchesForCar', $status);
+    }
+
     public function test_fork_card_canceled_is_not_active_dispatch_leg(): void
     {
         $cardOrder = [
