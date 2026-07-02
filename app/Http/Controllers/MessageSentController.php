@@ -63,56 +63,14 @@ class MessageSentController extends Controller
     /**
      * @throws \Exception
      */
-    public function sentCancelInfo($orderweb)
+    public function sentCancelInfo($orderweb, ?string $cancelInitiator = null, ?string $channelNote = null)
     {
-
-        $user_full_name = $orderweb->user_full_name;
-        $user_phone = $orderweb->user_phone;
-        $email = $orderweb->email;
-        $routefrom = $orderweb->routefrom;
-        $routeto = $orderweb->routeto;
-        $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost;
-        $client_cost = (int) ($orderweb->client_cost ?? 0);
-        $dispatching_order_uid = $orderweb->dispatching_order_uid;
-        $server = $orderweb->server;
-        switch ($orderweb->comment) {
-            case "taxi_easy_ua_pas1":
-                $pas = "ПАС_1";
-                break;
-            case "taxi_easy_ua_pas2":
-                $pas = "ПАС_2";
-                break;
-            case "taxi_easy_ua_pas3":
-                $pas = "ПАС_3";
-                break;
-            case "taxi_easy_ua_pas4":
-                $pas = "ПАС_4";
-                break;
-            case "taxi_easy_ua_pas5":
-                $pas = "ПАС_5";
-                break;
-        }
-
-        $kievTimeZone = new DateTimeZone('Europe/Kiev');
-
-        $dateTime = new DateTime($orderweb->updated_at);
-
-
-        $dateTime->setTimezone($kievTimeZone);
-        $formattedTime = $dateTime->format('d.m.Y H:i:s');
-
-        $updated_at = $formattedTime;
-        Log::debug("updated_at " .$updated_at);
-
-        $subject = "Отмена заказа";
-
-        $costForClient = \App\Helpers\OrderHelper::resolveDisplayCostGrivna($orderweb);
-        $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $costForClient грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
-        $messageAdmin = \App\Services\OrderPaymentNotificationHelper::appendWfpReferenceToCancelMessage(
-            $messageAdmin,
-            $orderweb->wfp_order_id
+        $messageAdmin = \App\Services\OrderCancelNotificationHelper::buildTelegramCancelMessage(
+            $orderweb,
+            $cancelInitiator,
+            $channelNote
         );
+        Log::debug('updated_at ' . \App\Services\OrderCancelNotificationHelper::formatCancelTime($orderweb->updated_at ?? null));
 
         $alarmMessage = new TelegramController();
 

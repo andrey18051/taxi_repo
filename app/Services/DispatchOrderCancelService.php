@@ -10,7 +10,6 @@ use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Jobs\DispatchOrderCancelRetryJob;
 use App\Models\Orderweb;
 use App\Support\DispatchOrderCancelSchedule;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -78,7 +77,8 @@ class DispatchOrderCancelService
             (new AndroidTestOSMController())->finalizeDispatchClientCancel(
                 $orderweb,
                 $primaryUid,
-                'Отмена my_server_api (без диспетчера)'
+                'Отмена my_server_api (без диспетчера)',
+                OrderCancelNotificationHelper::INITIATOR_SYSTEM
             );
 
             return [
@@ -95,8 +95,17 @@ class DispatchOrderCancelService
         $legs = $options['legs'] ?? [
             ['uid' => $resolveUidMapping ? $primaryUid : $rawPrimaryUid, 'auth_role' => 'default'],
         ];
+        $cancelInitiator = $options['cancel_initiator'] ?? OrderCancelNotificationHelper::INITIATOR_CLIENT;
 
-        $this->touchCampaignState($primaryUid, $city, $application, $paymentType, $legs, $resolveUidMapping);
+        $this->touchCampaignState(
+            $primaryUid,
+            $city,
+            $application,
+            $paymentType,
+            $legs,
+            $resolveUidMapping,
+            $cancelInitiator
+        );
 
         $pass = $this->runCancelPass(
             $orderweb,
@@ -230,7 +239,8 @@ class DispatchOrderCancelService
                     $application,
                     $paymentType,
                     $legs,
-                    $resolveUidMapping
+                    $resolveUidMapping,
+                    OrderCancelNotificationHelper::INITIATOR_CLIENT
                 );
             }
 
@@ -370,7 +380,12 @@ class DispatchOrderCancelService
 
         $elapsed = time() - (int) $state['started_at'];
         if (!$state['problem_telegram_sent'] && $elapsed >= DispatchOrderCancelSchedule::PROBLEM_TELEGRAM_AFTER_SECONDS) {
-            $this->sendProblemTelegram($orderweb, $primaryUid, $attempt);
+            $this->sendProblemTelegram(
+                $orderweb,
+                $primaryUid,
+                $attempt,
+                $state['cancel_initiator'] ?? OrderCancelNotificationHelper::INITIATOR_CLIENT
+            );
             $state['problem_telegram_sent'] = true;
         }
 
@@ -592,7 +607,13 @@ class DispatchOrderCancelService
                 $state['problem_telegram_sent'] = (bool) ($existing['problem_telegram_sent'] ?? false);
                 $state['legs'] = $this->mergeLegs($existing['legs'] ?? [], $legs);
                 $state['resolve_uid_mapping'] = (bool) ($existing['resolve_uid_mapping'] ?? $resolveUidMapping);
+                $state['cancel_initiator'] = $existing['cancel_initiator']
+                    ?? OrderCancelNotificationHelper::INITIATOR_CLIENT;
             }
+        }
+
+        if (!isset($state['cancel_initiator'])) {
+            $state['cancel_initiator'] = OrderCancelNotificationHelper::INITIATOR_CLIENT;
         }
 
         Cache::put($cacheKey, $state, now()->addHours(24));
@@ -616,7 +637,8 @@ class DispatchOrderCancelService
         string $application,
         ?string $paymentType,
         array $legs,
-        bool $resolveUidMapping = true
+        bool $resolveUidMapping = true,
+        ?string $cancelInitiator = null
     ): void {
         $cacheKey = self::CACHE_PREFIX . $primaryUid;
         if (Cache::has($cacheKey)) {
@@ -627,6 +649,9 @@ class DispatchOrderCancelService
                 $existing['payment_type'] = $paymentType;
                 $existing['legs'] = $this->mergeLegs($existing['legs'] ?? [], $legs);
                 $existing['resolve_uid_mapping'] = $resolveUidMapping;
+                if ($cancelInitiator !== null && empty($existing['cancel_initiator'])) {
+                    $existing['cancel_initiator'] = $cancelInitiator;
+                }
                 Cache::put($cacheKey, $existing, now()->addHours(24));
                 $this->addToCampaignIndex($primaryUid);
                 $this->enqueueCancelRetryJob($primaryUid, $existing, true);
@@ -642,6 +667,7 @@ class DispatchOrderCancelService
             'payment_type' => $paymentType,
             'legs' => $legs,
             'resolve_uid_mapping' => $resolveUidMapping,
+            'cancel_initiator' => $cancelInitiator ?? OrderCancelNotificationHelper::INITIATOR_CLIENT,
             'started_at' => time(),
             'attempt_number' => 0,
             'problem_telegram_sent' => false,
@@ -720,7 +746,23 @@ class DispatchOrderCancelService
             return;
         }
 
-        (new AndroidTestOSMController())->finalizeDispatchClientCancel($orderweb, $primaryUid);
+        (new AndroidTestOSMController())->finalizeDispatchClientCancel(
+            $orderweb,
+            $primaryUid,
+            null,
+            $this->resolveCampaignCancelInitiator($primaryUid)
+        );
+    }
+
+    private function resolveCampaignCancelInitiator(string $primaryUid): string
+    {
+        $state = Cache::get(self::CACHE_PREFIX . $primaryUid);
+
+        if (is_array($state) && !empty($state['cancel_initiator'])) {
+            return (string) $state['cancel_initiator'];
+        }
+
+        return OrderCancelNotificationHelper::INITIATOR_CLIENT;
     }
 
     /**
@@ -806,19 +848,16 @@ class DispatchOrderCancelService
         return (int) $body['order_client_cancel_result'];
     }
 
-    private function sendProblemTelegram(Orderweb $orderweb, string $primaryUid, int $attempt): void
-    {
-        $createdLocal = $orderweb->created_at
-            ? Carbon::parse($orderweb->created_at)->setTimezone('Europe/Kiev')->format('d.m.Y H:i:s')
-            : 'n/a';
-        $server = trim((string) ($orderweb->server ?? ''));
-        $from = trim((string) ($orderweb->routefrom ?? ''));
-
-        $message = sprintf(
-            '%s %s %s — проблема отмены',
-            $createdLocal,
-            $server,
-            $from !== '' ? $from : $primaryUid
+    private function sendProblemTelegram(
+        Orderweb $orderweb,
+        string $primaryUid,
+        int $attempt,
+        ?string $cancelInitiator = null
+    ): void {
+        $message = OrderCancelNotificationHelper::buildProblemCancelTelegramMessage(
+            $orderweb,
+            $primaryUid,
+            $cancelInitiator
         );
 
         try {

@@ -95,7 +95,11 @@ class OrderPaymentNotificationHelper
     public static function notifyForkCancelConfirmedTelegram(Orderweb $orderweb, ?string $channelNote = null): void
     {
         try {
-            (new \App\Http\Controllers\MessageSentController())->sentCancelInfo($orderweb);
+            (new \App\Http\Controllers\MessageSentController())->sentCancelInfo(
+                $orderweb,
+                OrderCancelNotificationHelper::INITIATOR_DISPATCHER,
+                $channelNote
+            );
         } catch (\Throwable $e) {
             Log::error('notifyForkCancelConfirmedTelegram: sentCancelInfo failed', [
                 'uid' => $orderweb->dispatching_order_uid ?? '',

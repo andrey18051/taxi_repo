@@ -12185,13 +12185,16 @@ class AndroidTestOSMController extends Controller
     /**
      * Обязательное уведомление в Telegram об отмене заказа (клиентский текст + опционально тех. строка).
      */
-    private function notifyOrderCancelTelegram(Orderweb $orderweb, ?string $channelNote = null): void
-    {
+    private function notifyOrderCancelTelegram(
+        Orderweb $orderweb,
+        ?string $channelNote = null,
+        ?string $cancelInitiator = null
+    ): void {
         if (!OrderStatusController::shouldNotifyClientOrderCanceled($orderweb)) {
             return;
         }
         try {
-            (new MessageSentController)->sentCancelInfo($orderweb);
+            (new MessageSentController)->sentCancelInfo($orderweb, $cancelInitiator, $channelNote);
         } catch (\Throwable $e) {
             Log::error('notifyOrderCancelTelegram: sentCancelInfo failed', [
                 'uid' => $orderweb->dispatching_order_uid ?? '',
@@ -12300,8 +12303,12 @@ class AndroidTestOSMController extends Controller
     /**
      * Подтверждённая отмена на диспетчере: Firestore всегда; push — только при полной отмене поездки.
      */
-    public function finalizeDispatchClientCancel(Orderweb $orderweb, string $uid, ?string $channelNote = null): void
-    {
+    public function finalizeDispatchClientCancel(
+        Orderweb $orderweb,
+        string $uid,
+        ?string $channelNote = null,
+        ?string $cancelInitiator = null
+    ): void {
         $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($uid) ?: $uid;
         $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
 
@@ -12324,9 +12331,9 @@ class AndroidTestOSMController extends Controller
             ]);
         }
         if ($channelNote !== null) {
-            $this->notifyOrderCancelTelegram($orderweb, $channelNote);
+            $this->notifyOrderCancelTelegram($orderweb, $channelNote, $cancelInitiator);
         } else {
-            $this->notifyOrderCancelTelegram($orderweb);
+            $this->notifyOrderCancelTelegram($orderweb, null, $cancelInitiator);
         }
         $this->markForkHistoryCanceledIfPresent($holdUid);
     }
@@ -12401,7 +12408,8 @@ class AndroidTestOSMController extends Controller
             $this->finalizeDispatchClientCancel(
                 $orderweb,
                 $uid,
-                'Отмена Double my_server_api (без диспетчера)'
+                'Отмена Double my_server_api (без диспетчера)',
+                \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
             );
 
             return [
@@ -12492,7 +12500,8 @@ class AndroidTestOSMController extends Controller
             $this->finalizeDispatchClientCancel(
                 $orderweb,
                 $uid,
-                'Отмена my_server_api (без диспетчера)'
+                'Отмена my_server_api (без диспетчера)',
+                \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
             );
 
             return [
@@ -12806,7 +12815,11 @@ class AndroidTestOSMController extends Controller
                 $orderweb->auto = null;
                 $orderweb->closeReason = "1";
                 $orderweb->save();
-                $this->notifyOrderCancelTelegram($orderweb);
+                $this->notifyOrderCancelTelegram(
+                    $orderweb,
+                    null,
+                    \App\Services\OrderCancelNotificationHelper::INITIATOR_DRIVER
+                );
                 return [
                     'response' => $resp_answer,
                 ];
@@ -13162,7 +13175,11 @@ class AndroidTestOSMController extends Controller
             if ($uid_history) {
                 OrderStatusController::markExplicitForkCancelRequested($uid_history);
             }
-            $this->notifyOrderCancelTelegram($orderweb, "Отмена UidHistory");
+            $this->notifyOrderCancelTelegram(
+                $orderweb,
+                "Отмена UidHistory",
+                \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
+            );
             $resp_answer = "Замовлення $uid отправлено в влику на отмену";
             return [
                 'response' => $resp_answer,
@@ -13230,7 +13247,11 @@ class AndroidTestOSMController extends Controller
                             $uid
                         );
                     }
-                    $this->notifyOrderCancelTelegram($orderweb, "Отмена Vod my_server_api");
+                    $this->notifyOrderCancelTelegram(
+                        $orderweb,
+                        "Отмена Vod my_server_api",
+                        \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
+                    );
                     $resp_answer = "Замовлення $uid отменено";
                 }
 

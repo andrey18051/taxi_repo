@@ -2327,50 +2327,16 @@ class AndroidAppController extends Controller
     /**
      * @throws \Exception
      */
-    public function sentCancelInfo($orderweb)
+    public function sentCancelInfo($orderweb, ?string $cancelInitiator = null, ?string $channelNote = null)
     {
-
-        $user_full_name = $orderweb->user_full_name;
-        $user_phone = $orderweb->user_phone;
-        $email = $orderweb->email;
-        $routefrom = $orderweb->routefrom;
-        $routeto = $orderweb->routeto;
-        $add_cost = $orderweb->add_cost;
-        $web_cost = $orderweb->web_cost +  $add_cost;
-        $dispatching_order_uid = $orderweb->dispatching_order_uid;
-        $server = $orderweb->server;
-        switch ($orderweb->comment) {
-            case "taxi_easy_ua_pas1":
-                $pas = "ПАС_1";
-                break;
-            case "taxi_easy_ua_pas2":
-                $pas = "ПАС_2";
-                break;
-            case "taxi_easy_ua_pas3":
-                $pas = "ПАС_3";
-                break;
-            case "taxi_easy_ua_pas4":
-                $pas = "ПАС_4";
-                break;
-            case "taxi_easy_ua_pas5":
-                $pas = "ПАС_5";
-                break;
-        }
-
-        $kievTimeZone = new DateTimeZone('Europe/Kiev');
-
-        $dateTime = new DateTime($orderweb->updated_at);
-
-
-        $dateTime->setTimezone($kievTimeZone);
-        $formattedTime = $dateTime->format('d.m.Y H:i:s');
-
-        $updated_at = $formattedTime;
-        Log::debug("updated_at " .$updated_at);
+        $messageAdmin = \App\Services\OrderCancelNotificationHelper::buildTelegramCancelMessage(
+            $orderweb,
+            $cancelInitiator,
+            $channelNote
+        );
+        Log::debug('updated_at ' . \App\Services\OrderCancelNotificationHelper::formatCancelTime($orderweb->updated_at ?? null));
 
         $subject = "Отмена заказа";
-
-        $messageAdmin = "Клиент $user_full_name (телефон $user_phone, email $email) отменил заказ по маршруту $routefrom -> $routeto стоимостью $web_cost грн. Номер заказа $dispatching_order_uid. Сервер $server. Приложение  $pas. Время отмены $updated_at";
         $paramsAdmin = [
             'subject' => $subject,
             'message' => $messageAdmin,
@@ -2755,7 +2721,7 @@ class AndroidAppController extends Controller
                 $orderweb->auto = null;
                 $orderweb->save();
                 $this->markUidHistoryCancelled($orderweb->dispatching_order_uid);
-                self::sentCancelInfo($orderweb);
+                self::sentCancelInfo($orderweb, \App\Services\OrderCancelNotificationHelper::INITIATOR_CLIENT);
                 return 'Замовлення скасоване.';
             case '0':
                 return 'Замовлення не вдалося скасувати. Статус поїздки дізнайтесь у диспетчера.';
