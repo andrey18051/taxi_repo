@@ -30,6 +30,7 @@ alwaysApply: true
 | `pas-google-pay-plan.mdc` | План Google Pay: моменты оплаты, доплата, города, этапы |
 | `git-multi-account.mdc` | Два GitHub-аккаунта: PAS (sferaved) и taxi_repo (andrey18051) |
 | `taxi-prod-log-access.mdc` | SSH к логам taxi на 91.219.60.148; скрипт `scripts/setup_taxi_prod_ssh.ps1` |
+| `mantis-bug-workflow.mdc` | Баги PAS через Mantis; логи сервера при разборе |
 | `cursor-rules-sync.mdc` | Синхронизация правил между репозиториями |
 
 PAS-специфичные правила (`pas-version-commit`, `pas-build-before-commit`) применяй **только** когда целевой репозиторий — PAS_1–PAS_4, не `taxi_repo`.
