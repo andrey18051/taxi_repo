@@ -12,6 +12,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\DailyTask::class,
         \App\Console\Commands\RestartTask::class,
         \App\Console\Commands\VersionApiTask::class,
+        \App\Console\Commands\SendLoginReminderDue::class,
     ];
     /**
      * Define the application's command schedule.
@@ -36,6 +37,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('dispatch-cancel:process-due')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
+
+        $schedule->command('login-reminder:send-due')
             ->everyMinute()
             ->withoutOverlapping()
             ->onOneServer()

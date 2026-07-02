@@ -56,6 +56,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailController;
 use App\Http\Controllers\UserMessageController;
 use App\Http\Controllers\UserTokenFmsController;
+use App\Http\Controllers\AndroidInstallationController;
 use App\Http\Controllers\ViberController;
 use App\Http\Controllers\ViberCustomsController;
 use App\Http\Controllers\VisicomController;
@@ -1463,6 +1464,11 @@ Route::get('/sleepUsersEmailsTest/{email}', [UserEmailController::class,'sleepUs
  */
 Route::get('/android_token/store/{email}/{app}/{token}/', [UserTokenFmsController::class,'store']);
 Route::get('/android_token_local/store/{email}/{app}/{token}/{local}/', [UserTokenFmsController::class,'storeLocal']);
+
+// Android: напоминание "не вошел после установки" (07:00 Europe/Kyiv)
+Route::get('/android_installation/register/{installationId}/{app}/{token}/{local}/{tz}/', [AndroidInstallationController::class,'register']);
+Route::get('/android_installation/schedule_login_reminder/{installationId}/{app}/{local}/{tz}/', [AndroidInstallationController::class,'scheduleLoginReminder']);
+Route::get('/android_installation/cancel_login_reminder/{installationId}/{app}/', [AndroidInstallationController::class,'cancelLoginReminder']);
 Route::get('/android_token/sendMessage/{body}/{app}/{user_id}/', [UserTokenFmsController::class,'sendMessage']);
 Route::get('/fcm/sendNotification/{body}/{app}/{user_id}/', [FCMController::class,'sendNotification']);
 Route::get('/fcm/getUserByEmail/{email}/{app}/', [FCMController::class,'getTokenByEmail']);
