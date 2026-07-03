@@ -2156,20 +2156,6 @@ class OrderStatusController extends Controller
         return $hasNewer;
     }
 
-    /**
-     * Диспетчер отменил ногу вилки (close_reason=1) — не восстанавливать UID автоматически.
-     */
-    public static function shouldSkipForkRestoreAfterDispatcherCancel(?array $legSnapshot, ?string $displayStatus): bool
-    {
-        if ($displayStatus !== 'Canceled' || $legSnapshot === null || $legSnapshot === []) {
-            return false;
-        }
-
-        $closeReason = $legSnapshot['close_reason'] ?? null;
-
-        return in_array($closeReason, [1, '1'], true);
-    }
-
     public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
     {
         if (!self::shouldNotifyClientOrderCanceled($orderweb)) {
