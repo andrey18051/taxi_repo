@@ -240,7 +240,7 @@ class DispatchOrderCancelService
                     $paymentType,
                     $legs,
                     $resolveUidMapping,
-                    OrderCancelNotificationHelper::INITIATOR_CLIENT
+                    OrderCancelNotificationHelper::INITIATOR_SYSTEM
                 );
             }
 

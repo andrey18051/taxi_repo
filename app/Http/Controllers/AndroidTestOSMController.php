@@ -124,7 +124,9 @@ class AndroidTestOSMController extends Controller
             (new AndroidTestOSMController)->webordersCancel(
                 $uid,
                 $city,
-                $application
+                $application,
+                false,
+                \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
             );
         } elseif (!empty($uid_Double)) {
             Log::info("Вызов webordersCancelDouble", [
@@ -12179,7 +12181,13 @@ class AndroidTestOSMController extends Controller
             ];
         }
 
-        return $this->webordersCancelRestorAddCostNal($uid, $city, $application, $orderweb);
+        return $this->webordersCancelRestorAddCostNal(
+            $uid,
+            $city,
+            $application,
+            $orderweb,
+            \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
+        );
     }
 
     /**
@@ -12312,22 +12320,39 @@ class AndroidTestOSMController extends Controller
         $holdUid = (new MemoryOrderChangeController)->findLatestOrderUid($uid) ?: $uid;
         $orderwebForNotify = Orderweb::where('dispatching_order_uid', $holdUid)->first() ?? $orderweb;
 
+        if (OrderStatusController::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
+            Log::info('finalizeDispatchClientCancel: skip superseded uid', [
+                'uid' => $uid,
+                'hold_uid' => $holdUid,
+                'orderweb_uid' => $orderweb->dispatching_order_uid,
+            ]);
+            $this->performFirestoreCancelCleanup($uid);
+
+            return;
+        }
+
         $this->performFirestoreCancelCleanup($uid);
         $this->markOrderwebClientCanceled($orderweb);
         $orderwebForNotify->refresh();
 
         $applicationResolved = (new UniversalAndroidFunctionController)->appFinder($orderweb->comment);
-        if (!empty($orderweb->email) && OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
+        $resolvedInitiator = \App\Services\OrderCancelNotificationHelper::resolveInitiator($cancelInitiator, $channelNote);
+        $shouldNotifyClient = !empty($orderweb->email)
+            && $resolvedInitiator !== \App\Services\OrderCancelNotificationHelper::INITIATOR_SYSTEM
+            && OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify);
+
+        if ($shouldNotifyClient) {
             $this->notifyClientOrderCanceled(
                 $applicationResolved,
                 $orderweb->email,
                 $uid
             );
-        } elseif (!OrderStatusController::shouldNotifyClientOrderCanceled($orderwebForNotify)) {
-            Log::info('finalizeDispatchClientCancel: skip client push, fork or order not fully canceled', [
+        } else {
+            Log::info('finalizeDispatchClientCancel: skip client push', [
                 'uid' => $uid,
                 'hold_uid' => $holdUid,
                 'close_reason' => $orderwebForNotify->closeReason,
+                'cancel_initiator' => $resolvedInitiator,
             ]);
         }
         if ($channelNote !== null) {
@@ -12468,7 +12493,8 @@ class AndroidTestOSMController extends Controller
         $uid,
         $city,
         $application,
-        $orderweb
+        $orderweb,
+        ?string $cancelInitiator = null
     ) {
         $city = trim($city);
         switch ($city) {
@@ -12517,6 +12543,7 @@ class AndroidTestOSMController extends Controller
             'application' => $application,
             'payment_type' => $orderweb->pay_system,
             'resolve_uid_mapping' => false,
+            'cancel_initiator' => $cancelInitiator ?? \App\Services\OrderCancelNotificationHelper::INITIATOR_CLIENT,
         ]);
 
         (new MessageSentController)->sentMessageAdminLog(
@@ -12785,7 +12812,8 @@ class AndroidTestOSMController extends Controller
         $uid,
         $city,
         $application,
-        bool $forceDispatchCancel = false
+        bool $forceDispatchCancel = false,
+        ?string $cancelInitiator = null
     ) {
         $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
@@ -12829,7 +12857,8 @@ class AndroidTestOSMController extends Controller
                 $uid,
                 $city,
                 $application,
-                $orderweb
+                $orderweb,
+                $cancelInitiator
             );
             if (!empty($result['dispatch_cancelled'])) {
                 $resp_answer = $result['client_message']

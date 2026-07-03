@@ -284,6 +284,22 @@ class OrderForkLegExecutor
             return $this->pollLeg($state, $leg, $phaseTag . '_cancel_pending');
         }
 
+        $legSnapshot = $leg === 'bonus'
+            ? $this->decodeLegStatus($uidHistory->bonus_status ?? null)
+            : $this->decodeLegStatus($uidHistory->double_status ?? null);
+        $displayStatus = $leg === 'bonus'
+            ? (string) ($state['newStatusBonus'] ?? '')
+            : (string) ($state['newStatusDouble'] ?? '');
+        if (OrderStatusController::shouldSkipForkRestoreAfterDispatcherCancel($legSnapshot, $displayStatus)) {
+            $this->log('restore_skipped_dispatcher_cancel', [
+                'phase' => $phaseTag,
+                'leg' => $leg,
+                'close_reason' => $legSnapshot['close_reason'] ?? null,
+            ]);
+
+            return $this->pollLeg($state, $leg, $phaseTag . '_dispatcher_canceled');
+        }
+
         if (($state['newStatusBonus'] ?? '') === 'Canceled'
             && ($state['newStatusDouble'] ?? '') === 'Canceled') {
             $this->log('restore_skipped_both_legs_canceled', [

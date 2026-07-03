@@ -9,6 +9,7 @@ use App\Models\Uid_history;
 use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
 use App\Services\DispatchOrderCancelService;
+use App\Support\ForkOrderCancelLegResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -1267,7 +1268,7 @@ class OrderStatusController extends Controller
      * Add-cost recreation cancels the old dispatch uid while the same orderweb row
      * already points at the new uid — do not mark the live order canceled.
      */
-    private static function shouldSkipCancelForSupersededUid(Orderweb $orderweb, string $uid): bool
+    public static function shouldSkipCancelForSupersededUid(Orderweb $orderweb, string $uid): bool
     {
         if (!$orderweb->exists) {
             return false;
@@ -2102,7 +2103,13 @@ class OrderStatusController extends Controller
             return false;
         }
 
-        $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+        $uid_history = ForkOrderCancelLegResolver::findHistory(
+            (string) $orderweb->dispatching_order_uid,
+            (string) $orderweb->dispatching_order_uid
+        );
+        if ($uid_history === null) {
+            $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
+        }
         if (self::isForkOrderStillLive($uid_history)) {
             Log::info('Skip client cancel notify: fork order still live', [
                 'uid' => $orderweb->dispatching_order_uid,
@@ -2111,11 +2118,56 @@ class OrderStatusController extends Controller
             return false;
         }
 
+        if (self::hasNewerActiveOrderForClient($orderweb)) {
+            return false;
+        }
+
         if (in_array((string) $orderweb->closeReason, ['-1', '0', '100'], true)) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Клиент уже получил новый orderweb (смена оплаты / пересоздание) — старый UID не отменяет поездку.
+     */
+    public static function hasNewerActiveOrderForClient(Orderweb $orderweb): bool
+    {
+        if (!$orderweb->exists || empty($orderweb->email) || empty($orderweb->comment)) {
+            return false;
+        }
+
+        $hasNewer = Orderweb::where('email', $orderweb->email)
+            ->where('comment', $orderweb->comment)
+            ->where('id', '>', $orderweb->id)
+            ->whereIn('closeReason', SimpleCashlessDispatchStatusSync::IN_PROGRESS_CLOSE_REASONS)
+            ->whereNull('cancel_timestamp')
+            ->exists();
+
+        if ($hasNewer) {
+            Log::info('Skip client cancel notify: newer active orderweb exists', [
+                'uid' => $orderweb->dispatching_order_uid,
+                'order_id' => $orderweb->id,
+                'email' => $orderweb->email,
+            ]);
+        }
+
+        return $hasNewer;
+    }
+
+    /**
+     * Диспетчер отменил ногу вилки (close_reason=1) — не восстанавливать UID автоматически.
+     */
+    public static function shouldSkipForkRestoreAfterDispatcherCancel(?array $legSnapshot, ?string $displayStatus): bool
+    {
+        if ($displayStatus !== 'Canceled' || $legSnapshot === null || $legSnapshot === []) {
+            return false;
+        }
+
+        $closeReason = $legSnapshot['close_reason'] ?? null;
+
+        return in_array($closeReason, [1, '1'], true);
     }
 
     public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
