@@ -1,0 +1,69 @@
+---
+description: taxi_repo — деплой prod/test только через GitHub Actions
+alwaysApply: true
+---
+
+# taxi_repo — деплой
+
+**Целевой репозиторий:** `C:\Users\user\PhpstormProjects\taxi_repo` (Laravel, TaxiEasyUaMain).
+
+| Что | Значение |
+|-----|----------|
+| Git | `https://github.com/andrey18051/taxi_repo.git`, ветка `main`, аккаунт **andrey18051** |
+| Workflow | `.github/workflows/ci-cd.yml` — **CI/CD Laravel Docker** |
+| Образ test | `ghcr.io/andrey18051/taxi_test:<SHA7>` |
+| Образ prod | `ghcr.io/andrey18051/taxi_work:<SHA7>` |
+| Prod-сервер | `91.219.60.148`, SSH alias `taxi-prod` |
+| Контейнер prod | `taxi_work`, `--network host` |
+| Контейнер test | `taxi_test`, `--network host` |
+
+## Обязательно: деплой только через GitHub Actions
+
+**Запрещено агенту** выкатывать prod/test через:
+
+- `docker cp` / hot-patch PHP в работающий контейнер
+- `/root/deploy_taxi_work.sh` с тегом `:1.0` (устаревший скрипт на сервере)
+- локальный `docker build` + push без workflow (если пользователь явно не попросил)
+
+**Правильный путь prod:**
+
+1. Код + тесты локально (`php vendor/bin/phpunit` по затронутым тестам).
+2. `git push origin main` (push **не** запускает деплой автоматически).
+3. GitHub → **Actions** → **CI/CD Laravel Docker** → **Run workflow**:
+   - `deploy_production` = **true**
+   - `deploy_test` = **false** (если не нужен test)
+4. Дождаться jobs `build-work` → `deploy-work`.
+5. Проверка: `ssh taxi-prod "docker ps --filter name=taxi_work"` — образ с тегом **7 символов SHA** коммита (например `7d89b2f`).
+
+CLI (если `gh auth login` актуален):
+
+```powershell
+gh workflow run "CI/CD Laravel Docker" --field deploy_production=true --field deploy_test=false
+```
+
+## Test-окружение
+
+Тот же workflow, `deploy_test=true`, `deploy_production=false` → контейнер `taxi_test`.
+
+## Push в main не деплоит
+
+Workflow — **только** `pull_request` (тесты) и `workflow_dispatch` (деплой). Это экономит минуты Actions (см. `github-actions-budget.mdc`).
+
+## Синхронизация перед правками
+
+1. `git status -sb` в корне `taxi_repo`.
+2. При отставании от `origin/main` — `git pull --ff-only` **до** правок PHP/API.
+3. При `[ahead, behind]` или конфликте — **стоп**, согласовать с пользователем.
+
+## Чеклист агента (taxi prod)
+
+| # | Шаг |
+|---|-----|
+| 1 | Sync + правки + unit-тесты |
+| 2 | `git push origin main` |
+| 3 | **Run workflow** CI/CD Laravel Docker (production) |
+| 4 | Проверить `docker ps` на prod — тег SHA = коммит |
+
+## Логи после деплоя
+
+SSH `taxi-prod`, путь prod: `/opt/laravel_logs/taxi_work/laravel.log` (см. `taxi-prod-log-access.mdc`).
