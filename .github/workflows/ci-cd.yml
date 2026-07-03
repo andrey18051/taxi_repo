@@ -157,7 +157,7 @@ jobs:
 
       - name: Run order leg action matrix tests
         run: |
-          php vendor/bin/phpunit --filter 'OrderLegActionMatrixList1Test|OrderLegActionMatrixExhaustiveTest|OrderForkLegExecutorExhaustiveTest|OrderForkLegExecutorLastStatusTest|IsDispatchOrderCanceledTest|ForkExplicitCancelSettledTest|WfpSupersededHoldHelperTest|DispatchOrderCancelSettledTest|DispatchOrderCancelScheduleTest|DispatchCancelFinalizeGateTest|OrderPaymentNotificationHelperTest'
+          php vendor/bin/phpunit --filter 'OrderLegActionMatrixList1Test|OrderLegActionMatrixExhaustiveTest|OrderForkLegExecutorExhaustiveTest|OrderForkLegExecutorLastStatusTest|IsDispatchOrderCanceledTest|ForkExplicitCancelSettledTest|ForkLegRecreationArmTest|WfpSupersededHoldHelperTest|DispatchOrderCancelSettledTest|DispatchOrderCancelScheduleTest|DispatchCancelFinalizeGateTest|OrderPaymentNotificationHelperTest'
 
       - name: Build and push TEST image
         id: build_test

@@ -284,6 +284,24 @@ class OrderForkLegExecutor
             return $this->pollLeg($state, $leg, $phaseTag . '_cancel_pending');
         }
 
+        if (OrderStatusController::isForkLegDispatcherCanceled($uidHistory, $leg)) {
+            $this->log('restore_skipped_dispatcher_leg', [
+                'phase' => $phaseTag,
+                'leg' => $leg,
+            ]);
+
+            return $this->pollLeg($state, $leg, $phaseTag . '_dispatcher_canceled');
+        }
+
+        if (!OrderStatusController::isForkLegRecreationArmed($uidHistory, $leg)) {
+            $this->log('restore_skipped_not_armed', [
+                'phase' => $phaseTag,
+                'leg' => $leg,
+            ]);
+
+            return $this->pollLeg($state, $leg, $phaseTag . '_restore_not_armed');
+        }
+
         if (($state['newStatusBonus'] ?? '') === 'Canceled'
             && ($state['newStatusDouble'] ?? '') === 'Canceled') {
             $this->log('restore_skipped_both_legs_canceled', [
@@ -332,6 +350,7 @@ class OrderForkLegExecutor
             $uidHistory = $state['uid_history'];
             $uidHistory->uid_bonusOrder = $newUid;
             $uidHistory->save();
+            OrderStatusController::clearForkLegRecreationArm($uidHistory, 'bonus');
             $this->log('restore_bonus', ['newUid' => $newUid, 'phase' => $phaseTag]);
             $state = $this->pollLeg($state, 'bonus', $phaseTag . '_after_restore');
             return $this->seedForkLegStatusAfterRestore($state, 'bonus', $creationSnapshot);
@@ -362,6 +381,7 @@ class OrderForkLegExecutor
         $uidHistory = $state['uid_history'];
         $uidHistory->uid_doubleOrder = $newUid;
         $uidHistory->save();
+        OrderStatusController::clearForkLegRecreationArm($uidHistory, 'double');
         $this->log('restore_double', ['newUid' => $newUid, 'phase' => $phaseTag]);
 
         $state = $this->pollLeg($state, 'double', $phaseTag . '_after_restore');
@@ -470,6 +490,11 @@ class OrderForkLegExecutor
      */
     private function cancelLeg(array $state, $leg, $phaseTag)
     {
+        /** @var Uid_history $uidHistory */
+        $uidHistory = $state['uid_history'];
+        OrderStatusController::armForkLegRecreation($uidHistory, $leg);
+        $state['uid_history'] = $uidHistory;
+
         if ($leg === 'bonus') {
             $this->controller->orderCanceled(
                 $state['bonusOrder'],
@@ -552,6 +577,61 @@ class OrderForkLegExecutor
             $state['updateTime'] = 5;
             $this->log('updateTime_shortened', ['updateTime' => 5, 'phase' => $phaseTag, 'leg' => $leg]);
         }
+
+        return $this->detectExternalDispatchCancel($state, $leg, $phaseTag);
+    }
+
+    /**
+     * Отмена на диспетчере без предшествующего cancelLeg от матрицы — не пересоздавать ногу.
+     *
+     * @param array $state
+     * @param string $leg
+     * @param string $phaseTag
+     * @return array
+     */
+    private function detectExternalDispatchCancel(array $state, $leg, $phaseTag)
+    {
+        /** @var Uid_history|null $uidHistory */
+        $uidHistory = $state['uid_history'];
+        if ($uidHistory === null) {
+            return $state;
+        }
+
+        if ($uidHistory->exists) {
+            $uidHistory->refresh();
+            $state['uid_history'] = $uidHistory;
+        }
+
+        $displayStatus = $leg === 'bonus'
+            ? (string) ($state['newStatusBonus'] ?? '')
+            : (string) ($state['newStatusDouble'] ?? '');
+        if ($displayStatus !== 'Canceled') {
+            return $state;
+        }
+
+        $snapshot = $this->decodeLegStatus(
+            $leg === 'bonus' ? ($uidHistory->bonus_status ?? null) : ($uidHistory->double_status ?? null)
+        );
+        if (!OrderStatusController::isDispatchOrderCanceled($snapshot)) {
+            return $state;
+        }
+
+        if (OrderStatusController::isForkLegRecreationArmed($uidHistory, $leg)
+            || OrderStatusController::isForkLegDispatcherCanceled($uidHistory, $leg)) {
+            return $state;
+        }
+
+        // close_reason=1 — штатный сигнал вилки перед restore, не отмена диспетчера.
+        if ((int) ($snapshot['close_reason'] ?? 0) === 1) {
+            return $state;
+        }
+
+        OrderStatusController::markForkLegDispatcherCanceled($uidHistory, $leg);
+        $this->log('external_dispatcher_cancel', [
+            'phase' => $phaseTag,
+            'leg' => $leg,
+            'hold' => $uidHistory->uid_bonusOrderHold,
+        ]);
 
         return $state;
     }

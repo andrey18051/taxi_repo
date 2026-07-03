@@ -159,6 +159,17 @@ final class ForkDispatchRecorder
         ]);
     }
 
+  /**
+     * Отмена диспетчером (не штатный close_reason=1 перед restore матрицы).
+     */
+    public static function dispatcherCanceledLegJson(): string
+    {
+        return json_encode([
+            'execution_status' => 'Canceled',
+            'close_reason' => 2,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */

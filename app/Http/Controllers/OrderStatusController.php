@@ -2028,6 +2028,113 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Матрица вилки: сервер сам отменил ногу перед пересозданием UID (действие «отмена»).
+     */
+    public static function armForkLegRecreation(?Uid_history $uid_history, string $leg): bool
+    {
+        if ($uid_history === null) {
+            return false;
+        }
+
+        if ($leg === 'bonus') {
+            $uid_history->bonus_recreate_armed = 1;
+        } elseif ($leg === 'double') {
+            $uid_history->double_recreate_armed = 1;
+        } else {
+            return false;
+        }
+
+        $uid_history->save();
+
+        Log::info('Fork leg recreation armed', [
+            'leg' => $leg,
+            'hold' => $uid_history->uid_bonusOrderHold,
+        ]);
+
+        return true;
+    }
+
+    public static function clearForkLegRecreationArm(?Uid_history $uid_history, string $leg): void
+    {
+        if ($uid_history === null) {
+            return;
+        }
+
+        if ($leg === 'bonus') {
+            $uid_history->bonus_recreate_armed = 0;
+        } elseif ($leg === 'double') {
+            $uid_history->double_recreate_armed = 0;
+        } else {
+            return;
+        }
+
+        $uid_history->save();
+    }
+
+    public static function isForkLegRecreationArmed(?Uid_history $uid_history, string $leg): bool
+    {
+        if ($uid_history === null) {
+            return false;
+        }
+
+        if ($leg === 'bonus') {
+            return (int) ($uid_history->bonus_recreate_armed ?? 0) === 1;
+        }
+
+        if ($leg === 'double') {
+            return (int) ($uid_history->double_recreate_armed ?? 0) === 1;
+        }
+
+        return false;
+    }
+
+    /**
+     * Диспетчер снял ногу без шага «отмена» от матрицы — не пересоздавать UID.
+     */
+    public static function markForkLegDispatcherCanceled(?Uid_history $uid_history, string $leg): bool
+    {
+        if ($uid_history === null) {
+            return false;
+        }
+
+        if ($leg === 'bonus') {
+            $uid_history->bonus_dispatcher_canceled = 1;
+            $uid_history->bonus_recreate_armed = 0;
+        } elseif ($leg === 'double') {
+            $uid_history->double_dispatcher_canceled = 1;
+            $uid_history->double_recreate_armed = 0;
+        } else {
+            return false;
+        }
+
+        $uid_history->save();
+
+        Log::info('Fork dispatcher cancel on leg', [
+            'leg' => $leg,
+            'hold' => $uid_history->uid_bonusOrderHold,
+        ]);
+
+        return true;
+    }
+
+    public static function isForkLegDispatcherCanceled(?Uid_history $uid_history, string $leg): bool
+    {
+        if ($uid_history === null) {
+            return false;
+        }
+
+        if ($leg === 'bonus') {
+            return (int) ($uid_history->bonus_dispatcher_canceled ?? 0) === 1;
+        }
+
+        if ($leg === 'double') {
+            return (int) ($uid_history->double_dispatcher_canceled ?? 0) === 1;
+        }
+
+        return false;
+    }
+
+    /**
      * Fork cancel is confirmed on dispatch when every leg is archived or close_reason=1.
      *
      * @param array<string, mixed>|null $cardOrder

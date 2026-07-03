@@ -156,6 +156,7 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
 
         $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
         $uidHistory->bonus_status = ForkDispatchRecorder::closedLegJson();
+        $uidHistory->bonus_recreate_armed = 1;
 
         $state = $this->baseState($uidHistory, [
             'newStatusBonus' => 'Canceled',
@@ -258,6 +259,100 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
     }
 
     /**
+     * Диспетчер снял ногу без cancelLeg от матрицы — не пересоздавать UID.
+     */
+    public function test_poll_external_dispatcher_cancel_blocks_restore(): void
+    {
+        $this->recorder->reset();
+        $this->recorder->bonusPollStatus = 'Canceled';
+        $this->recorder->doublePollStatus = 'SearchesForCar';
+
+        $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
+        $uidHistory->bonus_status = ForkDispatchRecorder::dispatcherCanceledLegJson();
+
+        $state = $this->baseState($uidHistory, [
+            'newStatusBonus' => 'Canceled',
+            'newStatusDouble' => 'SearchesForCar',
+            'lastStatusBonus' => 'CarFound',
+            'lastStatusDouble' => 'SearchesForCar',
+        ]);
+
+        $state = $this->invokeBonusPhase($state);
+
+        $this->assertNotContains('restore_bonus', $this->recorder->calls);
+        $this->assertSame(1, (int) $uidHistory->bonus_dispatcher_canceled);
+        $this->assertSame(0, (int) ($uidHistory->bonus_recreate_armed ?? 0));
+    }
+
+    public function test_poll_close_reason_one_without_arm_does_not_mark_dispatcher_cancel(): void
+    {
+        $this->recorder->reset();
+        $this->recorder->bonusPollStatus = 'Canceled';
+        $this->recorder->doublePollStatus = 'SearchesForCar';
+
+        $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
+        $uidHistory->bonus_status = ForkDispatchRecorder::closedLegJson();
+
+        $state = $this->baseState($uidHistory, [
+            'newStatusBonus' => 'Canceled',
+            'newStatusDouble' => 'SearchesForCar',
+            'lastStatusBonus' => 'CarFound',
+            'lastStatusDouble' => 'SearchesForCar',
+        ]);
+
+        $state = $this->invokeBonusPhase($state);
+
+        $this->assertSame(0, (int) ($uidHistory->bonus_dispatcher_canceled ?? 0));
+    }
+
+    public function test_restore_skipped_when_recreation_not_armed(): void
+    {
+        $this->recorder->reset();
+        $this->recorder->bonusPollStatus = 'Canceled';
+        $this->recorder->doublePollStatus = 'SearchesForCar';
+
+        $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
+        $uidHistory->bonus_status = ForkDispatchRecorder::closedLegJson();
+        $uidHistory->bonus_recreate_armed = 0;
+
+        $state = $this->baseState($uidHistory, [
+            'newStatusBonus' => 'Canceled',
+            'newStatusDouble' => 'SearchesForCar',
+            'lastStatusBonus' => 'CarFound',
+            'lastStatusDouble' => 'SearchesForCar',
+        ]);
+
+        $state = $this->invokeBonusPhase($state);
+
+        $this->assertNotContains('restore_bonus', $this->recorder->calls);
+        $this->assertContains('poll_bonus', $this->recorder->calls);
+        $this->assertSame(0, (int) ($uidHistory->bonus_dispatcher_canceled ?? 0));
+    }
+
+    public function test_cancel_leg_arms_recreation_for_restore(): void
+    {
+        $this->recorder->reset();
+        $this->recorder->bonusPollStatus = 'Canceled';
+        $this->recorder->doublePollStatus = 'SearchesForCar';
+
+        $uidHistory = ForkDispatchRecorder::makeUidHistoryStub();
+
+        $state = $this->baseState($uidHistory, [
+            'newStatusBonus' => 'CarFound',
+            'newStatusDouble' => 'SearchesForCar',
+            'lastStatusBonus' => 'CarFound',
+            'lastStatusDouble' => 'SearchesForCar',
+        ]);
+
+        $executor = $this->createExecutor();
+        $cancelLeg = new ReflectionMethod(OrderForkLegExecutor::class, 'cancelLeg');
+        $cancelLeg->setAccessible(true);
+        $cancelLeg->invoke($executor, $state, 'bonus', 'test_arm');
+
+        $this->assertSame(1, (int) $uidHistory->bonus_recreate_armed);
+    }
+
+    /**
      * @param array<string, mixed> $overrides
      * @return array<string, mixed>
      */
@@ -289,10 +384,12 @@ class OrderForkLegExecutorExhaustiveTest extends TestCase
     {
         if ($bonusAction === 'востановление') {
             $uidHistory->bonus_status = ForkDispatchRecorder::closedLegJson();
+            $uidHistory->bonus_recreate_armed = 1;
         }
 
         if ($doubleAction === 'востановление') {
             $uidHistory->double_status = ForkDispatchRecorder::closedLegJson();
+            $uidHistory->double_recreate_armed = 1;
         }
     }
 
