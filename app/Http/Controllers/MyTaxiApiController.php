@@ -710,13 +710,11 @@ class MyTaxiApiController extends Controller
         // Обновление заказа с новыми данными
         Log::debug('🔄 Обновление заказа с новым UID и расчетами стоимости');
 
-        $currentWebCost = $order->client_cost;
-        $currentAttempt20 = $order->attempt_20;
-        $newWebCost = $currentWebCost + (int) $currentAttempt20 + (int)$addCost;
+        $currentWebCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+        $newWebCost = $currentWebCost + (int)$addCost;
 
         Log::debug('💰 Расчет стоимости', [
-            'current_web_cost' => $currentWebCost,
-            'current_attempt_20' => $currentAttempt20,
+            'current_client_cost' => $currentWebCost,
             'new_add_cost' => $addCost,
             'total_new_web_cost' => $newWebCost
         ]);
@@ -741,8 +739,7 @@ class MyTaxiApiController extends Controller
         $order->save();
         Log::info("✅ Заказ обновлен с новым UID: " . $order_new_uid);
 
-        $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
-        $newClientCost = $oldClientCost + (int) $addCost;
+        $newClientCost = $newWebCost;
         $paySystem = $order->pay_system ?? 'nal_payment';
         Log::info('📧 Отправка уведомления о новом UID после доплаты...');
         try {
