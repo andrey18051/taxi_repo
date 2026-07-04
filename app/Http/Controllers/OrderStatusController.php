@@ -6,6 +6,7 @@ use App\City\SimpleCashlessDispatchStatusSync;
 use App\Models\ExecutionStatus;
 use App\Models\Orderweb;
 use App\Models\Uid_history;
+use App\Helpers\OrderHelper;
 use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
 use App\Services\DispatchOrderCancelService;
@@ -1205,9 +1206,15 @@ class OrderStatusController extends Controller
 
         $payload = json_decode($response, true);
 
-        return is_array($payload)
-            ? response()->json($payload)
-            : response()->json(['action' => $action, 'uid' => $uid]);
+        if (is_array($payload)) {
+            $displayCost = OrderHelper::resolveDisplayCostGrivna($orderweb);
+            if ($displayCost > 0) {
+                $payload['order_cost'] = (string) $displayCost;
+            }
+            return response()->json($payload);
+        }
+
+        return response()->json(['action' => $action, 'uid' => $uid]);
     }
 
     /**
@@ -1242,6 +1249,11 @@ class OrderStatusController extends Controller
             'uid' => $uid,
             'action' => OrderCarInfoHelper::actionFromCloseReason($closeReason),
         ];
+
+        $displayCost = OrderHelper::resolveDisplayCostGrivna($orderweb);
+        if ($displayCost > 0) {
+            $responseArr['order_cost'] = (string) $displayCost;
+        }
 
         $carInfo = OrderCarInfoHelper::formatForApp($orderweb->auto);
         if ($carInfo !== null) {
