@@ -12849,7 +12849,7 @@ class AndroidTestOSMController extends Controller
                     \App\Services\OrderCancelNotificationHelper::INITIATOR_DRIVER
                 );
                 return [
-                    'response' => $resp_answer,
+                    'response' => 'Запит на скасування замовлення надіслано. Замовлення скасоване. ',
                 ];
             }
 
