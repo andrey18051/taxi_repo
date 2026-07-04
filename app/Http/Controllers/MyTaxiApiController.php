@@ -710,7 +710,24 @@ class MyTaxiApiController extends Controller
         // Обновление заказа с новыми данными
         Log::debug('🔄 Обновление заказа с новым UID и расчетами стоимости');
 
-        $currentWebCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+        $currentClientCost = (int) ($order->client_cost ?? 0);
+        if ($currentClientCost > 0) {
+            $currentWebCost = $currentClientCost;
+        } else {
+            $webCost = (int) ($order->web_cost ?? 0);
+            $paySystem = $order->pay_system ?? 'nal_payment';
+            if (in_array($paySystem, ['wfp_payment', 'fondy_payment', 'mono_payment', 'google_pay_payment'])) {
+                $costCorrection = (new AndroidTestOSMController)->costCorrectionValue(
+                    $paySystem,
+                    self::reverseCity($order->city ?? ''),
+                    $order->server ?? '',
+                    self::reverseApplication($order->comment ?? '')
+                );
+                $currentWebCost = $webCost + $costCorrection;
+            } else {
+                $currentWebCost = $webCost;
+            }
+        }
         $newWebCost = $currentWebCost + (int)$addCost;
 
         Log::debug('💰 Расчет стоимости', [
@@ -871,5 +888,44 @@ class MyTaxiApiController extends Controller
             Log::debug("purchase startAddCostMyApi: ", ['response' => $response]);
         }
         return response()->json($response, 200);
+    }
+
+    private static function reverseCity(string $cityCode): string
+    {
+        $map = [
+            'city_kiev' => 'Kyiv City',
+            'city_odessa' => 'OdessaTest',
+            'city_cherkassy' => 'Cherkasy Oblast',
+            'city_zaporizhzhia' => 'Zaporizhzhia',
+            'city_dnipro' => 'Dnipropetrovsk Oblast',
+            'city_lviv' => 'Lviv',
+            'city_ivano_frankivsk' => 'Ivano_frankivsk',
+            'city_vinnytsia' => 'Vinnytsia',
+            'city_poltava' => 'Poltava',
+            'city_sumy' => 'Sumy',
+            'city_kharkiv' => 'Kharkiv',
+            'city_chernihiv' => 'Chernihiv',
+            'city_rivne' => 'Rivne',
+            'city_ternopil' => 'Ternopil',
+            'city_khmelnytskyi' => 'Khmelnytskyi',
+            'city_zakarpattya' => 'Zakarpattya',
+            'city_zhytomyr' => 'Zhytomyr',
+            'city_kropyvnytskyi' => 'Kropyvnytskyi',
+            'city_mykolaiv' => 'Mykolaiv',
+            'city_chernivtsi' => 'Chernivtsi',
+            'city_lutsk' => 'Lutsk',
+        ];
+        return $map[$cityCode] ?? 'Kyiv City';
+    }
+
+    private static function reverseApplication(string $comment): string
+    {
+        $map = [
+            'taxi_easy_ua_pas1' => 'PAS1',
+            'taxi_easy_ua_pas2' => 'PAS2',
+            'taxi_easy_ua_pas4' => 'PAS4',
+            'taxi_easy_ua_pas5' => 'PAS5',
+        ];
+        return $map[$comment] ?? 'PAS4';
     }
 }
