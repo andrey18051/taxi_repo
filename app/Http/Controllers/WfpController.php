@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\City\PaymentFlow;
+use App\Helpers\WfpClientNameHelper;
 use App\Helpers\WfpOrderPaymentContextHelper;
 use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
@@ -2495,6 +2496,7 @@ class WfpController extends Controller
             $secretKey = $merchant->wfp_merchantSecretKey;
 
             $orderDate = strtotime(date('Y-m-d H:i:s'));
+            $wfpClientName = WfpClientNameHelper::resolve($clientEmail, $clientPhone);
 
             $params = [
                 "merchantAccount" => $merchantAccount,
@@ -2526,8 +2528,8 @@ class WfpController extends Controller
                 "productName" => [$productName],
                 "productPrice" => [$amount],
                 "productCount" => [1],
-                "clientFirstName" => "Bulba",
-                "clientLastName" => "Taras",
+                "clientFirstName" => $wfpClientName['clientFirstName'],
+                "clientLastName" => $wfpClientName['clientLastName'],
                 "clientEmail" => $clientEmail,
                 "clientPhone" => $clientPhone,
                 "clientCountry" => "UKR",
@@ -2603,6 +2605,8 @@ class WfpController extends Controller
             ? $billingAddress['name']
             : 'GOOGLE PAY';
 
+        $wfpClientName = WfpClientNameHelper::resolve($clientEmail, $clientPhone);
+
         $signatureParams = [
             "merchantAccount" => $merchantAccount,
             "merchantDomainName" => "m.easy-order-taxi.site",
@@ -2631,8 +2635,8 @@ class WfpController extends Controller
             "productName" => [$productName],
             "productPrice" => [$amount],
             "productCount" => [1],
-            "clientFirstName" => "Bulba",
-            "clientLastName" => "Taras",
+            "clientFirstName" => $wfpClientName['clientFirstName'],
+            "clientLastName" => $wfpClientName['clientLastName'],
             "clientEmail" => $clientEmail,
             "clientPhone" => $clientPhone,
             "clientCountry" => "UKR",
@@ -2964,6 +2968,7 @@ class WfpController extends Controller
                 $recToken = (new CardsController)->decryptToken($recToken);
 
                 $orderDate = strtotime(date('Y-m-d H:i:s'));
+                $wfpClientName = WfpClientNameHelper::resolve($clientEmail, $clientPhone);
 
                 $params = [
                     "merchantAccount" => $merchantAccount,
@@ -2996,8 +3001,8 @@ class WfpController extends Controller
                     "productName" => [$productName],
                     "productPrice" => [$amount],
                     "productCount" => [1],
-                    "clientFirstName" => "Bulba",
-                    "clientLastName" => "Taras",
+                    "clientFirstName" => $wfpClientName['clientFirstName'],
+                    "clientLastName" => $wfpClientName['clientLastName'],
                     "clientEmail" => $clientEmail,
                     "clientPhone" => $clientPhone,
                     "clientCountry" => "UKR",
@@ -3183,6 +3188,7 @@ class WfpController extends Controller
                 ]);
 
                 $orderDate = strtotime(date('Y-m-d H:i:s'));
+                $wfpClientName = WfpClientNameHelper::resolve($clientEmail, $clientPhone);
 
                 // Подготовка параметров для подписи
                 $signatureParams = [
@@ -3221,8 +3227,8 @@ class WfpController extends Controller
                     "productName" => [$productName],
                     "productPrice" => [$amount],
                     "productCount" => [1],
-                    "clientFirstName" => "Bulba",
-                    "clientLastName" => "Taras",
+                    "clientFirstName" => $wfpClientName['clientFirstName'],
+                    "clientLastName" => $wfpClientName['clientLastName'],
                     "clientEmail" => $clientEmail,
                     "clientPhone" => $clientPhone,
                     "clientCountry" => "UKR",
@@ -3438,6 +3444,7 @@ class WfpController extends Controller
                 $recToken = (new CardsController)->decryptToken($recToken);
 
                 $orderDate = strtotime(date('Y-m-d H:i:s'));
+                $wfpClientName = WfpClientNameHelper::resolve($clientEmail, $clientPhone);
 
                 $params = [
                     "merchantAccount" => $merchantAccount,
@@ -3470,8 +3477,8 @@ class WfpController extends Controller
                     "productName" => [$productName],
                     "productPrice" => [$amount],
                     "productCount" => [1],
-                    "clientFirstName" => "Bulba",
-                    "clientLastName" => "Taras",
+                    "clientFirstName" => $wfpClientName['clientFirstName'],
+                    "clientLastName" => $wfpClientName['clientLastName'],
                     "clientEmail" => $clientEmail,
                     "clientPhone" => $clientPhone,
                     "clientCountry" => "UKR",
@@ -4905,6 +4912,10 @@ class WfpController extends Controller
             return false;
         }
 
+        if (!empty($order->cancel_timestamp)) {
+            return false;
+        }
+
         if (!empty($order->wfp_order_id) && $order->wfp_order_id !== $invoice->orderReference) {
             return true;
         }
@@ -5245,14 +5256,6 @@ class WfpController extends Controller
             ->where('created_at', '>=', now()->subMinutes(15))
             ->orderByDesc('id')
             ->first();
-
-        if ($order === null) {
-            $order = Orderweb::where('email', $email)
-                ->where('pay_system', 'google_pay_payment')
-                ->where('created_at', '>=', now()->subMinutes(15))
-                ->orderByDesc('id')
-                ->first();
-        }
 
         $invoiceAmount = $data['amount'] ?? null;
         $invoiceUid = null;

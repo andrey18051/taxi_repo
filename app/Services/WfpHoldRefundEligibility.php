@@ -49,6 +49,15 @@ final class WfpHoldRefundEligibility
         string $newOrderReference,
         ?string $currentOrderReference
     ): bool {
+        if (!empty($order->cancel_timestamp)) {
+            Log::info('WfpHoldRefundEligibility: skip GP rebind — order cancelled', [
+                'uid' => (string) ($order->dispatching_order_uid ?? ''),
+                'orderReference' => $newOrderReference,
+            ]);
+
+            return false;
+        }
+
         $orderUid = (string) ($order->dispatching_order_uid ?? '');
         $newInvoice = WfpInvoice::where('orderReference', $newOrderReference)->first();
 
