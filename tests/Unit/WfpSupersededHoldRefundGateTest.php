@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Models\MemoryOrderChange;
 use App\Models\Orderweb;
+use App\Models\WfpInvoice;
 use App\Services\DispatchOrderCancelService;
 use App\Services\WfpHoldRefundEligibility;
 use Illuminate\Database\Schema\Blueprint;
@@ -44,10 +45,23 @@ class WfpSupersededHoldRefundGateTest extends TestCase
             $table->string('uid_doubleOrder')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('wfp_invoices', function (Blueprint $table) {
+            $table->id();
+            $table->string('dispatching_order_uid')->nullable();
+            $table->string('merchantAccount')->nullable();
+            $table->string('orderReference')->nullable();
+            $table->string('amount')->nullable();
+            $table->string('transactionStatus')->nullable();
+            $table->string('reason')->nullable();
+            $table->string('reasonCode')->nullable();
+            $table->timestamps();
+        });
     }
 
     protected function tearDown(): void
     {
+        Schema::dropIfExists('wfp_invoices');
         Schema::dropIfExists('uid_histories');
         Schema::dropIfExists('memory_order_changes');
         Schema::dropIfExists('orderwebs');
@@ -84,5 +98,30 @@ class WfpSupersededHoldRefundGateTest extends TestCase
         $eligibility = new WfpHoldRefundEligibility(new DispatchOrderCancelService());
 
         $this->assertFalse($eligibility->mayRefundSupersededMainHold($orderweb));
+    }
+
+    public function test_superseded_refund_blocked_when_multiple_active_holds_on_add_cost(): void
+    {
+        $orderweb = new Orderweb();
+        $orderweb->dispatching_order_uid = 'live-uid';
+        $orderweb->server = 'http://188.40.143.61:7222';
+        $orderweb->save();
+
+        WfpInvoice::create([
+            'dispatching_order_uid' => 'live-uid',
+            'orderReference' => 'V_MAIN_10',
+            'amount' => '10',
+            'transactionStatus' => 'WaitingAuthComplete',
+        ]);
+        WfpInvoice::create([
+            'dispatching_order_uid' => 'live-uid',
+            'orderReference' => 'V_ADD_5',
+            'amount' => '5',
+            'transactionStatus' => 'WaitingAuthComplete',
+        ]);
+
+        $eligibility = new WfpHoldRefundEligibility(new DispatchOrderCancelService());
+
+        $this->assertFalse($eligibility->mayRefundSupersededMainHold($orderweb->fresh()));
     }
 }

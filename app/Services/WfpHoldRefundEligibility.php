@@ -137,8 +137,20 @@ final class WfpHoldRefundEligibility
     }
 
     /**
-     * Не void'ить superseded-холд на новом UID, пока предшественники ещё живы в диспетчере.
+     * Доплата картой: основной холд + add-cost — оба WaitingAuthComplete, не void'ить как superseded.
      */
+    public function hasMultipleActiveHolds(string $dispatchingOrderUid): bool
+    {
+        $dispatchingOrderUid = trim($dispatchingOrderUid);
+        if ($dispatchingOrderUid === '') {
+            return false;
+        }
+
+        return WfpInvoice::where('dispatching_order_uid', $dispatchingOrderUid)
+                ->where('transactionStatus', 'WaitingAuthComplete')
+                ->count() > 1;
+    }
+
     public function mayRefundSupersededMainHold(Orderweb $orderweb): bool
     {
         if ($orderweb->server === 'my_server_api') {
@@ -148,6 +160,14 @@ final class WfpHoldRefundEligibility
         $currentUid = (string) ($orderweb->dispatching_order_uid ?? '');
         if ($currentUid === '') {
             return true;
+        }
+
+        if ($this->hasMultipleActiveHolds($currentUid)) {
+            Log::info('WfpHoldRefundEligibility: skip superseded hold refund — multiple active holds (add-cost)', [
+                'uid' => $currentUid,
+            ]);
+
+            return false;
         }
 
         $predecessors = (new MemoryOrderChangeController)->collectPredecessorUids($currentUid);

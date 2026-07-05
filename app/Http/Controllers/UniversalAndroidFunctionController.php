@@ -7995,7 +7995,9 @@ class UniversalAndroidFunctionController extends Controller
 
                 $order->dispatching_order_uid = $order_new_uid;
                 $order->auto = null;
-                $order->wfp_order_id = $orderReference;
+                if (empty($order->wfp_order_id)) {
+                    $order->wfp_order_id = $orderReference;
+                }
                 $order->web_cost = $responseArr["order_cost"];
                 $order->attempt_20 = (int)$order->attempt_20 + 1;
                 $order->closeReason = "-1";
@@ -8287,7 +8289,9 @@ class UniversalAndroidFunctionController extends Controller
 
         $order->dispatching_order_uid = $orderNew;
         $order->auto = null;
-        $order->wfp_order_id = $orderReference;
+        if (empty($order->wfp_order_id)) {
+            $order->wfp_order_id = $orderReference;
+        }
         $order->web_cost = $responseArr['order_cost'];
         $order->client_cost = $newClientCost;
         $order->payment_type = 1;
@@ -8721,7 +8725,9 @@ class UniversalAndroidFunctionController extends Controller
                 // Обновление order
                 $order->dispatching_order_uid = $order_new_uid;
                 $order->auto = null;
-                $order->wfp_order_id = $orderReference;
+                if (empty($order->wfp_order_id)) {
+                    $order->wfp_order_id = $orderReference;
+                }
                 $order->web_cost = $responseArr["order_cost"];
                 $order->client_cost = $newClientCost;
                 $order->closeReason = "-1";

@@ -1150,6 +1150,8 @@ class OrderStatusController extends Controller
             return null;
         }
 
+        $snapshot = self::normalizeFalseCanceledDispatchStatus($snapshot) ?? $snapshot;
+
         $executionStatus = (string) ($snapshot['execution_status'] ?? 'SearchesForCar');
         $resolved = $this->resolveLegStatuses(
             $executionStatus,
@@ -1161,10 +1163,19 @@ class OrderStatusController extends Controller
 
         if (self::isDispatchCanceledForClientCancel($snapshot, $uid)
             && !self::hasActiveDispatchLeg($snapshot, $snapshot)) {
-            if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
+            if (DispatchOrderCancelService::isAddCostRecreationInProgress($uid)) {
+                $snapshot = self::normalizeFalseCanceledDispatchStatus($snapshot) ?? $snapshot;
+                $executionStatus = (string) ($snapshot['execution_status'] ?? 'SearchesForCar');
+                $resolved = $this->resolveLegStatuses(
+                    $executionStatus,
+                    $executionStatus,
+                    $snapshot,
+                    $snapshot
+                );
+                $action = $resolved['action'];
+            } elseif (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
                 return null;
-            }
-            if (!self::shouldDeferDispatchCancelForGooglePayHold($orderweb, $snapshot, $uid)) {
+            } elseif (!self::shouldDeferDispatchCancelForGooglePayHold($orderweb, $snapshot, $uid)) {
                 self::finalizeCanceledFromStatusPush($orderweb, $uid);
                 $orderweb->save();
 
@@ -1175,16 +1186,17 @@ class OrderStatusController extends Controller
                     'uid' => $uid,
                     'execution_status' => 'Canceled',
                 ]);
+            } else {
+                $snapshot['execution_status'] = 'SearchesForCar';
+                $executionStatus = 'SearchesForCar';
+                $resolved = $this->resolveLegStatuses(
+                    $executionStatus,
+                    $executionStatus,
+                    $snapshot,
+                    $snapshot
+                );
+                $action = $resolved['action'];
             }
-            $snapshot['execution_status'] = 'SearchesForCar';
-            $executionStatus = 'SearchesForCar';
-            $resolved = $this->resolveLegStatuses(
-                $executionStatus,
-                $executionStatus,
-                $snapshot,
-                $snapshot
-            );
-            $action = $resolved['action'];
         }
 
         SimpleCashlessDispatchStatusSync::applySnapshotToOrderweb($orderweb, $snapshot);
@@ -1268,6 +1280,15 @@ class OrderStatusController extends Controller
 
     private static function finalizeCanceledFromStatusPush(Orderweb $orderweb, string $uid): void
     {
+        if (DispatchOrderCancelService::isAddCostRecreationInProgress($uid)) {
+            Log::info('Skip cancel finalize: add-cost recreation in progress', [
+                'uid' => $uid,
+                'orderweb_uid' => $orderweb->dispatching_order_uid,
+            ]);
+
+            return;
+        }
+
         if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
             return;
         }
@@ -2277,6 +2298,12 @@ class OrderStatusController extends Controller
 
     public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
     {
+        if (DispatchOrderCancelService::isAddCostRecreationInProgress($uid)) {
+            Log::info('Skip fork cancel push: add-cost recreation in progress', ['uid' => $uid]);
+
+            return;
+        }
+
         if (!self::shouldNotifyClientOrderCanceled($orderweb)) {
             return;
         }

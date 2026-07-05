@@ -34,6 +34,8 @@ class DispatchOrderCancelService
 
     public const ADD_COST_RECREATION_WAIT_SECONDS = 60;
 
+    public const ADD_COST_RECREATION_CACHE_PREFIX = 'add_cost_recreation:';
+
     /**
      * @param array{
      *     primary_uid: string,
@@ -168,20 +170,64 @@ class DispatchOrderCancelService
      *
      * @return array{ready: bool, snapshots: array, cancel_result_code: int|null}
      */
+    public static function markAddCostRecreationInProgress(string $uid): void
+    {
+        $uid = trim($uid);
+        if ($uid === '') {
+            return;
+        }
+
+        Cache::put(self::ADD_COST_RECREATION_CACHE_PREFIX . $uid, true, now()->addMinutes(3));
+    }
+
+    public static function clearAddCostRecreationInProgress(string $uid): void
+    {
+        $uid = trim($uid);
+        if ($uid === '') {
+            return;
+        }
+
+        Cache::forget(self::ADD_COST_RECREATION_CACHE_PREFIX . $uid);
+    }
+
+    public static function isAddCostRecreationInProgress(string $uid): bool
+    {
+        $uid = trim($uid);
+        if ($uid === '') {
+            return false;
+        }
+
+        return Cache::has(self::ADD_COST_RECREATION_CACHE_PREFIX . $uid);
+    }
+
     public function waitForAddCostRecreationCancel(array $options): array
     {
         $rawPrimaryUid = (string) $options['primary_uid'];
         $resolveUidMapping = (bool) ($options['resolve_uid_mapping'] ?? false);
         $primaryUid = $this->resolveCancelLegUid($rawPrimaryUid, $resolveUidMapping);
+        self::markAddCostRecreationInProgress($rawPrimaryUid);
+        if ($rawPrimaryUid !== $primaryUid) {
+            self::markAddCostRecreationInProgress($primaryUid);
+        }
         $orderwebLookupUid = $resolveUidMapping
             ? $primaryUid
             : (new MemoryOrderChangeController)->show($rawPrimaryUid);
         $orderweb = Orderweb::where('dispatching_order_uid', $orderwebLookupUid)->first();
         if (!$orderweb) {
+            self::clearAddCostRecreationInProgress($rawPrimaryUid);
+            if ($rawPrimaryUid !== $primaryUid) {
+                self::clearAddCostRecreationInProgress($primaryUid);
+            }
+
             return ['ready' => false, 'snapshots' => [], 'cancel_result_code' => null];
         }
 
         if ($orderweb->server === 'my_server_api') {
+            self::clearAddCostRecreationInProgress($rawPrimaryUid);
+            if ($rawPrimaryUid !== $primaryUid) {
+                self::clearAddCostRecreationInProgress($primaryUid);
+            }
+
             return ['ready' => true, 'snapshots' => [], 'cancel_result_code' => null];
         }
 
@@ -225,11 +271,17 @@ class DispatchOrderCancelService
                     'attempt' => $attempt,
                 ]);
 
-                return [
+                $result = [
                     'ready' => true,
                     'snapshots' => $snapshots,
                     'cancel_result_code' => $cancelResultCode,
                 ];
+                self::clearAddCostRecreationInProgress($rawPrimaryUid);
+                if ($rawPrimaryUid !== $primaryUid) {
+                    self::clearAddCostRecreationInProgress($primaryUid);
+                }
+
+                return $result;
             }
 
             if ($attempt === 1) {
@@ -251,6 +303,11 @@ class DispatchOrderCancelService
             'primary_uid' => $primaryUid,
             'wait_seconds' => $waitSeconds,
         ]);
+
+        self::clearAddCostRecreationInProgress($rawPrimaryUid);
+        if ($rawPrimaryUid !== $primaryUid) {
+            self::clearAddCostRecreationInProgress($primaryUid);
+        }
 
         return [
             'ready' => false,
