@@ -2475,6 +2475,40 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Не затирать активный closeReason в orderweb ответом опроса старой ноги
+     * после доплаты/пересоздания (add-cost recreation).
+     */
+    public static function shouldPersistDispatchCloseReasonToOrderweb(
+        $orderweb,
+        ?array $snapshot,
+        string $requestUid,
+        ?bool $hasRecreationMapping = null
+    ): bool {
+        if ($orderweb === null || $snapshot === null || $snapshot === []) {
+            return true;
+        }
+        $stored = (string) ($orderweb->closeReason ?? '-1');
+        if (!in_array($stored, ['-1', '100', '101', '102', '103'], true)) {
+            return true;
+        }
+        $incoming = (int) ($snapshot['close_reason'] ?? -1);
+        if (!in_array($incoming, [1, 2, 3, 4, 5, 6, 7, 9], true)) {
+            return true;
+        }
+        if ($hasRecreationMapping === null) {
+            $dispatchUid = (string) ($orderweb->dispatching_order_uid ?? '');
+            $hasRecreationMapping = \App\Models\MemoryOrderChange::where('order_old', $requestUid)->exists()
+                || ($dispatchUid !== ''
+                    && \App\Models\MemoryOrderChange::where('order_new', $dispatchUid)->exists());
+        }
+        if ($hasRecreationMapping) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Нога вилки закрыта на диспетчере — можно создавать новый UID той же ноги (нал/безнал).
      * Canceled учитывается только при реальном close_reason (не -1).
      */

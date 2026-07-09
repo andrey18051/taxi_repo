@@ -14009,6 +14009,7 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+        $requestUid = $uid;
         $uid = (new MemoryOrderChangeController)->show($uid);
         $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
         Log::debug("1 historyUIDStatus uid $uid");
@@ -14131,7 +14132,13 @@ class AndroidTestOSMController extends Controller
 
                         $orderweb_uid->auto = $response_arr["order_car_info"] ?? null;
 
-                        $orderweb_uid->closeReason = $response_arr["close_reason"] ?? $orderweb_uid->closeReason;
+                        if (OrderStatusController::shouldPersistDispatchCloseReasonToOrderweb(
+                            $orderweb_uid,
+                            $response_arr,
+                            $requestUid
+                        )) {
+                            $orderweb_uid->closeReason = $response_arr["close_reason"] ?? $orderweb_uid->closeReason;
+                        }
                         $orderweb_uid->save();
 
                         return response()->json($response_arr);
