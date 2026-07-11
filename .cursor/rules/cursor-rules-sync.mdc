@@ -24,6 +24,7 @@ alwaysApply: true
 |------|------------|
 | `workspace-context-check.mdc` | Выбор репозитория, git fetch/pull |
 | `pas-version-commit.mdc` | Коммиты версий PAS (только PAS_*) |
+| `pas-market-release-confirm.mdc` | Не публиковать PAS в Play без явного подтверждения |
 | `pas-build-before-commit.mdc` | Сборка перед коммитом (только PAS_*) |
 | `pas-report-format.mdc` | Формат отчётов клиенту |
 | `pas-gradual-testing.mdc` | Постепенное улучшение тестов; `taxi_repo` — только test-роуты |
