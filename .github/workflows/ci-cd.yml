@@ -98,6 +98,7 @@ jobs:
 
           APP_KEY_VISICOM="${{ secrets.TEST_APP_KEY_VISICOM }}"
           APP_KEY_VISICOM_MY="${{ secrets.TEST_APP_KEY_VISICOM_MY }}"
+          APP_KEY_VISICOM_EXPIRES_AT="${{ vars.TEST_APP_KEY_VISICOM_EXPIRES_AT }}"
           APP_KEY_MAPBOX="${{ secrets.TEST_APP_KEY_MAPBOX }}"
           APP_KEY_IP2Location="${{ secrets.TEST_APP_KEY_IP2Location }}"
 
@@ -297,6 +298,7 @@ jobs:
 
           APP_KEY_VISICOM="${{ secrets.WORK_APP_KEY_VISICOM }}"
           APP_KEY_VISICOM_MY="${{ secrets.WORK_APP_KEY_VISICOM_MY }}"
+          APP_KEY_VISICOM_EXPIRES_AT="${{ vars.WORK_APP_KEY_VISICOM_EXPIRES_AT }}"
           APP_KEY_MAPBOX="${{ secrets.WORK_APP_KEY_MAPBOX }}"
           APP_KEY_IP2Location="${{ secrets.WORK_APP_KEY_IP2Location }}"
           TAXI_LOG_LEVEL="${{ vars.WORK_TAXI_LOG_LEVEL }}"

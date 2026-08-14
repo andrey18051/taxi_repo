@@ -146,6 +146,7 @@ return [
 
     'keyVisicom' => env('APP_KEY_VISICOM'),
     'keyVisicomMy' => env('APP_KEY_VISICOM_MY'),
+    'keyVisicomExpiresAt' => env('APP_KEY_VISICOM_EXPIRES_AT') ?: '2026-09-12',
     'keyMapbox' => env('APP_KEY_MAPBOX'),
     'keyIP2Location' => env('APP_KEY_IP2Location'),
 

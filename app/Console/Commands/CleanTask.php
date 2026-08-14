@@ -46,7 +46,7 @@ class CleanTask extends Command
         //Очистка таблиці истории безнальных заказов
 //        (new CleanerTableController())->cleanUidHistoriesTable();
 
-        //Проверка версии Visicom
+        // Проверка ключа Visicom + Telegram (остаток срока)
         (new OpenStreetMapController)->checkVisicomRequest();
         (new WfpController())->transactionListJob();
         return 0;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\OpenStreetMapHelper;
+use App\Helpers\VisicomKeyCheckHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -364,25 +365,40 @@ class OpenStreetMapController extends Controller
     }
 
     /**
-     * Проверить запрос к API Visicom.
+     * Проверить запрос к API Visicom и сообщить в Telegram остаток срока ключа.
      */
     public function checkVisicomRequest()
     {
         $url = "https://api.visicom.ua/data-api/5.0/uk/geocode.json?categories=adr_address&near=30.51043,50.45358&r=50&l=1&key=" . config("app.keyVisicom");
 
         $response = Http::get($url);
+        $ok = $response->successful() && $response->json('type') === 'Feature';
+        $remainingText = VisicomKeyCheckHelper::formatRemainingText(config('app.keyVisicomExpiresAt'));
+        $environmentLabel = VisicomKeyCheckHelper::environmentLabel(
+            config('app.name'),
+            config('app.url')
+        );
+        $telegramMessage = VisicomKeyCheckHelper::buildTelegramMessage(
+            $ok,
+            $response->status(),
+            $environmentLabel,
+            $remainingText
+        );
 
-        if ($response->successful() && $response->json('type') === 'Feature') {
-            $messageAdmin = "Проверка ключа Визикома успешна: " . json_encode($response->json(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if ($ok) {
+            $messageAdmin = $telegramMessage . ' Ответ: ' . json_encode($response->json(), JSON_UNESCAPED_UNICODE);
         } else {
-            $messageAdmin = "Ошибка проверки ключа Визикома: " . json_encode([
+            $messageAdmin = $telegramMessage . ' Детали: ' . json_encode([
                     'error' => 'Invalid response from Visicom API',
                     'details' => $response->json(),
                     'status' => $response->status(),
-                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                ], JSON_UNESCAPED_UNICODE);
         }
 
+        Log::info($telegramMessage);
         (new MessageSentController)->sentMessageAdmin($messageAdmin);
+        (new InformerController())->sendMessageInformer($telegramMessage);
+        (new TelegramController())->sendMeMessage($telegramMessage);
     }
 
 }
