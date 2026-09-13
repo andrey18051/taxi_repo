@@ -57,7 +57,7 @@ class TimeHelper
     {
         $at = ($at ?? now())->timezone(self::KYIV_TIMEZONE);
         $currentMinutes = $at->hour * 60 + $at->minute;
-        $startMinutes = self::timeToMinutes(config('app.start_time', '00:00'));
+        $startMinutes = self::timeToMinutes(config('app.start_time', '01:00'));
         $endMinutes = self::timeToMinutes(config('app.end_time', '05:00'));
 
         if ($startMinutes <= $endMinutes) {
@@ -75,7 +75,7 @@ class TimeHelper
             'timezone' => self::KYIV_TIMEZONE,
             'current_time' => $at->format('H:i:s'),
             'current_datetime' => $at->toIso8601String(),
-            'start_time' => config('app.start_time', '00:00'),
+            'start_time' => config('app.start_time', '01:00'),
             'end_time' => config('app.end_time', '05:00'),
             'curfew_active' => self::isCurfewActive($at),
             'near_boundary' => self::isNearCurfewBoundary($at),
@@ -95,7 +95,7 @@ class TimeHelper
 
         $at = ($at ?? now())->timezone(self::KYIV_TIMEZONE);
         $currentMinutes = $at->hour * 60 + $at->minute;
-        $startMinutes = self::timeToMinutes(config('app.start_time', '00:00'));
+        $startMinutes = self::timeToMinutes(config('app.start_time', '01:00'));
         $endMinutes = self::timeToMinutes(config('app.end_time', '05:00'));
 
         return self::minutesWithinWindow($currentMinutes, $startMinutes, $windowMinutes)
