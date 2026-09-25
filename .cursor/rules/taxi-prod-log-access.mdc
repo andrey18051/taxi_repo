@@ -20,12 +20,12 @@ ssh -o BatchMode=yes -o ConnectTimeout=10 taxi-prod "echo OK"
 | | |
 |---|---|
 | Host alias | `taxi-prod` |
-| Адрес | `91.219.60.148`, user `root`, ключ `~/.ssh/id_taxi_prod` |
+| Адрес | `51.83.162.226`, user `root`, ключ `~/.ssh/id_taxi_prod` |
 | Контейнер test | `/opt/laravel_logs/taxi_test/laravel.log` (OdessaTest, PAS-тесты) |
 | Контейнер work | `/opt/laravel_logs/taxi_work/laravel.log` (прод) |
 | Архив за день | `laravel_log_YYYY-MM-DD_21-0*.log` в той же папке (ротация ~00:00 Kyiv) |
 
-Диспетчерская API `188.190.245.102` — **другой** сервер; Laravel-логи только на `91.219.60.148`.
+Диспетчерская API `188.190.245.102` — другой сервер; Laravel-логи только на `51.83.162.226`.
 
 ## Настройка на новом устройстве
 

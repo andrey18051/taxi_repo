@@ -13,7 +13,7 @@ alwaysApply: true
 | Workflow | `.github/workflows/ci-cd.yml` — **CI/CD Laravel Docker** |
 | Образ test | `ghcr.io/andrey18051/taxi_test:<SHA7>` |
 | Образ prod | `ghcr.io/andrey18051/taxi_work:<SHA7>` |
-| Prod-сервер | `91.219.60.148`, SSH alias `taxi-prod` |
+| Prod-сервер | `51.83.162.226`, SSH alias `taxi-prod` |
 | Контейнер prod | `taxi_work`, `--network host` |
 | Контейнер test | `taxi_test`, `--network host` |
 
