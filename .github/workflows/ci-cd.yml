@@ -208,10 +208,13 @@ jobs:
               chmod +x /opt/laravel_logs/taxi_test/watch_log.sh
             fi
 
+            test -f /opt/centrifugo/laravel.env || { echo "FATAL: missing /opt/centrifugo/laravel.env (Centrifugo)"; exit 1; }
+
             docker run --name taxi_test -d \
               --network host \
               --restart unless-stopped \
               --user 0:0 \
+              --env-file /opt/centrifugo/laravel.env \
               -v /opt/secrets/firebase/test:/run/secrets/firebase:ro \
               -v /opt/laravel_logs/taxi_test:/usr/share/nginx/html/laravel_logs \
               ghcr.io/andrey18051/taxi_test:$IMAGE_TAG
@@ -413,10 +416,13 @@ jobs:
               chmod +x /opt/laravel_logs/taxi_work/watch_log.sh
             fi
 
+            test -f /opt/centrifugo/laravel.env || { echo "FATAL: missing /opt/centrifugo/laravel.env (Centrifugo)"; exit 1; }
+
             docker run --name taxi_work -d \
               --network host \
               --restart unless-stopped \
               --user 0:0 \
+              --env-file /opt/centrifugo/laravel.env \
               -v /opt/secrets/firebase/prod:/run/secrets/firebase:ro \
               -v /opt/laravel_logs/taxi_work:/usr/share/nginx/html/laravel_logs \
               ghcr.io/andrey18051/taxi_work:$IMAGE_TAG
