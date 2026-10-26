@@ -98,6 +98,19 @@ class UIDController extends Controller
 
             $orderweb_uid = Orderweb::where("dispatching_order_uid", $uid)->first();
             Log::debug("closeReasonUIDStatusService uid $uid");
+            if ($orderweb_uid instanceof Orderweb && is_array($response_arr)) {
+                $recreate = \App\Services\Pas2SimpleDispatchRecreate::attempt($orderweb_uid, $response_arr, false);
+                if ($recreate !== \App\Services\Pas2SimpleDispatchRecreate::SKIP) {
+                    $fresh = $orderweb_uid->fresh();
+
+                    return (string) (($fresh !== null ? $fresh->closeReason : null) ?? '-1');
+                }
+                $orderweb_uid = Orderweb::where('dispatching_order_uid', $uid)->first();
+                if (!$orderweb_uid) {
+                    return '-1';
+                }
+            }
+
             $orderweb_uid->auto = $response_arr["order_car_info"];
 
             $orderweb_uid->closeReason = $response_arr["close_reason"];

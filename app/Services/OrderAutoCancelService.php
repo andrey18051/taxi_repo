@@ -230,7 +230,9 @@ class OrderAutoCancelService
         (new AndroidTestOSMController)->webordersCancel(
             $uid,
             $city,
-            $application
+            $application,
+            false,
+            \App\Services\OrderCancelOrigin::AUTO_CANCEL
         );
 
         $this->sendCancelNotification($order, $uid, $logPrefix);

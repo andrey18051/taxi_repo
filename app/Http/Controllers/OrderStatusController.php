@@ -10,6 +10,7 @@ use App\Helpers\OrderHelper;
 use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
 use App\Services\DispatchOrderCancelService;
+use App\Services\Pas2SimpleDispatchRecreate;
 use App\Support\ForkOrderCancelLegResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -1137,11 +1138,50 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * PAS 2: внезапное снятие на сервере такси не отдаём клиенту как «заказ снят»,
+     * пока заказ пересоздаётся или уже переключён на новый UID.
+     *
+     * @param array<string, mixed> $snapshot
+     */
+    private function respondPas2DispatchRecreate(
+        Orderweb $orderweb,
+        array $snapshot,
+        bool $recoverStored
+    ): ?\Illuminate\Http\JsonResponse {
+        $result = Pas2SimpleDispatchRecreate::attempt($orderweb, $snapshot, $recoverStored);
+        if ($result === Pas2SimpleDispatchRecreate::SKIP) {
+            return null;
+        }
+
+        $orderweb->refresh();
+        $uid = (string) $orderweb->dispatching_order_uid;
+        $payload = [
+            'action' => OrderStatusMessageResolver::ACTION_SEARCH,
+            'close_reason' => -1,
+            'dispatching_order_uid' => $uid,
+            'uid' => $uid,
+            'execution_status' => 'SearchesForCar',
+        ];
+        $displayCost = OrderHelper::resolveDisplayCostGrivna($orderweb);
+        if ($displayCost > 0) {
+            $payload['order_cost'] = (string) $displayCost;
+        }
+
+        Log::info('PAS2 dispatch recreate kept the order in search', [
+            'result' => $result,
+            'uid' => $uid,
+        ]);
+
+        return response()->json($payload);
+    }
+
+    /**
      * Одиночный безнал: live GET dispatch на каждый опрос (как uid_history у вилки).
      */
     private function buildSimpleCashlessLiveStatusPushResponse(Orderweb $orderweb, string $uid): ?\Illuminate\Http\JsonResponse
     {
-        if (!SimpleCashlessDispatchStatusSync::shouldLiveSync($orderweb)) {
+        if (!SimpleCashlessDispatchStatusSync::shouldLiveSync($orderweb)
+            && !Pas2SimpleDispatchRecreate::shouldLivePoll($orderweb)) {
             return null;
         }
 
@@ -1151,6 +1191,11 @@ class OrderStatusController extends Controller
         }
 
         $snapshot = self::normalizeFalseCanceledDispatchStatus($snapshot) ?? $snapshot;
+
+        $pas2Response = $this->respondPas2DispatchRecreate($orderweb, $snapshot, false);
+        if ($pas2Response !== null) {
+            return $pas2Response;
+        }
 
         $executionStatus = (string) ($snapshot['execution_status'] ?? 'SearchesForCar');
         $resolved = $this->resolveLegStatuses(
@@ -1352,6 +1397,14 @@ class OrderStatusController extends Controller
         if ($orderweb) {
             $isCanceledOrderweb = in_array((string) $orderweb->closeReason, ['1', '2', '3', '4', '5', '6', '7', '9'], true);
             if ($isCanceledOrderweb) {
+                $pas2Response = $this->respondPas2DispatchRecreate($orderweb, [
+                    'close_reason' => (int) $orderweb->closeReason,
+                    'execution_status' => 'Canceled',
+                ], true);
+                if ($pas2Response !== null) {
+                    return $pas2Response;
+                }
+
                 Log::info('Exiting function: orderweb canceled', [
                     'close_reason' => $orderweb->closeReason,
                     'dispatching_order_uid' => $uid,

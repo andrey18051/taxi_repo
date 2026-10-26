@@ -12816,6 +12816,10 @@ class AndroidTestOSMController extends Controller
         ?string $cancelInitiator = null
     ) {
         $uid = (new MemoryOrderChangeController)->show($uid);
+        \App\Services\OrderCancelOrigin::mark(
+            (string) $uid,
+            \App\Services\OrderCancelOrigin::normalize($cancelInitiator)
+        );
         $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
         if (!$orderweb) {
             $startTime = time();

@@ -148,7 +148,13 @@ class CheckAndCancelOrderJob implements ShouldQueue
         Log::info("CheckAndCancelOrderJob: cancel unpaid uid={$uid} city={$city}");
 
         try {
-            (new AndroidTestOSMController)->webordersCancel($uid, $city, $application, true);
+            (new AndroidTestOSMController)->webordersCancel(
+                $uid,
+                $city,
+                $application,
+                true,
+                \App\Services\OrderCancelOrigin::PAYMENT_TIMEOUT
+            );
         } catch (\Throwable $e) {
             Log::error("CheckAndCancelOrderJob: webordersCancel failed uid={$uid}: " . $e->getMessage());
         }
