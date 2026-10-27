@@ -110,6 +110,7 @@ final class Pas2SimpleDispatchRecreate
             'server' => (string) ($order->server ?? ''),
             'is_fork' => false,
             'close_reason' => $closeReason,
+            'order_is_archive' => self::isArchivedFlag($snapshot['order_is_archive'] ?? null),
             'execution_status' => (string) ($snapshot['execution_status'] ?? ''),
             'previous_close_reason' => (string) ($order->closeReason ?? ''),
             'recover_stored' => $recoverStored,
@@ -308,6 +309,36 @@ final class Pas2SimpleDispatchRecreate
         }
 
         return self::RECREATED;
+    }
+
+    /**
+     * Ответ опросу приложения, пока старый UID уже в архиве, а клиент должен остаться в поиске.
+     *
+     * @return array<string, mixed>
+     */
+    public static function holdingSearchResponse(Orderweb $order): array
+    {
+        $payload = [
+            'dispatching_order_uid' => (string) ($order->dispatching_order_uid ?? ''),
+            'close_reason' => -1,
+            'execution_status' => 'SearchesForCar',
+            'order_is_archive' => false,
+            'order_car_info' => null,
+        ];
+        $cost = $order->client_cost ?? $order->web_cost ?? null;
+        if ($cost !== null && $cost !== '') {
+            $payload['order_cost'] = (string) $cost;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public static function isArchivedFlag($value): bool
+    {
+        return $value === true || $value === 1 || $value === '1';
     }
 
     private static function notifyClient(Orderweb $order, string $newUid): void

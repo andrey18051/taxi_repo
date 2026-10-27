@@ -14,6 +14,7 @@ use App\Jobs\StartNewProcessExecution;
 use App\Jobs\TokenPayJob;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use App\Services\DispatchOrderCancelService;
+use App\Services\Pas2SimpleDispatchRecreate;
 use App\Support\ForkOrderCancelLegResolver;
 use App\Mail\Check;
 use App\Mail\Server;
@@ -14131,6 +14132,24 @@ class AndroidTestOSMController extends Controller
                         if (!is_array($response_arr)) {
                             $response_arr = [];
                         }
+
+                        $recreateResult = Pas2SimpleDispatchRecreate::attempt($orderweb_uid, $response_arr, false);
+                        if (Pas2SimpleDispatchRecreate::isArchivedFlag($response_arr['order_is_archive'] ?? null)
+                            || $recreateResult !== Pas2SimpleDispatchRecreate::SKIP) {
+                            Log::info('historyUIDStatusNew pas2 recreate check', [
+                                'result' => $recreateResult,
+                                'uid' => $uid,
+                                'close_reason' => $response_arr['close_reason'] ?? null,
+                                'execution_status' => $response_arr['execution_status'] ?? null,
+                                'order_is_archive' => $response_arr['order_is_archive'] ?? null,
+                            ]);
+                        }
+                        if ($recreateResult !== Pas2SimpleDispatchRecreate::SKIP) {
+                            $fresh = $orderweb_uid->fresh() ?? $orderweb_uid;
+
+                            return response()->json(Pas2SimpleDispatchRecreate::holdingSearchResponse($fresh));
+                        }
+
                         $response_arr = OrderStatusController::normalizeFalseCanceledDispatchStatus($response_arr);
                         Log::debug("$url: ", $response_arr);
 

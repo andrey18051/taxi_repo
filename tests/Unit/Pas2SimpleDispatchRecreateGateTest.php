@@ -19,6 +19,7 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
             'server' => 'http://188.190.245.102:7303',
             'is_fork' => false,
             'close_reason' => 2,
+            'order_is_archive' => true,
             'execution_status' => 'Canceled',
             'previous_close_reason' => '-1',
             'recover_stored' => false,
@@ -57,6 +58,48 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
             'is_fork' => true,
         ])));
+    }
+
+    public function test_archive_flag_is_required_for_foreign_close(): void
+    {
+        $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'order_is_archive' => false,
+        ])));
+        $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'order_is_archive' => null,
+        ])));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 5,
+            'execution_status' => 'CostCalculation',
+            'order_is_archive' => true,
+        ])));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 4,
+            'execution_status' => 'Canceled',
+            'order_is_archive' => true,
+        ])));
+        $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 8,
+            'execution_status' => 'Canceled',
+            'order_is_archive' => true,
+        ])));
+    }
+
+    public function test_holding_search_response_does_not_look_canceled(): void
+    {
+        $order = new Orderweb();
+        $order->dispatching_order_uid = 'new-uid';
+        $order->web_cost = '60';
+
+        $payload = Pas2SimpleDispatchRecreate::holdingSearchResponse($order);
+
+        $this->assertSame('new-uid', $payload['dispatching_order_uid']);
+        $this->assertSame(-1, $payload['close_reason']);
+        $this->assertSame('SearchesForCar', $payload['execution_status']);
+        $this->assertFalse($payload['order_is_archive']);
+        $this->assertSame('60', $payload['order_cost']);
+        $this->assertTrue(Pas2SimpleDispatchRecreate::isArchivedFlag(true));
+        $this->assertFalse(Pas2SimpleDispatchRecreate::isArchivedFlag(false));
     }
 
     public function test_client_close_reasons_stay_canceled(): void

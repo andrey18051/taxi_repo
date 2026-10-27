@@ -25,6 +25,7 @@ final class Pas2SimpleDispatchRecreateGate
      *   server?: string,
      *   is_fork?: bool,
      *   close_reason?: int,
+     *   order_is_archive?: bool,
      *   execution_status?: string,
      *   previous_close_reason?: string,
      *   recover_stored?: bool,
@@ -56,6 +57,10 @@ final class Pas2SimpleDispatchRecreateGate
 
         $closeReason = (int) ($context['close_reason'] ?? -999);
         if (!in_array($closeReason, self::FOREIGN_CLOSE_REASONS, true)) {
+            return false;
+        }
+
+        if (empty($context['recover_stored']) && empty($context['order_is_archive'])) {
             return false;
         }
 
