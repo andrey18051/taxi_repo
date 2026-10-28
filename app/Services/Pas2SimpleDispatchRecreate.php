@@ -32,6 +32,9 @@ final class Pas2SimpleDispatchRecreate
 
     public const RECREATED = 'recreated';
 
+    /** POST не прошёл. Клиенту оставляем поиск и пробуем на следующем опросе. */
+    public const RETRY = 'retry';
+
     /** Цепочка уже переключена другим опросом — снимок старого UID не записывать. */
     public const MOVED = 'moved';
 
@@ -200,11 +203,12 @@ final class Pas2SimpleDispatchRecreate
 
         unset($parameter['dispatching_order_uid'], $parameter['order_uid'], $parameter['uid']);
 
-        $connectApi = rtrim((string) $memory->connectAPI, '/');
-        if ($connectApi === '') {
-            $connectApi = rtrim((string) $order->server, '/');
+        $url = self::webordersEndpoint((string) $memory->connectAPI, (string) $order->server);
+        if ($url === '') {
+            Log::warning('Pas2SimpleDispatchRecreate: dispatch url is empty', ['uid' => $oldUid]);
+
+            return self::SKIP;
         }
-        $url = $connectApi . '/api/weborders';
 
         try {
             $response = (new UniversalAndroidFunctionController)->postRequestHTTP(
@@ -215,7 +219,7 @@ final class Pas2SimpleDispatchRecreate
                 (string) $memory->apiVersion
             );
             if ($response === null) {
-                return self::SKIP;
+                return self::RETRY;
             }
             $body = is_object($response) && method_exists($response, 'body')
                 ? $response->body()
@@ -224,19 +228,21 @@ final class Pas2SimpleDispatchRecreate
         } catch (\Throwable $e) {
             Log::error('Pas2SimpleDispatchRecreate: dispatch POST failed', [
                 'uid' => $oldUid,
+                'url' => $url,
                 'error' => $e->getMessage(),
             ]);
 
-            return self::SKIP;
+            return self::RETRY;
         }
 
         if (!is_array($responseArr) || isset($responseArr['Message']) || empty($responseArr['dispatching_order_uid'])) {
             Log::error('Pas2SimpleDispatchRecreate: new order was not created', [
                 'uid' => $oldUid,
+                'url' => $url,
                 'response' => $responseArr,
             ]);
 
-            return self::SKIP;
+            return self::RETRY;
         }
 
         $newUid = (string) $responseArr['dispatching_order_uid'];
@@ -273,7 +279,7 @@ final class Pas2SimpleDispatchRecreate
             $newUid,
             json_encode($parameter, JSON_UNESCAPED_UNICODE),
             (string) $memory->authorization,
-            $connectApi,
+            $url,
             (string) $memory->identificationId,
             (string) $memory->apiVersion
         );
@@ -341,6 +347,28 @@ final class Pas2SimpleDispatchRecreate
         return $value === true || $value === 1 || $value === '1';
     }
 
+    /**
+     * В driver_memory_orders.connectAPI лежит уже полный URL создания
+     * (`http://host:port/api/weborders`). Повторно путь не дописываем.
+     * Пустое поле — база из order.server.
+     */
+    public static function webordersEndpoint(string $storedConnectApi, string $orderServer = ''): string
+    {
+        foreach ([$storedConnectApi, $orderServer] as $candidate) {
+            $value = rtrim($candidate, '/');
+            if ($value === '') {
+                continue;
+            }
+            if (str_ends_with(strtolower($value), '/api/weborders')) {
+                return $value;
+            }
+
+            return $value . '/api/weborders';
+        }
+
+        return '';
+    }
+
     private static function notifyClient(Orderweb $order, string $newUid): void
     {
         $email = (string) ($order->email ?? '');
@@ -376,8 +404,8 @@ final class Pas2SimpleDispatchRecreate
 
     private static function abandonDispatchUid(DriverMemoryOrder $memory, string $newUid): void
     {
-        $connectApi = rtrim((string) $memory->connectAPI, '/');
-        if ($connectApi === '' || (string) $memory->authorization === '') {
+        $cancelUrl = self::webordersEndpoint((string) $memory->connectAPI, '');
+        if ($cancelUrl === '' || (string) $memory->authorization === '') {
             return;
         }
 
@@ -386,7 +414,7 @@ final class Pas2SimpleDispatchRecreate
                 'Authorization' => (string) $memory->authorization,
                 'X-WO-API-APP-ID' => (string) $memory->identificationId,
                 'X-API-VERSION' => (string) $memory->apiVersion,
-            ])->put($connectApi . '/api/weborders/cancel/' . $newUid);
+            ])->put($cancelUrl . '/cancel/' . $newUid);
         } catch (\Throwable $e) {
             Log::error('Pas2SimpleDispatchRecreate: failed to cancel orphan uid', [
                 'uid' => $newUid,

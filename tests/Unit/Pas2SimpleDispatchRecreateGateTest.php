@@ -102,6 +102,25 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         $this->assertFalse(Pas2SimpleDispatchRecreate::isArchivedFlag(false));
     }
 
+    public function test_stored_dispatch_url_is_not_doubled(): void
+    {
+        $stored = 'http://188.190.245.102:7303/api/weborders';
+
+        $this->assertSame(
+            $stored,
+            Pas2SimpleDispatchRecreate::webordersEndpoint($stored, 'http://188.190.245.102:7303')
+        );
+        $this->assertSame(
+            $stored,
+            Pas2SimpleDispatchRecreate::webordersEndpoint('http://188.190.245.102:7303/', '')
+        );
+        $this->assertSame(
+            $stored,
+            Pas2SimpleDispatchRecreate::webordersEndpoint('', 'http://188.190.245.102:7303')
+        );
+        $this->assertSame('', Pas2SimpleDispatchRecreate::webordersEndpoint('', ''));
+    }
+
     public function test_client_close_reasons_stay_canceled(): void
     {
         foreach ([1, 6, 7, 9] as $reason) {
