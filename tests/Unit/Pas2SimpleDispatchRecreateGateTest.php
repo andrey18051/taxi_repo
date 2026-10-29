@@ -144,16 +144,47 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         ])));
     }
 
-    public function test_does_not_recreate_after_car_is_assigned(): void
+    public function test_recreates_when_dispatch_archives_after_car_was_assigned(): void
+    {
+        foreach ([2, 3, 4, 5] as $reason) {
+            $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+                'close_reason' => $reason,
+                'order_is_archive' => true,
+                'has_car' => true,
+                'previous_close_reason' => '-1',
+                'execution_status' => $reason === 5 ? 'CostCalculation' : 'Canceled',
+            ])));
+        }
+
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 4,
+            'has_car' => true,
+            'previous_close_reason' => '101',
+            'execution_status' => 'WaitingCarSearch',
+        ])));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 2,
+            'has_car' => true,
+            'execution_status' => 'CarFound',
+        ])));
+    }
+
+    public function test_does_not_recreate_a_live_or_finished_trip(): void
     {
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'order_is_archive' => false,
             'has_car' => true,
+            'execution_status' => 'CarFound',
         ])));
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'order_is_archive' => false,
             'previous_close_reason' => '101',
+            'execution_status' => 'Running',
         ])));
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
-            'execution_status' => 'Running',
+            'has_car' => true,
+            'execution_status' => 'Executed',
+            'close_reason' => 5,
         ])));
     }
 

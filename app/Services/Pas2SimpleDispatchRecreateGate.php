@@ -16,6 +16,12 @@ final class Pas2SimpleDispatchRecreateGate
     /** Заказ ещё в поиске, машину клиенту не показывали. */
     public const SEARCH_CLOSE_REASONS = ['-1', '0', '100', ''];
 
+    /**
+     * Машину уже показывали. Если диспетчер после этого закрыл заказ
+     * причиной 2/3/4/5, это снятое авто, а не живая поездка.
+     */
+    public const CAR_SHOWN_CLOSE_REASONS = ['101', '102', '103'];
+
     private const TRIP_EXECUTION = ['CarFound', 'Running', 'Executed'];
 
     /**
@@ -64,12 +70,14 @@ final class Pas2SimpleDispatchRecreateGate
             return false;
         }
 
+        $archivedForeign = self::isArchivedForeignClose($context, $closeReason);
         $execution = (string) ($context['execution_status'] ?? '');
-        if (in_array($execution, self::TRIP_EXECUTION, true)) {
+        if ($execution === 'Executed'
+            || (!$archivedForeign && in_array($execution, self::TRIP_EXECUTION, true))) {
             return false;
         }
 
-        if (!empty($context['has_car'])) {
+        if (!$archivedForeign && !empty($context['has_car'])) {
             return false;
         }
 
@@ -90,7 +98,22 @@ final class Pas2SimpleDispatchRecreateGate
         }
 
         $previous = (string) ($context['previous_close_reason'] ?? '');
+        if (in_array($previous, self::SEARCH_CLOSE_REASONS, true)) {
+            return true;
+        }
 
-        return in_array($previous, self::SEARCH_CLOSE_REASONS, true);
+        return $archivedForeign && in_array($previous, self::CAR_SHOWN_CLOSE_REASONS, true);
+    }
+
+    /**
+     * Архив диспетчера с «нет машины» / «отказ водителя» / «просчет».
+     * Сохранённое авто с прошлого опроса здесь уже не живой заказ.
+     *
+     * @param array<string, mixed> $context
+     */
+    private static function isArchivedForeignClose(array $context, int $closeReason): bool
+    {
+        return !empty($context['order_is_archive'])
+            && in_array($closeReason, self::FOREIGN_CLOSE_REASONS, true);
     }
 }
