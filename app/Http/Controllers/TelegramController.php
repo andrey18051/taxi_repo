@@ -160,7 +160,7 @@ class TelegramController extends Controller
 
     public function sendAlarmMessage($message)
     {
-        $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        $bot = config('bots.bot');
         Log::debug('sendAlarmMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
         Bus::chain([
@@ -172,7 +172,7 @@ class TelegramController extends Controller
 
     public function sendMeMessage($message)
     {
-        $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        $bot = config('bots.bot');
         Log::debug('sendMeMessage sending message: ' . $message);
 
 
@@ -186,7 +186,7 @@ class TelegramController extends Controller
 
     public function sendAlarmMessageLog($message)
     {
-        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
+        $bot = config('bots.info_bot');
 
         Log::debug('sendAlarmMessageLog sending message: ' . $message);
         // Отправляем в фоновую задачу
@@ -200,16 +200,11 @@ class TelegramController extends Controller
     public function sendMeMessageLog($message)
     {
         Log::debug('sendMeMessageLog sending message: ' . $message);
-//        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
-//        $bot = '8014868428:AAGhoxe4QJ6umD3XC3gMKo24eAze3uOjoxY'; //@andrey_log_bot
-//        // Отправляем в фоновую задачу
-//        Queue::push(new SendTelegramMessageJob($bot, 120352595, $message));
-//        return response()->json(['status' => 'Message sent in background'], 200);
     }
 
     public function sendInformMessage($message)
     {
-        $bot = '7012302264:AAG-uGMIt4xBQLGznvXXR0VkqtNsXw462gg'; //@andrey_info_bot
+        $bot = config('bots.info_bot');
         Log::debug('sendInformMessage sending message: ' . $message);
         // Отправляем в фоновую задачу
         Bus::chain([
@@ -221,7 +216,7 @@ class TelegramController extends Controller
 
     public function sendAboutDriverMessage($chat_id, $message)
     {
-        $bot = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        $bot = config('bots.bot');
         Log::debug('sendAboutDriverMessage sending message: ' . $message);
         // Отправляем в фоновую задачу для каждого чата
 
@@ -238,7 +233,7 @@ class TelegramController extends Controller
 
     public function sendMessageWithButton(string $telegramText, string $buttonText, string $buttonUrl)
     {
-        $botToken = '5875481045:AAE33BtWoSzilwWXGssmb4GIP27pxlvA9wo';
+        $botToken = config('bots.bot');
         $mainChatId = 120352595;
         $alarmChatId = config('app.chat_id_alarm', $mainChatId);
 
