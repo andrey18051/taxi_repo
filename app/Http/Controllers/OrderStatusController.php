@@ -1343,6 +1343,51 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Вилка: приложение может опрашивать наличный uid, а orderweb хранится на карточном.
+     *
+     * @param array<string, mixed>|null $nalOrder
+     * @param array<string, mixed>|null $cardOrder
+     */
+    private function findOrderwebForStatusPush(
+        string $polledUid,
+        ?Uid_history $history,
+        string $dispatchingOrderUid,
+        ?array $nalOrder,
+        ?array $cardOrder
+    ): ?Orderweb {
+        $candidates = [
+            $polledUid,
+            $dispatchingOrderUid,
+            $history->uid_bonusOrder ?? null,
+            $history->uid_doubleOrder ?? null,
+            $history->uid_bonusOrderHold ?? null,
+            is_array($cardOrder) ? ($cardOrder['dispatching_order_uid'] ?? null) : null,
+            is_array($nalOrder) ? ($nalOrder['dispatching_order_uid'] ?? null) : null,
+        ];
+        $seen = [];
+        foreach ($candidates as $candidate) {
+            $candidate = trim((string) $candidate);
+            if ($candidate === '' || isset($seen[$candidate])) {
+                continue;
+            }
+            $seen[$candidate] = true;
+            $found = Orderweb::where('dispatching_order_uid', $candidate)->first();
+            if ($found) {
+                if ($candidate !== $polledUid) {
+                    Log::info('Status push orderweb resolved via fork uid', [
+                        'polled_uid' => $polledUid,
+                        'orderweb_uid' => $found->dispatching_order_uid,
+                    ]);
+                }
+
+                return $found;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Add-cost recreation cancels the old dispatch uid while the same orderweb row
      * already points at the new uid — do not mark the live order canceled.
      */
@@ -1471,11 +1516,27 @@ class OrderStatusController extends Controller
             $autoInfoCard = $cardOrder['order_car_info'] ?? null;
             Log::debug('Extracted auto info', ['autoInfoNal' => $autoInfoNal, 'autoInfoCard' => $autoInfoCard]);
 
+            if (!$orderweb) {
+                $orderweb = $this->findOrderwebForStatusPush(
+                    $uid,
+                    $uid_history,
+                    $dispatching_order_uid,
+                    is_array($nalOrder) ? $nalOrder : null,
+                    is_array($cardOrder) ? $cardOrder : null
+                );
+            }
+
             if (self::isExplicitForkCancelRequested($uid_history)) {
                 if (self::areForkLegSnapshotsCancelSettled($cardOrder, $nalOrder)) {
                     $action = 'Заказ снят';
-                    self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
-                    $orderweb->save();
+                    if ($orderweb) {
+                        self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
+                        $orderweb->save();
+                    } else {
+                        Log::info('Dispatch cancel without orderweb row', [
+                            'dispatching_order_uid' => $dispatching_order_uid,
+                        ]);
+                    }
                     $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
                     Log::info('Order canceled (explicit fork cancel settled)', [
                         'action' => $action,
@@ -1500,8 +1561,14 @@ class OrderStatusController extends Controller
                 || self::isDispatchOrderCanceled($cardOrder)
                 || self::isDispatchOrderCanceled($nalOrder))) {
                 $action = 'Заказ снят';
-                self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
-                $orderweb->save();
+                if ($orderweb) {
+                    self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
+                    $orderweb->save();
+                } else {
+                    Log::info('Dispatch cancel without orderweb row', [
+                        'dispatching_order_uid' => $dispatching_order_uid,
+                    ]);
+                }
                 $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
                 Log::info('Order canceled', [
                     'action' => $action,
@@ -1512,6 +1579,22 @@ class OrderStatusController extends Controller
                 Log::info('Exiting function due to cancel', ['response' => $response]);
                 return $response;
             }
+            if (!$orderweb) {
+                $resolved = $this->resolveLegStatuses($nalState, $cardState, $nalOrder, $cardOrder);
+                $action = $resolved['action'];
+                $response = $resolved['response_leg'] === 'card' ? $cardOrderInput : $nalOrderInput;
+                $response = $this->addActionToResponseUid($response, $action, $dispatching_order_uid);
+                if ($resolved['close_reason'] >= 0) {
+                    $response = $this->patchCloseReasonInResponse($response, $resolved['close_reason']);
+                }
+                Log::info('Exiting status push without orderweb', [
+                    'action' => $action,
+                    'dispatching_order_uid' => $dispatching_order_uid,
+                ]);
+
+                return $response;
+            }
+
             $newAuto = $autoInfoNal ?? $autoInfoCard ?? null;
             if ($newAuto !== null) {
                 $orderweb->auto = $newAuto;
