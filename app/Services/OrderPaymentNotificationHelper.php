@@ -66,6 +66,11 @@ class OrderPaymentNotificationHelper
         return "Прив'язка оплати. Заказ: {$uid}. WFP: {$orderReference}. Тип: {$payLabel}. Сума: {$cost} грн.";
     }
 
+    public static function isConfirmedHoldStatus(?string $transactionStatus): bool
+    {
+        return in_array($transactionStatus, ['WaitingAuthComplete', 'Approved'], true);
+    }
+
     public static function notifyPaymentBoundTelegram(Orderweb $orderweb, string $orderReference): void
     {
         if ($orderReference === '' || $orderReference === '*') {

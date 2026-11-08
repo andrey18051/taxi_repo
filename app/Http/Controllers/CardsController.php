@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Services\CardChargeSelector;
 use App\Models\City_PAS1;
 use App\Models\City_PAS2;
 use App\Models\City_PAS4;
@@ -56,19 +57,31 @@ class CardsController extends Controller
             $user = User::where("email", $email)->first();
 
             if ($user) {
-                $activeCard = Card::
-                where("user_id", $user->id)->
-                where('merchant', $merchantAccount)->
-                where('app', $application)->
-                where('pay_system', 'wfp')->
-                where("active", true)->first();
-                $messageAdmin = "getActiveCard" . $activeCard;
+                $cards = Card::query()
+                    ->where('user_id', $user->id)
+                    ->where('merchant', $merchantAccount)
+                    ->where('app', $application)
+                    ->where('pay_system', 'wfp')
+                    ->orderByDesc('id')
+                    ->get();
+                $messageAdmin = 'getActiveCard count=' . $cards->count()
+                    . ' merchant=' . $merchantAccount
+                    . ' app=' . $application;
                 (new MessageSentController)->sentMessageAdminLog($messageAdmin);
-                if ($activeCard) {
-                    return ["rectoken" => $activeCard->rectoken];
-                } else {
+
+                $picked = CardChargeSelector::pick($cards->map(static function (Card $card) {
+                    return [
+                        'id' => $card->id,
+                        'active' => $card->active,
+                        'rectoken' => $card->rectoken,
+                    ];
+                })->all());
+
+                if ($picked === null || empty($picked['rectoken'])) {
                     return null;
                 }
+
+                return ['rectoken' => $picked['rectoken']];
             }
         }
     }

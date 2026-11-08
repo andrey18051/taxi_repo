@@ -2537,7 +2537,7 @@ class WfpController extends Controller
             ];
 
 // Відправлення POST-запиту
-            $response = Http::post('https://api.wayforpay.com/api ', $params);
+            $response = Http::post('https://api.wayforpay.com/api', $params);
             Log::debug("purchase: ", ['response' => $response->body()]);
             return $response;
         }
@@ -2963,7 +2963,16 @@ class WfpController extends Controller
             $merchantAccount = $merchant->wfp_merchantAccount;
             $secretKey = $merchant->wfp_merchantSecretKey;
 
-            $recToken = (new CardsController)->getActiveCard($clientEmail, $city, $application)['rectoken'];
+            $activeCard = (new CardsController)->getActiveCard($clientEmail, $city, $application);
+            $recToken = is_array($activeCard) ? ($activeCard['rectoken'] ?? null) : null;
+            if ($recToken == null) {
+                Log::warning('chargeActiveToken: no card token, hold skipped', [
+                    'orderReference' => $orderReference,
+                    'application' => $application,
+                    'city' => $city,
+                    'email' => $clientEmail,
+                ]);
+            }
             if ($recToken != null) {
                 $recToken = (new CardsController)->decryptToken($recToken);
 
@@ -3010,7 +3019,7 @@ class WfpController extends Controller
                 ];
 
                 // Відправлення POST-запиту
-                $response = Http::post('https://api.wayforpay.com/api ', $params);
+                $response = Http::post('https://api.wayforpay.com/api', $params);
                 Log::debug("purchase: ", ['response' => $response->body()]);
                 $this->stampInvoiceMerchantAfterCharge($orderReference, $response, $merchantAccount);
 
@@ -3020,6 +3029,16 @@ class WfpController extends Controller
                     $orderReference
                 );
                 $data = json_decode($responseStatus->body(), true);
+                $holdStatus = is_array($data) ? ($data['transactionStatus'] ?? null) : null;
+                if (\App\Services\OrderPaymentNotificationHelper::isConfirmedHoldStatus($holdStatus)) {
+                    $boundOrder = Orderweb::where('wfp_order_id', $orderReference)->first();
+                    if ($boundOrder !== null) {
+                        \App\Services\OrderPaymentNotificationHelper::notifyPaymentBoundTelegram(
+                            $boundOrder,
+                            $orderReference
+                        );
+                    }
+                }
 
                 $wfpInvoices = WfpInvoice::where("orderReference", $orderReference)->first();
                 if ($wfpInvoices !== null) {
@@ -3435,7 +3454,8 @@ class WfpController extends Controller
             $merchantAccount = $merchant->wfp_merchantAccount;
             $secretKey = $merchant->wfp_merchantSecretKey;
 
-            $recToken = (new CardsController)->getActiveCard($clientEmail, $city, $application)['rectoken'];
+            $activeCard = (new CardsController)->getActiveCard($clientEmail, $city, $application);
+            $recToken = is_array($activeCard) ? ($activeCard['rectoken'] ?? null) : null;
             if ($recToken != null) {
                 $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
 
@@ -3486,7 +3506,7 @@ class WfpController extends Controller
                 ];
 
 // Відправлення POST-запиту
-                $response = Http::post('https://api.wayforpay.com/api ', $params);
+                $response = Http::post('https://api.wayforpay.com/api', $params);
                 Log::debug("purchase: ", ['response' => $response->body()]);
                 $this->stampInvoiceMerchantAfterCharge($orderReference, $response, $merchantAccount);
 
@@ -4672,7 +4692,7 @@ class WfpController extends Controller
         ];
 
 // Відправлення POST-запиту
-        $response = Http::post('https://api.wayforpay.com/api ', $params);
+        $response = Http::post('https://api.wayforpay.com/api', $params);
         Log::debug("purchase: ", ['response' => $response->body()]);
         return $response;
     }

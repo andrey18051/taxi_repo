@@ -5698,7 +5698,9 @@ class UniversalAndroidFunctionController extends Controller
         $orderweb->pay_system = $pay_system;
         $orderweb->save();
 
-        \App\Services\OrderPaymentNotificationHelper::notifyPaymentBoundTelegram($orderweb, $orderReference);
+        if ($pay_system === 'google_pay_payment') {
+            \App\Services\OrderPaymentNotificationHelper::notifyPaymentBoundTelegram($orderweb, $orderReference);
+        }
 
         $application = SimpleCashlessPaymentWatch::resolveApplicationLabel($orderweb);
         if ($application !== null) {
@@ -5829,6 +5831,17 @@ class UniversalAndroidFunctionController extends Controller
     ): void {
         if ($paySystem !== 'wfp_payment') {
             return;
+        }
+
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if ($invoice !== null) {
+            $linkedOrder = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
+            if ($linkedOrder !== null
+                && is_numeric($linkedOrder->client_cost)
+                && (float) $linkedOrder->client_cost > 0
+            ) {
+                $amount = $linkedOrder->client_cost;
+            }
         }
 
         if ($preferredCardId !== null && $preferredCardId !== '') {
