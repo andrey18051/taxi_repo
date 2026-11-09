@@ -5,7 +5,7 @@ namespace App\City;
 final class PaymentFlowAuthorization
 {
     /**
-     * Adjust dispatch authorization for city payment_flow (fork / simple / off).
+     * Adjust dispatch authorization for city payment_flow (fork, legacy fork, simple, off).
      */
     public static function apply(array $authorizationChoiceArr, int $paymentFlow): array
     {

@@ -51,7 +51,7 @@
                     <td><input class="form-input input-lg"  style="width: 300px" v-model="filters.name.value" placeholder="Select by name"></td>
                     <td><input class="form-input input-lg"  style="width: 100px" v-model="filters.card_max_pay.value" placeholder="Select by card_max_pay" value="0"></td>
                     <td> <input class="form-input input-lg" style="width: 100px" v-model="filters.bonus_max_pay.value"  placeholder="Select by bonus_max_pay" value="0" ></td>
-                    <td> <input class="form-input input-lg" style="width: 140px" v-model="filters.payment_flow.value" placeholder="0/1/2"></td>
+                    <td> <input class="form-input input-lg" style="width: 140px" v-model="filters.payment_flow.value" placeholder="0/1/2/3"></td>
                     <td> <input class="form-input input-lg" style="width: 200px" v-model="filters.address.value"  placeholder="Select by address"></td>
                     <td> <input class="form-input input-lg" style="width: 150px" v-model="filters.login.value"  placeholder="Select by login"></td>
                     <td> <input class="form-input input-lg" style="width: 150px" v-model="filters.password.value"  placeholder="Select by password"></td>
@@ -65,10 +65,11 @@
                     <td><input id="card_max_pay" class="form-control" style="width: 100px" v-model.text="row.card_max_pay"  ></td>
                     <td> <input id="bonus_max_pay" class="form-control" style="width: 100px" v-model.text="row.bonus_max_pay"  ></td>
                     <td>
-                        <select id="payment_flow" class="form-control" style="width: 140px" v-model="row.payment_flow">
+                        <select id="payment_flow" class="form-control" style="width: 190px" v-model="row.payment_flow">
                             <option :value="0">0 — выкл</option>
                             <option :value="1">1 — вилка</option>
                             <option :value="2">2 — простой</option>
+                            <option :value="3">3 — вилка старая</option>
                         </select>
                     </td>
                     <td><input id="address" class="form-control" style="width: 200px" v-model.text="row.address" required ></td>

@@ -24,6 +24,23 @@ class PaymentFlowAuthorizationTest extends TestCase
         $this->assertSame('base-auth', $result['authorization']);
     }
 
+    public function test_legacy_fork_mode_keeps_pair_authorization(): void
+    {
+        $input = [
+            'authorization' => 'base-auth',
+            'payment_type' => 1,
+            'authorizationBonus' => 'bonus-auth',
+            'authorizationDouble' => 'double-auth',
+        ];
+
+        $result = PaymentFlowAuthorization::apply($input, PaymentFlow::FORK_LEGACY);
+
+        $this->assertSame('bonus-auth', $result['authorizationBonus']);
+        $this->assertSame('double-auth', $result['authorizationDouble']);
+        $this->assertSame('base-auth', $result['authorization']);
+        $this->assertSame(1, $result['payment_type']);
+    }
+
     public function test_simple_mode_uses_single_card_authorization(): void
     {
         $input = [

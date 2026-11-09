@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\LegacyForkStatusPoll;
 use App\City\CityPaymentFlowResolver;
 use App\City\GooglePayOrderReferenceResolver;
 use App\City\PaymentFlow;
@@ -52,6 +53,8 @@ use Illuminate\Support\Facades\Redis;
 
 class UniversalAndroidFunctionController extends Controller
 {
+    use LegacyForkStatusPoll;
+
     public function sentErrorMessage($message)
     {
         $alarmMessage = new TelegramController();
@@ -3170,6 +3173,15 @@ class UniversalAndroidFunctionController extends Controller
 
     public function startNewProcessExecutionStatusJob($doubleOrderId, $jobId): ?string
     {
+        if ($this->legacyForkStatusPollRequested($doubleOrderId)) {
+            Log::info("Fork status poll: legacy switch (payment_flow=3)", [
+                'doubleOrderId' => $doubleOrderId,
+                'jobId' => $jobId,
+            ]);
+
+            return $this->startNewProcessExecutionStatusJobLegacy($doubleOrderId, $jobId);
+        }
+
         try {
             Log::info("Starting startNewProcessExecutionStatusJob with doubleOrderId: {$doubleOrderId}, jobId: {$jobId}");
 
