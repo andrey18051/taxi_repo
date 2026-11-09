@@ -2061,9 +2061,28 @@ class OrderStatusController extends Controller
             // Если $response - это строка или массив
             $data = json_decode($response, true); // Преобразуем в массив
         }
+        if (!is_array($data)) {
+            $data = [];
+        }
+        $data = self::stampClientOrderUid($data, $action, $dispatching_order_uid);
+        return json_encode($data);  // Возвращаем результат в виде JSON
+    }
+
+    /**
+     * Номер заказа для приложения — карточной половины вилки, не ноги из тела статуса.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    public static function stampClientOrderUid(array $data, $action, $dispatching_order_uid): array
+    {
         $data['action'] = $action;
         $data['uid'] = $dispatching_order_uid;
-        return json_encode($data);  // Возвращаем результат в виде JSON
+        if ($dispatching_order_uid !== null && $dispatching_order_uid !== '') {
+            $data['dispatching_order_uid'] = $dispatching_order_uid;
+        }
+
+        return $data;
     }
 
     public function addCarInfoToResponseUid(

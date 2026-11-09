@@ -5866,7 +5866,7 @@ class UniversalAndroidFunctionController extends Controller
         }
 
         $productName = 'Інша допоміжна діяльність у сфері транспорту';
-        (new WfpController)->chargeActiveToken(
+        $chargeResponse = (new WfpController)->chargeActiveToken(
             $application,
             $city,
             $orderReference,
@@ -5875,6 +5875,9 @@ class UniversalAndroidFunctionController extends Controller
             $clientEmail,
             $clientPhone
         );
+        if ($chargeResponse === null) {
+            return;
+        }
         (new WfpController)->checkStatus($application, $city, $orderReference);
     }
 

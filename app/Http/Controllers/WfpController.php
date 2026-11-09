@@ -1068,6 +1068,23 @@ class WfpController extends Controller
     }
 
     /**
+     * Ответ клиенту. 1127 у WFP приходит как Declined, хотя банк запрос не получал.
+     */
+    public static function clientVisibleWfpStatus(array $wfpResponse): array
+    {
+        if (!self::shouldSkipCheckStatusInvoiceUpdate($wfpResponse)) {
+            return $wfpResponse;
+        }
+
+        $wfpResponse['transactionStatus'] = 'Pending';
+        if (($wfpResponse['reason'] ?? '') === '') {
+            $wfpResponse['reason'] = 'Order Not Found';
+        }
+
+        return $wfpResponse;
+    }
+
+    /**
      * Способы оплаты на странице ВФП для invoice (привязка карты 1 грн, повторная оплата через WebView).
      * Google Pay исключён: токен GPay не даёт rectoken для wfp_payment.
      */
@@ -1164,12 +1181,18 @@ class WfpController extends Controller
 
                 if (isset($response)) {
                     $data = json_decode($response->body(), true);
-                    if (self::shouldSkipCheckStatusInvoiceUpdate($data)) {
+                    if (is_array($data) && self::shouldSkipCheckStatusInvoiceUpdate($data)) {
                         Log::debug('checkStatus: order not in WFP yet, skip invoice update', [
                             'orderReference' => $orderReference,
                         ]);
 
-                        return $response;
+                        $visible = self::clientVisibleWfpStatus($data);
+                        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+                        if ($invoice && $invoice->transactionStatus === 'CardNotLinked') {
+                            $visible['transactionStatus'] = 'CardNotLinked';
+                        }
+
+                        return response()->json($visible);
                     }
 
                     $invoice = WfpInvoice::where("orderReference", $orderReference)->first();
@@ -1294,6 +1317,11 @@ class WfpController extends Controller
 
                 if (!$data || !isset($data['transactionStatus'])) {
                     Log::error("Ошибка получения ответа от WayforPay API на попытке $attempt");
+                } elseif (self::shouldSkipCheckStatusInvoiceUpdate($data)) {
+                    Log::debug('checkStatusJob: order not in WFP yet', [
+                        'orderReference' => $orderReference,
+                        'attempt' => $attempt,
+                    ]);
                 } else {
                     $transactionStatus = $data['transactionStatus'];
                     if (!$invoice) {
@@ -2900,6 +2928,29 @@ class WfpController extends Controller
      * @throws \Pusher\PusherException
      * @throws \Pusher\ApiErrorException
      */
+    /**
+     * Токена для мерчанта этого города нет: банк не вызываем и не пишем Declined.
+     */
+    private function markCardNotLinked($orderReference, $application, $clientEmail): void
+    {
+        $invoice = WfpInvoice::where('orderReference', $orderReference)->first();
+        if ($invoice === null || empty($invoice->dispatching_order_uid)) {
+            return;
+        }
+
+        $invoice->transactionStatus = 'CardNotLinked';
+        $invoice->reason = 'No card token for this merchant';
+        $invoice->reasonCode = 0;
+        $invoice->save();
+
+        PaymentStatusNotifier::notifyTransactionStatus(
+            'CardNotLinked',
+            $invoice->dispatching_order_uid,
+            $application,
+            (string) $clientEmail
+        );
+    }
+
     public function chargeActiveToken(
         $application,
         $city,
@@ -2972,6 +3023,9 @@ class WfpController extends Controller
                     'city' => $city,
                     'email' => $clientEmail,
                 ]);
+                $this->markCardNotLinked($orderReference, $application, $clientEmail);
+
+                return null;
             }
             if ($recToken != null) {
                 $recToken = (new CardsController)->decryptToken($recToken);

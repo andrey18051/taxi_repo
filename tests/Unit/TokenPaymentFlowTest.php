@@ -33,6 +33,29 @@ class TokenPaymentFlowTest extends TestCase
         ]));
     }
 
+    public function test_order_not_found_is_not_shown_as_card_decline(): void
+    {
+        $visible = WfpController::clientVisibleWfpStatus([
+            'reasonCode' => 1127,
+            'transactionStatus' => 'Declined',
+            'reason' => 'Order Not Found',
+        ]);
+
+        $this->assertSame('Pending', $visible['transactionStatus']);
+        $this->assertSame('Order Not Found', $visible['reason']);
+    }
+
+    public function test_real_decline_stays_visible_to_client(): void
+    {
+        $visible = WfpController::clientVisibleWfpStatus([
+            'reasonCode' => 1101,
+            'transactionStatus' => 'Declined',
+            'reason' => 'Declined To Card Issuer',
+        ]);
+
+        $this->assertSame('Declined', $visible['transactionStatus']);
+    }
+
     public function test_save_order_and_charge_runs_in_correct_order(): void
     {
         $callOrder = [];
