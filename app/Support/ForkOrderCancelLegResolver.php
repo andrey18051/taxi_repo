@@ -127,6 +127,20 @@ class ForkOrderCancelLegResolver
         return Orderweb::where('dispatching_order_uid', $hold)->first();
     }
 
+    /**
+     * В истории есть живая пара карта+нал. Одиночный cancel по одной ноге
+     * должен закрыть обе, а не ждать orderweb с ключом этой ноги.
+     */
+    public static function hasLivePair(?Uid_history $history): bool
+    {
+        if ($history === null) {
+            return false;
+        }
+
+        return trim((string) ($history->uid_bonusOrder ?? '')) !== ''
+            && trim((string) ($history->uid_doubleOrder ?? '')) !== '';
+    }
+
     public static function findHistory(string $uidA, string $uidB): ?Uid_history
     {
         $candidates = self::lookupCandidates($uidA, $uidB);

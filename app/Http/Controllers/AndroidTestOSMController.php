@@ -12406,6 +12406,48 @@ class AndroidTestOSMController extends Controller
     }
 
     /**
+     * PAS шлёт одиночный webordersCancel по uid карты или нала.
+     * orderweb вилки лежит на холде, поэтому поиск по ноге ждал минуту и клиент обрывал запрос.
+     *
+     * @return array{response: string}|null
+     */
+    public function cancelForkPairIfLeg(string $uid, string $city, string $application): ?array
+    {
+        $uid = trim($uid);
+        if ($uid === '') {
+            return null;
+        }
+
+        $history = ForkOrderCancelLegResolver::findHistory($uid, '');
+        $orderweb = ForkOrderCancelLegResolver::findOrderweb($uid, '');
+        if ($orderweb === null || !ForkOrderCancelLegResolver::hasLivePair($history)) {
+            return null;
+        }
+
+        Log::info('webordersCancel: fork leg, cancel both live legs', [
+            'requested_uid' => $uid,
+            'hold' => $orderweb->dispatching_order_uid,
+            'bonus' => $history->uid_bonusOrder,
+            'double' => $history->uid_doubleOrder,
+        ]);
+
+        $result = $this->dispatchForkClientCancel(
+            $orderweb,
+            (string) $history->uid_bonusOrder,
+            (string) $history->uid_doubleOrder,
+            $city,
+            $application,
+            $history
+        );
+
+        return [
+            'response' => $result['client_message']
+                ?? $result['response']
+                ?? 'Запит на скасування замовлення надіслано. ',
+        ];
+    }
+
+    /**
      * Гибридная отмена вилки: обе ноги (bonus + double) в одной кампании DispatchOrderCancelService.
      *
      * @return array{
@@ -12817,6 +12859,11 @@ class AndroidTestOSMController extends Controller
         bool $forceDispatchCancel = false,
         ?string $cancelInitiator = null
     ) {
+        $forkCancel = $this->cancelForkPairIfLeg((string) $uid, (string) $city, (string) $application);
+        if ($forkCancel !== null) {
+            return $forkCancel;
+        }
+
         $uid = (new MemoryOrderChangeController)->show($uid);
         \App\Services\OrderCancelOrigin::mark(
             (string) $uid,

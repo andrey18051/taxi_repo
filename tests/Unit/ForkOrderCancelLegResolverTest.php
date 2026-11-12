@@ -58,6 +58,19 @@ class ForkOrderCancelLegResolverTest extends TestCase
         $this->assertSame('double-uid', $legs[2]['uid']);
     }
 
+    public function test_has_live_pair_requires_both_legs(): void
+    {
+        $pair = new Uid_history();
+        $pair->uid_bonusOrder = '2c189ffe26c04d7bbc9d0f59ba5a6172';
+        $pair->uid_doubleOrder = '4ca84d2e9b614096a300608b8ce821a6';
+        $this->assertTrue(ForkOrderCancelLegResolver::hasLivePair($pair));
+
+        $cardOnly = new Uid_history();
+        $cardOnly->uid_bonusOrder = '2c189ffe26c04d7bbc9d0f59ba5a6172';
+        $this->assertFalse(ForkOrderCancelLegResolver::hasLivePair($cardOnly));
+        $this->assertFalse(ForkOrderCancelLegResolver::hasLivePair(null));
+    }
+
     public function test_live_sibling_prefers_history_uid_over_stale_loop_variable(): void
     {
         $history = new Uid_history();
