@@ -2486,56 +2486,19 @@ trait LegacyForkStatusPoll
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
                                                     Log::info("Nested lastStatusDouble case: SearchesForCar or WaitingCarSearch");
-                                                    //Отмена Bonus
-                                                    self::orderCanceled(
+                                                    if ($this->tryCloseActiveForkSearch(
+                                                        $uid_history,
+                                                        'double',
                                                         $bonusOrder,
-                                                        "bonus",
+                                                        'bonus',
                                                         $connectAPI,
                                                         $authorizationBonus,
                                                         $identificationId,
                                                         $apiVersion
-                                                    );
-                                                    Log::info("Called orderCanceled for bonus");
-                                                    //Опрос безнала
-                                                    $lastTimeUpdate = $lastStatusBonusTime;
-                                                    Log::info("Set lastTimeUpdate to lastStatusBonusTime: {$lastTimeUpdate}");
-                                                    //                                                $updateTime = 5;
-                                                    $newStatusBonus = self::newStatus(
-                                                        $authorizationBonus,
-                                                        $identificationId,
-                                                        $apiVersion,
-                                                        $responseBonus["url"],
-                                                        $bonusOrder,
-                                                        "bonus",
-                                                        $lastTimeUpdate,
-                                                        $updateTime,
-                                                        $uid_history
-                                                    );
-                                                    Log::info("Updated newStatusBonus: {$newStatusBonus}");
-                                                    $lastStatusBonusTime = time();
-                                                    Log::info("Updated lastStatusBonusTime: {$lastStatusBonusTime}");
-                                                    if ($no_required_time) {
-                                                        Log::info("no_required_time true, entering switch for updateTime");
-                                                        switch ($newStatusBonus) {
-                                                            case "SearchesForCar":
-                                                            case "WaitingCarSearch":
-                                                                $updateTime = 5;
-                                                                Log::info("Updated updateTime to 5");
-                                                                break;
-                                                            default:
-                                                                switch ($newStatusDouble) {
-                                                                    case "SearchesForCar":
-                                                                    case "WaitingCarSearch":
-                                                                        $updateTime = 5;
-                                                                        Log::info("Updated updateTime to 5");
-                                                                        break;
-                                                                    default:
-                                                                        $updateTime = 5;
-                                                                        Log::info("Default updateTime to 5");
-                                                                }
-                                                        }
+                                                    )) {
+                                                        break;
                                                     }
-                                                    break;
+                                                    // Отказ водителя: ногу нала создать заново, безнал не снимать.
                                                 case "Canceled":
                                                     if ($this->tryCloseActiveForkSearch(
                                                         $uid_history,
@@ -2654,56 +2617,19 @@ trait LegacyForkStatusPoll
                                                 case "SearchesForCar":
                                                 case "WaitingCarSearch":
                                                     Log::info("Nested lastStatusDouble case: SearchesForCar or WaitingCarSearch");
-                                                    //Отмена Bonus
-                                                    self::orderCanceled(
+                                                    if ($this->tryCloseActiveForkSearch(
+                                                        $uid_history,
+                                                        'double',
                                                         $bonusOrder,
-                                                        "bonus",
+                                                        'bonus',
                                                         $connectAPI,
                                                         $authorizationBonus,
                                                         $identificationId,
                                                         $apiVersion
-                                                    );
-                                                    Log::info("Called orderCanceled for bonus");
-                                                    //Опрос безнала
-                                                    $lastTimeUpdate = $lastStatusBonusTime;
-                                                    Log::info("Set lastTimeUpdate to lastStatusBonusTime: {$lastTimeUpdate}");
-                                                    //                                                $updateTime = 5;
-                                                    $newStatusBonus = self::newStatus(
-                                                        $authorizationBonus,
-                                                        $identificationId,
-                                                        $apiVersion,
-                                                        $responseBonus["url"],
-                                                        $bonusOrder,
-                                                        "bonus",
-                                                        $lastTimeUpdate,
-                                                        $updateTime,
-                                                        $uid_history
-                                                    );
-                                                    Log::info("Updated newStatusBonus: {$newStatusBonus}");
-                                                    $lastStatusBonusTime = time();
-                                                    Log::info("Updated lastStatusBonusTime: {$lastStatusBonusTime}");
-                                                    if ($no_required_time) {
-                                                        Log::info("no_required_time true, entering switch for updateTime");
-                                                        switch ($newStatusBonus) {
-                                                            case "SearchesForCar":
-                                                            case "WaitingCarSearch":
-                                                                $updateTime = 5;
-                                                                Log::info("Updated updateTime to 5");
-                                                                break;
-                                                            default:
-                                                                switch ($newStatusDouble) {
-                                                                    case "SearchesForCar":
-                                                                    case "WaitingCarSearch":
-                                                                        $updateTime = 5;
-                                                                        Log::info("Updated updateTime to 5");
-                                                                        break;
-                                                                    default:
-                                                                        $updateTime = 5;
-                                                                        Log::info("Default updateTime to 5");
-                                                                }
-                                                        }
+                                                    )) {
+                                                        break;
                                                     }
-                                                    break;
+                                                    // Отказ водителя: ногу нала создать заново, безнал не снимать.
                                                 case "Canceled":
                                                     if ($this->tryCloseActiveForkSearch(
                                                         $uid_history,

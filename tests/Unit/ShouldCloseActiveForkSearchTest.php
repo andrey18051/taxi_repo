@@ -18,6 +18,16 @@ class ShouldCloseActiveForkSearchTest extends TestCase
         ));
     }
 
+    public function test_cash_driver_refusal_while_card_searches_keeps_the_card(): void
+    {
+        $this->assertFalse($this->shouldClose(
+            $this->canceledLeg(2),
+            $this->leg('SearchesForCar'),
+            $this->orderweb(null),
+            false
+        ));
+    }
+
     public function test_driver_refusal_while_searching_keeps_the_other_leg(): void
     {
         foreach ([2, 3, 5] as $closeReason) {
