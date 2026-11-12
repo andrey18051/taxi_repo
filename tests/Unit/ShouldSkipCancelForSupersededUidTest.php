@@ -26,6 +26,7 @@ class ShouldSkipCancelForSupersededUidTest extends TestCase
             $table->id();
             $table->string('dispatching_order_uid')->nullable();
             $table->string('closeReason')->nullable();
+            $table->string('auto')->nullable();
             $table->timestamp('cancel_timestamp')->nullable();
             $table->timestamps();
         });
@@ -84,6 +85,21 @@ class ShouldSkipCancelForSupersededUidTest extends TestCase
         $orderweb = $this->makeOrderweb(self::NEW_UID);
 
         $this->assertTrue($this->invokeShouldSkip(self::OLD_UID, $orderweb));
+    }
+
+    public function test_do_not_skip_when_polled_uid_is_successor_of_hold(): void
+    {
+        $this->makeMemoryMapping(self::OLD_UID, self::NEW_UID);
+        $orderweb = $this->makeOrderweb(self::OLD_UID);
+
+        $this->assertFalse($this->invokeShouldSkip(self::NEW_UID, $orderweb));
+
+        OrderStatusController::applyCanceledOrderweb($orderweb);
+        $orderweb->save();
+        $orderweb->refresh();
+
+        $this->assertSame('1', (string) $orderweb->closeReason);
+        $this->assertNotNull($orderweb->cancel_timestamp);
     }
 
     public function test_do_not_skip_cancel_for_active_order_with_same_uid(): void

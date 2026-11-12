@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Concerns;
 
 use App\City\PaymentFlow;
+use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\MemoryOrderChangeController;
+use App\Http\Controllers\OrderStatusController;
 use App\Services\ForkLegUidChain;
 use App\Models\DoubleOrder;
 use App\Models\ExecStatusHistory;
@@ -905,9 +907,36 @@ trait LegacyForkStatusPoll
                                     case "SearchesForCar":
                                         Log::info("Nested case SearchesForCar for double");
                                         switch ($lastStatusBonus) {
+                                            case "SearchesForCar":
+                                            case "WaitingCarSearch":
+                                                Log::info("Nested lastStatusBonus case: active search cancel");
+                                                $this->tryCloseActiveForkSearch(
+                                                    $uid_history,
+                                                    'bonus',
+                                                    $doubleOrder,
+                                                    'double',
+                                                    $connectAPI,
+                                                    $authorizationDouble,
+                                                    $identificationId,
+                                                    $apiVersion
+                                                );
+                                                break;
+                                            case "Canceled":
+                                                if ($this->tryCloseActiveForkSearch(
+                                                    $uid_history,
+                                                    'bonus',
+                                                    $doubleOrder,
+                                                    'double',
+                                                    $connectAPI,
+                                                    $authorizationDouble,
+                                                    $identificationId,
+                                                    $apiVersion
+                                                )) {
+                                                    Log::info("Active fork search closed instead of restoring bonus, uid={$bonusOrder}");
+                                                    break;
+                                                }
                                             case "CarFound":
                                             case "Running":
-                                            case "Canceled":
                                             case "Executed":
                                             case "CostCalculation":
                                                 Log::info("Nested lastStatusBonus case: CarFound, Running, Canceled, Executed or CostCalculation");
@@ -1048,9 +1077,22 @@ trait LegacyForkStatusPoll
                                                     }
                                                 }
                                                 break;
+                                            case "Canceled":
+                                                if ($this->tryCloseActiveForkSearch(
+                                                    $uid_history,
+                                                    'bonus',
+                                                    $doubleOrder,
+                                                    'double',
+                                                    $connectAPI,
+                                                    $authorizationDouble,
+                                                    $identificationId,
+                                                    $apiVersion
+                                                )) {
+                                                    Log::info("Active fork search closed instead of restoring bonus, uid={$bonusOrder}");
+                                                    break;
+                                                }
                                             case "CarFound":
                                             case "Running":
-                                            case "Canceled":
                                             case "Executed":
                                             case "CostCalculation":
                                                 Log::info("Nested lastStatusBonus case: CarFound, Running, Canceled, Executed or CostCalculation");
@@ -2491,9 +2533,22 @@ trait LegacyForkStatusPoll
                                                         }
                                                     }
                                                     break;
+                                                case "Canceled":
+                                                    if ($this->tryCloseActiveForkSearch(
+                                                        $uid_history,
+                                                        'double',
+                                                        $bonusOrder,
+                                                        'bonus',
+                                                        $connectAPI,
+                                                        $authorizationBonus,
+                                                        $identificationId,
+                                                        $apiVersion
+                                                    )) {
+                                                        Log::info("Active fork search closed instead of restoring double, uid={$doubleOrder}");
+                                                        break;
+                                                    }
                                                 case "CarFound":
                                                 case "Running":
-                                                case "Canceled":
                                                 case "Executed":
                                                 case "CostCalculation":
                                                     Log::info("Nested lastStatusDouble case: CarFound, Running, Canceled, Executed or CostCalculation");
@@ -2646,9 +2701,22 @@ trait LegacyForkStatusPoll
                                                         }
                                                     }
                                                     break;
+                                                case "Canceled":
+                                                    if ($this->tryCloseActiveForkSearch(
+                                                        $uid_history,
+                                                        'double',
+                                                        $bonusOrder,
+                                                        'bonus',
+                                                        $connectAPI,
+                                                        $authorizationBonus,
+                                                        $identificationId,
+                                                        $apiVersion
+                                                    )) {
+                                                        Log::info("Active fork search closed instead of restoring double, uid={$doubleOrder}");
+                                                        break;
+                                                    }
                                                 case "CarFound":
                                                 case "Running":
-                                                case "Canceled":
                                                 case "Executed":
                                                 case "CostCalculation":
                                                     Log::info("Nested lastStatusDouble case: CarFound, Running, Canceled, Executed or CostCalculation");
@@ -3195,9 +3263,85 @@ trait LegacyForkStatusPoll
     }
 
     /**
+     * Оператор снял ногу, пока вторая ещё в поиске и машина не назначена.
+     * Закрыть вторую ногу и заказ клиента, не создавая новый поиск.
+     *
+     * @param Uid_history|null $uidHistory
+     * @param string $canceledLeg bonus|double
+     * @param string $siblingLeg bonus|double
+     */
+    private function tryCloseActiveForkSearch(
+        $uidHistory,
+        string $canceledLeg,
+        $siblingUid,
+        string $siblingLeg,
+        $connectAPI,
+        $authorization,
+        $identificationId,
+        $apiVersion
+    ): bool {
+        if (!$uidHistory instanceof Uid_history) {
+            return false;
+        }
+
+        $uidHistory->refresh();
+        $bonus = json_decode((string) $uidHistory->bonus_status, true);
+        $double = json_decode((string) $uidHistory->double_status, true);
+        $canceledSnapshot = $canceledLeg === 'bonus'
+            ? (is_array($bonus) ? $bonus : null)
+            : (is_array($double) ? $double : null);
+        $otherSnapshot = $canceledLeg === 'bonus'
+            ? (is_array($double) ? $double : null)
+            : (is_array($bonus) ? $bonus : null);
+
+        $hold = (string) $uidHistory->uid_bonusOrderHold;
+        $orderweb = $hold !== ''
+            ? Orderweb::where('dispatching_order_uid', $hold)->first()
+            : null;
+        $armed = OrderStatusController::isForkLegRecreationArmed($uidHistory, $canceledLeg);
+        if (!OrderStatusController::shouldCloseActiveForkSearchInsteadOfRestore(
+            $canceledSnapshot,
+            $otherSnapshot,
+            $orderweb,
+            $armed
+        )) {
+            return false;
+        }
+
+        if ($siblingUid !== null && $siblingUid !== '') {
+            self::orderCanceled(
+                $siblingUid,
+                $siblingLeg,
+                $connectAPI,
+                $authorization,
+                $identificationId,
+                $apiVersion
+            );
+            Log::info("Called orderCanceled for {$siblingLeg} instead of restoring {$canceledLeg}");
+        }
+
+        OrderStatusController::markForkLegDispatcherCanceled($uidHistory, $canceledLeg);
+        OrderStatusController::markExplicitForkCancelRequested($uidHistory);
+
+        if ($orderweb !== null) {
+            OrderStatusController::applyCanceledOrderweb($orderweb);
+            $orderweb->save();
+            (new AndroidTestOSMController())->cleanupFirestoreOnClientCancel($hold);
+            OrderStatusController::notifyForkOrderCanceledPush($orderweb, $hold);
+        }
+
+        Log::info('Active fork search closed instead of leg restore', [
+            'canceled_leg' => $canceledLeg,
+            'hold' => $hold,
+        ]);
+
+        return true;
+    }
+
+    /**
      * Новая нога вилки заменяет текущий UID и остаётся в цепочке, чтобы холд ждал все заказы.
      *
-     * @param \App\Models\Uid_history|null $uidHistory
+     * @param Uid_history|null $uidHistory
      * @param string $leg bonus|double
      */
     private function restoreLegacyForkLeg(
@@ -3209,6 +3353,22 @@ trait LegacyForkStatusPoll
         $url,
         $parameter
     ) {
+        if ($uidHistory instanceof Uid_history
+            && (OrderStatusController::isExplicitForkCancelRequested($uidHistory)
+                || OrderStatusController::isForkLegDispatcherCanceled($uidHistory, $leg))
+        ) {
+            $current = $leg === 'bonus'
+                ? (string) $uidHistory->uid_bonusOrder
+                : (string) $uidHistory->uid_doubleOrder;
+            Log::info('Skip legacy fork restore: cancel already requested', [
+                'leg' => $leg,
+                'uid' => $current,
+                'hold' => $uidHistory->uid_bonusOrderHold,
+            ]);
+
+            return $current;
+        }
+
         $newUid = self::orderNewCreat(
             $authorization,
             $identificationId,

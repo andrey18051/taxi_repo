@@ -1401,28 +1401,77 @@ class OrderStatusController extends Controller
         $currentUid = (string) $orderweb->dispatching_order_uid;
         $polledUid = (string) $uid;
 
-        if ($currentUid !== $polledUid) {
-            Log::info('Skip cancel: orderweb uid differs from polled uid (add-cost recreation)', [
-                'polled_uid' => $polledUid,
-                'orderweb_uid' => $currentUid,
-                'order_id' => $orderweb->id,
-            ]);
-
-            return true;
+        if ($currentUid === $polledUid) {
+            return false;
         }
 
-        $latestUid = (string) (new MemoryOrderChangeController())->findLatestOrderUid($polledUid);
-        if ($latestUid !== $polledUid && $currentUid === $latestUid) {
+        $memory = new MemoryOrderChangeController();
+        $latestOfPolled = (string) $memory->findLatestOrderUid($polledUid);
+        if ($latestOfPolled !== '' && $latestOfPolled !== $polledUid && $currentUid === $latestOfPolled) {
             Log::info('Skip cancel: polled uid superseded by active order', [
                 'polled_uid' => $polledUid,
-                'latest_uid' => $latestUid,
+                'latest_uid' => $latestOfPolled,
                 'order_id' => $orderweb->id,
             ]);
 
             return true;
         }
 
-        return false;
+        // Опрошенная нога — текущий конец цепочки этого orderweb (замена/отмена вилки).
+        // Заказ клиента ещё на холде, его нужно закрыть.
+        $latestOfCurrent = (string) $memory->findLatestOrderUid($currentUid);
+        if ($latestOfCurrent === $polledUid) {
+            return false;
+        }
+
+        Log::info('Skip cancel: orderweb uid differs from polled uid (add-cost recreation)', [
+            'polled_uid' => $polledUid,
+            'orderweb_uid' => $currentUid,
+            'order_id' => $orderweb->id,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Оператор снял или заменил ногу, пока вилка ещё в поиске и машина не назначена.
+     * Новую ногу не создавать: закрыть вторую ногу и заказ клиента.
+     *
+     * @param array<string, mixed>|null $canceledLeg
+     * @param array<string, mixed>|null $otherLeg
+     * @param Orderweb|null $orderweb
+     */
+    public static function shouldCloseActiveForkSearchInsteadOfRestore(
+        ?array $canceledLeg,
+        ?array $otherLeg,
+        $orderweb,
+        bool $recreationArmed
+    ): bool {
+        if ($recreationArmed || $canceledLeg === null || $canceledLeg === []) {
+            return false;
+        }
+
+        $status = (string) ($canceledLeg['execution_status'] ?? '');
+        if (strcasecmp($status, 'Canceled') !== 0 && strcasecmp($status, 'Cancelled') !== 0) {
+            return false;
+        }
+        if (self::isForkTechnicalDispatchCancel($canceledLeg)) {
+            return false;
+        }
+
+        $otherStatus = (string) ($otherLeg['execution_status'] ?? '');
+        if ($otherStatus !== '' && !in_array($otherStatus, ['SearchesForCar', 'WaitingCarSearch'], true)) {
+            return false;
+        }
+
+        if ($orderweb !== null) {
+            $auto = $orderweb->auto ?? null;
+            if ($auto !== null && $auto !== '') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
