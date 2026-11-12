@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\City\PaymentFlow;
 use App\City\SimpleCashlessDispatchStatusSync;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Models\Orderweb;
@@ -258,12 +259,64 @@ final class WfpHoldRefundEligibility
                 $snapshots[] = $doubleSnapshot;
             }
 
-            return $snapshots;
+            return $this->appendLegacyForkChainSnapshots(
+                $orderweb,
+                $snapshots,
+                $bonusUid,
+                $doubleUid,
+                (string) ($orderweb->dispatching_order_uid ?? $uid)
+            );
         }
 
         $snapshot = SimpleCashlessDispatchStatusSync::fetchDispatchSnapshot($orderweb, $uid);
 
-        return $snapshot === null ? null : [$snapshot];
+        if ($snapshot === null) {
+            return null;
+        }
+
+        return $this->appendLegacyForkChainSnapshots(
+            $orderweb,
+            [$snapshot],
+            $uid,
+            '',
+            (string) ($orderweb->dispatching_order_uid ?? $uid)
+        );
+    }
+
+    /**
+     * payment_flow = 3: возврат холда ждёт закрытия каждого заказа вилки.
+     *
+     * @param list<array<string, mixed>> $snapshots
+     * @return list<array<string, mixed>>|null
+     */
+    private function appendLegacyForkChainSnapshots(
+        Orderweb $orderweb,
+        array $snapshots,
+        string $bonusUid,
+        string $doubleUid,
+        string $holdUid
+    ): ?array {
+        if (PaymentFlow::normalize($orderweb->payment_flow_mode ?? 0) !== PaymentFlow::FORK_LEGACY) {
+            return $snapshots;
+        }
+
+        $known = array_values(array_filter([$bonusUid, $doubleUid], static function ($value) {
+            return trim((string) $value) !== '';
+        }));
+
+        foreach ((new ForkLegUidChain())->allUids($bonusUid, $doubleUid, $holdUid) as $forkUid) {
+            if (in_array($forkUid, $known, true)) {
+                continue;
+            }
+            $known[] = $forkUid;
+            $extra = SimpleCashlessDispatchStatusSync::fetchDispatchSnapshot($orderweb, $forkUid);
+            if ($extra === null) {
+                return null;
+            }
+            $snapshots[] = $extra;
+        }
+
+        return $snapshots;
     }
 
     /**

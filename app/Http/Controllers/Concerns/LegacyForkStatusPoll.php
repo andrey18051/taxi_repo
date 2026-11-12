@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Concerns;
 
 use App\City\PaymentFlow;
 use App\Http\Controllers\MemoryOrderChangeController;
+use App\Services\ForkLegUidChain;
 use App\Models\DoubleOrder;
 use App\Models\ExecStatusHistory;
 use App\Models\Orderweb;
@@ -474,7 +475,9 @@ trait LegacyForkStatusPoll
 
                                         //Восстановление нала
                                         Log::info("Calling orderNewCreat for double");
-                                        $doubleOrder = self::orderNewCreat(
+                                        $doubleOrder = $this->restoreLegacyForkLeg(
+                                            $uid_history,
+                                            'double',
                                             $authorizationDouble,
                                             $identificationId,
                                             $apiVersion,
@@ -909,7 +912,9 @@ trait LegacyForkStatusPoll
                                             case "CostCalculation":
                                                 Log::info("Nested lastStatusBonus case: CarFound, Running, Canceled, Executed or CostCalculation");
                                                 //Восстановление безнала
-                                                $bonusOrder = self::orderNewCreat(
+                                                $bonusOrder = $this->restoreLegacyForkLeg(
+                                                    $uid_history,
+                                                    'bonus',
                                                     $authorizationBonus,
                                                     $identificationId,
                                                     $apiVersion,
@@ -1050,7 +1055,9 @@ trait LegacyForkStatusPoll
                                             case "CostCalculation":
                                                 Log::info("Nested lastStatusBonus case: CarFound, Running, Canceled, Executed or CostCalculation");
                                                 //Восстановление безнала
-                                                $bonusOrder = self::orderNewCreat(
+                                                $bonusOrder = $this->restoreLegacyForkLeg(
+                                                    $uid_history,
+                                                    'bonus',
                                                     $authorizationBonus,
                                                     $identificationId,
                                                     $apiVersion,
@@ -1351,7 +1358,9 @@ trait LegacyForkStatusPoll
                                     case "WaitingCarSearch":
                                         Log::info("Nested case SearchesForCar or WaitingCarSearch for double");
                                         //Восстановление безнала
-                                        $bonusOrder = self::orderNewCreat(
+                                        $bonusOrder = $this->restoreLegacyForkLeg(
+                                            $uid_history,
+                                            'bonus',
                                             $authorizationBonus,
                                             $identificationId,
                                             $apiVersion,
@@ -1716,7 +1725,9 @@ trait LegacyForkStatusPoll
                                             }
 
                                             //Восстановление безнала
-                                            $bonusOrder = self::orderNewCreat(
+                                            $bonusOrder = $this->restoreLegacyForkLeg(
+                                                $uid_history,
+                                                'bonus',
                                                 $authorizationBonus,
                                                 $identificationId,
                                                 $apiVersion,
@@ -1907,7 +1918,9 @@ trait LegacyForkStatusPoll
                                                 }
                                             }
                                             //Восстановление безнала
-                                            $bonusOrder = self::orderNewCreat(
+                                            $bonusOrder = $this->restoreLegacyForkLeg(
+                                                $uid_history,
+                                                'bonus',
                                                 $authorizationBonus,
                                                 $identificationId,
                                                 $apiVersion,
@@ -2486,7 +2499,9 @@ trait LegacyForkStatusPoll
                                                     Log::info("Nested lastStatusDouble case: CarFound, Running, Canceled, Executed or CostCalculation");
                                                     //Восстановление нала
                                                     //                                        if ($doubleCancel) {
-                                                    $doubleOrder = self::orderNewCreat(
+                                                    $doubleOrder = $this->restoreLegacyForkLeg(
+                                                        $uid_history,
+                                                        'double',
                                                         $authorizationDouble,
                                                         $identificationId,
                                                         $apiVersion,
@@ -2638,7 +2653,9 @@ trait LegacyForkStatusPoll
                                                 case "CostCalculation":
                                                     Log::info("Nested lastStatusDouble case: CarFound, Running, Canceled, Executed or CostCalculation");
                                                     //Восстановление нала
-                                                    $doubleOrder = self::orderNewCreat(
+                                                    $doubleOrder = $this->restoreLegacyForkLeg(
+                                                        $uid_history,
+                                                        'double',
                                                         $authorizationDouble,
                                                         $identificationId,
                                                         $apiVersion,
@@ -2924,7 +2941,9 @@ trait LegacyForkStatusPoll
                                             Log::info("Nested case SearchesForCar or WaitingCarSearch for bonus");
                                             //Восстановление нала
                                             //                                if ($doubleCancel) {
-                                            $doubleOrder = self::orderNewCreat(
+                                            $doubleOrder = $this->restoreLegacyForkLeg(
+                                                $uid_history,
+                                                'double',
                                                 $authorizationDouble,
                                                 $identificationId,
                                                 $apiVersion,
@@ -3173,6 +3192,49 @@ trait LegacyForkStatusPoll
 
             return false;
         }
+    }
+
+    /**
+     * Новая нога вилки заменяет текущий UID и остаётся в цепочке, чтобы холд ждал все заказы.
+     *
+     * @param \App\Models\Uid_history|null $uidHistory
+     * @param string $leg bonus|double
+     */
+    private function restoreLegacyForkLeg(
+        $uidHistory,
+        string $leg,
+        $authorization,
+        $identificationId,
+        $apiVersion,
+        $url,
+        $parameter
+    ) {
+        $newUid = self::orderNewCreat(
+            $authorization,
+            $identificationId,
+            $apiVersion,
+            $url,
+            $parameter
+        );
+
+        if ($uidHistory instanceof \App\Models\Uid_history) {
+            $published = (new ForkLegUidChain())->publishLeg(
+                $uidHistory,
+                $leg,
+                is_string($newUid) ? $newUid : null
+            );
+            if ($published !== null) {
+                Log::info('Legacy fork leg published', [
+                    'leg' => $leg,
+                    'uid' => $published,
+                    'hold' => $uidHistory->uid_bonusOrderHold,
+                ]);
+
+                return $published;
+            }
+        }
+
+        return $newUid;
     }
 
 }

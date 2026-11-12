@@ -8,6 +8,8 @@ use App\Helpers\WfpOrderPaymentContextHelper;
 use App\Jobs\CheckStatusJob;
 use App\Jobs\RefundSettleCardPayJob;
 use App\Jobs\StartAddCostCardBottomCreat;
+use App\Services\ForkHoldSettlement;
+use App\Services\ForkLegUidChain;
 use App\Services\PaymentStatusNotifier;
 use App\Services\WfpHoldRefundEligibility;
 use App\Mail\Check;
@@ -4302,6 +4304,25 @@ class WfpController extends Controller
                 Log::info("closeReason_bonusOrderHold ($closeReason_bonusOrderHold) not 0 or 8, hold_bonusOrderHold remains false");
         }
 
+        $this->applyLegacyForkHoldGate(
+            $order,
+            $bonusOrder,
+            $doubleOrder,
+            $bonusOrderHold,
+            $connectAPI,
+            $autorization,
+            $identificationId,
+            $closeReason_bonusOrder,
+            $closeReason_doubleOrder,
+            $closeReason_bonusOrderHold,
+            $hold_bonusOrder,
+            $hold_doubleOrder,
+            $hold_bonusOrderHold,
+            $amount_settle,
+            $result,
+            $amount
+        );
+
         if ($amount >= $amount_settle) {
             $amount = $amount_settle;
             $order->web_cost = $amount;
@@ -4429,6 +4450,110 @@ class WfpController extends Controller
 
         return $result;
     }
+
+    /**
+     * payment_flow = 3: холд ждёт закрытия каждого заказа вилки, не первой пары.
+     *
+     * @param mixed $closeReason_bonusOrder
+     * @param mixed $closeReason_doubleOrder
+     * @param mixed $closeReason_bonusOrderHold
+     * @param bool $hold_bonusOrder
+     * @param bool $hold_doubleOrder
+     * @param bool $hold_bonusOrderHold
+     * @param mixed $amount_settle
+     * @param int $result
+     * @param mixed $originalAmount
+     */
+    private function applyLegacyForkHoldGate(
+        Orderweb $order,
+        $bonusOrder,
+        $doubleOrder,
+        $bonusOrderHold,
+        $connectAPI,
+        $autorization,
+        $identificationId,
+        &$closeReason_bonusOrder,
+        &$closeReason_doubleOrder,
+        &$closeReason_bonusOrderHold,
+        &$hold_bonusOrder,
+        &$hold_doubleOrder,
+        &$hold_bonusOrderHold,
+        &$amount_settle,
+        &$result,
+        $originalAmount
+    ): void {
+        if (PaymentFlow::normalize($order->payment_flow_mode ?? 0) !== PaymentFlow::FORK_LEGACY) {
+            return;
+        }
+
+        $reasons = [
+            $closeReason_bonusOrder,
+            $closeReason_doubleOrder,
+            $closeReason_bonusOrderHold,
+        ];
+        $known = [];
+        foreach ([$bonusOrder, $doubleOrder, $bonusOrderHold] as $knownUid) {
+            $knownUid = trim((string) $knownUid);
+            if ($knownUid !== '') {
+                $known[$knownUid] = true;
+            }
+        }
+
+        foreach ((new ForkLegUidChain())->allUids((string) $bonusOrder, (string) $doubleOrder, (string) $bonusOrderHold) as $forkUid) {
+            if (isset($known[$forkUid])) {
+                continue;
+            }
+            $known[$forkUid] = true;
+            $response = (new UIDController())->closeReasonUIDStatusFirstWfp(
+                $forkUid,
+                $connectAPI,
+                $autorization,
+                $identificationId
+            );
+            if (!is_array($response)) {
+                $reasons[] = -1;
+                continue;
+            }
+            $reason = $response['close_reason'] ?? -1;
+            $reasons[] = $reason;
+            if (in_array((string) $reason, ['0', '8'], true)) {
+                $amount_settle = $response['order_cost'] ?? $amount_settle;
+                $result = 1;
+            }
+        }
+
+        $decision = ForkHoldSettlement::decide($reasons);
+        Log::info('legacy fork hold gate', [
+            'decision' => $decision,
+            'reasons' => $reasons,
+            'hold' => $bonusOrderHold,
+        ]);
+
+        if ($decision === ForkHoldSettlement::KEEP) {
+            $hold_bonusOrder = false;
+            $hold_doubleOrder = false;
+            $hold_bonusOrderHold = false;
+            $closeReason_bonusOrder = -1;
+            $amount_settle = $originalAmount;
+            $result = 0;
+
+            return;
+        }
+
+        if ($decision === ForkHoldSettlement::SETTLE) {
+            if (!$hold_bonusOrder && !$hold_doubleOrder && !$hold_bonusOrderHold) {
+                $hold_bonusOrderHold = true;
+                $result = 1;
+            }
+
+            return;
+        }
+
+        $hold_bonusOrder = false;
+        $hold_doubleOrder = false;
+        $hold_bonusOrderHold = false;
+    }
+
     private function autorization($connectApi)
     {
 

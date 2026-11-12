@@ -15,6 +15,7 @@ use App\Helpers\OrderDuplicateHelper;
 use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Services\DispatchOrderCancelService;
+use App\Services\ForkLegUidChain;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -3831,6 +3832,67 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
+    /**
+     * Старые заказы вилки (payment_flow = 3), которые ещё открыты, тоже снимаются.
+     *
+     * @param Orderweb|null $orderweb
+     */
+    private function cancelOpenLegacyForkPredecessors(
+        string $bonusOrder,
+        string $doubleOrder,
+        string $holdUid,
+        $connectAPI,
+        $authorizationBonus,
+        $authorizationDouble,
+        $identificationId,
+        $apiVersion,
+        $orderweb
+    ): bool {
+        if ($orderweb === null
+            || PaymentFlow::normalize($orderweb->payment_flow_mode ?? 0) !== PaymentFlow::FORK_LEGACY) {
+            return true;
+        }
+
+        $memory = new MemoryOrderChangeController();
+        $latestBonus = (string) $memory->findLatestOrderUid($bonusOrder);
+        $bonusPredecessors = $memory->collectPredecessorUids($latestBonus !== '' ? $latestBonus : $bonusOrder);
+        $skip = array_filter([$bonusOrder, $doubleOrder]);
+        $ok = true;
+
+        foreach ((new ForkLegUidChain())->allUids($bonusOrder, $doubleOrder, $holdUid) as $uid) {
+            if (in_array($uid, $skip, true)) {
+                continue;
+            }
+
+            $isBonusLeg = in_array($uid, $bonusPredecessors, true) || $uid === $holdUid;
+            $authorization = $isBonusLeg ? $authorizationBonus : $authorizationDouble;
+            $response = (new UIDController())->closeReasonUIDStatusFirstWfp(
+                $uid,
+                $connectAPI,
+                $authorization,
+                $identificationId
+            );
+            if (!is_array($response) || (string) ($response['close_reason'] ?? '-1') !== '-1') {
+                continue;
+            }
+
+            $canceled = self::orderCanceledReturn(
+                $uid,
+                $isBonusLeg ? 'bonus' : 'double',
+                $connectAPI,
+                $authorization,
+                $identificationId,
+                $apiVersion
+            );
+            if (!$canceled) {
+                Log::warning('Legacy fork predecessor cancel failed', ['uid' => $uid]);
+                $ok = false;
+            }
+        }
+
+        return $ok;
+    }
+
     // Импорт для общего исключения
 
     public function canceledFinish(
@@ -3875,6 +3937,22 @@ class UniversalAndroidFunctionController extends Controller
             );
 
             if ($orderCanceledBonus && $orderCanceledDouble) {
+                $predecessorsCanceled = $this->cancelOpenLegacyForkPredecessors(
+                    (string) $bonusOrder,
+                    (string) $doubleOrder,
+                    (string) $uid_bonusOrderHold,
+                    $connectAPI,
+                    $authorizationBonus,
+                    $authorizationDouble,
+                    $identificationId,
+                    $apiVersion,
+                    $orderweb
+                );
+                if (!$predecessorsCanceled) {
+                    Log::warning("Failed to cancel remaining fork orders: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");
+                    return false;
+                }
+
                 Log::info("Fork canceled: bonusOrder=$bonusOrder, doubleOrder=$doubleOrder");
 
                 if ($orderweb) {
