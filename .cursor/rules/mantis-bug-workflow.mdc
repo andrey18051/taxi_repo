@@ -14,14 +14,78 @@ alwaysApply: true
 | URL (UI) | `https://t.easy-order-taxi.site/mantis/` |
 | Кнопка на диспетчерской | `taxi_repo` → `home.blade.php` (рядом с логами) |
 | Проект | PAS (id=1) |
-| API | REST `…/mantis/api/rest/`; токен в Firebase `keys/mantis_key` и на сервере `/opt/mantis/CREDENTIALS.local.txt` |
 | Эталон кода отправки | `PAS_4` → `utils/bugreport/mantis/` |
+| Закрытие тикета | из контейнера `mantisbt` на `omp-prod` (см. ниже), не REST |
 
 При задаче «разбери баг», «исправь жалобу», «тикет #N»:
 
 1. Читать тикет в Mantis (описание, вложения `app_log.txt`, история).
 2. Разбирать код в PAS / `taxi_repo` по фактам из тикета и логов.
-3. После исправления — **комментарий в тикет** (что сделано, версия) и закрытие (`resolved` / `closed`) через API или по просьбе пользователя.
+3. После **успешного деплоя** (prod или test, по среде бага) — **обязательно** комментарий в тикет и закрытие (`closed` + `fixed`). Не оставлять тикет открытым после выката фикса.
+
+## Где крутится Mantis — как заходить
+
+Mantis живёт на **новом** сервере, не на старом `taxi-prod`.
+
+| | |
+|---|---|
+| SSH alias | `omp-prod` |
+| Адрес | `51.83.162.226`, user `ubuntu`, ключ `~/.ssh/id_taxi_prod` |
+| Контейнер | `mantisbt` (`xlrl/mantisbt:2.28.0`) |
+| Порт на хосте | `127.0.0.1:8989` → контейнер `:80` |
+| Каталог на диске | `/opt/mantis/` (`config/`, `docker-compose.yml`, `CREDENTIALS.local.txt`) |
+| БД | MySQL `bugtracker` на `172.17.0.1` (docker-мост хоста), отдельного DB-контейнера нет |
+| Пользователь в Mantis | `administrator` (id=1) |
+
+Проверка и вход (с ПК пользователя):
+
+```powershell
+ssh -o BatchMode=yes -o ConnectTimeout=15 omp-prod "echo OK; docker ps --filter name=mantisbt --format '{{.Names}} {{.Status}} {{.Ports}}'"
+ssh omp-prod
+docker exec -it mantisbt bash
+```
+
+Одноразовая команда в контейнере без TTY:
+
+```powershell
+ssh omp-prod "docker exec mantisbt php -v"
+```
+
+Старый alias `taxi-prod` (`91.219.60.148`) для Mantis **не использовать** — SSH туда часто timeout. REST с хоста (`https://t.easy-order-taxi.site/mantis/api/rest/` и `http://127.0.0.1:8989/api/rest/`) обычно **401**. SOAP из контейнера с `admin_user` / `admin_password` / `api_token` из `/opt/mantis/CREDENTIALS.local.txt` — **Access denied**: пароль и токен в файле не совпадают с живым `administrator`. Не чинить это «на ходу» и **не печатать** содержимое `CREDENTIALS.local.txt` в чат.
+
+Логи Laravel taxi — **на том же** `omp-prod`: `/opt/laravel_logs/taxi_test/laravel.log` и `/opt/laravel_logs/taxi_work/laravel.log`. Сначала `ssh omp-prod "echo OK"`.
+
+## Закрытие тикета после деплоя (обязательно для агента)
+
+Чеклист:
+
+| # | Шаг |
+|---|-----|
+| 1 | Деплой прошёл (образ prod/test с SHA коммита) |
+| 2 | Комментарий: что исправлено, образ, нужно ли обновлять PAS |
+| 3 | Статус тикета → `closed` (90), resolution `fixed` (20) |
+
+«Закрыть баг» = статус **closed**, не оставлять только `resolved` (80).
+
+### Рабочий способ — PHP внутри контейнера через БД
+
+REST/SOAP не использовать, пока токен не починен. Ядро Mantis в контейнере поднимает БД **без** логина администратора: `require core.php` + `db_query` работают.
+
+Порядок:
+
+1. Написать PHP-скрипт локально (не коммитить в git). PowerShell ломает `\"` в `ssh`, поэтому файл → `scp` на `omp-prod:/tmp/` → `sed -i 's/\r$//'` → `docker cp` в `mantisbt:/tmp/` → `docker exec mantisbt php /tmp/….php`.
+2. В скрипте задать `$_SERVER['HTTP_HOST']` / `REQUEST_URI` / `SCRIPT_NAME`, `chdir('/var/www/html')`, `require_once '/var/www/html/core.php'`, `require_api('database_api.php')`, `require_api('constant_inc.php')`.
+3. **Не** вызывать `db_param()` / prepared statements — на PHP 8.5 в этом образе подготовка SQL падает. ID тикетов подставлять как целые числа; текст комментария экранировать (`'` → `''`, `\` → `\\`).
+4. Таблицы через плейсхолдеры Mantis: `{bug}`, `{bugnote}`, `{bugnote_text}`, `{bug_history}` (`mantis_*_table`). Колонки `bugnote_count` **нет**.
+5. На каждый номер тикета:
+   - `INSERT INTO {bugnote_text} (note)` и `INSERT INTO {bugnote}` (`reporter_id=1`, `view_state=10`, `date_submitted`/`last_modified` = `db_now()`);
+   - `UPDATE {bug} SET status=90, resolution=20, last_updated=… WHERE id=…`;
+   - `INSERT INTO {bug_history}`: `field_name='status'`, `old_value` предыдущий статус, `new_value='90'`, `type=0`; то же для `resolution`, если ещё не `20`.
+6. Константы: `FIXED=20`, `RESOLVED=80`, `CLOSED=90`.
+7. Проверка тем же скриптом: `SELECT id, status, resolution FROM {bug} WHERE id IN (…)` — должно быть `90` / `20`, комментарий виден в `{bugnote}` + `{bugnote_text}`.
+8. Сразу удалить временные файлы на сервере, в контейнере и локально. Не оставлять PHP с паролями.
+
+Токены, пароли, `CREDENTIALS.local.txt` — **не** в чат и **не** в git.
 
 ## Описание от клиента
 
@@ -33,15 +97,14 @@ alwaysApply: true
 
 При правке багов клиентов такси **всегда** смотреть серверные логи, не только `app_log.txt` из приложения.
 
-См. `taxi-prod-log-access.mdc`:
+- test / OdessaTest → `omp-prod` → `/opt/laravel_logs/taxi_test/laravel.log`
+- prod → `omp-prod` → `/opt/laravel_logs/taxi_work/laravel.log`
 
-- test / OdessaTest → `taxi_test` → `/opt/laravel_logs/taxi_test/laravel.log`
-- prod → `taxi_work` → `/opt/laravel_logs/taxi_work/laravel.log`
-
-Перед чтением логов — `ssh -o BatchMode=yes taxi-prod "echo OK"`.
+Перед чтением логов — `ssh -o BatchMode=yes omp-prod "echo OK"`. Подробности SSH — `taxi-prod-log-access.mdc` (alias `omp-prod`, не старый `taxi-prod`).
 
 ## Агент
 
-- Не закрывать тикет без разбора или без согласования с пользователем.
+- **Не закрывать** тикет без разбора или до успешного деплоя фикса.
+- **Всегда закрывать** тикет после успешного деплоя — не ждать отдельной просьбы пользователя. Закрывать из контейнера `mantisbt` на `omp-prod`, как выше.
 - Не публиковать пароли Mantis и API-токены в чат или в git.
 - Коммит/push правил — по `cursor-rules-sync.mdc` (PAS_1–PAS_4, `taxi_repo`).
