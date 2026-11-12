@@ -348,8 +348,11 @@ class OrderForkLegExecutor
             $state['bonusOrder'] = $newUid;
             /** @var Uid_history $uidHistory */
             $uidHistory = $state['uid_history'];
-            $uidHistory->uid_bonusOrder = $newUid;
-            $uidHistory->save();
+            (new ForkLegUidChain())->publishLeg(
+                $uidHistory,
+                'bonus',
+                is_string($newUid) ? $newUid : null
+            );
             OrderStatusController::clearForkLegRecreationArm($uidHistory, 'bonus');
             $this->log('restore_bonus', ['newUid' => $newUid, 'phase' => $phaseTag]);
             $state = $this->pollLeg($state, 'bonus', $phaseTag . '_after_restore');
@@ -379,8 +382,11 @@ class OrderForkLegExecutor
         $state['doubleOrder'] = $newUid;
         /** @var Uid_history $uidHistory */
         $uidHistory = $state['uid_history'];
-        $uidHistory->uid_doubleOrder = $newUid;
-        $uidHistory->save();
+        (new ForkLegUidChain())->publishLeg(
+            $uidHistory,
+            'double',
+            is_string($newUid) ? $newUid : null
+        );
         OrderStatusController::clearForkLegRecreationArm($uidHistory, 'double');
         $this->log('restore_double', ['newUid' => $newUid, 'phase' => $phaseTag]);
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\AndroidTestOSMController;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Http\Controllers\OrderStatusController;
 use App\Services\ForkLegUidChain;
+use App\Support\ForkOrderCancelLegResolver;
 use App\Models\DoubleOrder;
 use App\Models\ExecStatusHistory;
 use App\Models\Orderweb;
@@ -3311,6 +3312,7 @@ trait LegacyForkStatusPoll
             return false;
         }
 
+        $siblingUid = ForkOrderCancelLegResolver::liveSiblingUid($uidHistory, $siblingLeg, $siblingUid);
         if ($siblingUid !== null && $siblingUid !== '') {
             self::orderCanceled(
                 $siblingUid,
@@ -3320,7 +3322,10 @@ trait LegacyForkStatusPoll
                 $identificationId,
                 $apiVersion
             );
-            Log::info("Called orderCanceled for {$siblingLeg} instead of restoring {$canceledLeg}");
+            Log::info("Called orderCanceled for {$siblingLeg} instead of restoring {$canceledLeg}", [
+                'sibling_uid' => $siblingUid,
+                'hold' => $hold,
+            ]);
         }
 
         OrderStatusController::markForkLegDispatcherCanceled($uidHistory, $canceledLeg);

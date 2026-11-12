@@ -15,6 +15,7 @@ use App\Jobs\TokenPayJob;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use App\Services\DispatchOrderCancelService;
 use App\Services\Pas2SimpleDispatchRecreate;
+use App\Services\Pas2SimpleDispatchRecreateGate;
 use App\Support\ForkOrderCancelLegResolver;
 use App\Mail\Check;
 use App\Mail\Server;
@@ -13073,25 +13074,19 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-
-        $uid = (new MemoryOrderChangeController)->show($uid);
-
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb = ForkOrderCancelLegResolver::findOrderweb($uid, $uid_Double);
 
         if (!$orderweb) {
             $startTime = time();
             do {
-                // Попробуем найти запись
-                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+                $orderweb = ForkOrderCancelLegResolver::findOrderweb($uid, $uid_Double);
 
                 if ($orderweb) {
-                    // Если запись найдена, выходим из цикла
                     break;
                 }
 
-                // Ждём одну секунду перед следующим проверочным циклом
                 sleep(1);
-            } while (time() - $startTime < 60); // Проверяем, не прошло ли 60 секунд
+            } while (time() - $startTime < 60);
         }
         if ($orderweb) {
             $uid_history = ForkOrderCancelLegResolver::findHistory($uid, $uid_Double);
@@ -13512,9 +13507,7 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
-        $uid = (new MemoryOrderChangeController)->show($uid);
-
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb = ForkOrderCancelLegResolver::findOrderweb($uid, $uid_Double);
 
         if (!$orderweb) {
             $resp_answer = "Замовлення $uid не вдалося скасувати. 3";
@@ -13585,7 +13578,7 @@ class AndroidTestOSMController extends Controller
         Log::debug("webordersCancelDoubleWithotMemory payment_type  $payment_type");
         Log::debug("webordersCancelDoubleWithotMemory city  $city");
 
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb = ForkOrderCancelLegResolver::findOrderweb($uid, $uid_Double);
         if ($orderweb) {
             $uid_history = ForkOrderCancelLegResolver::findHistory($uid, $uid_Double);
             if ($uid_history) {
@@ -13655,14 +13648,13 @@ class AndroidTestOSMController extends Controller
                 $city = "Kyiv City";
                 break;
         }
-        $uid = (new MemoryOrderChangeController)->show($uid);
         Log::debug("**********************************************************");
         Log::debug("webordersCancelDoubleWithoutReviewHold uid $uid");
         Log::debug("webordersCancelDoubleWithoutReviewHold uid_Double  $uid_Double");
         Log::debug("webordersCancelDoubleWithoutReviewHold payment_type  $payment_type");
         Log::debug("webordersCancelDoubleWithoutReviewHold city  $city");
 
-        $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $orderweb = ForkOrderCancelLegResolver::findOrderweb($uid, $uid_Double);
         if ($orderweb) {
             $uid_Double = trim((string) $uid_Double);
             if ($uid_Double !== '' && $uid_Double !== ' ') {
@@ -14133,15 +14125,22 @@ class AndroidTestOSMController extends Controller
                             $response_arr = [];
                         }
 
-                        $recreateResult = Pas2SimpleDispatchRecreate::attempt($orderweb_uid, $response_arr, false);
+                        $recoverStored = Pas2SimpleDispatchRecreateGate::shouldRecoverStoredCloseReason(
+                            $orderweb_uid->closeReason ?? null
+                        );
+                        $recreateResult = Pas2SimpleDispatchRecreate::attempt($orderweb_uid, $response_arr, $recoverStored);
+                        $closeReason = (int) ($response_arr['close_reason'] ?? -1);
+                        $isForeignClose = in_array($closeReason, Pas2SimpleDispatchRecreateGate::FOREIGN_CLOSE_REASONS, true);
                         if (Pas2SimpleDispatchRecreate::isArchivedFlag($response_arr['order_is_archive'] ?? null)
-                            || $recreateResult !== Pas2SimpleDispatchRecreate::SKIP) {
+                            || $recreateResult !== Pas2SimpleDispatchRecreate::SKIP
+                            || $isForeignClose) {
                             Log::info('historyUIDStatusNew pas2 recreate check', [
                                 'result' => $recreateResult,
                                 'uid' => $uid,
                                 'close_reason' => $response_arr['close_reason'] ?? null,
                                 'execution_status' => $response_arr['execution_status'] ?? null,
                                 'order_is_archive' => $response_arr['order_is_archive'] ?? null,
+                                'recover_stored' => $recoverStored,
                             ]);
                         }
                         if ($recreateResult !== Pas2SimpleDispatchRecreate::SKIP) {
@@ -14150,7 +14149,13 @@ class AndroidTestOSMController extends Controller
                             return response()->json(Pas2SimpleDispatchRecreate::holdingSearchResponse($fresh));
                         }
 
-                        $response_arr = OrderStatusController::normalizeFalseCanceledDispatchStatus($response_arr);
+                        if ($isForeignClose && !Pas2SimpleDispatchRecreate::capReached($uid)) {
+                            return response()->json(Pas2SimpleDispatchRecreate::holdingSearchResponse($orderweb_uid));
+                        }
+
+                        if (!$isForeignClose) {
+                            $response_arr = OrderStatusController::normalizeFalseCanceledDispatchStatus($response_arr);
+                        }
                         Log::debug("$url: ", $response_arr);
 
                         $orderweb_uid->auto = $response_arr["order_car_info"] ?? null;

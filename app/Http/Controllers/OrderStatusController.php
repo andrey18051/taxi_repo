@@ -11,6 +11,7 @@ use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
 use App\Services\DispatchOrderCancelService;
 use App\Services\Pas2SimpleDispatchRecreate;
+use App\Services\Pas2SimpleDispatchRecreateGate;
 use App\Support\ForkOrderCancelLegResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -1190,12 +1191,15 @@ class OrderStatusController extends Controller
             return null;
         }
 
-        $snapshot = self::normalizeFalseCanceledDispatchStatus($snapshot) ?? $snapshot;
-
-        $pas2Response = $this->respondPas2DispatchRecreate($orderweb, $snapshot, false);
+        $recoverStored = Pas2SimpleDispatchRecreateGate::shouldRecoverStoredCloseReason(
+            $orderweb->closeReason ?? null
+        );
+        $pas2Response = $this->respondPas2DispatchRecreate($orderweb, $snapshot, $recoverStored);
         if ($pas2Response !== null) {
             return $pas2Response;
         }
+
+        $snapshot = self::normalizeFalseCanceledDispatchStatus($snapshot) ?? $snapshot;
 
         $executionStatus = (string) ($snapshot['execution_status'] ?? 'SearchesForCar');
         $resolved = $this->resolveLegStatuses(

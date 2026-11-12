@@ -10,9 +10,10 @@ namespace App\Services;
  */
 final class Pas2SimpleDispatchRecreateGate
 {
-    public const MAX_RECREATES = 2;
+    /** Диспетчер может несколько раз снять «нет машины»; 2 мало — третья попытка оставляла поиск без заказа. */
+    public const MAX_RECREATES = 5;
 
-    /** «Не выполнено» на диспетчере: не «снят клиентом» (1, 6, 7, 9). */
+    /** «Не выполнено» на диспетчере: не «снят клиентом» (1, 6, 7, 9). 4 — «нет машины». */
     public const FOREIGN_CLOSE_REASONS = [2, 3, 4, 5];
 
     /** Заказ ещё в поиске, машину клиенту не показывали. */
@@ -66,11 +67,10 @@ final class Pas2SimpleDispatchRecreateGate
             return false;
         }
 
-        if (empty($context['recover_stored']) && empty($context['order_is_archive'])) {
+        $archivedForeign = self::isForeignDispatchClose($context, $closeReason);
+        if (empty($context['recover_stored']) && !$archivedForeign) {
             return false;
         }
-
-        $archivedForeign = self::isArchivedForeignClose($context, $closeReason);
         $execution = (string) ($context['execution_status'] ?? '');
         if ($execution === 'Executed'
             || (!$archivedForeign && in_array($execution, self::TRIP_EXECUTION, true))) {
@@ -137,14 +137,31 @@ final class Pas2SimpleDispatchRecreateGate
     }
 
     /**
-     * Архив диспетчера с «нет машины» / «отказ водителя» / «просчет».
+     * Причина 2/3/4/5 уже лежит в orderweb — следующий опрос должен поднять заказ,
+     * даже если архив диспетчера ещё не пришёл.
+     */
+    public static function shouldRecoverStoredCloseReason($closeReason): bool
+    {
+        return in_array((string) $closeReason, ['2', '3', '4', '5'], true);
+    }
+
+    /**
+     * Архив диспетчера или Canceled с «нет машины» / «отказ водителя» / «просчет».
      * Сохранённое авто с прошлого опроса здесь уже не живой заказ.
      *
      * @param array<string, mixed> $context
      */
-    private static function isArchivedForeignClose(array $context, int $closeReason): bool
+    private static function isForeignDispatchClose(array $context, int $closeReason): bool
     {
-        return !empty($context['order_is_archive'])
-            && in_array($closeReason, self::FOREIGN_CLOSE_REASONS, true);
+        if (!in_array($closeReason, self::FOREIGN_CLOSE_REASONS, true)) {
+            return false;
+        }
+        if (!empty($context['order_is_archive'])) {
+            return true;
+        }
+
+        $execution = strtolower((string) ($context['execution_status'] ?? ''));
+
+        return $execution === 'canceled' || $execution === 'cancelled';
     }
 }

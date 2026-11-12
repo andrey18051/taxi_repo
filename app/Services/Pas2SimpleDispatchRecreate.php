@@ -363,6 +363,11 @@ final class Pas2SimpleDispatchRecreate
         return $value === true || $value === 1 || $value === '1';
     }
 
+    public static function capReached(string $uid): bool
+    {
+        return self::recreateCount($uid) >= Pas2SimpleDispatchRecreateGate::MAX_RECREATES;
+    }
+
     /**
      * В driver_memory_orders.connectAPI лежит уже полный URL создания
      * (`http://host:port/api/weborders`). Повторно путь не дописываем.

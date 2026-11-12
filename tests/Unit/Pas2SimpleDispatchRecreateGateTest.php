@@ -96,12 +96,30 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         ])));
     }
 
+    public function test_canceled_foreign_close_recreates_without_archive(): void
+    {
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 4,
+            'execution_status' => 'Canceled',
+            'order_is_archive' => false,
+        ])));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 4,
+            'execution_status' => 'Cancelled',
+            'order_is_archive' => null,
+        ])));
+    }
+
     public function test_archive_flag_is_required_for_foreign_close(): void
     {
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 4,
+            'execution_status' => 'WaitingCarSearch',
             'order_is_archive' => false,
         ])));
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'close_reason' => 4,
+            'execution_status' => 'WaitingCarSearch',
             'order_is_archive' => null,
         ])));
         $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
@@ -229,9 +247,23 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
             'recreate_count' => 1,
         ])));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'recreate_count' => 2,
+        ])));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'recreate_count' => Pas2SimpleDispatchRecreateGate::MAX_RECREATES - 1,
+        ])));
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
             'recreate_count' => Pas2SimpleDispatchRecreateGate::MAX_RECREATES,
         ])));
+    }
+
+    public function test_recover_stored_helper_covers_no_car_reason(): void
+    {
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecoverStoredCloseReason(4));
+        $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecoverStoredCloseReason('2'));
+        $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecoverStoredCloseReason('-1'));
+        $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecoverStoredCloseReason(1));
     }
 
     public function test_add_cost_recreation_is_left_alone(): void

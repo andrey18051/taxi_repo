@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Controllers\MemoryOrderChangeController;
 use App\Models\MemoryOrderChange;
 use App\Models\Uid_history;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Цепочка UID вилки: каждая пересозданная нога помнит предыдущие заказы.
@@ -19,14 +20,22 @@ final class ForkLegUidChain
             return;
         }
 
-        $exists = MemoryOrderChange::where('order_old', $oldUid)
-            ->where('order_new', $newUid)
-            ->exists();
-        if ($exists) {
-            return;
-        }
+        try {
+            $exists = MemoryOrderChange::where('order_old', $oldUid)
+                ->where('order_new', $newUid)
+                ->exists();
+            if ($exists) {
+                return;
+            }
 
-        (new MemoryOrderChangeController())->store($oldUid, $newUid);
+            (new MemoryOrderChangeController())->store($oldUid, $newUid);
+        } catch (\Throwable $e) {
+            Log::warning('ForkLegUidChain: rememberReplacement failed', [
+                'old' => $oldUid,
+                'new' => $newUid,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
