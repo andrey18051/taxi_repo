@@ -10,6 +10,7 @@ use App\Helpers\OrderHelper;
 use App\Services\OrderCarInfoHelper;
 use App\Services\OrderStatusMessageResolver;
 use App\Services\DispatchOrderCancelService;
+use App\Services\OrderCancelNotificationHelper;
 use App\Services\Pas2SimpleDispatchRecreate;
 use App\Services\Pas2SimpleDispatchRecreateGate;
 use App\Support\ForkOrderCancelLegResolver;
@@ -2505,8 +2506,11 @@ class OrderStatusController extends Controller
         return $hasNewer;
     }
 
-    public static function notifyForkOrderCanceledPush(Orderweb $orderweb, string $uid): void
-    {
+    public static function notifyForkOrderCanceledPush(
+        Orderweb $orderweb,
+        string $uid,
+        ?string $cancelInitiator = null
+    ): void {
         if (DispatchOrderCancelService::isAddCostRecreationInProgress($uid)) {
             Log::info('Skip fork cancel push: add-cost recreation in progress', ['uid' => $uid]);
 
@@ -2530,9 +2534,16 @@ class OrderStatusController extends Controller
 
         $uid_history = Uid_history::where('uid_bonusOrderHold', $orderweb->dispatching_order_uid)->first();
         if ($uid_history !== null && !empty($uid_history->uid_doubleOrder)) {
+            if ($cancelInitiator === null || $cancelInitiator === '') {
+                $cancelInitiator = OrderCancelNotificationHelper::initiatorForConfirmedForkCancel(
+                    DispatchOrderCancelService::peekCancelInitiator((string) $orderweb->dispatching_order_uid),
+                    self::isExplicitForkCancelRequested($uid_history)
+                );
+            }
             \App\Services\OrderPaymentNotificationHelper::notifyForkCancelConfirmedTelegram(
                 $orderweb,
-                'Вилка скасована (підтверджено на диспетчері)'
+                'Вилка скасована (підтверджено на диспетчері)',
+                $cancelInitiator
             );
         }
     }

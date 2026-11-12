@@ -79,6 +79,34 @@ class OrderCancelNotificationHelperTest extends TestCase
         $this->assertStringContainsString('Инициатор: диспетчер.', $message);
     }
 
+    public function test_client_fork_cancel_stays_client_when_dispatch_only_confirmed(): void
+    {
+        $this->assertSame(
+            OrderCancelNotificationHelper::INITIATOR_CLIENT,
+            OrderCancelNotificationHelper::initiatorForConfirmedForkCancel(null, true)
+        );
+        $this->assertSame(
+            OrderCancelNotificationHelper::INITIATOR_DISPATCHER,
+            OrderCancelNotificationHelper::initiatorForConfirmedForkCancel(null, false)
+        );
+        $this->assertSame(
+            OrderCancelNotificationHelper::INITIATOR_DRIVER,
+            OrderCancelNotificationHelper::initiatorForConfirmedForkCancel(
+                OrderCancelNotificationHelper::INITIATOR_DRIVER,
+                true
+            )
+        );
+
+        $message = OrderCancelNotificationHelper::buildTelegramCancelMessage(
+            $this->sampleOrderweb(),
+            OrderCancelNotificationHelper::INITIATOR_CLIENT,
+            'Вилка скасована (підтверджено на диспетчері)'
+        );
+
+        $this->assertStringContainsString('Инициатор: клиент.', $message);
+        $this->assertStringContainsString('отменил заказ', $message);
+    }
+
     public function test_system_initiator_includes_channel_note(): void
     {
         $message = OrderCancelNotificationHelper::buildTelegramCancelMessage(

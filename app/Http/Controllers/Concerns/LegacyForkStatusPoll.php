@@ -3254,6 +3254,7 @@ trait LegacyForkStatusPoll
             ]);
         }
 
+        $clientAlreadyRequested = OrderStatusController::isExplicitForkCancelRequested($uidHistory);
         OrderStatusController::markForkLegDispatcherCanceled($uidHistory, $canceledLeg);
         OrderStatusController::markExplicitForkCancelRequested($uidHistory);
 
@@ -3261,7 +3262,13 @@ trait LegacyForkStatusPoll
             OrderStatusController::applyCanceledOrderweb($orderweb);
             $orderweb->save();
             (new AndroidTestOSMController())->cleanupFirestoreOnClientCancel($hold);
-            OrderStatusController::notifyForkOrderCanceledPush($orderweb, $hold);
+            OrderStatusController::notifyForkOrderCanceledPush(
+                $orderweb,
+                $hold,
+                $clientAlreadyRequested
+                    ? \App\Services\OrderCancelNotificationHelper::INITIATOR_CLIENT
+                    : \App\Services\OrderCancelNotificationHelper::INITIATOR_DISPATCHER
+            );
         }
 
         Log::info('Active fork search closed instead of leg restore', [

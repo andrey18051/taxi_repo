@@ -810,15 +810,37 @@ class DispatchOrderCancelService
         );
     }
 
-    private function resolveCampaignCancelInitiator(string $primaryUid): string
+    public static function peekCancelInitiator(string $primaryUid): ?string
     {
-        $state = Cache::get(self::CACHE_PREFIX . $primaryUid);
-
-        if (is_array($state) && !empty($state['cancel_initiator'])) {
-            return (string) $state['cancel_initiator'];
+        $primaryUid = trim($primaryUid);
+        if ($primaryUid === '') {
+            return null;
         }
 
-        return OrderCancelNotificationHelper::INITIATOR_CLIENT;
+        $candidates = [$primaryUid];
+        try {
+            $mapped = trim((string) (new MemoryOrderChangeController)->show($primaryUid));
+            if ($mapped !== '' && !in_array($mapped, $candidates, true)) {
+                $candidates[] = $mapped;
+            }
+        } catch (\Throwable $e) {
+            // memory table may be absent in narrow tests
+        }
+
+        foreach ($candidates as $uid) {
+            $state = Cache::get(self::CACHE_PREFIX . $uid);
+            if (is_array($state) && !empty($state['cancel_initiator'])) {
+                return (string) $state['cancel_initiator'];
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveCampaignCancelInitiator(string $primaryUid): string
+    {
+        return self::peekCancelInitiator($primaryUid)
+            ?? OrderCancelNotificationHelper::INITIATOR_CLIENT;
     }
 
     /**

@@ -97,12 +97,19 @@ class OrderPaymentNotificationHelper
         }
     }
 
-    public static function notifyForkCancelConfirmedTelegram(Orderweb $orderweb, ?string $channelNote = null): void
-    {
+    public static function notifyForkCancelConfirmedTelegram(
+        Orderweb $orderweb,
+        ?string $channelNote = null,
+        ?string $cancelInitiator = null
+    ): void {
+        $initiator = ($cancelInitiator !== null && $cancelInitiator !== '')
+            ? $cancelInitiator
+            : OrderCancelNotificationHelper::INITIATOR_DISPATCHER;
+
         try {
             (new \App\Http\Controllers\MessageSentController())->sentCancelInfo(
                 $orderweb,
-                OrderCancelNotificationHelper::INITIATOR_DISPATCHER,
+                $initiator,
                 $channelNote
             );
         } catch (\Throwable $e) {

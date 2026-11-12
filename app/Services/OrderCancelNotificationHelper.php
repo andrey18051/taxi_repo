@@ -55,6 +55,23 @@ class OrderCancelNotificationHelper
         return null;
     }
 
+    /**
+     * Подтверждение на диспетчере — это факт закрытия, не автор отмены.
+     * Кнопка в приложении и кампания отмены важнее текста «підтверджено на диспетчері».
+     */
+    public static function initiatorForConfirmedForkCancel(?string $campaignInitiator, bool $clientRequested): string
+    {
+        if ($campaignInitiator !== null && $campaignInitiator !== '') {
+            return $campaignInitiator;
+        }
+
+        if ($clientRequested) {
+            return self::INITIATOR_CLIENT;
+        }
+
+        return self::INITIATOR_DISPATCHER;
+    }
+
     public static function initiatorLabel(string $initiator): string
     {
         switch ($initiator) {
