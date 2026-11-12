@@ -3,7 +3,9 @@
 namespace App\Services;
 
 /**
- * Когда простой одиночный заказ PAS 2 можно поднять заново после снятия на сервере такси.
+ * Когда одиночный заказ можно поднять заново после снятия на сервере такси.
+ * PAS 2 на простом режиме — нал и безнал. Остальные PAS — одиночный нал,
+ * в том числе в городе с вилкой, где наличный заказ один.
  * Решение без БД и HTTP — его проверяют тесты.
  */
 final class Pas2SimpleDispatchRecreateGate
@@ -27,6 +29,8 @@ final class Pas2SimpleDispatchRecreateGate
     /**
      * @param array{
      *   is_pas2?: bool,
+     *   is_client_app?: bool,
+     *   pay_system?: string,
      *   payment_flow?: int,
      *   server?: string,
      *   is_fork?: bool,
@@ -44,11 +48,7 @@ final class Pas2SimpleDispatchRecreateGate
      */
     public static function shouldRecreate(array $context): bool
     {
-        if (empty($context['is_pas2'])) {
-            return false;
-        }
-
-        if ((int) ($context['payment_flow'] ?? 0) !== \App\City\PaymentFlow::SIMPLE) {
+        if (!self::isEligibleOrder($context)) {
             return false;
         }
 
@@ -103,6 +103,37 @@ final class Pas2SimpleDispatchRecreateGate
         }
 
         return $archivedForeign && in_array($previous, self::CAR_SHOWN_CLOSE_REASONS, true);
+    }
+
+    /**
+     * PAS 2 и простой режим — как раньше (нал и оплаченный безнал).
+     * Одиночный нал любого PAS — и на простом режиме, и в городе с вилкой.
+     *
+     * @param array<string, mixed> $context
+     */
+    private static function isEligibleOrder(array $context): bool
+    {
+        $knownApp = !empty($context['is_pas2']) || !empty($context['is_client_app']);
+        if (!$knownApp) {
+            return false;
+        }
+
+        $flow = (int) ($context['payment_flow'] ?? 0);
+        if (!empty($context['is_pas2']) && $flow === \App\City\PaymentFlow::SIMPLE) {
+            return true;
+        }
+
+        $singleCash = (string) ($context['pay_system'] ?? '') === 'nal_payment'
+            && empty($context['is_fork']);
+        if (!$singleCash) {
+            return false;
+        }
+
+        return in_array($flow, [
+            \App\City\PaymentFlow::SIMPLE,
+            \App\City\PaymentFlow::FORK,
+            \App\City\PaymentFlow::FORK_LEGACY,
+        ], true);
     }
 
     /**

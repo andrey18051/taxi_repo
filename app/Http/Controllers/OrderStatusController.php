@@ -1434,8 +1434,9 @@ class OrderStatusController extends Controller
     }
 
     /**
-     * Оператор снял или заменил ногу, пока вилка ещё в поиске и машина не назначена.
+     * Клиент или оператор снял ногу, пока вилка ещё в поиске и машина не назначена.
      * Новую ногу не создавать: закрыть вторую ногу и заказ клиента.
+     * Отказ водителя (2, 3, 5) сюда не входит — такую ногу создают заново.
      *
      * @param array<string, mixed>|null $canceledLeg
      * @param array<string, mixed>|null $otherLeg
@@ -1455,7 +1456,7 @@ class OrderStatusController extends Controller
         if (strcasecmp($status, 'Canceled') !== 0 && strcasecmp($status, 'Cancelled') !== 0) {
             return false;
         }
-        if (self::isForkTechnicalDispatchCancel($canceledLeg)) {
+        if (self::isForkTechnicalDispatchCancel($canceledLeg) || self::isForkDriverRefusalClose($canceledLeg)) {
             return false;
         }
 
@@ -2638,6 +2639,21 @@ class OrderStatusController extends Controller
         $closeReason = $order['close_reason'] ?? -1;
 
         return in_array($closeReason, [-1, '-1', 0, '0', 4, '4'], true);
+    }
+
+    /**
+     * Отказ водителя, нет машины или просчёт на диспетчере (2, 3, 5).
+     * Ногу вилки создают заново, вторую ногу не снимают.
+     *
+     * @param array<string, mixed>|null $order
+     */
+    public static function isForkDriverRefusalClose(?array $order): bool
+    {
+        if ($order === null || $order === []) {
+            return false;
+        }
+
+        return in_array((int) ($order['close_reason'] ?? -999), [2, 3, 5], true);
     }
 
     /**

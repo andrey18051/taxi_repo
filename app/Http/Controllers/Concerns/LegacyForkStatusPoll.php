@@ -910,7 +910,7 @@ trait LegacyForkStatusPoll
                                             case "SearchesForCar":
                                             case "WaitingCarSearch":
                                                 Log::info("Nested lastStatusBonus case: active search cancel");
-                                                $this->tryCloseActiveForkSearch(
+                                                if ($this->tryCloseActiveForkSearch(
                                                     $uid_history,
                                                     'bonus',
                                                     $doubleOrder,
@@ -919,8 +919,10 @@ trait LegacyForkStatusPoll
                                                     $authorizationDouble,
                                                     $identificationId,
                                                     $apiVersion
-                                                );
-                                                break;
+                                                )) {
+                                                    break;
+                                                }
+                                                // Отказ водителя: ногу безнала создать заново, нал не снимать.
                                             case "Canceled":
                                                 if ($this->tryCloseActiveForkSearch(
                                                     $uid_history,
@@ -3263,8 +3265,9 @@ trait LegacyForkStatusPoll
     }
 
     /**
-     * Оператор снял ногу, пока вторая ещё в поиске и машина не назначена.
+     * Клиент или оператор снял ногу, пока вторая ещё в поиске и машина не назначена.
      * Закрыть вторую ногу и заказ клиента, не создавая новый поиск.
+     * Отказ водителя (2, 3, 5) ногу не закрывает: её создают заново.
      *
      * @param Uid_history|null $uidHistory
      * @param string $canceledLeg bonus|double

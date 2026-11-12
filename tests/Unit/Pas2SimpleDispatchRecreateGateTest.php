@@ -43,11 +43,47 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         ])));
     }
 
-    public function test_does_not_recreate_other_apps(): void
+    public function test_does_not_recreate_unknown_app(): void
     {
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
             'is_pas2' => false,
         ])));
+    }
+
+    public function test_recreates_single_cash_when_dispatch_refuses_on_fork_city(): void
+    {
+        foreach ([PaymentFlow::FORK, PaymentFlow::FORK_LEGACY] as $flow) {
+            $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+                'is_pas2' => false,
+                'is_client_app' => true,
+                'pay_system' => 'nal_payment',
+                'payment_flow' => $flow,
+                'close_reason' => 2,
+            ])));
+        }
+    }
+
+    public function test_does_not_recreate_card_order_on_legacy_fork(): void
+    {
+        $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+            'is_pas2' => false,
+            'is_client_app' => true,
+            'pay_system' => 'wfp_payment',
+            'payment_flow' => PaymentFlow::FORK_LEGACY,
+            'close_reason' => 2,
+        ])));
+    }
+
+    public function test_client_app_name_follows_the_order(): void
+    {
+        $pas4 = new Orderweb();
+        $pas4->comment = 'taxi_easy_ua_pas4';
+        $this->assertTrue(Pas2SimpleDispatchRecreate::isClientApp($pas4));
+        $this->assertSame('PAS4', Pas2SimpleDispatchRecreate::clientAppName($pas4));
+
+        $pas2 = new Orderweb();
+        $pas2->comment = 'taxi_easy_ua_pas2';
+        $this->assertSame('PAS2', Pas2SimpleDispatchRecreate::clientAppName($pas2));
     }
 
     public function test_does_not_recreate_fork_orders(): void

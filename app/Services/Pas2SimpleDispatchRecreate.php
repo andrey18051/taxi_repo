@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\City\CityPaymentFlowResolver;
 use App\City\PaymentFlow;
 use App\City\SimpleCashlessDispatchStatusSync;
 use App\Http\Controllers\AndroidTestOSMController;
@@ -20,9 +21,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
- * PAS 2, простой одиночный нал или безнал: сервер такси снял заказ не по вине клиента
- * во время поиска или уже после назначения авто — создаём новый UID теми же параметрами
- * и ведём цепочку. Архив с причиной 2/3/4/5 важнее машины, сохранённой на прошлом опросе.
+ * Сервер такси снял заказ не по вине клиента во время поиска или уже после назначения авто —
+ * создаём новый UID теми же параметрами и ведём цепочку.
+ * PAS 2 на простом режиме: нал и безнал. Любой PAS: одиночный нал, в том числе в городе с вилкой.
+ * Архив с причиной 2/3/4/5 важнее машины, сохранённой на прошлом опросе.
  * Неоплата (1 мин), таймер нашего бека и кнопка клиента сюда не попадают.
  */
 final class Pas2SimpleDispatchRecreate
@@ -63,6 +65,16 @@ final class Pas2SimpleDispatchRecreate
             || $comment === (string) config('app.X-WO-API-APP-ID-PAS2');
     }
 
+    public static function isClientApp(Orderweb $order): bool
+    {
+        return CityPaymentFlowResolver::applicationFromIdentificationId((string) ($order->comment ?? '')) !== null;
+    }
+
+    public static function clientAppName(Orderweb $order): string
+    {
+        return CityPaymentFlowResolver::applicationFromIdentificationId((string) ($order->comment ?? '')) ?? 'PAS2';
+    }
+
     /**
      * Нал PAS 2 в поиске: тот же live GET, что у простого безнала.
      * Поездка с машиной по-прежнему идёт старым опросом.
@@ -99,7 +111,7 @@ final class Pas2SimpleDispatchRecreate
             return self::SKIP;
         }
 
-        if (!self::isPas2($order)) {
+        if (!self::isClientApp($order)) {
             return self::SKIP;
         }
 
@@ -109,7 +121,9 @@ final class Pas2SimpleDispatchRecreate
         }
 
         $context = [
-            'is_pas2' => true,
+            'is_pas2' => self::isPas2($order),
+            'is_client_app' => true,
+            'pay_system' => (string) ($order->pay_system ?? ''),
             'payment_flow' => PaymentFlow::normalize($order->payment_flow_mode ?? 0),
             'server' => (string) ($order->server ?? ''),
             'is_fork' => false,
@@ -306,8 +320,9 @@ final class Pas2SimpleDispatchRecreate
         ]);
 
         try {
+            $app = self::clientAppName($order);
             (new MessageSentController())->sentMessageAdmin(
-                "PAS2: сервер такси снял заказ {$oldUid}, создан {$newUid}"
+                "{$app}: сервер такси снял заказ {$oldUid}, создан {$newUid}"
             );
         } catch (\Throwable $e) {
             Log::warning('Pas2SimpleDispatchRecreate: admin notify failed', [
@@ -379,10 +394,11 @@ final class Pas2SimpleDispatchRecreate
 
         $paySystem = (string) ($order->pay_system ?? 'nal_payment');
         $cost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+        $app = self::clientAppName($order);
 
         try {
-            (new PusherController())->sentUidAppEmailPayType($newUid, 'PAS2', $email, $paySystem, $cost);
-            (new CentrifugoController())->sentUidAppEmailPayType($newUid, 'PAS2', $email, $paySystem, $cost);
+            (new PusherController())->sentUidAppEmailPayType($newUid, $app, $email, $paySystem, $cost);
+            (new CentrifugoController())->sentUidAppEmailPayType($newUid, $app, $email, $paySystem, $cost);
         } catch (\Throwable $e) {
             Log::error('Pas2SimpleDispatchRecreate: uid push failed', [
                 'uid' => $newUid,

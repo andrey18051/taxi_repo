@@ -18,14 +18,16 @@ class ShouldCloseActiveForkSearchTest extends TestCase
         ));
     }
 
-    public function test_close_reason_two_while_searching_closes_order(): void
+    public function test_driver_refusal_while_searching_keeps_the_other_leg(): void
     {
-        $this->assertTrue($this->shouldClose(
-            $this->canceledLeg(2),
-            $this->leg('WaitingCarSearch'),
-            $this->orderweb(null),
-            false
-        ));
+        foreach ([2, 3, 5] as $closeReason) {
+            $this->assertFalse($this->shouldClose(
+                $this->canceledLeg($closeReason),
+                $this->leg('WaitingCarSearch'),
+                $this->orderweb(null),
+                false
+            ), 'close_reason ' . $closeReason);
+        }
     }
 
     public function test_armed_recreation_keeps_restore(): void
