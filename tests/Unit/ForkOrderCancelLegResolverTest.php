@@ -125,6 +125,32 @@ class ForkOrderCancelLegResolverTest extends TestCase
         $this->assertContains('double-1', $uids);
     }
 
+    public function test_find_orderweb_by_invoice_hold_keeps_hold_after_card_recreate(): void
+    {
+        $this->bootMemorySqlite();
+
+        (new ForkLegUidChain())->rememberReplacement(
+            '6d4150c1fe8f4c2696ad24ca2ced568e',
+            '2c189ffe26c04d7bbc9d0f59ba5a6172'
+        );
+
+        $orderweb = new Orderweb();
+        $orderweb->dispatching_order_uid = '6d4150c1fe8f4c2696ad24ca2ced568e';
+        $orderweb->closeReason = '1';
+        $orderweb->save();
+
+        $history = new Uid_history();
+        $history->uid_bonusOrderHold = '6d4150c1fe8f4c2696ad24ca2ced568e';
+        $history->uid_bonusOrder = '2c189ffe26c04d7bbc9d0f59ba5a6172';
+        $history->uid_doubleOrder = '4ca84d2e9b614096a300608b8ce821a6';
+        $history->save();
+
+        $found = ForkOrderCancelLegResolver::findOrderweb('6d4150c1fe8f4c2696ad24ca2ced568e', '');
+
+        $this->assertNotNull($found);
+        $this->assertSame('6d4150c1fe8f4c2696ad24ca2ced568e', $found->dispatching_order_uid);
+    }
+
     public function test_find_orderweb_by_new_bonus_uid_uses_hold_row(): void
     {
         $this->bootMemorySqlite();

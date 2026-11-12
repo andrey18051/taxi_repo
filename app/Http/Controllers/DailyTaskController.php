@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\WfpOrderPaymentContextHelper;
 use App\Helpers\WfpSupersededHoldHelper;
 use App\Services\WfpHoldRefundEligibility;
+use App\Support\ForkOrderCancelLegResolver;
 use App\Jobs\StartNewProcessExecution;
 use App\Models\DoubleOrder;
 use App\Models\Orderweb;
@@ -152,15 +153,19 @@ class DailyTaskController extends Controller
                     continue;
                 }
 
-                $uid = (new MemoryOrderChangeController)->show($uid);
-                Log::info("orderCardWfpReviewTask: UID после MemoryOrderChangeController: {$uid}");
-
-                $orderweb = Orderweb::where("dispatching_order_uid", $uid)->first();
+                $invoiceUid = trim((string) $uid);
+                $orderweb = ForkOrderCancelLegResolver::findOrderweb($invoiceUid, '');
 
                 if (!$orderweb) {
-                    Log::warning("orderCardWfpReviewTask: Orderweb не найден для UID: {$uid}");
+                    Log::warning("orderCardWfpReviewTask: Orderweb не найден для UID: {$invoiceUid}");
                     continue;
                 }
+
+                $uid = (string) $orderweb->dispatching_order_uid;
+                Log::info('orderCardWfpReviewTask: заказ найден по холду', [
+                    'invoice_uid' => $invoiceUid,
+                    'orderweb_uid' => $uid,
+                ]);
 
                 Log::info("orderCardWfpReviewTask: Найден Orderweb", [
                     'uid' => $orderweb->dispatching_order_uid,
