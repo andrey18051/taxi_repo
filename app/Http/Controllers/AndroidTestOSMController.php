@@ -12518,6 +12518,7 @@ class AndroidTestOSMController extends Controller
             'legs' => $legs,
             'dispatch_cancelled' => $cancelOutcome['dispatch_cancelled'] ?? false,
             'background_retry' => $cancelOutcome['background_retry'] ?? false,
+            'client_message' => $cancelOutcome['client_message'] ?? null,
         ]);
 
         if (!empty($cancelOutcome['background_retry']) || !empty($cancelOutcome['dispatch_cancelled'])) {

@@ -10,6 +10,7 @@ use App\Http\Controllers\UniversalAndroidFunctionController;
 use App\Jobs\DispatchOrderCancelRetryJob;
 use App\Models\Orderweb;
 use App\Support\DispatchOrderCancelSchedule;
+use App\Support\ForkOrderCancelLegResolver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -55,16 +56,14 @@ class DispatchOrderCancelService
      */
     public function requestClientCancel(array $options): array
     {
-        $rawPrimaryUid = $options['primary_uid'];
+        $rawPrimaryUid = trim((string) $options['primary_uid']);
         $resolveUidMapping = $options['resolve_uid_mapping'] ?? true;
-        $primaryUid = $this->resolveCancelLegUid($rawPrimaryUid, $resolveUidMapping);
-        $orderwebLookupUid = $resolveUidMapping
-            ? $primaryUid
-            : (new MemoryOrderChangeController)->show($rawPrimaryUid);
-        $orderweb = Orderweb::where('dispatching_order_uid', $orderwebLookupUid)->first();
+        $mappedUid = $this->resolveCancelLegUid($rawPrimaryUid, $resolveUidMapping);
+        $orderweb = ForkOrderCancelLegResolver::findOrderweb($rawPrimaryUid, $mappedUid);
         if (!$orderweb) {
             return $this->failureResult(null, 'Замовлення не знайдено.');
         }
+        $primaryUid = (string) $orderweb->dispatching_order_uid;
 
         if ($this->isOrderwebAlreadyFinished($orderweb)) {
             return [
@@ -95,7 +94,7 @@ class DispatchOrderCancelService
         $application = $options['application'];
         $paymentType = $options['payment_type'] ?? $orderweb->pay_system;
         $legs = $options['legs'] ?? [
-            ['uid' => $resolveUidMapping ? $primaryUid : $rawPrimaryUid, 'auth_role' => 'default'],
+            ['uid' => $resolveUidMapping ? $mappedUid : $rawPrimaryUid, 'auth_role' => 'default'],
         ];
         $cancelInitiator = $options['cancel_initiator'] ?? OrderCancelNotificationHelper::INITIATOR_CLIENT;
 
