@@ -223,6 +223,7 @@ Route::get('/sendOffice/{message}', [TelegramController::class, 'sendOfficeMessa
 
 Route::group(['namespace' => '\App\Http\Controllers\Controllers'], function () {
     Route::post('/webhook', [WebhookController::class, 'index']);
+    Route::post('/internal/mail-password', [\App\Http\Controllers\MailPasswordController::class, 'update']);
 });
 
 Route::get('/registerSmsFail', function () {

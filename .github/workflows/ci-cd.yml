@@ -82,6 +82,7 @@ jobs:
           MAIL_ENCRYPTION="${{ vars.TEST_MAIL_ENCRYPTION }}"
           MAIL_FROM_ADDRESS="${{ vars.TEST_MAIL_FROM_ADDRESS }}"
           MAIL_FROM_NAME="${{ vars.TEST_APP_NAME }}"
+          MAIL_ADMIN_TOKEN="${{ secrets.MAIL_ADMIN_TOKEN }}"
           MAIL_SWIFTMAILER_TEMP_PATH="${{ vars.MAIL_SWIFTMAILER_TEMP_PATH }}"
 
           AWS_ACCESS_KEY_ID="${{ vars.TEST_AWS_ACCESS_KEY_ID }}"
@@ -292,6 +293,7 @@ jobs:
           MAIL_ENCRYPTION="${{ vars.WORK_MAIL_ENCRYPTION }}"
           MAIL_FROM_ADDRESS="${{ vars.WORK_MAIL_FROM_ADDRESS }}"
           MAIL_FROM_NAME="${{ vars.WORK_APP_NAME }}"
+          MAIL_ADMIN_TOKEN="${{ secrets.MAIL_ADMIN_TOKEN }}"
 
           AWS_ACCESS_KEY_ID="${{ vars.WORK_AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY="${{ secrets.WORK_AWS_SECRET_ACCESS_KEY }}"

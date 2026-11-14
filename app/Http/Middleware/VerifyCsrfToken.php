@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         '/webhook',
+        '/internal/mail-password',
         '/webhookViber',
         '/webhookViberCustoms',
         '/server-callback',

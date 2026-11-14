@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Telegram;
+use App\Services\MailPasswordTelegram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,10 @@ class WebhookController extends Controller
 {
     public function index(Request $request, Telegram $telegram)
     {
+        if (MailPasswordTelegram::tryHandle($request)) {
+            return response('ok');
+        }
+
         //Log::debug($request->all());
 
         /**

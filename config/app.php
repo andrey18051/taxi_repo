@@ -328,6 +328,13 @@ return [
      */
 
     'chat_id_alarm' => 1379298637,
+
+    /**
+     * Кто может прислать боту /mailpass с новым паролем приложения Gmail.
+     */
+    'mail_password_admin_ids' => [120352595],
+
+    'mail_admin_token' => env('MAIL_ADMIN_TOKEN', ''),
     /**
      * Fondy
      */
