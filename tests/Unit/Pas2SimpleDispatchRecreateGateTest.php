@@ -63,14 +63,32 @@ class Pas2SimpleDispatchRecreateGateTest extends TestCase
         }
     }
 
-    public function test_does_not_recreate_card_order_on_legacy_fork(): void
+    public function test_recreates_single_card_when_dispatch_refuses_on_fork_city(): void
+    {
+        foreach ([PaymentFlow::FORK, PaymentFlow::FORK_LEGACY] as $flow) {
+            foreach (['wfp_payment', 'google_pay_payment'] as $pay) {
+                $this->assertTrue(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
+                    'is_pas2' => false,
+                    'is_client_app' => true,
+                    'pay_system' => $pay,
+                    'payment_flow' => $flow,
+                    'close_reason' => 2,
+                    'payment_confirmed' => true,
+                ])), "flow={$flow} pay={$pay}");
+            }
+        }
+    }
+
+    public function test_does_not_recreate_fork_pair_card_order(): void
     {
         $this->assertFalse(Pas2SimpleDispatchRecreateGate::shouldRecreate($this->context([
             'is_pas2' => false,
             'is_client_app' => true,
             'pay_system' => 'wfp_payment',
             'payment_flow' => PaymentFlow::FORK_LEGACY,
+            'is_fork' => true,
             'close_reason' => 2,
+            'payment_confirmed' => true,
         ])));
     }
 

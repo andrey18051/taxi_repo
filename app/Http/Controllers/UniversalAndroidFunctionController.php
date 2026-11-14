@@ -16,6 +16,7 @@ use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Services\DispatchOrderCancelService;
 use App\Services\ForkLegUidChain;
+use App\Support\ForkAddCostTarget;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -8465,31 +8466,52 @@ class UniversalAndroidFunctionController extends Controller
         $city = trim($city);
         Log::info("Город после очистки: '$city'.");
 
-        // Получаем UID из MemoryOrderChangeController
-        $uid = (new MemoryOrderChangeController)->show($uid);
-        Log::info("MemoryOrderChangeController вернул UID: '$uid'.");
-
-        // Ищем заказ
-        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $requestedUid = trim((string) $uid);
+        $resolved = ForkAddCostTarget::resolve($requestedUid, (string) $uid_Double);
+        $uid_history = null;
+        if ($resolved !== null) {
+            $order = $resolved['order'];
+            $uid_history = $resolved['history'];
+            if ($resolved['bonusUid'] !== '') {
+                $uid = $resolved['bonusUid'];
+            }
+            if ($uid_history !== null && $resolved['doubleUid'] !== '') {
+                $uid_Double = $resolved['doubleUid'];
+            } elseif ($uid_history === null) {
+                $uid_Double = $uid;
+            }
+            Log::info('Fork add-cost target resolved', [
+                'requested_uid' => $requestedUid,
+                'bonus_uid' => $uid,
+                'double_uid' => $uid_Double,
+                'order_uid' => $order->dispatching_order_uid,
+            ]);
+        } else {
+            $uid = (new MemoryOrderChangeController)->show($requestedUid);
+            Log::info("MemoryOrderChangeController вернул UID: '$uid'.");
+            $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+            $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
+            if (!$uid_history) {
+                $uid_Double = $uid;
+                Log::info("Uid_history не найдено, установлено uid_Double='$uid'.");
+            } else {
+                $uid_Double = $uid_history->uid_doubleOrder;
+                Log::info("Uid_history найдено, установлено uid_Double='$uid_Double'.");
+            }
+        }
         Log::info("Поиск заказа по UID '$uid': " . ($order ? "найден, dispatching_order_uid='{$order->dispatching_order_uid}'" : 'не найден.'));
         $messageAdmin = "Найден order с UID: " . ($order ? $order->dispatching_order_uid : 'null');
         Log::info($messageAdmin);
 
-        // Ищем данные в Uid_history
-        $uid_history = Uid_history::where("uid_bonusOrderHold", $uid)->first();
-        if (!$uid_history) {
-            $uid_Double = $uid;
-            Log::info("Uid_history не найдено, установлено uid_Double='$uid'.");
-        } else {
-            $uid_Double = $uid_history->uid_doubleOrder;
-            Log::info("Uid_history найдено, установлено uid_Double='$uid_Double'.");
-        }
-
         $email = $order ? $order->email : null;
         Log::info("Email заказа: " . ($email ?: 'не найден.'));
 
-        // Ищем данные из памяти о заказе
-        $orderMemory = DriverMemoryOrder::where("dispatching_order_uid", $uid)->first();
+        $orderMemory = ForkAddCostTarget::findMemory(
+            (string) $uid,
+            $requestedUid,
+            $order ? (string) $order->dispatching_order_uid : '',
+            (string) $uid_Double
+        );
         Log::info("Поиск orderMemory по UID '$uid': " . ($orderMemory ? "найден, dispatching_order_uid='{$orderMemory->dispatching_order_uid}'" : 'не найден.'));
         $messageAdmin = "Найден orderMemory с UID: " . ($orderMemory ? $orderMemory->dispatching_order_uid : 'null');
         Log::info($messageAdmin);
@@ -8792,7 +8814,9 @@ class UniversalAndroidFunctionController extends Controller
                 Log::info("Add-cost fork: dispatch cancel completed before recreate for uid='$oldBonusUid', uid_Double='$oldDoubleUid'.");
 //                (new AndroidTestOSMController)->webordersCancelAndRestorDouble($uid, $uid_Double, $city, $application, $order);
 
-                $oldUidHistory = Uid_history::where('uid_bonusOrderHold', $oldBonusUid)->first();
+                $oldUidHistory = $uid_history instanceof Uid_history
+                    ? $uid_history
+                    : Uid_history::where('uid_bonusOrderHold', $oldBonusUid)->first();
                 (new AndroidTestOSMController)->cleanupAddCostRecreationLocalState(
                     [$oldBonusUid, $oldDoubleUid],
                     $oldUidHistory
@@ -8801,8 +8825,9 @@ class UniversalAndroidFunctionController extends Controller
                 // Сохранение нового заказа
                 $order_old_uid = $order->dispatching_order_uid;
                 $order_new_uid = $orderNew;
-                (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
-                Log::info("Сохранен новый заказ в MemoryOrderChangeController: old_uid='$order_old_uid', new_uid='$order_new_uid'.");
+                $chainFromUid = trim((string) $oldBonusUid) !== '' ? (string) $oldBonusUid : (string) $order_old_uid;
+                (new MemoryOrderChangeController)->store($chainFromUid, $order_new_uid);
+                Log::info("Сохранен новый заказ в MemoryOrderChangeController: old_uid='$chainFromUid', new_uid='$order_new_uid'.");
 
                 $messageAdmin = "Создан новый заказ: " . json_encode($responseArr, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 Log::info($messageAdmin);
@@ -8816,8 +8841,13 @@ class UniversalAndroidFunctionController extends Controller
 
 
 
-                // Обновление WfpInvoice
-                $wfpInvoices = WfpInvoice::where("dispatching_order_uid", $order_old_uid)->get();
+                // Счёт доплаты висит на ноге, которую прислал PAS, а orderweb — на холде.
+                $invoiceUids = array_values(array_unique(array_filter([
+                    (string) $order_old_uid,
+                    (string) $oldBonusUid,
+                    $requestedUid,
+                ])));
+                $wfpInvoices = WfpInvoice::whereIn('dispatching_order_uid', $invoiceUids)->get();
                 if ($wfpInvoices->isNotEmpty()) {
                     foreach ($wfpInvoices as $wfpInvoice) {
                         $wfpInvoice->dispatching_order_uid = $order_new_uid;

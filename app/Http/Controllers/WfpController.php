@@ -10,6 +10,7 @@ use App\Jobs\RefundSettleCardPayJob;
 use App\Jobs\StartAddCostCardBottomCreat;
 use App\Services\ForkHoldSettlement;
 use App\Services\ForkLegUidChain;
+use App\Support\ForkAddCostTarget;
 use App\Services\PaymentStatusNotifier;
 use App\Services\WfpHoldRefundEligibility;
 use App\Mail\Check;
@@ -1558,29 +1559,41 @@ class WfpController extends Controller
                             'orderReference' => $value->orderReference
                         ]);
 
-                        $this->stampInvoiceMerchantAccount($value, $merchantAccount);
+                        // Устаревший холд мог быть на карте, а текущий заказ — Google Pay.
+                        // Возврат под мерчантом invoice; город/оплата заказа — только запасной вариант.
+                        $refundMerchantAccount = $merchantAccount;
+                        $refundSecretKey = $secretKey;
+                        $storedMerchant = trim((string) ($value->merchantAccount ?? ''));
+                        if ($storedMerchant !== '') {
+                            $storedSecret = $this->resolveSecretKeyForMerchantAccount($storedMerchant);
+                            if ($storedSecret !== null && $storedSecret !== '') {
+                                $refundMerchantAccount = $storedMerchant;
+                                $refundSecretKey = $storedSecret;
+                            }
+                        }
+                        if (
+                            $refundMerchantAccount === ''
+                            || $refundMerchantAccount === 'errorMerchantAccount'
+                            || $refundSecretKey === ''
+                        ) {
+                            Log::error('refund: merchant not resolved for invoice', [
+                                'orderReference' => $value->orderReference,
+                                'invoice_merchant' => $value->merchantAccount,
+                                'fallback_merchant' => $merchantAccount,
+                            ]);
+                            continue;
+                        }
 
-                        // Параметры для REFUND
-                        $params = [
-                            "transactionType" => "REFUND",
-                            "merchantAccount" => $merchantAccount,
-                            "orderReference" => $value->orderReference,
-                            "amount" => $value->amount,
-                            "currency" => "UAH",
-                            "comment" => "Повернення платежу",
-                            "merchantSignature" => self::generateHmacMd5Signature([
-                                "transactionType" => "REFUND",
-                                "merchantAccount" => $merchantAccount,
-                                "orderReference" => $value->orderReference,
-                                "amount" => $value->amount,
-                                "currency" => "UAH",
-                            ], $secretKey, "refund"),
-                            "apiVersion" => 1,
-                        ];
+                        $params = $this->buildRefundParams(
+                            $refundMerchantAccount,
+                            $refundSecretKey,
+                            $value
+                        );
 
                         Log::info('Refund parameters prepared', [
                             'params' => $params,
-                            'orderReference' => $value->orderReference
+                            'orderReference' => $value->orderReference,
+                            'invoice_merchant' => $value->merchantAccount,
                         ]);
 
                         $dispatchKey = 'wfp_refund_dispatch:' . $value->orderReference;
@@ -1920,8 +1933,15 @@ class WfpController extends Controller
 
     private function resolveMerchantForInvoice(WfpInvoice $invoice, ?array $dispatchParams = null): ?array
     {
-        $merchantAccount = trim((string) ($dispatchParams['merchantAccount'] ?? $invoice->merchantAccount ?? ''));
-        if ($merchantAccount !== '') {
+        // Invoice merchant first: city/pay_system of the live order can be Google Pay
+        // while this hold was created under the card merchant.
+        foreach ([
+            trim((string) ($invoice->merchantAccount ?? '')),
+            trim((string) ($dispatchParams['merchantAccount'] ?? '')),
+        ] as $merchantAccount) {
+            if ($merchantAccount === '') {
+                continue;
+            }
             $secretKey = $this->resolveSecretKeyForMerchantAccount($merchantAccount);
             if ($secretKey !== null) {
                 $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
@@ -1972,15 +1992,12 @@ class WfpController extends Controller
             return null;
         }
 
-        if (
-            ($data['transactionStatus'] ?? '') === 'Declined'
-            && (int) ($data['reasonCode'] ?? 0) === 1127
-        ) {
+        if ($this->isWfpOrderNotFoundResponse($data)) {
             Log::warning('refundSettleJob: CHECK_STATUS Order Not Found — skip sync (wrong merchant)', [
                 'orderReference' => $invoice->orderReference,
                 'merchantAccount' => $merchantAccount,
             ]);
-            return null;
+            return ['__order_not_found' => true, 'merchantAccount' => $merchantAccount] + $data;
         }
 
         $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
@@ -2087,9 +2104,132 @@ class WfpController extends Controller
             return false;
         }
 
+        if ($this->isWfpOrderNotFoundResponse($responseArray)) {
+            Log::warning('refundSettleJob: Order Not Found — no telegram spam', [
+                'orderReference' => $orderReference,
+                'merchantAccount' => $responseArray['merchantAccount'] ?? null,
+            ]);
+            Cache::forget('wfp_refund_dispatch:' . $orderReference);
+            return false;
+        }
+
         (new DailyTaskController)->sentTaskMessage('Попытка проверки холда: ' . json_encode($responseArray));
         Cache::forget('wfp_refund_dispatch:' . $orderReference);
         return false;
+    }
+
+    private function isWfpOrderNotFoundResponse(?array $data): bool
+    {
+        if ($data === null || $data === []) {
+            return false;
+        }
+
+        return strcasecmp((string) ($data['transactionStatus'] ?? ''), 'Declined') === 0
+            && (int) ($data['reasonCode'] ?? 0) === 1127;
+    }
+
+    /**
+     * Кандидаты мерчантов для возврата: сначала invoice, затем fallback города/заказа.
+     *
+     * @return list<array{merchantAccount: string, secretKey: string}>
+     */
+    private function collectRefundMerchantCandidates(
+        WfpInvoice $invoice,
+        ?array $dispatchParams = null
+    ): array {
+        $candidates = [];
+        $seen = [];
+
+        $push = function (?string $merchantAccount) use (&$candidates, &$seen): void {
+            $merchantAccount = trim((string) $merchantAccount);
+            if ($merchantAccount === '' || isset($seen[$merchantAccount])) {
+                return;
+            }
+            $secretKey = $this->resolveSecretKeyForMerchantAccount($merchantAccount);
+            if ($secretKey === null || $secretKey === '') {
+                return;
+            }
+            $seen[$merchantAccount] = true;
+            $candidates[] = [
+                'merchantAccount' => $merchantAccount,
+                'secretKey' => $secretKey,
+            ];
+        };
+
+        $push($invoice->merchantAccount ?? null);
+        $push($dispatchParams['merchantAccount'] ?? null);
+
+        $order = null;
+        if (!empty($invoice->dispatching_order_uid)) {
+            $order = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
+        }
+        if ($order === null) {
+            $order = Orderweb::where('wfp_order_id', $invoice->orderReference)->latest()->first();
+        }
+        if ($order !== null) {
+            $fromOrder = $this->checkMerchantInfo($order);
+            $push($fromOrder['merchantAccount'] ?? null);
+        }
+
+        $push(config('app.merchantAccountMy'));
+        $push(config('app.merchantAccount'));
+        $push('play_google_com_f183e');
+        $push('m_easy_order_taxi_site');
+
+        return $candidates;
+    }
+
+    /**
+     * Найти мерчант, у которого WFP знает этот orderReference.
+     *
+     * @return array{merchantAccount: string, secretKey: string}|null
+     */
+    private function resolveLiveMerchantForRefund(
+        WfpInvoice $invoice,
+        ?array $dispatchParams = null
+    ): ?array {
+        $candidates = $this->collectRefundMerchantCandidates($invoice, $dispatchParams);
+        $allNotFound = $candidates !== [];
+
+        foreach ($candidates as $candidate) {
+            $check = $this->syncInvoiceFromWfpCheckStatus(
+                $invoice,
+                $candidate['merchantAccount'],
+                $candidate['secretKey']
+            );
+            if ($check === null) {
+                $allNotFound = false;
+                continue;
+            }
+            if (!empty($check['__order_not_found'])) {
+                continue;
+            }
+
+            $this->stampInvoiceMerchantAccount($invoice, $candidate['merchantAccount']);
+            Log::info('refundSettleJob: live merchant resolved via CHECK_STATUS', [
+                'orderReference' => $invoice->orderReference,
+                'merchantAccount' => $candidate['merchantAccount'],
+                'transactionStatus' => $check['transactionStatus'] ?? null,
+            ]);
+
+            return $candidate;
+        }
+
+        if ($allNotFound) {
+            $invoice->refresh();
+            if (!$this->isFinalWfpStatus($invoice->transactionStatus)) {
+                $invoice->transactionStatus = 'Voided';
+                $invoice->reason = 'Order Not Found on all known merchants';
+                $invoice->reasonCode = 1127;
+                $invoice->save();
+                Log::warning('refundSettleJob: mark Voided — Order Not Found on all merchants', [
+                    'orderReference' => $invoice->orderReference,
+                    'tried' => array_column($candidates, 'merchantAccount'),
+                ]);
+            }
+        }
+
+        return null;
     }
 
     public function refundSettleJob($params, $orderReference)
@@ -2115,7 +2255,7 @@ class WfpController extends Controller
                 return 'exit';
             }
 
-            $merchant = $this->resolveMerchantForInvoice(
+            $merchant = $this->resolveLiveMerchantForRefund(
                 $invoice,
                 is_array($params) ? $params : null
             );
@@ -2124,6 +2264,11 @@ class WfpController extends Controller
                 || empty($merchant['merchantAccount'])
                 || $merchant['merchantAccount'] === 'errorMerchantAccount'
             ) {
+                $invoice->refresh();
+                if ($this->isFinalWfpStatus($invoice->transactionStatus)) {
+                    Cache::forget('wfp_refund_dispatch:' . $orderReference);
+                    return 'exit';
+                }
                 Log::error('refundSettleJob: merchant not resolved', ['orderReference' => $orderReference]);
                 Cache::forget('wfp_refund_dispatch:' . $orderReference);
                 return 'exit';
@@ -2131,9 +2276,6 @@ class WfpController extends Controller
 
             $merchantAccount = $merchant['merchantAccount'];
             $secretKey = $merchant['secretKey'];
-            $this->stampInvoiceMerchantAccount($invoice, $merchantAccount);
-
-            $this->syncInvoiceFromWfpCheckStatus($invoice, $merchantAccount, $secretKey);
             $invoice->refresh();
 
             if ($this->isFinalWfpStatus($invoice->transactionStatus)) {
@@ -2860,19 +3002,26 @@ class WfpController extends Controller
             return config('app.merchantSecretKey');
         }
 
-        foreach ([City_PAS1::class, City_PAS2::class, City_PAS4::class, City_PAS5::class] as $modelClass) {
-            $merchant = $modelClass::where('wfp_merchantAccount', $merchantAccount)->first();
-            if ($merchant && !empty($merchant->wfp_merchantSecretKey)) {
-                return $merchant->wfp_merchantSecretKey;
-            }
-        }
-
         if ($merchantAccount === config('app.merchantAccountMy')) {
             return config('app.merchantSecretKeyMy');
         }
 
         if ($merchantAccount === config('app.merchantAccount')) {
             return config('app.merchantSecretKey');
+        }
+
+        try {
+            foreach ([City_PAS1::class, City_PAS2::class, City_PAS4::class, City_PAS5::class] as $modelClass) {
+                $merchant = $modelClass::where('wfp_merchantAccount', $merchantAccount)->first();
+                if ($merchant && !empty($merchant->wfp_merchantSecretKey)) {
+                    return $merchant->wfp_merchantSecretKey;
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::debug('resolveSecretKeyForMerchantAccount: city lookup skipped', [
+                'merchantAccount' => $merchantAccount,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         return null;
@@ -5108,6 +5257,16 @@ class WfpController extends Controller
 
         $order = Orderweb::where('dispatching_order_uid', $invoice->dispatching_order_uid)->first();
         if ($order === null) {
+            $resolved = ForkAddCostTarget::resolve((string) $invoice->dispatching_order_uid);
+            $order = $resolved['order'] ?? null;
+            if ($order !== null) {
+                Log::info('isAddCostInvoice: orderweb resolved via fork hold', [
+                    'invoice_uid' => $invoice->dispatching_order_uid,
+                    'order_uid' => $order->dispatching_order_uid,
+                ]);
+            }
+        }
+        if ($order === null) {
             return false;
         }
 
@@ -5155,7 +5314,8 @@ class WfpController extends Controller
 
         $uid = $invoice->dispatching_order_uid;
         $amount = $invoice->amount;
-        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $resolved = ForkAddCostTarget::resolve((string) $uid);
+        $order = $resolved['order'] ?? Orderweb::where('dispatching_order_uid', $uid)->first();
 
         if ($order !== null && $order->wfp_order_id === $orderReference) {
             Log::info('Add-cost already applied, skipping duplicate processing', [
@@ -5165,7 +5325,10 @@ class WfpController extends Controller
             return;
         }
 
-        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        $uid_history = $resolved['history'] ?? Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        if (!$uid_history && $order !== null) {
+            $uid_history = Uid_history::where('uid_bonusOrderHold', $order->dispatching_order_uid)->first();
+        }
         if (!$uid_history) {
             Log::warning('dispatchAddCostProcessing: uid_history not found', [
                 'uid' => $uid,
@@ -5174,12 +5337,19 @@ class WfpController extends Controller
             return;
         }
 
-        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $bonusUid = trim((string) ($resolved['bonusUid'] ?? ''));
+        if ($bonusUid === '') {
+            $bonusUid = trim((string) ($uid_history->uid_bonusOrder ?? $uid));
+        }
+        $doubleUid = trim((string) ($resolved['doubleUid'] ?? ''));
+        if ($doubleUid === '') {
+            $doubleUid = (string) $uid_history->uid_doubleOrder;
+        }
         $payMethod = $this->resolveAddCostPayMethod($order);
 
         dispatch(new StartAddCostCardBottomCreat(
-            $uid,
-            $uid_history->uid_doubleOrder,
+            $bonusUid,
+            $doubleUid,
             $payMethod,
             $orderReference,
             $city,
@@ -5327,7 +5497,8 @@ class WfpController extends Controller
         }
 
         $uid = $wfpInvoice->dispatching_order_uid;
-        $order = Orderweb::where('dispatching_order_uid', $uid)->first();
+        $resolved = ForkAddCostTarget::resolve((string) $uid);
+        $order = $resolved['order'] ?? Orderweb::where('dispatching_order_uid', $uid)->first();
 
         if ($order === null) {
             Log::warning('Add-cost order not found', [
@@ -5401,18 +5572,30 @@ class WfpController extends Controller
             );
         }
 
-        $uid_history = Uid_history::where('uid_bonusOrderHold', $uid)->first();
+        $uid_history = ($resolved['history'] ?? null)
+            ?: Uid_history::where('uid_bonusOrderHold', $order->dispatching_order_uid)->first()
+            ?: Uid_history::where('uid_bonusOrderHold', $uid)->first();
         if (!$uid_history) {
             Log::warning('UID history not found, cannot process universal add cost', [
                 'uid' => $uid,
+                'order_uid' => $order->dispatching_order_uid,
                 'order_reference' => $orderReference,
             ]);
             return null;
         }
 
+        $bonusUid = trim((string) ($resolved['bonusUid'] ?? ''));
+        if ($bonusUid === '') {
+            $bonusUid = trim((string) ($uid_history->uid_bonusOrder ?: $uid));
+        }
+        $doubleUid = trim((string) ($resolved['doubleUid'] ?? ''));
+        if ($doubleUid === '') {
+            $doubleUid = (string) $uid_history->uid_doubleOrder;
+        }
+
         return (new UniversalAndroidFunctionController)->startAddCostCardBottomCreat(
-            $uid,
-            $uid_history->uid_doubleOrder,
+            $bonusUid,
+            $doubleUid,
             $this->resolveAddCostPayMethod($order),
             $orderReference,
             $city,

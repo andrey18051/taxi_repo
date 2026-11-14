@@ -4,8 +4,9 @@ namespace App\Services;
 
 /**
  * Когда одиночный заказ можно поднять заново после снятия на сервере такси.
- * PAS 2 на простом режиме — нал и безнал. Остальные PAS — одиночный нал,
- * в том числе в городе с вилкой, где наличный заказ один.
+ * PAS 2 на простом режиме — нал и безнал. Остальные PAS — одиночный нал
+ * или одиночный безнал (карта / Google Pay), в том числе в городе с вилкой,
+ * где заказ один (не пара hold/live). Вилочные пары сюда не входят.
  * Решение без БД и HTTP — его проверяют тесты.
  */
 final class Pas2SimpleDispatchRecreateGate
@@ -24,6 +25,15 @@ final class Pas2SimpleDispatchRecreateGate
      * причиной 2/3/4/5, это снятое авто, а не живая поездка.
      */
     public const CAR_SHOWN_CLOSE_REASONS = ['101', '102', '103'];
+
+    /** @var list<string> */
+    private const CARD_PAY_SYSTEMS = [
+        'wfp_payment',
+        'google_pay_payment',
+        'fondy_payment',
+        'mono_payment',
+        'card_payment',
+    ];
 
     private const TRIP_EXECUTION = ['CarFound', 'Running', 'Executed'];
 
@@ -107,7 +117,8 @@ final class Pas2SimpleDispatchRecreateGate
 
     /**
      * PAS 2 и простой режим — как раньше (нал и оплаченный безнал).
-     * Одиночный нал любого PAS — и на простом режиме, и в городе с вилкой.
+     * Одиночный нал или одиночный безнал любого PAS — и на простом режиме,
+     * и в городе с вилкой (Киев и т.п.), если заказ не вилочная пара.
      *
      * @param array<string, mixed> $context
      */
@@ -123,9 +134,11 @@ final class Pas2SimpleDispatchRecreateGate
             return true;
         }
 
-        $singleCash = (string) ($context['pay_system'] ?? '') === 'nal_payment'
-            && empty($context['is_fork']);
-        if (!$singleCash) {
+        if (!empty($context['is_fork'])) {
+            return false;
+        }
+
+        if (!self::isSingleEligiblePaySystem((string) ($context['pay_system'] ?? ''))) {
             return false;
         }
 
@@ -134,6 +147,15 @@ final class Pas2SimpleDispatchRecreateGate
             \App\City\PaymentFlow::FORK,
             \App\City\PaymentFlow::FORK_LEGACY,
         ], true);
+    }
+
+    private static function isSingleEligiblePaySystem(string $paySystem): bool
+    {
+        if ($paySystem === 'nal_payment') {
+            return true;
+        }
+
+        return in_array($paySystem, self::CARD_PAY_SYSTEMS, true);
     }
 
     /**
