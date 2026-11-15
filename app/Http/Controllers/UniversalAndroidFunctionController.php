@@ -16,6 +16,7 @@ use App\Helpers\OrderHelper;
 use App\Helpers\TimeHelper;
 use App\Services\DispatchOrderCancelService;
 use App\Services\ForkLegUidChain;
+use App\Support\AddCostClientPayload;
 use App\Support\ForkAddCostTarget;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use Illuminate\Database\Eloquent\Model;
@@ -8209,7 +8210,7 @@ class UniversalAndroidFunctionController extends Controller
 
         if (!$order || !$orderMemory) {
             Log::error("startAddCostSimpleCashless: order or orderMemory not found for uid='$uid'.");
-            return response()->json(['response' => '400'], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         switch ($order->comment) {
@@ -8283,7 +8284,7 @@ class UniversalAndroidFunctionController extends Controller
                 'uid' => $uid,
                 'authorization_choice' => $authorizationChoiceArr,
             ]);
-            return response()->json(['response' => '400'], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         $authorization = $authorizationChoiceArr['authorization'];
@@ -8295,7 +8296,7 @@ class UniversalAndroidFunctionController extends Controller
         $parameter = json_decode($orderMemory->response, true);
         if (!is_array($parameter)) {
             Log::error('startAddCostSimpleCashless: invalid orderMemory response', ['uid' => $uid]);
-            return response()->json(['response' => '400'], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         $oldDispatchUid = $order->dispatching_order_uid;
@@ -8311,7 +8312,7 @@ class UniversalAndroidFunctionController extends Controller
                 'uid' => $oldDispatchUid,
             ]);
 
-            return response()->json(['response' => 'dispatch_cancel_pending'], 200);
+            return response()->json(AddCostClientPayload::pendingCancel(), 200);
         }
 
         $targetClientCost = OrderHelper::resolveDisplayCostGrivna($order) + (int) $addCost;
@@ -8343,7 +8344,7 @@ class UniversalAndroidFunctionController extends Controller
             $responseArr = json_decode($response, true);
         } catch (\Exception $e) {
             Log::error('startAddCostSimpleCashless: dispatch POST failed: ' . $e->getMessage());
-            return response()->json(['response' => '400'], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         if (empty($responseArr) || isset($responseArr['Message']) || empty($responseArr['dispatching_order_uid'])) {
@@ -8351,9 +8352,9 @@ class UniversalAndroidFunctionController extends Controller
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
             Log::error($messageAdmin, ['response' => $responseArr]);
             $duplicateAddCost = OrderDuplicateHelper::isDuplicateOrderMessage($responseArr['Message'] ?? null);
-            return response()->json([
-                'response' => $duplicateAddCost ? 'duplicate_add_cost_failed' : 'Новый заказ не создался',
-            ], 200);
+            return response()->json(AddCostClientPayload::failed(
+                $duplicateAddCost ? 'duplicate_add_cost_failed' : 'Новый заказ не создался'
+            ), 200);
         }
 
         $orderNew = $responseArr['dispatching_order_uid'];
@@ -8519,7 +8520,7 @@ class UniversalAndroidFunctionController extends Controller
         // Проверяем существование заказа
         if (!$order || !$orderMemory) {
             Log::error("Не удалось найти order или orderMemory с UID: '$uid'.");
-            return response()->json(["response" => "400"], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         // Выбор приложения по комментарию
@@ -8600,7 +8601,7 @@ class UniversalAndroidFunctionController extends Controller
         // Проверка наличия ключей
         if (!isset($authorizationChoiceArr['authorizationBonus']) || !isset($authorizationChoiceArr['authorizationDouble'])) {
             Log::warning("Ключи authorizationBonus или authorizationDouble отсутствуют в \$authorizationChoiceArr: " . json_encode($authorizationChoiceArr));
-            return response()->json(["response" => "400"], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         // Извлечение данных авторизации
@@ -8638,7 +8639,7 @@ class UniversalAndroidFunctionController extends Controller
                 'uid_double' => $oldDoubleUid,
             ]);
 
-            return response()->json(['response' => 'dispatch_cancel_pending'], 200);
+            return response()->json(AddCostClientPayload::pendingCancel(), 200);
         }
 
         // Формирование URL для API
@@ -8705,7 +8706,7 @@ class UniversalAndroidFunctionController extends Controller
             $responseBonusArr["parameter"] = $parameter;
         } catch (\Exception $e) {
             Log::error("Ошибка при POST-запросе с authorizationBonus: " . $e->getMessage());
-            return response()->json(["response" => "400"], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
 
         // Наличная нога вилки: отдельный add_cost по котировке payment_type=0
@@ -8732,9 +8733,9 @@ class UniversalAndroidFunctionController extends Controller
             Log::error($messageAdmin);
             $duplicateAddCost = \App\Helpers\OrderDuplicateHelper::isDuplicateOrderMessage($responseBonusArr["Message"] ?? null)
                 || \App\Helpers\OrderDuplicateHelper::isDuplicateOrderMessage($responseDoubleArr["Message"] ?? null);
-            return response()->json([
-                "response" => $duplicateAddCost ? "duplicate_add_cost_failed" : "Новый заказ не создался",
-            ], 200);
+            return response()->json(AddCostClientPayload::failed(
+                $duplicateAddCost ? "duplicate_add_cost_failed" : "Новый заказ не создался"
+            ), 200);
         }
 
         if ((empty($responseBonusArr) || isset($responseBonusArr["Message"])) && !empty($responseDoubleArr) && !isset($responseDoubleArr["Message"])) {
@@ -8760,7 +8761,7 @@ class UniversalAndroidFunctionController extends Controller
             $responseArr = json_decode($responseFinal, true);
             if (!empty($responseArr) && isset($responseArr["Message"])) {
                 Log::info("API вернул сообщение об ошибке: " . $responseArr["Message"]);
-                return response()->json(["response" => $responseArr["Message"]], 200);
+                return response()->json(AddCostClientPayload::failed((string) $responseArr["Message"]), 200);
             }
 
             if ($responseFinal && !isset($responseArr["Message"])) {
@@ -8935,11 +8936,11 @@ class UniversalAndroidFunctionController extends Controller
                 return response()->json($response, 200);
             } else {
                 Log::error("Неудачный запрос API: " . json_encode($responseArr, JSON_UNESCAPED_UNICODE));
-                return response()->json(["response" => "400"], 200);
+                return response()->json(AddCostClientPayload::failed(), 200);
             }
         } catch (\Exception $e) {
             Log::error("Ошибка при обработке ответа API: " . $e->getMessage());
-            return response()->json(["response" => "400"], 200);
+            return response()->json(AddCostClientPayload::failed(), 200);
         }
     }
 

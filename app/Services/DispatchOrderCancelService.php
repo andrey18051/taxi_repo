@@ -213,6 +213,27 @@ class DispatchOrderCancelService
             : (new MemoryOrderChangeController)->show($rawPrimaryUid);
         $orderweb = Orderweb::where('dispatching_order_uid', $orderwebLookupUid)->first();
         if (!$orderweb) {
+            $siblingUid = '';
+            foreach ($options['legs'] ?? [] as $leg) {
+                if (!is_array($leg)) {
+                    continue;
+                }
+                $legUid = trim((string) ($leg['uid'] ?? ''));
+                if ($legUid !== '' && $legUid !== $rawPrimaryUid && $legUid !== $primaryUid) {
+                    $siblingUid = $legUid;
+                    break;
+                }
+            }
+            $orderweb = ForkOrderCancelLegResolver::findOrderweb($rawPrimaryUid, $siblingUid);
+            if ($orderweb) {
+                Log::info('DispatchOrderCancelService: add-cost orderweb resolved via fork hold', [
+                    'primary_uid' => $rawPrimaryUid,
+                    'lookup_uid' => $orderwebLookupUid,
+                    'orderweb_uid' => $orderweb->dispatching_order_uid,
+                ]);
+            }
+        }
+        if (!$orderweb) {
             self::clearAddCostRecreationInProgress($rawPrimaryUid);
             if ($rawPrimaryUid !== $primaryUid) {
                 self::clearAddCostRecreationInProgress($primaryUid);
