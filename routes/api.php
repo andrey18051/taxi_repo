@@ -3,6 +3,7 @@
 use App\Http\Controllers\AndroidController;
 use App\Http\Controllers\ComboTestController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\MantisBugReportController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\CityTariffController;
 use Illuminate\Http\Request;
@@ -28,6 +29,8 @@ use Illuminate\Support\Facades\RateLimiter;
 Route::get('/check', function () {
     return response()->json(['status' => 'OK'], 200);
 });
+
+Route::post('/mantis/issues', [MantisBugReportController::class, 'store']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

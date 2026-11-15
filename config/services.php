@@ -100,8 +100,9 @@ return [
         'timeout' => env('CITY_INFO_TIMEOUT', 5),
     ],
 
-    /** MantisBT — баг-репорты PAS (веб-UI, не API) */
+    /** MantisBT: UI — публичная ссылка, API — только локальный контейнер на этом хосте */
     'mantis' => [
         'url' => env('MANTIS_URL', 'https://t.easy-order-taxi.site/mantis/'),
+        'api_url' => env('MANTIS_API_URL', 'http://127.0.0.1:8989/api/rest/issues'),
     ],
 ];
