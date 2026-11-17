@@ -35,4 +35,33 @@ class DispatchOrderCancelAddCostRecreationTest extends TestCase
             Cache::has(DispatchOrderCancelService::ADD_COST_RECREATION_CACHE_PREFIX . 'uid-old')
         );
     }
+
+    public function test_collect_add_cost_recreation_uids_includes_legs(): void
+    {
+        $uids = DispatchOrderCancelService::collectAddCostRecreationUids(
+            'primary-raw',
+            'primary-resolved',
+            [
+                ['uid' => 'leg-bonus'],
+                ['uid' => 'leg-double'],
+                ['uid' => ''],
+            ]
+        );
+
+        $this->assertSame(
+            ['primary-raw', 'primary-resolved', 'leg-bonus', 'leg-double'],
+            $uids
+        );
+    }
+
+    public function test_clear_add_cost_recreation_uids_batch(): void
+    {
+        DispatchOrderCancelService::markAddCostRecreationInProgress('uid-a');
+        DispatchOrderCancelService::markAddCostRecreationInProgress('uid-b');
+
+        DispatchOrderCancelService::clearAddCostRecreationUids(['uid-a', 'uid-b']);
+
+        $this->assertFalse(DispatchOrderCancelService::isAddCostRecreationInProgress('uid-a'));
+        $this->assertFalse(DispatchOrderCancelService::isAddCostRecreationInProgress('uid-b'));
+    }
 }

@@ -1481,6 +1481,39 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Доплата по вилке сама снимает старые ноги (close_reason=1) и переносит orderweb
+     * на новый UID. Параллельный опрос не должен закрыть уже пересозданный заказ.
+     *
+     * @param array<int, string|null> $relatedUids hold / canceled leg / sibling
+     * @param Orderweb|null $orderweb
+     */
+    public static function shouldSkipActiveForkSearchCloseForAddCostRecreation(
+        $orderweb,
+        array $relatedUids
+    ): bool {
+        foreach ($relatedUids as $rawUid) {
+            $uid = trim((string) $rawUid);
+            if ($uid !== '' && DispatchOrderCancelService::isAddCostRecreationInProgress($uid)) {
+                return true;
+            }
+        }
+
+        if ($orderweb === null || !$orderweb->exists) {
+            return false;
+        }
+
+        $orderweb->refresh();
+        foreach ($relatedUids as $rawUid) {
+            $uid = trim((string) $rawUid);
+            if ($uid !== '' && self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @throws \Exception
      */
     public function getOrderStatusMessageResultPush($dispatching_order_uid)

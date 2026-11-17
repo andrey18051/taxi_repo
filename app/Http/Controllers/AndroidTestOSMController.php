@@ -13190,6 +13190,31 @@ class AndroidTestOSMController extends Controller
         }
     }
 
+    /**
+     * Сброс флага add-cost после того, как orderweb уже на новом UID.
+     *
+     * @param array<int, string|null> $uids
+     */
+    public function clearAddCostRecreationGuards(array $uids, ?Uid_history $uid_history = null): void
+    {
+        if ($uid_history !== null) {
+            $hold = trim((string) ($uid_history->uid_bonusOrderHold ?? ''));
+            if ($hold !== '') {
+                $uids[] = $hold;
+            }
+            $bonus = trim((string) ($uid_history->uid_bonusOrder ?? ''));
+            if ($bonus !== '') {
+                $uids[] = $bonus;
+            }
+            $double = trim((string) ($uid_history->uid_doubleOrder ?? ''));
+            if ($double !== '') {
+                $uids[] = $double;
+            }
+        }
+
+        \App\Services\DispatchOrderCancelService::clearAddCostRecreationUids($uids);
+    }
+
     public function webordersCancelUidHistory($uid) {
 
         $uid = (new MemoryOrderChangeController)->show($uid);

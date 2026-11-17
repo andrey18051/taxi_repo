@@ -3225,9 +3225,33 @@ trait LegacyForkStatusPoll
             : (is_array($bonus) ? $bonus : null);
 
         $hold = (string) $uidHistory->uid_bonusOrderHold;
+        $canceledUid = trim((string) ($canceledSnapshot['dispatching_order_uid'] ?? ''));
+        $siblingUid = ForkOrderCancelLegResolver::liveSiblingUid($uidHistory, $siblingLeg, $siblingUid);
         $orderweb = $hold !== ''
             ? Orderweb::where('dispatching_order_uid', $hold)->first()
             : null;
+        if ($orderweb === null && ($hold !== '' || $canceledUid !== '')) {
+            $orderweb = ForkOrderCancelLegResolver::findOrderweb(
+                $hold !== '' ? $hold : $canceledUid,
+                $canceledUid !== '' ? $canceledUid : (string) $siblingUid
+            );
+        }
+        $relatedUids = [$hold, $canceledUid, (string) $siblingUid];
+        if (OrderStatusController::shouldSkipActiveForkSearchCloseForAddCostRecreation(
+            $orderweb,
+            $relatedUids
+        )) {
+            Log::info('Skip active fork search close: add-cost recreation or superseded uid', [
+                'canceled_leg' => $canceledLeg,
+                'hold' => $hold,
+                'canceled_uid' => $canceledUid,
+                'sibling_uid' => $siblingUid,
+                'orderweb_uid' => $orderweb?->dispatching_order_uid,
+            ]);
+
+            return false;
+        }
+
         $armed = OrderStatusController::isForkLegRecreationArmed($uidHistory, $canceledLeg);
         if (!OrderStatusController::shouldCloseActiveForkSearchInsteadOfRestore(
             $canceledSnapshot,
@@ -3238,7 +3262,23 @@ trait LegacyForkStatusPoll
             return false;
         }
 
-        $siblingUid = ForkOrderCancelLegResolver::liveSiblingUid($uidHistory, $siblingLeg, $siblingUid);
+        // Доплата могла переписать orderweb на новый UID между проверкой и закрытием.
+        if ($orderweb !== null) {
+            $orderweb->refresh();
+            if (OrderStatusController::shouldSkipActiveForkSearchCloseForAddCostRecreation(
+                $orderweb,
+                $relatedUids
+            )) {
+                Log::info('Skip active fork search close after refresh: add-cost recreation', [
+                    'canceled_leg' => $canceledLeg,
+                    'hold' => $hold,
+                    'orderweb_uid' => $orderweb->dispatching_order_uid,
+                ]);
+
+                return false;
+            }
+        }
+
         if ($siblingUid !== null && $siblingUid !== '') {
             self::orderCanceled(
                 $siblingUid,

@@ -204,9 +204,9 @@ class DispatchOrderCancelService
         $rawPrimaryUid = (string) $options['primary_uid'];
         $resolveUidMapping = (bool) ($options['resolve_uid_mapping'] ?? false);
         $primaryUid = $this->resolveCancelLegUid($rawPrimaryUid, $resolveUidMapping);
-        self::markAddCostRecreationInProgress($rawPrimaryUid);
-        if ($rawPrimaryUid !== $primaryUid) {
-            self::markAddCostRecreationInProgress($primaryUid);
+        $trackedRecreationUids = self::collectAddCostRecreationUids($rawPrimaryUid, $primaryUid, $options['legs'] ?? []);
+        foreach ($trackedRecreationUids as $trackedUid) {
+            self::markAddCostRecreationInProgress($trackedUid);
         }
         $orderwebLookupUid = $resolveUidMapping
             ? $primaryUid
@@ -234,20 +234,20 @@ class DispatchOrderCancelService
             }
         }
         if (!$orderweb) {
-            self::clearAddCostRecreationInProgress($rawPrimaryUid);
-            if ($rawPrimaryUid !== $primaryUid) {
-                self::clearAddCostRecreationInProgress($primaryUid);
-            }
+            self::clearAddCostRecreationUids($trackedRecreationUids);
 
             return ['ready' => false, 'snapshots' => [], 'cancel_result_code' => null];
         }
 
-        if ($orderweb->server === 'my_server_api') {
-            self::clearAddCostRecreationInProgress($rawPrimaryUid);
-            if ($rawPrimaryUid !== $primaryUid) {
-                self::clearAddCostRecreationInProgress($primaryUid);
-            }
+        $holdUid = trim((string) $orderweb->dispatching_order_uid);
+        if ($holdUid !== '') {
+            self::markAddCostRecreationInProgress($holdUid);
+            $trackedRecreationUids[] = $holdUid;
+            $trackedRecreationUids = array_values(array_unique($trackedRecreationUids));
+        }
 
+        if ($orderweb->server === 'my_server_api') {
+            // Флаг держим до конца recreate в вызывающем коде (TTL 3 мин — запасной сброс).
             return ['ready' => true, 'snapshots' => [], 'cancel_result_code' => null];
         }
 
@@ -291,17 +291,13 @@ class DispatchOrderCancelService
                     'attempt' => $attempt,
                 ]);
 
-                $result = [
+                // Флаг не сбрасываем здесь: параллельный опрос вилки ещё может увидеть
+                // close_reason=1 на старых ногах. Сброс — после recreate (TTL 3 мин).
+                return [
                     'ready' => true,
                     'snapshots' => $snapshots,
                     'cancel_result_code' => $cancelResultCode,
                 ];
-                self::clearAddCostRecreationInProgress($rawPrimaryUid);
-                if ($rawPrimaryUid !== $primaryUid) {
-                    self::clearAddCostRecreationInProgress($primaryUid);
-                }
-
-                return $result;
             }
 
             if ($attempt === 1) {
@@ -324,16 +320,52 @@ class DispatchOrderCancelService
             'wait_seconds' => $waitSeconds,
         ]);
 
-        self::clearAddCostRecreationInProgress($rawPrimaryUid);
-        if ($rawPrimaryUid !== $primaryUid) {
-            self::clearAddCostRecreationInProgress($primaryUid);
-        }
+        self::clearAddCostRecreationUids($trackedRecreationUids);
 
         return [
             'ready' => false,
             'snapshots' => $snapshots,
             'cancel_result_code' => $cancelResultCode,
         ];
+    }
+
+    /**
+     * @param array<int, mixed> $legs
+     * @return array<int, string>
+     */
+    public static function collectAddCostRecreationUids(
+        string $rawPrimaryUid,
+        string $primaryUid,
+        array $legs = []
+    ): array {
+        $uids = [];
+        foreach ([$rawPrimaryUid, $primaryUid] as $uid) {
+            $uid = trim($uid);
+            if ($uid !== '') {
+                $uids[] = $uid;
+            }
+        }
+        foreach ($legs as $leg) {
+            if (!is_array($leg)) {
+                continue;
+            }
+            $legUid = trim((string) ($leg['uid'] ?? ''));
+            if ($legUid !== '') {
+                $uids[] = $legUid;
+            }
+        }
+
+        return array_values(array_unique($uids));
+    }
+
+    /**
+     * @param array<int, string> $uids
+     */
+    public static function clearAddCostRecreationUids(array $uids): void
+    {
+        foreach ($uids as $uid) {
+            self::clearAddCostRecreationInProgress((string) $uid);
+        }
     }
 
     private function stopCampaignWithoutMapping(string $primaryUid): void

@@ -61,8 +61,11 @@ class ForkAddCostRecreationLookupTest extends TestCase
         Schema::dropIfExists('memory_order_changes');
         Schema::dropIfExists('uid_histories');
         Schema::dropIfExists('orderwebs');
-        DispatchOrderCancelService::clearAddCostRecreationInProgress(self::BONUS);
-        DispatchOrderCancelService::clearAddCostRecreationInProgress(self::HOLD);
+        DispatchOrderCancelService::clearAddCostRecreationUids([
+            self::BONUS,
+            self::HOLD,
+            self::DOUBLE,
+        ]);
         parent::tearDown();
     }
 
@@ -93,6 +96,10 @@ class ForkAddCostRecreationLookupTest extends TestCase
         ]);
 
         $this->assertTrue($result['ready']);
+        // После ready флаг ещё держится, пока recreate не сбросит его явно.
+        $this->assertTrue(DispatchOrderCancelService::isAddCostRecreationInProgress(self::BONUS));
+        $this->assertTrue(DispatchOrderCancelService::isAddCostRecreationInProgress(self::HOLD));
+        $this->assertTrue(DispatchOrderCancelService::isAddCostRecreationInProgress(self::DOUBLE));
     }
 
     public function test_pending_cancel_payload_has_transaction_status(): void

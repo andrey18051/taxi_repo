@@ -8933,13 +8933,21 @@ class UniversalAndroidFunctionController extends Controller
 
                 }
 
+                // Флаг add-cost recreation держим до TTL (3 мин): старый опрос вилки
+                // ещё может увидеть close_reason=1 на снятых ногах после recreate.
                 return response()->json($response, 200);
             } else {
                 Log::error("Неудачный запрос API: " . json_encode($responseArr, JSON_UNESCAPED_UNICODE));
+                (new AndroidTestOSMController)->clearAddCostRecreationGuards(
+                    [$oldBonusUid, $oldDoubleUid]
+                );
                 return response()->json(AddCostClientPayload::failed(), 200);
             }
         } catch (\Exception $e) {
             Log::error("Ошибка при обработке ответа API: " . $e->getMessage());
+            (new AndroidTestOSMController)->clearAddCostRecreationGuards(
+                [$oldBonusUid ?? '', $oldDoubleUid ?? '']
+            );
             return response()->json(AddCostClientPayload::failed(), 200);
         }
     }
