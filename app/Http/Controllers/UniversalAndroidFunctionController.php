@@ -18,6 +18,8 @@ use App\Services\DispatchOrderCancelService;
 use App\Services\ForkLegUidChain;
 use App\Support\AddCostClientPayload;
 use App\Support\ForkAddCostTarget;
+use App\Support\ForkOrderCancelLegResolver;
+use App\Support\ForkUnpaidCancelClock;
 use App\Jobs\WebordersCancelAndRestorNalJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -4071,24 +4073,37 @@ class UniversalAndroidFunctionController extends Controller
     {
         Log::debug("Entering canceledOneMinute: uid=$uid");
 
-        $uid = (new MemoryOrderChangeController)->show($uid);
-        $order = Orderweb::where("dispatching_order_uid", $uid)->first();
+        $rawUid = trim((string) $uid);
+        $liveUid = (string) (new MemoryOrderChangeController)->show($rawUid);
+        $liveOrder = $liveUid !== ''
+            ? Orderweb::where('dispatching_order_uid', $liveUid)->first()
+            : null;
+        $originOrder = ($rawUid !== '' && $rawUid !== $liveUid)
+            ? Orderweb::where('dispatching_order_uid', $rawUid)->first()
+            : $liveOrder;
+        $order = $liveOrder ?? $originOrder;
+        if ($order === null) {
+            $order = ForkOrderCancelLegResolver::findOrderweb($rawUid, $liveUid);
+            $originOrder = $originOrder ?? $order;
+        }
 
         if (is_null($order)) {
-            Log::error("Order not found with UID: $uid");
+            Log::error("Order not found with UID: $liveUid");
             return false;
         }
 
+        $uid = (string) $order->dispatching_order_uid;
+        $created_at_timestamp = ForkUnpaidCancelClock::clockTimestamp(
+            $originOrder !== null ? $originOrder->created_at : null,
+            $order->created_at
+        );
+        Log::debug("canceledOneMinute: order created_at=" . ($order->created_at ?? '')
+            . " clock=" . ($created_at_timestamp ?? 'null')
+            . " live_uid=$liveUid");
 
+        $current_time_timestamp = time();
 
-        $created_at = $order->created_at;
-        Log::debug("canceledOneMinute: order created_at=$created_at");
-
-        $current_time = now()->toDateTimeString(); // Используем Laravel helper now() для текущего времени
-        $created_at_timestamp = strtotime($created_at);
-        $current_time_timestamp = strtotime($current_time);
-
-        if (($current_time_timestamp - $created_at_timestamp) <= 50) {
+        if (ForkUnpaidCancelClock::stillInsideWindow($created_at_timestamp, $current_time_timestamp)) {
             Log::debug("Less than one minute has passed since order creation: uid=$uid");
 
             $merchantInfo = (new WfpController)->checkMerchantInfo($order);
@@ -4110,7 +4125,8 @@ class UniversalAndroidFunctionController extends Controller
                 return false;
             }
 
-            $hasPaidInvoice = WfpInvoice::where('dispatching_order_uid', $uid)
+            $invoiceUids = array_values(array_unique(array_filter([$uid, $liveUid])));
+            $hasPaidInvoice = WfpInvoice::whereIn('dispatching_order_uid', $invoiceUids)
                 ->whereIn('transactionStatus', $paidStatuses)
                 ->exists();
             if ($hasPaidInvoice) {
@@ -4121,7 +4137,9 @@ class UniversalAndroidFunctionController extends Controller
         if ($orderReference != null) {
             Log::debug("canceledOneMinute: orderReference=$orderReference");
 
-            if ((new WfpController)->hasPendingAddCostPayment($uid, $orderReference)) {
+            $pendingAddCost = (new WfpController)->hasPendingAddCostPayment($uid, $orderReference)
+                || ($liveUid !== $uid && (new WfpController)->hasPendingAddCostPayment($liveUid, $orderReference));
+            if ($pendingAddCost) {
                 Log::debug("canceledOneMinute: pending add-cost payment, skip cancel uid=$uid");
                 return false;
             }
@@ -4134,11 +4152,13 @@ class UniversalAndroidFunctionController extends Controller
             }
             if ($invoice && ($transactionStatus === null || !in_array($transactionStatus, $paidStatuses, true))) {
                 Log::info("Order canceled due to invoice status: uid=$uid, orderReference=$orderReference, transactionStatus=" . ($transactionStatus ?? 'null'));
-                if (($current_time_timestamp - $created_at_timestamp) >= 50) {
-                    (new FCMController)->deleteDocumentFromFirestore($uid);
-                    (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($uid);
-                    (new FCMController)->deleteDocumentFromSectorFirestore($uid);
-                    (new FCMController)->writeDocumentToHistoryFirestore($uid, "cancelled");
+                if (!ForkUnpaidCancelClock::stillInsideWindow($created_at_timestamp, $current_time_timestamp)) {
+                    foreach (array_unique(array_filter([$uid, $liveUid])) as $firestoreUid) {
+                        (new FCMController)->deleteDocumentFromFirestore($firestoreUid);
+                        (new FCMController)->deleteDocumentFromFirestoreOrdersTakingCancel($firestoreUid);
+                        (new FCMController)->deleteDocumentFromSectorFirestore($firestoreUid);
+                        (new FCMController)->writeDocumentToHistoryFirestore($firestoreUid, "cancelled");
+                    }
                 }
 
                 return true;
