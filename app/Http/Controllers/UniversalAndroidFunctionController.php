@@ -7444,18 +7444,22 @@ class UniversalAndroidFunctionController extends Controller
 
 
                 $orderNew = $responseArr["dispatching_order_uid"];
+                $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
+                $newClientCost = $oldClientCost + (int) $addCost;
 
                 (new PusherController)->sentUidAppEmailPayType(
                     $orderNew,
                     $application,
                     $email,
-                    "nal_payment"
+                    "nal_payment",
+                    $newClientCost
                 );
                 (new CentrifugoController)->sentUidAppEmailPayType(
                     $orderNew,
                     $application,
                     $email,
-                    "nal_payment"
+                    "nal_payment",
+                    $newClientCost
                 );
 
 
@@ -7473,9 +7477,6 @@ class UniversalAndroidFunctionController extends Controller
                 (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
-
-                $oldClientCost = (int) ($order->client_cost ?? $order->web_cost ?? 0);
-                $newClientCost = $oldClientCost + (int) $addCost;
 
                 $order->dispatching_order_uid = $order_new_uid;
                 $order->auto = null;
@@ -7498,21 +7499,10 @@ class UniversalAndroidFunctionController extends Controller
 
                 (new MessageSentController())->sentCarRestoreOrderAfterAddCost($order);
                 Log::info("Сообщение о восстановлении машины отправлено.");
-                $response =  [
-                    'uid' => $order_new_uid,
-                    'web_cost' => $order->web_cost,
-                    'client_cost' => $newClientCost,
-                    'routefrom' => $order->routefrom,
-                    'startLat' => $order->startLat,
-                    'startLan' => $order->startLan,
-                    'routeto' => $order->routeto,
-                    'to_lat' => $order->to_lat,
-                    'to_lng' => $order->to_lng,
-                    'pay_system' => $order->pay_system,
-                    "transactionStatus" => "WaitingAuthComplete"
-                ];
-
-                return response()->json($response, 200);
+                return response()->json(
+                    AddCostClientPayload::recreated($order_new_uid, $order->web_cost, $newClientCost, $order),
+                    200
+                );
             } else {
 
                 Log::error("Неудачный запрос: статус " . $response->status());
@@ -8431,19 +8421,10 @@ class UniversalAndroidFunctionController extends Controller
             'new_client_cost' => $newClientCost,
         ]);
 
-        return response()->json([
-            'uid' => $orderNew,
-            'web_cost' => $order->web_cost,
-            'client_cost' => $newClientCost,
-            'routefrom' => $order->routefrom,
-            'startLat' => $order->startLat,
-            'startLan' => $order->startLan,
-            'routeto' => $order->routeto,
-            'to_lat' => $order->to_lat,
-            'to_lng' => $order->to_lng,
-            'pay_system' => $order->pay_system,
-            'transactionStatus' => 'WaitingAuthComplete',
-        ], 200);
+        return response()->json(
+            AddCostClientPayload::recreated($orderNew, $order->web_cost, $newClientCost, $order),
+            200
+        );
     }
 
     /**
@@ -8874,18 +8855,12 @@ class UniversalAndroidFunctionController extends Controller
                 $order->save();
                 Log::info("Обновлен order с новым UID: '$order_new_uid', web_cost='{$responseArr['order_cost']}', attempt_20='{$order->attempt_20}'.");
 
-                $response =  [
-                    'uid' => $order_new_uid,
-                    'web_cost' => $order->web_cost,
-                    'routefrom' => $order->routefrom,
-                    'startLat' => $order->startLat,
-                    'startLan' => $order->startLan,
-                    'routeto' => $order->routeto,
-                    'to_lat' => $order->to_lat,
-                    'to_lng' => $order->to_lng,
-                    'pay_system' => $order->pay_system,
-                    "transactionStatus" => "WaitingAuthComplete"
-                ];
+                $response = AddCostClientPayload::recreated(
+                    $order_new_uid,
+                    $order->web_cost,
+                    $newClientCost,
+                    $order
+                );
 
                 if (is_object($response) && method_exists($response, 'body')) {
                     Log::debug("purchase startAddCostMyApi: ", ['response' => $response->body()]);

@@ -27,4 +27,25 @@ final class AddCostClientPayload
             'transactionStatus' => self::STATUS_DECLINED,
         ];
     }
+
+    /**
+     * Успешное пересоздание после доплаты.
+     * client_cost — сколько списали с клиента (7+5). web_cost — цена диспетчера, она может быть ниже.
+     */
+    public static function recreated(string $uid, $webCost, $clientCost, object $order): array
+    {
+        return [
+            'uid' => $uid,
+            'web_cost' => $webCost,
+            'client_cost' => $clientCost,
+            'routefrom' => $order->routefrom ?? null,
+            'startLat' => $order->startLat ?? null,
+            'startLan' => $order->startLan ?? null,
+            'routeto' => $order->routeto ?? null,
+            'to_lat' => $order->to_lat ?? null,
+            'to_lng' => $order->to_lng ?? null,
+            'pay_system' => $order->pay_system ?? null,
+            'transactionStatus' => 'WaitingAuthComplete',
+        ];
+    }
 }
