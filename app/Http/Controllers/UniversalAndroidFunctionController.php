@@ -4269,7 +4269,6 @@ class UniversalAndroidFunctionController extends Controller
             (new AndroidTestOSMController)->webordersCancel($uid, $city, $application);
             return "exit cancelOnlyCardPayUid Мерчанта нет";
         } else {
-            sleep(60);
             $cancelNeed60 =self::canceledOneMinute($uid);
 
             if ($cancelNeed60) {
@@ -5012,9 +5011,10 @@ class UniversalAndroidFunctionController extends Controller
         $order->taxiColumnId = $params["taxiColumnId"]; //Обязательный. Номер колоны, в которую будут приходить заказы. 0, 1 или 2
         $order->bonus_status = $params['bonus_status'];
         $order->pay_system = $params["pay_system"]; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
-        $order->payment_type = SimpleCashlessDispatchStatusSync::isCashlessPaySystem($order->pay_system)
-            ? 1
-            : $params['payment_type']; //Тип оплаты заказа (нал, безнал) (см. Приложение 4). Null, 0 или 1
+        $order->payment_type = \App\Support\PaymentTypeColumn::store(
+            $order->pay_system,
+            $params['payment_type'] ?? 0
+        );
         $order->web_cost = $params['order_cost'];
         if (isset($params['clientCost'])) {
             if($params['clientCost'] != "0") {
@@ -8412,7 +8412,7 @@ class UniversalAndroidFunctionController extends Controller
         }
         $order->web_cost = $responseArr['order_cost'];
         $order->client_cost = $newClientCost;
-        $order->payment_type = 1;
+        $order->payment_type = \App\Support\PaymentTypeColumn::store($order->pay_system, 1);
         $order->closeReason = '-1';
         $order->closeReasonI = '0';
         $order->cancel_timestamp = null;

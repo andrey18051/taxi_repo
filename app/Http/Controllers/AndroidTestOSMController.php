@@ -9851,7 +9851,16 @@ class AndroidTestOSMController extends Controller
         $city,
         $application
     ) {
+        if (\App\Support\RepeatedCardInvoiceOrder::shouldRefuseNewDispatch(
+            $wfpInvoice,
+            \App\Support\RepeatedCardInvoiceOrder::orderAlreadyExists($wfpInvoice)
+        )) {
+            Log::info('orderClientCostMyApi: invoice already used, second dispatch order refused', [
+                'wfpInvoice' => $wfpInvoice,
+            ]);
 
+            return \App\Support\RepeatedCardInvoiceOrder::refuseResponse();
+        }
 
         switch ($city) {
             case "Lviv":

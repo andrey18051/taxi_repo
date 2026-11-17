@@ -18,16 +18,17 @@ class StartStatusPaymentReview implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public const DELAY_SECONDS = 60;
+
     private $orderId;
 
     /**
-     * Create a new job instance.
-     *
      * @return void
      */
     public function __construct($orderId)
     {
         $this->orderId = $orderId;
+        $this->delay(self::DELAY_SECONDS);
     }
 
     /**
