@@ -3246,7 +3246,7 @@ trait LegacyForkStatusPoll
                 'hold' => $hold,
                 'canceled_uid' => $canceledUid,
                 'sibling_uid' => $siblingUid,
-                'orderweb_uid' => $orderweb?->dispatching_order_uid,
+                'orderweb_uid' => $orderweb !== null ? $orderweb->dispatching_order_uid : null,
             ]);
 
             return false;
