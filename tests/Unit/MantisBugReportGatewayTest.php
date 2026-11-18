@@ -2,7 +2,9 @@
 
 namespace Tests\Unit;
 
+use App\Jobs\SendTelegramMessageJob;
 use App\Support\MantisBugReportGateway;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 use Tests\TestCase;
@@ -50,6 +52,30 @@ class MantisBugReportGatewayTest extends TestCase
 
         $this->assertSame(401, $result['status']);
         Http::assertNothingSent();
+    }
+
+    public function test_crash_screen_report_is_also_sent_to_telegram(): void
+    {
+        Bus::fake();
+        Http::fake([
+            'http://127.0.0.1:8989/api/rest/issues' => Http::response([
+                'issue' => ['id' => 109],
+            ], 201),
+        ]);
+
+        $body = json_encode([
+            'summary' => 'Упс... Щось пішло не так',
+            'description' => 'екран сбою',
+        ], JSON_UNESCAPED_UNICODE);
+
+        $result = (new MantisBugReportGateway())->forward('app-token', $body);
+
+        $this->assertSame(201, $result['status']);
+        $this->assertSame(
+            'https://t.easy-order-taxi.site/mantis/view.php?id=109',
+            $result['body']['view_url']
+        );
+        Bus::assertDispatched(SendTelegramMessageJob::class);
     }
 
     public function test_mantis_error_is_passed_through_without_view_url(): void

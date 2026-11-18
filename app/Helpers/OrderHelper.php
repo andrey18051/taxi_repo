@@ -242,6 +242,25 @@ class OrderHelper
     }
 
     /**
+     * Отказ водителя пересоздаёт заказ из сохранённых параметров.
+     * Доплата меняет client_cost, а в параметрах остаётся прежний add_cost.
+     * Разницу последней цены клиента и цены на диспетчере добавляем к add_cost.
+     *
+     * @param array<string, mixed> $parameter
+     * @return array<string, mixed>
+     */
+    public static function alignAddCostWithClientPrice(array $parameter, int $dispatchCost, int $clientCost): array
+    {
+        if ($dispatchCost <= 0 || $clientCost <= 0 || $dispatchCost === $clientCost) {
+            return $parameter;
+        }
+
+        $parameter['add_cost'] = (int) ($parameter['add_cost'] ?? 0) + ($clientCost - $dispatchCost);
+
+        return $parameter;
+    }
+
+    /**
      * Параметры наличной ноги вилки: отдельный пересчёт add_cost по payment_type=0.
      * Нельзя копировать add_cost безнала — иначе вилка уезжает (напр. 2 грн при client_cost 7).
      */

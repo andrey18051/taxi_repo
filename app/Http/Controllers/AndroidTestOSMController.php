@@ -8962,7 +8962,11 @@ class AndroidTestOSMController extends Controller
     ) {
 
         $order = Orderweb::where('dispatching_order_uid', $uid)->first();
-        $clientCost = $order->client_cost;
+        if (!$order) {
+            return response(['order_cost' => '0', 'Message' => 'Error'], 200)
+                ->header('Content-Type', 'application/json');
+        }
+        $clientCost = $order->client_cost ?: $order->web_cost;
         if ($order->server == "my_server_api" ) {
             return self::orderClientCostMyApi(
                 $originLatitude,
@@ -8987,18 +8991,12 @@ class AndroidTestOSMController extends Controller
         }
         $startTime = time();
         do {
-            $response = (new OrderStatusController)->getOrderStatusMessageResultPush($uid);
+            $statusResponse = (new OrderStatusController)->getOrderStatusMessageResultPush($uid);
 
-            $messageAdmin = "orderCacheReorder response: " . $response;
+            $messageAdmin = "orderCacheReorder response: " . $statusResponse;
             (new MessageSentController)->sentMessageAdmin($messageAdmin);
-// Decode JSON string into an associative array
-            $response = json_decode($response, true);
 
-// Access the "action" value
-            $action_value = $response['action'];
-
-
-            if( $action_value == "Заказ снят" ) {
+            if (\App\Support\DispatchStatusPayload::isCanceled($statusResponse)) {
 
                 return self::orderClientCost(
                     $originLatitude,
@@ -9031,7 +9029,7 @@ class AndroidTestOSMController extends Controller
         $response_error["Message"] = "Error";
 
         return response($response_error, 200)
-            ->header('Content-Type', 'json');
+            ->header('Content-Type', 'application/json');
     }
 
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\City\CityPaymentFlowResolver;
+use App\Helpers\OrderHelper;
 use App\City\PaymentFlow;
 use App\City\SimpleCashlessDispatchStatusSync;
 use App\Http\Controllers\AndroidTestOSMController;
@@ -218,6 +219,18 @@ final class Pas2SimpleDispatchRecreate
         }
 
         unset($parameter['dispatching_order_uid'], $parameter['order_uid'], $parameter['uid']);
+
+        $dispatchCost = (int) ($order->web_cost ?? 0);
+        $clientCost = OrderHelper::resolveDisplayCostGrivna($order);
+        $parameter = OrderHelper::alignAddCostWithClientPrice($parameter, $dispatchCost, $clientCost);
+        if ($clientCost > 0 && $dispatchCost > 0 && $clientCost !== $dispatchCost) {
+            Log::info('Pas2SimpleDispatchRecreate: add_cost aligned to client price', [
+                'uid' => $oldUid,
+                'dispatch_cost' => $dispatchCost,
+                'client_cost' => $clientCost,
+                'add_cost' => $parameter['add_cost'] ?? null,
+            ]);
+        }
 
         $url = self::webordersEndpoint((string) $memory->connectAPI, (string) $order->server);
         if ($url === '') {
