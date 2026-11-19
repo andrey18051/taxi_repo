@@ -42,6 +42,36 @@ class DispatchReorderAndCrashNoticeTest extends TestCase
         $this->assertSame($stored, OrderHelper::alignAddCostWithClientPrice($stored, 0, 11));
     }
 
+    public function test_refusal_recreate_uses_live_dispatch_add_cost_when_prices_already_match(): void
+    {
+        $stored = ['add_cost' => -54, 'payment_type' => 0];
+        $snapshot = ['order_cost' => '11', 'add_cost' => '-49'];
+
+        $rebuilt = OrderHelper::parametersForDispatchRecreate($stored, $snapshot, 11, 11);
+
+        $this->assertSame(-49, $rebuilt['add_cost']);
+        $this->assertSame(0, $rebuilt['payment_type']);
+    }
+
+    public function test_refusal_recreate_still_raises_add_cost_when_client_price_is_ahead_of_dispatch(): void
+    {
+        $stored = ['add_cost' => -54, 'payment_type' => 0];
+        $snapshot = ['order_cost' => '6', 'add_cost' => '-54'];
+
+        $rebuilt = OrderHelper::parametersForDispatchRecreate($stored, $snapshot, 6, 11);
+
+        $this->assertSame(-49, $rebuilt['add_cost']);
+    }
+
+    public function test_refusal_recreate_keeps_stored_add_cost_without_snapshot(): void
+    {
+        $stored = ['add_cost' => -54, 'payment_type' => 0];
+
+        $same = OrderHelper::parametersForDispatchRecreate($stored, [], 6, 6);
+
+        $this->assertSame(-54, $same['add_cost']);
+    }
+
     public function test_crash_screen_notice_is_only_the_oops_report(): void
     {
         $crash = json_encode([

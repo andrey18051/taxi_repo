@@ -7495,6 +7495,10 @@ class UniversalAndroidFunctionController extends Controller
                 $order_new_uid = $orderNew;
 
                 (new MemoryOrderChangeController)->store($order_old_uid, $order_new_uid);
+                $encodedParameters = json_encode($parameter, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($encodedParameters !== false) {
+                    $orderMemory->response = $encodedParameters;
+                }
                 $orderMemory->dispatching_order_uid = $order_new_uid;
                 $orderMemory->save();
 

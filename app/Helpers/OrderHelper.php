@@ -261,6 +261,34 @@ class OrderHelper
     }
 
     /**
+     * Параметры нового заказа после отказа водителя.
+     * Живой заказ на диспетчере уже может стоить больше, чем снимок в памяти:
+     * доплата наличными пишет client_cost и web_cost одинаково, и дельта тогда нулевая.
+     * Берём add_cost закрываемого заказа, затем дотягиваем до цены клиента, если она выше.
+     *
+     * @param array<string, mixed> $parameter
+     * @param array<string, mixed> $snapshot
+     * @return array<string, mixed>
+     */
+    public static function parametersForDispatchRecreate(
+        array $parameter,
+        array $snapshot,
+        int $storedWebCost,
+        int $clientCost
+    ): array {
+        if (isset($snapshot['add_cost']) && is_numeric($snapshot['add_cost'])) {
+            $parameter['add_cost'] = (int) $snapshot['add_cost'];
+        }
+
+        $dispatchCost = (int) ($snapshot['order_cost'] ?? 0);
+        if ($dispatchCost <= 0) {
+            $dispatchCost = $storedWebCost;
+        }
+
+        return self::alignAddCostWithClientPrice($parameter, $dispatchCost, $clientCost);
+    }
+
+    /**
      * Параметры наличной ноги вилки: отдельный пересчёт add_cost по payment_type=0.
      * Нельзя копировать add_cost безнала — иначе вилка уезжает (напр. 2 грн при client_cost 7).
      */

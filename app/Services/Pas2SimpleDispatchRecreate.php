@@ -180,7 +180,7 @@ final class Pas2SimpleDispatchRecreate
                 return self::SKIP;
             }
 
-            return self::recreate($current, $polledUid);
+            return self::recreate($current, $polledUid, $snapshot);
         } catch (\Throwable $e) {
             Log::error('Pas2SimpleDispatchRecreate: failed', [
                 'uid' => $polledUid,
@@ -202,7 +202,10 @@ final class Pas2SimpleDispatchRecreate
         }
     }
 
-    private static function recreate(Orderweb $order, string $oldUid): string
+    /**
+     * @param array<string, mixed> $snapshot
+     */
+    private static function recreate(Orderweb $order, string $oldUid, array $snapshot = []): string
     {
         $memory = self::findMemory($oldUid);
         if ($memory === null) {
@@ -220,17 +223,22 @@ final class Pas2SimpleDispatchRecreate
 
         unset($parameter['dispatching_order_uid'], $parameter['order_uid'], $parameter['uid']);
 
-        $dispatchCost = (int) ($order->web_cost ?? 0);
+        $storedWebCost = (int) ($order->web_cost ?? 0);
         $clientCost = OrderHelper::resolveDisplayCostGrivna($order);
-        $parameter = OrderHelper::alignAddCostWithClientPrice($parameter, $dispatchCost, $clientCost);
-        if ($clientCost > 0 && $dispatchCost > 0 && $clientCost !== $dispatchCost) {
-            Log::info('Pas2SimpleDispatchRecreate: add_cost aligned to client price', [
-                'uid' => $oldUid,
-                'dispatch_cost' => $dispatchCost,
-                'client_cost' => $clientCost,
-                'add_cost' => $parameter['add_cost'] ?? null,
-            ]);
-        }
+        $parameter = OrderHelper::parametersForDispatchRecreate(
+            $parameter,
+            $snapshot,
+            $storedWebCost,
+            $clientCost
+        );
+        Log::info('Pas2SimpleDispatchRecreate: recreate cost', [
+            'uid' => $oldUid,
+            'stored_web_cost' => $storedWebCost,
+            'snapshot_order_cost' => $snapshot['order_cost'] ?? null,
+            'snapshot_add_cost' => $snapshot['add_cost'] ?? null,
+            'client_cost' => $clientCost,
+            'add_cost' => $parameter['add_cost'] ?? null,
+        ]);
 
         $url = self::webordersEndpoint((string) $memory->connectAPI, (string) $order->server);
         if ($url === '') {
