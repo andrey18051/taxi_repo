@@ -62,7 +62,7 @@ class IsDispatchOrderCanceledTest extends TestCase
         $this->assertFalse(OrderStatusController::isDispatchOrderCanceled($order));
     }
 
-    public function test_normalize_fork_suppressed_leg_maps_to_waiting_car_search(): void
+    public function test_normalize_no_car_close_reason_maps_to_cost_calculation(): void
     {
         $order = [
             'execution_status' => 'Canceled',
@@ -71,10 +71,11 @@ class IsDispatchOrderCanceledTest extends TestCase
 
         $normalized = OrderStatusController::normalizeFalseCanceledDispatchStatus($order);
 
-        $this->assertSame('WaitingCarSearch', $normalized['execution_status']);
+        // Excel: безнал «нет машины» → CostCalculation → востановление, не WaitingCarSearch.
+        $this->assertSame('CostCalculation', $normalized['execution_status']);
     }
 
-    public function test_fork_leg_display_status_from_creation_response(): void
+    public function test_fork_leg_display_status_no_car_is_cost_calculation(): void
     {
         $status = OrderStatusController::forkLegDisplayStatus([
             'execution_status' => 'Canceled',
@@ -82,7 +83,19 @@ class IsDispatchOrderCanceledTest extends TestCase
             'dispatching_order_uid' => 'abc',
         ]);
 
-        $this->assertSame('WaitingCarSearch', $status);
+        $this->assertSame('CostCalculation', $status);
+    }
+
+    public function test_no_car_close_reason_is_driver_refusal_for_fork_restore(): void
+    {
+        $this->assertTrue(OrderStatusController::isForkDriverRefusalClose([
+            'execution_status' => 'Canceled',
+            'close_reason' => 4,
+        ]));
+        $this->assertTrue(OrderStatusController::isLegClosedForForkRecreate(
+            ['execution_status' => 'Canceled', 'close_reason' => 4],
+            'CostCalculation'
+        ));
     }
 
     public function test_fork_leg_display_status_from_search_creation(): void

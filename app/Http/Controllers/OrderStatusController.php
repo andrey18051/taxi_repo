@@ -2668,14 +2668,18 @@ class OrderStatusController extends Controller
         $status = (string) ($snapshot['execution_status'] ?? '');
         if (strcasecmp($status, 'Canceled') === 0 || strcasecmp($status, 'Cancelled') === 0) {
             $closeReason = (int) ($snapshot['close_reason'] ?? -1);
-            $snapshot['execution_status'] = $closeReason === 4 ? 'WaitingCarSearch' : 'SearchesForCar';
+            // 4 = «нет машины» → CostCalculation, чтобы матрица вилки делала восстановление
+            // (Excel: нал в поиске + безнал CostCalculation → востановление безнала).
+            // Раньше мапили в WaitingCarSearch — нога выглядела живой, restore не шёл.
+            $snapshot['execution_status'] = $closeReason === 4 ? 'CostCalculation' : 'SearchesForCar';
         }
 
         return $snapshot;
     }
 
     /**
-     * Техническая «отмена» диспетчера на вилке — не считать ногу закрытой.
+     * Техническая «отмена» диспетчера на вилке — не считать ногу закрытой клиентом.
+     * close_reason 4 («нет машины») тоже здесь: через normalize → CostCalculation + restore.
      *
      * @param array<string, mixed>|null $order
      */
@@ -2690,7 +2694,7 @@ class OrderStatusController extends Controller
     }
 
     /**
-     * Отказ водителя, нет машины или просчёт на диспетчере (2, 3, 5).
+     * Отказ водителя, нет машины или просчёт на диспетчере (2, 3, 4, 5).
      * Ногу вилки создают заново, вторую ногу не снимают.
      *
      * @param array<string, mixed>|null $order
@@ -2701,7 +2705,7 @@ class OrderStatusController extends Controller
             return false;
         }
 
-        return in_array((int) ($order['close_reason'] ?? -999), [2, 3, 5], true);
+        return in_array((int) ($order['close_reason'] ?? -999), [2, 3, 4, 5], true);
     }
 
     /**
@@ -2725,7 +2729,8 @@ class OrderStatusController extends Controller
 
     /**
      * Bonus/card leg in uid_history: canceled in dispatch (execution_status or close_reason).
-     * Canceled with close_reason -1/4 is a fork transition, not a real cancel (Oleg / Excel matrix).
+     * Canceled with close_reason -1/0/4 is not a client cancel: -1/0 → поиск,
+     * 4 («нет машины») → CostCalculation и восстановление ноги (Excel / Oleg).
      */
     public static function isDispatchOrderCanceled(?array $order): bool
     {

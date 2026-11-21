@@ -114,7 +114,7 @@ class ShouldCloseActiveForkSearchTest extends TestCase
 
     public function test_driver_refusal_while_searching_keeps_the_other_leg(): void
     {
-        foreach ([2, 3, 5] as $closeReason) {
+        foreach ([2, 3, 4, 5] as $closeReason) {
             $this->assertFalse($this->shouldClose(
                 $this->canceledLeg($closeReason),
                 $this->leg('WaitingCarSearch'),
@@ -122,6 +122,17 @@ class ShouldCloseActiveForkSearchTest extends TestCase
                 false
             ), 'close_reason ' . $closeReason);
         }
+    }
+
+    public function test_no_car_close_reason_keeps_restore_of_cashless_leg(): void
+    {
+        // Mantis #118: безнал close_reason=4 («нет машины»), нал в поиске → востановление, не закрытие вилки.
+        $this->assertFalse($this->shouldClose(
+            $this->canceledLeg(4),
+            $this->leg('SearchesForCar'),
+            $this->orderweb(null),
+            false
+        ));
     }
 
     public function test_armed_recreation_keeps_restore(): void
