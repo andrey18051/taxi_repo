@@ -2768,6 +2768,107 @@ class OrderStatusController extends Controller
         return in_array((int) ($order['close_reason'] ?? -999), [2, 3, 4, 5], true);
     }
 
+    private const LEGACY_FORK_LIVE_STATUSES = [
+        'WaitingCarSearch',
+        'SearchesForCar',
+        'CarFound',
+        'Running',
+    ];
+
+    /**
+     * Старая вилка: обе ноги Canceled — восстановить ногу с отказом водителя (2–5),
+     * если вторая уже снята с close_reason=1, а отказавшая до этого была активна (close=-1).
+     *
+     * @param 'bonus'|'double' $refusedLeg bonus=безнал, double=нал
+     * @param array<string, mixed>|null $nalCurrent
+     * @param array<string, mixed>|null $cardCurrent
+     * @param array<string, mixed>|null $nalPrevious
+     * @param array<string, mixed>|null $cardPrevious
+     */
+    public static function shouldRestoreLegacyForkLegOnDriverRefusal(
+        string $refusedLeg,
+        ?array $nalCurrent,
+        ?array $cardCurrent,
+        ?array $nalPrevious,
+        ?array $cardPrevious
+    ): bool {
+        if ($refusedLeg === 'bonus') {
+            return self::isLegacyForkCanceledWithClose($nalCurrent, 1)
+                && self::isLegacyForkCanceledWithCloseIn($cardCurrent, [2, 3, 4, 5])
+                && self::isLegacyForkCanceledWithClose($nalPrevious, 1)
+                && self::isLegacyForkLiveWithOpenClose($cardPrevious);
+        }
+
+        if ($refusedLeg === 'double') {
+            return self::isLegacyForkCanceledWithClose($cardCurrent, 1)
+                && self::isLegacyForkCanceledWithCloseIn($nalCurrent, [2, 3, 4, 5])
+                && self::isLegacyForkCanceledWithClose($cardPrevious, 1)
+                && self::isLegacyForkLiveWithOpenClose($nalPrevious);
+        }
+
+        return false;
+    }
+
+    /** @param array<string, mixed>|null $order */
+    public static function isLegacyForkCanceledWithClose(?array $order, int $closeReason): bool
+    {
+        return self::isLegacyForkCanceledWithCloseIn($order, [$closeReason]);
+    }
+
+    /**
+     * @param array<string, mixed>|null $order
+     * @param array<int, int> $closeReasons
+     */
+    public static function isLegacyForkCanceledWithCloseIn(?array $order, array $closeReasons): bool
+    {
+        if ($order === null || $order === []) {
+            return false;
+        }
+        $status = (string) ($order['execution_status'] ?? '');
+        if (strcasecmp($status, 'Canceled') !== 0 && strcasecmp($status, 'Cancelled') !== 0) {
+            return false;
+        }
+        if (!is_numeric($order['close_reason'] ?? null)) {
+            return false;
+        }
+
+        return in_array((int) $order['close_reason'], $closeReasons, true);
+    }
+
+    /** @param array<string, mixed>|null $order */
+    public static function isLegacyForkLiveWithOpenClose(?array $order): bool
+    {
+        if ($order === null || $order === []) {
+            return false;
+        }
+        $status = (string) ($order['execution_status'] ?? '');
+        if (!in_array($status, self::LEGACY_FORK_LIVE_STATUSES, true)) {
+            return false;
+        }
+        if (!is_numeric($order['close_reason'] ?? null)) {
+            return false;
+        }
+
+        return (int) $order['close_reason'] === -1;
+    }
+
+    public static function clearForkLegDispatcherCanceled(?Uid_history $uid_history, string $leg): void
+    {
+        if ($uid_history === null) {
+            return;
+        }
+
+        if ($leg === 'bonus') {
+            $uid_history->bonus_dispatcher_canceled = 0;
+        } elseif ($leg === 'double') {
+            $uid_history->double_dispatcher_canceled = 0;
+        } else {
+            return;
+        }
+
+        $uid_history->save();
+    }
+
     /**
      * Статус ноги вилки из ответа создания/опроса диспетчера (с нормализацией fork-cancel).
      *

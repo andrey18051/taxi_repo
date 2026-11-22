@@ -157,6 +157,18 @@ trait LegacyForkStatusPoll
                 Log::info("Updated lastStatusDouble to: {$lastStatusDouble}");
             }
 
+            $liveBonusSnapshot = null;
+            $liveDoubleSnapshot = null;
+            $canceledOneBonusSnapshot = null;
+            $canceledOneDoubleSnapshot = null;
+            $this->rememberLegacyForkLegSnapshotsForRestore(
+                $uid_history,
+                $liveBonusSnapshot,
+                $liveDoubleSnapshot,
+                $canceledOneBonusSnapshot,
+                $canceledOneDoubleSnapshot
+            );
+
             Log::info("Entering switch for newStatusDouble: {$newStatusDouble}");
             switch ($newStatusDouble) {
                 case "SearchesForCar":
@@ -256,6 +268,14 @@ trait LegacyForkStatusPoll
                     $bonusOrder = $uid_history->uid_bonusOrder;
 
                     $doubleOrder = $uid_history->uid_doubleOrder;
+
+                    $this->rememberLegacyForkLegSnapshotsForRestore(
+                        $uid_history,
+                        $liveBonusSnapshot,
+                        $liveDoubleSnapshot,
+                        $canceledOneBonusSnapshot,
+                        $canceledOneDoubleSnapshot
+                    );
 
                     $messageAdmin =
                         "bonusOrder  1: $bonusOrder  lastStatusBonus: $lastStatusBonus " .
@@ -1247,6 +1267,55 @@ trait LegacyForkStatusPoll
                                                             Log::info("Default updateTime to 5");
                                                     }
                                             }
+                                        }
+                                        break;
+                                    case "Canceled":
+                                        Log::info("Nested case Canceled for double while bonus Canceled");
+                                        $restoredLeg = $this->tryRestoreLegacyForkOnBothCanceled(
+                                            $uid_history,
+                                            $authorizationBonus,
+                                            $authorizationDouble,
+                                            $identificationId,
+                                            $apiVersion,
+                                            $responseBonus,
+                                            $responseDouble,
+                                            $liveBonusSnapshot,
+                                            $liveDoubleSnapshot,
+                                            $canceledOneBonusSnapshot,
+                                            $canceledOneDoubleSnapshot,
+                                            $bonusOrder,
+                                            $doubleOrder
+                                        );
+                                        if ($restoredLeg === 'bonus') {
+                                            $lastTimeUpdate = $lastStatusBonusTime;
+                                            $newStatusBonus = self::newStatus(
+                                                $authorizationBonus,
+                                                $identificationId,
+                                                $apiVersion,
+                                                $responseBonus["url"],
+                                                $bonusOrder,
+                                                "bonus",
+                                                $lastTimeUpdate,
+                                                $updateTime,
+                                                $uid_history
+                                            );
+                                            $lastStatusBonusTime = time();
+                                            $updateTime = 5;
+                                        } elseif ($restoredLeg === 'double') {
+                                            $lastTimeUpdate = $lastStatusDoubleTime;
+                                            $newStatusDouble = self::newStatus(
+                                                $authorizationDouble,
+                                                $identificationId,
+                                                $apiVersion,
+                                                $responseDouble["url"],
+                                                $doubleOrder,
+                                                "double",
+                                                $lastTimeUpdate,
+                                                $updateTime,
+                                                $uid_history
+                                            );
+                                            $lastStatusDoubleTime = time();
+                                            $updateTime = 5;
                                         }
                                         break;
                                     case "CostCalculation":
@@ -2784,6 +2853,55 @@ trait LegacyForkStatusPoll
                                                 }
                                             }
                                             break;
+                                        case "Canceled":
+                                            Log::info("Nested case Canceled for bonus while double Canceled");
+                                            $restoredLeg = $this->tryRestoreLegacyForkOnBothCanceled(
+                                                $uid_history,
+                                                $authorizationBonus,
+                                                $authorizationDouble,
+                                                $identificationId,
+                                                $apiVersion,
+                                                $responseBonus,
+                                                $responseDouble,
+                                                $liveBonusSnapshot,
+                                                $liveDoubleSnapshot,
+                                                $canceledOneBonusSnapshot,
+                                                $canceledOneDoubleSnapshot,
+                                                $bonusOrder,
+                                                $doubleOrder
+                                            );
+                                            if ($restoredLeg === 'bonus') {
+                                                $lastTimeUpdate = $lastStatusBonusTime;
+                                                $newStatusBonus = self::newStatus(
+                                                    $authorizationBonus,
+                                                    $identificationId,
+                                                    $apiVersion,
+                                                    $responseBonus["url"],
+                                                    $bonusOrder,
+                                                    "bonus",
+                                                    $lastTimeUpdate,
+                                                    $updateTime,
+                                                    $uid_history
+                                                );
+                                                $lastStatusBonusTime = time();
+                                                $updateTime = 5;
+                                            } elseif ($restoredLeg === 'double') {
+                                                $lastTimeUpdate = $lastStatusDoubleTime;
+                                                $newStatusDouble = self::newStatus(
+                                                    $authorizationDouble,
+                                                    $identificationId,
+                                                    $apiVersion,
+                                                    $responseDouble["url"],
+                                                    $doubleOrder,
+                                                    "double",
+                                                    $lastTimeUpdate,
+                                                    $updateTime,
+                                                    $uid_history
+                                                );
+                                                $lastStatusDoubleTime = time();
+                                                $updateTime = 5;
+                                            }
+                                            break;
                                         case "CostCalculation":
                                             Log::info("Nested case CostCalculation for bonus");
                                             break;
@@ -3323,6 +3441,139 @@ trait LegacyForkStatusPoll
         ]);
 
         return true;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function decodeUidHistoryLegSnapshot($uidHistory, string $leg): ?array
+    {
+        if (!$uidHistory instanceof Uid_history) {
+            return null;
+        }
+        $raw = $leg === 'bonus' ? $uidHistory->bonus_status : $uidHistory->double_status;
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+        $decoded = json_decode((string) $raw, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * Запомнить последний «живой» снимок ноги (для previous при обеих Canceled).
+     *
+     * @param array<string, mixed>|null $liveBonus
+     * @param array<string, mixed>|null $liveDouble
+     * @param array<string, mixed>|null $canceledOneBonus
+     * @param array<string, mixed>|null $canceledOneDouble
+     */
+    private function rememberLegacyForkLegSnapshotsForRestore(
+        $uidHistory,
+        ?array &$liveBonus,
+        ?array &$liveDouble,
+        ?array &$canceledOneBonus,
+        ?array &$canceledOneDouble
+    ): void {
+        $bonus = $this->decodeUidHistoryLegSnapshot($uidHistory, 'bonus');
+        $double = $this->decodeUidHistoryLegSnapshot($uidHistory, 'double');
+
+        if (OrderStatusController::isLegacyForkLiveWithOpenClose($bonus)) {
+            $liveBonus = $bonus;
+        }
+        if (OrderStatusController::isLegacyForkLiveWithOpenClose($double)) {
+            $liveDouble = $double;
+        }
+        if (OrderStatusController::isLegacyForkCanceledWithClose($bonus, 1)) {
+            $canceledOneBonus = $bonus;
+        }
+        if (OrderStatusController::isLegacyForkCanceledWithClose($double, 1)) {
+            $canceledOneDouble = $double;
+        }
+    }
+
+    /**
+     * Обе ноги Canceled: отказ 2–5 на бывшей активной → восстановить эту ногу (спека Олега).
+     *
+     * @param array<string, mixed>|null $liveBonus
+     * @param array<string, mixed>|null $liveDouble
+     * @param array<string, mixed>|null $canceledOneBonus
+     * @param array<string, mixed>|null $canceledOneDouble
+     * @return 'bonus'|'double'|null
+     */
+    private function tryRestoreLegacyForkOnBothCanceled(
+        $uidHistory,
+        $authorizationBonus,
+        $authorizationDouble,
+        $identificationId,
+        $apiVersion,
+        array $responseBonus,
+        array $responseDouble,
+        ?array $liveBonus,
+        ?array $liveDouble,
+        ?array $canceledOneBonus,
+        ?array $canceledOneDouble,
+        &$bonusOrder,
+        &$doubleOrder
+    ): ?string {
+        if (!$uidHistory instanceof Uid_history) {
+            return null;
+        }
+
+        $cardCurrent = $this->decodeUidHistoryLegSnapshot($uidHistory, 'bonus');
+        $nalCurrent = $this->decodeUidHistoryLegSnapshot($uidHistory, 'double');
+
+        if (OrderStatusController::shouldRestoreLegacyForkLegOnDriverRefusal(
+            'bonus',
+            $nalCurrent,
+            $cardCurrent,
+            $canceledOneDouble ?? $nalCurrent,
+            $liveBonus
+        )) {
+            OrderStatusController::clearForkLegDispatcherCanceled($uidHistory, 'bonus');
+            $bonusOrder = $this->restoreLegacyForkLeg(
+                $uidHistory,
+                'bonus',
+                $authorizationBonus,
+                $identificationId,
+                $apiVersion,
+                $responseBonus['url'],
+                $responseBonus['parameter']
+            );
+            Log::info('Legacy fork both-Canceled: restored bonus after driver refusal', [
+                'bonus' => $bonusOrder,
+                'hold' => $uidHistory->uid_bonusOrderHold,
+            ]);
+
+            return 'bonus';
+        }
+
+        if (OrderStatusController::shouldRestoreLegacyForkLegOnDriverRefusal(
+            'double',
+            $nalCurrent,
+            $cardCurrent,
+            $liveDouble,
+            $canceledOneBonus ?? $cardCurrent
+        )) {
+            OrderStatusController::clearForkLegDispatcherCanceled($uidHistory, 'double');
+            $doubleOrder = $this->restoreLegacyForkLeg(
+                $uidHistory,
+                'double',
+                $authorizationDouble,
+                $identificationId,
+                $apiVersion,
+                $responseDouble['url'],
+                $responseDouble['parameter']
+            );
+            Log::info('Legacy fork both-Canceled: restored double after driver refusal', [
+                'double' => $doubleOrder,
+                'hold' => $uidHistory->uid_bonusOrderHold,
+            ]);
+
+            return 'double';
+        }
+
+        return null;
     }
 
     /**
