@@ -54,14 +54,9 @@ class MantisBugReportGatewayTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_crash_screen_report_is_also_sent_to_telegram(): void
+    public function test_crash_screen_report_does_not_send_telegram_from_server(): void
     {
         Bus::fake();
-        config([
-            'bots.bot' => 'taxi-bot-token',
-            'bots.info_bot' => 'info-bot-token',
-            'app.chat_id_alarm' => '1379298637',
-        ]);
         Http::fake([
             'http://127.0.0.1:8989/api/rest/issues' => Http::response([
                 'issue' => ['id' => 109],
@@ -80,29 +75,7 @@ class MantisBugReportGatewayTest extends TestCase
             'https://t.easy-order-taxi.site/mantis/view.php?id=109',
             $result['body']['view_url']
         );
-
-        $sent = [];
-        Bus::assertDispatched(SendTelegramMessageJob::class, function (SendTelegramMessageJob $job) use (&$sent) {
-            $sent[] = [
-                'bot' => $this->jobProperty($job, 'bot'),
-                'chatId' => (string) $this->jobProperty($job, 'chatId'),
-            ];
-            return true;
-        });
-        $this->assertCount(2, $sent);
-        $this->assertSame(['info-bot-token', 'info-bot-token'], array_column($sent, 'bot'));
-        $this->assertEqualsCanonicalizing(
-            ['120352595', '1379298637'],
-            array_column($sent, 'chatId')
-        );
-    }
-
-    private function jobProperty(object $job, string $name)
-    {
-        $property = new \ReflectionProperty($job, $name);
-        $property->setAccessible(true);
-
-        return $property->getValue($job);
+        Bus::assertNotDispatched(SendTelegramMessageJob::class);
     }
 
     public function test_mantis_error_is_passed_through_without_view_url(): void

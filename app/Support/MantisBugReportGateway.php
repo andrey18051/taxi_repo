@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Http\Controllers\TelegramController;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +10,7 @@ use InvalidArgumentException;
 /**
  * Принимает баг-репорт от PAS и создаёт заявку в Mantis на этом же хосте.
  * Токен и тело не пишутся в лог.
+ * Telegram с логами устройства шлёт само приложение, не сервер.
  */
 class MantisBugReportGateway
 {
@@ -53,7 +53,6 @@ class MantisBugReportGateway
         if ($response->successful() && is_numeric($issueId)) {
             $public = (string) config('services.mantis.url', 'https://t.easy-order-taxi.site/mantis/');
             $decoded['view_url'] = self::viewUrl((int) $issueId, $public);
-            $this->notifyCrashScreen($rawBody, (int) $issueId, $decoded['view_url']);
         }
 
         Log::info('mantis bug report forwarded', [
@@ -67,23 +66,6 @@ class MantisBugReportGateway
     public static function viewUrl(int $issueId, string $publicBase): string
     {
         return rtrim(trim($publicBase), '/') . '/view.php?id=' . $issueId;
-    }
-
-    private function notifyCrashScreen(string $rawBody, int $issueId, string $viewUrl): void
-    {
-        $message = CrashScreenBugReportNotice::messageFromBody($rawBody, $issueId, $viewUrl);
-        if ($message === null) {
-            return;
-        }
-
-        try {
-            $telegram = new TelegramController();
-            $telegram->sendBugReportNotice($message);
-        } catch (\Throwable $e) {
-            Log::warning('mantis crash-screen telegram skipped', [
-                'issue_id' => $issueId,
-            ]);
-        }
     }
 
     private function assertLocalApi(string $url): void

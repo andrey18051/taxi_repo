@@ -184,25 +184,6 @@ class TelegramController extends Controller
         return response()->json(['status' => 'Message sent in background'], 200);
     }
 
-    /**
-     * Баг-репорт экрана «Упс» уходит тем же ботом, что и остальные баг-репорты.
-     * sendAlarmMessage / sendMeMessage используют бота заказов.
-     */
-    public function sendBugReportNotice($message)
-    {
-        $bot = config('bots.info_bot');
-        Log::debug('sendBugReportNotice sending message: ' . $message);
-
-        foreach ([120352595, config('app.chat_id_alarm')] as $chatId) {
-            Bus::chain([
-                (new SendTelegramMessageJob($bot, $chatId, $message))->onQueue('low'),
-                (new ClearFailedSendTelegramJobs())->onQueue('low'),
-            ])->dispatch();
-        }
-
-        return response()->json(['status' => 'Message sent in background'], 200);
-    }
-
     public function sendAlarmMessageLog($message)
     {
         $bot = config('bots.info_bot');

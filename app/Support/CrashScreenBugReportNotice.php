@@ -4,8 +4,7 @@ namespace App\Support;
 
 /**
  * Экран «Упс... Щось пішло не так» создаёт тикет в Mantis.
- * Telegram из отдельного процесса приложения не доходит,
- * поэтому уведомление отправляет сервер через info-бота.
+ * Telegram с логом устройства шлёт само PAS-приложение.
  */
 final class CrashScreenBugReportNotice
 {
