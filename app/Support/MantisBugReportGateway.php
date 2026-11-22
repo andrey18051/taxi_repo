@@ -78,8 +78,7 @@ class MantisBugReportGateway
 
         try {
             $telegram = new TelegramController();
-            $telegram->sendAlarmMessage($message);
-            $telegram->sendMeMessage($message);
+            $telegram->sendBugReportNotice($message);
         } catch (\Throwable $e) {
             Log::warning('mantis crash-screen telegram skipped', [
                 'issue_id' => $issueId,
