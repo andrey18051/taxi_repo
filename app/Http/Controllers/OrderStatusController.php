@@ -1111,6 +1111,30 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * UID для ответа статуса в PAS: холд / канонический номер клиента.
+     * После legacy fork recreate uid_bonusOrder — нога Vod, её нельзя отдавать как uid заказа
+     * (иначе клиент подменяет живой hold и показывает ложную оплату/отмену — Mantis #124).
+     *
+     * @param object|null $row Uid_history-like
+     */
+    public static function clientFacingUidFromHistory($row, string $fallback): string
+    {
+        if ($row === null) {
+            return $fallback;
+        }
+        $hold = trim((string) ($row->uid_bonusOrderHold ?? ''));
+        if ($hold !== '') {
+            return $hold;
+        }
+        $bonus = trim((string) ($row->uid_bonusOrder ?? ''));
+        if ($bonus !== '') {
+            return $bonus;
+        }
+
+        return $fallback;
+    }
+
+    /**
      * Один проход по Uid_history без ожидания на сервере.
      *
      * @return array{0: ?Uid_history, 1: ?string, 2: ?string, 3: string}
@@ -1127,11 +1151,13 @@ class OrderStatusController extends Controller
             }
             $nalOrderInput = $row->double_status;
             $cardOrderInput = $row->bonus_status;
-            if (!empty($row->uid_bonusOrder)) {
-                $dispatching_order_uid = $row->uid_bonusOrder;
-            }
+            $dispatching_order_uid = self::clientFacingUidFromHistory($row, $uid);
             if ($cardOrderInput !== null) {
-                Log::info('resolveUidHistoryForStatusPush: ready', ['column' => $column]);
+                Log::info('resolveUidHistoryForStatusPush: ready', [
+                    'column' => $column,
+                    'client_uid' => $dispatching_order_uid,
+                    'vod_bonus' => $row->uid_bonusOrder,
+                ]);
                 return [$row, $nalOrderInput, $cardOrderInput, $dispatching_order_uid];
             }
         }

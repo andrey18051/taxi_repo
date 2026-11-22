@@ -40,4 +40,32 @@ class OrderStatusUidStampTest extends TestCase
         $this->assertSame('keep-me', $stamped['dispatching_order_uid']);
         $this->assertSame('', $stamped['uid']);
     }
+
+    /** Mantis #124: после legacy fork recreate клиенту нужен hold, не Vod-нога. */
+    public function test_client_facing_uid_prefers_hold_over_recreated_bonus_leg(): void
+    {
+        $row = (object) [
+            'uid_bonusOrderHold' => '88e4f94ffac34c54b250c6b0a971f924',
+            'uid_bonusOrder' => '36257ff8cfe54284a5dd0f85052ee597',
+            'uid_doubleOrder' => '89e1c59954cf492ebcadfaf4368c0b10',
+        ];
+
+        $this->assertSame(
+            '88e4f94ffac34c54b250c6b0a971f924',
+            OrderStatusController::clientFacingUidFromHistory($row, 'fallback')
+        );
+    }
+
+    public function test_client_facing_uid_falls_back_to_bonus_when_hold_empty(): void
+    {
+        $row = (object) [
+            'uid_bonusOrderHold' => '',
+            'uid_bonusOrder' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        ];
+
+        $this->assertSame(
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            OrderStatusController::clientFacingUidFromHistory($row, 'fallback')
+        );
+    }
 }
