@@ -1849,30 +1849,9 @@ class UIDController extends Controller
             $uid_history = Uid_history::where('uid_doubleOrder', $uid)->first();
         }
 
-        if ($uid_history) {
-            if ($uid_history->cancel === '1' || $uid_history->cancel === 1) {
-                return 'Canceled';
-            }
-
-            $nalOrder = json_decode($uid_history->double_status, true) ?: [];
-            $cardOrder = json_decode($uid_history->bonus_status, true) ?: [];
-
-            if (OrderStatusController::isDispatchOrderCanceled($cardOrder)
-                || OrderStatusController::isDispatchOrderCanceled($nalOrder)) {
-                return 'Canceled';
-            }
-
-            $states = [
-                $nalOrder['execution_status'] ?? '',
-                $cardOrder['execution_status'] ?? '',
-            ];
-            foreach (['Running', 'CarFound', 'WaitingCarSearch', 'SearchesForCar'] as $preferred) {
-                foreach ($states as $state) {
-                    if ($state === $preferred) {
-                        return $preferred;
-                    }
-                }
-            }
+        $forkStatus = OrderStatusController::resolveForkExecutionStatusForClientList($uid_history);
+        if ($forkStatus !== null) {
+            return $forkStatus;
         }
 
         if (!empty($orderRow->cancel_timestamp)) {

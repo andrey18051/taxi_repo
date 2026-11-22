@@ -2505,6 +2505,45 @@ class OrderStatusController extends Controller
     }
 
     /**
+     * Статус вилки для списка «замовлення в роботі» / CancelApp.
+     * Живая нога (Running/Searches…) побеждает; Canceled — только если обе ноги мертвы
+     * или uid_history.cancel=1 (Mantis #127).
+     *
+     * @return string|null null = нет вилки / неоднозначно — смотреть orderweb
+     */
+    public static function resolveForkExecutionStatusForClientList(?Uid_history $uid_history): ?string
+    {
+        if ($uid_history === null) {
+            return null;
+        }
+
+        if ((int) ($uid_history->cancel ?? 0) === 1) {
+            return 'Canceled';
+        }
+
+        $nalOrder = json_decode($uid_history->double_status, true) ?: [];
+        $cardOrder = json_decode($uid_history->bonus_status, true) ?: [];
+
+        $states = [
+            $nalOrder['execution_status'] ?? '',
+            $cardOrder['execution_status'] ?? '',
+        ];
+        foreach (['Running', 'CarFound', 'WaitingCarSearch', 'SearchesForCar'] as $preferred) {
+            foreach ($states as $state) {
+                if ($state === $preferred) {
+                    return $preferred;
+                }
+            }
+        }
+
+        if (!self::isForkOrderStillLive($uid_history)) {
+            return 'Canceled';
+        }
+
+        return null;
+    }
+
+    /**
      * Firestore cleanup / finalize кампании — после подтверждённой отмены на диспетчере.
      * Не зависит от closeReason в orderweb (часто ещё -1 до финализации).
      * Для вилки — только когда обе ноги уже не активны на диспетчере.
