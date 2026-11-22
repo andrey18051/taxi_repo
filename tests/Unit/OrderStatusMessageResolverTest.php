@@ -84,5 +84,7 @@ class OrderStatusMessageResolverTest extends TestCase
         $result = $this->resolver->resolve('Canceled', 'Canceled', $nalOrder, $cardOrder);
 
         $this->assertSame('Заказ снят', $result['action']);
+        $this->assertSame(9, $result['close_reason']);
+        $this->assertSame('9', $result['orderweb_close_reason']);
     }
 }

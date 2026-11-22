@@ -257,15 +257,24 @@ class DailyTaskController extends Controller
                     Log::info("orderCardWfpReviewTask: Город определен как: {$city}");
 
                     // Обработка в зависимости от closeReason
+                    // 1/6/7/9 — клиент; 2–5 — отказ/не выполнен — тоже refund холда
                     switch ($orderweb->closeReason) {
                         case "1":
+                        case "2":
+                        case "3":
+                        case "4":
+                        case "5":
+                        case "6":
+                        case "7":
+                        case "9":
                             if (!$this->shouldRefundCanceledWfpHold($orderweb, $uid)) {
-                                Log::info('orderCardWfpReviewTask: closeReason=1 в orderweb, refund отложен — диспетчер не подтвердил отмену', [
+                                Log::info('orderCardWfpReviewTask: closeReason отмены в orderweb, refund отложен — диспетчер не подтвердил отмену', [
                                     'uid' => $uid,
+                                    'closeReason' => $orderweb->closeReason,
                                 ]);
                                 break;
                             }
-                            Log::info("orderCardWfpReviewTask: closeReason=1 - выполняем refund");
+                            Log::info("orderCardWfpReviewTask: closeReason={$orderweb->closeReason} - выполняем refund");
                             if ($wfpInvoicesForOrder != null && !$wfpInvoicesForOrder->isEmpty()) {
                                 foreach ($wfpInvoicesForOrder as $invoiceIndex => $valueInv) {
                                     if ($valueInv->transactionStatus !== 'WaitingAuthComplete') {
@@ -303,7 +312,7 @@ class DailyTaskController extends Controller
                                     }
                                 }
                             } else {
-                                Log::warning("orderCardWfpReviewTask: Нет инвойсов для refund при closeReason=1");
+                                Log::warning("orderCardWfpReviewTask: Нет инвойсов для refund при closeReason={$orderweb->closeReason}");
                             }
                             break;
 
@@ -349,7 +358,8 @@ class DailyTaskController extends Controller
                             break;
                     }
 
-                } else if ($orderweb->closeReason == '1' && $orderweb->server != 'my_server_api') {
+                } else if (in_array((string) $orderweb->closeReason, ['1', '2', '3', '4', '5', '6', '7', '9'], true)
+                    && $orderweb->server != 'my_server_api') {
                     $application = 'PAS4';
                     switch ($orderweb->comment) {
                         case 'taxi_easy_ua_pas1': $application = 'PAS1'; break;

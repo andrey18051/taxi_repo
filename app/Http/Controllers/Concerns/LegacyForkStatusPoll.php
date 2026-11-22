@@ -3299,7 +3299,13 @@ trait LegacyForkStatusPoll
         OrderStatusController::markExplicitForkCancelRequested($uidHistory);
 
         if ($orderweb !== null) {
-            OrderStatusController::applyCanceledOrderweb($orderweb);
+            OrderStatusController::applyCanceledOrderweb(
+                $orderweb,
+                OrderStatusController::resolvePersistedCancelCloseReason(
+                    $canceledLeg === 'nal' ? $canceledSnapshot : $otherSnapshot,
+                    $canceledLeg === 'card' ? $canceledSnapshot : $otherSnapshot
+                )
+            );
             $orderweb->save();
             (new AndroidTestOSMController())->cleanupFirestoreOnClientCancel($hold);
             OrderStatusController::notifyForkOrderCanceledPush(

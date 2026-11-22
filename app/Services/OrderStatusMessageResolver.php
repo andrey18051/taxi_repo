@@ -128,7 +128,9 @@ class OrderStatusMessageResolver
             return $this->pack(self::ACTION_COMPLETED, 'card', 104, '104');
         }
         if ($nalState === 'Executed' && $cardState === 'Canceled') {
-            return $this->pack(self::ACTION_CANCELED, 'card', 1, '1');
+            $persisted = $this->persistedCancelCloseReason($nalClose, $cardClose);
+
+            return $this->pack(self::ACTION_CANCELED, 'card', $persisted, (string) $persisted);
         }
         if ($nalState === 'Executed' && $cardState === 'Executed') {
             return $this->pack(self::ACTION_COMPLETED, 'card', 104, '104');
@@ -136,24 +138,30 @@ class OrderStatusMessageResolver
 
         if ($nalState === 'Canceled' && $cardState === 'CostCalculation') {
             $action = $nalClose !== -1 ? self::ACTION_CANCELED : self::ACTION_SEARCH;
+            $persisted = $nalClose !== -1 ? $nalClose : -1;
 
-            return $this->pack($action, 'nal', $nalClose, (string) ($nalClose !== -1 ? $nalClose : -1));
+            return $this->pack($action, 'nal', $persisted, (string) $persisted);
         }
         if ($nalState === 'CostCalculation' && $cardState === 'Canceled') {
             $action = $cardClose !== -1 ? self::ACTION_CANCELED : self::ACTION_SEARCH;
+            $persisted = $cardClose !== -1 ? $cardClose : -1;
 
-            return $this->pack($action, 'card', $cardClose, (string) ($cardClose !== -1 ? $cardClose : -1));
+            return $this->pack($action, 'card', $persisted, (string) $persisted);
         }
         if ($nalState === 'CostCalculation' && $cardState === 'CostCalculation') {
             if ($nalClose !== -1 && $cardClose !== -1) {
-                return $this->pack(self::ACTION_CANCELED, 'card', 1, '1');
+                $persisted = $this->persistedCancelCloseReason($nalClose, $cardClose);
+
+                return $this->pack(self::ACTION_CANCELED, 'card', $persisted, (string) $persisted);
             }
 
             return $this->pack(self::ACTION_SEARCH, 'card', -1, '-1');
         }
         if ($nalState === 'Canceled' && $cardState === 'Canceled') {
             if ($nalClose !== -1 || $cardClose !== -1) {
-                return $this->pack(self::ACTION_CANCELED, 'card', 1, '1');
+                $persisted = $this->persistedCancelCloseReason($nalClose, $cardClose);
+
+                return $this->pack(self::ACTION_CANCELED, 'card', $persisted, (string) $persisted);
             }
 
             return $this->pack(self::ACTION_SEARCH, 'card', -1, '-1');
@@ -257,6 +265,29 @@ class OrderStatusMessageResolver
         $value = $order['close_reason'] ?? -1;
 
         return is_numeric($value) ? (int) $value : -1;
+    }
+
+    /**
+     * 2–5 (отказ / не выполнен) важнее 1 (клиент), иначе история показывает «знятий клієнтом».
+     */
+    private function persistedCancelCloseReason(int $nalClose, int $cardClose): int
+    {
+        $candidates = [];
+        foreach ([$nalClose, $cardClose] as $code) {
+            if (in_array($code, [1, 2, 3, 4, 5, 6, 7, 9], true)) {
+                $candidates[] = $code;
+            }
+        }
+        if ($candidates === []) {
+            return 1;
+        }
+        foreach ([2, 3, 4, 5] as $preferred) {
+            if (in_array($preferred, $candidates, true)) {
+                return $preferred;
+            }
+        }
+
+        return $candidates[0];
     }
 
     /**

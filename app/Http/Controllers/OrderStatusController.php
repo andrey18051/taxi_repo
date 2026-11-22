@@ -401,7 +401,10 @@ class OrderStatusController extends Controller
     private function applyResolvedStatusToOrderweb(Orderweb $orderweb, array $resolved, string $action): void
     {
         if ($action === OrderStatusMessageResolver::ACTION_CANCELED) {
-            self::applyCanceledOrderweb($orderweb);
+            self::applyCanceledOrderweb(
+                $orderweb,
+                $resolved['orderweb_close_reason'] ?? $resolved['close_reason'] ?? '1'
+            );
 
             return;
         }
@@ -1252,12 +1255,13 @@ class OrderStatusController extends Controller
             } elseif (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
                 return null;
             } elseif (!self::shouldDeferDispatchCancelForGooglePayHold($orderweb, $snapshot, $uid)) {
-                self::finalizeCanceledFromStatusPush($orderweb, $uid);
+                $cancelCloseReason = self::resolvePersistedCancelCloseReason($snapshot, $snapshot);
+                self::finalizeCanceledFromStatusPush($orderweb, $uid, $cancelCloseReason);
                 $orderweb->save();
 
                 return response()->json([
                     'action' => OrderStatusMessageResolver::ACTION_CANCELED,
-                    'close_reason' => (int) ($snapshot['close_reason'] ?? 1),
+                    'close_reason' => (int) $cancelCloseReason,
                     'dispatching_order_uid' => $uid,
                     'uid' => $uid,
                     'execution_status' => 'Canceled',
@@ -1354,8 +1358,11 @@ class OrderStatusController extends Controller
         return response()->json($responseArr);
     }
 
-    private static function finalizeCanceledFromStatusPush(Orderweb $orderweb, string $uid): void
-    {
+    private static function finalizeCanceledFromStatusPush(
+        Orderweb $orderweb,
+        string $uid,
+        $closeReason = null
+    ): void {
         if (DispatchOrderCancelService::isAddCostRecreationInProgress($uid)) {
             Log::info('Skip cancel finalize: add-cost recreation in progress', [
                 'uid' => $uid,
@@ -1368,7 +1375,7 @@ class OrderStatusController extends Controller
         if (self::shouldSkipCancelForSupersededUid($orderweb, $uid)) {
             return;
         }
-        self::applyCanceledOrderweb($orderweb);
+        self::applyCanceledOrderweb($orderweb, $closeReason);
         (new AndroidTestOSMController())->cleanupFirestoreOnClientCancel($uid);
         self::notifyForkOrderCanceledPush($orderweb, $uid);
     }
@@ -1643,8 +1650,16 @@ class OrderStatusController extends Controller
             if (self::isExplicitForkCancelRequested($uid_history)) {
                 if (self::areForkLegSnapshotsCancelSettled($cardOrder, $nalOrder)) {
                     $action = 'Заказ снят';
+                    $cancelCloseReason = self::resolvePersistedCancelCloseReason(
+                        is_array($nalOrder) ? $nalOrder : null,
+                        is_array($cardOrder) ? $cardOrder : null
+                    );
                     if ($orderweb) {
-                        self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
+                        self::finalizeCanceledFromStatusPush(
+                            $orderweb,
+                            $dispatching_order_uid,
+                            $cancelCloseReason
+                        );
                         $orderweb->save();
                     } else {
                         Log::info('Dispatch cancel without orderweb row', [
@@ -1652,11 +1667,13 @@ class OrderStatusController extends Controller
                         ]);
                     }
                     $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
+                    $response = $this->patchCloseReasonInResponse($response, (int) $cancelCloseReason);
                     Log::info('Order canceled (explicit fork cancel settled)', [
                         'action' => $action,
                         'dispatching_order_uid' => $dispatching_order_uid,
                         'cardState' => $cardState,
                         'nalState' => $nalState,
+                        'close_reason' => $cancelCloseReason,
                     ]);
                     Log::info('Exiting function due to cancel', ['response' => $response]);
 
@@ -1675,8 +1692,16 @@ class OrderStatusController extends Controller
                 || self::isDispatchOrderCanceled($cardOrder)
                 || self::isDispatchOrderCanceled($nalOrder))) {
                 $action = 'Заказ снят';
+                $cancelCloseReason = self::resolvePersistedCancelCloseReason(
+                    is_array($nalOrder) ? $nalOrder : null,
+                    is_array($cardOrder) ? $cardOrder : null
+                );
                 if ($orderweb) {
-                    self::finalizeCanceledFromStatusPush($orderweb, $dispatching_order_uid);
+                    self::finalizeCanceledFromStatusPush(
+                        $orderweb,
+                        $dispatching_order_uid,
+                        $cancelCloseReason
+                    );
                     $orderweb->save();
                 } else {
                     Log::info('Dispatch cancel without orderweb row', [
@@ -1684,11 +1709,13 @@ class OrderStatusController extends Controller
                     ]);
                 }
                 $response = $this->addActionToResponseUid($cardOrderInput, $action, $dispatching_order_uid);
+                $response = $this->patchCloseReasonInResponse($response, (int) $cancelCloseReason);
                 Log::info('Order canceled', [
                     'action' => $action,
                     'dispatching_order_uid' => $dispatching_order_uid,
                     'cardState' => $cardState,
                     'nalState' => $nalState,
+                    'close_reason' => $cancelCloseReason,
                 ]);
                 Log::info('Exiting function due to cancel', ['response' => $response]);
                 return $response;
@@ -2077,7 +2104,7 @@ class OrderStatusController extends Controller
                     $closeReasonCard = $cardOrder['close_reason'] ?? -1;
                     if($closeReasonNal != -1 && $closeReasonCard != -1) {
                         $action = 'Заказ снят';
-                        $orderweb->closeReason = "1";
+                        $orderweb->closeReason = self::resolvePersistedCancelCloseReason($nalOrder, $cardOrder);
                     } else {
                         $action = 'Поиск авто';
                         $orderweb->auto = null;
@@ -2091,7 +2118,7 @@ class OrderStatusController extends Controller
                     $closeReasonCard = $cardOrder['close_reason'] ?? -1;
                     if($closeReasonNal != -1 && $closeReasonCard != -1) {
                         $action = 'Заказ снят';
-                        $orderweb->closeReason = "1";
+                        $orderweb->closeReason = self::resolvePersistedCancelCloseReason($nalOrder, $cardOrder);
                     } else {
                         $action = 'Поиск авто';
                         $orderweb->auto = null;
@@ -2116,7 +2143,11 @@ class OrderStatusController extends Controller
                     $orderweb->auto = $response_arr["order_car_info"];
                     $orderweb->closeReason = -1;
                 } else if (isset($response_arr["action"]) && $response_arr["action"] == "Заказ снят") {
-                    $orderweb->closeReason = 1;
+                    $orderweb->closeReason = self::resolvePersistedCancelCloseReason(
+                        is_array($nalOrder) ? $nalOrder : null,
+                        is_array($cardOrder) ? $cardOrder : null,
+                        $response_arr['close_reason'] ?? '1'
+                    );
                 } else {
 
                     $orderweb->closeReason = $response_arr["close_reason"] ?? -1; // Значение по умолчанию, если close_reason тоже отсутствует
@@ -2653,7 +2684,10 @@ class OrderStatusController extends Controller
     ): void {
         if ($action === OrderStatusMessageResolver::ACTION_CANCELED
             && !self::hasActiveDispatchLeg($cardOrder, $nalOrder)) {
-            self::applyCanceledOrderweb($orderweb);
+            self::applyCanceledOrderweb(
+                $orderweb,
+                self::resolvePersistedCancelCloseReason($nalOrder, $cardOrder)
+            );
             if ($uidForCancelPush !== null) {
                 self::notifyForkOrderCanceledPush($orderweb, $uidForCancelPush);
             }
@@ -2828,9 +2862,72 @@ class OrderStatusController extends Controller
         return false;
     }
 
-    public static function applyCanceledOrderweb(Orderweb $orderweb): void
+    /**
+     * Реальный код отмены диспетчера для orderweb / истории PAS.
+     * 1/6/7/9 — клиент; 2–5 — отказ водителя / не выполнен.
+     * При конфликте ног предпочитаем 2–5, чтобы UI не показывал «знятий клієнтом».
+     *
+     * @param array<string, mixed>|null $nalOrder
+     * @param array<string, mixed>|null $cardOrder
+     */
+    public static function resolvePersistedCancelCloseReason(
+        ?array $nalOrder = null,
+        ?array $cardOrder = null,
+        $fallback = '1'
+    ): string {
+        $candidates = [];
+        foreach ([$nalOrder, $cardOrder] as $order) {
+            if ($order === null || $order === []) {
+                continue;
+            }
+            $raw = $order['close_reason'] ?? -1;
+            if (!is_numeric($raw)) {
+                continue;
+            }
+            $code = (int) $raw;
+            if (in_array($code, [1, 2, 3, 4, 5, 6, 7, 9], true)) {
+                $candidates[] = $code;
+            }
+        }
+
+        if ($candidates === []) {
+            return self::normalizeCancelCloseReason($fallback);
+        }
+
+        foreach ([2, 3, 4, 5] as $preferred) {
+            if (in_array($preferred, $candidates, true)) {
+                return (string) $preferred;
+            }
+        }
+
+        return (string) $candidates[0];
+    }
+
+    public static function normalizeCancelCloseReason($closeReason): string
     {
-        $orderweb->closeReason = '1';
+        if ($closeReason === null || $closeReason === '' || (string) $closeReason === '-1') {
+            return '1';
+        }
+        if (!is_numeric($closeReason)) {
+            return '1';
+        }
+        $code = (int) $closeReason;
+        if (in_array($code, [1, 2, 3, 4, 5, 6, 7, 9], true)) {
+            return (string) $code;
+        }
+
+        return '1';
+    }
+
+    public static function applyCanceledOrderweb(Orderweb $orderweb, $closeReason = '1'): void
+    {
+        $incoming = self::normalizeCancelCloseReason($closeReason);
+        $existing = (string) ($orderweb->closeReason ?? '-1');
+        // Не затирать отказ водителя (2–5) дефолтным «знятий клієнтом» (1).
+        if (in_array($existing, ['2', '3', '4', '5'], true) && $incoming === '1') {
+            $incoming = $existing;
+        }
+        $orderweb->closeReason = $incoming;
         $orderweb->auto = null;
         if ($orderweb->cancel_timestamp === null) {
             $orderweb->cancel_timestamp = now();

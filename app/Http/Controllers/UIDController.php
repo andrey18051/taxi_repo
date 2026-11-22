@@ -1589,7 +1589,10 @@ class UIDController extends Controller
 
                 if (OrderStatusController::isExplicitForkCancelRequested($uid_history)
                     && OrderStatusController::areForkLegSnapshotsCancelSettled($cardOrder, $nalOrder)) {
-                    OrderStatusController::applyCanceledOrderweb($orderweb);
+                    OrderStatusController::applyCanceledOrderweb(
+                        $orderweb,
+                        OrderStatusController::resolvePersistedCancelCloseReason($nalOrder, $cardOrder)
+                    );
                     $orderweb->save();
                     return;
                 }
@@ -1598,7 +1601,10 @@ class UIDController extends Controller
                     && ($uid_history->cancel == "1"
                     || OrderStatusController::isDispatchOrderCanceled($cardOrder ?? null)
                     || OrderStatusController::isDispatchOrderCanceled($nalOrder ?? null))) {
-                    OrderStatusController::applyCanceledOrderweb($orderweb);
+                    OrderStatusController::applyCanceledOrderweb(
+                        $orderweb,
+                        OrderStatusController::resolvePersistedCancelCloseReason($nalOrder, $cardOrder)
+                    );
                     $orderweb->save();
                     return;
                 }
@@ -1742,7 +1748,10 @@ class UIDController extends Controller
                     $closeReasonCard = $cardOrder['close_reason'] ?? -1;
                     if($closeReasonNal != -1 && $closeReasonCard != -1) {
                         $action = 'Заказ снят';
-                        $orderweb->closeReason = "1";
+                        $orderweb->closeReason = OrderStatusController::resolvePersistedCancelCloseReason(
+                            $nalOrder,
+                            $cardOrder
+                        );
                     } else {
                         $action = 'Поиск авто';
                         $orderweb->auto = null;
@@ -1755,7 +1764,10 @@ class UIDController extends Controller
                     $closeReasonCard = $cardOrder['close_reason'] ?? -1;
                     if($closeReasonNal != -1 && $closeReasonCard != -1) {
                         $action = 'Заказ снят';
-                        $orderweb->closeReason = "1";
+                        $orderweb->closeReason = OrderStatusController::resolvePersistedCancelCloseReason(
+                            $nalOrder,
+                            $cardOrder
+                        );
                     } else {
                         $action = 'Поиск авто';
                         $orderweb->auto = null;
